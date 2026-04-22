@@ -178,13 +178,80 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (To be filled by roadmap) | | |
+| NEWTAB-01 | Phase 2 | Pending |
+| NEWTAB-02 | Phase 3 | Pending |
+| NEWTAB-03 | Phase 2 | Pending |
+| TABS-01 | Phase 2 | Pending |
+| TABS-02 | Phase 2 | Pending |
+| TABS-03 | Phase 2 | Pending |
+| TABS-04 | Phase 2 | Pending |
+| TABS-05 | Phase 2 | Pending |
+| TABS-06 | Phase 2 | Pending |
+| DOMAIN-01 | Phase 3 | Pending |
+| DOMAIN-02 | Phase 3 | Pending |
+| DOMAIN-03 | Phase 3 | Pending |
+| DOMAIN-04 | Phase 3 | Pending |
+| OPS-01 | Phase 4 | Pending |
+| OPS-02 | Phase 4 | Pending |
+| OPS-03 | Phase 4 | Pending |
+| OPS-04 | Phase 4 | Pending |
+| OPS-05 | Phase 4 | Pending |
+| SEARCH-01 | Phase 5 | Pending |
+| SEARCH-02 | Phase 10 | Pending |
+| SEARCH-03 | Phase 10 | Pending |
+| SEARCH-04 | Phase 5 | Pending |
+| ARCHIVE-01 | Phase 5 | Pending |
+| ARCHIVE-02 | Phase 5 | Pending |
+| ARCHIVE-03 | Phase 5 | Pending |
+| ARCHIVE-04 | Phase 5 | Pending |
+| ARCHIVE-05 | Phase 5 | Pending |
+| STORE-01 | Phase 2 | Pending |
+| STORE-02 | Phase 10 | Pending |
+| STORE-03 | Phase 10 | Pending |
+| STORE-04 | Phase 10 | Pending |
+| STORE-05 | Phase 10 | Pending |
+| VISUAL-01 | Phase 6 | Pending |
+| VISUAL-02 | Phase 6 | Pending |
+| VISUAL-03 | Phase 6 | Pending |
+| VISUAL-04 | Phase 6 | Pending |
+| VISUAL-05 | Phase 6 | Pending |
+| VISUAL-06 | Phase 6 | Pending |
+| A11Y-01 | Phase 6 | Pending |
+| A11Y-02 | Phase 6 | Pending |
+| A11Y-03 | Phase 6 | Pending |
+| I18N-01 | Phase 6 | Pending |
+| I18N-02 | Phase 6 | Pending |
+| TIMELINE-01 | Phase 7 | Pending |
+| TIMELINE-02 | Phase 7 | Pending |
+| COMPACT-01 | Phase 7 | Pending |
+| GRID-01 | Phase 7 | Pending |
+| FREQ-01 | Phase 7 | Pending |
+| FREQ-02 | Phase 7 | Pending |
+| FREQ-03 | Phase 7 | Pending |
+| DEDUP-01 | Phase 8 | Pending |
+| DEDUP-02 | Phase 8 | Pending |
+| SESSION-01 | Phase 8 | Pending |
+| SESSION-02 | Phase 8 | Pending |
+| SESSION-03 | Phase 8 | Pending |
+| EXPORT-01 | Phase 8 | Pending |
+| EXPORT-02 | Phase 8 | Pending |
+| EXPORT-03 | Phase 8 | Pending |
+| SETTINGS-01 | Phase 8 | Pending |
+| SETTINGS-02 | Phase 8 | Pending |
+| TAGS-01 | Phase 9 | Pending |
+| TAGS-02 | Phase 9 | Pending |
+| KANBAN-01 | Phase 9 | Pending |
+| KANBAN-02 | Phase 9 | Pending |
+| BOOKMARK-01 | Phase 9 | Pending |
+| BOOKMARK-02 | Phase 9 | Pending |
+| PIN-01 | Phase 9 | Pending |
+| SNAPSHOT-01 | Phase 10 | Pending |
 
 **Coverage:**
-- v1 requirements: 47 total
-- Mapped to phases: 0
-- Unmapped: 47 ⚠️
+- v1 requirements: 69 total
+- Mapped to phases: 69
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-22*
-*Last updated: 2026-04-22 after initial definition*
+*Last updated: 2026-04-22 after roadmap creation*
