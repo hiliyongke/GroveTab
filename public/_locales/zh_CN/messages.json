@@ -1,0 +1,14 @@
+{
+  "appName": {
+    "message": "Canopy"
+  },
+  "appDescription": {
+    "message": "美观的全新标签页标签管理器——统一管理所有已打开的标签、归档会话和书签"
+  },
+  "searchPlaceholder": {
+    "message": "搜索标签..."
+  },
+  "saveAllTabs": {
+    "message": "保存所有标签"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "appName": {
+    "message": "Canopy"
+  },
+  "appDescription": {
+    "message": "A beautiful new tab page manager — unify all your tabs, sessions, and bookmarks"
+  },
+  "searchPlaceholder": {
+    "message": "Search tabs..."
+  },
+  "saveAllTabs": {
+    "message": "Save all tabs"
+  }
+}

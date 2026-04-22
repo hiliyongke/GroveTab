@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "Canopy",
+  "version": "0.1.0",
+  "description": "A beautiful new tab page that manages all your tabs, sessions, and bookmarks",
+  "default_locale": "zh_CN",
+  "permissions": [
+    "tabs",
+    "storage",
+    "favicon",
+    "alarms",
+    "sessions",
+    "contextMenus"
+  ],
+  "optional_permissions": ["history"],
+  "host_permissions": [],
+  "optional_host_permissions": ["<all_urls>"],
+  "chrome_url_overrides": {
+    "newtab": "src/pages/newtab/index.html"
+  },
+  "action": {
+    "default_popup": "src/pages/popup/index.html",
+    "default_icon": {
+      "16": "public/icons/icon-16.png",
+      "48": "public/icons/icon-48.png",
+      "128": "public/icons/icon-128.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/sw/index.ts",
+    "type": "module"
+  },
+  "icons": {
+    "16": "public/icons/icon-16.png",
+    "48": "public/icons/icon-48.png",
+    "128": "public/icons/icon-128.png"
+  },
+  "incognito": "split"
+}
