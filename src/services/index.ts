@@ -1,1 +1,1 @@
-// Services barrel — will be expanded in later phases
+export * from './archive-service';

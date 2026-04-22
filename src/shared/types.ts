@@ -15,20 +15,12 @@ export interface LiveTab {
   audible: boolean;
   groupId: number;
   lastAccessed: number;
-  /** Extracted hostname from URL */
   hostname: string;
-  /** Tab belongs to the current window or not */
   isCurrentWindow: boolean;
 }
 
 /** Special URL classification */
-export type SpecialUrlType =
-  | 'chrome'       // chrome://, chrome-extension://
-  | 'file'         // file://
-  | 'about'        // about:blank, about:newtab
-  | 'devtools'     // devtools://
-  | 'edge'         // edge://
-  | 'normal';      // Regular http(s) URL
+export type SpecialUrlType = 'chrome' | 'file' | 'about' | 'devtools' | 'edge' | 'normal';
 
 /** Window information */
 export interface WindowInfo {
@@ -76,23 +68,16 @@ export interface StorageMeta {
 
 /** User settings */
 export interface UserSettings {
-  /** Override new tab page */
   overrideNewTab: boolean;
-  /** Default view mode */
   defaultView: 'domain' | 'timeline' | 'compact' | 'grid' | 'freq' | 'kanban';
-  /** Theme preference */
   theme: 'light' | 'dark' | 'system';
-  /** Gradient preset */
   gradientPreset: 'aurora' | 'sunrise' | 'deepspace' | 'custom';
-  /** Show incognito tabs */
   showIncognito: boolean;
-  /** Language */
   language: 'zh-CN' | 'en';
 }
 
 // ── Undo System ───────────────────────────────────────
 
-/** A single tab snapshot for undo */
 export interface ClosedTabSnapshot {
   url: string;
   title: string;
@@ -101,15 +86,31 @@ export interface ClosedTabSnapshot {
   pinned: boolean;
 }
 
-/** Undo record — represents a close action that can be undone */
 export interface UndoRecord {
   id: string;
-  /** Timestamp of the close action */
   createdAt: number;
-  /** Tabs that were closed */
   tabs: ClosedTabSnapshot[];
-  /** Human-readable description */
   description: string;
-  /** Whether this undo has expired */
   expired: boolean;
+}
+
+// ── Archive / Sessions ────────────────────────────────
+
+/** An archived tab entry */
+export interface ArchivedTab {
+  url: string;
+  title: string;
+  favIconUrl: string;
+  hostname: string;
+  pinned: boolean;
+}
+
+/** An archived session (group of tabs saved at once) */
+export interface ArchivedSession {
+  id: string;
+  name: string;
+  createdAt: number;
+  tabs: ArchivedTab[];
+  /** Tab count for quick display */
+  tabCount: number;
 }
