@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { writeFileSync, mkdirSync, copyFileSync } from 'node:fs';
@@ -10,10 +11,8 @@ function chromeExtensionPlugin() {
   return {
     name: 'chrome-extension',
     writeBundle() {
-      // Copy manifest.json to dist
       copyFileSync(resolve(__dirname, 'manifest.json'), resolve(__dirname, 'dist/manifest.json'));
 
-      // Write newtab HTML
       mkdirSync(resolve(__dirname, 'dist/src/pages/newtab'), { recursive: true });
       writeFileSync(
         resolve(__dirname, 'dist/src/pages/newtab/index.html'),
@@ -24,7 +23,6 @@ function chromeExtensionPlugin() {
 </html>`,
       );
 
-      // Write popup HTML
       mkdirSync(resolve(__dirname, 'dist/src/pages/popup'), { recursive: true });
       writeFileSync(
         resolve(__dirname, 'dist/src/pages/popup/index.html'),
@@ -39,7 +37,7 @@ function chromeExtensionPlugin() {
 }
 
 export default defineConfig({
-  plugins: [react(), chromeExtensionPlugin()],
+  plugins: [tailwindcss(), react(), chromeExtensionPlugin()],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),

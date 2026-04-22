@@ -20,3 +20,14 @@ Thumbs.db
 
 # Test
 coverage/
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# Vite cache
+.vite/
+
+# Auto-generated JS/DSL from TS configs
+vite.config.js
+vitest.config.js
+vitest.config.d.ts

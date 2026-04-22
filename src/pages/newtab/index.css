@@ -1,16 +1,14 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-:root {
+@theme {
   /* Design Tokens — Phase 6 will expand these */
   --color-primary: #8EC5FC;
   --color-secondary: #E0C3FC;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 20px;
+  --font-family-sans: -apple-system, 'SF Pro Text', 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   --blur-card: blur(24px) saturate(180%);
-  --font-family: -apple-system, 'SF Pro Text', 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
 * {
@@ -20,7 +18,7 @@
 }
 
 body {
-  font-family: var(--font-family);
+  font-family: var(--font-family-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
