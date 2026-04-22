@@ -1,9 +1,14 @@
 /**
- * OnboardingCard — First-time user welcome card
+ * OnboardingCard —— 首次访问引导卡片（antd 版）
+ *
+ * 设计：
+ *   - antd Card 作为容器，带背景光晕装饰
+ *   - 主 CTA 使用 antd Button（primary）+ 箭头图标
  */
 
 import { useState } from 'react';
-import { TreePine, ArrowRight } from 'lucide-react';
+import { Button, Card, theme } from 'antd';
+import { ArrowRightOutlined, ApartmentOutlined, ThunderboltFilled } from '@ant-design/icons';
 import { markOnboardingDone } from '@/repositories';
 import { useT } from '@/shared/i18n';
 
@@ -11,9 +16,13 @@ interface OnboardingCardProps {
   onDismiss: () => void;
 }
 
+/**
+ * 首次访问引导卡片
+ */
 export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
   const [dismissed, setDismissed] = useState(false);
   const { t } = useT();
+  const { token } = theme.useToken();
 
   const handleDismiss = async () => {
     await markOnboardingDone();
@@ -24,31 +33,110 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
   if (dismissed) return null;
 
   return (
-    <div
-      className="max-w-md mx-auto mb-8 p-6 rounded-[var(--radius-lg)]
-        bg-surface backdrop-blur-xl border border-border
-        text-center"
+    <Card
+      style={{
+        position: 'relative',
+        maxWidth: 560,
+        margin: '0 auto 20px',
+        overflow: 'hidden',
+        borderRadius: token.borderRadiusLG * 1.5,
+        boxShadow: token.boxShadowSecondary,
+      }}
+      styles={{
+        body: {
+          position: 'relative',
+          padding: '28px 24px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center',
+          gap: 14,
+        },
+      }}
     >
-      <TreePine className="w-12 h-12 text-text-secondary mx-auto mb-4" />
-      <h2 className="text-xl font-bold text-text mb-2">
-        {t('onboarding.title')}
-      </h2>
-      <p className="text-sm text-text-secondary mb-1">
-        {t('onboarding.desc')}
-      </p>
-      <p className="text-xs text-text-muted mb-6">
+      {/* 背景装饰光晕 */}
+      <div
+        aria-hidden
+        style={{
+          pointerEvents: 'none',
+          position: 'absolute',
+          top: -48,
+          right: -48,
+          width: 192,
+          height: 192,
+          borderRadius: '50%',
+          background: `radial-gradient(closest-side, ${token.colorPrimaryBg}, transparent)`,
+        }}
+      />
+
+      {/* Logo 软底板 */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 56,
+          height: 56,
+          borderRadius: token.borderRadiusLG,
+          background: token.colorPrimaryBg,
+          color: token.colorPrimary,
+          position: 'relative',
+        }}
+      >
+        <ApartmentOutlined style={{ fontSize: 26 }} />
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <h2
+          style={{
+            margin: 0,
+            fontSize: 20,
+            fontWeight: 600,
+            letterSpacing: '-0.01em',
+            color: token.colorText,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+          }}
+        >
+          {t('onboarding.title')}
+          <ThunderboltFilled style={{ fontSize: 14, color: token.colorPrimary }} />
+        </h2>
+        <p
+          style={{
+            margin: 0,
+            fontSize: 14,
+            fontWeight: 500,
+            color: token.colorTextSecondary,
+          }}
+        >
+          {t('onboarding.desc')}
+        </p>
+      </div>
+
+      <p
+        style={{
+          margin: 0,
+          fontSize: 12.5,
+          color: token.colorTextTertiary,
+          maxWidth: 380,
+          lineHeight: 1.6,
+        }}
+      >
         {t('onboarding.detail')}
       </p>
-      <button
+
+      <Button
+        type="primary"
+        size="large"
         onClick={handleDismiss}
-        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[var(--radius-md)]
-          bg-surface-hover hover:bg-badge border border-border
-          text-text text-sm font-medium
-          transition-colors duration-200 cursor-pointer"
+        icon={<ArrowRightOutlined />}
+        iconPosition="end"
+        style={{ marginTop: 4 }}
       >
         {t('onboarding.dismiss')}
-        <ArrowRight className="w-4 h-4" />
-      </button>
-    </div>
+      </Button>
+    </Card>
   );
 }

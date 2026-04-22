@@ -1,51 +1,101 @@
 /**
- * FrequencyView — Tabs sorted by activation frequency (7-day)
+ * FrequencyView — 按使用频率（近期活跃度）排序（antd 版）
+ *
+ * 设计：
+ *   - 顶部标题：火焰图标 + 描述（tracking-wider 小字）
+ *   - 序号作为 TabItem 的 leading slot，与行整体共享 hover 高亮
+ *   - 前 3 名序号使用品牌色徽章
+ *   - 跨域名列表，展示 hostname 辅助识别
  */
 
 import { useMemo } from 'react';
 import { useTabsStore } from '@/store';
 import { useT } from '@/shared/i18n';
+import { findAmbiguousTitleIds } from '@/shared/utils/url-display';
 import { TabItem } from './TabItem';
-import { Flame } from 'lucide-react';
+import { FireOutlined } from '@ant-design/icons';
+import { theme } from 'antd';
 
 const MAX_DISPLAY = 30;
 
+/**
+ * 频率视图
+ */
 export function FrequencyView() {
   const tabs = useTabsStore((s) => s.tabs);
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
   const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
   const { t } = useT();
+  const { token } = theme.useToken();
 
-  // For now, use lastAccessed as a proxy for frequency
-  // SW StatsCollector will provide real data later
+  /** 暂用 lastAccessed 近似频率；后续 SW StatsCollector 补全真实数据 */
   const sortedTabs = useMemo(() => {
-    return [...tabs]
-      .sort((a, b) => b.lastAccessed - a.lastAccessed)
-      .slice(0, MAX_DISPLAY);
+    return [...tabs].sort((a, b) => b.lastAccessed - a.lastAccessed).slice(0, MAX_DISPLAY);
   }, [tabs]);
 
-  if (tabs.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-text-muted">
-        <p className="text-lg">{t('tabs.empty')}</p>
-      </div>
-    );
-  }
+  /** 榜单内同名 tab id 集合 */
+  const ambiguousIds = useMemo(() => findAmbiguousTitleIds(sortedTabs), [sortedTabs]);
+
+  if (tabs.length === 0) return null;
 
   return (
     <div>
-      <div className="flex items-center gap-2 text-sm text-text-secondary mb-3 px-1">
-        <Flame className="w-4 h-4" />
-        {t('view.frequencyDesc', { count: sortedTabs.length })}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          marginBottom: 12,
+          padding: '0 10px',
+        }}
+      >
+        <FireOutlined style={{ fontSize: 14, color: token.colorPrimary }} />
+        <span
+          style={{
+            fontSize: 11.5,
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            color: token.colorTextTertiary,
+          }}
+        >
+          {t('view.frequencyDesc', { count: sortedTabs.length })}
+        </span>
       </div>
-      <div className="flex flex-col gap-1.5">
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {sortedTabs.map((tab, i) => (
-          <div key={tab.id} className="flex items-center gap-2">
-            <span className="w-6 text-xs text-text-muted text-right font-mono">{i + 1}</span>
-            <div className="flex-1">
-              <TabItem tab={tab} onJump={jumpToTab} onClose={closeSingleTab} />
-            </div>
-          </div>
+          <TabItem
+            key={tab.id}
+            tab={tab}
+            onJump={jumpToTab}
+            onClose={closeSingleTab}
+            showHostname
+            showUrlHint={ambiguousIds.has(tab.id)}
+            leading={
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  width: 20,
+                  height: 20,
+                  borderRadius: '50%',
+                  fontSize: 10.5,
+                  fontWeight: 600,
+                  fontVariantNumeric: 'tabular-nums',
+                  lineHeight: 1,
+                  background:
+                    i < 3 ? token.colorPrimaryBg : token.colorFillSecondary,
+                  color:
+                    i < 3 ? token.colorPrimary : token.colorTextTertiary,
+                }}
+              >
+                {i + 1}
+              </span>
+            }
+          />
         ))}
       </div>
     </div>

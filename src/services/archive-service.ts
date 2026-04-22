@@ -5,7 +5,7 @@
 import { nanoid } from 'nanoid';
 import type { ArchivedSession, ArchivedTab } from '@/shared/types';
 import { getData, setData } from '@/repositories';
-import { queryAllTabs, closeTabs } from '@/chrome';
+import { queryAllTabs, closeTabs, createTab, getCurrentWindow, getFaviconUrl } from '@/chrome';
 import { extractHostname, isSelfNewTabPage, shouldDisplayUrl } from '@/chrome';
 
 const SESSIONS_KEY = 'canopy_sessions';
@@ -40,13 +40,19 @@ export async function archiveAllTabs(): Promise<{ session: ArchivedSession; clos
     throw new Error('No tabs to archive');
   }
 
-  const archivedTabs: ArchivedTab[] = toArchive.map((tab) => ({
-    url: tab.url || tab.pendingUrl || '',
-    title: tab.title || '',
-    favIconUrl: tab.favIconUrl || '',
-    hostname: extractHostname(tab.url || ''),
-    pinned: tab.pinned,
-  }));
+  const archivedTabs: ArchivedTab[] = toArchive.map((tab) => {
+    const url = tab.url || tab.pendingUrl || '';
+    // 归档保存时也把 favicon 改写成扩展同源的 `_favicon/` 入口，
+    // 恢复后 `<img>` 渲染不会因原站离线或跨域而污染控制台。
+    const extensionFavicon = getFaviconUrl(url);
+    return {
+      url,
+      title: tab.title || '',
+      favIconUrl: extensionFavicon || tab.favIconUrl || '',
+      hostname: extractHostname(url),
+      pinned: tab.pinned,
+    };
+  });
 
   const session: ArchivedSession = {
     id: nanoid(10),
@@ -61,44 +67,51 @@ export async function archiveAllTabs(): Promise<{ session: ArchivedSession; clos
   sessions.unshift(session);
   await saveSessions(sessions);
 
-  // Now close the tabs
+  // Now close the tabs — 失败也不影响归档完成（快照已保存），仅打 warn
   const tabIds = toArchive.map((t) => t.id).filter((id): id is number => id !== undefined);
+  let closedCount = tabIds.length;
   try {
     await closeTabs(tabIds);
-  } catch {
-    // Even if close fails, the archive is already saved
+  } catch (err) {
+    console.warn('[Canopy] archive: close tabs failed after snapshot saved', err);
+    closedCount = 0;
   }
 
-  return { session, closedCount: tabIds.length };
+  return { session, closedCount };
 }
 
-/** Restore an archived session (opens in a new window) */
+/**
+ * 恢复一个归档会话
+ *
+ * 单个 tab → 在当前窗口直接新开
+ * 多个 tab → 分批 30 个：第一批 createWindow，后续 append 到当前窗口
+ *
+ * 所有 chrome API 调用都经 safeCall 封装，失败会带上下文抛出，
+ * 由上层（ArchivePanel）通过 feedback 告知用户。
+ */
 export async function restoreSession(sessionId: string): Promise<void> {
   const sessions = await getArchivedSessions();
   const session = sessions.find((s) => s.id === sessionId);
   if (!session) throw new Error('Session not found');
 
-  const urls = session.tabs.map((t) => t.url);
+  const urls = session.tabs.map((t) => t.url).filter(Boolean);
+  if (urls.length === 0) return;
 
   if (urls.length === 1) {
-    chrome.tabs.create({ url: urls[0] });
-  } else {
-    // Open in batches of 30 to avoid browser freeze
-    const batchSize = 30;
-    for (let i = 0; i < urls.length; i += batchSize) {
-      const batch = urls.slice(i, i + batchSize);
-      if (i === 0) {
-        chrome.windows.create({ url: batch });
-      } else {
-        // Add to the most recently created window
-        const currentWindow = await chrome.windows.getCurrent();
-        if (currentWindow.id) {
-          for (const url of batch) {
-            chrome.tabs.create({ windowId: currentWindow.id, url });
-          }
-        }
-      }
-    }
+    await createTab({ url: urls[0] });
+    return;
+  }
+
+  /**
+   * 恢复策略（与 undo 保持一致）：
+   *   - 全部在**当前窗口**追加，不再新开窗口
+   *   - 顺序 createTab，避免 Chrome 对同窗口瞬时并发建 tab 的限流
+   *   - active:false，防止频繁抢焦点
+   */
+  const currentWindow = await getCurrentWindow();
+  const windowId = currentWindow?.id;
+  for (const url of urls) {
+    await createTab({ url, windowId, active: false });
   }
 }
 

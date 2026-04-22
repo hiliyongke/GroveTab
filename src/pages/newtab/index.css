@@ -1,126 +1,96 @@
-@import 'tailwindcss';
+/**
+ * Canopy — 全局样式
+ *
+ * 策略：视觉全部交给 antd v6 默认主题；这里只保留 antd 无法覆盖的内容：
+ *   1. color-scheme / 盒模型等浏览器级基础重置
+ *   2. body 背景色跟随 antd 的 --ant-color-bg-layout
+ *   3. 滚动条微调（更素雅，不抢视觉）
+ *   4. 基于 CSS columns 的瀑布流布局 utility（antd 没有内建）
+ *   5. favicon 占位块（由代码生成颜色，纯结构样式）
+ */
 
-/* ── Custom dark variant using data-theme attribute ── */
-@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
-
-/* ── Theme-dependent CSS variables ── */
 :root {
-  /* Light theme colors — Edge-style soft blue-grey */
-  --canopy-surface: rgba(255, 255, 255, 0.72);
-  --canopy-surface-hover: rgba(255, 255, 255, 0.88);
-  --canopy-text: rgba(30, 35, 48, 0.92);
-  --canopy-text-secondary: rgba(30, 35, 48, 0.62);
-  --canopy-text-muted: rgba(30, 35, 48, 0.38);
-  --canopy-border: rgba(180, 190, 210, 0.45);
-  --canopy-badge: rgba(220, 226, 240, 0.65);
-  --canopy-focus-ring: rgba(59, 130, 246, 0.7);
-  --canopy-shadow: 0 2px 12px rgba(30, 40, 70, 0.08);
-
-  /* Gradient presets — Edge default: soft blue-grey */
-  --gradient-aurora: linear-gradient(160deg, #f0f3f8 0%, #e4eaf5 40%, #dce4f2 70%, #d5deeD 100%);
-  --gradient-sunrise: linear-gradient(135deg, #FEE140 0%, #FA709A 40%, #FDBB6F 70%, #FEE140 100%);
-  --gradient-deepspace: linear-gradient(135deg, #0F2027 0%, #203A43 40%, #2C5364 70%, #0F2027 100%);
+  color-scheme: light;
+}
+[data-theme='dark'] {
+  color-scheme: dark;
 }
 
-[data-theme=dark] {
-  --canopy-surface: rgba(40, 48, 66, 0.65);
-  --canopy-surface-hover: rgba(50, 60, 82, 0.8);
-  --canopy-text: rgba(235, 238, 245, 0.92);
-  --canopy-text-secondary: rgba(235, 238, 245, 0.62);
-  --canopy-text-muted: rgba(235, 238, 245, 0.38);
-  --canopy-border: rgba(80, 90, 120, 0.45);
-  --canopy-badge: rgba(55, 65, 90, 0.65);
-  --canopy-focus-ring: rgba(96, 165, 250, 0.7);
-  --canopy-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
-}
-
-/* ── Tailwind theme tokens ── */
-@theme {
-  /* Radius */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
-
-  /* Font */
-  --font-family-sans: -apple-system, 'SF Pro Text', 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-
-  /* Blur */
-  --blur-card: blur(24px) saturate(180%);
-
-  /* Elevation */
-  --elev-1: 0 1px 2px rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.04);
-  --elev-2: 0 4px 16px rgba(0,0,0,.08);
-
-  /* Spacing */
-  --space-unit: 4px;
-
-  /* Duration */
-  --duration-fast: 150ms;
-  --duration-normal: 200ms;
-
-  /* Easing */
-  --ease-default: cubic-bezier(.22,.61,.36,1);
-}
-
-/* ── Dynamic theme tokens (reference CSS variables) ── */
-@theme inline {
-  --color-surface: var(--canopy-surface);
-  --color-surface-hover: var(--canopy-surface-hover);
-  --color-text: var(--canopy-text);
-  --color-text-secondary: var(--canopy-text-secondary);
-  --color-text-muted: var(--canopy-text-muted);
-  --color-border: var(--canopy-border);
-  --color-badge: var(--canopy-badge);
-  --color-focus-ring: var(--canopy-focus-ring);
-}
-
-/* ── Base reset ── */
-* {
+html,
+body,
+#root {
+  height: 100%;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
 body {
-  font-family: var(--font-family-sans);
+  background-color: var(--ant-color-bg-layout);
+  color: var(--ant-color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  min-height: 100vh;
-  background: var(--gradient-aurora);
-  background-attachment: fixed;
 }
 
-/* ── Gradient flow animation (disabled for Edge-style calm background) ── */
-@keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-.gradient-animated {
-  /* animation: gradient-shift 30s ease infinite; */
+/* ─── 自定义滚动条（webkit）──────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ant-color-border-secondary);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ant-color-border);
 }
 
-/* ── Reduced motion ── */
-@media (prefers-reduced-motion: reduce) {
-  .gradient-animated {
-    animation: none;
+/* ─── 域名卡片瀑布流容器（antd 无对应组件） ────────── */
+.canopy-domain-masonry {
+  column-gap: 16px;
+  column-fill: balance;
+}
+.canopy-domain-masonry-item {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin-bottom: 14px;
+}
+
+/* ─── favicon 占位块（无图时的字母色块） ──────────── */
+.canopy-favicon-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* ─── 主题切换图标动画 ─────────────────────────────
+ * 头部明暗切换按钮在 theme 变化时，icon 元素通过 key 被重建；
+ * 这里给它一个轻量的「旋转 + 渐入」效果，让切换可感知。
+ */
+@keyframes canopy-theme-icon-spin {
+  0% {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.6);
   }
-}
-
-/* ── Focus visible styles — A11Y-02 ── */
-*:focus-visible {
-  outline: 2px solid var(--canopy-focus-ring);
-  outline-offset: 2px;
-}
-
-*:focus {
-  outline: none;
-}
-
-/* ── Minimum touch target — A11Y-01 ── */
-button,
-[role="button"] {
-  min-height: 32px;
-  min-width: 32px;
+  60% {
+    opacity: 1;
+    transform: rotate(10deg) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
 }

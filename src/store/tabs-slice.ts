@@ -1,14 +1,26 @@
 /**
  * Zustand Store — Tabs Slice
  *
- * Manages the list of live tabs with incremental updates from SW broadcasts.
- * Close actions create undo records.
+ * 统一的 tab 状态与操作入口，职责：
+ *   1. 通过 SW broadcast 增量维护 live tabs 列表
+ *   2. 所有「动」tab 的操作（关闭 / 跳转）在此集中容错：
+ *      - 内部 try/catch 所有 chrome API 调用
+ *      - 失败时直接调用 `feedback.error(...)` 给用户可感反馈
+ *      - 失败时仍重抛给调用方，便于上层（如 DedupInfoBar）切 loading=false
+ *   3. 关闭类操作自动创建 undo record（fire-and-forget，不阻塞关闭）
+ *
+ * 关键设计决策：
+ *   - UI 层调用 action 时不需要再包 try/catch——反馈由 store 统一负责
+ *   - Action 失败后会**静默刷新全量 tabs**（silent: true），
+ *     修复 "chrome 端已改变但 UI 未同步" 的幽灵态
  */
 
 import { create } from 'zustand';
 import type { LiveTab, SwBroadcastMessage, WindowInfo, ClosedTabSnapshot } from '@/shared/types';
 import { queryAllTabs, getAllWindows, activateTab, closeTab, closeTabs, getFaviconUrl } from '@/chrome';
 import { extractHostname, shouldDisplayUrl, isSelfNewTabPage } from '@/chrome';
+import { feedback } from '@/shared/ui/feedback';
+import { translate } from '@/shared/i18n/core';
 import { useUndoStore } from './undo-slice';
 
 interface TabsState {
@@ -24,8 +36,14 @@ interface TabsState {
   error: string | null;
 
   // Actions
-  /** Initial full load of all tabs */
-  loadAllTabs: () => Promise<void>;
+  /**
+   * 拉取所有 tabs。
+   *
+   * @param options.silent  设为 true 时不翻全局 `loading=true`，适合「局部操作完成后静默兜底刷新」的场景
+   *                        （例如合并去重 / 关闭多个 tab 后，防止 SW broadcast 漏发）。默认 false，
+   *                        保留首次加载展示 Spin 的行为。
+   */
+  loadAllTabs: (options?: { silent?: boolean }) => Promise<void>;
   /** Handle SW broadcast message */
   handleBroadcast: (message: SwBroadcastMessage) => void;
   /** Activate (jump to) a tab */
@@ -45,11 +63,28 @@ function tabToLiveTab(tab: chrome.tabs.Tab, currentWindowId: number): LiveTab | 
   if (isSelfNewTabPage(tab)) return null;
   if (!shouldDisplayUrl(url)) return null;
 
+  /**
+   * favicon 策略：统一走扩展同源的 `_favicon/` 入口。
+   *
+   * Chrome 给的 `tab.favIconUrl` 很多时候是远程站点 URL，直接塞给 `<img>` 会导致：
+   *   - 站点离线 / 图标 404 时控制台打红 `net::ERR_*`
+   *   - 有些站点图标带 CORS 限制，也会污染控制台
+   *
+   * 改用 `chrome-extension://<id>/_favicon/?pageUrl=...` 后：
+   *   - 与 newtab 页同源，不会触发 CORS 报错
+   *   - Chrome 内部自己去抓远程图标并缓存，失败也只是返回空图，不污染控制台
+   *   - canvas 可以安全地读像素做取色
+   *
+   * 仅在扩展上下文有效；普通浏览器预览（无 chrome.runtime.id）退回原始值。
+   */
+  const extensionFavicon = getFaviconUrl(url);
+  const favIconUrl = extensionFavicon || tab.favIconUrl || '';
+
   return {
     id: tab.id!,
     url,
     title: tab.title || url,
-    favIconUrl: tab.favIconUrl || getFaviconUrl(url),
+    favIconUrl,
     windowId: tab.windowId,
     incognito: tab.incognito,
     pinned: tab.pinned,
@@ -78,8 +113,14 @@ export const useTabsStore = create<TabsState>((set, get) => ({
   loading: false,
   error: null,
 
-  loadAllTabs: async () => {
-    set({ loading: true, error: null });
+  loadAllTabs: async (options) => {
+    const silent = options?.silent === true;
+    // 静默模式下只重置 error，不碰 loading——避免合并/批量关闭后主视图闪回 Spin
+    if (silent) {
+      set({ error: null });
+    } else {
+      set({ loading: true, error: null });
+    }
     try {
       const [allTabs, currentWindow] = await Promise.all([
         queryAllTabs(),
@@ -107,10 +148,17 @@ export const useTabsStore = create<TabsState>((set, get) => ({
         tabs: liveTabs,
         currentWindowId,
         windows: windowMap,
-        loading: false,
+        // 静默模式本来就没翻 loading，这里也不覆盖；非静默模式才落回 false
+        ...(silent ? {} : { loading: false }),
       });
     } catch (err) {
-      set({ loading: false, error: String(err) });
+      // 首次加载失败需要用户感知；静默刷新失败只打日志，避免打扰
+      if (!silent) {
+        feedback.error(translate('tabs.loadFailed'), err);
+      } else {
+        console.warn('[Canopy] silent refresh failed', err);
+      }
+      set(silent ? { error: String(err) } : { loading: false, error: String(err) });
     }
   },
 
@@ -119,23 +167,27 @@ export const useTabsStore = create<TabsState>((set, get) => ({
 
     switch (message.type) {
       case 'tab-created': {
-        get().loadAllTabs();
+        // broadcast 驱动的刷新必须静默：否则每次新开 tab，主视图就闪一次全屏 Spin
+        get().loadAllTabs({ silent: true });
         break;
       }
       case 'tab-updated': {
         const { id, url, title, favIconUrl } = message.payload;
         set({
-          tabs: tabs.map((t) =>
-            t.id === id
-              ? {
-                  ...t,
-                  url: (url as string) || t.url,
-                  title: (title as string) || t.title,
-                  favIconUrl: (favIconUrl as string) || t.favIconUrl,
-                  hostname: url ? extractHostname(url as string) : t.hostname,
-                }
-              : t,
-          ),
+          tabs: tabs.map((t) => {
+            if (t.id !== id) return t;
+            const newUrl = (url as string) || t.url;
+            // 同步沿用 tabToLiveTab 的策略：若有 URL 就走扩展同源 favicon，
+            // 避免 sw 广播把远程 favIconUrl 写回 store 导致 `<img>` 跨域报错。
+            const extensionFavicon = newUrl ? getFaviconUrl(newUrl) : '';
+            return {
+              ...t,
+              url: newUrl,
+              title: (title as string) || t.title,
+              favIconUrl: extensionFavicon || (favIconUrl as string) || t.favIconUrl,
+              hostname: url ? extractHostname(url as string) : t.hostname,
+            };
+          }),
         });
         break;
       }
@@ -154,7 +206,8 @@ export const useTabsStore = create<TabsState>((set, get) => ({
         break;
       }
       case 'tab-moved': {
-        get().loadAllTabs();
+        // 同 tab-created：静默刷新，避免主视图闪 Spin
+        get().loadAllTabs({ silent: true });
         break;
       }
       case 'window-focus-changed': {
@@ -177,25 +230,57 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     try {
       await activateTab(tabId, windowId);
     } catch (err) {
+      // 常见失败：目标 tab 已被用户关闭、窗口已 minimize 等——给出明确反馈
+      feedback.error(translate('tabs.jumpFailed'), err);
       set({ error: String(err) });
+      // 兜底刷新，清掉 UI 里已经不存在的 tab
+      void get().loadAllTabs({ silent: true });
     }
   },
 
+  /**
+   * 关闭单个 tab
+   *
+   * ⚠️ 历史 Bug 防回归：
+   *   原实现把 addRecord 和 closeTab 放在同一个 try 里 await 串联——
+   *   一旦 addRecord 内部 chrome.storage.local 写入 hang 住或抛错（容量超限、I/O 异常等），
+   *   closeTab 永远不会被执行 → 浏览器 tab 没有被关闭，且外层调用方的 loading 永远转圈。
+   *   现在：Undo 仅作为「锦上添花」——失败只告警到 console，绝不阻塞真正的关闭。
+   *
+   * 错误处理：任何 chrome API 失败会 toast + 兜底刷新，UI 层不需要再包 try/catch。
+   */
   closeSingleTab: async (tabId) => {
     const { tabs } = get();
     const tab = tabs.find((t) => t.id === tabId);
     if (!tab) return;
 
     try {
-      // Create undo record BEFORE closing
       const snapshots = [liveTabToSnapshot(tab)];
-      await useUndoStore.getState().addRecord(snapshots, `关闭 "${tab.title}"`);
+      // Undo 写入失败不阻塞关闭（见 closeSingleTab 注释）
+      void useUndoStore
+        .getState()
+        .addRecord(snapshots, `关闭 "${tab.title}"`)
+        .catch((err) => {
+          console.warn('[Canopy] addRecord failed, undo will be unavailable', err);
+        });
       await closeTab(tabId);
+      // 关闭成功后不强制刷新——SW broadcast 的 tab-removed 会驱动 UI 移除
     } catch (err) {
+      feedback.error(translate('tabs.closeFailed'), err);
       set({ error: String(err) });
+      // 兜底：可能真关掉了但 broadcast 丢失，silent 刷新同步 UI
+      void get().loadAllTabs({ silent: true });
+      throw err;
     }
   },
 
+  /**
+   * 关闭多个 tab —— 合并去重 / 多选场景的主要入口
+   *
+   * 成功后会展示 "已关闭 N 个标签页" 的反馈；失败由 feedback 统一兜。
+   * 调用方（如 DedupInfoBar）可以继续用 try/finally 控制自己的 busy 状态，
+   * 但不需要再自己调用 message.error——已被 store 统一处理。
+   */
   closeMultipleTabs: async (tabIds) => {
     const { tabs } = get();
     const targets = tabs.filter((t) => tabIds.includes(t.id));
@@ -203,19 +288,29 @@ export const useTabsStore = create<TabsState>((set, get) => ({
 
     try {
       const snapshots = targets.map(liveTabToSnapshot);
-      await useUndoStore.getState().addRecord(
-        snapshots,
-        `关闭 ${targets.length} 个标签页`,
-      );
+      void useUndoStore
+        .getState()
+        .addRecord(snapshots, `关闭 ${targets.length} 个标签页`)
+        .catch((err) => {
+          console.warn('[Canopy] addRecord failed, undo will be unavailable', err);
+        });
       await closeTabs(tabIds);
     } catch (err) {
+      // 同时落入 store error 和 feedback：
+      //   - feedback 让用户立即看到结果
+      //   - set error 让未来的错误面板/重试 UI 可消费
+      //   - throw 让直接调用方（DedupInfoBar 合并按钮等）能感知失败并切回非 loading
+      feedback.error(translate('tabs.closeFailed'), err);
       set({ error: String(err) });
+      void get().loadAllTabs({ silent: true });
+      throw err;
     }
   },
 
   closeDomainGroup: async (domain) => {
     const { tabs } = get();
-    const groupTabs = tabs.filter((t) => t.hostname === domain || t.hostname.endsWith(`.${domain}`));
+    // domain 来自 groupTabsByDomain 的分组键（hostname），精确匹配即可
+    const groupTabs = tabs.filter((t) => t.hostname === domain);
     if (groupTabs.length === 0) return;
 
     const nonPinned = groupTabs.filter((t) => !t.pinned);
@@ -223,13 +318,20 @@ export const useTabsStore = create<TabsState>((set, get) => ({
 
     try {
       const snapshots = nonPinned.map(liveTabToSnapshot);
-      await useUndoStore.getState().addRecord(
-        snapshots,
-        `关闭 ${domain} 的 ${nonPinned.length} 个标签页`,
-      );
+      void useUndoStore
+        .getState()
+        .addRecord(snapshots, `关闭 ${domain} 的 ${nonPinned.length} 个标签页`)
+        .catch((err) => {
+          console.warn('[Canopy] addRecord failed, undo will be unavailable', err);
+        });
       await closeTabs(nonPinned.map((t) => t.id));
+      // 批量操作给出成功反馈，让用户明确感知"点了就有结果"
+      feedback.success(translate('tabs.closedCount', { count: nonPinned.length }));
     } catch (err) {
+      feedback.error(translate('tabs.closeGroupFailed'), err);
       set({ error: String(err) });
+      void get().loadAllTabs({ silent: true });
+      throw err;
     }
   },
 
@@ -240,13 +342,19 @@ export const useTabsStore = create<TabsState>((set, get) => ({
 
     try {
       const snapshots = nonPinned.map(liveTabToSnapshot);
-      await useUndoStore.getState().addRecord(
-        snapshots,
-        `关闭全部 ${nonPinned.length} 个非固定标签页`,
-      );
+      void useUndoStore
+        .getState()
+        .addRecord(snapshots, `关闭全部 ${nonPinned.length} 个非固定标签页`)
+        .catch((err) => {
+          console.warn('[Canopy] addRecord failed, undo will be unavailable', err);
+        });
       await closeTabs(nonPinned.map((t) => t.id));
+      feedback.success(translate('tabs.closedCount', { count: nonPinned.length }));
     } catch (err) {
+      feedback.error(translate('tabs.closeFailed'), err);
       set({ error: String(err) });
+      void get().loadAllTabs({ silent: true });
+      throw err;
     }
   },
 }));

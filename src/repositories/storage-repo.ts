@@ -17,6 +17,10 @@ const DEFAULT_SETTINGS: UserSettings = {
   gradientPreset: 'aurora',
   showIncognito: false,
   language: 'zh-CN',
+  domainGroupColumns: 'auto',
+  domainGroupShowItemFavicon: true,
+  domainGroupAccentBarPosition: 'left',
+  domainGroupCardRadius: 'default',
 };
 
 // ── Generic CRUD ──────────────────────────────────────

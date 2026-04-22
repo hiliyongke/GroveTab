@@ -1,148 +1,351 @@
 /**
- * SearchBox — Global search with MiniSearch + keyboard shortcuts
+ * SearchBox — 全局搜索浮层（antd 版，Raycast / Spotlight 风）
+ *
+ * 实现要点：
+ *   - 使用 antd Modal 的 centered=false + 自定义 top，实现顶部浮层
+ *   - 内部结构：Input（大号圆角搜索框）+ 结果 List + 底部状态栏
+ *   - 按键导航保持不变（↑/↓ 选中、Enter 跳转、Esc 清空 → 再 Esc 关闭）
  */
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Search, X } from 'lucide-react';
+import { useState, useMemo, useRef, useCallback } from 'react';
+import { Modal, Input, theme, Empty } from 'antd';
+import type { InputRef } from 'antd';
+import {
+  SearchOutlined,
+  EnterOutlined,
+} from '@ant-design/icons';
 import MiniSearch from 'minisearch';
-import { useTabsStore } from '@/store';
-import { TabItem } from '@/features/tabs';
 import type { LiveTab } from '@/shared/types';
+import { useTabsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { pinyinMatch } from '@/shared/utils/pinyin';
 
 interface SearchBoxProps {
-  onClose: () => void;
+  /** 受控：是否打开 */
+  open: boolean;
+  /** 受控：开关切换回调 */
+  onOpenChange: (open: boolean) => void;
 }
 
-// Build a MiniSearch index from live tabs
-function buildSearchIndex(tabs: LiveTab[]): MiniSearch<LiveTab> {
-  const ms = new MiniSearch<LiveTab>({
-    fields: ['title', 'hostname', 'url'],
-    storeFields: ['id', 'title', 'url', 'hostname', 'favIconUrl', 'windowId', 'pinned', 'audible', 'incognito', 'isCurrentWindow', 'lastAccessed', 'groupId'],
-    searchOptions: {
-      boost: { title: 3, hostname: 2 },
-      fuzzy: 0.2,
-      prefix: true,
-    },
+/**
+ * 构建 MiniSearch 索引
+ */
+function buildSearchIndex(tabs: LiveTab[]) {
+  const ms = new MiniSearch({
+    fields: ['title', 'hostname'],
+    storeFields: ['id'],
+    searchOptions: { fuzzy: 0.2, prefix: true },
   });
   if (tabs.length > 0) {
-    ms.addAll(tabs);
+    ms.addAll(tabs.map((t) => ({ id: t.id, title: t.title, hostname: t.hostname })));
   }
   return ms;
 }
 
-export function SearchBox({ onClose }: SearchBoxProps) {
+/**
+ * 小键盘提示胶囊
+ */
+function Kbd({ children }: { children: React.ReactNode }) {
+  const { token } = theme.useToken();
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minWidth: 18,
+        height: 18,
+        padding: '0 5px',
+        fontSize: 10.5,
+        fontFamily: 'var(--font-family-mono, monospace)',
+        color: token.colorTextSecondary,
+        background: token.colorFillTertiary,
+        border: `1px solid ${token.colorBorderSecondary}`,
+        borderRadius: 4,
+        lineHeight: 1,
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+/**
+ * 全局搜索浮层
+ */
+export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
   const [query, setQuery] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const inputRef = useRef<InputRef>(null);
   const tabs = useTabsStore((s) => s.tabs);
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
-  const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
   const { t } = useT();
+  const { token } = theme.useToken();
 
   const searchIndex = useMemo(() => buildSearchIndex(tabs), [tabs]);
 
   const results = useMemo(() => {
     if (!query.trim()) return [];
     try {
-      const miniResults = searchIndex.search(query) as unknown as LiveTab[];
-      if (miniResults.length > 0) return miniResults;
-    } catch { /* fallback to pinyin */ }
-    // Pinyin fallback: filter tabs by pinyin match
-    return tabs.filter((tab) =>
-      pinyinMatch(tab.title, query) || pinyinMatch(tab.hostname, query)
+      const miniResults = searchIndex.search(query);
+      if (miniResults.length > 0) {
+        const byId = new Map(tabs.map((tb) => [tb.id, tb]));
+        return miniResults
+          .map((r) => byId.get(r.id as number))
+          .filter((x): x is LiveTab => !!x);
+      }
+    } catch {
+      /* fallback */
+    }
+    return tabs.filter(
+      (tab) => pinyinMatch(tab.title, query) || pinyinMatch(tab.hostname, query)
     );
   }, [query, searchIndex, tabs]);
 
-  // Focus input on mount
-  useEffect(() => {
-    inputRef.current?.focus();
+  const close = useCallback(() => onOpenChange(false), [onOpenChange]);
+
+  /**
+   * 由 Modal 的 afterOpenChange 驱动「打开时重置状态 + 聚焦」，
+   * 这是一次真实的 UI 事件回调，避免在 useEffect 里同步 setState 触发 React 19
+   * 的级联渲染告警，并且保证焦点发生在 Modal 真正挂载完成之后，体验更稳。
+   */
+  const handleAfterOpenChange = useCallback((visible: boolean) => {
+    if (visible) {
+      setQuery('');
+      setActiveIndex(0);
+      inputRef.current?.focus();
+    }
   }, []);
 
-  // Keyboard handler
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      if (query) {
-        setQuery('');
-      } else {
-        onClose();
+  const handleJump = useCallback(
+    (tab: LiveTab) => {
+      jumpToTab(tab.id, tab.windowId);
+      close();
+    },
+    [jumpToTab, close]
+  );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (query) {
+          e.preventDefault();
+          e.stopPropagation();
+          setQuery('');
+          setActiveIndex(0);
+        }
+        // 没有 query 时交给 Modal 默认关闭行为
+        return;
       }
-    }
-  }, [query, onClose]);
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActiveIndex((i) => Math.min(i + 1, results.length - 1));
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActiveIndex((i) => Math.max(i - 1, 0));
+        return;
+      }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const tab = results[activeIndex];
+        if (tab) handleJump(tab);
+        return;
+      }
+    },
+    [query, results, activeIndex, handleJump]
+  );
 
   return (
-    <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm flex items-start justify-center pt-[15vh]">
+    <Modal
+      open={open}
+      onCancel={close}
+      afterOpenChange={handleAfterOpenChange}
+      footer={null}
+      closable={false}
+      destroyOnHidden
+      maskClosable
+      width={640}
+      centered={false}
+      styles={{
+        mask: { backdropFilter: 'blur(8px)' },
+        body: { padding: 0 },
+      }}
+      style={{ top: '15vh' }}
+    >
+      {/* 搜索输入行 */}
       <div
-        className="w-full max-w-2xl rounded-[var(--radius-lg)]
-          bg-surface backdrop-blur-xl border border-border
-          shadow-2xl overflow-hidden"
+        style={{
+          padding: '14px 16px',
+          borderBottom: `1px solid ${token.colorBorderSecondary}`,
+        }}
       >
-        {/* Search input */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
-          <Search className="w-5 h-5 text-text-muted flex-shrink-0" />
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={t('search.placeholder')}
-            className="flex-1 bg-transparent text-text text-base placeholder:text-text-muted
-              outline-none border-none"
-          />
-          {query && (
-            <button
-              onClick={() => setQuery('')}
-              className="w-6 h-6 flex items-center justify-center rounded-full
-                hover:bg-surface-hover text-text-muted hover:text-text
-                transition-colors duration-150 cursor-pointer"
-              aria-label={t('search.clear')}
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-          <kbd className="hidden sm:inline-flex items-center px-2 py-0.5 rounded
-            bg-badge text-text-muted text-xs font-mono">
-            Esc
-          </kbd>
-        </div>
+        <Input
+          ref={inputRef}
+          size="large"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setActiveIndex(0);
+          }}
+          onKeyDown={handleKeyDown}
+          placeholder={t('search.placeholder')}
+          prefix={<SearchOutlined style={{ color: token.colorTextTertiary }} />}
+          allowClear
+          variant="borderless"
+          style={{ fontSize: 15 }}
+        />
+      </div>
 
-        {/* Results */}
-        {query.trim() && (
-          <div className="max-h-[50vh] overflow-y-auto p-3">
-            {results.length > 0 ? (
-              <div className="flex flex-col gap-1.5">
-                <div className="text-xs text-text-muted px-2 mb-1">
-                  {t('search.results', { count: results.length })}
-                </div>
-                {results.map((tab) => (
-                  <TabItem
-                    key={tab.id}
-                    tab={tab}
-                    onJump={(id, winId) => {
-                      jumpToTab(id, winId);
-                      onClose();
-                    }}
-                    onClose={closeSingleTab}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-text-muted">
-                <p className="text-sm">{t('search.noResults')}</p>
-                <p className="text-xs mt-1">{t('search.tryOther')}</p>
+      {/* 结果列表 */}
+      <div style={{ maxHeight: '50vh', overflowY: 'auto', padding: '4px 0' }}>
+        {results.length === 0 ? (
+          <div style={{ padding: '32px 24px' }}>
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description={
+                <span style={{ fontSize: 13, color: token.colorTextSecondary }}>
+                  {query ? t('search.noResults') : t('search.hint')}
+                </span>
+              }
+            />
+            {query && (
+              <div
+                style={{
+                  marginTop: 8,
+                  textAlign: 'center',
+                  fontSize: 12,
+                  color: token.colorTextTertiary,
+                }}
+              >
+                {t('search.tryOther')}
               </div>
             )}
           </div>
-        )}
-
-        {/* Hint when empty */}
-        {!query.trim() && (
-          <div className="px-5 py-6 text-center text-text-muted text-sm">
-            {t('search.hint')}
-          </div>
+        ) : (
+          <ul
+            role="listbox"
+            style={{
+              listStyle: 'none',
+              margin: 0,
+              padding: '4px 0',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            {results.map((tab, idx) => {
+              const active = idx === activeIndex;
+              return (
+                <li
+                  key={tab.id}
+                  role="option"
+                  aria-selected={active}
+                  onMouseEnter={() => setActiveIndex(idx)}
+                  onClick={() => handleJump(tab)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    margin: '0 6px',
+                    padding: '10px 12px',
+                    borderRadius: token.borderRadius,
+                    cursor: 'pointer',
+                    background: active ? token.colorFillSecondary : 'transparent',
+                    transition: `background ${token.motionDurationFast}`,
+                  }}
+                >
+                  {tab.favIconUrl ? (
+                    <img
+                      src={tab.favIconUrl}
+                      alt=""
+                      style={{ width: 18, height: 18, borderRadius: 4, flexShrink: 0 }}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <span
+                      style={{
+                        width: 18,
+                        height: 18,
+                        borderRadius: 4,
+                        background: token.colorFillSecondary,
+                        flexShrink: 0,
+                      }}
+                    />
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: 13.5,
+                        fontWeight: 500,
+                        color: token.colorText,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        lineHeight: 1.3,
+                      }}
+                    >
+                      {tab.title}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 11.5,
+                        color: token.colorTextTertiary,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        marginTop: 2,
+                        lineHeight: 1.3,
+                      }}
+                    >
+                      {tab.hostname}
+                    </div>
+                  </div>
+                  {active && (
+                    <EnterOutlined
+                      style={{ fontSize: 12, color: token.colorTextTertiary, flexShrink: 0 }}
+                    />
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         )}
       </div>
-    </div>
+
+      {/* 底部状态栏 */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 20px',
+          height: 40,
+          borderTop: `1px solid ${token.colorBorderSecondary}`,
+          background: token.colorFillQuaternary,
+          fontSize: 11.5,
+          color: token.colorTextTertiary,
+        }}
+      >
+        <span>{results.length > 0 ? t('search.results', { count: results.length }) : ' '}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <Kbd>↑</Kbd>
+            <Kbd>↓</Kbd>
+            <span>navigate</span>
+          </span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <Kbd>↵</Kbd>
+            <span>open</span>
+          </span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <Kbd>esc</Kbd>
+            <span>{t('search.close')}</span>
+          </span>
+        </div>
+      </div>
+    </Modal>
   );
 }

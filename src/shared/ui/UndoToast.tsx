@@ -1,23 +1,33 @@
 /**
- * UndoToast — Bottom toast showing undo option after closing tabs
+ * UndoToast — 关闭标签后的撤销提示（antd 版）
+ *
+ * 设计：
+ *   - 底部居中浮动胶囊（使用 antd token 控制配色）
+ *   - 撤销按钮使用 antd Button（primary）
+ *   - 关闭按钮使用 antd Button（text）
+ *   - 从下方滑入（原生 CSS 动画 .canopy-pulse / 自定义 transform）
  */
 
+import { Button, theme } from 'antd';
+import { UndoOutlined, CloseOutlined } from '@ant-design/icons';
 import { useUndoStore } from '@/store';
-import { Undo, X } from 'lucide-react';
 import { useT } from '@/shared/i18n';
 
+/**
+ * 撤销提示浮条
+ */
 export function UndoToast() {
   const activeToast = useUndoStore((s) => s.activeToast);
   const undoRecord = useUndoStore((s) => s.undoRecord);
   const dismissToast = useUndoStore((s) => s.dismissToast);
   const { t } = useT();
+  const { token } = theme.useToken();
 
   if (!activeToast) return null;
 
   const tabCount = activeToast.tabs.length;
-  const label = tabCount === 1
-    ? t('undo.closeOne')
-    : t('undo.close', { count: tabCount });
+  const label =
+    tabCount === 1 ? t('undo.closeOne') : t('undo.close', { count: tabCount });
 
   const handleUndo = () => undoRecord(activeToast.id);
 
@@ -25,29 +35,43 @@ export function UndoToast() {
     <div
       role="alert"
       aria-live="polite"
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50
-        flex items-center gap-3 px-5 py-3 rounded-[var(--radius-lg)]
-        bg-surface backdrop-blur-xl border border-border
-        shadow-lg animate-in slide-in-from-bottom-4"
+      style={{
+        position: 'fixed',
+        bottom: 24,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 1100,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '8px 8px 8px 20px',
+        borderRadius: 999,
+        background: token.colorBgElevated,
+        border: `1px solid ${token.colorBorderSecondary}`,
+        boxShadow: token.boxShadow,
+        backdropFilter: 'blur(16px)',
+      }}
     >
-      <span className="text-sm text-text">{label}</span>
-      <button
+      <span style={{ fontSize: 13, fontWeight: 500, color: token.colorText }}>{label}</span>
+
+      <Button
+        type="primary"
+        shape="round"
+        size="small"
+        icon={<UndoOutlined />}
         onClick={handleUndo}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[var(--radius-md)]
-          bg-badge hover:bg-surface-hover text-text text-sm font-medium
-          transition-colors duration-150 cursor-pointer"
       >
-        <Undo className="w-3.5 h-3.5" />
         {t('undo.action')}
-      </button>
-      <button
+      </Button>
+
+      <Button
+        type="text"
+        shape="circle"
+        size="small"
+        icon={<CloseOutlined />}
         onClick={dismissToast}
-        className="w-6 h-6 flex items-center justify-center rounded-full
-          hover:bg-surface-hover text-text-muted hover:text-text
-          transition-colors duration-150 cursor-pointer"
-      >
-        <X className="w-3.5 h-3.5" />
-      </button>
+        aria-label="Dismiss"
+      />
     </div>
   );
 }

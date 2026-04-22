@@ -29,7 +29,7 @@ export function parseImportJSON(text: string): { sessions: ArchivedSession[]; er
       errors.push('Invalid format: missing sessions array');
       return { sessions: [], errors };
     }
-    const sessions = data.sessions.filter((s: any) => {
+    const sessions = data.sessions.filter((s: Partial<ArchivedSession>) => {
       if (!s.id || !s.tabs || !Array.isArray(s.tabs)) {
         errors.push(`Invalid session: ${s.name || s.id || 'unknown'}`);
         return false;
