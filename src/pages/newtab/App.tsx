@@ -6,9 +6,9 @@ import { useEffect, useState, useCallback } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useTabsStore, useSettingsStore, useUndoStore } from '@/store';
 import { useSwBroadcast } from '@/shared/hooks';
-import { Header, UndoToast, GradientBackground, ThemeProvider } from '@/shared/ui';
+import { Header, UndoToast, GradientBackground, ThemeProvider, type ViewMode } from '@/shared/ui';
 import { I18nProvider, useT } from '@/shared/i18n';
-import { DomainGroupView } from '@/features/tabs';
+import { DomainGroupView, TimelineView, CompactView, GridView, FrequencyView } from '@/features/tabs';
 import { SearchBox } from '@/features/search';
 import { OnboardingCard, ArchivePanel } from '@/features/sessions';
 import { hasCompletedOnboarding } from '@/repositories';
@@ -23,6 +23,7 @@ function AppContent() {
   const [checked, setChecked] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('domain');
   const { t } = useT();
 
   useSwBroadcast();
@@ -30,6 +31,8 @@ function AppContent() {
   useEffect(() => {
     const init = async () => {
       await loadSettings();
+      const settings = useSettingsStore.getState().settings;
+      setViewMode((settings.defaultView as ViewMode) || 'domain');
       await loadAllTabs();
       await loadUndoRecords();
       const done = await hasCompletedOnboarding();
@@ -60,6 +63,11 @@ function AppContent() {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
+  const handleViewChange = useCallback((view: ViewMode) => {
+    setViewMode(view);
+    useSettingsStore.getState().updateSettings({ defaultView: view });
+  }, []);
+
   const handleArchive = useCallback(async () => {
     try {
       await archiveAllTabs();
@@ -79,7 +87,12 @@ function AppContent() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header onSearch={() => setShowSearch(true)} onArchive={handleArchive} />
+      <Header
+        onSearch={() => setShowSearch(true)}
+        onArchive={handleArchive}
+        currentView={viewMode}
+        onViewChange={handleViewChange}
+      />
 
       <main className="flex-1 px-6 pb-8 max-w-4xl mx-auto w-full">
         {showOnboarding && (
@@ -91,7 +104,11 @@ function AppContent() {
             {t('tabs.loading')}
           </div>
         ) : (
-          <DomainGroupView />
+          viewMode === 'domain' ? <DomainGroupView /> :
+          viewMode === 'timeline' ? <TimelineView /> :
+          viewMode === 'compact' ? <CompactView /> :
+          viewMode === 'grid' ? <GridView /> :
+          <FrequencyView />
         )}
       </main>
 

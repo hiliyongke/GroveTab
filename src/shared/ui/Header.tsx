@@ -5,14 +5,17 @@
 import { TreePine, Search, Archive } from 'lucide-react';
 import { useTabsStore } from '@/store';
 import { ThemeToggle } from './ThemeToggle';
+import { ViewSwitcher, type ViewMode } from './ViewSwitcher';
 import { useT } from '@/shared/i18n';
 
 interface HeaderProps {
   onSearch: () => void;
   onArchive: () => void;
+  currentView: ViewMode;
+  onViewChange: (view: ViewMode) => void;
 }
 
-export function Header({ onSearch, onArchive }: HeaderProps) {
+export function Header({ onSearch, onArchive, currentView, onViewChange }: HeaderProps) {
   const tabCount = useTabsStore((s) => s.tabs.length);
   const { t } = useT();
 
@@ -24,6 +27,9 @@ export function Header({ onSearch, onArchive }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-2">
+        {/* View switcher */}
+        <ViewSwitcher currentView={currentView} onViewChange={onViewChange} />
+
         {/* Search button */}
         <button
           onClick={onSearch}

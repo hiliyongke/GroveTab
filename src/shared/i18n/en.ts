@@ -41,5 +41,16 @@ const en: Record<string, string> = {
   'gradient.deepspace': 'Deep Space',
   'gradient.custom': 'Custom',
   'gradient.title': 'Gradient Theme',
+  'view.domain': 'Domain Groups',
+  'view.timeline': 'Timeline',
+  'view.compact': 'Compact',
+  'view.grid': 'Grid',
+  'view.frequency': 'Frequency',
+  'view.frequencyDesc': 'Top {count} most used tabs',
+  'timeline.today': 'Today',
+  'timeline.yesterday': 'Yesterday',
+  'timeline.thisWeek': 'This Week',
+  'timeline.older': 'Older',
+  'tabs.empty': 'No open tabs',
 };
 export default en;

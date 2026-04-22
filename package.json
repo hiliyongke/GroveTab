@@ -13,6 +13,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\""
   },
   "dependencies": {
+    "@tanstack/react-virtual": "^3.13.24",
     "date-fns": "^4.1.0",
     "lucide-react": "^1.8.0",
     "minisearch": "^7.2.0",

@@ -41,5 +41,16 @@ const zhCN: Record<string, string> = {
   'gradient.deepspace': 'Deep Space',
   'gradient.custom': '自定义',
   'gradient.title': '渐变主题',
+  'view.domain': '域名分组',
+  'view.timeline': '时间轴',
+  'view.compact': '紧凑列表',
+  'view.grid': '网格',
+  'view.frequency': '使用频率',
+  'view.frequencyDesc': '最常使用的 {count} 个标签页',
+  'timeline.today': '今天',
+  'timeline.yesterday': '昨天',
+  'timeline.thisWeek': '本周',
+  'timeline.older': '更早',
+  'tabs.empty': '没有打开的标签页',
 };
 export default zhCN;

@@ -69,7 +69,7 @@ export interface StorageMeta {
 /** User settings */
 export interface UserSettings {
   overrideNewTab: boolean;
-  defaultView: 'domain' | 'timeline' | 'compact' | 'grid' | 'freq' | 'kanban';
+  defaultView: 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'kanban';
   theme: 'light' | 'dark' | 'system';
   gradientPreset: 'aurora' | 'sunrise' | 'deepspace' | 'custom';
   customGradient?: string;
