@@ -18,7 +18,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     overrideNewTab: true,
     defaultView: 'domain',
     theme: 'system',
-    gradientPreset: 'aurora',
+    gradientPreset: 'slate',
     showIncognito: false,
     language: 'zh-CN',
     domainGroupColumns: 'auto',

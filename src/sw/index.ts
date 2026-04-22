@@ -89,10 +89,114 @@ chrome.runtime.onInstalled.addListener(() => {
   });
 });
 
-chrome.contextMenus.onClicked.addListener((info) => {
+chrome.contextMenus.onClicked.addListener(async (info) => {
   if (info.menuItemId === 'canopy-save-all') {
-    // Will be implemented in Phase 5 (Archive)
-    console.log('[Canopy SW] Save all tabs triggered');
+    try {
+      const tabs = await chrome.tabs.query({ currentWindow: true });
+      const toSave = tabs.filter((tab) => {
+        const url = tab.url || tab.pendingUrl || '';
+        if (!url || url.startsWith('chrome://') || url.startsWith('chrome-extension://') || url.startsWith('about:')) return false;
+        if (tab.pinned) return false;
+        if (tab.incognito) return false;
+        return true;
+      });
+      if (toSave.length === 0) return;
+
+      const { nanoid } = await import('nanoid');
+      const session = {
+        id: nanoid(10),
+        name: `会话 ${new Date().toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`,
+        createdAt: Date.now(),
+        tabs: toSave.map((tab) => ({
+          url: tab.url || tab.pendingUrl || '',
+          title: tab.title || '',
+          favIconUrl: tab.favIconUrl || '',
+          hostname: (() => { try { return new URL(tab.url || '').hostname; } catch { return ''; } })(),
+          pinned: tab.pinned,
+        })),
+        tabCount: toSave.length,
+      };
+
+      // 保存到 storage
+      const result = await chrome.storage.local.get('canopy_sessions');
+      const sessions: unknown[] = Array.isArray(result.canopy_sessions) ? result.canopy_sessions : [];
+      sessions.unshift(session);
+      await chrome.storage.local.set({ canopy_sessions: sessions });
+
+      // 关闭已归档标签
+      const tabIds = toSave.map((t) => t.id).filter((id): id is number => id !== undefined);
+      if (tabIds.length > 0) {
+        await chrome.tabs.remove(tabIds);
+      }
+    } catch (err) {
+      console.error('[Canopy SW] Save all tabs failed:', err);
+    }
+  }
+});
+
+// ── 全局快捷键 ────────────────────────────────────────
+
+chrome.commands.onCommand.addListener(async (command) => {
+  if (command === 'open-canopy') {
+    /** 在当前窗口打开 Canopy 新标签页 */
+    try {
+      const url = chrome.runtime.getURL('src/pages/newtab/index.html');
+      await chrome.tabs.create({ url });
+    } catch (err) {
+      console.error('[Canopy SW] Open Canopy failed:', err);
+    }
+  }
+
+  if (command === 'save-all-tabs') {
+    /** 归档当前窗口所有标签——与上下文菜单同一逻辑 */
+    try {
+      const tabs = await chrome.tabs.query({ currentWindow: true });
+      const toSave = tabs.filter((tab) => {
+        const url = tab.url || tab.pendingUrl || '';
+        if (!url || url.startsWith('chrome://') || url.startsWith('chrome-extension://') || url.startsWith('about:')) return false;
+        if (tab.pinned) return false;
+        if (tab.incognito) return false;
+        return true;
+      });
+      if (toSave.length === 0) return;
+
+      const { nanoid } = await import('nanoid');
+      const session = {
+        id: nanoid(10),
+        name: `会话 ${new Date().toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`,
+        createdAt: Date.now(),
+        tabs: toSave.map((tab) => ({
+          url: tab.url || tab.pendingUrl || '',
+          title: tab.title || '',
+          favIconUrl: tab.favIconUrl || '',
+          hostname: (() => { try { return new URL(tab.url || '').hostname; } catch { return ''; } })(),
+          pinned: tab.pinned,
+        })),
+        tabCount: toSave.length,
+      };
+
+      const result = await chrome.storage.local.get('canopy_sessions');
+      const sessions: unknown[] = Array.isArray(result.canopy_sessions) ? result.canopy_sessions : [];
+      sessions.unshift(session);
+      await chrome.storage.local.set({ canopy_sessions: sessions });
+
+      const tabIds = toSave.map((t) => t.id).filter((id): id is number => id !== undefined);
+      if (tabIds.length > 0) {
+        await chrome.tabs.remove(tabIds);
+      }
+    } catch (err) {
+      console.error('[Canopy SW] Save all (command) failed:', err);
+    }
+  }
+
+  if (command === 'toggle-search') {
+    /** 打开 Canopy 并聚焦搜索框——通过 URL hash 传递信号 */
+    try {
+      const url = chrome.runtime.getURL('src/pages/newtab/index.html#search');
+      await chrome.tabs.create({ url });
+    } catch (err) {
+      console.error('[Canopy SW] Toggle search failed:', err);
+    }
   }
 });
 

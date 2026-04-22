@@ -17,6 +17,8 @@ export interface LiveTab {
   lastAccessed: number;
   hostname: string;
   isCurrentWindow: boolean;
+  /** 标签页是否已被丢弃（休眠），丢弃后释放内存但保留位置 */
+  discarded?: boolean;
 }
 
 /** Special URL classification */
@@ -70,9 +72,32 @@ export interface StorageMeta {
 /** User settings */
 export interface UserSettings {
   overrideNewTab: boolean;
-  defaultView: 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'kanban';
+  defaultView: 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency';
   theme: 'light' | 'dark' | 'system';
-  gradientPreset: 'aurora' | 'sunrise' | 'deepspace' | 'custom';
+  /**
+   * 背景渐变预设：
+   *   - 'default'   ：antd 默认色，最干净
+   *   - 'slate'     ：浅灰蓝渐变（浅色友好）
+   *   - 'warm'      ：暖米色渐变（浅色友好）
+   *   - 'ocean'     ：蓝绿海洋渐变（双模自适应）
+   *   - 'forest'    ：深绿渐变（双模自适应）
+   *   - 'sunset'    ：晚霞橙紫渐变（双模自适应）
+   *   - 'deepspace' ：深空蓝黑渐变（深色友好）
+   *   - 'midnight'  ：午夜深蓝渐变（深色友好）
+   *   - 'custom'    ：用户自定义（暂未开放编辑器）
+   *
+   * 每个预设包含 light / dark 两套色值，运行期按 resolvedTheme 自动切换。
+   */
+  gradientPreset:
+    | 'default'
+    | 'slate'
+    | 'warm'
+    | 'ocean'
+    | 'forest'
+    | 'sunset'
+    | 'deepspace'
+    | 'midnight'
+    | 'custom';
   customGradient?: string;
   showIncognito: boolean;
   language: 'zh-CN' | 'en';

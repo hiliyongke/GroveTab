@@ -17,13 +17,15 @@ import {
   InfoCircleOutlined,
   RightOutlined,
   LinkOutlined,
+  EditOutlined,
 } from '@ant-design/icons';
-import { Alert, Modal, Button, List, Empty, Spin, Tooltip, theme } from 'antd';
+import { Alert, Modal, Button, List, Empty, Spin, Tooltip, Input, theme } from 'antd';
 import type { ArchivedSession, ArchivedTab } from '@/shared/types';
 import {
   getArchivedSessions,
   restoreSession,
   deleteSession,
+  renameSession,
   archiveAllTabs,
 } from '@/services';
 import { createTab, getCurrentWindow } from '@/chrome';
@@ -80,6 +82,9 @@ export function ArchivePanel({ open, onOpenChange }: ArchivePanelProps) {
    * 点击同一条会折叠；点击另一条则切换到新的一条。
    */
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  /** 正在重命名的会话 ID，null 表示不在重命名态 */
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renamingValue, setRenamingValue] = useState('');
   const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
   const tabCount = useTabsStore((s) => s.tabs.length);
   const { t, locale } = useT();
@@ -117,6 +122,32 @@ export function ArchivePanel({ open, onOpenChange }: ArchivePanelProps) {
     } catch (err) {
       feedback.error(t('archive.deleteFailed'), err);
     }
+  };
+
+  /**
+   * 重命名确认：调用 renameSession 后刷新列表并退出编辑态。
+   * 空值或重复值直接取消，不调 API。
+   */
+  const handleRenameConfirm = async (id: string) => {
+    const newName = renamingValue.trim();
+    if (!newName) {
+      setRenamingId(null);
+      return;
+    }
+    try {
+      await renameSession(id, newName);
+      await refreshSessions();
+      feedback.success(t('archive.renameOk'));
+    } catch (err) {
+      feedback.error(t('archive.rename'), err);
+    }
+    setRenamingId(null);
+  };
+
+  /** 进入重命名态：预填当前名称 + 聚焦 */
+  const startRenaming = (session: ArchivedSession) => {
+    setRenamingId(session.id);
+    setRenamingValue(session.name);
   };
 
   /**
@@ -300,18 +331,36 @@ export function ArchivePanel({ open, onOpenChange }: ArchivePanelProps) {
 
                     {/* 标题 + 描述 */}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div
-                        style={{
-                          fontSize: 13.5,
-                          fontWeight: 500,
-                          color: token.colorText,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {session.name}
-                      </div>
+                      {renamingId === session.id ? (
+                        <Input
+                          size="small"
+                          value={renamingValue}
+                          onChange={(e) => setRenamingValue(e.target.value)}
+                          onPressEnter={() => handleRenameConfirm(session.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Escape') {
+                              e.stopPropagation();
+                              setRenamingId(null);
+                            }
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ fontSize: 13, fontWeight: 500 }}
+                          autoFocus
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            fontSize: 13.5,
+                            fontWeight: 500,
+                            color: token.colorText,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {session.name}
+                        </div>
+                      )}
                       <div style={{ fontSize: 11.5, color: token.colorTextTertiary, marginTop: 2 }}>
                         {t('archive.tabCount', { count: session.tabCount })}
                         <span style={{ margin: '0 6px', color: token.colorBorder }}>·</span>
@@ -331,6 +380,13 @@ export function ArchivePanel({ open, onOpenChange }: ArchivePanelProps) {
                           type="text"
                           icon={<UndoOutlined />}
                           onClick={() => handleRestore(session.id)}
+                        />
+                      </Tooltip>
+                      <Tooltip title={t('archive.rename')}>
+                        <Button
+                          type="text"
+                          icon={<EditOutlined />}
+                          onClick={() => startRenaming(session)}
                         />
                       </Tooltip>
                       <Tooltip title={t('archive.delete')}>

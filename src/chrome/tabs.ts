@@ -134,6 +134,28 @@ export async function createTab(createProperties: chrome.tabs.CreateProperties):
 }
 
 /**
+ * 丢弃（休眠）单个标签页——释放内存但保留标签页位置。
+ * 丢弃后标签页会变成灰色占位符，点击后自动恢复。
+ * 已丢弃的标签页再次调用会静默成功（幂等）。
+ */
+export async function discardTab(tabId: number): Promise<void> {
+  await safeCall('tabs.discard', () => chrome.tabs.discard(tabId));
+}
+
+/**
+ * 批量丢弃（休眠）标签页
+ */
+export async function discardTabs(tabIds: number[]): Promise<void> {
+  if (tabIds.length === 0) return;
+  // chrome.tabs.discard 只支持单个 tabId，逐个调用
+  await Promise.all(tabIds.map((id) =>
+    safeCall('tabs.discard', () => chrome.tabs.discard(id)).catch(() => {
+      /* 个别失败不阻塞其余 */
+    })
+  ));
+}
+
+/**
  * 获取当前窗口 —— 恢复会话等场景需要
  */
 export async function getCurrentWindow(): Promise<chrome.windows.Window> {

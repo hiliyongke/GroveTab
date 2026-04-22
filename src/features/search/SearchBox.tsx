@@ -32,12 +32,13 @@ interface SearchBoxProps {
  */
 function buildSearchIndex(tabs: LiveTab[]) {
   const ms = new MiniSearch({
-    fields: ['title', 'hostname'],
+    /** 搜索范围：标题 + 域名 + URL。URL 字段权重较低，避免域名噪音盖过标题匹配 */
+    fields: ['title', 'hostname', 'url'],
     storeFields: ['id'],
     searchOptions: { fuzzy: 0.2, prefix: true },
   });
   if (tabs.length > 0) {
-    ms.addAll(tabs.map((t) => ({ id: t.id, title: t.title, hostname: t.hostname })));
+    ms.addAll(tabs.map((t) => ({ id: t.id, title: t.title, hostname: t.hostname, url: t.url })));
   }
   return ms;
 }
@@ -98,7 +99,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
       /* fallback */
     }
     return tabs.filter(
-      (tab) => pinyinMatch(tab.title, query) || pinyinMatch(tab.hostname, query)
+      (tab) => pinyinMatch(tab.title, query) || pinyinMatch(tab.hostname, query) || tab.url.toLowerCase().includes(query.toLowerCase()),
     );
   }, [query, searchIndex, tabs]);
 
@@ -334,11 +335,11 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
             <Kbd>↑</Kbd>
             <Kbd>↓</Kbd>
-            <span>navigate</span>
+            <span>{t('search.navigate')}</span>
           </span>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
             <Kbd>↵</Kbd>
-            <span>open</span>
+            <span>{t('search.open')}</span>
           </span>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
             <Kbd>esc</Kbd>

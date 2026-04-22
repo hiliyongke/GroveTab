@@ -69,6 +69,8 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [faviconError, setFaviconError] = useState(false);
   const [hovered, setHovered] = useState(false);
+  /** 休眠态——标签已被浏览器丢弃，显示灰色样式 */
+  const isDiscarded = tab.discarded ?? false;
 
   /** 友好展示串：路径 + 关键参数，失败回落到原 URL */
   const urlHint = showUrlHint ? formatUrlForDisplay(tab.url) : '';
@@ -122,6 +124,7 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
           backgroundColor: hovered ? token.colorFillTertiary : 'transparent',
           transition: `background-color ${token.motionDurationFast}`,
           outline: 'none',
+          opacity: isDiscarded ? 0.5 : 1,
         }}
       >
         {leading}
@@ -293,6 +296,7 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
           x={contextMenu.x}
           y={contextMenu.y}
           url={tab.url}
+          tabId={tab.id}
           onClose={() => setContextMenu(null)}
         />
       )}

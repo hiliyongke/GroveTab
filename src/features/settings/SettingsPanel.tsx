@@ -17,7 +17,6 @@ import {
   Progress,
   Alert,
   Space,
-  Radio,
   Switch,
   theme,
   App,
@@ -30,9 +29,14 @@ import {
   UploadOutlined,
   DeleteOutlined,
   HddOutlined,
+  KeyOutlined,
+  SunOutlined,
+  MoonOutlined,
 } from '@ant-design/icons';
 import { useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
+import { useResolvedTheme } from '@/shared/hooks';
+import { GRADIENT_PRESETS } from '@/shared/theme/gradient-presets';
 import {
   exportSessionsJSON,
   downloadFile,
@@ -53,13 +57,7 @@ interface QuotaInfo {
   isWarning: boolean;
 }
 
-/** 背景预设（用户可在 appearance Tab 中选择） */
-const GRADIENT_PRESETS: { id: 'aurora' | 'sunrise' | 'deepspace'; label: string; colors: string[] }[] =
-  [
-    { id: 'aurora', label: 'Slate', colors: ['#f1f5f9', '#e2e8f0', '#cbd5e1'] },
-    { id: 'sunrise', label: 'Stone', colors: ['#fafaf9', '#e7e5e4', '#d6d3d1'] },
-    { id: 'deepspace', label: 'Deep Space', colors: ['#0F2027', '#203A43', '#2C5364'] },
-  ];
+/** 背景预设的数据源已迁移到 @/shared/theme/gradient-presets.ts，此处仅消费 */
 
 /**
  * 设置面板
@@ -117,6 +115,9 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
     });
   };
 
+  /** 当前 resolved 主题（非 setting 里的 theme），用于色卡预览和角标 */
+  const isDark = useResolvedTheme() === 'dark';
+
   /** Tab 1：外观 */
   const appearancePanel = (
     <Space direction="vertical" size={24} style={{ width: '100%' }}>
@@ -132,32 +133,93 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
         />
       </Field>
 
-      <Field label={t('gradient.title')}>
-        <Radio.Group
-          value={settings.gradientPreset}
-          onChange={(e) =>
-            updateSettings({
-              gradientPreset: e.target.value as 'aurora' | 'sunrise' | 'deepspace' | 'custom',
-            })
-          }
-          style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}
+      <Field label={t('gradient.title')} hint={t('gradient.hint')}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: 10,
+          }}
         >
-          {GRADIENT_PRESETS.map((preset) => (
-            <Radio.Button
-              key={preset.id}
-              value={preset.id}
-              style={{
-                width: 64,
-                height: 64,
-                padding: 0,
-                borderRadius: token.borderRadiusLG,
-                overflow: 'hidden',
-                background: `linear-gradient(135deg, ${preset.colors.join(', ')})`,
-              }}
-              title={preset.label}
-            />
-          ))}
-        </Radio.Group>
+          {GRADIENT_PRESETS.map((preset) => {
+            const isSelected = settings.gradientPreset === preset.id;
+            return (
+              <button
+                key={preset.id}
+                type="button"
+                onClick={() => updateSettings({ gradientPreset: preset.id })}
+                style={{
+                  all: 'unset',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'stretch',
+                  borderRadius: token.borderRadiusLG,
+                  overflow: 'hidden',
+                  border: isSelected
+                    ? `2px solid ${token.colorPrimary}`
+                    : `1px solid ${token.colorBorderSecondary}`,
+                  transition: 'border-color 160ms ease, box-shadow 160ms ease',
+                  boxShadow: isSelected ? `0 0 0 1px ${token.colorPrimary}` : 'none',
+                }}
+              >
+                {/* 色卡 */}
+                <div
+                  style={{
+                    height: 48,
+                    background: isDark ? preset.dark : preset.light,
+                    position: 'relative',
+                  }}
+                >
+                  {/* 模式兼容角标 */}
+                  {preset.compatibleMode !== 'both' && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: 4,
+                        right: 4,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: 16,
+                        height: 16,
+                        borderRadius: 4,
+                        fontSize: 9,
+                        color: '#fff',
+                        background:
+                          preset.compatibleMode === 'dark'
+                            ? 'rgba(0,0,0,0.5)'
+                            : 'rgba(255,255,255,0.7)',
+                      }}
+                    >
+                      {preset.compatibleMode === 'dark' ? (
+                        <MoonOutlined />
+                      ) : (
+                        <SunOutlined style={{ color: '#333' }} />
+                      )}
+                    </span>
+                  )}
+                </div>
+                {/* 名称标签 */}
+                <div
+                  style={{
+                    padding: '4px 6px',
+                    fontSize: 11,
+                    fontWeight: isSelected ? 600 : 400,
+                    color: isSelected ? token.colorPrimary : token.colorTextSecondary,
+                    background: token.colorBgContainer,
+                    textAlign: 'center',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {t(preset.labelKey)}
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </Field>
     </Space>
   );
@@ -294,6 +356,68 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
     </Space>
   );
 
+  /** Tab 4：快捷键 */
+  const shortcutsPanel = (
+    <Space direction="vertical" size={20} style={{ width: '100%' }}>
+      <Alert
+        type="info"
+        message={t('settings.shortcutsHint')}
+        showIcon
+        style={{ fontSize: 12 }}
+      />
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 12,
+        }}
+      >
+        {[
+          { label: t('shortcuts.openCanopy'), keys: 'Alt + C' },
+          { label: t('shortcuts.saveAll'), keys: 'Alt + Shift + S' },
+          { label: t('shortcuts.toggleSearch'), keys: 'Alt + K' },
+          { label: t('shortcuts.localSearch'), keys: '⌘/Ctrl + K', hint: t('shortcuts.localSearchHint') },
+        ].map((item) => (
+          <div
+            key={item.label}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '10px 14px',
+              borderRadius: token.borderRadiusLG,
+              background: token.colorFillQuaternary,
+              border: `1px solid ${token.colorBorderSecondary}`,
+            }}
+          >
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 500 }}>{item.label}</div>
+              {item.hint && (
+                <div style={{ fontSize: 11, color: token.colorTextTertiary, marginTop: 2 }}>
+                  {item.hint}
+                </div>
+              )}
+            </div>
+            <kbd
+              style={{
+                fontSize: 12,
+                fontFamily: 'inherit',
+                padding: '3px 8px',
+                borderRadius: token.borderRadiusSM,
+                background: token.colorBgContainer,
+                border: `1px solid ${token.colorBorder}`,
+                color: token.colorTextSecondary,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {item.keys}
+            </kbd>
+          </div>
+        ))}
+      </div>
+    </Space>
+  );
+
   /** Tab 3：数据 */
   const dataPanel = (
     <Space direction="vertical" size={20} style={{ width: '100%' }}>
@@ -418,6 +542,15 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
               </span>
             ),
             children: dataPanel,
+          },
+          {
+            key: 'shortcuts',
+            label: (
+              <span>
+                <KeyOutlined /> {t('settings.shortcuts')}
+              </span>
+            ),
+            children: shortcutsPanel,
           },
         ]}
       />

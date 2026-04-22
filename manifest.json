@@ -35,5 +35,19 @@
     "48": "public/icons/icon-48.png",
     "128": "public/icons/icon-128.png"
   },
+  "commands": {
+    "open-canopy": {
+      "suggested_key": { "default": "Alt+C" },
+      "description": "Open Canopy new tab page"
+    },
+    "save-all-tabs": {
+      "suggested_key": { "default": "Alt+Shift+S" },
+      "description": "Archive all tabs in current window"
+    },
+    "toggle-search": {
+      "suggested_key": { "default": "Alt+K" },
+      "description": "Open search in Canopy"
+    }
+  },
   "incognito": "split"
 }

@@ -17,7 +17,7 @@
 
 import { create } from 'zustand';
 import type { LiveTab, SwBroadcastMessage, WindowInfo, ClosedTabSnapshot } from '@/shared/types';
-import { queryAllTabs, getAllWindows, activateTab, closeTab, closeTabs, getFaviconUrl } from '@/chrome';
+import { queryAllTabs, getAllWindows, activateTab, closeTab, closeTabs, getFaviconUrl, discardTab as chromeDiscardTab, discardTabs as chromeDiscardTabs } from '@/chrome';
 import { extractHostname, shouldDisplayUrl, isSelfNewTabPage } from '@/chrome';
 import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
@@ -56,6 +56,10 @@ interface TabsState {
   closeDomainGroup: (domain: string) => Promise<void>;
   /** Close all non-pinned tabs (with confirmation if >20) */
   closeAllNonPinned: () => Promise<void>;
+  /** 丢弃（休眠）单个标签页，释放内存但保留位置 */
+  discardTab: (tabId: number) => Promise<void>;
+  /** 丢弃（休眠）整个域名的标签页 */
+  discardDomainGroup: (domain: string) => Promise<void>;
 }
 
 function tabToLiveTab(tab: chrome.tabs.Tab, currentWindowId: number): LiveTab | null {
@@ -93,6 +97,7 @@ function tabToLiveTab(tab: chrome.tabs.Tab, currentWindowId: number): LiveTab | 
     lastAccessed: tab.lastAccessed ?? 0,
     hostname: extractHostname(url),
     isCurrentWindow: tab.windowId === currentWindowId,
+    discarded: tab.discarded ?? false,
   };
 }
 
@@ -353,6 +358,34 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     } catch (err) {
       feedback.error(translate('tabs.closeFailed'), err);
       set({ error: String(err) });
+      void get().loadAllTabs({ silent: true });
+      throw err;
+    }
+  },
+
+  discardTab: async (tabId) => {
+    try {
+      await chromeDiscardTab(tabId);
+      feedback.success(translate('tabs.discarded'));
+      void get().loadAllTabs({ silent: true });
+    } catch (err) {
+      feedback.error(translate('tabs.discardFailed'), err);
+      void get().loadAllTabs({ silent: true });
+      throw err;
+    }
+  },
+
+  discardDomainGroup: async (domain) => {
+    const { tabs } = get();
+    const groupTabs = tabs.filter((t) => t.hostname === domain && !t.pinned && !t.discarded);
+    if (groupTabs.length === 0) return;
+
+    try {
+      await chromeDiscardTabs(groupTabs.map((t) => t.id));
+      feedback.success(translate('tabs.discardedGroup', { domain, count: groupTabs.length }));
+      void get().loadAllTabs({ silent: true });
+    } catch (err) {
+      feedback.error(translate('tabs.discardFailed'), err);
       void get().loadAllTabs({ silent: true });
       throw err;
     }

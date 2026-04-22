@@ -87,3 +87,19 @@ Canopy 是 Chrome/Edge 扩展的新标签页替代（newtab override），核心
   - 域名分组色条位置支持左/顶/隐藏三档，色彩作为身份索引
   - Chrome API 全链条 safeCall + feedback 反馈，UI 层不再写 try/catch
   - React 19 副作用纪律贯彻完毕
+- **竞品调研 + UX 修复 —— 2026-04-23** ✅
+  - 搜索支持 URL 字段 + 状态栏 i18n 修复
+  - 归档会话重命名 UI 补齐（后端已有，前端缺入口）
+  - SW 上下文菜单 save-all 从空操作升级为完整归档流程
+  - 清理 kanban 悬空类型 + Popup 升级为可用快捷操作页
+- **主题体系升级 —— 2026-04-23** ✅
+  - 预设从 3 种扩到 9 种（default/slate/warm/ocean/forest/sunset/deepspace/midnight/custom）
+  - 每个预设含 light+dark 双套渐变，resolveGradient() 统一消费
+  - 设置面板渐变选择器重做：3×3 grid 大色卡 + 模式角标
+  - App.tsx layoutBackground 消灭硬编码
+  - 旧 aurora→slate / sunrise→warm 自动迁移
+
+- **竞品差距（2026-04-23 调研）**
+  - **已实现的高优特性**：全局快捷键（manifest commands + SW 监听 + 设置面板展示）、域名分组内拖拽排序（motion Reorder.Group/Item）、标签休眠/冻结（chrome.tabs.discard + 右键菜单 + 整组休眠）
+  - **仍未实现的中优特性**：分组间拖拽（CSS multi-column 冲突）、Chrome 原生 Tab Groups 集成、多窗口管理面板、历史记录集成
+  - **低优/暂不落地**：云同步、AI 功能、团队协作工作区

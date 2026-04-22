@@ -56,6 +56,7 @@ import { OnboardingCard, ArchivePanel } from '@/features/sessions';
 import { SettingsPanel } from '@/features/settings';
 import { hasCompletedOnboarding } from '@/repositories';
 import { recordMetric } from '@/shared/utils/metrics';
+import { resolveGradient, type GradientPresetId } from '@/shared/theme/gradient-presets';
 
 const { Header, Content } = Layout;
 const { Text } = Typography;
@@ -356,7 +357,6 @@ function AppContent() {
 
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [checked, setChecked] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   /** Hero 搜索框是否已滚出视野——用于驱动 Header 吸附搜索渐显 */
@@ -367,29 +367,35 @@ function AppContent() {
    * 不需要刷新。切视图时通过 updateSettings 写回 store，两个入口自动同步。
    */
   const defaultView = useSettingsStore((s) => s.settings.defaultView);
-  const viewMode: ViewMode = (defaultView as ViewMode) ?? 'domain';
+  /** 防御旧版残留的 'kanban' 值——类型已移除但磁盘可能存有 */
+  const validViews: ViewMode[] = ['domain', 'timeline', 'compact', 'grid', 'frequency'];
+  const viewMode: ViewMode = validViews.includes(defaultView as ViewMode) ? (defaultView as ViewMode) : 'domain';
 
-  /** 背景预设 → CSS gradient。想改配色集中在此处 */
+  /** 背景预设 → CSS gradient，统一走 resolveGradient 消灭硬编码 */
   const gradientPreset = useSettingsStore((s) => s.settings.gradientPreset);
   const resolvedDark = useResolvedTheme() === 'dark';
-  /**
-   * 暗色模式下亮系预设（aurora / sunrise）自动回退到 antd 默认 layout 色，
-   * 避免"设置了却看起来不暗"的割裂感；deepspace 本身就是深色系，双模皆适用。
-   */
-  const layoutBackground = (() => {
-    if (gradientPreset === 'deepspace') {
-      return 'linear-gradient(135deg, #0F2027, #203A43, #2C5364)';
-    }
-    if (resolvedDark) return 'var(--ant-color-bg-layout)';
-    if (gradientPreset === 'sunrise') {
-      return 'linear-gradient(135deg, #fafaf9, #e7e5e4, #d6d3d1)';
-    }
-    // aurora / custom / undefined → slate
-    return 'linear-gradient(135deg, #f1f5f9, #e2e8f0, #cbd5e1)';
-  })();
+  const layoutBackground = resolveGradient(gradientPreset as GradientPresetId, resolvedDark);
   const { t } = useT();
 
   useSwBroadcast();
+
+  /**
+   * 全局快捷键通过 URL hash 传信号：#search → 自动聚焦搜索框
+   * 首次渲染时检测 hash，后续不再监听（这是 one-shot 信号）
+   *
+   * 注：不用 useEffect + setShowSearch（react-hooks/set-state-in-effect 规则禁止），
+   * 改为在初始化阶段同步读取 hash，若命中则将初始值设为 true。
+   */
+  const [searchFromHash] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const hash = window.location.hash;
+    if (hash === '#search') {
+      history.replaceState(null, '', window.location.pathname);
+      return true;
+    }
+    return false;
+  });
+  const [showSearch, setShowSearch] = useState(searchFromHash);
 
   useEffect(() => {
     const init = async () => {

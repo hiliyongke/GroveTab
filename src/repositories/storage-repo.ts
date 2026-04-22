@@ -14,7 +14,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   overrideNewTab: true,
   defaultView: 'domain',
   theme: 'system',
-  gradientPreset: 'aurora',
+  gradientPreset: 'slate',
   showIncognito: false,
   language: 'zh-CN',
   domainGroupColumns: 'auto',
@@ -43,7 +43,14 @@ export async function removeData(key: StorageKey): Promise<void> {
 
 export async function getSettings(): Promise<UserSettings> {
   const settings = await getData<UserSettings>('canopy_settings');
-  return settings ?? { ...DEFAULT_SETTINGS };
+  if (!settings) return { ...DEFAULT_SETTINGS };
+  /**
+   * 旧值迁移：aurora → slate，sunrise → warm
+   * 2026-04-23 预设体系重命名后，存量用户磁盘里可能还存着旧 ID。
+   */
+  if (settings.gradientPreset === 'aurora' as string) settings.gradientPreset = 'slate';
+  if (settings.gradientPreset === 'sunrise' as string) settings.gradientPreset = 'warm';
+  return settings;
 }
 
 export async function saveSettings(settings: Partial<UserSettings>): Promise<UserSettings> {

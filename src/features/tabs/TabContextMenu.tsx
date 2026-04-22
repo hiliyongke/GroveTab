@@ -15,9 +15,10 @@ import {
   PushpinOutlined,
   TagOutlined,
   MessageOutlined,
+  StopOutlined,
 } from '@ant-design/icons';
 import { Button, Input, Tag, Divider, Card, theme } from 'antd';
-import { useMetadataStore } from '@/store';
+import { useMetadataStore, useTabsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { stringToColor } from '@/shared/utils/color';
 
@@ -25,6 +26,8 @@ interface TabContextMenuProps {
   x: number;
   y: number;
   url: string;
+  /** 标签页 ID，用于休眠等需要 tabId 的操作 */
+  tabId?: number;
   onClose: () => void;
 }
 
@@ -33,7 +36,7 @@ const MENU_WIDTH = 240;
 /**
  * 标签右键上下文菜单
  */
-export function TabContextMenu({ x, y, url, onClose }: TabContextMenuProps) {
+export function TabContextMenu({ x, y, url, tabId, onClose }: TabContextMenuProps) {
   const { t } = useT();
   const { token } = theme.useToken();
   const addTag = useMetadataStore((s) => s.addTag);
@@ -43,6 +46,7 @@ export function TabContextMenu({ x, y, url, onClose }: TabContextMenuProps) {
   const isPinned = useMetadataStore((s) => s.isPinned);
   const tags = useMetadataStore((s) => s.getTags(url));
   const note = useMetadataStore((s) => s.getNote(url));
+  const discardTab = useTabsStore((s) => s.discardTab);
 
   const [showTagInput, setShowTagInput] = useState(false);
   const [showNoteInput, setShowNoteInput] = useState(false);
@@ -132,6 +136,26 @@ export function TabContextMenu({ x, y, url, onClose }: TabContextMenuProps) {
         >
           {pinned ? t('context.unpin') : t('context.pin')}
         </Button>
+
+        {/* 休眠标签页 */}
+        {tabId != null && (
+          <Button
+            type="text"
+            block
+            icon={<StopOutlined />}
+            onClick={async () => {
+              onClose();
+              try {
+                await discardTab(tabId);
+              } catch {
+                /* store 已 toast */
+              }
+            }}
+            style={{ textAlign: 'left', justifyContent: 'flex-start', height: 32 }}
+          >
+            {t('tabs.discard')}
+          </Button>
+        )}
 
         <Divider style={{ margin: '4px 0' }} />
 
