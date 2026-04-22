@@ -9,6 +9,14 @@ const TAGS_KEY = 'canopy_tags';
 const NOTES_KEY = 'canopy_notes';
 const PINS_KEY = 'canopy_pins';
 
+/**
+ * 稳定的空数组引用。
+ *
+ * 注意：selector 在无匹配时必须返回同一个引用，否则 zustand 会误判 snapshot 变化，
+ * 在 React 18/19 的 useSyncExternalStore 机制下触发无限重渲染（React error #185）。
+ */
+const EMPTY_TAGS: readonly string[] = Object.freeze([]);
+
 interface MetadataState {
   tags: Record<string, string[]>;
   notes: Record<string, string>;
@@ -96,8 +104,8 @@ export const useMetadataStore = create<MetadataState>((set, get) => ({
   },
 
   isPinned: (url) => get().pinnedUrls.has(normalizeKey(url)),
-  getTags: (url) => get().tags[normalizeKey(url)] || [],
-  getNote: (url) => get().notes[normalizeKey(url)] || '',
+  getTags: (url) => get().tags[normalizeKey(url)] ?? (EMPTY_TAGS as string[]),
+  getNote: (url) => get().notes[normalizeKey(url)] ?? '',
 }));
 
 /** Normalize URL for consistent keying (strip hash + trailing slash) */

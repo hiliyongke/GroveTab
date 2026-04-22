@@ -14,16 +14,16 @@
 ## Implementation Decisions
 
 ### 构建工具
-- **D-01:** 使用 Vite 5 + @crxjs/vite-plugin v2 作为构建工具（MV3 HMR 支持）；备选 wxt.dev（如果 CRXJS SW HMR 有问题则切换）
+- **D-01:** 使用 Vite 8 + 自定义 Chrome 扩展 Vite 插件 作为构建工具（MV3 多入口构建 + HMR 支持）；CRXJS / wxt.dev 作为备选方案
 - **D-02:** 包管理器使用 pnpm
 
 ### 框架与语言
-- **D-03:** React 18 + TypeScript 5（strict mode）
+- **D-03:** React 19 + TypeScript 6（strict 模式）
 - **D-04:** 状态管理使用 Zustand 4
 
 ### 样式
-- **D-05:** Tailwind CSS 3 + CSS Variables（主题切换通过 CSS var）
-- **D-06:** 动画使用 Framer Motion 11
+- **D-05:** Tailwind CSS 4 + CSS Variables（主题切换通过 CSS var）
+- **D-06:** 动画使用 Motion 12 库(代替 Framer Motion)
 - **D-07:** 图标使用 Lucide React
 
 ### 扩展配置

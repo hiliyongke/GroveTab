@@ -101,7 +101,7 @@ function AppContent() {
         onViewChange={handleViewChange}
       />
 
-      <main className="flex-1 px-6 pb-8 max-w-4xl mx-auto w-full">
+      <main className="flex-1 px-6 pb-8 max-w-7xl mx-auto w-full">
         {showOnboarding && (
           <OnboardingCard onDismiss={() => setShowOnboarding(false)} />
         )}

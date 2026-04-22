@@ -5,33 +5,33 @@
 
 /* ── Theme-dependent CSS variables ── */
 :root {
-  /* Light theme colors */
-  --canopy-surface: rgba(255, 255, 255, 0.5);
-  --canopy-surface-hover: rgba(255, 255, 255, 0.7);
-  --canopy-text: rgba(15, 23, 42, 0.9);
-  --canopy-text-secondary: rgba(15, 23, 42, 0.65);
-  --canopy-text-muted: rgba(15, 23, 42, 0.4);
-  --canopy-border: rgba(255, 255, 255, 0.6);
-  --canopy-badge: rgba(255, 255, 255, 0.6);
-  --canopy-focus-ring: rgba(59, 130, 246, 0.8);
-  --canopy-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  /* Light theme colors — Edge-style soft blue-grey */
+  --canopy-surface: rgba(255, 255, 255, 0.72);
+  --canopy-surface-hover: rgba(255, 255, 255, 0.88);
+  --canopy-text: rgba(30, 35, 48, 0.92);
+  --canopy-text-secondary: rgba(30, 35, 48, 0.62);
+  --canopy-text-muted: rgba(30, 35, 48, 0.38);
+  --canopy-border: rgba(180, 190, 210, 0.45);
+  --canopy-badge: rgba(220, 226, 240, 0.65);
+  --canopy-focus-ring: rgba(59, 130, 246, 0.7);
+  --canopy-shadow: 0 2px 12px rgba(30, 40, 70, 0.08);
 
-  /* Gradient presets */
-  --gradient-aurora: linear-gradient(135deg, #F5F7FA 0%, #C3CFE2 25%, #E0C3FC 50%, #8EC5FC 75%, #E0C3FC 100%);
+  /* Gradient presets — Edge default: soft blue-grey */
+  --gradient-aurora: linear-gradient(160deg, #f0f3f8 0%, #e4eaf5 40%, #dce4f2 70%, #d5deeD 100%);
   --gradient-sunrise: linear-gradient(135deg, #FEE140 0%, #FA709A 40%, #FDBB6F 70%, #FEE140 100%);
   --gradient-deepspace: linear-gradient(135deg, #0F2027 0%, #203A43 40%, #2C5364 70%, #0F2027 100%);
 }
 
 [data-theme=dark] {
-  --canopy-surface: rgba(255, 255, 255, 0.15);
-  --canopy-surface-hover: rgba(255, 255, 255, 0.25);
-  --canopy-text: rgba(255, 255, 255, 0.9);
-  --canopy-text-secondary: rgba(255, 255, 255, 0.65);
-  --canopy-text-muted: rgba(255, 255, 255, 0.4);
-  --canopy-border: rgba(255, 255, 255, 0.2);
-  --canopy-badge: rgba(255, 255, 255, 0.15);
-  --canopy-focus-ring: rgba(96, 165, 250, 0.8);
-  --canopy-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  --canopy-surface: rgba(40, 48, 66, 0.65);
+  --canopy-surface-hover: rgba(50, 60, 82, 0.8);
+  --canopy-text: rgba(235, 238, 245, 0.92);
+  --canopy-text-secondary: rgba(235, 238, 245, 0.62);
+  --canopy-text-muted: rgba(235, 238, 245, 0.38);
+  --canopy-border: rgba(80, 90, 120, 0.45);
+  --canopy-badge: rgba(55, 65, 90, 0.65);
+  --canopy-focus-ring: rgba(96, 165, 250, 0.7);
+  --canopy-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
 }
 
 /* ── Tailwind theme tokens ── */
@@ -87,11 +87,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
   background: var(--gradient-aurora);
-  background-size: 400% 400%;
   background-attachment: fixed;
 }
 
-/* ── Gradient flow animation ── */
+/* ── Gradient flow animation (disabled for Edge-style calm background) ── */
 @keyframes gradient-shift {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -99,7 +98,7 @@ body {
 }
 
 .gradient-animated {
-  animation: gradient-shift 30s ease infinite;
+  /* animation: gradient-shift 30s ease infinite; */
 }
 
 /* ── Reduced motion ── */

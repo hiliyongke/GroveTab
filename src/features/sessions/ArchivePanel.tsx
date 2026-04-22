@@ -2,7 +2,7 @@
  * ArchivePanel — List of archived sessions with restore/delete actions
  */
 
-import { useState, useSyncExternalStore } from 'react';
+import { useState, useSyncExternalStore, useEffect } from 'react';
 import { X, RotateCcw, Trash2, Clock } from 'lucide-react';
 import type { ArchivedSession } from '@/shared/types';
 import { getArchivedSessions, restoreSession, deleteSession } from '@/services';
@@ -47,9 +47,11 @@ export function ArchivePanel({ onClose }: ArchivePanelProps) {
   const [loading, setLoading] = useState(sessions.length === 0);
   const { t, locale } = useT();
 
-  if (loading && sessions.length > 0) {
-    setLoading(false);
-  }
+  useEffect(() => {
+    if (loading && sessions.length > 0) {
+      setLoading(false);
+    }
+  }, [loading, sessions.length]);
 
   const handleRestore = async (id: string) => {
     await restoreSession(id);
