@@ -2,12 +2,14 @@
  * Zustand Store — Tabs Slice
  *
  * Manages the list of live tabs with incremental updates from SW broadcasts.
+ * Close actions create undo records.
  */
 
 import { create } from 'zustand';
-import type { LiveTab, SwBroadcastMessage, WindowInfo } from '@/shared/types';
+import type { LiveTab, SwBroadcastMessage, WindowInfo, ClosedTabSnapshot } from '@/shared/types';
 import { queryAllTabs, getAllWindows, activateTab, closeTab, closeTabs, getFaviconUrl } from '@/chrome';
 import { extractHostname, shouldDisplayUrl, isSelfNewTabPage } from '@/chrome';
+import { useUndoStore } from './undo-slice';
 
 interface TabsState {
   /** All live tabs (filtered for display) */
@@ -28,15 +30,18 @@ interface TabsState {
   handleBroadcast: (message: SwBroadcastMessage) => void;
   /** Activate (jump to) a tab */
   jumpToTab: (tabId: number, windowId: number) => Promise<void>;
-  /** Close a single tab */
+  /** Close a single tab (creates undo record) */
   closeSingleTab: (tabId: number) => Promise<void>;
-  /** Close multiple tabs */
+  /** Close multiple tabs (creates undo record) */
   closeMultipleTabs: (tabIds: number[]) => Promise<void>;
+  /** Close all tabs in a domain group */
+  closeDomainGroup: (domain: string) => Promise<void>;
+  /** Close all non-pinned tabs (with confirmation if >20) */
+  closeAllNonPinned: () => Promise<void>;
 }
 
 function tabToLiveTab(tab: chrome.tabs.Tab, currentWindowId: number): LiveTab | null {
   const url = tab.url || tab.pendingUrl || '';
-  // Skip self new tab pages and non-displayable URLs
   if (isSelfNewTabPage(tab)) return null;
   if (!shouldDisplayUrl(url)) return null;
 
@@ -53,6 +58,16 @@ function tabToLiveTab(tab: chrome.tabs.Tab, currentWindowId: number): LiveTab | 
     lastAccessed: tab.lastAccessed ?? 0,
     hostname: extractHostname(url),
     isCurrentWindow: tab.windowId === currentWindowId,
+  };
+}
+
+function liveTabToSnapshot(tab: LiveTab): ClosedTabSnapshot {
+  return {
+    url: tab.url,
+    title: tab.title,
+    favIconUrl: tab.favIconUrl,
+    windowId: tab.windowId,
+    pinned: tab.pinned,
   };
 }
 
@@ -76,7 +91,6 @@ export const useTabsStore = create<TabsState>((set, get) => ({
         .map((tab) => tabToLiveTab(tab, currentWindowId))
         .filter(Boolean) as LiveTab[];
 
-      // Build window info
       const allWindows = await getAllWindows();
       const windowMap = new Map<number, WindowInfo>();
       for (const win of allWindows) {
@@ -105,7 +119,6 @@ export const useTabsStore = create<TabsState>((set, get) => ({
 
     switch (message.type) {
       case 'tab-created': {
-        // Reload all tabs to get accurate state
         get().loadAllTabs();
         break;
       }
@@ -133,7 +146,6 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       }
       case 'tab-activated': {
         const { id } = message.payload;
-        // Update lastAccessed for the activated tab
         set({
           tabs: tabs.map((t) =>
             t.id === id ? { ...t, lastAccessed: Date.now() } : t,
@@ -170,17 +182,69 @@ export const useTabsStore = create<TabsState>((set, get) => ({
   },
 
   closeSingleTab: async (tabId) => {
+    const { tabs } = get();
+    const tab = tabs.find((t) => t.id === tabId);
+    if (!tab) return;
+
     try {
+      // Create undo record BEFORE closing
+      const snapshots = [liveTabToSnapshot(tab)];
+      await useUndoStore.getState().addRecord(snapshots, `关闭 "${tab.title}"`);
       await closeTab(tabId);
-      // The tab-removed broadcast will update the store
     } catch (err) {
       set({ error: String(err) });
     }
   },
 
   closeMultipleTabs: async (tabIds) => {
+    const { tabs } = get();
+    const targets = tabs.filter((t) => tabIds.includes(t.id));
+    if (targets.length === 0) return;
+
     try {
+      const snapshots = targets.map(liveTabToSnapshot);
+      await useUndoStore.getState().addRecord(
+        snapshots,
+        `关闭 ${targets.length} 个标签页`,
+      );
       await closeTabs(tabIds);
+    } catch (err) {
+      set({ error: String(err) });
+    }
+  },
+
+  closeDomainGroup: async (domain) => {
+    const { tabs } = get();
+    const groupTabs = tabs.filter((t) => t.hostname === domain || t.hostname.endsWith(`.${domain}`));
+    if (groupTabs.length === 0) return;
+
+    const nonPinned = groupTabs.filter((t) => !t.pinned);
+    if (nonPinned.length === 0) return;
+
+    try {
+      const snapshots = nonPinned.map(liveTabToSnapshot);
+      await useUndoStore.getState().addRecord(
+        snapshots,
+        `关闭 ${domain} 的 ${nonPinned.length} 个标签页`,
+      );
+      await closeTabs(nonPinned.map((t) => t.id));
+    } catch (err) {
+      set({ error: String(err) });
+    }
+  },
+
+  closeAllNonPinned: async () => {
+    const { tabs } = get();
+    const nonPinned = tabs.filter((t) => !t.pinned);
+    if (nonPinned.length === 0) return;
+
+    try {
+      const snapshots = nonPinned.map(liveTabToSnapshot);
+      await useUndoStore.getState().addRecord(
+        snapshots,
+        `关闭全部 ${nonPinned.length} 个非固定标签页`,
+      );
+      await closeTabs(nonPinned.map((t) => t.id));
     } catch (err) {
       set({ error: String(err) });
     }

@@ -3,7 +3,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, X } from 'lucide-react';
 import type { DomainGroup } from '@/shared/utils/domain';
 import { getGroupFavicon } from '@/shared/utils/domain';
 import { TabItem } from './TabItem';
@@ -18,10 +18,16 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
   const [collapsed, setCollapsed] = useState(initialCollapsed);
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
   const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
+  const closeDomainGroup = useTabsStore((s) => s.closeDomainGroup);
 
   const toggleCollapse = useCallback(() => {
     setCollapsed((prev) => !prev);
   }, []);
+
+  const handleCloseAll = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    closeDomainGroup(group.domain);
+  }, [closeDomainGroup, group.domain]);
 
   const favicon = getGroupFavicon(group.tabs);
 
@@ -64,6 +70,17 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
         {/* Tab count badge */}
         <span className="px-2 py-0.5 rounded-full bg-white/15 text-xs text-white/50 font-medium flex-shrink-0">
           {group.tabs.length}
+        </span>
+
+        {/* Close all button */}
+        <span
+          onClick={handleCloseAll}
+          className="opacity-0 group-hover:opacity-100 w-7 h-7 flex items-center justify-center
+            rounded-full hover:bg-red-500/30 text-white/40 hover:text-red-300
+            transition-all duration-150 flex-shrink-0"
+          title="关闭此域名所有标签页"
+        >
+          <X className="w-4 h-4" />
         </span>
       </button>
 

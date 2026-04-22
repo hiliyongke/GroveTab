@@ -89,3 +89,27 @@ export interface UserSettings {
   /** Language */
   language: 'zh-CN' | 'en';
 }
+
+// ── Undo System ───────────────────────────────────────
+
+/** A single tab snapshot for undo */
+export interface ClosedTabSnapshot {
+  url: string;
+  title: string;
+  favIconUrl: string;
+  windowId: number;
+  pinned: boolean;
+}
+
+/** Undo record — represents a close action that can be undone */
+export interface UndoRecord {
+  id: string;
+  /** Timestamp of the close action */
+  createdAt: number;
+  /** Tabs that were closed */
+  tabs: ClosedTabSnapshot[];
+  /** Human-readable description */
+  description: string;
+  /** Whether this undo has expired */
+  expired: boolean;
+}
