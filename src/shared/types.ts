@@ -57,7 +57,8 @@ export type StorageKey =
   | 'canopy_undo'
   | 'canopy_stats'
   | 'canopy_snapshots'
-  | 'canopy_meta';
+  | 'canopy_meta'
+  | 'canopy_metrics';
 
 /** Storage metadata */
 export interface StorageMeta {

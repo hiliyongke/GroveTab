@@ -14,6 +14,7 @@ import { OnboardingCard, ArchivePanel } from '@/features/sessions';
 import { SettingsPanel } from '@/features/settings';
 import { hasCompletedOnboarding } from '@/repositories';
 import { archiveAllTabs } from '@/services';
+import { recordMetric } from '@/shared/utils/metrics';
 
 function AppContent() {
   const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
@@ -42,6 +43,7 @@ function AppContent() {
       const done = await hasCompletedOnboarding();
       setShowOnboarding(!done);
       setChecked(true);
+      recordMetric('newtabOpens');
     };
     init();
   }, [loadAllTabs, loadSettings, loadUndoRecords]);

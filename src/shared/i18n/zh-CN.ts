@@ -80,5 +80,7 @@ const zhCN: Record<string, string> = {
   'context.save': '保存',
   'context.cancel': '取消',
   'tabs.emptyHint': '打开一些网页，然后回到这里查看',
+  'settings.storage': '存储空间',
+  'settings.quotaWarning': '存储空间即将用完，建议清理归档数据',
 };
 export default zhCN;

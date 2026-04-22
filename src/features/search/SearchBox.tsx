@@ -9,6 +9,7 @@ import { useTabsStore } from '@/store';
 import { TabItem } from '@/features/tabs';
 import type { LiveTab } from '@/shared/types';
 import { useT } from '@/shared/i18n';
+import { pinyinMatch } from '@/shared/utils/pinyin';
 
 interface SearchBoxProps {
   onClose: () => void;
@@ -44,11 +45,14 @@ export function SearchBox({ onClose }: SearchBoxProps) {
   const results = useMemo(() => {
     if (!query.trim()) return [];
     try {
-      return searchIndex.search(query) as unknown as LiveTab[];
-    } catch {
-      return [];
-    }
-  }, [query, searchIndex]);
+      const miniResults = searchIndex.search(query) as unknown as LiveTab[];
+      if (miniResults.length > 0) return miniResults;
+    } catch { /* fallback to pinyin */ }
+    // Pinyin fallback: filter tabs by pinyin match
+    return tabs.filter((tab) =>
+      pinyinMatch(tab.title, query) || pinyinMatch(tab.hostname, query)
+    );
+  }, [query, searchIndex, tabs]);
 
   // Focus input on mount
   useEffect(() => {

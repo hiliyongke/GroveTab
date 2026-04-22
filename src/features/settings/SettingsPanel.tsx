@@ -2,16 +2,24 @@
  * SettingsPanel — Side panel for user preferences
  */
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { X, Palette, Sliders, Database, Download, Upload, Trash2 } from 'lucide-react';
 import { useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { GradientPicker } from '@/shared/ui';
 import { exportSessionsJSON, downloadFile, parseImportJSON } from '@/shared/utils/import-export';
 import { getArchivedSessions, saveSessions } from '@/services';
+import { getQuotaStatus, formatBytes } from '@/shared/utils/quota';
 
 interface SettingsPanelProps {
   onClose: () => void;
+}
+
+interface QuotaInfo {
+  usedBytes: number;
+  totalBytes: number;
+  percentage: number;
+  isWarning: boolean;
 }
 
 export function SettingsPanel({ onClose }: SettingsPanelProps) {
@@ -20,8 +28,13 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
   const [tab, setTab] = useState<'appearance' | 'behavior' | 'data'>('appearance');
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
+  const [quotaInfo, setQuotaInfo] = useState<QuotaInfo | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { t } = useT();
+
+  useEffect(() => {
+    getQuotaStatus().then(setQuotaInfo);
+  }, []);
 
   const handleExport = async () => {
     const sessions = await getArchivedSessions();
@@ -94,7 +107,6 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
         <div className="p-5 space-y-6">
           {tab === 'appearance' && (
             <>
-              {/* Language */}
               <div>
                 <label className="text-sm font-medium text-text mb-2 block">{t('settings.language')}</label>
                 <select
@@ -106,35 +118,49 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
                   <option value="en">English</option>
                 </select>
               </div>
-
-              {/* Gradient */}
               <GradientPicker />
             </>
           )}
 
           {tab === 'behavior' && (
-            <>
-              {/* Default view */}
-              <div>
-                <label className="text-sm font-medium text-text mb-2 block">{t('settings.defaultView')}</label>
-                <select
-                  value={settings.defaultView}
-                  onChange={(e) => updateSettings({ defaultView: e.target.value as any })}
-                  className="w-full px-3 py-2 rounded-[var(--radius-md)] bg-surface border border-border text-text text-sm"
-                >
-                  <option value="domain">{t('view.domain')}</option>
-                  <option value="timeline">{t('view.timeline')}</option>
-                  <option value="compact">{t('view.compact')}</option>
-                  <option value="grid">{t('view.grid')}</option>
-                  <option value="frequency">{t('view.frequency')}</option>
-                </select>
-              </div>
-            </>
+            <div>
+              <label className="text-sm font-medium text-text mb-2 block">{t('settings.defaultView')}</label>
+              <select
+                value={settings.defaultView}
+                onChange={(e) => updateSettings({ defaultView: e.target.value as any })}
+                className="w-full px-3 py-2 rounded-[var(--radius-md)] bg-surface border border-border text-text text-sm"
+              >
+                <option value="domain">{t('view.domain')}</option>
+                <option value="timeline">{t('view.timeline')}</option>
+                <option value="compact">{t('view.compact')}</option>
+                <option value="grid">{t('view.grid')}</option>
+                <option value="frequency">{t('view.frequency')}</option>
+              </select>
+            </div>
           )}
 
           {tab === 'data' && (
             <>
-              {/* Export */}
+              {quotaInfo && (
+                <div className="px-4 py-3 rounded-[var(--radius-md)] bg-surface border border-border">
+                  <div className="flex items-center justify-between text-sm mb-1.5">
+                    <span className="text-text">{t('settings.storage')}</span>
+                    <span className={`text-xs ${quotaInfo.isWarning ? 'text-amber-300' : 'text-text-muted'}`}>
+                      {formatBytes(quotaInfo.usedBytes)} / {formatBytes(quotaInfo.totalBytes)}
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full bg-badge overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${quotaInfo.isWarning ? 'bg-amber-400' : 'bg-text-muted'}`}
+                      style={{ width: `${quotaInfo.percentage}%` }}
+                    />
+                  </div>
+                  {quotaInfo.isWarning && (
+                    <p className="text-xs text-amber-300 mt-1.5">{t('settings.quotaWarning')}</p>
+                  )}
+                </div>
+              )}
+
               <button
                 onClick={handleExport}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-[var(--radius-md)]
@@ -145,7 +171,6 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
                 {t('settings.export')}
               </button>
 
-              {/* Import */}
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-[var(--radius-md)]
@@ -166,7 +191,6 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
                 <p className="text-xs text-text-muted">{importStatus}</p>
               )}
 
-              {/* Clear all */}
               <button
                 onClick={handleClearAll}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-[var(--radius-md)]

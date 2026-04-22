@@ -80,5 +80,7 @@ const en: Record<string, string> = {
   'context.save': 'Save',
   'context.cancel': 'Cancel',
   'tabs.emptyHint': 'Open some pages and come back here',
+  'settings.storage': 'Storage',
+  'settings.quotaWarning': 'Storage is running low. Consider clearing archive data.',
 };
 export default en;
