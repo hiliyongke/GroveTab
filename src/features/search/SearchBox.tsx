@@ -8,6 +8,7 @@ import MiniSearch from 'minisearch';
 import { useTabsStore } from '@/store';
 import { TabItem } from '@/features/tabs';
 import type { LiveTab } from '@/shared/types';
+import { useT } from '@/shared/i18n';
 
 interface SearchBoxProps {
   onClose: () => void;
@@ -36,6 +37,7 @@ export function SearchBox({ onClose }: SearchBoxProps) {
   const tabs = useTabsStore((s) => s.tabs);
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
   const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
+  const { t } = useT();
 
   const searchIndex = useMemo(() => buildSearchIndex(tabs), [tabs]);
 
@@ -68,34 +70,35 @@ export function SearchBox({ onClose }: SearchBoxProps) {
     <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm flex items-start justify-center pt-[15vh]">
       <div
         className="w-full max-w-2xl rounded-[var(--radius-lg)]
-          bg-black/60 backdrop-blur-xl border border-white/20
-          shadow-2xl shadow-black/30 overflow-hidden"
+          bg-surface backdrop-blur-xl border border-border
+          shadow-2xl overflow-hidden"
       >
         {/* Search input */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-white/10">
-          <Search className="w-5 h-5 text-white/40 flex-shrink-0" />
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
+          <Search className="w-5 h-5 text-text-muted flex-shrink-0" />
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="搜索标签页..."
-            className="flex-1 bg-transparent text-white/90 text-base placeholder:text-white/30
+            placeholder={t('search.placeholder')}
+            className="flex-1 bg-transparent text-text text-base placeholder:text-text-muted
               outline-none border-none"
           />
           {query && (
             <button
               onClick={() => setQuery('')}
               className="w-6 h-6 flex items-center justify-center rounded-full
-                hover:bg-white/20 text-white/40 hover:text-white/70
-                transition-all duration-150 cursor-pointer"
+                hover:bg-surface-hover text-text-muted hover:text-text
+                transition-colors duration-150 cursor-pointer"
+              aria-label={t('search.clear')}
             >
               <X className="w-4 h-4" />
             </button>
           )}
           <kbd className="hidden sm:inline-flex items-center px-2 py-0.5 rounded
-            bg-white/10 text-white/30 text-xs font-mono">
+            bg-badge text-text-muted text-xs font-mono">
             Esc
           </kbd>
         </div>
@@ -105,8 +108,8 @@ export function SearchBox({ onClose }: SearchBoxProps) {
           <div className="max-h-[50vh] overflow-y-auto p-3">
             {results.length > 0 ? (
               <div className="flex flex-col gap-1.5">
-                <div className="text-xs text-white/40 px-2 mb-1">
-                  找到 {results.length} 个结果
+                <div className="text-xs text-text-muted px-2 mb-1">
+                  {t('search.results', { count: results.length })}
                 </div>
                 {results.map((tab) => (
                   <TabItem
@@ -121,9 +124,9 @@ export function SearchBox({ onClose }: SearchBoxProps) {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-white/40">
-                <p className="text-sm">没有找到匹配的标签页</p>
-                <p className="text-xs mt-1">试试其他关键词</p>
+              <div className="text-center py-8 text-text-muted">
+                <p className="text-sm">{t('search.noResults')}</p>
+                <p className="text-xs mt-1">{t('search.tryOther')}</p>
               </div>
             )}
           </div>
@@ -131,8 +134,8 @@ export function SearchBox({ onClose }: SearchBoxProps) {
 
         {/* Hint when empty */}
         {!query.trim() && (
-          <div className="px-5 py-6 text-center text-white/30 text-sm">
-            输入关键词搜索标签页标题、域名或 URL
+          <div className="px-5 py-6 text-center text-text-muted text-sm">
+            {t('search.hint')}
           </div>
         )}
       </div>

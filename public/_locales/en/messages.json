@@ -18,5 +18,177 @@
   "popup_title": {
     "message": "Canopy",
     "description": "Popup page title"
+  },
+  "header_search": {
+    "message": "Search",
+    "description": "Search button label"
+  },
+  "header_archive": {
+    "message": "Archive",
+    "description": "Archive button label"
+  },
+  "header_tabCount": {
+    "message": "$count$ tabs",
+    "description": "Tab count display",
+    "placeholders": {
+      "count": { "content": "$1", "example": "5" }
+    }
+  },
+  "theme_light": {
+    "message": "Light",
+    "description": "Light theme label"
+  },
+  "theme_dark": {
+    "message": "Dark",
+    "description": "Dark theme label"
+  },
+  "theme_system": {
+    "message": "System",
+    "description": "System theme label"
+  },
+  "theme_toggle": {
+    "message": "Toggle theme",
+    "description": "Theme toggle button aria label"
+  },
+  "tabs_loading": {
+    "message": "Loading tabs...",
+    "description": "Loading state text"
+  },
+  "tabs_close": {
+    "message": "Close tab",
+    "description": "Close tab aria label"
+  },
+  "tabs_closeDomain": {
+    "message": "Close all tabs from this domain",
+    "description": "Close domain group aria label"
+  },
+  "tabs_collapse": {
+    "message": "Expand",
+    "description": "Expand group aria label"
+  },
+  "tabs_expand": {
+    "message": "Collapse",
+    "description": "Collapse group aria label"
+  },
+  "tabs_otherWindow": {
+    "message": "Other window",
+    "description": "Other window indicator"
+  },
+  "tabs_playing": {
+    "message": "Playing audio",
+    "description": "Audio playing indicator"
+  },
+  "search_placeholder": {
+    "message": "Search tabs...",
+    "description": "Search input placeholder"
+  },
+  "search_noResults": {
+    "message": "No matching tabs found",
+    "description": "No search results text"
+  },
+  "search_tryOther": {
+    "message": "Try different keywords",
+    "description": "Try other keywords hint"
+  },
+  "search_hint": {
+    "message": "Search tabs by title, domain, or URL",
+    "description": "Search hint when empty"
+  },
+  "search_results": {
+    "message": "$count$ results found",
+    "description": "Search results count",
+    "placeholders": {
+      "count": { "content": "$1", "example": "5" }
+    }
+  },
+  "search_clear": {
+    "message": "Clear search",
+    "description": "Clear search button aria label"
+  },
+  "archive_title": {
+    "message": "Archived Sessions",
+    "description": "Archive panel title"
+  },
+  "archive_close": {
+    "message": "Close archive panel",
+    "description": "Close archive aria label"
+  },
+  "archive_restore": {
+    "message": "Restore",
+    "description": "Restore session button"
+  },
+  "archive_delete": {
+    "message": "Delete",
+    "description": "Delete session button"
+  },
+  "archive_empty": {
+    "message": "No archived sessions",
+    "description": "Empty archive text"
+  },
+  "archive_emptyHint": {
+    "message": "Click the archive button to save all current tabs",
+    "description": "Empty archive hint"
+  },
+  "archive_loading": {
+    "message": "Loading...",
+    "description": "Archive loading text"
+  },
+  "archive_tabCount": {
+    "message": "$count$ tabs",
+    "description": "Tab count in archive session",
+    "placeholders": {
+      "count": { "content": "$1", "example": "5" }
+    }
+  },
+  "undo_close": {
+    "message": "$count$ tab(s) closed",
+    "description": "Undo toast message for multiple tabs",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "undo_closeOne": {
+    "message": "1 tab closed",
+    "description": "Undo toast message for single tab"
+  },
+  "undo_action": {
+    "message": "Undo",
+    "description": "Undo button text"
+  },
+  "onboarding_title": {
+    "message": "Welcome to Canopy",
+    "description": "Onboarding card title"
+  },
+  "onboarding_desc": {
+    "message": "Your tabs at a glance.",
+    "description": "Onboarding card subtitle"
+  },
+  "onboarding_detail": {
+    "message": "Every new tab shows all your open pages. Grouped by domain, searchable, archivable — find any tab in 3 seconds.",
+    "description": "Onboarding card detail"
+  },
+  "onboarding_dismiss": {
+    "message": "Get started",
+    "description": "Onboarding dismiss button"
+  },
+  "gradient_aurora": {
+    "message": "Aurora",
+    "description": "Aurora gradient preset name"
+  },
+  "gradient_sunrise": {
+    "message": "Sunrise",
+    "description": "Sunrise gradient preset name"
+  },
+  "gradient_deepspace": {
+    "message": "Deep Space",
+    "description": "Deep Space gradient preset name"
+  },
+  "gradient_custom": {
+    "message": "Custom",
+    "description": "Custom gradient label"
+  },
+  "gradient_title": {
+    "message": "Gradient Theme",
+    "description": "Gradient picker title"
   }
 }

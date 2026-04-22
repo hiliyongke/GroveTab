@@ -18,5 +18,177 @@
   "popup_title": {
     "message": "Canopy",
     "description": "Popup page title"
+  },
+  "header_search": {
+    "message": "搜索",
+    "description": "Search button label"
+  },
+  "header_archive": {
+    "message": "归档",
+    "description": "Archive button label"
+  },
+  "header_tabCount": {
+    "message": "$count$ 个标签页",
+    "description": "Tab count display",
+    "placeholders": {
+      "count": { "content": "$1", "example": "5" }
+    }
+  },
+  "theme_light": {
+    "message": "浅色",
+    "description": "Light theme label"
+  },
+  "theme_dark": {
+    "message": "深色",
+    "description": "Dark theme label"
+  },
+  "theme_system": {
+    "message": "跟随系统",
+    "description": "System theme label"
+  },
+  "theme_toggle": {
+    "message": "切换主题",
+    "description": "Theme toggle button aria label"
+  },
+  "tabs_loading": {
+    "message": "加载标签页中...",
+    "description": "Loading state text"
+  },
+  "tabs_close": {
+    "message": "关闭标签页",
+    "description": "Close tab aria label"
+  },
+  "tabs_closeDomain": {
+    "message": "关闭此域名所有标签页",
+    "description": "Close domain group aria label"
+  },
+  "tabs_collapse": {
+    "message": "展开",
+    "description": "Expand group aria label"
+  },
+  "tabs_expand": {
+    "message": "折叠",
+    "description": "Collapse group aria label"
+  },
+  "tabs_otherWindow": {
+    "message": "其他窗口",
+    "description": "Other window indicator"
+  },
+  "tabs_playing": {
+    "message": "正在播放",
+    "description": "Audio playing indicator"
+  },
+  "search_placeholder": {
+    "message": "搜索标签页...",
+    "description": "Search input placeholder"
+  },
+  "search_noResults": {
+    "message": "没有找到匹配的标签页",
+    "description": "No search results text"
+  },
+  "search_tryOther": {
+    "message": "试试其他关键词",
+    "description": "Try other keywords hint"
+  },
+  "search_hint": {
+    "message": "输入关键词搜索标签页标题、域名或 URL",
+    "description": "Search hint when empty"
+  },
+  "search_results": {
+    "message": "找到 $count$ 个结果",
+    "description": "Search results count",
+    "placeholders": {
+      "count": { "content": "$1", "example": "5" }
+    }
+  },
+  "search_clear": {
+    "message": "清空搜索",
+    "description": "Clear search button aria label"
+  },
+  "archive_title": {
+    "message": "归档会话",
+    "description": "Archive panel title"
+  },
+  "archive_close": {
+    "message": "关闭归档面板",
+    "description": "Close archive aria label"
+  },
+  "archive_restore": {
+    "message": "恢复",
+    "description": "Restore session button"
+  },
+  "archive_delete": {
+    "message": "删除",
+    "description": "Delete session button"
+  },
+  "archive_empty": {
+    "message": "暂无归档会话",
+    "description": "Empty archive text"
+  },
+  "archive_emptyHint": {
+    "message": "点击归档按钮保存当前所有标签页",
+    "description": "Empty archive hint"
+  },
+  "archive_loading": {
+    "message": "加载中...",
+    "description": "Archive loading text"
+  },
+  "archive_tabCount": {
+    "message": "$count$ 个标签页",
+    "description": "Tab count in archive session",
+    "placeholders": {
+      "count": { "content": "$1", "example": "5" }
+    }
+  },
+  "undo_close": {
+    "message": "已关闭 $count$ 个标签页",
+    "description": "Undo toast message for multiple tabs",
+    "placeholders": {
+      "count": { "content": "$1", "example": "3" }
+    }
+  },
+  "undo_closeOne": {
+    "message": "已关闭 1 个标签页",
+    "description": "Undo toast message for single tab"
+  },
+  "undo_action": {
+    "message": "撤销",
+    "description": "Undo button text"
+  },
+  "onboarding_title": {
+    "message": "欢迎使用 Canopy",
+    "description": "Onboarding card title"
+  },
+  "onboarding_desc": {
+    "message": "你的标签，一目了然。",
+    "description": "Onboarding card subtitle"
+  },
+  "onboarding_detail": {
+    "message": "每次打开新标签页，所有已打开的网页都会在这里展示。按域名分组、搜索、归档——3 秒内找到任何标签。",
+    "description": "Onboarding card detail"
+  },
+  "onboarding_dismiss": {
+    "message": "开始使用",
+    "description": "Onboarding dismiss button"
+  },
+  "gradient_aurora": {
+    "message": "Aurora",
+    "description": "Aurora gradient preset name"
+  },
+  "gradient_sunrise": {
+    "message": "Sunrise",
+    "description": "Sunrise gradient preset name"
+  },
+  "gradient_deepspace": {
+    "message": "Deep Space",
+    "description": "Deep Space gradient preset name"
+  },
+  "gradient_custom": {
+    "message": "自定义",
+    "description": "Custom gradient label"
+  },
+  "gradient_title": {
+    "message": "渐变主题",
+    "description": "Gradient picker title"
   }
 }

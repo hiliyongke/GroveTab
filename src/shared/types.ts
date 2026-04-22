@@ -72,6 +72,7 @@ export interface UserSettings {
   defaultView: 'domain' | 'timeline' | 'compact' | 'grid' | 'freq' | 'kanban';
   theme: 'light' | 'dark' | 'system';
   gradientPreset: 'aurora' | 'sunrise' | 'deepspace' | 'custom';
+  customGradient?: string;
   showIncognito: boolean;
   language: 'zh-CN' | 'en';
 }

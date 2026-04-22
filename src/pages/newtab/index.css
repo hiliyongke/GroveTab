@@ -1,16 +1,80 @@
 @import 'tailwindcss';
 
+/* ── Custom dark variant using data-theme attribute ── */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+/* ── Theme-dependent CSS variables ── */
+:root {
+  /* Light theme colors */
+  --canopy-surface: rgba(255, 255, 255, 0.5);
+  --canopy-surface-hover: rgba(255, 255, 255, 0.7);
+  --canopy-text: rgba(15, 23, 42, 0.9);
+  --canopy-text-secondary: rgba(15, 23, 42, 0.65);
+  --canopy-text-muted: rgba(15, 23, 42, 0.4);
+  --canopy-border: rgba(255, 255, 255, 0.6);
+  --canopy-badge: rgba(255, 255, 255, 0.6);
+  --canopy-focus-ring: rgba(59, 130, 246, 0.8);
+  --canopy-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+
+  /* Gradient presets */
+  --gradient-aurora: linear-gradient(135deg, #F5F7FA 0%, #C3CFE2 25%, #E0C3FC 50%, #8EC5FC 75%, #E0C3FC 100%);
+  --gradient-sunrise: linear-gradient(135deg, #FEE140 0%, #FA709A 40%, #FDBB6F 70%, #FEE140 100%);
+  --gradient-deepspace: linear-gradient(135deg, #0F2027 0%, #203A43 40%, #2C5364 70%, #0F2027 100%);
+}
+
+[data-theme=dark] {
+  --canopy-surface: rgba(255, 255, 255, 0.15);
+  --canopy-surface-hover: rgba(255, 255, 255, 0.25);
+  --canopy-text: rgba(255, 255, 255, 0.9);
+  --canopy-text-secondary: rgba(255, 255, 255, 0.65);
+  --canopy-text-muted: rgba(255, 255, 255, 0.4);
+  --canopy-border: rgba(255, 255, 255, 0.2);
+  --canopy-badge: rgba(255, 255, 255, 0.15);
+  --canopy-focus-ring: rgba(96, 165, 250, 0.8);
+  --canopy-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Tailwind theme tokens ── */
 @theme {
-  /* Design Tokens — Phase 6 will expand these */
-  --color-primary: #8EC5FC;
-  --color-secondary: #E0C3FC;
+  /* Radius */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 20px;
+
+  /* Font */
   --font-family-sans: -apple-system, 'SF Pro Text', 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+
+  /* Blur */
   --blur-card: blur(24px) saturate(180%);
+
+  /* Elevation */
+  --elev-1: 0 1px 2px rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.04);
+  --elev-2: 0 4px 16px rgba(0,0,0,.08);
+
+  /* Spacing */
+  --space-unit: 4px;
+
+  /* Duration */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+
+  /* Easing */
+  --ease-default: cubic-bezier(.22,.61,.36,1);
 }
 
+/* ── Dynamic theme tokens (reference CSS variables) ── */
+@theme inline {
+  --color-surface: var(--canopy-surface);
+  --color-surface-hover: var(--canopy-surface-hover);
+  --color-text: var(--canopy-text);
+  --color-text-secondary: var(--canopy-text-secondary);
+  --color-text-muted: var(--canopy-text-muted);
+  --color-border: var(--canopy-border);
+  --color-badge: var(--canopy-badge);
+  --color-focus-ring: var(--canopy-focus-ring);
+}
+
+/* ── Base reset ── */
 * {
   margin: 0;
   padding: 0;
@@ -22,6 +86,42 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
-  background: linear-gradient(135deg, #F5F7FA 0%, #E0C3FC 50%, #8EC5FC 100%);
+  background: var(--gradient-aurora);
+  background-size: 400% 400%;
   background-attachment: fixed;
+}
+
+/* ── Gradient flow animation ── */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.gradient-animated {
+  animation: gradient-shift 30s ease infinite;
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .gradient-animated {
+    animation: none;
+  }
+}
+
+/* ── Focus visible styles — A11Y-02 ── */
+*:focus-visible {
+  outline: 2px solid var(--canopy-focus-ring);
+  outline-offset: 2px;
+}
+
+*:focus {
+  outline: none;
+}
+
+/* ── Minimum touch target — A11Y-01 ── */
+button,
+[role="button"] {
+  min-height: 32px;
+  min-width: 32px;
 }

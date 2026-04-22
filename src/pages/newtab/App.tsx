@@ -3,16 +3,18 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useTabsStore, useSettingsStore, useUndoStore } from '@/store';
 import { useSwBroadcast } from '@/shared/hooks';
-import { Header, UndoToast } from '@/shared/ui';
+import { Header, UndoToast, GradientBackground, ThemeProvider } from '@/shared/ui';
+import { I18nProvider, useT } from '@/shared/i18n';
 import { DomainGroupView } from '@/features/tabs';
 import { SearchBox } from '@/features/search';
 import { OnboardingCard, ArchivePanel } from '@/features/sessions';
 import { hasCompletedOnboarding } from '@/repositories';
 import { archiveAllTabs } from '@/services';
 
-function App() {
+function AppContent() {
   const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
   const loading = useTabsStore((s) => s.loading);
   const loadSettings = useSettingsStore((s) => s.loadSettings);
@@ -21,6 +23,7 @@ function App() {
   const [checked, setChecked] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
+  const { t } = useT();
 
   useSwBroadcast();
 
@@ -60,10 +63,8 @@ function App() {
   const handleArchive = useCallback(async () => {
     try {
       await archiveAllTabs();
-      // Reload tabs after archiving
       await loadAllTabs();
     } catch (err) {
-      // No tabs to archive, or error
       console.warn('Archive failed:', err);
     }
   }, [loadAllTabs]);
@@ -71,7 +72,7 @@ function App() {
   if (!checked) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-white/50 text-sm animate-pulse">Loading...</div>
+        <div className="text-text-muted text-sm animate-pulse">Loading...</div>
       </div>
     );
   }
@@ -86,8 +87,8 @@ function App() {
         )}
 
         {loading ? (
-          <div className="text-white/50 text-sm animate-pulse text-center py-10">
-            加载标签页中...
+          <div className="text-text-muted text-sm animate-pulse text-center py-10">
+            {t('tabs.loading')}
           </div>
         ) : (
           <DomainGroupView />
@@ -96,9 +97,46 @@ function App() {
 
       <UndoToast />
 
-      {showSearch && <SearchBox onClose={() => setShowSearch(false)} />}
-      {showArchive && <ArchivePanel onClose={() => setShowArchive(false)} />}
+      <AnimatePresence>
+        {showSearch && (
+          <motion.div
+            key="search-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            <SearchBox onClose={() => setShowSearch(false)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showArchive && (
+          <motion.div
+            key="archive-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            <ArchivePanel onClose={() => setShowArchive(false)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <I18nProvider>
+        <GradientBackground>
+          <AppContent />
+        </GradientBackground>
+      </I18nProvider>
+    </ThemeProvider>
   );
 }
 

@@ -8,6 +8,7 @@ import type { DomainGroup } from '@/shared/utils/domain';
 import { getGroupFavicon } from '@/shared/utils/domain';
 import { TabItem } from './TabItem';
 import { useTabsStore } from '@/store';
+import { useT } from '@/shared/i18n';
 
 interface DomainGroupCardProps {
   group: DomainGroup;
@@ -19,6 +20,7 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
   const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
   const closeDomainGroup = useTabsStore((s) => s.closeDomainGroup);
+  const { t } = useT();
 
   const toggleCollapse = useCallback(() => {
     setCollapsed((prev) => !prev);
@@ -37,15 +39,17 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
       <button
         type="button"
         onClick={toggleCollapse}
+        aria-label={collapsed ? t('tabs.collapse') : t('tabs.expand')}
         className="group flex items-center gap-3 w-full px-4 py-3 rounded-[var(--radius-lg)]
-          bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/15
-          transition-all duration-200 cursor-pointer text-left"
+          bg-surface hover:bg-surface-hover backdrop-blur-xl border border-border
+          transition-colors duration-200 cursor-pointer text-left
+          focus-visible:outline-2 focus-visible:outline-focus-ring focus-visible:outline-offset-2"
       >
         {/* Collapse icon */}
         {collapsed ? (
-          <ChevronRight className="w-4 h-4 text-white/40 flex-shrink-0" />
+          <ChevronRight className="w-4 h-4 text-text-muted flex-shrink-0" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-white/40 flex-shrink-0" />
+          <ChevronDown className="w-4 h-4 text-text-muted flex-shrink-0" />
         )}
 
         {/* Favicon */}
@@ -59,26 +63,28 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
             }}
           />
         ) : (
-          <div className="w-5 h-5 rounded bg-white/20 flex-shrink-0" />
+          <div className="w-5 h-5 rounded bg-surface flex-shrink-0" />
         )}
 
         {/* Domain name */}
-        <span className="text-sm font-semibold text-white/80 flex-1 truncate">
+        <span className="text-sm font-semibold text-text flex-1 truncate">
           {group.domain}
         </span>
 
         {/* Tab count badge */}
-        <span className="px-2 py-0.5 rounded-full bg-white/15 text-xs text-white/50 font-medium flex-shrink-0">
+        <span className="px-2 py-0.5 rounded-full bg-badge text-xs text-text-secondary font-medium flex-shrink-0">
           {group.tabs.length}
         </span>
 
         {/* Close all button */}
         <span
           onClick={handleCloseAll}
+          role="button"
+          tabIndex={0}
+          aria-label={t('tabs.closeDomain')}
           className="opacity-0 group-hover:opacity-100 w-7 h-7 flex items-center justify-center
-            rounded-full hover:bg-red-500/30 text-white/40 hover:text-red-300
-            transition-all duration-150 flex-shrink-0"
-          title="关闭此域名所有标签页"
+            rounded-full hover:bg-red-500/30 text-text-muted hover:text-red-300
+            transition-colors duration-150 flex-shrink-0"
         >
           <X className="w-4 h-4" />
         </span>

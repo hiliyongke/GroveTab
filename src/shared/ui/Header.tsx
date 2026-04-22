@@ -1,9 +1,11 @@
 /**
- * Header — Top bar with branding, search, and archive actions
+ * Header — Top bar with branding, search, theme toggle, and archive actions
  */
 
 import { TreePine, Search, Archive } from 'lucide-react';
 import { useTabsStore } from '@/store';
+import { ThemeToggle } from './ThemeToggle';
+import { useT } from '@/shared/i18n';
 
 interface HeaderProps {
   onSearch: () => void;
@@ -12,12 +14,13 @@ interface HeaderProps {
 
 export function Header({ onSearch, onArchive }: HeaderProps) {
   const tabCount = useTabsStore((s) => s.tabs.length);
+  const { t } = useT();
 
   return (
     <header className="flex items-center justify-between px-6 py-4">
       <div className="flex items-center gap-3">
-        <TreePine className="w-7 h-7 text-white/80" />
-        <h1 className="text-xl font-bold text-white/90 tracking-tight">Canopy</h1>
+        <TreePine className="w-7 h-7 text-text" />
+        <h1 className="text-xl font-bold text-text tracking-tight">Canopy</h1>
       </div>
 
       <div className="flex items-center gap-2">
@@ -25,15 +28,16 @@ export function Header({ onSearch, onArchive }: HeaderProps) {
         <button
           onClick={onSearch}
           className="flex items-center gap-2 px-3 py-2 rounded-[var(--radius-md)]
-            bg-white/10 hover:bg-white/20 border border-white/10
-            text-white/50 hover:text-white/80 text-sm
-            transition-all duration-150 cursor-pointer"
+            bg-surface hover:bg-surface-hover border border-border
+            text-text-secondary hover:text-text text-sm
+            transition-colors duration-150 cursor-pointer"
+          aria-label={t('header.search')}
         >
           <Search className="w-4 h-4" />
-          <span className="hidden sm:inline">搜索</span>
+          <span className="hidden sm:inline">{t('header.search')}</span>
           <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded
-            bg-white/10 text-white/30 text-xs font-mono">
-            ⌘K
+            bg-badge text-text-muted text-xs font-mono">
+            {t('search.shortcut')}
           </kbd>
         </button>
 
@@ -41,16 +45,20 @@ export function Header({ onSearch, onArchive }: HeaderProps) {
         <button
           onClick={onArchive}
           className="flex items-center gap-2 px-3 py-2 rounded-[var(--radius-md)]
-            bg-white/10 hover:bg-white/20 border border-white/10
-            text-white/50 hover:text-white/80 text-sm
-            transition-all duration-150 cursor-pointer"
+            bg-surface hover:bg-surface-hover border border-border
+            text-text-secondary hover:text-text text-sm
+            transition-colors duration-150 cursor-pointer"
+          aria-label={t('header.archive')}
         >
           <Archive className="w-4 h-4" />
-          <span className="hidden sm:inline">归档</span>
+          <span className="hidden sm:inline">{t('header.archive')}</span>
         </button>
 
-        <span className="text-sm text-white/40 ml-2">
-          {tabCount} 个标签页
+        {/* Theme toggle */}
+        <ThemeToggle />
+
+        <span className="text-sm text-text-muted ml-2">
+          {t('header.tabCount', { count: tabCount })}
         </span>
       </div>
     </header>
