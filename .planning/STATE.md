@@ -7,15 +7,15 @@
 See: .planning/PROJECT.md (updated 2026-04-22)
 
 **Core value:** 每次新开 Tab，3 秒内找到并跳转到目标页面
-**Current focus:** Phase 2 — 新标签页接管 + 数据层
+**Current focus:** Phase 3 — 域名分组视图
 
 ## Progress
 
 | Phase | Status | Plans | Progress |
 |-------|--------|-------|----------|
 | 1 | ✅ | 7/7 | 100% |
-| 2 | ◐ | 0/9 | 0% |
-| 3 | ○ | 0/6 | 0% |
+| 2 | ✅ | 9/9 | 100% |
+| 3 | ◐ | 0/6 | 0% |
 | 4 | ○ | 0/6 | 0% |
 | 5 | ○ | 0/8 | 0% |
 | 6 | ○ | 0/11 | 0% |
@@ -41,6 +41,7 @@ See: .planning/PROJECT.md (updated 2026-04-22)
 | 2026-04-22 | Balanced model profile | 性价比最优 |
 | 2026-04-22 | Phase 1 完成 | 脚手架搭建成功 |
 | 2026-04-22 | 全依赖升级到最新 | React 19, Vite 8, TW 4, TS 6, ESLint 10 |
+| 2026-04-22 | Phase 2 完成 | 新标签页接管 + 数据层完整 |
 
 ---
 *State initialized: 2026-04-22*

@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { useTabsStore, useSettingsStore } from '@/store';
 import { useSwBroadcast } from '@/shared/hooks';
 import { Header } from '@/shared/ui';
-import { TabList } from '@/features/tabs';
+import { DomainGroupView } from '@/features/tabs';
 import { OnboardingCard } from '@/features/sessions';
 import { hasCompletedOnboarding } from '@/repositories';
 
@@ -54,7 +54,7 @@ function App() {
             加载标签页中...
           </div>
         ) : (
-          <TabList />
+          <DomainGroupView />
         )}
       </main>
     </div>
