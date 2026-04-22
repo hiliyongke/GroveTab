@@ -1,2 +1,1 @@
-// Repositories — Phase 2
-export {};
+export * from './storage-repo';

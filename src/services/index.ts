@@ -1,2 +1,1 @@
-// Services — Phase 2
-export {};
+// Services barrel — will be expanded in later phases

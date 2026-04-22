@@ -7,14 +7,14 @@
 See: .planning/PROJECT.md (updated 2026-04-22)
 
 **Core value:** 每次新开 Tab，3 秒内找到并跳转到目标页面
-**Current focus:** Phase 1 — 项目脚手架
+**Current focus:** Phase 2 — 新标签页接管 + 数据层
 
 ## Progress
 
 | Phase | Status | Plans | Progress |
 |-------|--------|-------|----------|
-| 1 | ○ | 0/7 | 0% |
-| 2 | ○ | 0/9 | 0% |
+| 1 | ✅ | 7/7 | 100% |
+| 2 | ◐ | 0/9 | 0% |
 | 3 | ○ | 0/6 | 0% |
 | 4 | ○ | 0/6 | 0% |
 | 5 | ○ | 0/8 | 0% |
@@ -39,6 +39,8 @@ See: .planning/PROJECT.md (updated 2026-04-22)
 | 2026-04-22 | Research before planning | 领域调研后规划更准确 |
 | 2026-04-22 | Plan check + verifier | 质量保障 |
 | 2026-04-22 | Balanced model profile | 性价比最优 |
+| 2026-04-22 | Phase 1 完成 | 脚手架搭建成功 |
+| 2026-04-22 | 全依赖升级到最新 | React 19, Vite 8, TW 4, TS 6, ESLint 10 |
 
 ---
 *State initialized: 2026-04-22*

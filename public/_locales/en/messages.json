@@ -1,14 +1,22 @@
 {
   "appName": {
-    "message": "Canopy"
+    "message": "Canopy",
+    "description": "Extension name"
   },
   "appDescription": {
-    "message": "A beautiful new tab page manager — unify all your tabs, sessions, and bookmarks"
+    "message": "Your tabs at a glance — New Tab tab manager",
+    "description": "Extension description"
   },
-  "searchPlaceholder": {
-    "message": "Search tabs..."
+  "context_save_all": {
+    "message": "Save all tabs to Canopy",
+    "description": "Context menu item for saving all tabs"
   },
-  "saveAllTabs": {
-    "message": "Save all tabs"
+  "newtab_title": {
+    "message": "Canopy — New Tab",
+    "description": "New tab page title"
+  },
+  "popup_title": {
+    "message": "Canopy",
+    "description": "Popup page title"
   }
 }

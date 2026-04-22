@@ -1,2 +1,2 @@
-// Zustand store — Phase 2
-export {};
+export { useTabsStore } from './tabs-slice';
+export { useSettingsStore } from './settings-slice';
