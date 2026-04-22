@@ -4,7 +4,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { useTabsStore, useSettingsStore, useUndoStore } from '@/store';
+import { useTabsStore, useSettingsStore, useUndoStore, useMetadataStore } from '@/store';
 import { useSwBroadcast } from '@/shared/hooks';
 import { Header, UndoToast, GradientBackground, ThemeProvider, type ViewMode } from '@/shared/ui';
 import { I18nProvider, useT } from '@/shared/i18n';
@@ -20,6 +20,7 @@ function AppContent() {
   const loading = useTabsStore((s) => s.loading);
   const loadSettings = useSettingsStore((s) => s.loadSettings);
   const loadUndoRecords = useUndoStore((s) => s.loadRecords);
+  const loadMetadata = useMetadataStore((s) => s.loadMetadata);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [checked, setChecked] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -37,6 +38,7 @@ function AppContent() {
       setViewMode((settings.defaultView as ViewMode) || 'domain');
       await loadAllTabs();
       await loadUndoRecords();
+      await loadMetadata();
       const done = await hasCompletedOnboarding();
       setShowOnboarding(!done);
       setChecked(true);

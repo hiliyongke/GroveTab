@@ -70,5 +70,15 @@ const en: Record<string, string> = {
   'settings.clearAll': 'Clear all archives',
   'settings.confirmClear': 'Confirm? Click to execute',
   'header.settings': 'Settings',
+  'context.pin': 'Pin',
+  'context.unpin': 'Unpin',
+  'context.addTag': 'Add tag',
+  'context.tagPlaceholder': 'Enter tag name...',
+  'context.addNote': 'Add note',
+  'context.editNote': 'Edit note',
+  'context.notePlaceholder': 'Enter note...',
+  'context.save': 'Save',
+  'context.cancel': 'Cancel',
+  'tabs.emptyHint': 'Open some pages and come back here',
 };
 export default en;

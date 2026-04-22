@@ -70,5 +70,15 @@ const zhCN: Record<string, string> = {
   'settings.clearAll': '清空所有归档',
   'settings.confirmClear': '确认清空？点击执行',
   'header.settings': '设置',
+  'context.pin': '固定',
+  'context.unpin': '取消固定',
+  'context.addTag': '添加标签',
+  'context.tagPlaceholder': '输入标签名...',
+  'context.addNote': '添加备注',
+  'context.editNote': '编辑备注',
+  'context.notePlaceholder': '输入备注...',
+  'context.save': '保存',
+  'context.cancel': '取消',
+  'tabs.emptyHint': '打开一些网页，然后回到这里查看',
 };
 export default zhCN;

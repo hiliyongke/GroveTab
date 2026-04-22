@@ -6,17 +6,8 @@ import { useMemo } from 'react';
 import { useTabsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { groupTabsByDomain } from '@/shared/utils/domain';
+import { stringToColor } from '@/shared/utils/color';
 import { Volume2 } from 'lucide-react';
-
-/** Generate a stable HSL color from a string */
-function stringToColor(str: string): string {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const h = ((hash % 360) + 360) % 360;
-  return `hsl(${h}, 55%, 60%)`;
-}
 
 export function GridView() {
   const tabs = useTabsStore((s) => s.tabs);
