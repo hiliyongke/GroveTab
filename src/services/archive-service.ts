@@ -20,6 +20,8 @@ async function saveSessions(sessions: ArchivedSession[]): Promise<void> {
   await setData(SESSIONS_KEY, sessions);
 }
 
+export { saveSessions };
+
 /** Archive all open non-pinned tabs (atomic: write first, then close) */
 export async function archiveAllTabs(): Promise<{ session: ArchivedSession; closedCount: number }> {
   const allTabs = await queryAllTabs();

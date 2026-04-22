@@ -6,3 +6,4 @@ export { TimelineView } from './TimelineView';
 export { CompactView } from './CompactView';
 export { GridView } from './GridView';
 export { FrequencyView } from './FrequencyView';
+export { DedupInfoBar } from './DedupInfoBar';

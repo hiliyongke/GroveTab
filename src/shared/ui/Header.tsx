@@ -2,7 +2,7 @@
  * Header — Top bar with branding, search, theme toggle, and archive actions
  */
 
-import { TreePine, Search, Archive } from 'lucide-react';
+import { TreePine, Search, Archive, Settings } from 'lucide-react';
 import { useTabsStore } from '@/store';
 import { ThemeToggle } from './ThemeToggle';
 import { ViewSwitcher, type ViewMode } from './ViewSwitcher';
@@ -11,11 +11,12 @@ import { useT } from '@/shared/i18n';
 interface HeaderProps {
   onSearch: () => void;
   onArchive: () => void;
+  onSettings: () => void;
   currentView: ViewMode;
   onViewChange: (view: ViewMode) => void;
 }
 
-export function Header({ onSearch, onArchive, currentView, onViewChange }: HeaderProps) {
+export function Header({ onSearch, onArchive, onSettings, currentView, onViewChange }: HeaderProps) {
   const tabCount = useTabsStore((s) => s.tabs.length);
   const { t } = useT();
 
@@ -62,6 +63,18 @@ export function Header({ onSearch, onArchive, currentView, onViewChange }: Heade
 
         {/* Theme toggle */}
         <ThemeToggle />
+
+        {/* Settings */}
+        <button
+          onClick={onSettings}
+          className="w-9 h-9 flex items-center justify-center rounded-[var(--radius-md)]
+            bg-surface hover:bg-surface-hover border border-border
+            text-text-secondary hover:text-text
+            transition-colors duration-150 cursor-pointer"
+          aria-label={t('header.settings')}
+        >
+          <Settings className="w-4 h-4" />
+        </button>
 
         <span className="text-sm text-text-muted ml-2">
           {t('header.tabCount', { count: tabCount })}

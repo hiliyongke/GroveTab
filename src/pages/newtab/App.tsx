@@ -8,9 +8,10 @@ import { useTabsStore, useSettingsStore, useUndoStore } from '@/store';
 import { useSwBroadcast } from '@/shared/hooks';
 import { Header, UndoToast, GradientBackground, ThemeProvider, type ViewMode } from '@/shared/ui';
 import { I18nProvider, useT } from '@/shared/i18n';
-import { DomainGroupView, TimelineView, CompactView, GridView, FrequencyView } from '@/features/tabs';
+import { DomainGroupView, TimelineView, CompactView, GridView, FrequencyView, DedupInfoBar } from '@/features/tabs';
 import { SearchBox } from '@/features/search';
 import { OnboardingCard, ArchivePanel } from '@/features/sessions';
+import { SettingsPanel } from '@/features/settings';
 import { hasCompletedOnboarding } from '@/repositories';
 import { archiveAllTabs } from '@/services';
 
@@ -23,6 +24,7 @@ function AppContent() {
   const [checked, setChecked] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('domain');
   const { t } = useT();
 
@@ -90,6 +92,7 @@ function AppContent() {
       <Header
         onSearch={() => setShowSearch(true)}
         onArchive={handleArchive}
+        onSettings={() => setShowSettings(true)}
         currentView={viewMode}
         onViewChange={handleViewChange}
       />
@@ -98,6 +101,8 @@ function AppContent() {
         {showOnboarding && (
           <OnboardingCard onDismiss={() => setShowOnboarding(false)} />
         )}
+
+        <DedupInfoBar />
 
         {loading ? (
           <div className="text-text-muted text-sm animate-pulse text-center py-10">
@@ -138,6 +143,20 @@ function AppContent() {
             transition={{ duration: 0.15 }}
           >
             <ArchivePanel onClose={() => setShowArchive(false)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showSettings && (
+          <motion.div
+            key="settings-overlay"
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 40 }}
+            transition={{ duration: 0.2 }}
+          >
+            <SettingsPanel onClose={() => setShowSettings(false)} />
           </motion.div>
         )}
       </AnimatePresence>
