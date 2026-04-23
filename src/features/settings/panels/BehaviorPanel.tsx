@@ -11,7 +11,7 @@
  *   - 时间轴精确时间显示
  */
 
-import { Select, Segmented, Switch, Space } from 'antd';
+import { Select, Segmented, Switch, Space, Checkbox } from 'antd';
 import type { UserSettings } from '@/shared/types';
 import { useT } from '@/shared/i18n';
 import { VIEW_CONFIGS } from '@/shared/config/views';
@@ -119,6 +119,26 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
       </Field>
 
       <Field
+        label={t('settings.domainGroupSortBy')}
+        hint={t('settings.domainGroupSortByHint')}
+      >
+        <Segmented
+          block
+          value={settings.domainGroupSortBy ?? 'tabCount'}
+          onChange={(v) =>
+            handleSetting({
+              domainGroupSortBy: v as 'tabCount' | 'alphabetical' | 'recentAccess',
+            })
+          }
+          options={[
+            { value: 'tabCount', label: t('settings.sortByTabCount') },
+            { value: 'alphabetical', label: t('settings.sortByAlphabetical') },
+            { value: 'recentAccess', label: t('settings.sortByRecentAccess') },
+          ]}
+        />
+      </Field>
+
+      <Field
         label={t('settings.timelineGranularity')}
         hint={t('settings.timelineGranularityHint')}
       >
@@ -148,6 +168,54 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
         <Switch
           checked={settings.timelineShowExactTime ?? false}
           onChange={(v) => handleSetting({ timelineShowExactTime: v })}
+        />
+      </Field>
+
+      {/* ── 搜索配置 ── */}
+      <Field
+        label={t('settings.searchScope')}
+        hint={t('settings.searchScopeHint')}
+      >
+        <Checkbox.Group
+          value={settings.searchScope ?? ['title', 'hostname', 'url']}
+          onChange={(v) => {
+            if (v.length === 0) return; // 至少保留一个字段
+            handleSetting({ searchScope: v as Array<'title' | 'hostname' | 'url'> });
+          }}
+          options={[
+            { label: t('settings.searchScopeTitle'), value: 'title' },
+            { label: t('settings.searchScopeHostname'), value: 'hostname' },
+            { label: t('settings.searchScopeUrl'), value: 'url' },
+          ]}
+        />
+      </Field>
+
+      <Field
+        label={t('settings.searchEnablePinyin')}
+        hint={t('settings.searchEnablePinyinHint')}
+      >
+        <Switch
+          checked={settings.searchEnablePinyin ?? true}
+          onChange={(v) => handleSetting({ searchEnablePinyin: v })}
+        />
+      </Field>
+
+      <Field
+        label={t('settings.searchSortBy')}
+        hint={t('settings.searchSortByHint')}
+      >
+        <Segmented
+          block
+          value={settings.searchSortBy ?? 'relevance'}
+          onChange={(v) =>
+            handleSetting({
+              searchSortBy: v as 'relevance' | 'recentAccess',
+            })
+          }
+          options={[
+            { value: 'relevance', label: t('settings.searchSortByRelevance') },
+            { value: 'recentAccess', label: t('settings.searchSortByRecentAccess') },
+          ]}
         />
       </Field>
     </Space>

@@ -171,6 +171,13 @@
     "message": "开始使用",
     "description": "Onboarding dismiss button"
   },
+  "archive_session_name": {
+    "message": "会话 $date$",
+    "description": "Default name for archived session in Service Worker",
+    "placeholders": {
+      "date": { "content": "$1", "example": "4月23日 15:43" }
+    }
+  },
   "gradient_aurora": {
     "message": "Aurora",
     "description": "Aurora gradient preset name"

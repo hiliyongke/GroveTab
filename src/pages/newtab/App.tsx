@@ -12,7 +12,7 @@
  * 所有 UI 组件一律走 antd；不再依赖 Tailwind / 自写原子组件。
  */
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, lazy, Suspense } from 'react';
 import {
   Layout,
   Input,
@@ -35,28 +35,47 @@ import {
 } from '@ant-design/icons';
 import { useTabsStore, useSettingsStore, useUndoStore, useMetadataStore, useSelectionStore } from '@/store';
 import { useSwBroadcast, useResolvedTheme } from '@/shared/hooks';
+import { useKeybinding } from '@/shared/hooks/use-keybinding';
 import { AntdThemeProvider } from '@/shared/ui/AntdThemeProvider';
+import { ErrorBoundary } from '@/shared/ui/ErrorBoundary';
 import { UndoToast } from '@/shared/ui/UndoToast';
 import { I18nProvider, useT } from '@/shared/i18n';
-import {
-  DomainGroupView,
-  TimelineView,
-  CompactView,
-  GridView,
-  FrequencyView,
-  TidySuggestionBar,
-  BatchActionBar,
-  TabGroupView,
-  WindowView,
-  BookmarkView,
-} from '@/features/tabs';
-import { SearchBox } from '@/features/search';
-import { OnboardingCard, ArchivePanel } from '@/features/sessions';
-import { SettingsPanel } from '@/features/settings';
+import { DomainGroupView } from '@/features/tabs/DomainGroupView';
+import { TidySuggestionBar } from '@/features/tabs/TidySuggestionBar';
+import { BatchActionBar } from '@/features/tabs/BatchActionBar';
+
+/** 懒加载非默认视图——直接导入文件而非 barrel，确保每个视图独立拆 chunk */
+const TimelineView = lazy(() => import('@/features/tabs/TimelineView').then((m) => ({ default: m.TimelineView })));
+const CompactView = lazy(() => import('@/features/tabs/CompactView').then((m) => ({ default: m.CompactView })));
+const GridView = lazy(() => import('@/features/tabs/GridView').then((m) => ({ default: m.GridView })));
+const FrequencyView = lazy(() => import('@/features/tabs/FrequencyView').then((m) => ({ default: m.FrequencyView })));
+const TabGroupView = lazy(() => import('@/features/tabs/TabGroupView').then((m) => ({ default: m.TabGroupView })));
+const WindowView = lazy(() => import('@/features/tabs/WindowView').then((m) => ({ default: m.WindowView })));
+const BookmarkView = lazy(() => import('@/features/tabs/BookmarkView').then((m) => ({ default: m.BookmarkView })));
+import { OnboardingCard } from '@/features/sessions/OnboardingCard';
+
+/** 懒加载抽屉/面板——非首屏必需，直接导入文件确保独立拆 chunk */
+const SearchBox = lazy(() => import('@/features/search/SearchBox').then((m) => ({ default: m.SearchBox })));
+const ArchivePanel = lazy(() => import('@/features/sessions/ArchivePanel').then((m) => ({ default: m.ArchivePanel })));
+const SettingsPanel = lazy(() => import('@/features/settings/SettingsPanel').then((m) => ({ default: m.SettingsPanel })));
 import { hasCompletedOnboarding } from '@/repositories';
 import { recordMetric } from '@/shared/utils/metrics';
+import { initArchiveStorage } from '@/services/archive-service';
 import { resolveGradient } from '@/shared/theme/gradient-presets';
 import { VIEW_CONFIGS, VALID_VIEWS, type ViewMode } from '@/shared/config/views';
+import { registerViews, getViewComponentMap } from '@/shared/config/view-registry';
+
+/** 注册所有视图到 ViewRegistry —— 新增视图只需在此添加一条 */
+registerViews([
+  { id: 'domain', component: DomainGroupView, order: 1 },
+  { id: 'tabgroup', component: TabGroupView, order: 2 },
+  { id: 'window', component: WindowView, order: 3 },
+  { id: 'bookmarks', component: BookmarkView, order: 4 },
+  { id: 'timeline', component: TimelineView, order: 5 },
+  { id: 'compact', component: CompactView, order: 6 },
+  { id: 'grid', component: GridView, order: 7 },
+  { id: 'frequency', component: FrequencyView, order: 8 },
+]);
 
 const { Header, Content } = Layout;
 const { Text } = Typography;
@@ -400,6 +419,7 @@ function AppContent() {
   useEffect(() => {
     const init = async () => {
       await loadSettings();
+      await initArchiveStorage(); // IDB 降级检测（不阻塞关键路径）
       await loadAllTabs();
       await loadUndoRecords();
       await loadMetadata();
@@ -411,50 +431,28 @@ function AppContent() {
     void init();
   }, [loadAllTabs, loadSettings, loadUndoRecords, loadMetadata]);
 
-  /** Cmd/Ctrl+K 或 "/" 打开搜索 */
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setShowSearch(true);
-        return;
-      }
-      if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
-        const target = e.target as HTMLElement;
-        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
-          e.preventDefault();
-          setShowSearch(true);
-        }
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, []);
+  /** 页面内快捷键：通过可配置的 useKeybinding hook 注册 */
+  useKeybinding('search', useCallback(() => setShowSearch(true), []));
 
   /**
    * 多选快捷键
    *   - Escape：退出多选模式
    *   - Ctrl/Cmd+A：全选当前视图所有标签
    */
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      const selectionStore = useSelectionStore.getState();
-      // Escape 退出多选
-      if (e.key === 'Escape' && selectionStore.selectionMode) {
-        e.preventDefault();
-        selectionStore.exitSelectionMode();
-        return;
-      }
-      // Ctrl/Cmd+A 全选
-      if ((e.metaKey || e.ctrlKey) && e.key === 'a' && selectionStore.selectionMode) {
-        e.preventDefault();
-        const allIds = tabs.map((t) => t.id);
-        selectionStore.selectAll(allIds);
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [tabs]);
+  useKeybinding('exitSelection', useCallback(() => {
+    const selectionStore = useSelectionStore.getState();
+    if (selectionStore.selectionMode) {
+      selectionStore.exitSelectionMode();
+    }
+  }, []));
+
+  useKeybinding('selectAll', useCallback(() => {
+    const selectionStore = useSelectionStore.getState();
+    if (selectionStore.selectionMode) {
+      const allIds = useTabsStore.getState().tabs.map((t) => t.id);
+      selectionStore.selectAll(allIds);
+    }
+  }, []));
 
   /**
    * 滚动吸附搜索
@@ -542,23 +540,16 @@ function AppContent() {
               }
               style={{ padding: '80px 0' }}
             />
-          ) : viewMode === 'domain' ? (
-            <DomainGroupView />
-          ) : viewMode === 'tabgroup' ? (
-            <TabGroupView />
-          ) : viewMode === 'window' ? (
-            <WindowView />
-          ) : viewMode === 'bookmarks' ? (
-            <BookmarkView />
-          ) : viewMode === 'timeline' ? (
-            <TimelineView />
-          ) : viewMode === 'compact' ? (
-            <CompactView />
-          ) : viewMode === 'grid' ? (
-            <GridView />
-          ) : (
-            <FrequencyView />
-          )}
+          ) : (() => {
+            const ViewComponent = getViewComponentMap()[viewMode];
+            return ViewComponent
+              ? (
+                  <Suspense fallback={<div style={{ textAlign: 'center', padding: '40px 0' }}><Spin /></div>}>
+                    <ViewComponent />
+                  </Suspense>
+                )
+              : <DomainGroupView />;
+          })()}
         </section>
       </Content>
 
@@ -566,9 +557,11 @@ function AppContent() {
 
       <BatchActionBar />
 
-      <SearchBox open={showSearch} onOpenChange={setShowSearch} />
-      <ArchivePanel open={showArchive} onOpenChange={setShowArchive} />
-      <SettingsPanel open={showSettings} onOpenChange={setShowSettings} />
+      <Suspense fallback={null}>
+        <SearchBox open={showSearch} onOpenChange={setShowSearch} />
+        <ArchivePanel open={showArchive} onOpenChange={setShowArchive} />
+        <SettingsPanel open={showSettings} onOpenChange={setShowSettings} />
+      </Suspense>
     </Layout>
   );
 }
@@ -577,7 +570,9 @@ function App() {
   return (
     <I18nProvider>
       <AntdThemeProvider>
-        <AppContent />
+        <ErrorBoundary label="AppContent">
+          <AppContent />
+        </ErrorBoundary>
       </AntdThemeProvider>
     </I18nProvider>
   );

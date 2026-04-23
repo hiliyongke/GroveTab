@@ -159,6 +159,29 @@ export interface UserSettings {
    * 影响 Card 本身及左/顶色条的同侧圆角。
    */
   domainGroupCardRadius?: 'none' | 'small' | 'default' | 'large';
+  /**
+   * 域名分组的排序方式：
+   *   - 'tabCount'（默认）：按组内标签数量降序，标签多的排前面
+   *   - 'alphabetical'：按域名字母升序（A→Z）
+   *   - 'recentAccess'：按组内最近访问时间降序，最近活跃的排前面
+   */
+  domainGroupSortBy?: 'tabCount' | 'alphabetical' | 'recentAccess';
+  /**
+   * 搜索配置：
+   *   - scope：搜索范围，选择哪些字段参与搜索匹配
+   *   - enablePinyin：是否启用拼音搜索（关闭后跳过 pinyin-pro 计算，略省性能）
+   *   - sortBy：搜索结果排序方式
+   */
+  searchScope?: Array<'title' | 'hostname' | 'url'>;
+  searchEnablePinyin?: boolean;
+  searchSortBy?: 'relevance' | 'recentAccess';
+  /**
+   * 自定义快捷键映射（页面内快捷键）
+   *   - key: KeybindingAction（'search' | 'exitSelection' | 'selectAll'）
+   *   - value: 快捷键字符串（如 'Mod+k'、'Escape'、'Mod+a'）
+   * 未设置的动作使用 KEYBINDING_DEFS 中的默认值。
+   */
+  customKeybindings?: Record<string, string>;
 }
 
 // ── Undo System ───────────────────────────────────────

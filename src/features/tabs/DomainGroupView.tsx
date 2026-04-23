@@ -43,12 +43,15 @@ export function DomainGroupView() {
     const v = s.settings.domainGroupColumns;
     return typeof v === 'number' && v >= 1 && v <= 6 ? v : null;
   });
+  /** 分组排序方式（默认按标签数量降序） */
+  const sortBy = useSettingsStore((s) => s.settings.domainGroupSortBy ?? 'tabCount');
 
   const groups = useMemo(() => groupTabsByDomain(tabs), [tabs]);
 
-  // 固定分组优先、按标签数量降序
+  // 根据 sortBy 配置排序分组；固定分组始终优先
   const sortedGroups = useMemo(() => {
     return [...groups].sort((a, b) => {
+      // 固定（pinned）分组始终优先
       const aHasPinned = a.tabs.some((tab) =>
         pinnedUrls.has(tab.url.replace(/#.*$/, '').replace(/\/+$/, ''))
       );
@@ -57,10 +60,22 @@ export function DomainGroupView() {
       );
       if (aHasPinned && !bHasPinned) return -1;
       if (!aHasPinned && bHasPinned) return 1;
-      if (b.tabs.length !== a.tabs.length) return b.tabs.length - a.tabs.length;
-      return 0;
+
+      // 按 sortBy 配置排序
+      switch (sortBy) {
+        case 'alphabetical':
+          return a.domain.localeCompare(b.domain);
+        case 'recentAccess': {
+          const aMax = Math.max(...a.tabs.map((t) => t.lastAccessed || 0));
+          const bMax = Math.max(...b.tabs.map((t) => t.lastAccessed || 0));
+          return bMax - aMax;
+        }
+        case 'tabCount':
+        default:
+          return b.tabs.length - a.tabs.length;
+      }
     });
-  }, [groups, pinnedUrls]);
+  }, [groups, pinnedUrls, sortBy]);
 
   /**
    * 批次内去重分配 Accent——解决"相邻卡颜色太近几乎没法区分"的问题。

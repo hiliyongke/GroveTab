@@ -5,20 +5,23 @@
  *   - 使用 antd Modal 的 centered=false + 自定义 top，实现顶部浮层
  *   - 内部结构：Input（大号圆角搜索框）+ 结果 List + 底部状态栏
  *   - 按键导航保持不变（↑/↓ 选中、Enter 跳转、Esc 清空 → 再 Esc 关闭）
+ *   - 搜索范围、拼音开关、排序方式均从 UserSettings 读取
+ *   - MiniSearch 和拼音模块懒加载，避免首屏 bundle 体积过大
  */
 
-import { useState, useMemo, useRef, useCallback } from 'react';
+import { useState, useMemo, useRef, useCallback, useEffect, type ReactNode } from 'react';
 import { Modal, Input, theme, Empty } from 'antd';
 import type { InputRef } from 'antd';
 import {
   SearchOutlined,
   EnterOutlined,
 } from '@ant-design/icons';
-import MiniSearch from 'minisearch';
 import type { LiveTab } from '@/shared/types';
-import { useTabsStore } from '@/store';
+import { useTabsStore, useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
-import { pinyinMatch } from '@/shared/utils/pinyin';
+
+/** 搜索范围字段的默认值 */
+const DEFAULT_SEARCH_SCOPE = ['title', 'hostname', 'url'] as const;
 
 interface SearchBoxProps {
   /** 受控：是否打开 */
@@ -27,26 +30,12 @@ interface SearchBoxProps {
   onOpenChange: (open: boolean) => void;
 }
 
-/**
- * 构建 MiniSearch 索引
- */
-function buildSearchIndex(tabs: LiveTab[]) {
-  const ms = new MiniSearch({
-    /** 搜索范围：标题 + 域名 + URL。URL 字段权重较低，避免域名噪音盖过标题匹配 */
-    fields: ['title', 'hostname', 'url'],
-    storeFields: ['id'],
-    searchOptions: { fuzzy: 0.2, prefix: true },
-  });
-  if (tabs.length > 0) {
-    ms.addAll(tabs.map((t) => ({ id: t.id, title: t.title, hostname: t.hostname, url: t.url })));
-  }
-  return ms;
-}
+type PinyinMatchFn = (text: string, query: string) => boolean;
 
 /**
  * 小键盘提示胶囊
  */
-function Kbd({ children }: { children: React.ReactNode }) {
+function Kbd({ children }: { children: ReactNode }) {
   const { token } = theme.useToken();
   return (
     <span
@@ -83,32 +72,136 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
   const { t } = useT();
   const { token } = theme.useToken();
 
-  const searchIndex = useMemo(() => buildSearchIndex(tabs), [tabs]);
+  /**
+   * 读取搜索配置。
+   *
+   * 注意：selector 里不能用 `?? []` 这类会创建新引用的兜底值；
+   * 在 React 19 + Zustand 的 useSyncExternalStore 机制下，这会让 React 误判 snapshot
+   * 每次都变了，从而触发无限重渲染（React error #185）。
+   */
+  const rawSearchScope = useSettingsStore((s) => s.settings.searchScope);
+  const searchScope = rawSearchScope ?? DEFAULT_SEARCH_SCOPE;
+  const enablePinyin = useSettingsStore((s) => s.settings.searchEnablePinyin ?? true);
+  const searchSortBy = useSettingsStore((s) => s.settings.searchSortBy ?? 'relevance');
 
+  /**
+   * MiniSearch 索引（异步构建）
+   */
+  const [searchIndex, setSearchIndex] = useState<any>(null);
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    (async () => {
+      const { default: MS } = await import('minisearch');
+      if (cancelled) return;
+      const fields: string[] =
+        (searchScope as string[]).length > 0
+          ? [...searchScope as string[]]
+          : ['title'];
+      const ms = new MS({
+        fields,
+        storeFields: ['id'],
+        searchOptions: { fuzzy: 0.2, prefix: true },
+      });
+      if (tabs.length > 0) {
+        ms.addAll(
+          tabs.map((t: LiveTab) => ({
+            id: t.id,
+            title: t.title,
+            hostname: t.hostname,
+            url: t.url,
+          })),
+        );
+      }
+      if (!cancelled) setSearchIndex(ms);
+    })();
+    return () => { cancelled = true; };
+  }, [open, tabs, searchScope]);
+
+  /**
+   * 拼音匹配函数（异步预加载）
+   */
+  const [pinyinMatchFn, setPinyinMatchFn] = useState<PinyinMatchFn | null>(null);
+  useEffect(() => {
+    if (!enablePinyin) { setPinyinMatchFn(null); return; }
+    (async () => {
+      const { pinyinMatch } = await import('@/shared/utils/pinyin');
+      setPinyinMatchFn(() => pinyinMatch);
+    })();
+  }, [enablePinyin]);
+
+  /**
+   * 搜索结果 memo
+   */
   const results = useMemo(() => {
-    if (!query.trim()) return [];
+    if (!query.trim()) return [] as LiveTab[];
+
+    const scopeSet = new Set(searchScope as string[]);
+    const matchTitle = scopeSet.has('title');
+    const matchHostname = scopeSet.has('hostname');
+    const matchUrl = scopeSet.has('url');
+
     try {
-      const miniResults = searchIndex.search(query);
+      const miniResults: Array<{ id: number }> = searchIndex?.search(query) ?? [];
       if (miniResults.length > 0) {
-        const byId = new Map(tabs.map((tb) => [tb.id, tb]));
-        return miniResults
-          .map((r) => byId.get(r.id as number))
-          .filter((x): x is LiveTab => !!x);
+        const byId = new Map(tabs.map((tb: LiveTab) => [tb.id, tb] as [number, LiveTab]));
+        let matched: LiveTab[] = miniResults
+          .map((r: { id: number }) => byId.get(r.id))
+          .filter((x: LiveTab | undefined): x is LiveTab => !!x);
+
+        /** 拼音补充搜索 */
+        if (enablePinyin && pinyinMatchFn) {
+          const existingIds = new Set(matched.map((t: LiveTab) => t.id));
+          const pinyinExtras = tabs.filter((tab: LiveTab) => {
+            if (existingIds.has(tab.id)) return false;
+            const mt = matchTitle && pinyinMatchFn(tab.title, query);
+            const mh = matchHostname && pinyinMatchFn(tab.hostname, query);
+            return mt || mh;
+          });
+          matched = [...matched, ...pinyinExtras];
+        }
+
+        /** 排序：按配置决定 */
+        if (searchSortBy === 'recentAccess') {
+          matched.sort((a: LiveTab, b: LiveTab) =>
+            (b.lastAccessed || 0) - (a.lastAccessed || 0),
+          );
+        }
+
+        return matched;
       }
     } catch {
-      /* fallback */
+      /* MiniSearch 解析异常 */
     }
-    return tabs.filter(
-      (tab) => pinyinMatch(tab.title, query) || pinyinMatch(tab.hostname, query) || tab.url.toLowerCase().includes(query.toLowerCase()),
-    );
-  }, [query, searchIndex, tabs]);
+
+    /** MiniSearch 未命中时，用拼音 + 字符串匹配兜底 */
+    let fallback = tabs.filter((tab: LiveTab) => {
+      if (matchTitle) {
+        let matchedByPinyin = false;
+        if (enablePinyin && pinyinMatchFn) {
+          if (pinyinMatchFn(tab.title, query)) matchedByPinyin = true;
+        }
+        if (matchedByPinyin) return true;
+        if (tab.title.toLowerCase().includes(query.toLowerCase())) return true;
+      }
+      if (matchHostname && tab.hostname.toLowerCase().includes(query.toLowerCase())) return true;
+      if (matchUrl && tab.url.toLowerCase().includes(query.toLowerCase())) return true;
+      return false;
+    });
+
+    if (searchSortBy === 'recentAccess') {
+      fallback.sort((a: LiveTab, b: LiveTab) =>
+        (b.lastAccessed || 0) - (a.lastAccessed || 0),
+      );
+    }
+
+    return fallback;
+  }, [query, searchIndex, pinyinMatchFn, tabs, searchScope, enablePinyin, searchSortBy]);
 
   const close = useCallback(() => onOpenChange(false), [onOpenChange]);
 
   /**
-   * 由 Modal 的 afterOpenChange 驱动「打开时重置状态 + 聚焦」，
-   * 这是一次真实的 UI 事件回调，避免在 useEffect 里同步 setState 触发 React 19
-   * 的级联渲染告警，并且保证焦点发生在 Modal 真正挂载完成之后，体验更稳。
+   * Modal 打开时重置状态 + 聚焦
    */
   const handleAfterOpenChange = useCallback((visible: boolean) => {
     if (visible) {
@@ -123,7 +216,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
       void jumpToTab(tab.id, tab.windowId);
       close();
     },
-    [jumpToTab, close]
+    [jumpToTab, close],
   );
 
   const handleKeyDown = useCallback(
@@ -134,6 +227,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
           e.stopPropagation();
           setQuery('');
           setActiveIndex(0);
+          return;
         }
         // 没有 query 时交给 Modal 默认关闭行为
         return;
@@ -155,7 +249,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
         return;
       }
     },
-    [query, results, activeIndex, handleJump]
+    [query, results, activeIndex, handleJump],
   );
 
   return (
@@ -235,7 +329,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
               flexDirection: 'column',
             }}
           >
-            {results.map((tab, idx) => {
+            {results.map((tab: LiveTab, idx: number) => {
               const active = idx === activeIndex;
               return (
                 <li

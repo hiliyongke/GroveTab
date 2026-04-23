@@ -9,6 +9,7 @@
  */
 
 import { swBroadcast } from '@/shared/utils/sw-broadcast';
+import { archiveCurrentWindowTabs } from './archive-handler';
 
 /** 上一次轮询时的 tab discarded 状态缓存，用于检测 discard 变化 */
 const cachedTabDiscardedState = new Map<number, boolean>();
@@ -112,42 +113,7 @@ chrome.contextMenus.onClicked.addListener((info) => {
   void (async () => {
     if (info.menuItemId === 'canopy-save-all') {
       try {
-        const tabs = await chrome.tabs.query({ currentWindow: true });
-        const toSave = tabs.filter((tab) => {
-          const url = tab.url || tab.pendingUrl || '';
-          if (!url || url.startsWith('chrome://') || url.startsWith('chrome-extension://') || url.startsWith('about:')) return false;
-          if (tab.pinned) return false;
-          if (tab.incognito) return false;
-          return true;
-        });
-        if (toSave.length === 0) return;
-
-        const { nanoid } = await import('nanoid');
-        const session = {
-          id: nanoid(10),
-          name: `会话 ${new Date().toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`,
-          createdAt: Date.now(),
-          tabs: toSave.map((tab) => ({
-            url: tab.url || tab.pendingUrl || '',
-            title: tab.title || '',
-            favIconUrl: tab.favIconUrl || '',
-            hostname: (() => { try { return new URL(tab.url || '').hostname; } catch { return ''; } })(),
-            pinned: tab.pinned,
-          })),
-          tabCount: toSave.length,
-        };
-
-        // 保存到 storage
-        const result = await chrome.storage.local.get('canopy_sessions');
-        const sessions: unknown[] = Array.isArray(result.canopy_sessions) ? result.canopy_sessions : [];
-        sessions.unshift(session);
-        await chrome.storage.local.set({ canopy_sessions: sessions });
-
-        // 关闭已归档标签
-        const tabIds = toSave.map((t) => t.id).filter((id): id is number => id !== undefined);
-        if (tabIds.length > 0) {
-          await chrome.tabs.remove(tabIds);
-        }
+        await archiveCurrentWindowTabs();
       } catch (err) {
         console.error('[Canopy SW] Save all tabs failed:', err);
       }
@@ -170,42 +136,9 @@ chrome.commands.onCommand.addListener((command) => {
     }
 
     if (command === 'save-all-tabs') {
-      /** 归档当前窗口所有标签——与上下文菜单同一逻辑 */
+      /** 归档当前窗口所有标签——复用 archive-handler 公共逻辑 */
       try {
-        const tabs = await chrome.tabs.query({ currentWindow: true });
-        const toSave = tabs.filter((tab) => {
-          const url = tab.url || tab.pendingUrl || '';
-          if (!url || url.startsWith('chrome://') || url.startsWith('chrome-extension://') || url.startsWith('about:')) return false;
-          if (tab.pinned) return false;
-          if (tab.incognito) return false;
-          return true;
-        });
-        if (toSave.length === 0) return;
-
-        const { nanoid } = await import('nanoid');
-        const session = {
-          id: nanoid(10),
-          name: `会话 ${new Date().toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`,
-          createdAt: Date.now(),
-          tabs: toSave.map((tab) => ({
-            url: tab.url || tab.pendingUrl || '',
-            title: tab.title || '',
-            favIconUrl: tab.favIconUrl || '',
-            hostname: (() => { try { return new URL(tab.url || '').hostname; } catch { return ''; } })(),
-            pinned: tab.pinned,
-          })),
-          tabCount: toSave.length,
-        };
-
-        const result = await chrome.storage.local.get('canopy_sessions');
-        const sessions: unknown[] = Array.isArray(result.canopy_sessions) ? result.canopy_sessions : [];
-        sessions.unshift(session);
-        await chrome.storage.local.set({ canopy_sessions: sessions });
-
-        const tabIds = toSave.map((t) => t.id).filter((id): id is number => id !== undefined);
-        if (tabIds.length > 0) {
-          await chrome.tabs.remove(tabIds);
-        }
+        await archiveCurrentWindowTabs();
       } catch (err) {
         console.error('[Canopy SW] Save all (command) failed:', err);
       }

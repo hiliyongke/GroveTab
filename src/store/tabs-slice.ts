@@ -347,6 +347,24 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     const nonPinned = groupTabs.filter((t) => !t.pinned);
     if (nonPinned.length === 0) return;
 
+    /**
+     * 批量关闭安全阈值：超过 20 个 tab 时弹出确认对话框
+     *
+     * 使用 antd Modal.confirm 让用户二次确认，避免误操作。
+     * 确认后才执行关闭；取消则静默返回。
+     */
+    if (nonPinned.length > 20) {
+      const confirmed = await new Promise<boolean>((resolve) => {
+        feedback.modal.confirm({
+          title: translate('tabs.closeConfirmTitle'),
+          content: translate('tabs.closeDomainConfirmContent', { domain, count: nonPinned.length }),
+          onOk: () => resolve(true),
+          onCancel: () => resolve(false),
+        });
+      });
+      if (!confirmed) return;
+    }
+
     try {
       const snapshots = nonPinned.map(liveTabToSnapshot);
       void useUndoStore
@@ -370,6 +388,24 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     const { tabs } = get();
     const nonPinned = tabs.filter((t) => !t.pinned);
     if (nonPinned.length === 0) return;
+
+    /**
+     * 批量关闭安全阈值：超过 20 个 tab 时弹出确认对话框
+     *
+     * 使用 antd Modal.confirm 让用户二次确认，避免误操作。
+     * 确认后才执行关闭；取消则静默返回。
+     */
+    if (nonPinned.length > 20) {
+      const confirmed = await new Promise<boolean>((resolve) => {
+        feedback.modal.confirm({
+          title: translate('tabs.closeConfirmTitle'),
+          content: translate('tabs.closeConfirmContent', { count: nonPinned.length }),
+          onOk: () => resolve(true),
+          onCancel: () => resolve(false),
+        });
+      });
+      if (!confirmed) return;
+    }
 
     try {
       const snapshots = nonPinned.map(liveTabToSnapshot);

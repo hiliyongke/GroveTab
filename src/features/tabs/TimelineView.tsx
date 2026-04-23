@@ -340,6 +340,8 @@ function SegmentContent({
   const { token } = theme.useToken();
   /** 段内同名 tab id 集合 */
   const ambiguousIds = useMemo(() => findAmbiguousTitleIds(segment.tabs), [segment.tabs]);
+  /** 段内 tab ID 列表（供 Shift 范围选） */
+  const segmentTabIds = useMemo(() => segment.tabs.map((t) => t.id), [segment.tabs]);
 
   /** 段尾/段首时间范围（供段标题展示） */
   const rangeText = showExactTime ? formatSegmentRange(segment.tabs) : undefined;
@@ -366,6 +368,8 @@ function SegmentContent({
               onClose={(id) => { void closeSingleTab(id); }}
               showHostname
               showUrlHint={ambiguousIds.has(tab.id)}
+              selectable
+              visibleTabIds={segmentTabIds}
               trailing={
                 showExactTime && tab.lastAccessed ? (
                   <span

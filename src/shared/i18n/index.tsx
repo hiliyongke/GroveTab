@@ -9,7 +9,7 @@
  * 从本文件 re-export（仅类型不算 value export，不破坏 fast-refresh）。
  */
 
-import { createContext, useContext, useCallback } from 'react';
+import { createContext, useContext, useCallback, useMemo } from 'react';
 import { useSettingsStore } from '@/store';
 import { translateWithLocale, type Locale } from './core';
 
@@ -56,8 +56,14 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     [locale],
   );
 
+  /** 用 useMemo 稳定化 context value，避免消费组件因引用变化而无限重渲染 */
+  const contextValue = useMemo(
+    () => ({ locale, t, setLocale }),
+    [locale, t, setLocale],
+  );
+
   return (
-    <I18nContext.Provider value={{ locale, t, setLocale }}>
+    <I18nContext.Provider value={contextValue}>
       {children}
     </I18nContext.Provider>
   );

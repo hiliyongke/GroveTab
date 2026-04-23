@@ -1,5 +1,9 @@
 /**
  * ArchiveService — Atomic archive (save all tabs) and restore operations
+ *
+ * 集成 IndexedDB 自动降级：
+ *   当 chrome.storage.local 使用率超过 80% 时，归档数据自动迁移到 IndexedDB，
+ *   后续读写透明路由到 IDB，不影响上层逻辑。
  */
 
 import { nanoid } from 'nanoid';
@@ -7,16 +11,62 @@ import type { ArchivedSession, ArchivedTab } from '@/shared/types';
 import { getData, setData } from '@/repositories';
 import { queryAllTabs, closeTabs, createTab, getCurrentWindow, getFaviconUrl } from '@/chrome';
 import { extractHostname, isSelfNewTabPage, shouldDisplayUrl } from '@/chrome';
+import {
+  shouldFallbackToIDB,
+  hasIDBData,
+  getSessionsFromIDB,
+  saveSessionsToIDB,
+  autoFallbackIfNeeded,
+} from '@/shared/utils/idb-fallback';
 
 const SESSIONS_KEY = 'canopy_sessions';
 
-/** Get all archived sessions */
-export async function getArchivedSessions(): Promise<ArchivedSession[]> {
-  return (await getData<ArchivedSession[]>(SESSIONS_KEY)) ?? [];
+/** 是否已降级到 IndexedDB（运行时缓存，避免每次都检测） */
+let useIDB = false;
+
+/**
+ * 初始化归档存储路由
+ *
+ * 在应用启动时调用，检测是否需要降级并建立路由。
+ */
+export async function initArchiveStorage(): Promise<void> {
+  // 如果 IDB 中已有数据，说明之前已迁移
+  const hasIDB = await hasIDBData();
+  if (hasIDB) {
+    useIDB = true;
+    return;
+  }
+  // 检测是否需要自动降级
+  await autoFallbackIfNeeded();
+  useIDB = await hasIDBData();
 }
 
-/** Save a new archived session */
+/** Get all archived sessions（自动路由到 IDB 或 chrome.storage） */
+export async function getArchivedSessions(): Promise<ArchivedSession[]> {
+  if (useIDB) {
+    return getSessionsFromIDB();
+  }
+  const sessions = (await getData<ArchivedSession[]>(SESSIONS_KEY)) ?? [];
+  // 懒检测：如果还没降级，检查是否需要
+  if (!useIDB) {
+    const shouldFB = await shouldFallbackToIDB();
+    if (shouldFB) {
+      await autoFallbackIfNeeded();
+      useIDB = await hasIDBData();
+      if (useIDB && sessions.length > 0) {
+        // 迁移刚发生，从 IDB 重读
+        return getSessionsFromIDB();
+      }
+    }
+  }
+  return sessions;
+}
+
+/** Save sessions（自动路由） */
 async function saveSessions(sessions: ArchivedSession[]): Promise<void> {
+  if (useIDB) {
+    return saveSessionsToIDB(sessions);
+  }
   await setData(SESSIONS_KEY, sessions);
 }
 

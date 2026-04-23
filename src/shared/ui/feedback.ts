@@ -27,20 +27,38 @@ interface FeedbackApi {
   modal: ModalHookAPI;
 }
 
-let api: FeedbackApi | null = null;
+/**
+ * 反馈 API 的持有方式：
+ *   - 直接引用：绑定一次后不再变化
+ *   - Ref 代理：通过 React ref 间接访问，每次调用都读取最新值，
+ *     解决 antd App.useApp() 返回引用不稳定的问题
+ *
+ * 注意：这里统一用 RefObject 模式，避免 antd 内部实例引用不稳定导致的问题。
+ */
+let holder: (React.RefObject<FeedbackApi> | FeedbackApi | null) = null;
+
+/** 从 holder 中解析出实际的 FeedbackApi 实例 */
+function resolveApi(): FeedbackApi | null {
+  if (!holder) return null;
+  if ('current' in holder) return (holder as React.RefObject<FeedbackApi>).current;
+  return holder as FeedbackApi;
+}
 
 /**
  * React 层注入 antd 反馈实例（应在 App 根组件的 useEffect 中调用一次）
+ *
+ * 支持直接传入 FeedbackApi 或 React.RefObject<FeedbackApi>（推荐后者，
+ * 避免因 antd 内部引用不稳定导致 useEffect 反复触发）。
  */
-export function bindFeedback(instance: FeedbackApi): void {
-  api = instance;
+export function bindFeedback(instance: React.RefObject<FeedbackApi> | FeedbackApi): void {
+  holder = instance;
 }
 
 /**
  * 解绑（热重载/卸载时调用，避免引用已卸载的 React 树）
  */
 export function unbindFeedback(): void {
-  api = null;
+  holder = null;
 }
 
 /**
@@ -51,16 +69,19 @@ export function unbindFeedback(): void {
  */
 export const feedback = {
   success(content: string): void {
+    const api = resolveApi();
     if (api) api.message.success(content);
     else console.info('[Canopy/feedback:success]', content);
   },
 
   info(content: string): void {
+    const api = resolveApi();
     if (api) api.message.info(content);
     else console.info('[Canopy/feedback:info]', content);
   },
 
   warning(content: string): void {
+    const api = resolveApi();
     if (api) api.message.warning(content);
     else console.warn('[Canopy/feedback:warning]', content);
   },
@@ -74,6 +95,7 @@ export const feedback = {
   error(content: string, err?: unknown): void {
     if (err !== undefined) console.warn('[Canopy/feedback:error]', content, err);
     else console.warn('[Canopy/feedback:error]', content);
+    const api = resolveApi();
     if (api) api.message.error(content);
   },
 
@@ -82,8 +104,25 @@ export const feedback = {
    */
   notify: {
     error(title: string, description?: string): void {
+      const api = resolveApi();
       if (api) api.notification.error({ message: title, description });
       else console.warn('[Canopy/notify:error]', title, description);
     },
   },
+
+  /**
+   * Modal 对话框 —— 供 store 层触发确认弹窗
+   *
+   * 若 React 树未 mount 则 fallback 到 window.confirm。
+   */
+  modal: {
+    confirm(config: Parameters<ModalHookAPI['confirm']>[0]): void {
+      const api = resolveApi();
+      if (api) api.modal.confirm(config);
+      else {
+        const ok = window.confirm(config.title ? String(config.title) : '确认？');
+        if (ok && config.onOk) config.onOk(null as never);
+      }
+    },
+  } satisfies { confirm(config: Parameters<ModalHookAPI['confirm']>[0]): void },
 };

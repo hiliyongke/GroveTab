@@ -11,7 +11,7 @@
  * 设计 token 与 docs/ui-mock/newtab.html 视觉稿保持一致，是项目视觉基准。
  */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { ConfigProvider, theme as antdTheme, App as AntdApp } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 import enUS from 'antd/locale/en_US';
@@ -21,18 +21,34 @@ import { useSettingsStore } from '@/store';
 import { useResolvedTheme } from '@/shared/hooks';
 import { bindFeedback, unbindFeedback } from './feedback';
 
+/** AntdApp 容器的稳定样式常量，避免每次渲染创建新对象 */
+const ANT_APP_STYLE: React.CSSProperties = { minHeight: '100vh' };
+
 /**
  * 将 antd App 的 message/notification/modal 实例注入到模块级 `feedback`
  *
  * 必须放在 `<AntdApp>` 的子节点里，`App.useApp()` 才能拿到有效实例；
  * 组件本身不渲染任何节点。
+ *
+ * 注意：antd App.useApp() 返回的 message/notification/modal 引用可能不稳定
+ * （每次渲染都可能变化），因此用 ref 持有最新引用，effect 只在 mount/unmount 时
+ * 执行绑定/解绑。通过 bindFeedback 的代理对象，feedback 模块始终能访问最新实例。
  */
 function FeedbackBridge() {
   const { message, notification, modal } = AntdApp.useApp();
+  /** 用 ref 持有最新的 antd API 引用，避免 useEffect 依赖不稳定导致反复触发 */
+  const apiRef = useRef({ message, notification, modal });
+  apiRef.current = { message, notification, modal };
+
   useEffect(() => {
-    bindFeedback({ message, notification, modal });
+    /**
+     * 绑定代理对象到 feedback —— 每次调用 feedback 方法时，
+     * 都会从 apiRef.current 读取最新的 message/notification/modal，
+     * 确保 feedback 始终指向有效实例（即使 antd 内部重新创建了它们）。
+     */
+    bindFeedback(apiRef);
     return () => unbindFeedback();
-  }, [message, notification, modal]);
+  }, []);
   return null;
 }
 
@@ -82,7 +98,7 @@ export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ConfigProvider theme={themeConfig} locale={locale}>
-      <AntdApp style={{ minHeight: '100vh' }}>
+      <AntdApp style={ANT_APP_STYLE}>
         <FeedbackBridge />
         {children}
       </AntdApp>

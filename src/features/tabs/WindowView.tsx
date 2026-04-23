@@ -23,6 +23,7 @@ import { TabItem } from './TabItem';
 import { useT } from '@/shared/i18n';
 import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
+import { moveTabs } from '@/chrome';
 
 /**
  * 多窗口管理视图
@@ -72,7 +73,6 @@ export function WindowView() {
         return;
       }
       // 使用 chrome.tabs.move 批量移动
-      const { moveTabs } = await import('@/chrome');
       // 逐批移动（避免一次性移动太多标签导致超时）
       const BATCH = 10;
       for (let i = 0; i < otherTabIds.length; i += BATCH) {
