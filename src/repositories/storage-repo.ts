@@ -21,6 +21,14 @@ const DEFAULT_SETTINGS: UserSettings = {
   domainGroupShowItemFavicon: true,
   domainGroupAccentBarPosition: 'left',
   domainGroupCardRadius: 'default',
+  searchScope: ['title', 'hostname', 'url'],
+  searchEnablePinyin: true,
+  searchSortBy: 'relevance',
+  searchDefaultEngine: 'google',
+  searchEnabledEngines: ['google', 'bing', 'baidu', 'duckduckgo'],
+  searchAutoFallbackToWeb: true,
+  searchUseHistorySuggestions: true,
+  searchUseHotSuggestions: true,
 };
 
 // ── Generic CRUD ──────────────────────────────────────
@@ -93,6 +101,31 @@ export async function hasCompletedOnboarding(): Promise<boolean> {
 
 export async function markOnboardingDone(): Promise<void> {
   await setData(ONBOARDING_KEY, true);
+}
+
+// ── Search History ─────────────────────────────────────
+
+const SEARCH_HISTORY_KEY = 'canopy_search_history' as StorageKey;
+const MAX_RECENT_SEARCHES = 12;
+
+/**
+ * 获取最近搜索词。
+ */
+export async function getRecentSearches(): Promise<string[]> {
+  return (await getData<string[]>(SEARCH_HISTORY_KEY)) ?? [];
+}
+
+/**
+ * 记录一条最近搜索词。
+ */
+export async function pushRecentSearch(query: string): Promise<string[]> {
+  const normalized = query.trim();
+  if (normalized === '') return getRecentSearches();
+
+  const existing = await getRecentSearches();
+  const deduped = [normalized, ...existing.filter((item) => item !== normalized)].slice(0, MAX_RECENT_SEARCHES);
+  await setData(SEARCH_HISTORY_KEY, deduped);
+  return deduped;
 }
 
 // Initialize meta on module load

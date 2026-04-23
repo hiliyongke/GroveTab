@@ -7,7 +7,7 @@
  *   - 新增"归档当前窗口"主操作按钮
  */
 
-import { useState, useSyncExternalStore, useCallback } from 'react';
+import { useState, useSyncExternalStore, useCallback, useEffect } from 'react';
 import {
   PlusOutlined,
   SaveOutlined,
@@ -28,6 +28,7 @@ import { useT } from '@/shared/i18n';
 import { useTabsStore } from '@/store';
 import { feedback } from '@/shared/ui/feedback';
 import { SessionItem } from './components/SessionItem';
+import { iconColor } from '@/shared/utils/icon-colors';
 
 /* ---------- 简易外部 store 同步归档列表 ---------- */
 let sessionsCache: ArchivedSession[] = [];
@@ -61,9 +62,10 @@ void refreshSessions();
 interface ArchivePanelProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSessionsChange?: (sessions: ArchivedSession[]) => void;
 }
 
-export function ArchivePanel({ open, onOpenChange }: ArchivePanelProps) {
+export function ArchivePanel({ open, onOpenChange, onSessionsChange }: ArchivePanelProps) {
   const sessions = useSyncExternalStore(subscribeSessions, getSessionsSnapshot);
   const initialized = useSyncExternalStore(subscribeSessions, getSessionsInitialized);
   const loading = !initialized;
@@ -75,6 +77,11 @@ export function ArchivePanel({ open, onOpenChange }: ArchivePanelProps) {
   const tabCount = useTabsStore((s) => s.tabs.length);
   const { t, locale } = useT();
   const { token } = theme.useToken();
+
+  useEffect(() => {
+    if (!initialized) return;
+    onSessionsChange?.(sessions);
+  }, [initialized, onSessionsChange, sessions]);
 
   const handleAfterOpenChange = useCallback(
     (visible: boolean) => {
@@ -179,7 +186,7 @@ export function ArchivePanel({ open, onOpenChange }: ArchivePanelProps) {
               color: token.colorPrimary,
             }}
           >
-            <SaveOutlined style={{ fontSize: 14 }} />
+            <SaveOutlined style={{ fontSize: 14, color: iconColor('archive', token) }} />
           </div>
           <span style={{ flex: 1, fontSize: 15, fontWeight: 600 }}>{t('archive.title')}</span>
           <Button
@@ -200,7 +207,7 @@ export function ArchivePanel({ open, onOpenChange }: ArchivePanelProps) {
           type="info"
           showIcon
           icon={<InfoCircleOutlined />}
-          message={t('archive.description')}
+          description={t('archive.description')}
           style={{
             marginBottom: 12,
             borderRadius: token.borderRadius,
@@ -210,14 +217,14 @@ export function ArchivePanel({ open, onOpenChange }: ArchivePanelProps) {
         />
         {loading ? (
           <div style={{ textAlign: 'center', padding: '48px 0' }}>
-            <Spin tip={t('archive.loading')}>
-              <div style={{ minHeight: 48 }} />
-            </Spin>
+            <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+              <Spin />
+              <span style={{ fontSize: 12, color: token.colorTextSecondary }}>{t('archive.loading')}</span>
+            </div>
           </div>
         ) : sessions.length === 0 ? (
           <Empty
             image={<InboxOutlined style={{ fontSize: 48, color: token.colorTextTertiary }} />}
-            imageStyle={{ height: 60 }}
             description={
               <div>
                 <p style={{ fontSize: 13.5, fontWeight: 500, color: token.colorText, margin: 0 }}>

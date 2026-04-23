@@ -34,6 +34,8 @@ import {
   MoonFilled,
   DesktopOutlined,
 } from '@ant-design/icons';
+import { theme as antdTheme } from 'antd';
+import { iconColor } from '@/shared/utils/icon-colors';
 import { useTabsStore, useSettingsStore, useUndoStore, useMetadataStore, useSelectionStore } from '@/store';
 import { useSwBroadcast, useResolvedTheme } from '@/shared/hooks';
 import { useKeybinding } from '@/shared/hooks/use-keybinding';
@@ -44,6 +46,7 @@ import { I18nProvider, useT } from '@/shared/i18n';
 import { DomainGroupView } from '@/features/tabs/DomainGroupView';
 import { TidySuggestionBar } from '@/features/tabs/TidySuggestionBar';
 import { BatchActionBar } from '@/features/tabs/BatchActionBar';
+import { WorkspaceOverview, SelectionModeNotice } from '@/features/tabs/WorkspaceOverview';
 
 /** 懒加载非默认视图——直接导入文件而非 barrel，确保每个视图独立拆 chunk */
 const TimelineView = lazy(() => import('@/features/tabs/TimelineView').then((m) => ({ default: m.TimelineView })));
@@ -54,17 +57,19 @@ const TabGroupView = lazy(() => import('@/features/tabs/TabGroupView').then((m) 
 const WindowView = lazy(() => import('@/features/tabs/WindowView').then((m) => ({ default: m.WindowView })));
 const BookmarkView = lazy(() => import('@/features/tabs/BookmarkView').then((m) => ({ default: m.BookmarkView })));
 import { OnboardingCard } from '@/features/sessions/OnboardingCard';
+import { feedback } from '@/shared/ui/feedback';
+import { hasCompletedOnboarding } from '@/repositories';
+import type { ArchivedSession } from '@/shared/types';
+import { recordMetric } from '@/shared/utils/metrics';
+import { archiveCurrentWindowTabs, getArchivedSessions, initArchiveStorage } from '@/services/archive-service';
+import { resolveGradient } from '@/shared/theme/gradient-presets';
+import { VIEW_CONFIGS, VALID_VIEWS, type ViewMode } from '@/shared/config/views';
+import { registerViews, getViewComponentMap } from '@/shared/config/view-registry';
 
 /** 懒加载抽屉/面板——非首屏必需，直接导入文件确保独立拆 chunk */
 const SearchBox = lazy(() => import('@/features/search/SearchBox').then((m) => ({ default: m.SearchBox })));
 const ArchivePanel = lazy(() => import('@/features/sessions/ArchivePanel').then((m) => ({ default: m.ArchivePanel })));
 const SettingsPanel = lazy(() => import('@/features/settings/SettingsPanel').then((m) => ({ default: m.SettingsPanel })));
-import { hasCompletedOnboarding } from '@/repositories';
-import { recordMetric } from '@/shared/utils/metrics';
-import { initArchiveStorage } from '@/services/archive-service';
-import { resolveGradient } from '@/shared/theme/gradient-presets';
-import { VIEW_CONFIGS, VALID_VIEWS, type ViewMode } from '@/shared/config/views';
-import { registerViews, getViewComponentMap } from '@/shared/config/view-registry';
 
 /** 注册所有视图到 ViewRegistry —— 新增视图只需在此添加一条 */
 registerViews([
@@ -109,6 +114,7 @@ function AppHeader({
   const theme = useSettingsStore((s) => s.settings.theme);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const { t } = useT();
+  const { token } = antdTheme.useToken();
 
   /** 循环切换 light → dark → system */
   const toggleTheme = useCallback(() => {
@@ -127,11 +133,11 @@ function AppHeader({
    */
   const themeIcon =
     theme === 'system' ? (
-      <DesktopOutlined key="sys" />
+      <DesktopOutlined key="sys" style={{ color: iconColor('theme', token) }} />
     ) : theme === 'dark' ? (
-      <MoonFilled key="dark" />
+      <MoonFilled key="dark" style={{ color: iconColor('theme', token) }} />
     ) : (
-      <SunOutlined key="light" />
+      <SunOutlined key="light" style={{ color: iconColor('theme', token) }} />
     );
 
   return (
@@ -236,7 +242,7 @@ function AppHeader({
             e.currentTarget.style.background = 'var(--ant-color-fill-tertiary)';
           }}
         >
-          <SearchOutlined style={{ fontSize: 13, flexShrink: 0 }} />
+          <SearchOutlined style={{ fontSize: 13, flexShrink: 0, color: iconColor('search', token) }} />
           <span
             style={{
               flex: 1,
@@ -269,7 +275,7 @@ function AppHeader({
 
       <Space size={4} style={{ flexShrink: 0 }}>
         <Tooltip title={t('header.archiveTooltip')} placement="bottom">
-          <Button type="text" icon={<SaveOutlined />} onClick={onArchive}>
+          <Button type="text" icon={<SaveOutlined style={{ color: iconColor('archive', token) }} />} onClick={onArchive}>
             {/* 按钮保留一个文字标签，避免用户光看 icon 猜不出功能 */}
             <span style={{ fontSize: 12, marginInlineStart: 4 }}>{t('header.archive')}</span>
           </Button>
@@ -294,7 +300,7 @@ function AppHeader({
           />
         </Tooltip>
         <Tooltip title={t('header.settings')}>
-          <Button type="text" icon={<SettingOutlined />} onClick={onSettings} />
+          <Button type="text" icon={<SettingOutlined style={{ color: iconColor('settings', token) }} />} onClick={onSettings} />
         </Tooltip>
       </Space>
     </Header>
@@ -372,6 +378,11 @@ function AppContent() {
   const loadSettings = useSettingsStore((s) => s.loadSettings);
   const loadUndoRecords = useUndoStore((s) => s.loadRecords);
   const loadMetadata = useMetadataStore((s) => s.loadMetadata);
+  const selectedIds = useSelectionStore((s) => s.selectedIds);
+  const selectionMode = useSelectionStore((s) => s.selectionMode);
+  const selectAll = useSelectionStore((s) => s.selectAll);
+  const clearSelection = useSelectionStore((s) => s.clearSelection);
+  const exitSelectionMode = useSelectionStore((s) => s.exitSelectionMode);
 
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [checked, setChecked] = useState(false);
@@ -379,9 +390,20 @@ function AppContent() {
   const [initRunId, setInitRunId] = useState(0);
   const [showArchive, setShowArchive] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [archiving, setArchiving] = useState(false);
+  const [tidyExpandSignal, setTidyExpandSignal] = useState(0);
+  const [archiveSummary, setArchiveSummary] = useState<{
+    archivedSessionCount: number;
+    latestArchiveLabel: string | null;
+  }>({
+    archivedSessionCount: 0,
+    latestArchiveLabel: null,
+  });
   /** Hero 搜索框是否已滚出视野——用于驱动 Header 吸附搜索渐显 */
   const [compactSearchVisible, setCompactSearchVisible] = useState(false);
+  const mountedRef = useRef(true);
   const heroSearchRef = useRef<HTMLDivElement>(null);
+  const tidySectionRef = useRef<HTMLDivElement>(null);
   /**
    * viewMode 直接从 settings 派生 —— 这样「设置里修改默认视图」会即时反映到当前页面，
    * 不需要刷新。切视图时通过 updateSettings 写回 store，两个入口自动同步。
@@ -397,6 +419,25 @@ function AppContent() {
   const resolvedDark = useResolvedTheme() === 'dark';
   const layoutBackground = resolveGradient(gradientPreset, resolvedDark, customGradient);
   const { t } = useT();
+
+  const syncArchiveSummary = useCallback((sessions: ArchivedSession[]) => {
+    if (!mountedRef.current) return;
+    setArchiveSummary({
+      archivedSessionCount: sessions.length,
+      latestArchiveLabel: sessions[0]?.name ?? null,
+    });
+  }, []);
+
+  const refreshArchiveSummary = useCallback(async () => {
+    try {
+      const sessions = await getArchivedSessions();
+      syncArchiveSummary(sessions);
+      return sessions;
+    } catch (err) {
+      console.warn('[Canopy] load archive summary failed', err);
+      return [];
+    }
+  }, [syncArchiveSummary]);
 
   useSwBroadcast();
 
@@ -420,21 +461,27 @@ function AppContent() {
 
   useEffect(() => {
     let cancelled = false;
+    mountedRef.current = true;
 
     void (async () => {
       try {
         await loadSettings();
 
-        const [archiveStorageResult, tabsResult, undoResult, metadataResult, onboardingResult] = await Promise.allSettled([
-          initArchiveStorage(),
+        const [archiveSessionsResult, tabsResult, undoResult, metadataResult, onboardingResult] = await Promise.allSettled([
+          (async () => {
+            await initArchiveStorage();
+            return getArchivedSessions();
+          })(),
           loadAllTabs(),
           loadUndoRecords(),
           loadMetadata(),
           hasCompletedOnboarding(),
         ]);
 
-        if (archiveStorageResult.status === 'rejected') {
-          console.warn('[Canopy] initArchiveStorage failed', archiveStorageResult.reason);
+        if (archiveSessionsResult.status === 'fulfilled') {
+          syncArchiveSummary(archiveSessionsResult.value);
+        } else {
+          console.warn('[Canopy] initArchiveStorage failed', archiveSessionsResult.reason);
         }
         if (tabsResult.status === 'rejected') {
           console.warn('[Canopy] loadAllTabs failed', tabsResult.reason);
@@ -471,8 +518,9 @@ function AppContent() {
 
     return () => {
       cancelled = true;
+      mountedRef.current = false;
     };
-  }, [initRunId, loadAllTabs, loadMetadata, loadSettings, loadUndoRecords, t]);
+  }, [initRunId, loadAllTabs, loadMetadata, loadSettings, loadUndoRecords, syncArchiveSummary, t]);
 
   /** 页面内快捷键：通过可配置的 useKeybinding hook 注册 */
   useKeybinding('search', useCallback(() => setShowSearch(true), []));
@@ -525,6 +573,50 @@ function AppContent() {
     void useSettingsStore.getState().updateSettings({ defaultView: view });
   }, []);
 
+  const handleOpenSearch = useCallback(() => {
+    setShowSearch(true);
+  }, []);
+
+  const handleOpenArchive = useCallback(() => {
+    setShowArchive(true);
+  }, []);
+
+  const handleArchivePanelOpenChange = useCallback((open: boolean) => {
+    setShowArchive(open);
+    if (!open) {
+      void refreshArchiveSummary();
+    }
+  }, [refreshArchiveSummary]);
+
+  const handleArchiveCurrent = useCallback(async () => {
+    if (archiving || tabs.length === 0) return;
+    setArchiving(true);
+    try {
+      const { archivedCount, closedCount } = await archiveCurrentWindowTabs();
+      await loadAllTabs({ silent: true });
+      await refreshArchiveSummary();
+      feedback.success(t('archive.archivedOk', { count: archivedCount }));
+      if (closedCount < archivedCount) {
+        feedback.warning(t('archive.closeIncomplete', { count: archivedCount - closedCount }));
+      }
+      setShowArchive(true);
+    } catch (err) {
+      feedback.error(t('archive.archiveFailed'), err);
+    } finally {
+      setArchiving(false);
+    }
+  }, [archiving, loadAllTabs, refreshArchiveSummary, t, tabs.length]);
+
+  const handleFocusTidy = useCallback(() => {
+    setTidyExpandSignal((value) => value + 1);
+    tidySectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
+
+  const handleSelectAllTabs = useCallback(() => {
+    selectAll(tabs.map((tab) => tab.id));
+  }, [selectAll, tabs]);
+
+  const selectedTabs = tabs.filter((tab) => selectedIds.has(tab.id));
   const tabCount = tabs.length;
   const domainCount = new Set(tabs.map((tab) => tab.hostname)).size;
 
@@ -552,16 +644,16 @@ function AppContent() {
         tabCount={tabCount}
         domainCount={domainCount}
         compactSearchVisible={compactSearchVisible}
-        onArchive={() => setShowArchive(true)}
+        onArchive={handleOpenArchive}
         onSettings={() => setShowSettings(true)}
-        onOpenSearch={() => setShowSearch(true)}
+        onOpenSearch={handleOpenSearch}
       />
 
       <Content style={{ width: '100%', padding: '0 24px 48px' }}>
         <HeroBar
           viewMode={viewMode}
           onViewChange={handleViewChange}
-          onOpenSearch={() => setShowSearch(true)}
+          onOpenSearch={handleOpenSearch}
           sentinelRef={heroSearchRef}
         />
 
@@ -586,9 +678,31 @@ function AppContent() {
           />
         )}
 
+        <WorkspaceOverview
+          tabs={tabs}
+          archivedSessionCount={archiveSummary.archivedSessionCount}
+          latestArchiveLabel={archiveSummary.latestArchiveLabel}
+          archiving={archiving}
+          onOpenSearch={handleOpenSearch}
+          onFocusTidy={handleFocusTidy}
+          onArchiveCurrent={() => { void handleArchiveCurrent(); }}
+          onOpenArchive={handleOpenArchive}
+        />
+
         {showOnboarding && <OnboardingCard onDismiss={() => setShowOnboarding(false)} />}
 
-        <TidySuggestionBar />
+        {selectionMode && (
+          <SelectionModeNotice
+            selectedTabs={selectedTabs}
+            onSelectAll={handleSelectAllTabs}
+            onClearSelection={clearSelection}
+            onExitSelectionMode={exitSelectionMode}
+          />
+        )}
+
+        <div ref={tidySectionRef}>
+          <TidySuggestionBar expandSignal={tidyExpandSignal} />
+        </div>
 
         <section>
           {loading ? (
@@ -606,10 +720,22 @@ function AppContent() {
                   <Text type="secondary" style={{ fontSize: 12 }}>
                     {t('tabs.emptyHint')}
                   </Text>
+                  <Text type="secondary" style={{ display: 'block', fontSize: 12, marginTop: 6 }}>
+                    {t('tabs.emptyRecoveryHint')}
+                  </Text>
                 </div>
               }
               style={{ padding: '80px 0' }}
-            />
+            >
+              <Space wrap>
+                <Button icon={<SaveOutlined />} onClick={handleOpenArchive}>
+                  {t('dashboard.openArchives')}
+                </Button>
+                <Button icon={<SettingOutlined />} onClick={() => setShowSettings(true)}>
+                  {t('header.settings')}
+                </Button>
+              </Space>
+            </Empty>
           ) : (() => {
             const ViewComponent = getViewComponentMap()[viewMode];
             return ViewComponent !== undefined
@@ -629,7 +755,7 @@ function AppContent() {
 
       <Suspense fallback={null}>
         <SearchBox open={showSearch} onOpenChange={setShowSearch} />
-        <ArchivePanel open={showArchive} onOpenChange={setShowArchive} />
+        <ArchivePanel open={showArchive} onOpenChange={handleArchivePanelOpenChange} onSessionsChange={syncArchiveSummary} />
         <SettingsPanel open={showSettings} onOpenChange={setShowSettings} />
       </Suspense>
     </Layout>

@@ -18,6 +18,7 @@ import {
   SelectOutlined,
 } from '@ant-design/icons';
 import { useSelectionStore, useTabsStore } from '@/store';
+import { iconColor } from '@/shared/utils/icon-colors';
 import { archiveSelectedTabs } from '@/services';
 import { useT } from '@/shared/i18n';
 import { feedback } from '@/shared/ui/feedback';
@@ -112,7 +113,7 @@ export function BatchActionBar() {
         <Button
           size="small"
           danger
-          icon={<CloseOutlined style={{ fontSize: 12 }} />}
+          icon={<CloseOutlined style={{ fontSize: 12, color: iconColor('close', token) }} />}
           onClick={() => { void handleBatchClose(); }}
         >
           {t('batch.close')}
@@ -120,7 +121,7 @@ export function BatchActionBar() {
 
         <Button
           size="small"
-          icon={<StopOutlined style={{ fontSize: 12 }} />}
+          icon={<StopOutlined style={{ fontSize: 12, color: iconColor('discard', token) }} />}
           onClick={() => { void handleBatchDiscard(); }}
         >
           {t('batch.discard')}
@@ -138,7 +139,7 @@ export function BatchActionBar() {
         <Button
           size="small"
           type="text"
-          icon={<CloseCircleOutlined style={{ fontSize: 12 }} />}
+          icon={<CloseCircleOutlined style={{ fontSize: 12, color: iconColor('close', token) }} />}
           onClick={exitSelectionMode}
         >
           {t('batch.cancel')}

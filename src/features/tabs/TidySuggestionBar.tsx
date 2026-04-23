@@ -11,7 +11,7 @@
  *   - 一键整理：合并所有重复 + 休眠所有闲置
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Alert, App, Button, Card, List, Space, Tooltip, Tag, theme } from 'antd';
 import {
   DownOutlined,
@@ -24,14 +24,20 @@ import { useTabsStore } from '@/store';
 import { findDuplicates, type DupGroup } from '@/shared/utils/dedupe';
 import { detectIdleTabs, formatIdleTime, type IdleTabInfo } from '@/shared/utils/idle-detect';
 import { useT } from '@/shared/i18n';
+import { iconColor } from '@/shared/utils/icon-colors';
+
+interface TidySuggestionBarProps {
+  /** 外部要求展开建议栏时递增该信号。 */
+  expandSignal?: number;
+}
 
 /**
  * 智能整理建议栏
  */
-export function TidySuggestionBar() {
+export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) {
   const tabs = useTabsStore((s) => s.tabs);
   const closeMultipleTabs = useTabsStore((s) => s.closeMultipleTabs);
-  const discardTab = useTabsStore((s) => s.discardTab);
+  const discardMultipleTabs = useTabsStore((s) => s.discardMultipleTabs);
   const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
   const [expanded, setExpanded] = useState(false);
   const [dismissed, setDismissed] = useState(false);
@@ -49,6 +55,17 @@ export function TidySuggestionBar() {
 
   // 任何建议都没有时不渲染
   const hasSuggestions = dupGroups.length > 0 || idleTabs.length > 0;
+
+  useEffect(() => {
+    if (expandSignal <= 0 || !hasSuggestions) return;
+    const timer = window.setTimeout(() => {
+      setDismissed(false);
+      setExpanded(true);
+    }, 0);
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [expandSignal, hasSuggestions]);
 
   /**
    * 安全执行批量操作：禁用按钮 → 执行 → 静默刷新 → 成功提示
@@ -91,21 +108,17 @@ export function TidySuggestionBar() {
   const handleDiscardIdle = useCallback(async (items: IdleTabInfo[]) => {
     if (busy) return;
     setBusy(true);
-    let ok = 0;
-    for (const item of items) {
-      try {
-        await discardTab(item.tab.id);
-        ok++;
-      } catch {
-        // 个别失败不阻塞
-      }
+    try {
+      const ids = items.map((item) => item.tab.id);
+      await discardMultipleTabs(ids);
+      await loadAllTabs({ silent: true });
+      message.success(t('tidy.discardedIdle', { count: ids.length }));
+    } catch {
+      // store 已 toast
+    } finally {
+      setBusy(false);
     }
-    await loadAllTabs({ silent: true });
-    setBusy(false);
-    if (ok > 0) {
-      message.success(t('tidy.discardedIdle', { count: ok }));
-    }
-  }, [busy, discardTab, loadAllTabs, message, t]);
+  }, [busy, discardMultipleTabs, loadAllTabs, message, t]);
 
   /** 一键整理：合并重复 + 休眠闲置 */
   const handleTidyAll = useCallback(async () => {
@@ -126,12 +139,13 @@ export function TidySuggestionBar() {
     }
 
     // 2. 休眠闲置
-    for (const item of idleTabs) {
+    if (idleTabs.length > 0) {
       try {
-        await discardTab(item.tab.id);
-        discardedCount++;
+        const idleIds = idleTabs.map((item) => item.tab.id);
+        await discardMultipleTabs(idleIds);
+        discardedCount = idleIds.length;
       } catch {
-        // 个别失败继续
+        // store 已 toast
       }
     }
 
@@ -140,7 +154,7 @@ export function TidySuggestionBar() {
     if (mergedCount > 0 || discardedCount > 0) {
       message.success(t('tidy.tidyAllDone', { merged: mergedCount, discarded: discardedCount }));
     }
-  }, [busy, closeMultipleTabs, discardTab, dupGroups, idleTabs, loadAllTabs, message, t]);
+  }, [busy, closeMultipleTabs, discardMultipleTabs, dupGroups, idleTabs, loadAllTabs, message, t]);
 
   // 条件渲染放在所有 hooks 之后
   if (dismissed || !hasSuggestions) return null;
@@ -161,7 +175,7 @@ export function TidySuggestionBar() {
       <Alert
         type="info"
         showIcon
-        icon={<ThunderboltOutlined />}
+        icon={<ThunderboltOutlined style={{ color: iconColor('tidy', token) }} />}
         message={
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ flex: 1, fontSize: 13, fontWeight: 500 }}>
@@ -191,7 +205,7 @@ export function TidySuggestionBar() {
                 <Button
                   type="text"
                   size="small"
-                  icon={<CloseOutlined style={{ fontSize: 12 }} />}
+                  icon={<CloseOutlined style={{ fontSize: 12, color: iconColor('close', token) }} />}
                   onClick={() => setDismissed(true)}
                 />
               </Tooltip>
@@ -212,7 +226,7 @@ export function TidySuggestionBar() {
           {dupGroups.length > 0 && (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                <MergeCellsOutlined style={{ fontSize: 13, color: token.colorWarning }} />
+                <MergeCellsOutlined style={{ fontSize: 13, color: iconColor('duplicates', token) }} />
                 <span style={{ fontSize: 12.5, fontWeight: 600, color: token.colorText }}>
                   {t('tidy.dupSection')}
                 </span>
@@ -272,7 +286,7 @@ export function TidySuggestionBar() {
                 marginTop: dupGroups.length > 0 ? 12 : 0,
                 marginBottom: 6,
               }}>
-                <StopOutlined style={{ fontSize: 13, color: token.colorTextSecondary }} />
+                <StopOutlined style={{ fontSize: 13, color: iconColor('idle', token) }} />
                 <span style={{ fontSize: 12.5, fontWeight: 600, color: token.colorText }}>
                   {t('tidy.idleSection')}
                 </span>

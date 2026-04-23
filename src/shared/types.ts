@@ -75,6 +75,10 @@ export interface StorageMeta {
 }
 
 /** User settings */
+export type SearchScopeField = 'title' | 'hostname' | 'url';
+export type SearchSortMode = 'relevance' | 'recentAccess';
+export type SearchEngineId = 'google' | 'bing' | 'baidu' | 'duckduckgo';
+
 export interface UserSettings {
   overrideNewTab: boolean;
   defaultView: 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'bookmarks';
@@ -171,10 +175,20 @@ export interface UserSettings {
    *   - scope：搜索范围，选择哪些字段参与搜索匹配
    *   - enablePinyin：是否启用拼音搜索（关闭后跳过 pinyin-pro 计算，略省性能）
    *   - sortBy：搜索结果排序方式
+   *   - defaultEngine：默认网页搜索引擎
+   *   - enabledEngines：搜索框中可切换的引擎列表
+   *   - autoFallbackToWeb：本地标签页未命中时是否优先给出全网搜索动作
+   *   - useHistorySuggestions：是否启用浏览器历史建议
+   *   - useHotSuggestions：是否启用热门关键词建议
    */
-  searchScope?: Array<'title' | 'hostname' | 'url'>;
+  searchScope?: SearchScopeField[];
   searchEnablePinyin?: boolean;
-  searchSortBy?: 'relevance' | 'recentAccess';
+  searchSortBy?: SearchSortMode;
+  searchDefaultEngine?: SearchEngineId;
+  searchEnabledEngines?: SearchEngineId[];
+  searchAutoFallbackToWeb?: boolean;
+  searchUseHistorySuggestions?: boolean;
+  searchUseHotSuggestions?: boolean;
   /**
    * 自定义快捷键映射（页面内快捷键）
    *   - key: KeybindingAction（'search' | 'exitSelection' | 'selectAll'）

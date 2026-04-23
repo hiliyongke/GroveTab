@@ -1,20 +1,17 @@
 /**
- * BehaviorPanel — 行为设置 Tab
+ * BehaviorPanel —— 行为设置 Tab。
  *
  * 包含：
- *   - 默认视图选择
- *   - 域名分组列数
- *   - 子项 favicon 显示
- *   - 身份色条位置
- *   - 卡片圆角
- *   - 时间轴粒度
- *   - 时间轴精确时间显示
+ * 1. 默认视图与布局偏好
+ * 2. 时间轴与域名分组行为
+ * 3. 搜索范围、拼音、排序与多搜索引擎设置
  */
 
-import { Select, Segmented, Switch, Space, Checkbox } from 'antd';
-import type { UserSettings } from '@/shared/types';
+import { Select, Segmented, Switch, Checkbox } from 'antd';
+import type { SearchEngineId, SearchScopeField, UserSettings } from '@/shared/types';
 import { useT } from '@/shared/i18n';
 import { VIEW_CONFIGS } from '@/shared/config/views';
+import { SEARCH_ENGINE_OPTIONS } from '@/shared/config/search-engines';
 import { Field } from '../components/Field';
 
 interface BehaviorPanelProps {
@@ -24,22 +21,26 @@ interface BehaviorPanelProps {
 
 export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) {
   const { t } = useT();
+  const enabledEngines = settings.searchEnabledEngines ?? SEARCH_ENGINE_OPTIONS.map((item) => item.id);
+  const defaultSearchEngine = enabledEngines.includes(settings.searchDefaultEngine ?? 'google')
+    ? (settings.searchDefaultEngine ?? 'google')
+    : enabledEngines[0];
 
-  /** 防 ESLint no-misused-promises：updateSettings 异步但 onChange 期望 void */
+  /** 防 ESLint `no-misused-promises`：`updateSettings` 异步但表单回调需要 `void`。 */
   const handleSetting = (patch: Partial<UserSettings>) => {
     void updateSettings(patch);
   };
 
   return (
-    <Space direction="vertical" size={24} style={{ width: '100%' }}>
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 24 }}>
       <Field label={t('settings.defaultView')}>
         <Select
           value={settings.defaultView}
-          onChange={(v) => handleSetting({ defaultView: v })}
+          onChange={(value) => handleSetting({ defaultView: value })}
           style={{ width: '100%' }}
-          options={VIEW_CONFIGS.map((v) => ({
-            value: v.id,
-            label: t(v.labelKey),
+          options={VIEW_CONFIGS.map((view) => ({
+            value: view.id,
+            label: t(view.labelKey),
           }))}
         />
       </Field>
@@ -51,10 +52,9 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
         <Segmented
           block
           value={String(settings.domainGroupColumns ?? 'auto')}
-          onChange={(v) =>
+          onChange={(value) =>
             handleSetting({
-              domainGroupColumns:
-                v === 'auto' ? 'auto' : (Number(v) as 1 | 2 | 3 | 4 | 5 | 6),
+              domainGroupColumns: value === 'auto' ? 'auto' : (Number(value) as 1 | 2 | 3 | 4 | 5 | 6),
             })
           }
           options={[
@@ -73,7 +73,7 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
       >
         <Switch
           checked={settings.domainGroupShowItemFavicon ?? true}
-          onChange={(v) => handleSetting({ domainGroupShowItemFavicon: v })}
+          onChange={(value) => handleSetting({ domainGroupShowItemFavicon: value })}
         />
       </Field>
 
@@ -84,9 +84,9 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
         <Segmented
           block
           value={settings.domainGroupAccentBarPosition ?? 'left'}
-          onChange={(v) =>
+          onChange={(value) =>
             handleSetting({
-              domainGroupAccentBarPosition: v as 'left' | 'top' | 'none',
+              domainGroupAccentBarPosition: value as 'left' | 'top' | 'none',
             })
           }
           options={[
@@ -104,9 +104,9 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
         <Segmented
           block
           value={settings.domainGroupCardRadius ?? 'default'}
-          onChange={(v) =>
+          onChange={(value) =>
             handleSetting({
-              domainGroupCardRadius: v as 'none' | 'small' | 'default' | 'large',
+              domainGroupCardRadius: value as 'none' | 'small' | 'default' | 'large',
             })
           }
           options={[
@@ -125,9 +125,9 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
         <Segmented
           block
           value={settings.domainGroupSortBy ?? 'tabCount'}
-          onChange={(v) =>
+          onChange={(value) =>
             handleSetting({
-              domainGroupSortBy: v as 'tabCount' | 'alphabetical' | 'recentAccess',
+              domainGroupSortBy: value as 'tabCount' | 'alphabetical' | 'recentAccess',
             })
           }
           options={[
@@ -144,14 +144,10 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
       >
         <Segmented
           block
-          value={
-            (settings.timelineGranularity ?? 'day') === 'fine'
-              ? 'hour'
-              : settings.timelineGranularity ?? 'day'
-          }
-          onChange={(v) =>
+          value={(settings.timelineGranularity ?? 'day') === 'fine' ? 'hour' : settings.timelineGranularity ?? 'day'}
+          onChange={(value) =>
             handleSetting({
-              timelineGranularity: v as 'day' | 'hour',
+              timelineGranularity: value as 'day' | 'hour',
             })
           }
           options={[
@@ -167,20 +163,19 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
       >
         <Switch
           checked={settings.timelineShowExactTime ?? false}
-          onChange={(v) => handleSetting({ timelineShowExactTime: v })}
+          onChange={(value) => handleSetting({ timelineShowExactTime: value })}
         />
       </Field>
 
-      {/* ── 搜索配置 ── */}
       <Field
         label={t('settings.searchScope')}
         hint={t('settings.searchScopeHint')}
       >
         <Checkbox.Group
           value={settings.searchScope ?? ['title', 'hostname', 'url']}
-          onChange={(v) => {
-            if (v.length === 0) return; // 至少保留一个字段
-            handleSetting({ searchScope: v as Array<'title' | 'hostname' | 'url'> });
+          onChange={(values) => {
+            if (values.length === 0) return;
+            handleSetting({ searchScope: values as SearchScopeField[] });
           }}
           options={[
             { label: t('settings.searchScopeTitle'), value: 'title' },
@@ -196,7 +191,7 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
       >
         <Switch
           checked={settings.searchEnablePinyin ?? true}
-          onChange={(v) => handleSetting({ searchEnablePinyin: v })}
+          onChange={(value) => handleSetting({ searchEnablePinyin: value })}
         />
       </Field>
 
@@ -207,9 +202,9 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
         <Segmented
           block
           value={settings.searchSortBy ?? 'relevance'}
-          onChange={(v) =>
+          onChange={(value) =>
             handleSetting({
-              searchSortBy: v as 'relevance' | 'recentAccess',
+              searchSortBy: value as 'relevance' | 'recentAccess',
             })
           }
           options={[
@@ -218,6 +213,77 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
           ]}
         />
       </Field>
-    </Space>
+
+      <Field
+        label={t('settings.searchDefaultEngine')}
+        hint={t('settings.searchDefaultEngineHint')}
+      >
+        <Select<SearchEngineId>
+          value={defaultSearchEngine}
+          onChange={(value) => handleSetting({ searchDefaultEngine: value })}
+          style={{ width: '100%' }}
+          options={enabledEngines.map((engineId) => {
+            const option = SEARCH_ENGINE_OPTIONS.find((item) => item.id === engineId);
+            return {
+              value: engineId,
+              label: option?.label ?? engineId,
+            };
+          })}
+        />
+      </Field>
+
+      <Field
+        label={t('settings.searchEnabledEngines')}
+        hint={t('settings.searchEnabledEnginesHint')}
+      >
+        <Checkbox.Group
+          value={enabledEngines}
+          onChange={(values) => {
+            if (values.length === 0) return;
+            const nextEngines = values;
+            handleSetting({
+              searchEnabledEngines: nextEngines,
+              searchDefaultEngine: nextEngines.includes(defaultSearchEngine)
+                ? defaultSearchEngine
+                : nextEngines[0],
+            });
+          }}
+          options={SEARCH_ENGINE_OPTIONS.map((item) => ({
+            label: item.label,
+            value: item.id,
+          }))}
+        />
+      </Field>
+
+      <Field
+        label={t('settings.searchAutoFallbackToWeb')}
+        hint={t('settings.searchAutoFallbackToWebHint')}
+      >
+        <Switch
+          checked={settings.searchAutoFallbackToWeb ?? true}
+          onChange={(value) => handleSetting({ searchAutoFallbackToWeb: value })}
+        />
+      </Field>
+
+      <Field
+        label={t('settings.searchUseHistorySuggestions')}
+        hint={t('settings.searchUseHistorySuggestionsHint')}
+      >
+        <Switch
+          checked={settings.searchUseHistorySuggestions ?? true}
+          onChange={(value) => handleSetting({ searchUseHistorySuggestions: value })}
+        />
+      </Field>
+
+      <Field
+        label={t('settings.searchUseHotSuggestions')}
+        hint={t('settings.searchUseHotSuggestionsHint')}
+      >
+        <Switch
+          checked={settings.searchUseHotSuggestions ?? true}
+          onChange={(value) => handleSetting({ searchUseHotSuggestions: value })}
+        />
+      </Field>
+    </div>
   );
 }

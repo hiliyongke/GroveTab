@@ -265,7 +265,7 @@ export function DataPanel() {
                 fontWeight: 500,
               }}
             >
-              <HddOutlined style={{ color: token.colorTextTertiary }} />
+              <HddOutlined style={{ color: token.colorInfo }} />
               {t('settings.storage')}
             </span>
             <span

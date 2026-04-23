@@ -7,7 +7,7 @@
  */
 
 import { useState } from 'react';
-import { Button, Card, theme } from 'antd';
+import { Button, Card, Space, Tag, theme } from 'antd';
 import { ArrowRightOutlined, ApartmentOutlined, ThunderboltFilled } from '@ant-design/icons';
 import { markOnboardingDone } from '@/repositories';
 import { useT } from '@/shared/i18n';
@@ -126,6 +126,18 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
       >
         {t('onboarding.detail')}
       </p>
+
+      <Space size={8} wrap style={{ justifyContent: 'center' }}>
+        <Tag color="processing" style={{ margin: 0 }}>
+          {t('onboarding.featureSearch')}
+        </Tag>
+        <Tag color="gold" style={{ margin: 0 }}>
+          {t('onboarding.featureArchive')}
+        </Tag>
+        <Tag color="green" style={{ margin: 0 }}>
+          {t('onboarding.featureGroup')}
+        </Tag>
+      </Space>
 
       <Button
         type="primary"
