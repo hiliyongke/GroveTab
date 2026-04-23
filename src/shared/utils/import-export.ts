@@ -24,7 +24,7 @@ export function downloadFile(content: string, filename: string, type = 'applicat
 export function parseImportJSON(text: string): { sessions: ArchivedSession[]; errors: string[] } {
   const errors: string[] = [];
   try {
-    const data = JSON.parse(text);
+    const data = JSON.parse(text) as { sessions?: unknown };
     if (!data.sessions || !Array.isArray(data.sessions)) {
       errors.push('Invalid format: missing sessions array');
       return { sessions: [], errors };

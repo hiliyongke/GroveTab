@@ -91,14 +91,14 @@ export function TabContextMenu({ x, y, url, tabId, onClose }: TabContextMenuProp
   const handleAddTag = () => {
     const v = tagValue.trim();
     if (v) {
-      addTag(url, v);
+      void addTag(url, v);
       setTagValue('');
       setShowTagInput(false);
     }
   };
 
   const handleSaveNote = () => {
-    setNote(url, noteValue);
+    void setNote(url, noteValue);
     setShowNoteInput(false);
   };
 
@@ -131,7 +131,7 @@ export function TabContextMenu({ x, y, url, tabId, onClose }: TabContextMenuProp
           block
           icon={<PushpinOutlined />}
           onClick={() => {
-            togglePin(url);
+            void togglePin(url);
             onClose();
           }}
           style={{ textAlign: 'left', justifyContent: 'flex-start', height: 32 }}
@@ -145,13 +145,15 @@ export function TabContextMenu({ x, y, url, tabId, onClose }: TabContextMenuProp
             type="text"
             block
             icon={<StopOutlined />}
-            onClick={async () => {
-              onClose();
-              try {
-                await discardTab(tabId);
-              } catch {
-                /* store 已 toast */
-              }
+            onClick={() => {
+              void (async () => {
+                onClose();
+                try {
+                  await discardTab(tabId);
+                } catch {
+                  /* store 已 toast */
+                }
+              })();
             }}
             style={{ textAlign: 'left', justifyContent: 'flex-start', height: 32 }}
           >
@@ -165,13 +167,15 @@ export function TabContextMenu({ x, y, url, tabId, onClose }: TabContextMenuProp
             type="text"
             block
             icon={<ColumnWidthOutlined />}
-            onClick={async () => {
-              onClose();
-              try {
-                await splitTabToSide(tabId);
-              } catch {
-                /* splitTabToSide 内部已 safeCall */
-              }
+            onClick={() => {
+              void (async () => {
+                onClose();
+                try {
+                  await splitTabToSide(tabId);
+                } catch {
+                  /* splitTabToSide 内部已 safeCall */
+                }
+              })();
             }}
             style={{ textAlign: 'left', justifyContent: 'flex-start', height: 32 }}
           >
@@ -208,7 +212,7 @@ export function TabContextMenu({ x, y, url, tabId, onClose }: TabContextMenuProp
                 closable
                 onClose={(e) => {
                   e.preventDefault();
-                  removeTag(url, tag);
+                  void removeTag(url, tag);
                 }}
                 style={{
                   margin: 0,

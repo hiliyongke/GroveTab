@@ -25,7 +25,7 @@ const DEFAULT_METRICS: Metrics = {
   lastUsedAt: 0,
 };
 
-export async function getMetrics(): Promise<Metrics> {
+async function getMetrics(): Promise<Metrics> {
   return (await getData<Metrics>(METRICS_KEY)) || { ...DEFAULT_METRICS };
 }
 
@@ -38,7 +38,7 @@ export async function recordMetric(
   if (!metrics.firstUsedAt) metrics.firstUsedAt = now;
   metrics.lastUsedAt = now;
   if (typeof metrics[key] === 'number') {
-    (metrics[key] as number) += increment;
+    (metrics[key]) += increment;
   }
   await setData(METRICS_KEY, metrics);
 }

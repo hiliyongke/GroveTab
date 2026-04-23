@@ -32,7 +32,7 @@ export function DataPanel() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    getQuotaStatus().then(setQuotaInfo);
+    void getQuotaStatus().then(setQuotaInfo);
   }, []);
 
   const handleExport = async () => {
@@ -132,7 +132,7 @@ export function DataPanel() {
       )}
 
       <Space direction="vertical" size={8} style={{ width: '100%' }}>
-        <Button block icon={<DownloadOutlined />} onClick={handleExport}>
+        <Button block icon={<DownloadOutlined />} onClick={() => { void handleExport(); }}>
           {t('settings.export')}
         </Button>
         <Button block icon={<UploadOutlined />} onClick={() => fileInputRef.current?.click()}>
@@ -143,7 +143,7 @@ export function DataPanel() {
           type="file"
           accept=".json"
           style={{ display: 'none' }}
-          onChange={handleImport}
+          onChange={(e) => { void handleImport(e); }}
         />
         {importStatus && (
           <div style={{ fontSize: 11.5, color: token.colorTextTertiary, padding: '0 4px' }}>

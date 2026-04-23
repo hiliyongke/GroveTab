@@ -5,7 +5,7 @@
 import { pinyin } from 'pinyin-pro';
 
 /** Extract pinyin initials from a string (e.g. "标签" → "bq") */
-export function getPinyinInitials(text: string): string {
+function getPinyinInitials(text: string): string {
   try {
     return pinyin(text, { pattern: 'first', toneType: 'none' }).replace(/\s/g, '');
   } catch {

@@ -42,7 +42,7 @@ function toTreeData(nodes: BookmarkNode[]): Array<Record<string, unknown>> {
     .filter((node) => node.children || node.url)
     .map((node) => ({
       key: node.id,
-      title: node.title || (node.url ? (() => { try { return new URL(node.url!).hostname; } catch { return node.url; } })() : '未命名'),
+      title: node.title || (node.url ? (() => { try { return new URL(node.url).hostname; } catch { return node.url; } })() : '未命名'),
       icon: node.url ? <BookOutlined style={{ fontSize: 12 }} /> : undefined,
       children: node.children ? toTreeData(node.children) : undefined,
       isLeaf: !!node.url,
@@ -65,11 +65,11 @@ export function BookmarkView() {
 
   /** 检查权限 */
   useEffect(() => {
-    hasBookmarksPermission().then((has) => {
+    void hasBookmarksPermission().then((has) => {
       setHasPermission(has);
       setChecking(false);
       if (has) {
-        getBookmarkTree().then(setBookmarks);
+        void getBookmarkTree().then(setBookmarks);
       }
     });
   }, []);
@@ -133,7 +133,7 @@ export function BookmarkView() {
         <div style={{ fontSize: 14, color: token.colorTextSecondary, marginBottom: 16 }}>
           {t('bookmark.needPermission')}
         </div>
-        <Button type="primary" icon={<BookOutlined />} onClick={handleRequestPermission}>
+        <Button type="primary" icon={<BookOutlined />} onClick={() => { void handleRequestPermission(); }}>
           {t('bookmark.grantPermission')}
         </Button>
       </div>
@@ -148,11 +148,11 @@ export function BookmarkView() {
           prefix={<SearchOutlined />}
           placeholder={t('bookmark.searchPlaceholder')}
           value={searchQuery}
-          onChange={(e) => handleSearch(e.target.value)}
+          onChange={(e) => { void handleSearch(e.target.value); }}
           allowClear
           style={{ flex: 1 }}
         />
-        <Button icon={<PlusOutlined />} onClick={handleBookmarkAll}>
+        <Button icon={<PlusOutlined />} onClick={() => { void handleBookmarkAll(); }}>
           {t('bookmark.bookmarkAll')}
         </Button>
       </div>

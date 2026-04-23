@@ -21,6 +21,7 @@ import { queryAllTabs, getAllWindows, activateTab, closeTab, closeTabs, getFavic
 import { extractHostname, shouldDisplayUrl, isSelfNewTabPage } from '@/chrome';
 import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
+import { swBroadcast } from '@/shared/utils/sw-broadcast';
 import { useUndoStore } from './undo-slice';
 
 interface TabsState {
@@ -193,7 +194,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     switch (message.type) {
       case 'tab-created': {
         // broadcast 驱动的刷新必须静默：否则每次新开 tab，主视图就闪一次全屏 Spin
-        get().loadAllTabs({ silent: true });
+        void get().loadAllTabs({ silent: true });
         break;
       }
       case 'tab-updated': {
@@ -232,7 +233,12 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       }
       case 'tab-moved': {
         // 同 tab-created：静默刷新，避免主视图闪 Spin
-        get().loadAllTabs({ silent: true });
+        void get().loadAllTabs({ silent: true });
+        break;
+      }
+      case 'tab-discarded': {
+        // discarded 状态变化（休眠/恢复）需要全量刷新才能正确更新所有 tab 的 discarded 标记
+        void get().loadAllTabs({ silent: true });
         break;
       }
       case 'window-focus-changed': {
@@ -387,6 +393,8 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     try {
       await chromeDiscardTab(tabId);
       feedback.success(translate('tabs.discarded'));
+      // 立即广播，确保其他 Canopy 窗口同步更新（不等 SW alarm 轮询）
+      swBroadcast('tab-discarded', { id: tabId, discarded: true });
       void get().loadAllTabs({ silent: true });
     } catch (err) {
       feedback.error(translate('tabs.discardFailed'), err);
@@ -403,6 +411,10 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     try {
       await chromeDiscardTabs(groupTabs.map((t) => t.id));
       feedback.success(translate('tabs.discardedGroup', { domain, count: groupTabs.length }));
+      // 广播休眠事件，其他 Canopy 窗口同步更新
+      for (const t of groupTabs) {
+        swBroadcast('tab-discarded', { id: t.id, discarded: true, windowId: t.windowId });
+      }
       void get().loadAllTabs({ silent: true });
     } catch (err) {
       feedback.error(translate('tabs.discardFailed'), err);

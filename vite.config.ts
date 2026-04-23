@@ -6,24 +6,34 @@ import { writeFileSync, mkdirSync, readFileSync, readdirSync } from 'node:fs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+interface Manifest {
+  background?: { service_worker?: string };
+  chrome_url_overrides?: { newtab?: string };
+  action: { default_popup?: string; default_icon?: Record<string, string> };
+  icons: Record<string, string>;
+  [key: string]: unknown;
+}
+
 function chromeExtensionPlugin() {
   return {
     name: 'chrome-extension',
     writeBundle() {
       const manifest = JSON.parse(
         readFileSync(resolve(__dirname, 'manifest.json'), 'utf-8'),
-      );
+      ) as Manifest;
 
       // 修正路径为构建产物路径
-      manifest.background.service_worker = 'sw.js';
-      manifest.chrome_url_overrides.newtab = 'src/pages/newtab/index.html';
+      manifest.background!.service_worker = 'sw.js';
+      manifest.chrome_url_overrides!.newtab = 'src/pages/newtab/index.html';
       manifest.action.default_popup = 'src/pages/popup/index.html';
 
       // 修正图标路径
       const iconKeys = ['16', '48', '128'];
       for (const key of iconKeys) {
         manifest.icons[key] = manifest.icons[key].replace('public/', '');
-        manifest.action.default_icon[key] = manifest.action.default_icon[key].replace('public/', '');
+        if (manifest.action?.default_icon?.[key]) {
+          manifest.action.default_icon[key] = manifest.action.default_icon[key].replace('public/', '');
+        }
       }
 
       writeFileSync(
@@ -78,7 +88,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
-    minify: false,
+    minify: 'esbuild',
     rollupOptions: {
       input: {
         newtab: resolve(__dirname, 'src/pages/newtab/main.tsx'),

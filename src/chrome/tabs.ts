@@ -74,22 +74,6 @@ export async function queryAllTabs(): Promise<chrome.tabs.Tab[]> {
   return safeCall('tabs.query', () => chrome.tabs.query({}));
 }
 
-export async function queryCurrentWindowTabs(): Promise<chrome.tabs.Tab[]> {
-  return safeCall('tabs.query(currentWindow)', () => chrome.tabs.query({ currentWindow: true }));
-}
-
-/**
- * 获取单个 tab —— 查询类接口允许「不存在」失败回落 undefined，
- * 因为很多调用方是「顺手探测」场景，失败不应打断主流程。
- */
-export async function getTab(tabId: number): Promise<chrome.tabs.Tab | undefined> {
-  try {
-    return await safeCall('tabs.get', () => chrome.tabs.get(tabId));
-  } catch {
-    return undefined;
-  }
-}
-
 /**
  * 激活（跳转）一个 tab + 聚焦其所在窗口
  *
@@ -168,39 +152,6 @@ export async function getAllWindows(): Promise<chrome.windows.Window[]> {
   return safeCall('windows.getAll', () => chrome.windows.getAll({ populate: false }));
 }
 
-export async function getWindow(windowId: number): Promise<chrome.windows.Window | undefined> {
-  try {
-    return await safeCall('windows.get', () => chrome.windows.get(windowId));
-  } catch {
-    return undefined;
-  }
-}
-
-export async function createWindowWithTabs(urls: string[]): Promise<chrome.windows.Window> {
-  const win = await safeCall('windows.create', () => chrome.windows.create({ url: urls }));
-  if (!win) throw new Error('[Canopy/chrome] windows.create: returned empty window');
-  return win;
-}
-
-// ── Sessions ──────────────────────────────────────────
-
-export async function getRecentlyClosed(): Promise<chrome.sessions.Session[]> {
-  return safeCall('sessions.getRecentlyClosed', () => chrome.sessions.getRecentlyClosed());
-}
-
-/**
- * 恢复会话 —— 失败回落 undefined（失败信号由上层自行决定是否展示）。
- * 这里不抛出的原因：sessions.restore 常见失败是「会话已过期」，
- * 语义上属于「正常的空结果」而非错误。
- */
-export async function restoreSession(sessionId?: string): Promise<chrome.sessions.Session | undefined> {
-  try {
-    return await safeCall('sessions.restore', () => chrome.sessions.restore(sessionId));
-  } catch {
-    return undefined;
-  }
-}
-
 // ── Storage ───────────────────────────────────────────
 
 export async function storageGet<T>(key: string): Promise<T | undefined> {
@@ -275,34 +226,6 @@ export async function queryTabGroups(windowId?: number): Promise<ChromeTabGroup[
   }
 }
 
-/**
- * 更新 Tab Group 的标题和颜色
- */
-export async function updateTabGroup(
-  groupId: number,
-  updateProperties: { title?: string; color?: 'grey' | 'blue' | 'red' | 'yellow' | 'green' | 'pink' | 'purple' | 'cyan' | 'orange'; collapsed?: boolean },
-): Promise<void> {
-  await safeCall('tabGroups.update', () =>
-    chrome.tabGroups.update(groupId, updateProperties),
-  );
-}
-
-/**
- * 将指定标签页加入某个 Chrome 原生 Tab Group
- */
-export async function groupTabs(tabIds: [number, ...number[]], groupId?: number): Promise<number> {
-  return safeCall('tabs.group', () =>
-    chrome.tabs.group({ tabIds, groupId }),
-  );
-}
-
-/**
- * 将指定标签页从 Tab Group 中移出
- */
-export async function ungroupTabs(tabIds: [number, ...number[]]): Promise<void> {
-  await safeCall('tabs.ungroup', () => chrome.tabs.ungroup(tabIds));
-}
-
 // ── Split Screen ──────────────────────────────────────
 
 /**
@@ -360,16 +283,6 @@ export async function splitTabToSide(tabId: number): Promise<number> {
 }
 
 // ── Tab Move ──────────────────────────────────────────
-
-/**
- * 移动标签页到指定窗口的指定位置
- *
- * 用于跨窗口移动标签（拖拽、合并窗口等场景）。
- * `index` 设为 -1 表示追加到窗口末尾。
- */
-export async function moveTab(tabId: number, windowId: number, index: number = -1): Promise<chrome.tabs.Tab> {
-  return safeCall('tabs.move', () => chrome.tabs.move(tabId, { windowId, index }));
-}
 
 /**
  * 批量移动标签页到指定窗口

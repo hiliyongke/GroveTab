@@ -313,7 +313,7 @@ export function getAccentFromFavicon(url: string): Promise<Accent | null> {
   });
 
   pending.set(url, task);
-  task.finally(() => pending.delete(url));
+  void task.finally(() => pending.delete(url));
   return task;
 }
 

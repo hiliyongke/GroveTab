@@ -120,7 +120,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
 
   const handleJump = useCallback(
     (tab: LiveTab) => {
-      jumpToTab(tab.id, tab.windowId);
+      void jumpToTab(tab.id, tab.windowId);
       close();
     },
     [jumpToTab, close]

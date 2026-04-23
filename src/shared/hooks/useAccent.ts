@@ -70,7 +70,7 @@ export function useAccent(favicon: string | undefined, colorKey: string): Accent
     // 已有缓存（成功或已知失败）无需再异步
     if (!favicon || peekFaviconAccent(favicon) !== undefined) return;
     let alive = true;
-    getAccentFromFavicon(favicon).then((result) => {
+    void getAccentFromFavicon(favicon).then((result) => {
       if (!alive) return;
       setState({
         key: composeKey(favicon, colorKey),

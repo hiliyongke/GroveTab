@@ -130,7 +130,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
       <Button
         type="primary"
         size="large"
-        onClick={handleDismiss}
+        onClick={() => { void handleDismiss(); }}
         icon={<ArrowRightOutlined />}
         iconPosition="end"
         style={{ marginTop: 4 }}

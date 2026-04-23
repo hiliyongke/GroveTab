@@ -45,7 +45,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 
   const setLocale = useCallback(
     (newLocale: Locale) => {
-      updateSettings({ language: newLocale });
+      void updateSettings({ language: newLocale });
     },
     [updateSettings],
   );

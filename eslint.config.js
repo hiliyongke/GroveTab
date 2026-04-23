@@ -5,13 +5,20 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 
 export default tseslint.config(
-  { ignores: ['dist', '.planning', 'node_modules'] },
+  { ignores: ['dist', '.planning', 'node_modules', '*.d.ts', 'tests'] },
   {
-    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+    extends: [
+      js.configs.recommended,
+      ...tseslint.configs.recommendedTypeChecked,
+    ],
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
       globals: {
         ...globals.browser,
         ...globals.webextensions,
@@ -25,6 +32,9 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/strict-boolean-expressions': ['warn', { allowNullableBoolean: true, allowNullableObject: false }],
+      '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/prefer-nullish-coalescing': 'warn',
     },
   },
 );

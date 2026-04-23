@@ -25,21 +25,7 @@ export interface BookmarkNode {
 export async function getBookmarkTree(): Promise<BookmarkNode[]> {
   try {
     const tree = await safeCall('bookmarks.getTree', () => chrome.bookmarks.getTree());
-    return tree as unknown as BookmarkNode[];
-  } catch {
-    return [];
-  }
-}
-
-/**
- * 获取最近添加的书签
- */
-export async function getRecentBookmarks(maxResults: number = 50): Promise<BookmarkNode[]> {
-  try {
-    const bookmarks = await safeCall('bookmarks.getRecent', () =>
-      chrome.bookmarks.getRecent(maxResults),
-    );
-    return bookmarks as unknown as BookmarkNode[];
+    return tree;
   } catch {
     return [];
   }
@@ -54,7 +40,7 @@ export async function searchBookmarks(query: string): Promise<BookmarkNode[]> {
     const results = await safeCall('bookmarks.search', () =>
       chrome.bookmarks.search(query),
     );
-    return results as unknown as BookmarkNode[];
+    return results;
   } catch {
     return [];
   }
@@ -68,7 +54,7 @@ export async function createBookmark(bookmark: { parentId?: string; title?: stri
     const result = await safeCall('bookmarks.create', () =>
       chrome.bookmarks.create(bookmark),
     );
-    return result as unknown as BookmarkNode;
+    return result;
   } catch {
     return null;
   }

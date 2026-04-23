@@ -67,7 +67,7 @@ export function GridView() {
 
   /** 弹窗内点击「跳转」：跳完顺手关闭弹窗 */
   const handleJumpFromModal = (tabId: number, windowId: number) => {
-    jumpToTab(tabId, windowId);
+    void jumpToTab(tabId, windowId);
     setActiveDomain(null);
   };
 
@@ -86,7 +86,7 @@ export function GridView() {
             domain={group.domain}
             colorKey={group.colorKey}
             tabs={group.tabs}
-            onJump={jumpToTab}
+            onJump={(id, wid) => { void jumpToTab(id, wid); }}
             onOpenList={() => setActiveDomain(group.domain)}
             countLabel={t('header.tabCount', { count: group.tabs.length })}
             accentOverride={accentMap[group.colorKey]}
@@ -98,7 +98,7 @@ export function GridView() {
         group={activeGroup}
         onClose={() => setActiveDomain(null)}
         onJump={handleJumpFromModal}
-        onCloseTab={closeSingleTab}
+        onCloseTab={(id) => { void closeSingleTab(id); }}
       />
     </>
   );

@@ -14,31 +14,32 @@
 import { Select, Segmented, Switch, Space } from 'antd';
 import type { UserSettings } from '@/shared/types';
 import { useT } from '@/shared/i18n';
-import { VIEW_CONFIGS, type ViewMode } from '@/shared/config/views';
+import { VIEW_CONFIGS } from '@/shared/config/views';
 import { Field } from '../components/Field';
 
 interface BehaviorPanelProps {
   settings: UserSettings;
-  updateSettings: (patch: Partial<UserSettings>) => void;
+  updateSettings: (patch: Partial<UserSettings>) => void | Promise<void>;
 }
 
 export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) {
   const { t } = useT();
+
+  /** 防 ESLint no-misused-promises：updateSettings 异步但 onChange 期望 void */
+  const handleSetting = (patch: Partial<UserSettings>) => {
+    void updateSettings(patch);
+  };
 
   return (
     <Space direction="vertical" size={24} style={{ width: '100%' }}>
       <Field label={t('settings.defaultView')}>
         <Select
           value={settings.defaultView}
-          onChange={(v) =>
-            updateSettings({
-              defaultView: v as ViewMode,
-            })
-          }
+          onChange={(v) => handleSetting({ defaultView: v })}
           style={{ width: '100%' }}
           options={VIEW_CONFIGS.map((v) => ({
             value: v.id,
-            label: t(v.labelKey as Parameters<typeof t>[0]),
+            label: t(v.labelKey),
           }))}
         />
       </Field>
@@ -51,7 +52,7 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
           block
           value={String(settings.domainGroupColumns ?? 'auto')}
           onChange={(v) =>
-            updateSettings({
+            handleSetting({
               domainGroupColumns:
                 v === 'auto' ? 'auto' : (Number(v) as 1 | 2 | 3 | 4 | 5 | 6),
             })
@@ -72,7 +73,7 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
       >
         <Switch
           checked={settings.domainGroupShowItemFavicon ?? true}
-          onChange={(v) => updateSettings({ domainGroupShowItemFavicon: v })}
+          onChange={(v) => handleSetting({ domainGroupShowItemFavicon: v })}
         />
       </Field>
 
@@ -84,7 +85,7 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
           block
           value={settings.domainGroupAccentBarPosition ?? 'left'}
           onChange={(v) =>
-            updateSettings({
+            handleSetting({
               domainGroupAccentBarPosition: v as 'left' | 'top' | 'none',
             })
           }
@@ -104,7 +105,7 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
           block
           value={settings.domainGroupCardRadius ?? 'default'}
           onChange={(v) =>
-            updateSettings({
+            handleSetting({
               domainGroupCardRadius: v as 'none' | 'small' | 'default' | 'large',
             })
           }
@@ -129,7 +130,7 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
               : settings.timelineGranularity ?? 'day'
           }
           onChange={(v) =>
-            updateSettings({
+            handleSetting({
               timelineGranularity: v as 'day' | 'hour',
             })
           }
@@ -146,7 +147,7 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
       >
         <Switch
           checked={settings.timelineShowExactTime ?? false}
-          onChange={(v) => updateSettings({ timelineShowExactTime: v })}
+          onChange={(v) => handleSetting({ timelineShowExactTime: v })}
         />
       </Field>
     </Space>

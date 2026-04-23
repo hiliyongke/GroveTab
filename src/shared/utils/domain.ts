@@ -25,7 +25,7 @@ export interface DomainInfo {
 /**
  * 解析 URL，拿到 hostname / 注册域 / 子域三元组
  */
-export function getDomainInfo(url: string): DomainInfo {
+function getDomainInfo(url: string): DomainInfo {
   try {
     const parsed = parse(url);
     const hostname = parsed.hostname ?? '';
@@ -42,24 +42,6 @@ export function getDomainInfo(url: string): DomainInfo {
       subdomain: null,
     };
   }
-}
-
-/**
- * 取分组显示用的域（优先 hostname，空则兜底 "other"）
- */
-export function getGroupDomain(url: string): string {
-  const info = getDomainInfo(url);
-  return info.hostname || info.registeredDomain || 'other';
-}
-
-/**
- * 取颜色用的稳定键（注册域；失败则退回 hostname）
- *
- * 对外兼容名保留为 getRegisteredDomain，避免影响其他引用。
- */
-export function getRegisteredDomain(url: string): string {
-  const info = getDomainInfo(url);
-  return info.registeredDomain || info.hostname || 'other';
 }
 
 /**

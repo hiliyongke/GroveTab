@@ -369,7 +369,7 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
           loading={closing}
           disabled={closing}
           icon={closing ? undefined : <CloseOutlined style={{ fontSize: 12 }} />}
-          onClick={handleCloseAll}
+          onClick={(e: React.MouseEvent) => { void handleCloseAll(e); }}
           style={{
             position: 'absolute',
             top: 8,
@@ -404,8 +404,8 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
               >
                 <TabItem
                   tab={tab}
-                  onJump={jumpToTab}
-                  onClose={closeSingleTab}
+                  onJump={(id, wid) => { void jumpToTab(id, wid); }}
+                  onClose={(id) => { void closeSingleTab(id); }}
                   hideFavicon={!showItemFavicon}
                   showUrlHint={ambiguousIds.has(tab.id)}
                   selectable

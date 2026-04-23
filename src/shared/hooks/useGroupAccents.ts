@@ -149,7 +149,7 @@ export function useGroupAccents(inputs: GroupAccentInput[]): Record<string, Acce
 
     // 去重
     const unique = Array.from(new Set(pendingUrls));
-    Promise.all(unique.map((u) => getAccentFromFavicon(u))).then(() => {
+    void Promise.all(unique.map((u) => getAccentFromFavicon(u))).then(() => {
       if (alive) setTick((t) => t + 1);
     });
 

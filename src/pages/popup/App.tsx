@@ -22,14 +22,14 @@ function App() {
 
   useEffect(() => {
     if (typeof chrome !== 'undefined' && chrome.tabs) {
-      chrome.tabs.query({}).then((tabs) => setTabCount(tabs.length));
-      chrome.tabs.query({ currentWindow: true }).then((tabs) => setCurrentTabs(tabs.length));
+      void chrome.tabs.query({}).then((tabs) => setTabCount(tabs.length));
+      void chrome.tabs.query({ currentWindow: true }).then((tabs) => setCurrentTabs(tabs.length));
     }
   }, []);
 
   /** 打开 Canopy 新标签页 */
   const openNewTab = () => {
-    chrome.tabs?.create({ url: chrome.runtime.getURL('src/pages/newtab/index.html') });
+    void chrome.tabs?.create({ url: chrome.runtime.getURL('src/pages/newtab/index.html') });
     window.close();
   };
 
@@ -80,7 +80,7 @@ function App() {
         <Button type="primary" icon={<AppstoreOutlined />} block onClick={openNewTab}>
           打开标签管理
         </Button>
-        <Button icon={<SaveOutlined />} block onClick={archiveAll} disabled={currentTabs === 0}>
+        <Button icon={<SaveOutlined />} block onClick={() => { void archiveAll(); }} disabled={currentTabs === 0}>
           归档当前窗口
         </Button>
       </Space>

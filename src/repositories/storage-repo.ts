@@ -5,7 +5,7 @@
  * to avoid reading all data on every access.
  */
 
-import { storageGet, storageSet, storageRemove, storageGetBytesInUse } from '@/chrome';
+import { storageGet, storageSet } from '@/chrome';
 import type { StorageKey, StorageMeta, UserSettings } from '@/shared/types';
 
 const CURRENT_SCHEMA_VERSION = 1;
@@ -31,11 +31,6 @@ export async function getData<T>(key: StorageKey): Promise<T | undefined> {
 
 export async function setData<T>(key: StorageKey, value: T): Promise<void> {
   await storageSet(key, value);
-  await updateMetaTimestamp();
-}
-
-export async function removeData(key: StorageKey): Promise<void> {
-  await storageRemove(key);
   await updateMetaTimestamp();
 }
 
@@ -87,21 +82,6 @@ async function updateMetaTimestamp(): Promise<void> {
   }
 }
 
-// ── Capacity ──────────────────────────────────────────
-
-const WARN_THRESHOLD = 8 * 1024 * 1024; // 8 MiB
-const MAX_QUOTA = 10 * 1024 * 1024; // 10 MiB (chrome.storage.local limit)
-
-export async function getStorageUsage(): Promise<{ used: number; quota: number; percent: number; warn: boolean }> {
-  const used = await storageGetBytesInUse();
-  return {
-    used,
-    quota: MAX_QUOTA,
-    percent: Math.round((used / MAX_QUOTA) * 100),
-    warn: used > WARN_THRESHOLD,
-  };
-}
-
 // ── Onboarding ────────────────────────────────────────
 
 const ONBOARDING_KEY = 'canopy_onboarding_done' as StorageKey;
@@ -116,4 +96,4 @@ export async function markOnboardingDone(): Promise<void> {
 }
 
 // Initialize meta on module load
-ensureMeta();
+void ensureMeta();

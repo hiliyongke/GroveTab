@@ -228,7 +228,7 @@ export function SessionItem({
                     height={14}
                     style={{ flexShrink: 0, borderRadius: 2 }}
                     onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.visibility = 'hidden';
+                      (e.currentTarget).style.visibility = 'hidden';
                     }}
                   />
                 ) : (

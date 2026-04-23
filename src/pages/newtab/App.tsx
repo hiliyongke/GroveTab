@@ -55,7 +55,7 @@ import { OnboardingCard, ArchivePanel } from '@/features/sessions';
 import { SettingsPanel } from '@/features/settings';
 import { hasCompletedOnboarding } from '@/repositories';
 import { recordMetric } from '@/shared/utils/metrics';
-import { resolveGradient, type GradientPresetId } from '@/shared/theme/gradient-presets';
+import { resolveGradient } from '@/shared/theme/gradient-presets';
 import { VIEW_CONFIGS, VALID_VIEWS, type ViewMode } from '@/shared/config/views';
 
 const { Header, Content } = Layout;
@@ -93,7 +93,7 @@ function AppHeader({
   /** 循环切换 light → dark → system */
   const toggleTheme = useCallback(() => {
     const next = theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light';
-    updateSettings({ theme: next });
+    void updateSettings({ theme: next });
   }, [theme, updateSettings]);
 
   /**
@@ -255,7 +255,7 @@ function AppHeader({
             <span style={{ fontSize: 12, marginInlineStart: 4 }}>{t('header.archive')}</span>
           </Button>
         </Tooltip>
-        <Tooltip title={t(`theme.${theme}` as 'theme.light' | 'theme.dark' | 'theme.system')}>
+        <Tooltip title={t(`theme.${theme}`)}>
           <Button
             type="text"
             // key 跟随 theme 变化 → Button 内部 icon 节点被 React 替换，
@@ -339,7 +339,7 @@ function HeroBar({
         options={VIEW_CONFIGS.map((v) => ({
           value: v.id,
           icon: <v.Icon />,
-          label: t(v.labelKey as Parameters<typeof t>[0]),
+          label: t(v.labelKey),
         }))}
       />
     </section>
@@ -366,15 +366,15 @@ function AppContent() {
    * 不需要刷新。切视图时通过 updateSettings 写回 store，两个入口自动同步。
    */
   const defaultView = useSettingsStore((s) => s.settings.defaultView);
-  const viewMode: ViewMode = VALID_VIEWS.includes(defaultView as ViewMode)
-    ? (defaultView as ViewMode)
+  const viewMode: ViewMode = VALID_VIEWS.includes(defaultView)
+    ? (defaultView)
     : 'domain';
 
   /** 背景预设 → CSS gradient，统一走 resolveGradient 消灭硬编码 */
   const gradientPreset = useSettingsStore((s) => s.settings.gradientPreset);
   const customGradient = useSettingsStore((s) => s.settings.customGradient);
   const resolvedDark = useResolvedTheme() === 'dark';
-  const layoutBackground = resolveGradient(gradientPreset as GradientPresetId, resolvedDark, customGradient);
+  const layoutBackground = resolveGradient(gradientPreset, resolvedDark, customGradient);
   const { t } = useT();
 
   useSwBroadcast();
@@ -406,9 +406,9 @@ function AppContent() {
       const done = await hasCompletedOnboarding();
       setShowOnboarding(!done);
       setChecked(true);
-      recordMetric('newtabOpens');
+      void recordMetric('newtabOpens');
     };
-    init();
+    void init();
   }, [loadAllTabs, loadSettings, loadUndoRecords, loadMetadata]);
 
   /** Cmd/Ctrl+K 或 "/" 打开搜索 */
@@ -481,7 +481,7 @@ function AppContent() {
 
   const handleViewChange = useCallback((view: ViewMode) => {
     // 切换视图仅写 settings；viewMode 从 settings 派生，会自动更新
-    useSettingsStore.getState().updateSettings({ defaultView: view });
+    void useSettingsStore.getState().updateSettings({ defaultView: view });
   }, []);
 
   const tabCount = tabs.length;

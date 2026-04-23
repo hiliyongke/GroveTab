@@ -18,7 +18,7 @@ import { Field } from '../components/Field';
 
 interface AppearancePanelProps {
   settings: UserSettings;
-  updateSettings: (patch: Partial<UserSettings>) => void;
+  updateSettings: (patch: Partial<UserSettings>) => void | Promise<void>;
 }
 
 export function AppearancePanel({ settings, updateSettings }: AppearancePanelProps) {
@@ -39,7 +39,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
   const updateCustomGradient = useCallback(
     (patch: Partial<UserSettings['customGradient']>) => {
       const merged = { ...customGradient, ...patch };
-      updateSettings({
+      void updateSettings({
         gradientPreset: 'custom',
         customGradient: merged,
       });
@@ -52,7 +52,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
       <Field label={t('settings.language')}>
         <Select
           value={settings.language}
-          onChange={(v) => updateSettings({ language: v as 'zh-CN' | 'en' })}
+          onChange={(v) => { void updateSettings({ language: v }); }}
           style={{ width: '100%' }}
           options={[
             { value: 'zh-CN', label: '中文' },
@@ -84,7 +84,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                 key={preset.id}
                 type="button"
                 onClick={() => {
-                  updateSettings({ gradientPreset: preset.id });
+                  void updateSettings({ gradientPreset: preset.id });
                   if (preset.id === 'custom') setShowGradientEditor(true);
                 }}
                 style={{

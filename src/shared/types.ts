@@ -44,6 +44,7 @@ export type SwBroadcastType =
   | 'tab-removed'
   | 'tab-activated'
   | 'tab-moved'
+  | 'tab-discarded'
   | 'window-focus-changed';
 
 export interface SwBroadcastMessage {

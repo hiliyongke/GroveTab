@@ -56,7 +56,7 @@ async function refreshSessions() {
 }
 
 // 模块加载时初始化
-refreshSessions();
+void refreshSessions();
 
 interface ArchivePanelProps {
   open: boolean;
@@ -79,7 +79,7 @@ export function ArchivePanel({ open, onOpenChange }: ArchivePanelProps) {
   const handleAfterOpenChange = useCallback(
     (visible: boolean) => {
       if (visible) {
-        refreshSessions();
+        void refreshSessions();
       } else {
         setExpandedId(null);
       }
@@ -184,7 +184,7 @@ export function ArchivePanel({ open, onOpenChange }: ArchivePanelProps) {
             icon={<PlusOutlined />}
             loading={archivingCurrent}
             disabled={tabCount === 0}
-            onClick={handleArchiveCurrent}
+            onClick={() => { void handleArchiveCurrent(); }}
             title={t('header.tabCount', { count: tabCount })}
           >
             {t('header.archive')}
@@ -247,13 +247,13 @@ export function ArchivePanel({ open, onOpenChange }: ArchivePanelProps) {
                 onToggleExpand={() =>
                   setExpandedId((prev) => (prev === session.id ? null : session.id))
                 }
-                onRestore={handleRestore}
-                onDelete={handleDelete}
+                onRestore={(id) => { void handleRestore(id); }}
+                onDelete={(id) => { void handleDelete(id); }}
                 onStartRenaming={startRenaming}
-                onRenameConfirm={handleRenameConfirm}
+                onRenameConfirm={(id) => { void handleRenameConfirm(id); }}
                 onRenameChange={setRenamingValue}
                 onRenameCancel={() => setRenamingId(null)}
-                onOpenSingle={handleOpenSingle}
+                onOpenSingle={(tab) => { void handleOpenSingle(tab); }}
               />
             )}
           />

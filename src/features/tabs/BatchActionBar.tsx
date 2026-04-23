@@ -141,7 +141,7 @@ export function BatchActionBar() {
           size="small"
           danger
           icon={<CloseOutlined style={{ fontSize: 12 }} />}
-          onClick={handleBatchClose}
+          onClick={() => { void handleBatchClose(); }}
         >
           {t('batch.close')}
         </Button>
@@ -149,7 +149,7 @@ export function BatchActionBar() {
         <Button
           size="small"
           icon={<StopOutlined style={{ fontSize: 12 }} />}
-          onClick={handleBatchDiscard}
+          onClick={() => { void handleBatchDiscard(); }}
         >
           {t('batch.discard')}
         </Button>
@@ -158,7 +158,7 @@ export function BatchActionBar() {
           size="small"
           type="primary"
           icon={<SaveOutlined style={{ fontSize: 12 }} />}
-          onClick={handleBatchArchive}
+          onClick={() => { void handleBatchArchive(); }}
         >
           {t('batch.archive')}
         </Button>

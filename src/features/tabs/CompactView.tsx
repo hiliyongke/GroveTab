@@ -72,8 +72,8 @@ export function CompactView() {
               tab={tab}
               top={virtualRow.start}
               height={virtualRow.size}
-              onJump={jumpToTab}
-              onClose={closeSingleTab}
+              onJump={(id, wid) => { void jumpToTab(id, wid); }}
+              onClose={(id) => { void closeSingleTab(id); }}
               closeLabel={t('tabs.close')}
               otherWindowLabel={t('tabs.otherWindow')}
             />

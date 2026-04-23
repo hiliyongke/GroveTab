@@ -119,8 +119,8 @@ export function TabGroupView() {
               <TabItem
                 key={tab.id}
                 tab={tab}
-                onJump={jumpToTab}
-                onClose={closeSingleTab}
+                onJump={(id, wid) => { void jumpToTab(id, wid); }}
+                onClose={(id) => { void closeSingleTab(id); }}
                 showHostname
                 selectable
                 visibleTabIds={allTabIds}

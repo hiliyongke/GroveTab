@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "src/pages/newtab/main.tsx",
+    "src/pages/popup/main.tsx",
+    "src/sw/index.ts",
+    "tests/**/*.{test,spec}.{ts,tsx}"
+  ],
+  "project": ["src/**/*.{ts,tsx}"],
+  "ignore": ["src/pages/newtab/dev-mock.js", "src/pages/newtab/theme-init.js"]
+}

@@ -29,7 +29,7 @@ export function UndoToast() {
   const label =
     tabCount === 1 ? t('undo.closeOne') : t('undo.close', { count: tabCount });
 
-  const handleUndo = () => undoRecord(activeToast.id);
+  const handleUndo = () => { void undoRecord(activeToast.id); };
 
   return (
     <div

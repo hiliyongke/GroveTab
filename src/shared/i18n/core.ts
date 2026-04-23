@@ -16,7 +16,7 @@ import en from './en';
 export type Locale = 'zh-CN' | 'en';
 
 /** 字典表：按 Locale 索引到 key→value 的平坦 Map */
-export const dictionaries: Record<Locale, Record<string, string>> = {
+const dictionaries: Record<Locale, Record<string, string>> = {
   'zh-CN': zhCN,
   en,
 };
@@ -68,16 +68,4 @@ export function translate(
   return lookup(loc, key, params);
 }
 
-/** 使用 Intl.DateTimeFormat 格式化日期 */
-export function formatDate(date: Date | number, locale?: string): string {
-  return new Intl.DateTimeFormat(locale || 'zh-CN', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(date);
-}
 
-/** 使用 Intl.NumberFormat 格式化数字 */
-export function formatNumber(num: number, locale?: string): string {
-  return new Intl.NumberFormat(locale || 'zh-CN').format(num);
-}

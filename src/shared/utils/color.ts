@@ -73,7 +73,7 @@ function hashString(str: string): number {
  *
  * 公网域名 / 已收敛到注册域的内网域名走原串。
  */
-export function normalizeColorKey(raw: string): string {
+function normalizeColorKey(raw: string): string {
   if (!raw) return 'other';
   // 剥协议和路径
   let key = raw.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
@@ -91,16 +91,9 @@ export function normalizeColorKey(raw: string): string {
 /**
  * 从水彩色相池中为字符串选一个色相（稳定哈希）
  */
-export function stringToDopamineHue(str: string): number {
+function stringToDopamineHue(str: string): number {
   const idx = hashString(normalizeColorKey(str)) % PALETTE_HUES.length;
   return PALETTE_HUES[idx];
-}
-
-/**
- * 基于字符串生成稳定的 hue 角（仅保留向后兼容，不推荐新代码使用）
- */
-export function stringToHue(str: string): number {
-  return hashString(str) % 360;
 }
 
 /**

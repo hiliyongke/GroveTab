@@ -39,6 +39,3 @@ export const VIEW_CONFIGS: ViewConfig[] = [
 
 /** 合法的 ViewMode 值数组，用于防御旧版残留值 */
 export const VALID_VIEWS: ViewMode[] = VIEW_CONFIGS.map((v) => v.id);
-
-/** 快速查找表 */
-export const VIEW_MAP = new Map<ViewMode, ViewConfig>(VIEW_CONFIGS.map((v) => [v.id, v]));

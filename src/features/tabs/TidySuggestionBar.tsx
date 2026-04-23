@@ -72,7 +72,7 @@ export function TidySuggestionBar() {
   /** 合并单个重复组 */
   const handleMergeGroup = useCallback((group: DupGroup) => {
     const toClose = group.tabs.slice(1).map((tab) => tab.id);
-    runAction(
+    void runAction(
       () => closeMultipleTabs(toClose),
       t('dedup.mergedOne', { count: toClose.length }),
     );
@@ -81,7 +81,7 @@ export function TidySuggestionBar() {
   /** 合并所有重复 */
   const handleMergeAll = useCallback(() => {
     const toClose = dupGroups.flatMap((g) => g.tabs.slice(1).map((tab) => tab.id));
-    runAction(
+    void runAction(
       () => closeMultipleTabs(toClose),
       t('dedup.mergedAll', { count: toClose.length }),
     );
@@ -168,7 +168,7 @@ export function TidySuggestionBar() {
               {summaryParts.join('；')}
             </span>
             <Space size={4}>
-              <Button type="primary" size="small" loading={busy} onClick={handleTidyAll}>
+              <Button type="primary" size="small" loading={busy} onClick={() => { void handleTidyAll(); }}>
                 {t('tidy.tidyAll')}
               </Button>
               <Tooltip title={expanded ? t('tabs.collapse') : t('tabs.expand')}>
@@ -280,7 +280,7 @@ export function TidySuggestionBar() {
                   size="small"
                   type="link"
                   loading={busy}
-                  onClick={() => handleDiscardIdle(idleTabs)}
+                  onClick={() => { void handleDiscardIdle(idleTabs); }}
                   style={{ fontSize: 12, padding: 0, height: 'auto' }}
                 >
                   {t('tidy.discardAllIdle')}

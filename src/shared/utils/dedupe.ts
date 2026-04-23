@@ -8,7 +8,7 @@ import type { LiveTab } from '@/shared/types';
 const TRACKING_PARAMS = /^(utm_\w+|fbclid|gclid|mc_eid|mc_cid|ref|source)$/i;
 
 /** Normalize a URL for dedup comparison */
-export function normalizeUrl(url: string): string {
+function normalizeUrl(url: string): string {
   try {
     const parsed = new URL(url);
     // Remove hash

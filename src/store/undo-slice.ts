@@ -38,7 +38,7 @@ export const useUndoStore = create<UndoState>((set, get) => ({
   records: [],
   activeToast: null,
 
-  addRecord: async (tabs, description) => {
+  addRecord: (tabs, description) => {
     const record: UndoRecord = {
       id: nanoid(8),
       createdAt: Date.now(),
@@ -74,7 +74,7 @@ export const useUndoStore = create<UndoState>((set, get) => ({
       });
     }, UNDO_TTL);
 
-    return record;
+    return Promise.resolve(record);
   },
 
   undoRecord: async (recordId) => {

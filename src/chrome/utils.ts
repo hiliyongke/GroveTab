@@ -7,7 +7,7 @@ import type { SpecialUrlType } from '@/shared/types';
 /**
  * Classify a URL into special types or 'normal'
  */
-export function classifyUrl(url: string): SpecialUrlType {
+function classifyUrl(url: string): SpecialUrlType {
   if (!url) return 'about';
   if (url.startsWith('chrome://') || url.startsWith('chrome-extension://')) return 'chrome';
   if (url.startsWith('file://')) return 'file';
@@ -43,7 +43,7 @@ export function extractHostname(url: string): string {
 /**
  * Check if a tab is the Canopy new tab page itself
  */
-export function isCanopyNewTab(url: string): boolean {
+function isCanopyNewTab(url: string): boolean {
   return url.startsWith('chrome-extension://') && url.includes('/newtab/');
 }
 

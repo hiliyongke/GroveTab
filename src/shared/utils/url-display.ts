@@ -73,23 +73,6 @@ export function formatUrlForDisplay(
 }
 
 /**
- * 判断两个 URL 是否在同一 origin 下的不同页面
- * 用于辅助判定"同名不同页"
- */
-export function isDifferentPage(a: string, b: string): boolean {
-  try {
-    const ua = new URL(a);
-    const ub = new URL(b);
-    if (ua.origin !== ub.origin) return true;
-    return (
-      ua.pathname !== ub.pathname || ua.search !== ub.search || ua.hash !== ub.hash
-    );
-  } catch {
-    return a !== b;
-  }
-}
-
-/**
  * 压缩路径：段数 ≤ 2 保留全部，否则首段 + … + 末段
  */
 function compressPath(pathname: string): string {
