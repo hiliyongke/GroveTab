@@ -64,6 +64,6 @@ export async function deleteProfile(id: string): Promise<void> {
 }
 
 /** 用预设覆盖当前设置 */
-export async function applyProfile(profile: SettingsProfile): Promise<Partial<UserSettings>> {
+export function applyProfile(profile: SettingsProfile): Partial<UserSettings> {
   return profile.settings;
 }

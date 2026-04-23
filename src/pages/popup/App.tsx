@@ -13,12 +13,15 @@ import {
   AppstoreOutlined,
   SaveOutlined,
 } from '@ant-design/icons';
+import { archiveCurrentWindowTabs } from '@/services';
 
 const { Title } = Typography;
 
 function App() {
   const [tabCount, setTabCount] = useState(0);
   const [currentTabs, setCurrentTabs] = useState(0);
+  const [archiving, setArchiving] = useState(false);
+  const [archiveError, setArchiveError] = useState('');
 
   useEffect(() => {
     if (typeof chrome !== 'undefined' && chrome.tabs) {
@@ -33,16 +36,19 @@ function App() {
     window.close();
   };
 
-  /** 归档当前窗口标签 */
+  /** 归档当前窗口标签。 */
   const archiveAll = async () => {
-    if (!chrome.tabs) return;
-    const tabs = await chrome.tabs.query({ currentWindow: true });
-    const toClose = tabs.filter((t) => {
-      const url = t.url || t.pendingUrl || '';
-      return url && !url.startsWith('chrome://') && !url.startsWith('chrome-extension://') && !t.pinned;
-    });
-    if (toClose.length > 0) {
-      await chrome.tabs.remove(toClose.map((t) => t.id!));
+    if (archiving) return;
+    setArchiving(true);
+    setArchiveError('');
+    try {
+      await archiveCurrentWindowTabs();
+      window.close();
+    } catch (err) {
+      console.warn('[Canopy/popup] archive current window failed', err);
+      setArchiveError('归档失败，请重试');
+    } finally {
+      setArchiving(false);
     }
   };
 
@@ -80,10 +86,22 @@ function App() {
         <Button type="primary" icon={<AppstoreOutlined />} block onClick={openNewTab}>
           打开标签管理
         </Button>
-        <Button icon={<SaveOutlined />} block onClick={() => { void archiveAll(); }} disabled={currentTabs === 0}>
+        <Button
+          icon={<SaveOutlined />}
+          block
+          loading={archiving}
+          onClick={() => { void archiveAll(); }}
+          disabled={currentTabs === 0 || archiving}
+        >
           归档当前窗口
         </Button>
       </Space>
+
+      {archiveError && (
+        <div style={{ marginTop: 10, fontSize: 12, color: '#ff4d4f' }}>
+          {archiveError}
+        </div>
+      )}
     </div>
   );
 }

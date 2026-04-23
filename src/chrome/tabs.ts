@@ -70,8 +70,17 @@ export function safeCall<T>(label: string, fn: () => Promise<T>, timeout = DEFAU
 
 // ── Tabs ──────────────────────────────────────────────
 
+/**
+ * 查询标签页。
+ *
+ * @param queryInfo Chrome tabs.query 的查询条件；默认查询全部标签页。
+ */
+export async function queryTabs(queryInfo: chrome.tabs.QueryInfo = {}): Promise<chrome.tabs.Tab[]> {
+  return safeCall('tabs.query', () => chrome.tabs.query(queryInfo));
+}
+
 export async function queryAllTabs(): Promise<chrome.tabs.Tab[]> {
-  return safeCall('tabs.query', () => chrome.tabs.query({}));
+  return queryTabs({});
 }
 
 /**

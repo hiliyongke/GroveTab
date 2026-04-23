@@ -17,7 +17,7 @@
 
 import { create } from 'zustand';
 import type { LiveTab, SwBroadcastMessage, WindowInfo, ClosedTabSnapshot } from '@/shared/types';
-import { queryAllTabs, getAllWindows, activateTab, closeTab, closeTabs, getFaviconUrl, discardTab as chromeDiscardTab, discardTabs as chromeDiscardTabs, queryTabGroups, type ChromeTabGroup } from '@/chrome';
+import { queryAllTabs, getAllWindows, activateTab, closeTab, closeTabs, getFaviconUrl, discardTab as chromeDiscardTab, queryTabGroups, type ChromeTabGroup } from '@/chrome';
 import { extractHostname, shouldDisplayUrl, isSelfNewTabPage } from '@/chrome';
 import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
@@ -59,12 +59,14 @@ interface TabsState {
   closeAllNonPinned: () => Promise<void>;
   /** 丢弃（休眠）单个标签页，释放内存但保留位置 */
   discardTab: (tabId: number) => Promise<void>;
+  /** 丢弃（休眠）多个标签页，统一反馈并只做一次状态同步 */
+  discardMultipleTabs: (tabIds: number[]) => Promise<void>;
   /** 丢弃（休眠）整个域名的标签页 */
   discardDomainGroup: (domain: string) => Promise<void>;
 }
 
 function tabToLiveTab(tab: chrome.tabs.Tab, currentWindowId: number): LiveTab | null {
-  const url = tab.url || tab.pendingUrl || '';
+  const url = tab.url ?? tab.pendingUrl ?? '';
   if (isSelfNewTabPage(tab)) return null;
   if (!shouldDisplayUrl(url)) return null;
 
@@ -83,12 +85,12 @@ function tabToLiveTab(tab: chrome.tabs.Tab, currentWindowId: number): LiveTab | 
    * 仅在扩展上下文有效；普通浏览器预览（无 chrome.runtime.id）退回原始值。
    */
   const extensionFavicon = getFaviconUrl(url);
-  const favIconUrl = extensionFavicon || tab.favIconUrl || '';
+  const favIconUrl = extensionFavicon !== '' ? extensionFavicon : (tab.favIconUrl ?? '');
 
   return {
     id: tab.id!,
     url,
-    title: tab.title || url,
+    title: tab.title ?? url,
     favIconUrl,
     windowId: tab.windowId,
     incognito: tab.incognito,
@@ -110,6 +112,51 @@ function liveTabToSnapshot(tab: LiveTab): ClosedTabSnapshot {
     windowId: tab.windowId,
     pinned: tab.pinned,
   };
+}
+
+/** 构建窗口信息映射，避免按窗口反复 `filter` 全量标签。 */
+function buildWindowMap(allWindows: chrome.windows.Window[], allTabs: chrome.tabs.Tab[]): Map<number, WindowInfo> {
+  const tabsCountByWindowId = new Map<number, number>();
+  for (const tab of allTabs) {
+    tabsCountByWindowId.set(tab.windowId, (tabsCountByWindowId.get(tab.windowId) ?? 0) + 1);
+  }
+
+  const windowMap = new Map<number, WindowInfo>();
+  for (const win of allWindows) {
+    if (win.id == null) continue;
+    windowMap.set(win.id, {
+      id: win.id,
+      focused: win.focused,
+      type: win.type ?? 'normal',
+      incognito: win.incognito,
+      tabsCount: tabsCountByWindowId.get(win.id) ?? 0,
+    });
+  }
+  return windowMap;
+}
+
+/** 局部更新某个标签页的休眠状态。 */
+function patchTabDiscardedState(tabs: LiveTab[], tabId: number, discarded: boolean): LiveTab[] {
+  return tabs.map((tab) => (
+    tab.id === tabId ? { ...tab, discarded } : tab
+  ));
+}
+
+/** 批量调用 Chrome 的 discard，并保留逐项成功/失败信息。 */
+async function discardTabsBatch(tabIds: number[]): Promise<{ succeededIds: number[]; failedIds: number[] }> {
+  const results = await Promise.allSettled(tabIds.map((tabId) => chromeDiscardTab(tabId)));
+  const succeededIds: number[] = [];
+  const failedIds: number[] = [];
+
+  results.forEach((result, index) => {
+    if (result.status === 'fulfilled') {
+      succeededIds.push(tabIds[index]);
+    } else {
+      failedIds.push(tabIds[index]);
+    }
+  });
+
+  return { succeededIds, failedIds };
 }
 
 export const useTabsStore = create<TabsState>((set, get) => ({
@@ -145,11 +192,11 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       const liveTabs = allTabs
         .map((tab) => {
           const liveTab = tabToLiveTab(tab, currentWindowId);
-          if (!liveTab) return null;
+          if (liveTab === null) return null;
           // 注入 Tab Group 信息
           if (liveTab.groupId !== -1) {
             const group = groupMap.get(liveTab.groupId);
-            if (group) {
+            if (group !== undefined) {
               liveTab.groupTitle = group.title;
               liveTab.groupColor = group.color;
             }
@@ -159,16 +206,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
         .filter(Boolean) as LiveTab[];
 
       const allWindows = await getAllWindows();
-      const windowMap = new Map<number, WindowInfo>();
-      for (const win of allWindows) {
-        windowMap.set(win.id!, {
-          id: win.id!,
-          focused: win.focused,
-          type: win.type ?? 'normal',
-          incognito: win.incognito,
-          tabsCount: allTabs.filter((t) => t.windowId === win.id).length,
-        });
-      }
+      const windowMap = buildWindowMap(allWindows, allTabs);
 
       set({
         tabs: liveTabs,
@@ -202,16 +240,18 @@ export const useTabsStore = create<TabsState>((set, get) => ({
         set({
           tabs: tabs.map((t) => {
             if (t.id !== id) return t;
-            const newUrl = (url as string) || t.url;
+            const incomingUrl = typeof url === 'string' ? url : t.url;
             // 同步沿用 tabToLiveTab 的策略：若有 URL 就走扩展同源 favicon，
             // 避免 sw 广播把远程 favIconUrl 写回 store 导致 `<img>` 跨域报错。
-            const extensionFavicon = newUrl ? getFaviconUrl(newUrl) : '';
+            const extensionFavicon = incomingUrl !== '' ? getFaviconUrl(incomingUrl) : '';
+            const incomingTitle = typeof title === 'string' && title !== '' ? title : t.title;
+            const incomingFavicon = typeof favIconUrl === 'string' ? favIconUrl : t.favIconUrl;
             return {
               ...t,
-              url: newUrl,
-              title: (title as string) || t.title,
-              favIconUrl: extensionFavicon || (favIconUrl as string) || t.favIconUrl,
-              hostname: url ? extractHostname(url as string) : t.hostname,
+              url: incomingUrl,
+              title: incomingTitle,
+              favIconUrl: extensionFavicon !== '' ? extensionFavicon : incomingFavicon,
+              hostname: typeof url === 'string' && url !== '' ? extractHostname(url) : t.hostname,
             };
           }),
         });
@@ -237,15 +277,17 @@ export const useTabsStore = create<TabsState>((set, get) => ({
         break;
       }
       case 'tab-discarded': {
-        // discarded 状态变化（休眠/恢复）需要全量刷新才能正确更新所有 tab 的 discarded 标记
-        void get().loadAllTabs({ silent: true });
+        const { id, discarded } = message.payload;
+        if (typeof id === 'number' && typeof discarded === 'boolean') {
+          set({ tabs: patchTabDiscardedState(tabs, id, discarded) });
+        }
         break;
       }
       case 'window-focus-changed': {
         const { windowId } = message.payload;
-        if (windowId && windowId !== chrome.windows.WINDOW_ID_NONE) {
+        if (typeof windowId === 'number' && windowId !== chrome.windows.WINDOW_ID_NONE) {
           set({
-            currentWindowId: windowId as number,
+            currentWindowId: windowId,
             tabs: tabs.map((t) => ({
               ...t,
               isCurrentWindow: t.windowId === windowId,
@@ -283,7 +325,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
   closeSingleTab: async (tabId) => {
     const { tabs } = get();
     const tab = tabs.find((t) => t.id === tabId);
-    if (!tab) return;
+    if (tab === undefined) return;
 
     try {
       const snapshots = [liveTabToSnapshot(tab)];
@@ -426,36 +468,76 @@ export const useTabsStore = create<TabsState>((set, get) => ({
   },
 
   discardTab: async (tabId) => {
-    try {
-      await chromeDiscardTab(tabId);
-      feedback.success(translate('tabs.discarded'));
-      // 立即广播，确保其他 Canopy 窗口同步更新（不等 SW alarm 轮询）
-      swBroadcast('tab-discarded', { id: tabId, discarded: true });
-      void get().loadAllTabs({ silent: true });
-    } catch (err) {
+    const { succeededIds } = await discardTabsBatch([tabId]);
+    if (succeededIds.length === 0) {
+      const err = new Error(`Discard failed for tab ${tabId}`);
       feedback.error(translate('tabs.discardFailed'), err);
-      void get().loadAllTabs({ silent: true });
+      set({ error: String(err) });
       throw err;
+    }
+
+    set((state) => ({ tabs: patchTabDiscardedState(state.tabs, tabId, true) }));
+    feedback.success(translate('tabs.discarded'));
+    swBroadcast('tab-discarded', { id: tabId, discarded: true });
+  },
+
+  discardMultipleTabs: async (tabIds) => {
+    if (tabIds.length === 0) return;
+
+    const { succeededIds, failedIds } = await discardTabsBatch(tabIds);
+    if (succeededIds.length === 0) {
+      const err = new Error('Discard failed for all selected tabs');
+      feedback.error(translate('tabs.discardFailed'), err);
+      set({ error: String(err) });
+      throw err;
+    }
+
+    const succeededSet = new Set(succeededIds);
+    set((state) => ({
+      tabs: state.tabs.map((tab) => (
+        succeededSet.has(tab.id) ? { ...tab, discarded: true } : tab
+      )),
+    }));
+
+    feedback.success(translate('tabs.discardedCount', { count: succeededIds.length }));
+    if (failedIds.length > 0) {
+      feedback.warning(translate('tabs.discardPartial', { count: failedIds.length }));
+    }
+
+    for (const tabId of succeededIds) {
+      swBroadcast('tab-discarded', { id: tabId, discarded: true });
     }
   },
 
   discardDomainGroup: async (domain) => {
     const { tabs } = get();
-    const groupTabs = tabs.filter((t) => t.hostname === domain && !t.pinned && !t.discarded);
+    const groupTabs = tabs.filter((tab) => tab.hostname === domain && !tab.pinned && !tab.discarded);
     if (groupTabs.length === 0) return;
 
-    try {
-      await chromeDiscardTabs(groupTabs.map((t) => t.id));
-      feedback.success(translate('tabs.discardedGroup', { domain, count: groupTabs.length }));
-      // 广播休眠事件，其他 Canopy 窗口同步更新
-      for (const t of groupTabs) {
-        swBroadcast('tab-discarded', { id: t.id, discarded: true, windowId: t.windowId });
-      }
-      void get().loadAllTabs({ silent: true });
-    } catch (err) {
+    const { succeededIds, failedIds } = await discardTabsBatch(groupTabs.map((tab) => tab.id));
+    if (succeededIds.length === 0) {
+      const err = new Error(`Discard failed for domain ${domain}`);
       feedback.error(translate('tabs.discardFailed'), err);
-      void get().loadAllTabs({ silent: true });
+      set({ error: String(err) });
       throw err;
+    }
+
+    const succeededSet = new Set(succeededIds);
+    set((state) => ({
+      tabs: state.tabs.map((tab) => (
+        succeededSet.has(tab.id) ? { ...tab, discarded: true } : tab
+      )),
+    }));
+
+    feedback.success(translate('tabs.discardedGroup', { domain, count: succeededIds.length }));
+    if (failedIds.length > 0) {
+      feedback.warning(translate('tabs.discardPartial', { count: failedIds.length }));
+    }
+
+    for (const tab of groupTabs) {
+      if (succeededSet.has(tab.id)) {
+        swBroadcast('tab-discarded', { id: tab.id, discarded: true, windowId: tab.windowId });
+      }
     }
   },
 }));

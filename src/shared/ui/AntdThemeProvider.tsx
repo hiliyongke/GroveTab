@@ -38,7 +38,10 @@ function FeedbackBridge() {
   const { message, notification, modal } = AntdApp.useApp();
   /** 用 ref 持有最新的 antd API 引用，避免 useEffect 依赖不稳定导致反复触发 */
   const apiRef = useRef({ message, notification, modal });
-  apiRef.current = { message, notification, modal };
+
+  useEffect(() => {
+    apiRef.current = { message, notification, modal };
+  }, [message, notification, modal]);
 
   useEffect(() => {
     /**

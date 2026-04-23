@@ -37,7 +37,6 @@ function KeybindingRecorder({
   const { t } = useT();
   const { token } = theme.useToken();
   const [recording, setRecording] = useState(false);
-  const [displayText, setDisplayText] = useState(currentKeys);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -62,7 +61,6 @@ function KeybindingRecorder({
       parts.push(mainKey.length === 1 ? mainKey.toLowerCase() : mainKey);
 
       const keyStr = parts.join('+');
-      setDisplayText(keyStr);
       onRecord(keyStr);
       setRecording(false);
     };
@@ -73,7 +71,6 @@ function KeybindingRecorder({
         e.preventDefault();
         e.stopPropagation();
         setRecording(false);
-        setDisplayText(currentKeys);
       }
     };
 
@@ -84,12 +81,6 @@ function KeybindingRecorder({
       window.removeEventListener('keydown', cancelHandler, true);
     };
   }, [recording, currentKeys, onRecord]);
-
-  useEffect(() => {
-    if (!recording) {
-      setDisplayText(currentKeys);
-    }
-  }, [currentKeys, recording]);
 
   const formatDisplay = (key: string) => {
     return key
@@ -119,7 +110,7 @@ function KeybindingRecorder({
           transition: 'all 160ms ease',
         }}
       >
-        {recording ? t('shortcuts.recording') : formatDisplay(displayText)}
+        {recording ? t('shortcuts.recording') : formatDisplay(currentKeys)}
       </div>
       <Button
         type="text"

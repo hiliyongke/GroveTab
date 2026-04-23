@@ -1,15 +1,18 @@
 /**
- * ArchiveService — Atomic archive (save all tabs) and restore operations
+ * 归档服务。
  *
- * 集成 IndexedDB 自动降级：
- *   当 chrome.storage.local 使用率超过 80% 时，归档数据自动迁移到 IndexedDB，
- *   后续读写透明路由到 IDB，不影响上层逻辑。
+ * 统一负责会话快照的创建、持久化与恢复，避免 UI、Popup、Service Worker
+ * 分别维护各自的归档实现，导致数据写入不一致。
+ *
+ * 同时集成 IndexedDB 自动降级：
+ * 当 `chrome.storage.local` 使用率超过阈值时，归档数据自动迁移到 IndexedDB，
+ * 后续读写透明路由到 IDB，不影响上层调用方。
  */
 
 import { nanoid } from 'nanoid';
 import type { ArchivedSession, ArchivedTab } from '@/shared/types';
 import { getData, setData } from '@/repositories';
-import { queryAllTabs, closeTabs, createTab, getCurrentWindow, getFaviconUrl } from '@/chrome';
+import { queryAllTabs, queryTabs, closeTabs, createTab, getCurrentWindow, getFaviconUrl } from '@/chrome';
 import { extractHostname, isSelfNewTabPage, shouldDisplayUrl } from '@/chrome';
 import {
   shouldFallbackToIDB,
@@ -21,40 +24,43 @@ import {
 
 const SESSIONS_KEY = 'canopy_sessions';
 
+/** 归档结果：快照一定已落盘，关闭标签页可能部分失败。 */
+export interface ArchiveOperationResult {
+  session: ArchivedSession;
+  archivedCount: number;
+  closedCount: number;
+}
+
 /** 是否已降级到 IndexedDB（运行时缓存，避免每次都检测） */
 let useIDB = false;
 
 /**
- * 初始化归档存储路由
+ * 初始化归档存储路由。
  *
  * 在应用启动时调用，检测是否需要降级并建立路由。
  */
 export async function initArchiveStorage(): Promise<void> {
-  // 如果 IDB 中已有数据，说明之前已迁移
   const hasIDB = await hasIDBData();
   if (hasIDB) {
     useIDB = true;
     return;
   }
-  // 检测是否需要自动降级
   await autoFallbackIfNeeded();
   useIDB = await hasIDBData();
 }
 
-/** Get all archived sessions（自动路由到 IDB 或 chrome.storage） */
+/** 获取全部归档会话（自动路由到 IDB 或 `chrome.storage.local`）。 */
 export async function getArchivedSessions(): Promise<ArchivedSession[]> {
   if (useIDB) {
     return getSessionsFromIDB();
   }
   const sessions = (await getData<ArchivedSession[]>(SESSIONS_KEY)) ?? [];
-  // 懒检测：如果还没降级，检查是否需要
   if (!useIDB) {
     const shouldFB = await shouldFallbackToIDB();
     if (shouldFB) {
       await autoFallbackIfNeeded();
       useIDB = await hasIDBData();
       if (useIDB && sessions.length > 0) {
-        // 迁移刚发生，从 IDB 重读
         return getSessionsFromIDB();
       }
     }
@@ -62,7 +68,7 @@ export async function getArchivedSessions(): Promise<ArchivedSession[]> {
   return sessions;
 }
 
-/** Save sessions（自动路由） */
+/** 保存归档会话（自动路由）。 */
 async function saveSessions(sessions: ArchivedSession[]): Promise<void> {
   if (useIDB) {
     return saveSessionsToIDB(sessions);
@@ -72,53 +78,80 @@ async function saveSessions(sessions: ArchivedSession[]): Promise<void> {
 
 export { saveSessions };
 
-/** Archive all open non-pinned tabs (atomic: write first, then close) */
-export async function archiveAllTabs(): Promise<{ session: ArchivedSession; closedCount: number }> {
-  const allTabs = await queryAllTabs();
+/** 判断标签页是否允许归档。 */
+function isArchivableTab(tab: chrome.tabs.Tab): boolean {
+  if (isSelfNewTabPage(tab)) return false;
+  if (tab.pinned) return false;
+  if (tab.incognito) return false;
+  const url = tab.url ?? tab.pendingUrl ?? '';
+  return shouldDisplayUrl(url);
+}
 
-  // Filter: exclude self, pinned, incognito, non-displayable
-  const toArchive = allTabs.filter((tab) => {
-    if (isSelfNewTabPage(tab)) return false;
-    if (tab.pinned) return false;
-    if (tab.incognito) return false;
-    const url = tab.url || tab.pendingUrl || '';
-    if (!shouldDisplayUrl(url)) return false;
-    return true;
+/** 把 Chrome 标签页转换为归档快照条目。 */
+function toArchivedTab(tab: chrome.tabs.Tab): ArchivedTab {
+  const url = tab.url ?? tab.pendingUrl ?? '';
+  const extensionFavicon = getFaviconUrl(url);
+  return {
+    url,
+    title: tab.title ?? '',
+    favIconUrl: extensionFavicon !== '' ? extensionFavicon : (tab.favIconUrl ?? ''),
+    hostname: extractHostname(url),
+    pinned: tab.pinned,
+  };
+}
+
+/** 生成默认会话名，优先复用扩展 i18n 文案。 */
+function buildDefaultSessionName(): string {
+  const locale = typeof chrome === 'undefined'
+    ? 'zh-CN'
+    : (chrome.i18n?.getUILanguage?.() ?? 'zh-CN');
+  const dateStr = new Date().toLocaleString(locale, {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
+  const localized = typeof chrome === 'undefined'
+    ? ''
+    : (chrome.i18n?.getMessage?.('archive_session_name', [dateStr]) ?? '');
+  return localized !== '' ? localized : `会话 ${dateStr}`;
+}
 
+/** 持久化一个新会话到会话列表头部。 */
+async function prependSession(session: ArchivedSession): Promise<void> {
+  const sessions = await getArchivedSessions();
+  sessions.unshift(session);
+  await saveSessions(sessions);
+}
+
+/**
+ * 归档一组标签页。
+ *
+ * 流程：
+ * 1. 过滤掉不可归档的标签页
+ * 2. 先把快照写入持久化存储
+ * 3. 再关闭真实标签页
+ *
+ * 即使关闭阶段失败，也保证归档快照已经可恢复。
+ */
+async function archiveTabs(tabs: chrome.tabs.Tab[]): Promise<ArchiveOperationResult> {
+  const toArchive = tabs.filter(isArchivableTab);
   if (toArchive.length === 0) {
     throw new Error('No tabs to archive');
   }
 
-  const archivedTabs: ArchivedTab[] = toArchive.map((tab) => {
-    const url = tab.url || tab.pendingUrl || '';
-    // 归档保存时也把 favicon 改写成扩展同源的 `_favicon/` 入口，
-    // 恢复后 `<img>` 渲染不会因原站离线或跨域而污染控制台。
-    const extensionFavicon = getFaviconUrl(url);
-    return {
-      url,
-      title: tab.title || '',
-      favIconUrl: extensionFavicon || tab.favIconUrl || '',
-      hostname: extractHostname(url),
-      pinned: tab.pinned,
-    };
-  });
-
+  const archivedTabs = toArchive.map(toArchivedTab);
   const session: ArchivedSession = {
     id: nanoid(10),
-    name: `会话 ${new Date().toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`,
+    name: buildDefaultSessionName(),
     createdAt: Date.now(),
     tabs: archivedTabs,
     tabCount: archivedTabs.length,
   };
 
-  // Atomic: write to storage FIRST, then close tabs
-  const sessions = await getArchivedSessions();
-  sessions.unshift(session);
-  await saveSessions(sessions);
+  await prependSession(session);
 
-  // Now close the tabs — 失败也不影响归档完成（快照已保存），仅打 warn
-  const tabIds = toArchive.map((t) => t.id).filter((id): id is number => id !== undefined);
+  const tabIds = toArchive.map((tab) => tab.id).filter((id): id is number => id !== undefined);
   let closedCount = tabIds.length;
   try {
     await closeTabs(tabIds);
@@ -127,24 +160,43 @@ export async function archiveAllTabs(): Promise<{ session: ArchivedSession; clos
     closedCount = 0;
   }
 
-  return { session, closedCount };
+  return {
+    session,
+    archivedCount: archivedTabs.length,
+    closedCount,
+  };
+}
+
+/** 归档所有可归档标签页。 */
+export async function archiveAllTabs(): Promise<ArchiveOperationResult> {
+  return archiveTabs(await queryAllTabs());
+}
+
+/** 归档当前窗口的可归档标签页。 */
+export async function archiveCurrentWindowTabs(): Promise<ArchiveOperationResult> {
+  return archiveTabs(await queryTabs({ currentWindow: true }));
+}
+
+/** 归档指定 ID 的标签页。 */
+export async function archiveSelectedTabs(tabIds: number[]): Promise<ArchiveOperationResult> {
+  const targetIds = new Set(tabIds);
+  const allTabs = await queryAllTabs();
+  return archiveTabs(allTabs.filter((tab) => tab.id !== undefined && targetIds.has(tab.id)));
 }
 
 /**
- * 恢复一个归档会话
+ * 恢复一个归档会话。
  *
- * 单个 tab → 在当前窗口直接新开
- * 多个 tab → 分批 30 个：第一批 createWindow，后续 append 到当前窗口
- *
- * 所有 chrome API 调用都经 safeCall 封装，失败会带上下文抛出，
- * 由上层（ArchivePanel）通过 feedback 告知用户。
+ * 恢复策略：
+ * - 单个标签页：直接在当前环境打开
+ * - 多个标签页：顺序追加到当前窗口，避免 Chrome 对同窗口瞬时并发建 tab 限流
  */
 export async function restoreSession(sessionId: string): Promise<void> {
   const sessions = await getArchivedSessions();
   const session = sessions.find((s) => s.id === sessionId);
-  if (!session) throw new Error('Session not found');
+  if (session === undefined) throw new Error('Session not found');
 
-  const urls = session.tabs.map((t) => t.url).filter(Boolean);
+  const urls = session.tabs.map((tab) => tab.url).filter((url): url is string => url !== '');
   if (urls.length === 0) return;
 
   if (urls.length === 1) {
@@ -152,12 +204,6 @@ export async function restoreSession(sessionId: string): Promise<void> {
     return;
   }
 
-  /**
-   * 恢复策略（与 undo 保持一致）：
-   *   - 全部在**当前窗口**追加，不再新开窗口
-   *   - 顺序 createTab，避免 Chrome 对同窗口瞬时并发建 tab 的限流
-   *   - active:false，防止频繁抢焦点
-   */
   const currentWindow = await getCurrentWindow();
   const windowId = currentWindow?.id;
   for (const url of urls) {
@@ -165,18 +211,18 @@ export async function restoreSession(sessionId: string): Promise<void> {
   }
 }
 
-/** Delete an archived session */
+/** 删除一个归档会话。 */
 export async function deleteSession(sessionId: string): Promise<void> {
   const sessions = await getArchivedSessions();
-  const filtered = sessions.filter((s) => s.id !== sessionId);
+  const filtered = sessions.filter((session) => session.id !== sessionId);
   await saveSessions(filtered);
 }
 
-/** Rename an archived session */
+/** 重命名一个归档会话。 */
 export async function renameSession(sessionId: string, newName: string): Promise<void> {
   const sessions = await getArchivedSessions();
-  const session = sessions.find((s) => s.id === sessionId);
-  if (session) {
+  const session = sessions.find((item) => item.id === sessionId);
+  if (session !== undefined) {
     session.name = newName;
     await saveSessions(sessions);
   }

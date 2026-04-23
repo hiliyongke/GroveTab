@@ -31,6 +31,9 @@ interface SearchBoxProps {
 }
 
 type PinyinMatchFn = (text: string, query: string) => boolean;
+type SearchIndexLike = {
+  search: (query: string) => Array<{ id: number }>;
+};
 
 /**
  * 小键盘提示胶囊
@@ -85,13 +88,13 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
   const searchSortBy = useSettingsStore((s) => s.settings.searchSortBy ?? 'relevance');
 
   /**
-   * MiniSearch 索引（异步构建）
+   * MiniSearch 索引（异步构建）。
    */
-  const [searchIndex, setSearchIndex] = useState<any>(null);
+  const [searchIndex, setSearchIndex] = useState<SearchIndexLike | null>(null);
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
-    (async () => {
+    void (async () => {
       const { default: MS } = await import('minisearch');
       if (cancelled) return;
       const fields: string[] =
@@ -119,16 +122,20 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
   }, [open, tabs, searchScope]);
 
   /**
-   * 拼音匹配函数（异步预加载）
+   * 拼音匹配函数（异步预加载）。
+   *
+   * 仅在首次需要时懒加载；关闭拼音搜索时通过派生值禁用，
+   * 不在 effect 体内同步 `setState(null)`，避免 React 19 的级联渲染告警。
    */
-  const [pinyinMatchFn, setPinyinMatchFn] = useState<PinyinMatchFn | null>(null);
+  const [loadedPinyinMatchFn, setLoadedPinyinMatchFn] = useState<PinyinMatchFn | null>(null);
+  const pinyinMatchFn = enablePinyin ? loadedPinyinMatchFn : null;
   useEffect(() => {
-    if (!enablePinyin) { setPinyinMatchFn(null); return; }
-    (async () => {
+    if (!enablePinyin || loadedPinyinMatchFn !== null) return;
+    void (async () => {
       const { pinyinMatch } = await import('@/shared/utils/pinyin');
-      setPinyinMatchFn(() => pinyinMatch);
+      setLoadedPinyinMatchFn(() => pinyinMatch);
     })();
-  }, [enablePinyin]);
+  }, [enablePinyin, loadedPinyinMatchFn]);
 
   /**
    * 搜索结果 memo
@@ -147,10 +154,10 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
         const byId = new Map(tabs.map((tb: LiveTab) => [tb.id, tb] as [number, LiveTab]));
         let matched: LiveTab[] = miniResults
           .map((r: { id: number }) => byId.get(r.id))
-          .filter((x: LiveTab | undefined): x is LiveTab => !!x);
+          .filter((x: LiveTab | undefined): x is LiveTab => x !== undefined);
 
         /** 拼音补充搜索 */
-        if (enablePinyin && pinyinMatchFn) {
+        if (enablePinyin && pinyinMatchFn !== null) {
           const existingIds = new Set(matched.map((t: LiveTab) => t.id));
           const pinyinExtras = tabs.filter((tab: LiveTab) => {
             if (existingIds.has(tab.id)) return false;
@@ -175,10 +182,10 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
     }
 
     /** MiniSearch 未命中时，用拼音 + 字符串匹配兜底 */
-    let fallback = tabs.filter((tab: LiveTab) => {
+    const fallback = tabs.filter((tab: LiveTab) => {
       if (matchTitle) {
         let matchedByPinyin = false;
-        if (enablePinyin && pinyinMatchFn) {
+        if (enablePinyin && pinyinMatchFn !== null) {
           if (pinyinMatchFn(tab.title, query)) matchedByPinyin = true;
         }
         if (matchedByPinyin) return true;
@@ -245,7 +252,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
       if (e.key === 'Enter') {
         e.preventDefault();
         const tab = results[activeIndex];
-        if (tab) handleJump(tab);
+        if (tab !== undefined) handleJump(tab);
         return;
       }
     },
@@ -260,7 +267,6 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
       footer={null}
       closable={false}
       destroyOnHidden
-      maskClosable
       width={640}
       centered={false}
       styles={{

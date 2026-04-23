@@ -140,10 +140,13 @@ export function ArchivePanel({ open, onOpenChange }: ArchivePanelProps) {
     if (archivingCurrent || tabCount === 0) return;
     setArchivingCurrent(true);
     try {
-      const { closedCount } = await archiveAllTabs();
+      const { archivedCount, closedCount } = await archiveAllTabs();
       await loadAllTabs({ silent: true });
       await refreshSessions();
-      feedback.success(t('archive.archivedOk', { count: closedCount }));
+      feedback.success(t('archive.archivedOk', { count: archivedCount }));
+      if (closedCount < archivedCount) {
+        feedback.warning(t('archive.closeIncomplete', { count: archivedCount - closedCount }));
+      }
     } catch (err) {
       feedback.error(t('archive.archiveFailed'), err);
     } finally {

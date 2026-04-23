@@ -23,6 +23,17 @@ const QUOTA_THRESHOLD = 0.8; // 80% 使用率触发降级
 /** IndexedDB 实例缓存 */
 let dbInstance: IDBDatabase | null = null;
 
+/** 统一把 IndexedDB 的错误值包装成 Error。 */
+function toIDBError(error: unknown, label: string): Error {
+  if (error instanceof Error) return error;
+  return new Error(`[IDB Fallback] ${label} failed`);
+}
+
+/** 归档会话数组的最小类型守卫。 */
+function isArchivedSessionArray(value: unknown): value is ArchivedSession[] {
+  return Array.isArray(value);
+}
+
 /**
  * 打开（或复用）IndexedDB 连接
  */
@@ -44,7 +55,7 @@ function openDB(): Promise<IDBDatabase> {
       resolve(dbInstance);
     };
 
-    request.onerror = () => reject(request.error);
+    request.onerror = () => reject(toIDBError(request.error, 'openDB'));
   });
 }
 
@@ -69,7 +80,8 @@ export async function shouldFallbackToIDB(): Promise<boolean> {
 export async function migrateSessionsToIDB(): Promise<number> {
   // 1. 读取 chrome.storage.local 中的 sessions
   const result = await chrome.storage.local.get('canopy_sessions');
-  const sessions: ArchivedSession[] = Array.isArray(result.canopy_sessions) ? result.canopy_sessions : [];
+  const rawSessions: unknown = result.canopy_sessions;
+  const sessions = isArchivedSessionArray(rawSessions) ? rawSessions : [];
 
   if (sessions.length === 0) return 0;
 
@@ -84,7 +96,7 @@ export async function migrateSessionsToIDB(): Promise<number> {
 
   await new Promise<void>((resolve, reject) => {
     tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
+    tx.onerror = () => reject(toIDBError(tx.error, 'migrateSessionsToIDB'));
   });
 
   // 3. 从 chrome.storage.local 删除
@@ -105,7 +117,7 @@ export async function getSessionsFromIDB(): Promise<ArchivedSession[]> {
   return new Promise((resolve, reject) => {
     const request = store.getAll();
     request.onsuccess = () => resolve(request.result as ArchivedSession[]);
-    request.onerror = () => reject(request.error);
+    request.onerror = () => reject(toIDBError(request.error, 'getSessionsFromIDB'));
   });
 }
 
@@ -125,7 +137,7 @@ export async function saveSessionsToIDB(sessions: ArchivedSession[]): Promise<vo
 
   await new Promise<void>((resolve, reject) => {
     tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
+    tx.onerror = () => reject(toIDBError(tx.error, 'saveSessionsToIDB'));
   });
 }
 
@@ -141,7 +153,7 @@ export async function hasIDBData(): Promise<boolean> {
     return new Promise((resolve, reject) => {
       const request = store.count();
       request.onsuccess = () => resolve(request.result > 0);
-      request.onerror = () => reject(request.error);
+      request.onerror = () => reject(toIDBError(request.error, 'hasIDBData'));
     });
   } catch {
     return false;

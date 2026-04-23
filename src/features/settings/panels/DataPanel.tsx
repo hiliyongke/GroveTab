@@ -41,6 +41,8 @@ interface QuotaInfo {
   isWarning: boolean;
 }
 
+const MAX_IMPORT_FILE_BYTES = 2 * 1024 * 1024;
+
 export function DataPanel() {
   const { t } = useT();
   const { token } = theme.useToken();
@@ -72,7 +74,7 @@ export function DataPanel() {
   }, [profileName, settings, message, t]);
 
   /** 应用预设 */
-  const handleApplyProfile = useCallback(async (profile: SettingsProfile) => {
+  const handleApplyProfile = useCallback((profile: SettingsProfile) => {
     void updateSettings(profile.settings);
     message.success(t('settings.profileApplied', { name: profile.name }));
   }, [updateSettings, message, t]);
@@ -105,11 +107,19 @@ export function DataPanel() {
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (file == null) return;
+
+    if (file.size > MAX_IMPORT_FILE_BYTES) {
+      setImportStatus(t('settings.importTooLarge', { size: '2 MB' }));
+      if (fileInputRef.current !== null) fileInputRef.current.value = '';
+      return;
+    }
+
     const text = await file.text();
     const { sessions, errors } = parseImportJSON(text);
     if (errors.length > 0) {
       setImportStatus(t('settings.importError', { count: errors.length }));
+      if (fileInputRef.current !== null) fileInputRef.current.value = '';
       return;
     }
     const existing = await getArchivedSessions();
@@ -117,7 +127,7 @@ export function DataPanel() {
     const newSessions = sessions.filter((s) => !existingIds.has(s.id));
     await saveSessions([...newSessions, ...existing]);
     setImportStatus(t('settings.importSuccess', { count: newSessions.length }));
-    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (fileInputRef.current !== null) fileInputRef.current.value = '';
   };
 
   const handleClearAll = () => {
@@ -135,7 +145,7 @@ export function DataPanel() {
   };
 
   return (
-    <Space direction="vertical" size={24} style={{ width: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, width: '100%' }}>
       {/* ── 配置预设 ── */}
       <Field label={t('settings.profiles')} hint={t('settings.profilesHint')}>
         <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
@@ -229,7 +239,7 @@ export function DataPanel() {
       </Field>
 
       {/* ── 存储配额 ── */}
-      {quotaInfo && (
+      {quotaInfo !== null && (
         <div
           style={{
             padding: 14,
@@ -277,15 +287,15 @@ export function DataPanel() {
           {quotaInfo.isWarning && (
             <Alert
               type="error"
-              message={t('settings.quotaWarning')}
               showIcon
+              description={t('settings.quotaWarning')}
               style={{ marginTop: 10 }}
             />
           )}
         </div>
       )}
 
-      <Space direction="vertical" size={8} style={{ width: '100%' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
         <Button block icon={<DownloadOutlined />} onClick={() => { void handleExport(); }}>
           {t('settings.export')}
         </Button>
@@ -299,16 +309,16 @@ export function DataPanel() {
           style={{ display: 'none' }}
           onChange={(e) => { void handleImport(e); }}
         />
-        {importStatus && (
+        {importStatus !== null && (
           <div style={{ fontSize: 11.5, color: token.colorTextTertiary, padding: '0 4px' }}>
             {importStatus}
           </div>
         )}
-      </Space>
+      </div>
 
       <Button block danger icon={<DeleteOutlined />} onClick={handleClearAll}>
         {t('settings.clearAll')}
       </Button>
-    </Space>
+    </div>
   );
 }

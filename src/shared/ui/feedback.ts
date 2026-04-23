@@ -39,9 +39,9 @@ let holder: (React.RefObject<FeedbackApi> | FeedbackApi | null) = null;
 
 /** 从 holder 中解析出实际的 FeedbackApi 实例 */
 function resolveApi(): FeedbackApi | null {
-  if (!holder) return null;
-  if ('current' in holder) return (holder as React.RefObject<FeedbackApi>).current;
-  return holder as FeedbackApi;
+  if (holder === null) return null;
+  if ('current' in holder) return holder.current;
+  return holder;
 }
 
 /**
@@ -70,19 +70,19 @@ export function unbindFeedback(): void {
 export const feedback = {
   success(content: string): void {
     const api = resolveApi();
-    if (api) api.message.success(content);
+    if (api !== null) api.message.success(content);
     else console.info('[Canopy/feedback:success]', content);
   },
 
   info(content: string): void {
     const api = resolveApi();
-    if (api) api.message.info(content);
+    if (api !== null) api.message.info(content);
     else console.info('[Canopy/feedback:info]', content);
   },
 
   warning(content: string): void {
     const api = resolveApi();
-    if (api) api.message.warning(content);
+    if (api !== null) api.message.warning(content);
     else console.warn('[Canopy/feedback:warning]', content);
   },
 
@@ -96,7 +96,7 @@ export const feedback = {
     if (err !== undefined) console.warn('[Canopy/feedback:error]', content, err);
     else console.warn('[Canopy/feedback:error]', content);
     const api = resolveApi();
-    if (api) api.message.error(content);
+    if (api !== null) api.message.error(content);
   },
 
   /**
@@ -105,7 +105,7 @@ export const feedback = {
   notify: {
     error(title: string, description?: string): void {
       const api = resolveApi();
-      if (api) api.notification.error({ message: title, description });
+      if (api !== null) api.notification.error({ message: title, description });
       else console.warn('[Canopy/notify:error]', title, description);
     },
   },
@@ -118,10 +118,13 @@ export const feedback = {
   modal: {
     confirm(config: Parameters<ModalHookAPI['confirm']>[0]): void {
       const api = resolveApi();
-      if (api) api.modal.confirm(config);
+      if (api !== null) api.modal.confirm(config);
       else {
-        const ok = window.confirm(config.title ? String(config.title) : '确认？');
-        if (ok && config.onOk) config.onOk(null as never);
+        const fallbackTitle = typeof config.title === 'string' || typeof config.title === 'number'
+          ? String(config.title)
+          : '确认？';
+        const ok = window.confirm(fallbackTitle);
+        if (ok && config.onOk !== undefined) config.onOk(null);
       }
     },
   } satisfies { confirm(config: Parameters<ModalHookAPI['confirm']>[0]): void },

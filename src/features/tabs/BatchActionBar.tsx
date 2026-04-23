@@ -18,6 +18,7 @@ import {
   SelectOutlined,
 } from '@ant-design/icons';
 import { useSelectionStore, useTabsStore } from '@/store';
+import { archiveSelectedTabs } from '@/services';
 import { useT } from '@/shared/i18n';
 import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
@@ -34,8 +35,7 @@ export function BatchActionBar() {
   const resetAfterBatch = useSelectionStore((s) => s.resetAfterBatch);
   const exitSelectionMode = useSelectionStore((s) => s.exitSelectionMode);
   const closeMultipleTabs = useTabsStore((s) => s.closeMultipleTabs);
-  const discardTab = useTabsStore((s) => s.discardTab);
-  const tabs = useTabsStore((s) => s.tabs);
+  const discardMultipleTabs = useTabsStore((s) => s.discardMultipleTabs);
   const { t } = useT();
   const { token } = theme.useToken();
 
@@ -53,62 +53,34 @@ export function BatchActionBar() {
     }
   }, [selectedIds, closeMultipleTabs, resetAfterBatch]);
 
-  /** 批量休眠 */
+  /** 批量休眠。 */
   const handleBatchDiscard = useCallback(async () => {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
-    // 逐个休眠——discardTab 是单个操作
-    let failed = 0;
-    for (const id of ids) {
-      try {
-        await discardTab(id);
-      } catch {
-        failed++;
-      }
+    try {
+      await discardMultipleTabs(ids);
+      resetAfterBatch();
+    } catch {
+      // store 已统一反馈
     }
-    if (failed > 0) {
-      feedback.error(translate('tabs.discardFailed'));
-    }
-    resetAfterBatch();
-  }, [selectedIds, discardTab, resetAfterBatch]);
+  }, [selectedIds, discardMultipleTabs, resetAfterBatch]);
 
-  /** 批量归档：把选中的标签页保存为会话后关闭 */
+  /** 批量归档：统一走归档服务，避免直接写 storage。 */
   const handleBatchArchive = useCallback(async () => {
     const ids = Array.from(selectedIds);
-    const selectedTabs = tabs.filter((tab) => ids.includes(tab.id));
-    if (selectedTabs.length === 0) return;
+    if (ids.length === 0) return;
 
     try {
-      // 动态导入 nanoid（与 SW 保持一致）
-      const { nanoid } = await import('nanoid');
-      const session = {
-        id: nanoid(10),
-        name: `批量归档 ${new Date().toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`,
-        createdAt: Date.now(),
-        tabs: selectedTabs.map((tab) => ({
-          url: tab.url,
-          title: tab.title,
-          favIconUrl: tab.favIconUrl,
-          hostname: tab.hostname,
-          pinned: tab.pinned,
-        })),
-        tabCount: selectedTabs.length,
-      };
-
-      // 保存到 storage
-      const result = await chrome.storage.local.get('canopy_sessions');
-      const sessions: unknown[] = Array.isArray(result.canopy_sessions) ? result.canopy_sessions : [];
-      sessions.unshift(session);
-      await chrome.storage.local.set({ canopy_sessions: sessions });
-
-      // 关闭已归档标签
-      await closeMultipleTabs(ids);
-      feedback.success(translate('archive.archivedOk', { count: selectedTabs.length }));
+      const { archivedCount, closedCount } = await archiveSelectedTabs(ids);
+      feedback.success(translate('archive.archivedOk', { count: archivedCount }));
+      if (closedCount < archivedCount) {
+        feedback.warning(translate('archive.closeIncomplete', { count: archivedCount - closedCount }));
+      }
       resetAfterBatch();
     } catch (err) {
       feedback.error(translate('archive.archiveFailed'), err);
     }
-  }, [selectedIds, tabs, closeMultipleTabs, resetAfterBatch]);
+  }, [selectedIds, resetAfterBatch]);
 
   // 非多选模式或无选中时不渲染
   if (!selectionMode || count === 0) return null;

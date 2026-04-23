@@ -29,6 +29,7 @@ import {
   flattenBookmarks,
   type BookmarkNode,
 } from '@/chrome/bookmarks';
+import { createTab } from '@/chrome';
 import { useTabsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { feedback } from '@/shared/ui/feedback';
@@ -39,14 +40,22 @@ import { translate } from '@/shared/i18n/core';
  */
 function toTreeData(nodes: BookmarkNode[]): Array<Record<string, unknown>> {
   return nodes
-    .filter((node) => node.children || node.url)
-    .map((node) => ({
-      key: node.id,
-      title: node.title || (node.url ? (() => { try { return new URL(node.url).hostname; } catch { return node.url; } })() : '未命名'),
-      icon: node.url ? <BookOutlined style={{ fontSize: 12 }} /> : undefined,
-      children: node.children ? toTreeData(node.children) : undefined,
-      isLeaf: !!node.url,
-    }));
+    .filter((node) => (node.children?.length ?? 0) > 0 || (node.url ?? '') !== '')
+    .map((node) => {
+      const bookmarkUrl = node.url ?? '';
+      const hasBookmarkUrl = bookmarkUrl !== '';
+      const fallbackTitle = hasBookmarkUrl
+        ? (() => { try { return new URL(bookmarkUrl).hostname; } catch { return bookmarkUrl; } })()
+        : '未命名';
+
+      return {
+        key: node.id,
+        title: (node.title ?? '') !== '' ? node.title : fallbackTitle,
+        icon: hasBookmarkUrl ? <BookOutlined style={{ fontSize: 12 }} /> : undefined,
+        children: node.children !== undefined ? toTreeData(node.children) : undefined,
+        isLeaf: hasBookmarkUrl,
+      };
+    });
 }
 
 /**
@@ -99,18 +108,22 @@ export function BookmarkView() {
     setSearching(false);
   }, []);
 
-  /** 打开书签 */
-  const handleOpenBookmark = useCallback((url: string) => {
-    window.open(url, '_blank');
+  /** 打开书签。 */
+  const handleOpenBookmark = useCallback(async (url: string) => {
+    try {
+      await createTab({ url });
+    } catch (err) {
+      feedback.error(translate('bookmark.openFailed'), err);
+    }
   }, []);
 
   /** 收藏当前所有标签页 */
   const handleBookmarkAll = useCallback(async () => {
     let count = 0;
     for (const tab of tabs) {
-      if (tab.url && !tab.url.startsWith('chrome://') && !tab.url.startsWith('chrome-extension://')) {
+      if (!tab.url.startsWith('chrome://') && !tab.url.startsWith('chrome-extension://')) {
         const result = await createBookmark({ title: tab.title, url: tab.url });
-        if (result) count++;
+        if (result !== null) count++;
       }
     }
     feedback.success(translate('bookmark.bookmarkedAll', { count }));
@@ -171,7 +184,11 @@ export function BookmarkView() {
               <List.Item
                 key={item.id}
                 style={{ cursor: 'pointer', padding: '6px 8px' }}
-                onClick={() => item.url && handleOpenBookmark(item.url)}
+                onClick={() => {
+                  if (item.url) {
+                    void handleOpenBookmark(item.url);
+                  }
+                }}
               >
                 <List.Item.Meta
                   title={
@@ -201,7 +218,9 @@ export function BookmarkView() {
             if (node?.isLeaf) {
               // 通过 key 找到书签 URL
               const flat = allFlatBookmarks.find((b) => b.id === keys[0]);
-              if (flat?.url) handleOpenBookmark(flat.url);
+              if (flat?.url) {
+                void handleOpenBookmark(flat.url);
+              }
             }
           }}
         />

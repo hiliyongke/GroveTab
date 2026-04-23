@@ -24,6 +24,7 @@ import {
   Tooltip,
   Empty,
   Spin,
+  Alert,
 } from 'antd';
 import {
   SearchOutlined,
@@ -170,7 +171,6 @@ function AppHeader({
         </Text>
         {/* 吸顶搜索显示时，计数 Tag 淡出让位，避免挤占中部空间 */}
         <Tag
-          bordered
           style={{
             fontSize: 11,
             marginInlineStart: 6,
@@ -337,7 +337,7 @@ function HeroBar({
           placeholder={t('search.placeholder')}
           prefix={<SearchOutlined style={{ color: 'var(--ant-color-text-tertiary)' }} />}
           suffix={
-            <Tag bordered style={{ fontFamily: 'monospace', margin: 0 }}>
+            <Tag style={{ fontFamily: 'monospace', margin: 0 }}>
               ⌘K
             </Tag>
           }
@@ -375,6 +375,8 @@ function AppContent() {
 
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [checked, setChecked] = useState(false);
+  const [initError, setInitError] = useState<string | null>(null);
+  const [initRunId, setInitRunId] = useState(0);
   const [showArchive, setShowArchive] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   /** Hero 搜索框是否已滚出视野——用于驱动 Header 吸附搜索渐显 */
@@ -417,19 +419,60 @@ function AppContent() {
   const [showSearch, setShowSearch] = useState(searchFromHash);
 
   useEffect(() => {
-    const init = async () => {
-      await loadSettings();
-      await initArchiveStorage(); // IDB 降级检测（不阻塞关键路径）
-      await loadAllTabs();
-      await loadUndoRecords();
-      await loadMetadata();
-      const done = await hasCompletedOnboarding();
-      setShowOnboarding(!done);
-      setChecked(true);
-      void recordMetric('newtabOpens');
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        await loadSettings();
+
+        const [archiveStorageResult, tabsResult, undoResult, metadataResult, onboardingResult] = await Promise.allSettled([
+          initArchiveStorage(),
+          loadAllTabs(),
+          loadUndoRecords(),
+          loadMetadata(),
+          hasCompletedOnboarding(),
+        ]);
+
+        if (archiveStorageResult.status === 'rejected') {
+          console.warn('[Canopy] initArchiveStorage failed', archiveStorageResult.reason);
+        }
+        if (tabsResult.status === 'rejected') {
+          console.warn('[Canopy] loadAllTabs failed', tabsResult.reason);
+          if (!cancelled) {
+            setInitError(t('tabs.loadFailed'));
+          }
+        }
+        if (undoResult.status === 'rejected') {
+          console.warn('[Canopy] loadUndoRecords failed', undoResult.reason);
+        }
+        if (metadataResult.status === 'rejected') {
+          console.warn('[Canopy] loadMetadata failed', metadataResult.reason);
+        }
+        if (!cancelled) {
+          if (onboardingResult.status === 'fulfilled') {
+            setShowOnboarding(!onboardingResult.value);
+          } else {
+            console.warn('[Canopy] hasCompletedOnboarding failed', onboardingResult.reason);
+            setShowOnboarding(true);
+          }
+        }
+      } catch (err) {
+        console.warn('[Canopy] app initialization failed', err);
+        if (!cancelled) {
+          setInitError(t('tabs.loadFailed'));
+        }
+      } finally {
+        if (!cancelled) {
+          setChecked(true);
+        }
+        void recordMetric('newtabOpens');
+      }
+    })();
+
+    return () => {
+      cancelled = true;
     };
-    void init();
-  }, [loadAllTabs, loadSettings, loadUndoRecords, loadMetadata]);
+  }, [initRunId, loadAllTabs, loadMetadata, loadSettings, loadUndoRecords, t]);
 
   /** 页面内快捷键：通过可配置的 useKeybinding hook 注册 */
   useKeybinding('search', useCallback(() => setShowSearch(true), []));
@@ -466,7 +509,7 @@ function AppContent() {
   useEffect(() => {
     if (!checked) return;
     const node = heroSearchRef.current;
-    if (!node || typeof IntersectionObserver === 'undefined') return;
+    if (node === null || typeof IntersectionObserver === 'undefined') return;
     const io = new IntersectionObserver(
       ([entry]) => {
         setCompactSearchVisible(!entry.isIntersecting);
@@ -495,7 +538,10 @@ function AppContent() {
           justifyContent: 'center',
         }}
       >
-        <Spin tip={t('tabs.loading')} />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+          <Spin />
+          <Text type="secondary">{t('tabs.loading')}</Text>
+        </div>
       </div>
     );
   }
@@ -519,6 +565,27 @@ function AppContent() {
           sentinelRef={heroSearchRef}
         />
 
+        {initError !== null && (
+          <Alert
+            showIcon
+            type="warning"
+            description={initError}
+            action={(
+              <Button
+                size="small"
+                onClick={() => {
+                  setInitError(null);
+                  setChecked(false);
+                  setInitRunId((value) => value + 1);
+                }}
+              >
+                {t('context.retry')}
+              </Button>
+            )}
+            style={{ marginBottom: 16 }}
+          />
+        )}
+
         {showOnboarding && <OnboardingCard onDismiss={() => setShowOnboarding(false)} />}
 
         <TidySuggestionBar />
@@ -526,7 +593,10 @@ function AppContent() {
         <section>
           {loading ? (
             <div style={{ textAlign: 'center', padding: '80px 0' }}>
-              <Spin tip={t('tabs.loading')} />
+              <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+                <Spin />
+                <Text type="secondary">{t('tabs.loading')}</Text>
+              </div>
             </div>
           ) : tabCount === 0 ? (
             <Empty
@@ -542,7 +612,7 @@ function AppContent() {
             />
           ) : (() => {
             const ViewComponent = getViewComponentMap()[viewMode];
-            return ViewComponent
+            return ViewComponent !== undefined
               ? (
                   <Suspense fallback={<div style={{ textAlign: 'center', padding: '40px 0' }}><Spin /></div>}>
                     <ViewComponent />
