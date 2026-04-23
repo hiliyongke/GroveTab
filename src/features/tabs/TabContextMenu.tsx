@@ -16,11 +16,13 @@ import {
   TagOutlined,
   MessageOutlined,
   StopOutlined,
+  ColumnWidthOutlined,
 } from '@ant-design/icons';
 import { Button, Input, Tag, Divider, Card, theme } from 'antd';
 import { useMetadataStore, useTabsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { stringToColor } from '@/shared/utils/color';
+import { splitTabToSide } from '@/chrome';
 
 interface TabContextMenuProps {
   x: number;
@@ -154,6 +156,26 @@ export function TabContextMenu({ x, y, url, tabId, onClose }: TabContextMenuProp
             style={{ textAlign: 'left', justifyContent: 'flex-start', height: 32 }}
           >
             {t('tabs.discard')}
+          </Button>
+        )}
+
+        {/* 分屏——将标签页移到新窗口，左右各占 50% */}
+        {tabId != null && (
+          <Button
+            type="text"
+            block
+            icon={<ColumnWidthOutlined />}
+            onClick={async () => {
+              onClose();
+              try {
+                await splitTabToSide(tabId);
+              } catch {
+                /* splitTabToSide 内部已 safeCall */
+              }
+            }}
+            style={{ textAlign: 'left', justifyContent: 'flex-start', height: 32 }}
+          >
+            {t('context.splitScreen')}
           </Button>
         )}
 

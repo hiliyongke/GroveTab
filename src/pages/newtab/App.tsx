@@ -37,8 +37,11 @@ import {
   UnorderedListOutlined,
   TableOutlined,
   FireOutlined,
+  GroupOutlined,
+  BlockOutlined,
+  BookOutlined,
 } from '@ant-design/icons';
-import { useTabsStore, useSettingsStore, useUndoStore, useMetadataStore } from '@/store';
+import { useTabsStore, useSettingsStore, useUndoStore, useMetadataStore, useSelectionStore } from '@/store';
 import { useSwBroadcast, useResolvedTheme } from '@/shared/hooks';
 import { AntdThemeProvider } from '@/shared/ui/AntdThemeProvider';
 import { UndoToast } from '@/shared/ui/UndoToast';
@@ -49,7 +52,11 @@ import {
   CompactView,
   GridView,
   FrequencyView,
-  DedupInfoBar,
+  TidySuggestionBar,
+  BatchActionBar,
+  TabGroupView,
+  WindowView,
+  BookmarkView,
 } from '@/features/tabs';
 import { SearchBox } from '@/features/search';
 import { OnboardingCard, ArchivePanel } from '@/features/sessions';
@@ -61,7 +68,7 @@ import { resolveGradient, type GradientPresetId } from '@/shared/theme/gradient-
 const { Header, Content } = Layout;
 const { Text } = Typography;
 
-type ViewMode = 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency';
+type ViewMode = 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'bookmarks';
 
 /**
  * 顶栏：品牌 + 次级操作（归档 / 明暗切换 / 设置）
@@ -306,12 +313,12 @@ function HeroBar({
       style={{
         padding: '28px 0 20px',
         display: 'flex',
-        gap: 16,
-        alignItems: 'center',
-        flexWrap: 'wrap',
+        flexDirection: 'column',
+        gap: 12,
       }}
     >
-      <div ref={sentinelRef} style={{ flex: '1 1 280px', minWidth: 280 }}>
+      {/* 第一行：搜索框 */}
+      <div ref={sentinelRef}>
         <Input
           size="large"
           readOnly
@@ -331,12 +338,16 @@ function HeroBar({
         />
       </div>
 
+      {/* 第二行：视图切换 Segmented（预览图模式可通过设置面板切换） */}
       <Segmented<ViewMode>
         size="large"
         value={viewMode}
         onChange={onViewChange}
         options={[
           { value: 'domain', icon: <AppstoreOutlined />, label: t('view.domain') },
+          { value: 'tabgroup', icon: <GroupOutlined />, label: t('view.tabgroup') },
+          { value: 'window', icon: <BlockOutlined />, label: t('view.window') },
+          { value: 'bookmarks', icon: <BookOutlined />, label: t('view.bookmarks') },
           { value: 'timeline', icon: <ClockCircleOutlined />, label: t('view.timeline') },
           { value: 'compact', icon: <UnorderedListOutlined />, label: t('view.compact') },
           { value: 'grid', icon: <TableOutlined />, label: t('view.grid') },
@@ -367,14 +378,15 @@ function AppContent() {
    * 不需要刷新。切视图时通过 updateSettings 写回 store，两个入口自动同步。
    */
   const defaultView = useSettingsStore((s) => s.settings.defaultView);
-  /** 防御旧版残留的 'kanban' 值——类型已移除但磁盘可能存有 */
-  const validViews: ViewMode[] = ['domain', 'timeline', 'compact', 'grid', 'frequency'];
+  /** 防御旧版残留的 'kanban'/'preview' 值——类型已移除但磁盘可能存有 */
+  const validViews: ViewMode[] = ['domain', 'timeline', 'compact', 'grid', 'frequency', 'tabgroup', 'window', 'bookmarks'];
   const viewMode: ViewMode = validViews.includes(defaultView as ViewMode) ? (defaultView as ViewMode) : 'domain';
 
   /** 背景预设 → CSS gradient，统一走 resolveGradient 消灭硬编码 */
   const gradientPreset = useSettingsStore((s) => s.settings.gradientPreset);
+  const customGradient = useSettingsStore((s) => s.settings.customGradient);
   const resolvedDark = useResolvedTheme() === 'dark';
-  const layoutBackground = resolveGradient(gradientPreset as GradientPresetId, resolvedDark);
+  const layoutBackground = resolveGradient(gradientPreset as GradientPresetId, resolvedDark, customGradient);
   const { t } = useT();
 
   useSwBroadcast();
@@ -430,6 +442,31 @@ function AppContent() {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, []);
+
+  /**
+   * 多选快捷键
+   *   - Escape：退出多选模式
+   *   - Ctrl/Cmd+A：全选当前视图所有标签
+   */
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const selectionStore = useSelectionStore.getState();
+      // Escape 退出多选
+      if (e.key === 'Escape' && selectionStore.selectionMode) {
+        e.preventDefault();
+        selectionStore.exitSelectionMode();
+        return;
+      }
+      // Ctrl/Cmd+A 全选
+      if ((e.metaKey || e.ctrlKey) && e.key === 'a' && selectionStore.selectionMode) {
+        e.preventDefault();
+        const allIds = tabs.map((t) => t.id);
+        selectionStore.selectAll(allIds);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [tabs]);
 
   /**
    * 滚动吸附搜索
@@ -498,7 +535,7 @@ function AppContent() {
 
         {showOnboarding && <OnboardingCard onDismiss={() => setShowOnboarding(false)} />}
 
-        <DedupInfoBar />
+        <TidySuggestionBar />
 
         <section>
           {loading ? (
@@ -519,6 +556,12 @@ function AppContent() {
             />
           ) : viewMode === 'domain' ? (
             <DomainGroupView />
+          ) : viewMode === 'tabgroup' ? (
+            <TabGroupView />
+          ) : viewMode === 'window' ? (
+            <WindowView />
+          ) : viewMode === 'bookmarks' ? (
+            <BookmarkView />
           ) : viewMode === 'timeline' ? (
             <TimelineView />
           ) : viewMode === 'compact' ? (
@@ -532,6 +575,8 @@ function AppContent() {
       </Content>
 
       <UndoToast />
+
+      <BatchActionBar />
 
       <SearchBox open={showSearch} onOpenChange={setShowSearch} />
       <ArchivePanel open={showArchive} onOpenChange={setShowArchive} />

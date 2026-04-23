@@ -120,8 +120,22 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
   },
 ];
 
+/**
+ * 将色标数组 + 角度拼接成 CSS linear-gradient 字符串
+ */
+export function buildGradient(stops: Array<{ color: string; position: number }>, angle: number): string {
+  const sorted = [...stops].sort((a, b) => a.position - b.position);
+  const colorStops = sorted.map((s) => `${s.color} ${Math.round(s.position * 100)}%`).join(', ');
+  return `linear-gradient(${angle}deg, ${colorStops})`;
+}
+
 /** 根据 ID 和当前模式快速查找渐变 CSS */
-export function resolveGradient(id: GradientPresetId, isDark: boolean): string {
+export function resolveGradient(id: GradientPresetId, isDark: boolean, customGradient?: { stops: Array<{ color: string; position: number }>; angle: number; darkStops?: Array<{ color: string; position: number }>; darkAngle?: number }): string {
+  if (id === 'custom' && customGradient) {
+    const stops = (isDark && customGradient.darkStops) ? customGradient.darkStops : customGradient.stops;
+    const angle = (isDark && customGradient.darkAngle != null) ? customGradient.darkAngle : customGradient.angle;
+    return buildGradient(stops, angle);
+  }
   const preset = GRADIENT_PRESETS.find((p) => p.id === id);
   if (!preset) return 'var(--ant-color-bg-layout)';
   return isDark ? preset.dark : preset.light;

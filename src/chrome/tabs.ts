@@ -59,7 +59,7 @@ function normalizeError(err: unknown, label: string): Error {
 const DEFAULT_TIMEOUT = 5000;
 
 /** 带超时 + 错误归一化的 chrome API 调用器 */
-function safeCall<T>(label: string, fn: () => Promise<T>, timeout = DEFAULT_TIMEOUT): Promise<T> {
+export function safeCall<T>(label: string, fn: () => Promise<T>, timeout = DEFAULT_TIMEOUT): Promise<T> {
   try {
     return withTimeout(fn(), timeout, label);
   } catch (err) {
@@ -246,4 +246,135 @@ export function getFaviconUrl(url: string, size: number = 32): string {
     typeof chrome !== 'undefined' && chrome?.runtime?.id ? chrome.runtime.id : '';
   if (!runtimeId) return '';
   return `chrome-extension://${runtimeId}/_favicon/?pageUrl=${encodeURIComponent(url)}&size=${size}`;
+}
+
+// ── Tab Groups ────────────────────────────────────────
+
+/** Chrome 原生 Tab Group 信息 */
+export interface ChromeTabGroup {
+  id: number;
+  title?: string;
+  color: string;
+  collapsed: boolean;
+  windowId: number;
+}
+
+/**
+ * 获取当前窗口的所有 Tab Group
+ *
+ * chrome.tabGroups API 需要 `tabGroups` permission。
+ * 失败时返回空数组（兼容无权限或非扩展上下文）。
+ */
+export async function queryTabGroups(windowId?: number): Promise<ChromeTabGroup[]> {
+  try {
+    const opts: chrome.tabGroups.QueryInfo = {};
+    if (windowId != null) opts.windowId = windowId;
+    return safeCall('tabGroups.query', () => chrome.tabGroups.query(opts));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * 更新 Tab Group 的标题和颜色
+ */
+export async function updateTabGroup(
+  groupId: number,
+  updateProperties: { title?: string; color?: 'grey' | 'blue' | 'red' | 'yellow' | 'green' | 'pink' | 'purple' | 'cyan' | 'orange'; collapsed?: boolean },
+): Promise<void> {
+  await safeCall('tabGroups.update', () =>
+    chrome.tabGroups.update(groupId, updateProperties),
+  );
+}
+
+/**
+ * 将指定标签页加入某个 Chrome 原生 Tab Group
+ */
+export async function groupTabs(tabIds: [number, ...number[]], groupId?: number): Promise<number> {
+  return safeCall('tabs.group', () =>
+    chrome.tabs.group({ tabIds, groupId }),
+  );
+}
+
+/**
+ * 将指定标签页从 Tab Group 中移出
+ */
+export async function ungroupTabs(tabIds: [number, ...number[]]): Promise<void> {
+  await safeCall('tabs.ungroup', () => chrome.tabs.ungroup(tabIds));
+}
+
+// ── Split Screen ──────────────────────────────────────
+
+/**
+ * 分屏：将指定标签页移到新窗口，并将原窗口和新窗口各调整到屏幕 50%
+ *
+ * 流程：
+ *   1. 获取原窗口位置/尺寸
+ *   2. 将标签移到新窗口（chrome.windows.create）
+ *   3. 原窗口缩小到左半屏
+ *   4. 新窗口缩小到右半屏
+ *
+ * @returns 新窗口的 ID
+ */
+export async function splitTabToSide(tabId: number): Promise<number> {
+  // 1. 获取原 tab 和窗口信息
+  const tab = await safeCall('tabs.get', () => chrome.tabs.get(tabId));
+  const originWindow = await safeCall('windows.get', () => chrome.windows.get(tab.windowId));
+  const ol = originWindow.left ?? 0;
+  const ot = originWindow.top ?? 0;
+  const ow = originWindow.width ?? screen.availWidth;
+  const oh = originWindow.height ?? screen.availHeight;
+
+  // 2. 将 tab 移到新窗口
+  const newWindow = await safeCall('windows.create', () =>
+    chrome.windows.create({ tabId, focused: true }),
+  );
+  if (!newWindow?.id) throw new Error('[Canopy/chrome] splitTabToSide: new window has no id');
+
+  // 3. 计算半屏位置
+  const halfWidth = Math.floor(ow / 2);
+
+  // 4. 原窗口 → 左半屏
+  await safeCall('windows.update(origin)', () =>
+    chrome.windows.update(tab.windowId, {
+      left: ol,
+      top: ot,
+      width: halfWidth,
+      height: oh,
+      focused: false,
+    }),
+  );
+
+  // 5. 新窗口 → 右半屏
+  await safeCall('windows.update(new)', () =>
+    chrome.windows.update(newWindow.id!, {
+      left: ol + halfWidth,
+      top: ot,
+      width: halfWidth,
+      height: oh,
+      focused: true,
+    }),
+  );
+
+  return newWindow.id;
+}
+
+// ── Tab Move ──────────────────────────────────────────
+
+/**
+ * 移动标签页到指定窗口的指定位置
+ *
+ * 用于跨窗口移动标签（拖拽、合并窗口等场景）。
+ * `index` 设为 -1 表示追加到窗口末尾。
+ */
+export async function moveTab(tabId: number, windowId: number, index: number = -1): Promise<chrome.tabs.Tab> {
+  return safeCall('tabs.move', () => chrome.tabs.move(tabId, { windowId, index }));
+}
+
+/**
+ * 批量移动标签页到指定窗口
+ */
+export async function moveTabs(tabIds: number[], windowId: number, index: number = -1): Promise<chrome.tabs.Tab[]> {
+  if (tabIds.length === 0) return [];
+  return safeCall('tabs.move', () => chrome.tabs.move(tabIds, { windowId, index }));
 }

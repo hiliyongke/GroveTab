@@ -10,9 +10,9 @@
  *   - 所有交互走 antd Button + Tag + Tooltip 原生组件
  */
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import type { LiveTab } from '@/shared/types';
-import { Button, Tag, Tooltip, theme } from 'antd';
+import { Button, Tag, Tooltip, Checkbox, theme } from 'antd';
 import {
   GlobalOutlined,
   SoundOutlined,
@@ -22,7 +22,7 @@ import {
   SelectOutlined,
 } from '@ant-design/icons';
 import { useT } from '@/shared/i18n';
-import { useMetadataStore } from '@/store';
+import { useMetadataStore, useSelectionStore } from '@/store';
 import { stringToColor } from '@/shared/utils/color';
 import { formatUrlForDisplay } from '@/shared/utils/url-display';
 import { TabContextMenu } from './TabContextMenu';
@@ -55,17 +55,32 @@ interface TabItemProps {
    * 行尾附加节点（状态图标与关闭按钮之间），用于显示时间戳等辅助信息
    */
   trailing?: React.ReactNode;
+  /**
+   * 是否支持多选（由父视图决定是否启用）。
+   * 启用后行首显示 Checkbox，长按/Ctrl+点击/Shift+点击触发多选。
+   */
+  selectable?: boolean;
+  /**
+   * 当前视图内所有可见 tab ID 列表（用于 Shift 范围选）。
+   * 仅在 selectable=true 时需要传入。
+   */
+  visibleTabIds?: number[];
 }
 
 /**
  * 单条标签行
  */
-export function TabItem({ tab, onJump, onClose, leading, showHostname = false, hideFavicon = false, showUrlHint = false, trailing }: TabItemProps) {
+export function TabItem({ tab, onJump, onClose, leading, showHostname = false, hideFavicon = false, showUrlHint = false, trailing, selectable = false, visibleTabIds = [] }: TabItemProps) {
   const { t } = useT();
   const { token } = theme.useToken();
   const isPinned = useMetadataStore((s) => s.isPinned(tab.url));
   const tags = useMetadataStore((s) => s.getTags(tab.url));
   const note = useMetadataStore((s) => s.getNote(tab.url));
+  /** 多选状态 */
+  const selectionMode = useSelectionStore((s) => s.selectionMode);
+  const isSelected = useSelectionStore((s) => s.selectedIds.has(tab.id));
+  const toggleSelect = useSelectionStore((s) => s.toggleSelect);
+  const enterSelectionMode = useSelectionStore((s) => s.enterSelectionMode);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [faviconError, setFaviconError] = useState(false);
   const [hovered, setHovered] = useState(false);
@@ -75,7 +90,30 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
   /** 友好展示串：路径 + 关键参数，失败回落到原 URL */
   const urlHint = showUrlHint ? formatUrlForDisplay(tab.url) : '';
 
-  const handleClick = () => onJump(tab.id, tab.windowId);
+  /** 多选模式下点击逻辑：Ctrl/Cmd+点击 或 selectionMode 已开启时切换选中 */
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    // 多选模式下的点击逻辑
+    if (selectable && (e.ctrlKey || e.metaKey || selectionMode)) {
+      e.preventDefault();
+      toggleSelect(tab.id, e.shiftKey, visibleTabIds);
+      return;
+    }
+    // 正常点击：跳转标签
+    onJump(tab.id, tab.windowId);
+  }, [selectable, selectionMode, tab.id, tab.windowId, toggleSelect, visibleTabIds, onJump]);
+
+  /** 长按进入多选模式 */
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // 如果支持多选且不在多选模式，右键也作为多选入口之一
+    if (selectable && !selectionMode) {
+      enterSelectionMode();
+      toggleSelect(tab.id, false, visibleTabIds);
+      return;
+    }
+    setContextMenu({ x: e.clientX, y: e.clientY });
+  }, [selectable, selectionMode, tab.id, visibleTabIds, enterSelectionMode, toggleSelect]);
   /**
    * 关闭按钮 handler：
    *   - onClose (即 store.closeSingleTab) 是 async，失败会 throw
@@ -89,11 +127,8 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
     });
   };
 
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setContextMenu({ x: e.clientX, y: e.clientY });
-  };
+  /** 选中态背景色 */
+  const selectedBg = token.colorPrimaryBg;
 
   return (
     <>
@@ -108,7 +143,12 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            handleClick();
+            // 多选模式下空格/回车切换选中
+            if (selectable && selectionMode) {
+              toggleSelect(tab.id, false, visibleTabIds);
+              return;
+            }
+            onJump(tab.id, tab.windowId);
           }
         }}
         onContextMenu={handleContextMenu}
@@ -121,12 +161,28 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
           padding: showUrlHint ? '6px 10px' : '0 10px',
           borderRadius: token.borderRadius,
           cursor: 'pointer',
-          backgroundColor: hovered ? token.colorFillTertiary : 'transparent',
+          backgroundColor: isSelected
+            ? selectedBg
+            : hovered
+              ? token.colorFillTertiary
+              : 'transparent',
           transition: `background-color ${token.motionDurationFast}`,
           outline: 'none',
           opacity: isDiscarded ? 0.5 : 1,
         }}
       >
+        {/* 多选 Checkbox——仅在 selectable 且处于多选模式时显示 */}
+        {selectable && (selectionMode || isSelected) && (
+          <Checkbox
+            checked={isSelected}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleSelect(tab.id, e.shiftKey, visibleTabIds);
+            }}
+            style={{ flexShrink: 0 }}
+          />
+        )}
+
         {leading}
 
         {/* Favicon（可通过 hideFavicon 整体隐藏，行内元素间距由父级 gap 负责） */}
@@ -291,6 +347,7 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
         </Tooltip>
       </div>
 
+      {/* 右键菜单——仅非多选模式下显示完整菜单 */}
       {contextMenu && (
         <TabContextMenu
           x={contextMenu.x}

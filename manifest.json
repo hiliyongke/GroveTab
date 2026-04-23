@@ -10,9 +10,11 @@
     "favicon",
     "alarms",
     "sessions",
-    "contextMenus"
+    "contextMenus",
+    "tabGroups",
+    "activeTab"
   ],
-  "optional_permissions": ["history"],
+  "optional_permissions": ["history", "bookmarks"],
   "host_permissions": [],
   "optional_host_permissions": ["<all_urls>"],
   "chrome_url_overrides": {

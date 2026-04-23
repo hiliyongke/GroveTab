@@ -100,6 +100,20 @@ Canopy 是 Chrome/Edge 扩展的新标签页替代（newtab override），核心
   - 旧 aurora→slate / sunrise→warm 自动迁移
 
 - **竞品差距（2026-04-23 调研）**
-  - **已实现的高优特性**：全局快捷键（manifest commands + SW 监听 + 设置面板展示）、域名分组内拖拽排序（motion Reorder.Group/Item）、标签休眠/冻结（chrome.tabs.discard + 右键菜单 + 整组休眠）
-  - **仍未实现的中优特性**：分组间拖拽（CSS multi-column 冲突）、Chrome 原生 Tab Groups 集成、多窗口管理面板、历史记录集成
-  - **低优/暂不落地**：云同步、AI 功能、团队协作工作区
+  - **已实现的高优特性**：全局快捷键、域名分组内拖拽排序、标签休眠/冻结
+  - **Phase 05-12 全量补齐 —— 2026-04-23** ✅
+    - Phase 05：多选与批量操作（selection-slice + BatchActionBar + Ctrl/Cmd+A 全选 + Escape 退出）
+    - Phase 06：智能整理建议（idle-detect + TidySuggestionBar 合并重复+休眠闲置）
+    - Phase 07：Chrome 原生 Tab Groups 集成（tabGroups permission + TabGroupView + groupTitle/groupColor 注入 LiveTab）
+    - Phase 08：多窗口管理面板（WindowView + moveTab/moveTabs + 合并到当前窗口）
+    - Phase 09：标签页预览缩略图（TabPreview + captureVisibleTab + session 缓存 + 设置开关）
+    - Phase 10：书签集成（optional bookmarks permission + BookmarkView + 树形浏览+搜索+收藏）
+    - Phase 11：标签页分屏（splitTabToSide + 右键菜单"分屏显示" + 50/50 自动布局）
+    - Phase 12：自定义渐变编辑器（ColorPicker+Slider色标编辑+角度滑块+深色模式独立配色+实时预览）
+    - 最终状态：tsc 0 error / build 485ms / lint 0 error 4 warning
+    - 设置面板 defaultView 下拉更新为 8 个视图（domain/tabgroup/window/bookmarks/timeline/compact/grid/frequency）
+    - resolveGradient 支持 customGradient 参数
+    - TidySuggestionBar 修复 rules-of-hooks（early return 移到 hooks 之后）
+    - TabPreview 修复 set-state-in-effect（改用 onOpenChange 事件回调）
+  - **仍未实现的特性**：分组间拖拽（CSS multi-column 冲突）、历史记录集成
+  - **暂不落地的联网特性**：云同步、AI 功能、团队协作工作区

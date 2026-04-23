@@ -19,6 +19,10 @@ export interface LiveTab {
   isCurrentWindow: boolean;
   /** 标签页是否已被丢弃（休眠），丢弃后释放内存但保留位置 */
   discarded?: boolean;
+  /** Chrome 原生 Tab Group 标题（仅当 groupId !== -1 时有值） */
+  groupTitle?: string;
+  /** Chrome 原生 Tab Group 颜色（仅当 groupId !== -1 时有值） */
+  groupColor?: string;
 }
 
 /** Special URL classification */
@@ -72,7 +76,7 @@ export interface StorageMeta {
 /** User settings */
 export interface UserSettings {
   overrideNewTab: boolean;
-  defaultView: 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency';
+  defaultView: 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'bookmarks';
   theme: 'light' | 'dark' | 'system';
   /**
    * 背景渐变预设：
@@ -98,7 +102,18 @@ export interface UserSettings {
     | 'deepspace'
     | 'midnight'
     | 'custom';
-  customGradient?: string;
+  /**
+   * 自定义渐变配置（仅 gradientPreset='custom' 时生效）
+   *   - stops：色标数组，每项 { color: '#hex', position: 0~1 }
+   *   - angle：渐变角度（度），默认 135
+   *   - darkStops / darkAngle：深色模式独立配置，不填则用 stops / angle 的暗化版本
+   */
+  customGradient?: {
+    stops: Array<{ color: string; position: number }>;
+    angle: number;
+    darkStops?: Array<{ color: string; position: number }>;
+    darkAngle?: number;
+  };
   showIncognito: boolean;
   language: 'zh-CN' | 'en';
   /** 域名分组视图的列数；'auto' 表示由容器宽度自动决定（默认），1–6 为手动锁定 */

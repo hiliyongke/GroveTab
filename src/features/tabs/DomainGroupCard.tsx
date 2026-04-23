@@ -399,6 +399,8 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
                   onClose={closeSingleTab}
                   hideFavicon={!showItemFavicon}
                   showUrlHint={ambiguousIds.has(tab.id)}
+                  selectable
+                  visibleTabIds={tabOrder.map((t) => t.id)}
                 />
               </Reorder.Item>
             ))}

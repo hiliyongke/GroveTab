@@ -17,7 +17,7 @@
 
 import { create } from 'zustand';
 import type { LiveTab, SwBroadcastMessage, WindowInfo, ClosedTabSnapshot } from '@/shared/types';
-import { queryAllTabs, getAllWindows, activateTab, closeTab, closeTabs, getFaviconUrl, discardTab as chromeDiscardTab, discardTabs as chromeDiscardTabs } from '@/chrome';
+import { queryAllTabs, getAllWindows, activateTab, closeTab, closeTabs, getFaviconUrl, discardTab as chromeDiscardTab, discardTabs as chromeDiscardTabs, queryTabGroups, type ChromeTabGroup } from '@/chrome';
 import { extractHostname, shouldDisplayUrl, isSelfNewTabPage } from '@/chrome';
 import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
@@ -127,14 +127,34 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       set({ loading: true, error: null });
     }
     try {
-      const [allTabs, currentWindow] = await Promise.all([
+      const [allTabs, currentWindow, tabGroupsResult] = await Promise.all([
         queryAllTabs(),
         chrome.windows.getCurrent(),
+        queryTabGroups(), // 获取所有 Tab Group 信息
       ]);
 
       const currentWindowId = currentWindow.id!;
+
+      /** 构建 groupId → groupInfo 的快速查找表 */
+      const groupMap = new Map<number, ChromeTabGroup>();
+      for (const g of tabGroupsResult) {
+        groupMap.set(g.id, g);
+      }
+
       const liveTabs = allTabs
-        .map((tab) => tabToLiveTab(tab, currentWindowId))
+        .map((tab) => {
+          const liveTab = tabToLiveTab(tab, currentWindowId);
+          if (!liveTab) return null;
+          // 注入 Tab Group 信息
+          if (liveTab.groupId !== -1) {
+            const group = groupMap.get(liveTab.groupId);
+            if (group) {
+              liveTab.groupTitle = group.title;
+              liveTab.groupColor = group.color;
+            }
+          }
+          return liveTab;
+        })
         .filter(Boolean) as LiveTab[];
 
       const allWindows = await getAllWindows();
