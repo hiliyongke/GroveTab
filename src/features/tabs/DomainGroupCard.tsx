@@ -56,10 +56,11 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
   /** 关闭整个分组的 in-flight 标记，防止重复点击 + 驱动 Button loading */
   const [closing, setClosing] = useState(false);
   /**
-   * 分组内标签排序 state——初始跟随 group.tabs（按 lastAccessed 降序），
-   * 用户拖拽后覆盖为手动顺序。group.tabs 变化时自动同步（新增/删除标签后）。
+   * 用户手动拖拽后的标签 ID 顺序。
+   * null 表示未拖拽过，此时 tabOrder 直接等于 group.tabs。
+   * 用 ID 而非完整对象存储，避免 group.tabs 更新（关闭/新增）时产生 stale state。
    */
-  const [tabOrder, setTabOrder] = useState(group.tabs);
+  const [orderOverride, setOrderOverride] = useState<number[] | null>(null);
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
   const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
   const closeDomainGroup = useTabsStore((s) => s.closeDomainGroup);
@@ -145,31 +146,39 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
   const ambiguousIds = useMemo(() => findAmbiguousTitleIds(group.tabs), [group.tabs]);
 
   /**
-   * 当 group.tabs 外部变化（关闭/新增/更新）时同步 tabOrder。
-   * 采用"合并策略"：已有 id 保留用户拖拽位置，新增 id 追加到末尾，
-   * 删除的 id 自动消失。
+   * 派生 tabOrder：优先按 orderOverride 中的 ID 顺序排，
+   * 再追加 group.tabs 中未在 orderOverride 里出现的（新增标签）。
+   * 已删除的标签 ID 会在 freshMap.get(id) 时自然过滤掉。
+   * 此值在渲染期通过 useMemo 计算，不触发 setState，符合 React 19 纪律。
    */
-  if (
-    tabOrder.length !== group.tabs.length ||
-    tabOrder.some((t, i) => t.id !== group.tabs[i]?.id)
-  ) {
-    // 用 group.tabs 的最新数据重建，但尽量保留用户手动排序
-    const ordered = new Map(tabOrder.map((t) => [t.id, t]));
+  const tabOrder = useMemo(() => {
+    if (!orderOverride) return group.tabs;
+
+    const freshMap = new Map(group.tabs.map((t) => [t.id, t]));
     const result: typeof group.tabs = [];
-    // 先按 tabOrder 中已有的顺序排
-    for (const t of tabOrder) {
-      const fresh = group.tabs.find((gt) => gt.id === t.id);
-      if (fresh) result.push(fresh);
+
+    for (const id of orderOverride) {
+      const tab = freshMap.get(id);
+      if (tab) {
+        result.push(tab);
+        freshMap.delete(id);
+      }
     }
-    // 再追加新增的 tab（不在 tabOrder 里的）
-    for (const t of group.tabs) {
-      if (!ordered.has(t.id)) result.push(t);
+
+    for (const tab of group.tabs) {
+      if (freshMap.has(tab.id)) result.push(tab);
     }
-    // 只在确实不同时才 set，避免无限循环
-    if (result.length !== tabOrder.length || result.some((t, i) => t.id !== tabOrder[i]?.id)) {
-      setTabOrder(result);
-    }
-  }
+
+    return result;
+  }, [group.tabs, orderOverride]);
+
+  /** 拖拽完成时只更新 ID 顺序，不直接操作完整 tab 对象 */
+  const handleReorder = useCallback(
+    (newOrder: typeof group.tabs) => {
+      setOrderOverride(newOrder.map((t) => t.id));
+    },
+    [],
+  );
 
   return (
     <Card
@@ -383,7 +392,7 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
           <Reorder.Group
             axis="y"
             values={tabOrder}
-            onReorder={setTabOrder}
+            onReorder={handleReorder}
             style={{ display: 'flex', flexDirection: 'column', gap: 2, listStyle: 'none', margin: 0, padding: 0 }}
           >
             {tabOrder.map((tab) => (

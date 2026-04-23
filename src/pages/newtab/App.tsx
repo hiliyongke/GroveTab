@@ -32,14 +32,6 @@ import {
   SunOutlined,
   MoonFilled,
   DesktopOutlined,
-  AppstoreOutlined,
-  ClockCircleOutlined,
-  UnorderedListOutlined,
-  TableOutlined,
-  FireOutlined,
-  GroupOutlined,
-  BlockOutlined,
-  BookOutlined,
 } from '@ant-design/icons';
 import { useTabsStore, useSettingsStore, useUndoStore, useMetadataStore, useSelectionStore } from '@/store';
 import { useSwBroadcast, useResolvedTheme } from '@/shared/hooks';
@@ -64,11 +56,12 @@ import { SettingsPanel } from '@/features/settings';
 import { hasCompletedOnboarding } from '@/repositories';
 import { recordMetric } from '@/shared/utils/metrics';
 import { resolveGradient, type GradientPresetId } from '@/shared/theme/gradient-presets';
+import { VIEW_CONFIGS, VALID_VIEWS, type ViewMode } from '@/shared/config/views';
 
 const { Header, Content } = Layout;
 const { Text } = Typography;
 
-type ViewMode = 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'bookmarks';
+
 
 /**
  * 顶栏：品牌 + 次级操作（归档 / 明暗切换 / 设置）
@@ -343,16 +336,11 @@ function HeroBar({
         size="large"
         value={viewMode}
         onChange={onViewChange}
-        options={[
-          { value: 'domain', icon: <AppstoreOutlined />, label: t('view.domain') },
-          { value: 'tabgroup', icon: <GroupOutlined />, label: t('view.tabgroup') },
-          { value: 'window', icon: <BlockOutlined />, label: t('view.window') },
-          { value: 'bookmarks', icon: <BookOutlined />, label: t('view.bookmarks') },
-          { value: 'timeline', icon: <ClockCircleOutlined />, label: t('view.timeline') },
-          { value: 'compact', icon: <UnorderedListOutlined />, label: t('view.compact') },
-          { value: 'grid', icon: <TableOutlined />, label: t('view.grid') },
-          { value: 'frequency', icon: <FireOutlined />, label: t('view.frequency') },
-        ]}
+        options={VIEW_CONFIGS.map((v) => ({
+          value: v.id,
+          icon: <v.Icon />,
+          label: t(v.labelKey as Parameters<typeof t>[0]),
+        }))}
       />
     </section>
   );
@@ -378,9 +366,9 @@ function AppContent() {
    * 不需要刷新。切视图时通过 updateSettings 写回 store，两个入口自动同步。
    */
   const defaultView = useSettingsStore((s) => s.settings.defaultView);
-  /** 防御旧版残留的 'kanban'/'preview' 值——类型已移除但磁盘可能存有 */
-  const validViews: ViewMode[] = ['domain', 'timeline', 'compact', 'grid', 'frequency', 'tabgroup', 'window', 'bookmarks'];
-  const viewMode: ViewMode = validViews.includes(defaultView as ViewMode) ? (defaultView as ViewMode) : 'domain';
+  const viewMode: ViewMode = VALID_VIEWS.includes(defaultView as ViewMode)
+    ? (defaultView as ViewMode)
+    : 'domain';
 
   /** 背景预设 → CSS gradient，统一走 resolveGradient 消灭硬编码 */
   const gradientPreset = useSettingsStore((s) => s.settings.gradientPreset);
