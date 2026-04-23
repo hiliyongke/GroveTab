@@ -13,7 +13,7 @@ import { useTabsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { findAmbiguousTitleIds } from '@/shared/utils/url-display';
 import { TabItem } from './TabItem';
-import { FireOutlined } from '@ant-design/icons';
+import { Flame } from 'lucide-react';
 import { theme } from 'antd';
 
 const MAX_DISPLAY = 30;
@@ -49,7 +49,7 @@ export function FrequencyView() {
           padding: '0 10px',
         }}
       >
-        <FireOutlined style={{ fontSize: 14, color: token.colorPrimary }} />
+        <Flame size={14} style={{ color: token.colorPrimary }} />
         <span
           style={{
             fontSize: 11.5,

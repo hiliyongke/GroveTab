@@ -16,7 +16,6 @@ import { useEffect, useState, useCallback, useRef, lazy, Suspense } from 'react'
 import {
   Layout,
   Input,
-  Segmented,
   Space,
   Typography,
   Tag,
@@ -27,13 +26,13 @@ import {
   Alert,
 } from 'antd';
 import {
-  SearchOutlined,
-  SettingOutlined,
-  SaveOutlined,
-  SunOutlined,
-  MoonFilled,
-  DesktopOutlined,
-} from '@ant-design/icons';
+  Search,
+  Settings,
+  Save,
+  Sun,
+  Moon,
+  Monitor,
+} from 'lucide-react';
 import { theme as antdTheme } from 'antd';
 import { iconColor } from '@/shared/utils/icon-colors';
 import { useTabsStore, useSettingsStore, useUndoStore, useMetadataStore, useSelectionStore } from '@/store';
@@ -46,7 +45,7 @@ import { I18nProvider, useT } from '@/shared/i18n';
 import { DomainGroupView } from '@/features/tabs/DomainGroupView';
 import { TidySuggestionBar } from '@/features/tabs/TidySuggestionBar';
 import { BatchActionBar } from '@/features/tabs/BatchActionBar';
-import { WorkspaceOverview, SelectionModeNotice } from '@/features/tabs/WorkspaceOverview';
+import { SelectionModeNotice } from '@/features/tabs/WorkspaceOverview';
 
 /** 懒加载非默认视图——直接导入文件而非 barrel，确保每个视图独立拆 chunk */
 const TimelineView = lazy(() => import('@/features/tabs/TimelineView').then((m) => ({ default: m.TimelineView })));
@@ -57,14 +56,15 @@ const TabGroupView = lazy(() => import('@/features/tabs/TabGroupView').then((m) 
 const WindowView = lazy(() => import('@/features/tabs/WindowView').then((m) => ({ default: m.WindowView })));
 const BookmarkView = lazy(() => import('@/features/tabs/BookmarkView').then((m) => ({ default: m.BookmarkView })));
 import { OnboardingCard } from '@/features/sessions/OnboardingCard';
-import { feedback } from '@/shared/ui/feedback';
 import { hasCompletedOnboarding } from '@/repositories';
 import type { ArchivedSession } from '@/shared/types';
 import { recordMetric } from '@/shared/utils/metrics';
-import { archiveCurrentWindowTabs, getArchivedSessions, initArchiveStorage } from '@/services/archive-service';
+import { getArchivedSessions, initArchiveStorage } from '@/services/archive-service';
 import { resolveGradient } from '@/shared/theme/gradient-presets';
 import { VIEW_CONFIGS, VALID_VIEWS, type ViewMode } from '@/shared/config/views';
 import { registerViews, getViewComponentMap } from '@/shared/config/view-registry';
+import { findDuplicates } from '@/shared/utils/dedupe';
+import { detectIdleTabs } from '@/shared/utils/idle-detect';
 
 /** 懒加载抽屉/面板——非首屏必需，直接导入文件确保独立拆 chunk */
 const SearchBox = lazy(() => import('@/features/search/SearchBox').then((m) => ({ default: m.SearchBox })));
@@ -89,16 +89,21 @@ const { Text } = Typography;
 
 
 /**
- * 顶栏：品牌 + 次级操作（归档 / 明暗切换 / 设置）
+ * 顶栏：轻量工具条（标签计数 + 吸附搜索 + 操作按钮）
  *
- * 滚动吸附搜索：
- *   - 上层通过 `compactSearchVisible` 告知「Hero 搜索框已滚出视野」
- *   - Header 中部会渐显一个 compact 搜索触发器（点击同样打开命令面板）
- *   - 使用 opacity + translateY + max-width 动画，避免出现/消失时导致 Header 其他元素跳动
+ * 设计策略：
+ *   - 不再放品牌 logo（已移到 HeroBar 居中展示），Header 仅作功能栏
+ *   - 左侧：小型 logo 图标 + 标签计数，紧凑不抢视觉
+ *   - 中部：滚动吸附搜索触发器（Hero 搜索框滚出视野时渐显）
+ *   - 右侧：归档 / 明暗切换 / 设置
+ *   - 整体更薄更轻，把视觉重心让给 Hero 区的品牌 + 搜索
  */
 function AppHeader({
   tabCount,
   domainCount,
+  duplicateTabsCount,
+  idleTabsCount,
+  hasTidySuggestions,
   compactSearchVisible,
   onArchive,
   onSettings,
@@ -106,6 +111,9 @@ function AppHeader({
 }: {
   tabCount: number;
   domainCount: number;
+  duplicateTabsCount: number;
+  idleTabsCount: number;
+  hasTidySuggestions: boolean;
   compactSearchVisible: boolean;
   onArchive: () => void;
   onSettings: () => void;
@@ -115,6 +123,7 @@ function AppHeader({
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const { t } = useT();
   const { token } = antdTheme.useToken();
+  const resolvedTheme = useResolvedTheme();
 
   /** 循环切换 light → dark → system */
   const toggleTheme = useCallback(() => {
@@ -125,19 +134,16 @@ function AppHeader({
   /**
    * 主题图标：三态分别用差异化强烈的图形，避免「点了看不出变化」
    *   - light  → 太阳 ☀
-   *   - dark   → 月亮（实心）🌙
-   *   - system → 显示器（跟随系统的视觉隐喻）🖥
-   *
-   * 原来的实现是 `BulbOutlined / BulbFilled`——两个图标都是灯泡，
-   * 小尺寸按钮里肉眼几乎区分不出，用户感知「点了没反应」。
+   *   - dark   → 月亮 🌙
+   *   - system → 显示器 🖥
    */
   const themeIcon =
     theme === 'system' ? (
-      <DesktopOutlined key="sys" style={{ color: iconColor('theme', token) }} />
+      <Monitor key="sys" size={14} style={{ color: iconColor('theme', token) }} />
     ) : theme === 'dark' ? (
-      <MoonFilled key="dark" style={{ color: iconColor('theme', token) }} />
+      <Moon key="dark" size={14} style={{ color: iconColor('theme', token) }} />
     ) : (
-      <SunOutlined key="light" style={{ color: iconColor('theme', token) }} />
+      <Sun key="light" size={14} style={{ color: iconColor('theme', token) }} />
     );
 
   return (
@@ -146,25 +152,30 @@ function AppHeader({
         position: 'sticky',
         top: 0,
         zIndex: 20,
-        height: 56,
+        height: 'var(--canopy-header-height)',
         display: 'flex',
         alignItems: 'center',
-        padding: '0 24px',
-        background: 'var(--ant-color-bg-container)',
-        borderBottom: '1px solid var(--ant-color-border-secondary)',
-        backdropFilter: 'blur(8px)',
+        padding: '0 20px',
+        background: 'var(--canopy-glass-bg)',
+        borderBottom: resolvedTheme === 'dark'
+          ? '1px solid rgba(255,255,255,0.06)'
+          : '1px solid rgba(0,0,0,0.06)',
+        backdropFilter: 'var(--canopy-glass-filter)',
+        WebkitBackdropFilter: 'var(--canopy-glass-filter)',
       }}
     >
-      <Space size={10} style={{ flexShrink: 0 }}>
+      {/* 左侧：小 logo + 状态摘要 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
         <div
           style={{
-            width: 28,
-            height: 28,
-            borderRadius: 8,
-            background: 'linear-gradient(135deg, #1677ff, #69b1ff)',
+            width: 24,
+            height: 24,
+            borderRadius: 7,
+            background: 'var(--canopy-logo-gradient)',
             color: '#fff',
-            fontWeight: 800,
-            fontSize: 15,
+            fontWeight: 700,
+            fontSize: 11,
+            letterSpacing: '-0.02em',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -172,31 +183,45 @@ function AppHeader({
         >
           C
         </div>
-        <Text strong style={{ fontSize: 15 }}>
-          Canopy
-        </Text>
-        {/* 吸顶搜索显示时，计数 Tag 淡出让位，避免挤占中部空间 */}
+        {/* 状态徽标 */}
         <Tag
+          color={hasTidySuggestions ? 'gold' : 'green'}
           style={{
-            fontSize: 11,
-            marginInlineStart: 6,
+            margin: 0,
+            fontSize: 10.5,
+            fontWeight: 500,
+            borderRadius: 6,
             opacity: compactSearchVisible ? 0 : 1,
             transform: compactSearchVisible ? 'translateX(-4px)' : 'translateX(0)',
             transition: 'opacity 220ms ease, transform 220ms ease',
             pointerEvents: compactSearchVisible ? 'none' : 'auto',
           }}
         >
-          {t('header.tabCount', { count: tabCount })} · {domainCount}{' '}
-          {t('view.domain').toLowerCase()}
+          {hasTidySuggestions ? t('dashboard.tidyReady') : t('dashboard.allClear')}
         </Tag>
-      </Space>
+        {/* 核心计数 —— 仅在吸附搜索未激活时显示 */}
+        <span
+          style={{
+            fontSize: 12,
+            color: token.colorTextSecondary,
+            whiteSpace: 'nowrap',
+            opacity: compactSearchVisible ? 0 : 1,
+            transform: compactSearchVisible ? 'translateX(-4px)' : 'translateX(0)',
+            transition: 'opacity 220ms ease, transform 220ms ease',
+          }}
+        >
+          {tabCount} {t('view.domain').toLowerCase()} · {domainCount} {t('view.domain').toLowerCase()}
+          {(duplicateTabsCount > 0 || idleTabsCount > 0) && (
+            <> · <span style={{ color: hasTidySuggestions ? token.colorWarning : token.colorTextSecondary }}>{duplicateTabsCount + idleTabsCount}</span> 待处理</>
+          )}
+        </span>
+      </div>
 
       {/*
         中部吸附搜索触发器
         ---------------------------------
-        · flex:1 占满中间空间，保持左右 Space 不挤压
-        · max-width + opacity + transform 共同做 "渐入-滑下" 动画
-        · 未激活时 max-width=0 且 pointerEvents=none，彻底不占点击位
+        · flex:1 占满中间空间
+        · Hero 搜索框在视野内时隐藏，滚出后渐显
       */}
       <div
         style={{
@@ -220,7 +245,7 @@ function AppHeader({
             gap: 8,
             width: '100%',
             maxWidth: compactSearchVisible ? 420 : 0,
-            height: 34,
+            height: 32,
             padding: compactSearchVisible ? '0 12px' : '0',
             borderRadius: 999,
             background: 'var(--ant-color-fill-tertiary)',
@@ -242,7 +267,7 @@ function AppHeader({
             e.currentTarget.style.background = 'var(--ant-color-fill-tertiary)';
           }}
         >
-          <SearchOutlined style={{ fontSize: 13, flexShrink: 0, color: iconColor('search', token) }} />
+          <Search size={13} style={{ flexShrink: 0, color: iconColor('search', token) }} />
           <span
             style={{
               flex: 1,
@@ -273,18 +298,13 @@ function AppHeader({
         </button>
       </div>
 
-      <Space size={4} style={{ flexShrink: 0 }}>
+      <Space size={2} style={{ flexShrink: 0 }}>
         <Tooltip title={t('header.archiveTooltip')} placement="bottom">
-          <Button type="text" icon={<SaveOutlined style={{ color: iconColor('archive', token) }} />} onClick={onArchive}>
-            {/* 按钮保留一个文字标签，避免用户光看 icon 猜不出功能 */}
-            <span style={{ fontSize: 12, marginInlineStart: 4 }}>{t('header.archive')}</span>
-          </Button>
+          <Button type="text" icon={<Save size={14} style={{ color: iconColor('archive', token) }} />} onClick={onArchive} />
         </Tooltip>
         <Tooltip title={t(`theme.${theme}`)}>
           <Button
             type="text"
-            // key 跟随 theme 变化 → Button 内部 icon 节点被 React 替换，
-            // 搭配下方 keyframes 动画，产生一个「翻转 + 渐入」的可感知切换反馈
             icon={
               <span
                 key={theme}
@@ -300,7 +320,7 @@ function AppHeader({
           />
         </Tooltip>
         <Tooltip title={t('header.settings')}>
-          <Button type="text" icon={<SettingOutlined style={{ color: iconColor('settings', token) }} />} onClick={onSettings} />
+          <Button type="text" icon={<Settings size={14} style={{ color: iconColor('settings', token) }} />} onClick={onSettings} />
         </Tooltip>
       </Space>
     </Header>
@@ -308,42 +328,97 @@ function AppHeader({
 }
 
 /**
- * Hero 区：大号搜索触发器 + 视图切换 Segmented
+ * Hero 区：品牌 Logo + 搜索框 + 视图切换
  *
- * `sentinelRef` 挂在搜索框外层——上层通过 IntersectionObserver 观察该节点，
- * 当它完全滚出顶部视野时，Header 里的 compact 搜索框渐显吸顶。
+ * 排版策略（参考微软新标签页）：
+ *   - 品牌 Logo 居中展示，搜索框紧随其下——形成视觉重心
+ *   - Logo 不做太大，保持精致感；品牌名用渐变文字
+ *   - 搜索框居中、超宽、带辉光阴影——第一视觉焦点
+ *   - 视图切换在搜索框下方，紧凑 Tab 行
+ *   - 整体垂直节奏：logo → 搜索 → 视图，间距递减
  */
 function HeroBar({
   viewMode,
   onViewChange,
   onOpenSearch,
   sentinelRef,
+  showViewSwitcher,
 }: {
   viewMode: ViewMode;
   onViewChange: (v: ViewMode) => void;
   onOpenSearch: () => void;
   sentinelRef: React.RefObject<HTMLDivElement | null>;
+  showViewSwitcher: boolean;
 }) {
   const { t } = useT();
+  const { token } = antdTheme.useToken();
+  const resolvedTheme = useResolvedTheme();
 
   return (
     <section
       style={{
-        padding: '28px 0 20px',
+        padding: '36px 0 24px',
         display: 'flex',
         flexDirection: 'column',
-        gap: 12,
+        alignItems: 'center',
+        gap: 16,
       }}
     >
-      {/* 第一行：搜索框 */}
-      <div ref={sentinelRef}>
+      {/* 品牌 Logo —— 居中展示，参考微软新标签页 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 10,
+            background: 'var(--canopy-logo-gradient)',
+            color: '#fff',
+            fontWeight: 800,
+            fontSize: 17,
+            letterSpacing: '-0.03em',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: 'var(--canopy-logo-glow)',
+          }}
+        >
+          C
+        </div>
+        <span
+          style={{
+            fontSize: 20,
+            fontWeight: 700,
+            letterSpacing: '-0.02em',
+            background: 'var(--canopy-logo-gradient)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}
+        >
+          Canopy
+        </span>
+      </div>
+
+      {/* 搜索框 —— 超宽居中，大圆角 + 品牌辉光 */}
+      <div ref={sentinelRef} style={{ width: '100%', maxWidth: 680 }}>
         <Input
           size="large"
           readOnly
           placeholder={t('search.placeholder')}
-          prefix={<SearchOutlined style={{ color: 'var(--ant-color-text-tertiary)' }} />}
+          prefix={<Search size={17} style={{ color: token.colorPrimary }} />}
           suffix={
-            <Tag style={{ fontFamily: 'monospace', margin: 0 }}>
+            <Tag
+              style={{
+                fontFamily: token.fontFamilyCode,
+                margin: 0,
+                fontSize: 11,
+                borderRadius: 6,
+                padding: '2px 8px',
+                background: token.colorFillQuaternary,
+                border: `1px solid ${token.colorBorderSecondary}`,
+                color: token.colorTextTertiary,
+              }}
+            >
               ⌘K
             </Tag>
           }
@@ -352,21 +427,68 @@ function HeroBar({
             onOpenSearch();
           }}
           onClick={onOpenSearch}
-          style={{ borderRadius: 999, cursor: 'pointer' }}
+          style={{
+            borderRadius: 'var(--canopy-search-radius)',
+            cursor: 'pointer',
+            height: 'var(--canopy-search-height)',
+            fontSize: 'var(--canopy-search-font-size)',
+            background: token.colorBgContainer,
+            border: `1px solid ${token.colorBorderSecondary}`,
+            boxShadow: 'var(--canopy-shadow-brand-glow)',
+            transition: `box-shadow ${token.motionDurationMid} ${token.motionEaseInOut}, border-color ${token.motionDurationMid} ${token.motionEaseInOut}`,
+          }}
         />
       </div>
 
-      {/* 第二行：视图切换 Segmented（预览图模式可通过设置面板切换） */}
-      <Segmented<ViewMode>
-        size="large"
-        value={viewMode}
-        onChange={onViewChange}
-        options={VIEW_CONFIGS.map((v) => ({
-          value: v.id,
-          icon: <v.Icon />,
-          label: t(v.labelKey),
-        }))}
-      />
+      {/* 视图切换 —— 紧凑 Tab 行，居中排列 */}
+      {showViewSwitcher && (
+        <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+          padding: '3px',
+          borderRadius: 10,
+          background: token.colorFillQuaternary,
+          border: `1px solid ${token.colorBorderSecondary}`,
+        }}
+      >
+        {VIEW_CONFIGS.map((v) => {
+          const isActive = viewMode === v.id;
+          return (
+            <button
+              key={v.id}
+              type="button"
+              onClick={() => onViewChange(v.id)}
+              style={{
+                all: 'unset',
+                boxSizing: 'border-box',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                padding: '5px 12px',
+                borderRadius: 8,
+                fontSize: 12.5,
+                fontWeight: isActive ? 600 : 400,
+                color: isActive ? token.colorPrimary : token.colorTextSecondary,
+                background: isActive ? token.colorBgContainer : 'transparent',
+                boxShadow: isActive
+                  ? (resolvedTheme === 'dark'
+                    ? '0 1px 3px rgba(0,0,0,0.3)'
+                    : '0 1px 3px rgba(0,0,0,0.08)')
+                  : 'none',
+                cursor: 'pointer',
+                transition: `all ${token.motionDurationFast} ${token.motionEaseInOut}`,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <v.Icon size={14} />
+              <span>{t(v.labelKey)}</span>
+            </button>
+          );
+        })}
+      </div>
+      )}
     </section>
   );
 }
@@ -390,15 +512,8 @@ function AppContent() {
   const [initRunId, setInitRunId] = useState(0);
   const [showArchive, setShowArchive] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [archiving, setArchiving] = useState(false);
-  const [tidyExpandSignal, setTidyExpandSignal] = useState(0);
-  const [archiveSummary, setArchiveSummary] = useState<{
-    archivedSessionCount: number;
-    latestArchiveLabel: string | null;
-  }>({
-    archivedSessionCount: 0,
-    latestArchiveLabel: null,
-  });
+  /** tidyExpandSignal 不再需要动态更新，固定值即可 */
+  const tidyExpandSignal = 0;
   /** Hero 搜索框是否已滚出视野——用于驱动 Header 吸附搜索渐显 */
   const [compactSearchVisible, setCompactSearchVisible] = useState(false);
   const mountedRef = useRef(true);
@@ -416,16 +531,17 @@ function AppContent() {
   /** 背景预设 → CSS gradient，统一走 resolveGradient 消灭硬编码 */
   const gradientPreset = useSettingsStore((s) => s.settings.gradientPreset);
   const customGradient = useSettingsStore((s) => s.settings.customGradient);
+  const backgroundImage = useSettingsStore((s) => s.settings.backgroundImage);
+  const backgroundOverlay = useSettingsStore((s) => s.settings.backgroundOverlay);
+  const contentMaxWidth = useSettingsStore((s) => s.settings.contentMaxWidth ?? 1360);
+  const uiVisibility = useSettingsStore((s) => s.settings.uiVisibility);
   const resolvedDark = useResolvedTheme() === 'dark';
   const layoutBackground = resolveGradient(gradientPreset, resolvedDark, customGradient);
   const { t } = useT();
 
-  const syncArchiveSummary = useCallback((sessions: ArchivedSession[]) => {
-    if (!mountedRef.current) return;
-    setArchiveSummary({
-      archivedSessionCount: sessions.length,
-      latestArchiveLabel: sessions[0]?.name ?? null,
-    });
+  /** 归档数据同步回调 —— ArchivePanel 变更后触发刷新 */
+  const syncArchiveSummary = useCallback((_sessions: ArchivedSession[]) => {
+    // 不再需要本地状态存储，保留回调签名以兼容 ArchivePanel
   }, []);
 
   const refreshArchiveSummary = useCallback(async () => {
@@ -588,30 +704,6 @@ function AppContent() {
     }
   }, [refreshArchiveSummary]);
 
-  const handleArchiveCurrent = useCallback(async () => {
-    if (archiving || tabs.length === 0) return;
-    setArchiving(true);
-    try {
-      const { archivedCount, closedCount } = await archiveCurrentWindowTabs();
-      await loadAllTabs({ silent: true });
-      await refreshArchiveSummary();
-      feedback.success(t('archive.archivedOk', { count: archivedCount }));
-      if (closedCount < archivedCount) {
-        feedback.warning(t('archive.closeIncomplete', { count: archivedCount - closedCount }));
-      }
-      setShowArchive(true);
-    } catch (err) {
-      feedback.error(t('archive.archiveFailed'), err);
-    } finally {
-      setArchiving(false);
-    }
-  }, [archiving, loadAllTabs, refreshArchiveSummary, t, tabs.length]);
-
-  const handleFocusTidy = useCallback(() => {
-    setTidyExpandSignal((value) => value + 1);
-    tidySectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, []);
-
   const handleSelectAllTabs = useCallback(() => {
     selectAll(tabs.map((tab) => tab.id));
   }, [selectAll, tabs]);
@@ -619,6 +711,13 @@ function AppContent() {
   const selectedTabs = tabs.filter((tab) => selectedIds.has(tab.id));
   const tabCount = tabs.length;
   const domainCount = new Set(tabs.map((tab) => tab.hostname)).size;
+
+  /** Workspace 统计摘要 —— 用于 Header 状态栏展示 */
+  const dupGroups = findDuplicates(tabs);
+  const idleTabsArr = detectIdleTabs(tabs);
+  const duplicateTabsCount = dupGroups.reduce((sum, group) => sum + group.tabs.length - 1, 0);
+  const idleTabsCount = idleTabsArr.length;
+  const hasTidySuggestions = duplicateTabsCount > 0 || idleTabsCount > 0;
 
   if (!checked) {
     return (
@@ -638,24 +737,70 @@ function AppContent() {
     );
   }
 
-  return (
-    <Layout style={{ minHeight: '100vh', background: layoutBackground }}>
-      <AppHeader
-        tabCount={tabCount}
-        domainCount={domainCount}
-        compactSearchVisible={compactSearchVisible}
-        onArchive={handleOpenArchive}
-        onSettings={() => setShowSettings(true)}
-        onOpenSearch={handleOpenSearch}
-      />
+  /**
+   * 构建 Layout 背景样式：
+   *   - 基础层：渐变背景
+   *   - 图片层：backgroundImage.url（如有）
+   *   - 遮罩层：通过 ::after 伪元素实现（在 index.css 中）
+   */
+  const layoutStyle: React.CSSProperties = {
+    minHeight: '100vh',
+    background: layoutBackground,
+    position: 'relative',
+  };
 
-      <Content style={{ width: '100%', padding: '0 24px 48px' }}>
-        <HeroBar
-          viewMode={viewMode}
-          onViewChange={handleViewChange}
-          onOpenSearch={handleOpenSearch}
-          sentinelRef={heroSearchRef}
+  /** 如果有背景图，叠加在渐变之上 */
+  if (backgroundImage?.url) {
+    layoutStyle.backgroundImage = `url("${backgroundImage.url}")`;
+    layoutStyle.backgroundSize = backgroundImage.fit === 'repeat' ? 'auto' : backgroundImage.fit;
+    layoutStyle.backgroundRepeat = backgroundImage.fit === 'repeat' ? 'repeat' : 'no-repeat';
+    layoutStyle.backgroundPosition = backgroundImage.position ?? 'center';
+    layoutStyle.backgroundAttachment = 'fixed';
+    /** 渐变作为 fallback */
+    layoutStyle.backgroundColor = layoutBackground;
+  }
+
+  return (
+    <Layout style={layoutStyle}>
+      {/* 背景遮罩层：当 backgroundOverlay.enabled 时渲染 */}
+      {backgroundOverlay?.enabled && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 0,
+            pointerEvents: 'none',
+            background: resolvedDark ? backgroundOverlay.colorDark : backgroundOverlay.color,
+            backdropFilter: backgroundOverlay.blur > 0 ? `blur(${backgroundOverlay.blur}px)` : undefined,
+            WebkitBackdropFilter: backgroundOverlay.blur > 0 ? `blur(${backgroundOverlay.blur}px)` : undefined,
+          }}
         />
+      )}
+
+      {uiVisibility?.header !== false && (
+        <AppHeader
+          tabCount={tabCount}
+          domainCount={domainCount}
+          duplicateTabsCount={duplicateTabsCount}
+          idleTabsCount={idleTabsCount}
+          hasTidySuggestions={hasTidySuggestions}
+          compactSearchVisible={compactSearchVisible}
+          onArchive={handleOpenArchive}
+          onSettings={() => setShowSettings(true)}
+          onOpenSearch={handleOpenSearch}
+        />
+      )}
+
+      <Content style={{ width: '100%', maxWidth: contentMaxWidth > 0 ? contentMaxWidth : undefined, margin: '0 auto', padding: '0 32px 64px', position: 'relative', zIndex: 1 }}>
+        {uiVisibility?.heroSearch !== false && (
+          <HeroBar
+            viewMode={viewMode}
+            onViewChange={handleViewChange}
+            onOpenSearch={handleOpenSearch}
+            sentinelRef={heroSearchRef}
+            showViewSwitcher={uiVisibility?.viewSwitcher !== false}
+          />
+        )}
 
         {initError !== null && (
           <Alert
@@ -678,16 +823,7 @@ function AppContent() {
           />
         )}
 
-        <WorkspaceOverview
-          tabs={tabs}
-          archivedSessionCount={archiveSummary.archivedSessionCount}
-          latestArchiveLabel={archiveSummary.latestArchiveLabel}
-          archiving={archiving}
-          onOpenSearch={handleOpenSearch}
-          onFocusTidy={handleFocusTidy}
-          onArchiveCurrent={() => { void handleArchiveCurrent(); }}
-          onOpenArchive={handleOpenArchive}
-        />
+        {/* WorkspaceOverview 已融入 AppHeader 状态栏，此处不再渲染独立组件 */}
 
         {showOnboarding && <OnboardingCard onDismiss={() => setShowOnboarding(false)} />}
 
@@ -700,9 +836,11 @@ function AppContent() {
           />
         )}
 
-        <div ref={tidySectionRef}>
-          <TidySuggestionBar expandSignal={tidyExpandSignal} />
-        </div>
+        {uiVisibility?.tidySuggestion !== false && (
+          <div ref={tidySectionRef}>
+            <TidySuggestionBar expandSignal={tidyExpandSignal} />
+          </div>
+        )}
 
         <section>
           {loading ? (
@@ -728,10 +866,10 @@ function AppContent() {
               style={{ padding: '80px 0' }}
             >
               <Space wrap>
-                <Button icon={<SaveOutlined />} onClick={handleOpenArchive}>
+                <Button icon={<Save size={14} />} onClick={handleOpenArchive}>
                   {t('dashboard.openArchives')}
                 </Button>
-                <Button icon={<SettingOutlined />} onClick={() => setShowSettings(true)}>
+                <Button icon={<Settings size={14} />} onClick={() => setShowSettings(true)}>
                   {t('header.settings')}
                 </Button>
               </Space>

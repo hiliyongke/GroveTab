@@ -12,14 +12,14 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Space, Progress, Alert, App, theme, Input, Popconfirm, Empty } from 'antd';
 import {
-  DownloadOutlined,
-  UploadOutlined,
-  DeleteOutlined,
-  HddOutlined,
-  SaveOutlined,
-  SwapOutlined,
-  EditOutlined,
-} from '@ant-design/icons';
+  Download,
+  Upload,
+  Trash2,
+  HardDrive,
+  Save,
+  ArrowLeftRight,
+  Pencil,
+} from 'lucide-react';
 import { useT } from '@/shared/i18n';
 import { useSettingsStore } from '@/store';
 import { exportSessionsJSON, downloadFile, parseImportJSON } from '@/shared/utils/import-export';
@@ -160,7 +160,7 @@ export function DataPanel() {
           <Button
             size="small"
             type="primary"
-            icon={<SaveOutlined />}
+            icon={<Save size={14} />}
             disabled={!profileName.trim()}
             onClick={() => { void handleCreateProfile(); }}
           >
@@ -205,14 +205,14 @@ export function DataPanel() {
                   <Button
                     type="text"
                     size="small"
-                    icon={<SwapOutlined />}
+                    icon={<ArrowLeftRight size={14} />}
                     title={t('settings.profileApply')}
                     onClick={() => { void handleApplyProfile(p); }}
                   />
                   <Button
                     type="text"
                     size="small"
-                    icon={<EditOutlined />}
+                    icon={<Pencil size={14} />}
                     title={t('settings.profileRename')}
                     onClick={() => { setEditingId(p.id); setEditingName(p.name); }}
                   />
@@ -227,7 +227,7 @@ export function DataPanel() {
                       type="text"
                       size="small"
                       danger
-                      icon={<DeleteOutlined />}
+                      icon={<Trash2 size={14} />}
                       title={t('settings.profileDelete')}
                     />
                   </Popconfirm>
@@ -265,7 +265,7 @@ export function DataPanel() {
                 fontWeight: 500,
               }}
             >
-              <HddOutlined style={{ color: token.colorInfo }} />
+              <HardDrive size={14} style={{ color: token.colorInfo }} />
               {t('settings.storage')}
             </span>
             <span
@@ -296,10 +296,10 @@ export function DataPanel() {
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
-        <Button block icon={<DownloadOutlined />} onClick={() => { void handleExport(); }}>
+        <Button block icon={<Download size={14} />} onClick={() => { void handleExport(); }}>
           {t('settings.export')}
         </Button>
-        <Button block icon={<UploadOutlined />} onClick={() => fileInputRef.current?.click()}>
+        <Button block icon={<Upload size={14} />} onClick={() => fileInputRef.current?.click()}>
           {t('settings.import')}
         </Button>
         <input
@@ -316,7 +316,7 @@ export function DataPanel() {
         )}
       </div>
 
-      <Button block danger icon={<DeleteOutlined />} onClick={handleClearAll}>
+      <Button block danger icon={<Trash2 size={14} />} onClick={handleClearAll}>
         {t('settings.clearAll')}
       </Button>
     </div>

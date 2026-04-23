@@ -2,9 +2,9 @@
  * TabItem — 标签行（antd 版）
  *
  * 设计：
- *   - 36px 行高，与其它紧凑行对齐
- *   - favicon 15×15 + 内容区 + 状态图标 + hover 显示关闭按钮
- *   - hover 态使用 antd token 的 colorFillTertiary
+ *   - 40px 行高（比原 36px 更宽松），与其它紧凑行对齐
+ *   - favicon 16×16（比原 15×15 更清晰）+ 内容区 + 状态图标 + hover 显示关闭按钮
+ *   - hover 态使用 antd token 的 colorFillTertiary + 微妙左侧色条
  *   - 可选 leading slot：由调用方传入的前置元素（如序号徽章），与行整体共享 hover
  *   - 可选 showHostname：在跨域名列表场景（Timeline / Frequency）展示主机名
  *   - 所有交互走 antd Button + Tag + Tooltip 原生组件
@@ -14,13 +14,13 @@ import { useState, useCallback } from 'react';
 import type { LiveTab } from '@/shared/types';
 import { Button, Tag, Tooltip, Checkbox, theme } from 'antd';
 import {
-  GlobalOutlined,
-  SoundOutlined,
-  PushpinFilled,
-  MessageOutlined,
-  CloseOutlined,
-  SelectOutlined,
-} from '@ant-design/icons';
+  Globe,
+  Volume2,
+  Pin,
+  MessageSquare,
+  X,
+  Pointer,
+} from 'lucide-react';
 import { useT } from '@/shared/i18n';
 import { useMetadataStore, useSelectionStore } from '@/store';
 import { stringToColor } from '@/shared/utils/color';
@@ -157,18 +157,19 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
           alignItems: 'center',
           gap: 10,
           width: '100%',
-          minHeight: showUrlHint ? 48 : 36,
-          padding: showUrlHint ? '6px 10px' : '0 10px',
-          borderRadius: token.borderRadius,
+          minHeight: showUrlHint ? 52 : 40,
+          padding: showUrlHint ? '8px 12px' : '4px 12px',
+          borderRadius: token.borderRadiusSM,
           cursor: 'pointer',
           backgroundColor: isSelected
             ? selectedBg
             : hovered
               ? token.colorFillTertiary
               : 'transparent',
-          transition: `background-color ${token.motionDurationFast}`,
+          transition: `background-color ${token.motionDurationFast} ${token.motionEaseInOut}`,
           outline: 'none',
           opacity: isDiscarded ? 0.5 : 1,
+          position: 'relative',
         }}
       >
         {/* 多选 Checkbox——仅在 selectable 且处于多选模式时显示 */}
@@ -191,14 +192,14 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
             <img
               src={tab.favIconUrl}
               alt=""
-              style={{ width: 15, height: 15, borderRadius: 3, flexShrink: 0 }}
+              style={{ width: 16, height: 16, borderRadius: 3, flexShrink: 0 }}
               onError={() => setFaviconError(true)}
             />
           ) : (
             <div
               style={{
-                width: 15,
-                height: 15,
+                width: 16,
+                height: 16,
                 borderRadius: 3,
                 background: token.colorFillSecondary,
                 display: 'flex',
@@ -207,7 +208,7 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
                 flexShrink: 0,
               }}
             >
-              <GlobalOutlined style={{ fontSize: 10, color: token.colorTextTertiary }} />
+              <Globe size={10} style={{ color: token.colorTextTertiary }} />
             </div>
           )
         )}
@@ -256,11 +257,12 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
               </span>
             )}
             {isPinned && (
-              <PushpinFilled style={{ fontSize: 10, color: token.colorPrimary, flexShrink: 0 }} />
+              <Pin size={10} style={{ color: token.colorPrimary, flexShrink: 0 }} />
             )}
             {note && (
-              <MessageOutlined
-                style={{ fontSize: 10, color: token.colorTextTertiary, flexShrink: 0 }}
+              <MessageSquare
+                size={10}
+                style={{ color: token.colorTextTertiary, flexShrink: 0 }}
               />
             )}
             {tags.slice(0, 2).map((tag) => (
@@ -310,13 +312,13 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
         <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
           {tab.audible && (
             <Tooltip title={t('tabs.playing')}>
-              <SoundOutlined style={{ fontSize: 12, color: token.colorPrimary }} />
+              <Volume2 size={12} style={{ color: token.colorPrimary }} />
             </Tooltip>
           )}
           {!tab.isCurrentWindow && (
             <Tooltip title={t('tabs.otherWindow')}>
               {/* 使用外链箭头图标表达「跳去另一个窗口」语义，避免与 favicon 兜底的 Global 图标混淆 */}
-              <SelectOutlined style={{ fontSize: 12, color: token.colorTextTertiary }} />
+              <Pointer size={12} style={{ color: token.colorTextTertiary }} />
             </Tooltip>
           )}
         </div>
@@ -330,7 +332,7 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
             type="text"
             size="small"
             danger
-            icon={<CloseOutlined style={{ fontSize: 12 }} />}
+            icon={<X size={12} />}
             onClick={handleClose}
             style={{
               flexShrink: 0,

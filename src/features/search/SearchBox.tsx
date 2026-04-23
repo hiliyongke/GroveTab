@@ -12,15 +12,15 @@ import { useState, useMemo, useRef, useCallback, useEffect, type ReactNode } fro
 import { Modal, Input, theme, Empty, Select, Tag } from 'antd';
 import type { InputRef } from 'antd';
 import {
-  AppstoreOutlined,
-  ClockCircleOutlined,
-  EnterOutlined,
-  FireOutlined,
-  GlobalOutlined,
-  LinkOutlined,
-  SearchOutlined,
-  UnlockOutlined,
-} from '@ant-design/icons';
+  LayoutGrid,
+  Clock,
+  CornerDownLeft,
+  Flame,
+  Globe,
+  Link,
+  Search,
+  Unlock,
+} from 'lucide-react';
 import type {
   LiveTab,
   SearchEngineId,
@@ -746,7 +746,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
           }}
           onKeyDown={handleKeyDown}
           placeholder={t('search.universalPlaceholder')}
-          prefix={<SearchOutlined style={{ color: iconColor('search', token) }} />}
+          prefix={<Search size={14} style={{ color: iconColor('search', token) }} />}
           allowClear
           variant="borderless"
           style={{ fontSize: 15, flex: 1 }}
@@ -756,7 +756,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
           value={currentEngine}
           onChange={setCurrentEngine}
           style={{ minWidth: 132 }}
-          suffixIcon={<GlobalOutlined />}
+          suffixIcon={<Globe size={14} />}
           options={enabledEngines.map((engineId) => {
             const option = getSearchEngineOption(engineId);
             return { value: option.id, label: option.label };
@@ -809,14 +809,14 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
                   {section.items.map((item, offset) => {
                     const itemIndex = startIndex + offset;
                     const active = itemIndex === activeIndex;
-                    let icon: ReactNode = <SearchOutlined />;
+                    let icon: ReactNode = <Search size={11} />;
                     let iconRole: IconRole = 'search';
-                    if (item.type === 'tab') { icon = <AppstoreOutlined />; iconRole = 'tab'; }
-                    if (item.type === 'history') { icon = <LinkOutlined />; iconRole = 'history'; }
-                    if (item.type === 'web') { icon = <GlobalOutlined />; iconRole = 'web'; }
-                    if (item.type === 'permission') { icon = <UnlockOutlined />; iconRole = 'permission'; }
-                    if (item.type === 'suggestion' && item.source === 'recent') { icon = <ClockCircleOutlined />; iconRole = 'recent'; }
-                    if (item.type === 'suggestion' && item.source === 'hot') { icon = <FireOutlined />; iconRole = 'hot'; }
+                    if (item.type === 'tab') { icon = <LayoutGrid size={11} />; iconRole = 'tab'; }
+                    if (item.type === 'history') { icon = <Link size={11} />; iconRole = 'history'; }
+                    if (item.type === 'web') { icon = <Globe size={11} />; iconRole = 'web'; }
+                    if (item.type === 'permission') { icon = <Unlock size={11} />; iconRole = 'permission'; }
+                    if (item.type === 'suggestion' && item.source === 'recent') { icon = <Clock size={11} />; iconRole = 'recent'; }
+                    if (item.type === 'suggestion' && item.source === 'hot') { icon = <Flame size={11} />; iconRole = 'hot'; }
 
                     const semanticIconColor = iconColor(iconRole, token);
                     const titleNode = renderHighlightedText(item.title, normalizedQuery, token.colorText, token.colorPrimary);
@@ -914,8 +914,9 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
                           </div>
                         </div>
                         {active && (
-                          <EnterOutlined
-                            style={{ fontSize: 12, color: token.colorTextTertiary, flexShrink: 0 }}
+                          <CornerDownLeft
+                            size={12}
+                            style={{ color: token.colorTextTertiary, flexShrink: 0 }}
                           />
                         )}
                       </li>

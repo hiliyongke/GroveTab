@@ -12,12 +12,12 @@
 
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import {
-  PushpinOutlined,
-  TagOutlined,
-  MessageOutlined,
-  StopOutlined,
-  ColumnWidthOutlined,
-} from '@ant-design/icons';
+  Pin,
+  Tag as TagIcon,
+  MessageSquare,
+  Moon,
+  MoveHorizontal,
+} from 'lucide-react';
 import { Button, Input, Tag, Divider, Card, theme } from 'antd';
 import { useMetadataStore, useTabsStore } from '@/store';
 import { useT } from '@/shared/i18n';
@@ -129,7 +129,7 @@ export function TabContextMenu({ x, y, url, tabId, onClose }: TabContextMenuProp
         <Button
           type="text"
           block
-          icon={<PushpinOutlined />}
+          icon={<Pin size={14} />}
           onClick={() => {
             void togglePin(url);
             onClose();
@@ -144,7 +144,7 @@ export function TabContextMenu({ x, y, url, tabId, onClose }: TabContextMenuProp
           <Button
             type="text"
             block
-            icon={<StopOutlined />}
+            icon={<Moon size={14} />}
             onClick={() => {
               void (async () => {
                 onClose();
@@ -166,7 +166,7 @@ export function TabContextMenu({ x, y, url, tabId, onClose }: TabContextMenuProp
           <Button
             type="text"
             block
-            icon={<ColumnWidthOutlined />}
+            icon={<MoveHorizontal size={14} />}
             onClick={() => {
               void (async () => {
                 onClose();
@@ -189,7 +189,7 @@ export function TabContextMenu({ x, y, url, tabId, onClose }: TabContextMenuProp
         <Button
           type="text"
           block
-          icon={<TagOutlined />}
+          icon={<TagIcon size={14} />}
           onClick={() => setShowTagInput(true)}
           style={{ textAlign: 'left', justifyContent: 'flex-start', height: 32 }}
         >
@@ -260,7 +260,7 @@ export function TabContextMenu({ x, y, url, tabId, onClose }: TabContextMenuProp
         <Button
           type="text"
           block
-          icon={<MessageOutlined />}
+          icon={<MessageSquare size={14} />}
           onClick={() => {
             setShowNoteInput(true);
             setNoteValue(note);

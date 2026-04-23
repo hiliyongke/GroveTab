@@ -20,7 +20,7 @@
 
 import { useMemo, useState } from 'react';
 import { Timeline, theme } from 'antd';
-import { DownOutlined } from '@ant-design/icons';
+import { ChevronDown } from 'lucide-react';
 import { useTabsStore, useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { findAmbiguousTitleIds } from '@/shared/utils/url-display';
@@ -312,9 +312,9 @@ function SegmentHeader({
       >
         {count}
       </span>
-      <DownOutlined
+      <ChevronDown
+        size={10}
         style={{
-          fontSize: 10,
           color: token.colorTextTertiary,
           transform: collapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
           transition: `transform ${token.motionDurationMid}`,

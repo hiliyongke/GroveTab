@@ -8,7 +8,7 @@
 
 import { useState } from 'react';
 import { Button, Card, Space, Tag, theme } from 'antd';
-import { ArrowRightOutlined, ApartmentOutlined, ThunderboltFilled } from '@ant-design/icons';
+import { ArrowRight, Network, Zap } from 'lucide-react';
 import { markOnboardingDone } from '@/repositories';
 import { useT } from '@/shared/i18n';
 
@@ -83,7 +83,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
           position: 'relative',
         }}
       >
-        <ApartmentOutlined style={{ fontSize: 26 }} />
+        <Network size={26} />
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -101,7 +101,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
           }}
         >
           {t('onboarding.title')}
-          <ThunderboltFilled style={{ fontSize: 14, color: token.colorPrimary }} />
+          <Zap size={14} style={{ color: token.colorPrimary }} />
         </h2>
         <p
           style={{
@@ -143,7 +143,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
         type="primary"
         size="large"
         onClick={() => { void handleDismiss(); }}
-        icon={<ArrowRightOutlined />}
+        icon={<ArrowRight size={14} />}
         iconPosition="end"
         style={{ marginTop: 4 }}
       >

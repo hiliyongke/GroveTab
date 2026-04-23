@@ -15,6 +15,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   defaultView: 'domain',
   theme: 'system',
   gradientPreset: 'slate',
+  skinPreset: 'minimal',
   showIncognito: false,
   language: 'zh-CN',
   domainGroupColumns: 'auto',
@@ -29,6 +30,16 @@ const DEFAULT_SETTINGS: UserSettings = {
   searchAutoFallbackToWeb: true,
   searchUseHistorySuggestions: true,
   searchUseHotSuggestions: true,
+  layoutDensity: 'default',
+  contentMaxWidth: 1360,
+  reducedMotion: 'auto',
+  uiVisibility: {
+    header: true,
+    heroSearch: true,
+    viewSwitcher: true,
+    workspaceOverview: true,
+    tidySuggestion: true,
+  },
 };
 
 // ── Generic CRUD ──────────────────────────────────────

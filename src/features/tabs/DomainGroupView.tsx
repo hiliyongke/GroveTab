@@ -22,7 +22,7 @@ import { DomainGroupCard } from './DomainGroupCard';
  */
 function getColumnStyle(forcedColumns: number | null): React.CSSProperties {
   const base: React.CSSProperties = {
-    columnGap: '16px',
+    columnGap: '20px',
     columnFill: 'balance',
   };
   if (forcedColumns && forcedColumns >= 1 && forcedColumns <= 6) {
@@ -103,7 +103,7 @@ export function DomainGroupView() {
         <div
           key={group.domain}
           style={{
-            marginBottom: 14,
+            marginBottom: 16,
             breakInside: 'avoid',
             pageBreakInside: 'avoid',
           }}

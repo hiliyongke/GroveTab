@@ -9,11 +9,11 @@
 
 import { Drawer, Tabs } from 'antd';
 import {
-  BgColorsOutlined,
-  ControlOutlined,
-  DatabaseOutlined,
-  KeyOutlined,
-} from '@ant-design/icons';
+  Palette,
+  SlidersHorizontal,
+  Database,
+  KeyRound,
+} from 'lucide-react';
 import { useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { AppearancePanel } from './panels/AppearancePanel';
@@ -47,7 +47,7 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
             key: 'appearance',
             label: (
               <span>
-                <BgColorsOutlined /> {t('settings.appearance')}
+                <Palette size={14} /> {t('settings.appearance')}
               </span>
             ),
             children: <AppearancePanel settings={settings} updateSettings={updateSettings} />,
@@ -56,7 +56,7 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
             key: 'behavior',
             label: (
               <span>
-                <ControlOutlined /> {t('settings.behavior')}
+                <SlidersHorizontal size={14} /> {t('settings.behavior')}
               </span>
             ),
             children: <BehaviorPanel settings={settings} updateSettings={updateSettings} />,
@@ -65,7 +65,7 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
             key: 'data',
             label: (
               <span>
-                <DatabaseOutlined /> {t('settings.data')}
+                <Database size={14} /> {t('settings.data')}
               </span>
             ),
             children: <DataPanel />,
@@ -74,7 +74,7 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
             key: 'shortcuts',
             label: (
               <span>
-                <KeyOutlined /> {t('settings.shortcuts')}
+                <KeyRound size={14} /> {t('settings.shortcuts')}
               </span>
             ),
             children: <ShortcutsPanel />,

@@ -2,17 +2,32 @@
  * AppearancePanel — 外观设置 Tab
  *
  * 包含：
+ *   - 皮肤预设选择器（5 套高级皮肤）
  *   - 语言选择
- *   - 渐变背景预设选择器（3×3 网格色卡）
- *   - 自定义渐变编辑器（色标 / 角度 / 深色模式独立配色）
+ *   - 渐变背景预设选择器 + 自定义渐变编辑器
+ *   - 自定义背景图（URL / 文件上传 + 填充模式 + 定位）
+ *   - 背景遮罩层（颜色 + 模糊度）
+ *   - 布局密度（紧凑 / 默认 / 宽松）
+ *   - 内容区最大宽度
+ *   - 动效控制（减弱动效）
+ *   - UI 区域显隐（顶栏 / 搜索框 / 视图切换 / 概览 / 整理建议）
  */
 
 import { useState, useCallback } from 'react';
-import { Select, Button, Slider, ColorPicker, Space, Switch, theme } from 'antd';
-import { EditOutlined, PlusOutlined, MinusCircleOutlined, SunOutlined, MoonOutlined } from '@ant-design/icons';
+import { Select, Button, Slider, ColorPicker, Space, Switch, InputNumber, Input, Upload, Divider, theme } from 'antd';
+import {
+  Pencil,
+  Plus,
+  MinusCircle,
+  Sun,
+  Moon,
+  Image,
+  Trash2,
+} from 'lucide-react';
 import { useT } from '@/shared/i18n';
 import { useResolvedTheme } from '@/shared/hooks';
 import { GRADIENT_PRESETS, buildGradient } from '@/shared/theme/gradient-presets';
+import { SKIN_PRESETS } from '@/shared/theme/skin-presets';
 import type { UserSettings } from '@/shared/types';
 import { Field } from '../components/Field';
 
@@ -47,8 +62,160 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
     [customGradient, updateSettings],
   );
 
+  /** 安全更新 backgroundImage */
+  const updateBgImage = useCallback(
+    (patch: Partial<NonNullable<UserSettings['backgroundImage']>>) => {
+      const current = settings.backgroundImage ?? { url: '', fit: 'cover' as const };
+      void updateSettings({ backgroundImage: { ...current, ...patch } });
+    },
+    [settings.backgroundImage, updateSettings],
+  );
+
+  /** 安全更新 backgroundOverlay */
+  const updateBgOverlay = useCallback(
+    (patch: Partial<NonNullable<UserSettings['backgroundOverlay']>>) => {
+      const current = settings.backgroundOverlay ?? {
+        enabled: false,
+        color: 'rgba(0,0,0,0.35)',
+        colorDark: 'rgba(0,0,0,0.6)',
+        blur: 0,
+      };
+      void updateSettings({ backgroundOverlay: { ...current, ...patch } });
+    },
+    [settings.backgroundOverlay, updateSettings],
+  );
+
+  /** 安全更新 uiVisibility */
+  const updateUiVisibility = useCallback(
+    (key: keyof NonNullable<UserSettings['uiVisibility']>, value: boolean) => {
+      const current = settings.uiVisibility ?? {
+        header: true,
+        heroSearch: true,
+        viewSwitcher: true,
+        workspaceOverview: true,
+        tidySuggestion: true,
+      };
+      void updateSettings({ uiVisibility: { ...current, [key]: value } });
+    },
+    [settings.uiVisibility, updateSettings],
+  );
+
+  /** 处理文件上传 → 转为 base64 data URL */
+  const handleFileUpload = useCallback(
+    (file: File) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        updateBgImage({ url: dataUrl });
+      };
+      reader.readAsDataURL(file);
+    },
+    [updateBgImage],
+  );
+
   return (
     <Space direction="vertical" size={24} style={{ width: '100%' }}>
+      {/* ── 皮肤预设选择器 ── */}
+      <Field label={t('skin.title')} hint={t('skin.hint')}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: 10,
+          }}
+        >
+          {SKIN_PRESETS.map((skin) => {
+            const isSelected = settings.skinPreset === skin.id || (!settings.skinPreset && skin.id === 'minimal');
+            const gradientBg = `linear-gradient(135deg, ${skin.previewColors[0]}, ${skin.previewColors[1]}, ${skin.previewColors[2] ?? skin.previewColors[1]})`;
+            return (
+              <button
+                key={skin.id}
+                type="button"
+                onClick={() => { void updateSettings({ skinPreset: skin.id }); }}
+                style={{
+                  all: 'unset',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'stretch',
+                  borderRadius: token.borderRadiusLG,
+                  overflow: 'hidden',
+                  border: isSelected
+                    ? `2px solid ${token.colorPrimary}`
+                    : `1px solid ${token.colorBorderSecondary}`,
+                  transition: 'border-color 160ms ease, box-shadow 160ms ease',
+                  boxShadow: isSelected ? `0 0 0 1px ${token.colorPrimary}` : 'none',
+                }}
+              >
+                <div style={{ height: 52, background: gradientBg, position: 'relative' }}>
+                  {skin.compatibleMode !== 'both' && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: 4,
+                        right: 4,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: 16,
+                        height: 16,
+                        borderRadius: 4,
+                        fontSize: 9,
+                        color: '#fff',
+                        background:
+                          skin.compatibleMode === 'dark'
+                            ? 'rgba(0,0,0,0.5)'
+                            : 'rgba(255,255,255,0.7)',
+                      }}
+                    >
+                      {skin.compatibleMode === 'dark' ? (
+                        <Moon size={9} />
+                      ) : (
+                        <Sun size={9} style={{ color: '#333' }} />
+                      )}
+                    </span>
+                  )}
+                </div>
+                <div
+                  style={{
+                    padding: '4px 6px',
+                    background: token.colorBgContainer,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 11,
+                      fontWeight: isSelected ? 600 : 500,
+                      color: isSelected ? token.colorPrimary : token.colorText,
+                      textAlign: 'center',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {t(skin.labelKey)}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 10,
+                      color: token.colorTextTertiary,
+                      textAlign: 'center',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      marginTop: 1,
+                    }}
+                  >
+                    {t(skin.descriptionKey)}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </Field>
+
+      {/* ── 语言选择 ── */}
       <Field label={t('settings.language')}>
         <Select
           value={settings.language}
@@ -61,6 +228,14 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
         />
       </Field>
 
+      {/* ══════════════════════════════════════════════════
+          背景定制区
+          ══════════════════════════════════════════════════ */}
+      <Divider style={{ fontSize: 12, color: token.colorTextTertiary, margin: '8px 0' }}>
+        {t('bg.sectionTitle')}
+      </Divider>
+
+      {/* ── 渐变背景预设 ── */}
       <Field label={t('gradient.title')} hint={t('gradient.hint')}>
         <div
           style={{
@@ -124,9 +299,9 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                       }}
                     >
                       {preset.compatibleMode === 'dark' ? (
-                        <MoonOutlined />
+                        <Moon size={9} />
                       ) : (
-                        <SunOutlined style={{ color: '#333' }} />
+                        <Sun size={9} style={{ color: '#333' }} />
                       )}
                     </span>
                   )}
@@ -141,7 +316,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                         color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.4)',
                       }}
                     >
-                      <EditOutlined />
+                      <Pencil size={16} />
                     </span>
                   )}
                 </div>
@@ -165,6 +340,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
           })}
         </div>
 
+        {/* 自定义渐变编辑器 */}
         {settings.gradientPreset === 'custom' && (
           <div
             style={{
@@ -184,13 +360,13 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
               }}
             >
               <span style={{ fontSize: 12, fontWeight: 500, color: token.colorTextSecondary }}>
-                <EditOutlined style={{ marginRight: 6 }} />
+                <Pencil size={14} style={{ marginRight: 6 }} />
                 {t('gradient.customEditor')}
               </span>
               <Button
                 size="small"
                 type={showGradientEditor ? 'default' : 'link'}
-                icon={showGradientEditor ? undefined : <EditOutlined />}
+                icon={showGradientEditor ? undefined : <Pencil size={14} />}
                 onClick={() => setShowGradientEditor(!showGradientEditor)}
               >
                 {showGradientEditor ? t('gradient.collapseEditor') : t('gradient.expandEditor')}
@@ -265,7 +441,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                           type="text"
                           size="small"
                           danger
-                          icon={<MinusCircleOutlined />}
+                          icon={<MinusCircle size={14} />}
                           onClick={() => {
                             const newStops = customGradient.stops.filter((_, idx) => idx !== i);
                             updateCustomGradient({ stops: newStops });
@@ -281,7 +457,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                     type="dashed"
                     size="small"
                     block
-                    icon={<PlusOutlined />}
+                    icon={<Plus size={14} />}
                     style={{ marginTop: 8 }}
                     onClick={() => {
                       const lastPos = customGradient.stops[customGradient.stops.length - 1]?.position ?? 0.5;
@@ -363,15 +539,216 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
           </div>
         )}
       </Field>
+
+      {/* ── 自定义背景图 ── */}
+      <Field label={t('bg.imageTitle')} hint={t('bg.imageHint')}>
+        <Space direction="vertical" size={8} style={{ width: '100%' }}>
+          <Input
+            placeholder={t('bg.imageUrlPlaceholder')}
+            value={settings.backgroundImage?.url ?? ''}
+            onChange={(e) => updateBgImage({ url: e.target.value })}
+            suffix={
+              settings.backgroundImage?.url ? (
+                <Button
+                  type="text"
+                  size="small"
+                  danger
+                  icon={<Trash2 size={14} />}
+                  onClick={() => { void updateSettings({ backgroundImage: undefined }); }}
+                />
+              ) : (
+                <Image size={14} style={{ color: token.colorTextTertiary }} />
+              )
+            }
+          />
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <Upload
+              beforeUpload={(file) => {
+                handleFileUpload(file);
+                return false; // 阻止自动上传
+              }}
+              showUploadList={false}
+              accept="image/*"
+            >
+              <Button size="small" icon={<Image size={14} />}>
+                {t('bg.uploadImage')}
+              </Button>
+            </Upload>
+            {settings.backgroundImage?.url && (
+              <Select
+                size="small"
+                value={settings.backgroundImage.fit}
+                onChange={(v) => updateBgImage({ fit: v })}
+                style={{ width: 120 }}
+                options={[
+                  { value: 'cover', label: t('bg.fitCover') },
+                  { value: 'contain', label: t('bg.fitContain') },
+                  { value: 'repeat', label: t('bg.fitRepeat') },
+                ]}
+              />
+            )}
+          </div>
+        </Space>
+      </Field>
+
+      {/* ── 背景遮罩层 ── */}
+      <Field label={t('bg.overlayTitle')} hint={t('bg.overlayHint')}>
+        <Space direction="vertical" size={8} style={{ width: '100%' }}>
+          <Switch
+            size="small"
+            checked={settings.backgroundOverlay?.enabled ?? false}
+            onChange={(checked) => updateBgOverlay({ enabled: checked })}
+          />
+          <span style={{ fontSize: 11, marginLeft: 8, color: token.colorTextSecondary }}>
+            {t('bg.overlayEnabled')}
+          </span>
+
+          {(settings.backgroundOverlay?.enabled) && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 11, color: token.colorTextTertiary, flexShrink: 0 }}>
+                  {t('bg.overlayColor')}
+                </span>
+                <ColorPicker
+                  size="small"
+                  value={isDark
+                    ? (settings.backgroundOverlay?.colorDark ?? 'rgba(0,0,0,0.6)')
+                    : (settings.backgroundOverlay?.color ?? 'rgba(0,0,0,0.35)')}
+                  onChangeComplete={(color) => {
+                    const hex = color.toHexString();
+                    const rgba = hexToRgba(hex, isDark
+                      ? parseAlpha(settings.backgroundOverlay?.colorDark ?? 'rgba(0,0,0,0.6)')
+                      : parseAlpha(settings.backgroundOverlay?.color ?? 'rgba(0,0,0,0.35)'));
+                    if (isDark) {
+                      updateBgOverlay({ colorDark: rgba });
+                    } else {
+                      updateBgOverlay({ color: rgba });
+                    }
+                  }}
+                />
+              </div>
+              <div>
+                <span style={{ fontSize: 11, color: token.colorTextTertiary }}>
+                  {t('bg.overlayBlur')}: {settings.backgroundOverlay?.blur ?? 0}px
+                </span>
+                <Slider
+                  min={0}
+                  max={20}
+                  value={settings.backgroundOverlay?.blur ?? 0}
+                  onChange={(v) => updateBgOverlay({ blur: v })}
+                />
+              </div>
+            </>
+          )}
+        </Space>
+      </Field>
+
+      {/* ══════════════════════════════════════════════════
+          布局定制区
+          ══════════════════════════════════════════════════ */}
+      <Divider style={{ fontSize: 12, color: token.colorTextTertiary, margin: '8px 0' }}>
+        {t('layout.sectionTitle')}
+      </Divider>
+
+      {/* ── 布局密度 ── */}
+      <Field label={t('layout.density')} hint={t('layout.densityHint')}>
+        <Select
+          value={settings.layoutDensity ?? 'default'}
+          onChange={(v) => { void updateSettings({ layoutDensity: v }); }}
+          style={{ width: '100%' }}
+          options={[
+            { value: 'compact', label: t('layout.densityCompact') },
+            { value: 'default', label: t('layout.densityDefault') },
+            { value: 'comfortable', label: t('layout.densityComfortable') },
+          ]}
+        />
+      </Field>
+
+      {/* ── 内容区最大宽度 ── */}
+      <Field label={t('layout.maxWidth')} hint={t('layout.maxWidthHint')}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <InputNumber
+            min={0}
+            max={3000}
+            step={40}
+            value={settings.contentMaxWidth ?? 1360}
+            onChange={(v) => { void updateSettings({ contentMaxWidth: v ?? 0 }); }}
+            style={{ width: 120 }}
+          />
+          <span style={{ fontSize: 11, color: token.colorTextTertiary }}>px</span>
+          <span style={{ fontSize: 10, color: token.colorTextQuaternary }}>
+            ({t('layout.maxWidthZero')})
+          </span>
+        </div>
+      </Field>
+
+      {/* ══════════════════════════════════════════════════
+          动效与无障碍
+          ══════════════════════════════════════════════════ */}
+      <Divider style={{ fontSize: 12, color: token.colorTextTertiary, margin: '8px 0' }}>
+        {t('a11y.sectionTitle')}
+      </Divider>
+
+      {/* ── 减弱动效 ── */}
+      <Field label={t('a11y.reducedMotion')} hint={t('a11y.reducedMotionHint')}>
+        <Select
+          value={settings.reducedMotion ?? 'auto'}
+          onChange={(v) => { void updateSettings({ reducedMotion: v }); }}
+          style={{ width: '100%' }}
+          options={[
+            { value: 'auto', label: t('a11y.reducedMotionAuto') },
+            { value: 'on', label: t('a11y.reducedMotionOn') },
+            { value: 'off', label: t('a11y.reducedMotionOff') },
+          ]}
+        />
+      </Field>
+
+      {/* ══════════════════════════════════════════════════
+          UI 区域显隐
+          ══════════════════════════════════════════════════ */}
+      <Divider style={{ fontSize: 12, color: token.colorTextTertiary, margin: '8px 0' }}>
+        {t('uiVisibility.sectionTitle')}
+      </Divider>
+
+      <Field label={t('uiVisibility.sectionTitle')} hint={t('uiVisibility.hint')}>
+        <Space direction="vertical" size={10} style={{ width: '100%' }}>
+          {([
+            ['header', t('uiVisibility.header'), t('uiVisibility.headerHint')],
+            ['heroSearch', t('uiVisibility.heroSearch'), t('uiVisibility.heroSearchHint')],
+            ['viewSwitcher', t('uiVisibility.viewSwitcher'), t('uiVisibility.viewSwitcherHint')],
+            ['workspaceOverview', t('uiVisibility.workspaceOverview'), t('uiVisibility.workspaceOverviewHint')],
+            ['tidySuggestion', t('uiVisibility.tidySuggestion'), t('uiVisibility.tidySuggestionHint')],
+          ] as const).map(([key, label, hint]) => (
+            <div
+              key={key}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '6px 10px',
+                borderRadius: token.borderRadiusSM,
+                background: token.colorFillQuaternary,
+              }}
+            >
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 500, color: token.colorText }}>{label}</div>
+                <div style={{ fontSize: 10, color: token.colorTextTertiary }}>{hint}</div>
+              </div>
+              <Switch
+                size="small"
+                checked={settings.uiVisibility?.[key] !== false}
+                onChange={(v) => updateUiVisibility(key, v)}
+              />
+            </div>
+          ))}
+        </Space>
+      </Field>
     </Space>
   );
 }
 
 /**
  * 将 HEX 色值暗化指定比例
- *
- * @param hex   原始色值（#RRGGBB）
- * @param ratio 暗化比例 0~1，0 不变，1 全黑
  */
 function darkenHex(hex: string, ratio: number): string {
   const h = hex.replace('#', '');
@@ -379,4 +756,23 @@ function darkenHex(hex: string, ratio: number): string {
   const g = Math.round(parseInt(h.slice(2, 4), 16) * (1 - ratio));
   const b = Math.round(parseInt(h.slice(4, 6), 16) * (1 - ratio));
   return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+}
+
+/**
+ * 从 rgba 字符串解析 alpha 值
+ */
+function parseAlpha(rgba: string): number {
+  const match = rgba.match(/[\d.]+(?=\))/);
+  return match ? parseFloat(match[0]) : 0.35;
+}
+
+/**
+ * HEX + alpha → rgba 字符串
+ */
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
 }

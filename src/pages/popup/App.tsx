@@ -10,9 +10,9 @@
 import { useState, useEffect } from 'react';
 import { Button, Space, Typography, Divider } from 'antd';
 import {
-  AppstoreOutlined,
-  SaveOutlined,
-} from '@ant-design/icons';
+  LayoutGrid,
+  Save,
+} from 'lucide-react';
 import { archiveCurrentWindowTabs } from '@/services';
 
 const { Title } = Typography;
@@ -83,11 +83,11 @@ function App() {
       <Divider style={{ margin: '8px 0' }} />
 
       <Space direction="vertical" style={{ width: '100%' }} size={8}>
-        <Button type="primary" icon={<AppstoreOutlined />} block onClick={openNewTab}>
+        <Button type="primary" icon={<LayoutGrid size={14} />} block onClick={openNewTab}>
           打开标签管理
         </Button>
         <Button
-          icon={<SaveOutlined />}
+          icon={<Save size={14} />}
           block
           loading={archiving}
           onClick={() => { void archiveAll(); }}

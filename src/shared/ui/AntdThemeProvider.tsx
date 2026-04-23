@@ -1,14 +1,13 @@
 /**
- * AntdThemeProvider —— antd v6 主题桥接
+ * AntdThemeProvider —— antd v6 主题桥接 + 皮肤系统
  *
  * 职责：
  *   1. 通过 `useResolvedTheme` 订阅 settings.theme 与系统 `prefers-color-scheme`，
  *      在「跟随系统」模式下也能即时响应系统明暗切换
  *   2. 写 `<html data-theme="...">` 以兼容存量 CSS 变量引用
- *   3. 根据当前主题选择 antd 的 defaultAlgorithm / darkAlgorithm，并注入统一 token
- *   4. 挂载 antd 的 App 容器（提供 message/notification/modal 的静态调用上下文）
- *
- * 设计 token 与 docs/ui-mock/newtab.html 视觉稿保持一致，是项目视觉基准。
+ *   3. 从皮肤预设（skinPreset）动态生成 antd theme config + CSS 变量
+ *   4. 注入皮肤级 CSS 变量到 `:root`，供组件内通过 `var(--canopy-xxx)` 消费
+ *   5. 挂载 antd 的 App 容器（提供 message/notification/modal 的静态调用上下文）
  */
 
 import { useEffect, useMemo, useRef } from 'react';
@@ -20,6 +19,7 @@ import 'dayjs/locale/zh-cn';
 import { useSettingsStore } from '@/store';
 import { useResolvedTheme } from '@/shared/hooks';
 import { bindFeedback, unbindFeedback } from './feedback';
+import { getSkinPreset, type SkinPresetId } from '@/shared/theme/skin-presets';
 
 /** AntdApp 容器的稳定样式常量，避免每次渲染创建新对象 */
 const ANT_APP_STYLE: React.CSSProperties = { minHeight: '100vh' };
@@ -29,10 +29,6 @@ const ANT_APP_STYLE: React.CSSProperties = { minHeight: '100vh' };
  *
  * 必须放在 `<AntdApp>` 的子节点里，`App.useApp()` 才能拿到有效实例；
  * 组件本身不渲染任何节点。
- *
- * 注意：antd App.useApp() 返回的 message/notification/modal 引用可能不稳定
- * （每次渲染都可能变化），因此用 ref 持有最新引用，effect 只在 mount/unmount 时
- * 执行绑定/解绑。通过 bindFeedback 的代理对象，feedback 模块始终能访问最新实例。
  */
 function FeedbackBridge() {
   const { message, notification, modal } = AntdApp.useApp();
@@ -44,15 +40,197 @@ function FeedbackBridge() {
   }, [message, notification, modal]);
 
   useEffect(() => {
-    /**
-     * 绑定代理对象到 feedback —— 每次调用 feedback 方法时，
-     * 都会从 apiRef.current 读取最新的 message/notification/modal，
-     * 确保 feedback 始终指向有效实例（即使 antd 内部重新创建了它们）。
-     */
     bindFeedback(apiRef);
     return () => unbindFeedback();
   }, []);
   return null;
+}
+
+/**
+ * 从皮肤预设生成 antd ThemeConfig
+ *
+ * 皮肤预设定义了完整的视觉 token 包，此函数将其转换为 antd 可消费的
+ * ConfigProvider theme 配置。
+ */
+function buildThemeConfig(skinId: SkinPresetId, isDark: boolean, density: 'compact' | 'default' | 'comfortable') {
+  const skin = getSkinPreset(skinId);
+
+  /** 布局密度缩放因子 */
+  const ds = density === 'compact' ? 0.85 : density === 'comfortable' ? 1.15 : 1;
+
+  return {
+    algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+    cssVar: { key: 'canopy' },
+    hashed: false,
+    token: {
+      /** 品牌主色 */
+      colorPrimary: skin.colorPrimary,
+      /** 圆角体系 */
+      borderRadius: skin.borderRadius,
+      borderRadiusLG: skin.borderRadiusLG,
+      borderRadiusSM: skin.borderRadiusSM,
+      borderRadiusXS: skin.borderRadiusXS,
+      /** 控件高度（随密度缩放） */
+      controlHeight: Math.round(skin.controlHeight * ds),
+      controlHeightLG: Math.round(skin.controlHeightLG * ds),
+      controlHeightSM: Math.round(skin.controlHeightSM * ds),
+      /** 字体 */
+      fontFamily: skin.fontFamily,
+      fontFamilyCode:
+        '"SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", "Noto Sans Mono SC", ui-monospace, monospace',
+      fontSize: skin.fontSize,
+      fontSizeHeading1: 32,
+      fontSizeHeading2: 24,
+      fontSizeHeading3: 20,
+      fontSizeHeading4: 16,
+      /** 行高 */
+      lineHeight: 1.6,
+      /** 动效 */
+      motionDurationSlow: skin.motionDurationSlow,
+      motionDurationMid: skin.motionDurationMid,
+      motionDurationFast: skin.motionDurationFast,
+      motionEaseInOut: skin.motionEaseInOut,
+      motionEaseOut: skin.motionEaseOut,
+      motionEaseIn: 'cubic-bezier(0.4, 0, 1, 1)',
+      /** 间距（随密度缩放） */
+      padding: Math.round(skin.padding * ds),
+      paddingLG: Math.round(skin.paddingLG * ds),
+      paddingSM: Math.round(skin.paddingSM * ds),
+      paddingXS: 8,
+      margin: 12,
+      marginLG: 16,
+      marginSM: 8,
+      marginXS: 4,
+      /** 线条 */
+      lineWidth: 1,
+      lineType: 'solid',
+      /** 明暗模式背景色 */
+      ...(isDark ? {
+        colorBgContainer: skin.colorBgContainerDark,
+        colorBgElevated: skin.colorBgElevatedDark,
+        colorBgLayout: skin.colorBgLayoutDark,
+        colorBgSpotlight: '#262629',
+        colorBorderSecondary: skin.colorBorderSecondaryDark,
+      } : {
+        colorBgLayout: skin.colorBgLayoutLight,
+        colorBgContainer: skin.colorBgContainerLight,
+        colorBgElevated: skin.colorBgElevatedLight,
+        colorBorderSecondary: skin.colorBorderSecondaryLight,
+      }),
+    },
+    components: {
+      Card: {
+        borderRadiusLG: skin.borderRadiusLG,
+        paddingLG: 20,
+        boxShadowTertiary: isDark
+          ? skin.shadow.card.dark
+          : skin.shadow.card.light,
+      },
+      Button: {
+        borderRadius: skin.borderRadius,
+        contentFontSizeSM: 12,
+        primaryShadow: isDark
+          ? `0 2px 8px ${skin.colorPrimary}40`
+          : `0 2px 8px ${skin.colorPrimary}33`,
+      },
+      Input: {
+        borderRadius: skin.borderRadius,
+        activeBorderColor: skin.colorPrimary,
+        hoverBorderColor: skin.colorPrimaryHover,
+        activeShadow: `0 0 0 3px ${skin.colorPrimary}1F`,
+      },
+      Modal: {
+        borderRadiusLG: skin.borderRadiusLG + 4,
+        contentBg: isDark ? skin.colorBgElevatedDark : skin.colorBgElevatedLight,
+        headerBg: isDark ? skin.colorBgElevatedDark : skin.colorBgElevatedLight,
+      },
+      Tag: {
+        borderRadiusSM: skin.borderRadiusXS,
+      },
+      Segmented: {
+        borderRadius: skin.borderRadius,
+        borderRadiusSM: skin.borderRadiusSM,
+      },
+      Tooltip: {},
+    },
+  };
+}
+
+/**
+ * 从皮肤预设生成 CSS 变量，注入到 :root
+ *
+ * 这些变量供组件内通过 `var(--canopy-skin-xxx)` 消费，
+ * 实现皮肤驱动的视觉一致性，消灭硬编码色值。
+ */
+function buildSkinCSSVars(
+  skinId: SkinPresetId,
+  isDark: boolean,
+  density: 'compact' | 'default' | 'comfortable',
+  reducedMotion: boolean,
+): Record<string, string> {
+  const skin = getSkinPreset(skinId);
+
+  /** 布局密度缩放因子 */
+  const densityScale = density === 'compact' ? 0.8 : density === 'comfortable' ? 1.25 : 1;
+
+  const vars: Record<string, string> = {
+    // ── 毛玻璃 ──
+    '--canopy-glass-blur': `${skin.glass.blur}px`,
+    '--canopy-glass-saturate': `${skin.glass.saturate}%`,
+    '--canopy-glass-bg': isDark ? skin.glass.bgDark : skin.glass.bgLight,
+    '--canopy-glass-filter': `blur(${skin.glass.blur}px) saturate(${skin.glass.saturate}%)`,
+
+    // ── 阴影 ──
+    '--canopy-shadow-card': isDark ? skin.shadow.card.dark : skin.shadow.card.light,
+    '--canopy-shadow-card-hover': isDark ? skin.shadow.cardHover.dark : skin.shadow.cardHover.light,
+    '--canopy-shadow-floating': isDark ? skin.shadow.floating.dark : skin.shadow.floating.light,
+    '--canopy-shadow-brand-glow': isDark ? skin.shadow.brandGlow.dark : skin.shadow.brandGlow.light,
+
+    // ── Logo ──
+    '--canopy-logo-gradient': skin.logoGradient,
+    '--canopy-logo-glow': isDark ? skin.logoGlowShadow.dark : skin.logoGlowShadow.light,
+
+    // ── 搜索框 ──
+    '--canopy-search-height': `${Math.round(skin.searchBox.height * densityScale)}px`,
+    '--canopy-search-radius': `${skin.searchBox.borderRadius}px`,
+    '--canopy-search-font-size': `${skin.searchBox.fontSize}px`,
+
+    // ── Header ──
+    '--canopy-header-height': `${Math.round(skin.header.height * densityScale)}px`,
+
+    // ── 浮动栏 ──
+    '--canopy-floating-radius': `${skin.floatingBar.borderRadius}px`,
+
+    // ── 卡片风格 ──
+    '--canopy-card-lift': skin.cardStyle.hoverLift && !reducedMotion ? `${skin.cardStyle.liftDistance}px` : '0px',
+
+    // ── 纹理 ──
+    '--canopy-texture-noise': skin.texture.noise ? '1' : '0',
+    '--canopy-texture-noise-opacity': `${skin.texture.noiseOpacity}`,
+    '--canopy-texture-grid': skin.texture.grid ? '1' : '0',
+    '--canopy-texture-grid-color': isDark ? skin.texture.gridColor.dark : skin.texture.gridColor.light,
+
+    // ── 品牌色 ──
+    '--canopy-color-primary': skin.colorPrimary,
+    '--canopy-color-primary-hover': skin.colorPrimaryHover,
+
+    // ── 边框 ──
+    '--canopy-border-hover': isDark ? 'var(--ant-color-border)' : 'var(--ant-color-border)',
+
+    // ── 布局密度缩放 ──
+    '--canopy-density-scale': `${densityScale}`,
+    '--canopy-spacing-unit': `${Math.round(4 * densityScale)}px`,
+    '--canopy-card-gap': `${Math.round(16 * densityScale)}px`,
+    '--canopy-card-padding': `${Math.round(16 * densityScale)}px`,
+    '--canopy-section-gap': `${Math.round(24 * densityScale)}px`,
+
+    // ── 动效 ──
+    '--canopy-motion-duration': reducedMotion ? '0s' : '0.2s',
+    '--canopy-motion-duration-slow': reducedMotion ? '0s' : '0.3s',
+    '--canopy-motion-duration-fast': reducedMotion ? '0s' : '0.12s',
+  };
+
+  return vars;
 }
 
 /**
@@ -62,6 +240,14 @@ export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
   const language = useSettingsStore((s) => s.settings.language);
   const loaded = useSettingsStore((s) => s.loaded);
   const mode = useResolvedTheme();
+  const skinPreset = useSettingsStore((s) => s.settings.skinPreset ?? 'minimal');
+  const layoutDensity = useSettingsStore((s) => s.settings.layoutDensity ?? 'default');
+  const reducedMotionSetting = useSettingsStore((s) => s.settings.reducedMotion ?? 'auto');
+
+  /** 计算实际是否减弱动效 */
+  const reducedMotion = reducedMotionSetting === 'on'
+    || (reducedMotionSetting === 'auto' && typeof window !== 'undefined'
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
   // 同步 data-theme 到 <html>，供存量 CSS 变量消费
   useEffect(() => {
@@ -69,32 +255,51 @@ export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.setAttribute('data-theme', mode);
   }, [mode, loaded]);
 
+  // 同步皮肤纹理属性到 <html>
+  useEffect(() => {
+    if (!loaded) return;
+    const skin = getSkinPreset(skinPreset as SkinPresetId);
+    if (skin.texture.noise) {
+      document.documentElement.setAttribute('data-texture-noise', '');
+    } else {
+      document.documentElement.removeAttribute('data-texture-noise');
+    }
+  }, [skinPreset, loaded]);
+
   // 同步 dayjs locale
   useEffect(() => {
     dayjs.locale(language === 'zh-CN' ? 'zh-cn' : 'en');
   }, [language]);
 
-  // 当前阶段只切换明暗算法，全部走 antd 默认 token；未来要做多套主题再在此处扩展
+  /**
+   * 注入皮肤级 CSS 变量到 :root
+   *
+   * 使用 CSSStyleDeclaration 批量写入，比逐个 setProperty 高效，
+   * 且避免闪烁（同步写入而非异步）。
+   */
+  const skinVars = useMemo(
+    () => buildSkinCSSVars(skinPreset as SkinPresetId, mode === 'dark', layoutDensity, reducedMotion),
+    [skinPreset, mode, layoutDensity, reducedMotion],
+  );
+
+  useEffect(() => {
+    const root = document.documentElement;
+    for (const [key, value] of Object.entries(skinVars)) {
+      root.style.setProperty(key, value);
+    }
+    return () => {
+      for (const key of Object.keys(skinVars)) {
+        root.style.removeProperty(key);
+      }
+    };
+  }, [skinVars]);
+
+  /**
+   * 主题配置：从皮肤预设动态生成
+   */
   const themeConfig = useMemo(
-    () => ({
-      algorithm: mode === 'dark' ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
-      cssVar: { key: 'canopy' },
-      hashed: false,
-      /**
-       * Tooltip 保持 antd 默认反色样式。
-       *
-       * 之前尝试过在 `components.Tooltip` 里覆盖 `colorBgSpotlight` + `colorTextLightSolid`
-       * 把它做成「白底深字」与 Canopy 卡片视觉更贴合，但 `colorTextLightSolid` 其实是
-       * 全局 Seed token，放在 components 命名空间里不生效，导致文字色计算链断裂；
-       * 叠加 `cssVar + hashed: false` 会让多个 Tooltip 共享同一份 CSS 变量，
-       * 出现「首次显示正常，第二次就不显示」的诡异 bug。
-       *
-       * 目前策略：组件级 token 保持空，主题切换完全交给 antd 默认算法。
-       * 未来要做品牌化 Tooltip 时，需同时在 seed token + components.Tooltip 里
-       * 成对覆盖色与阴影，并删掉 `hashed: false`。
-       */
-    }),
-    [mode],
+    () => buildThemeConfig(skinPreset as SkinPresetId, mode === 'dark', layoutDensity),
+    [skinPreset, mode, layoutDensity],
   );
 
   const locale = language === 'zh-CN' ? zhCN : enUS;

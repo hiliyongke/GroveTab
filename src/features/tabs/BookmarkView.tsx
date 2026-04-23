@@ -16,10 +16,10 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Tree, Input, Button, Empty, List, Spin, theme } from 'antd';
 import {
-  BookOutlined,
-  SearchOutlined,
-  PlusOutlined,
-} from '@ant-design/icons';
+  BookOpen,
+  Search,
+  Plus,
+} from 'lucide-react';
 import {
   getBookmarkTree,
   searchBookmarks,
@@ -51,7 +51,7 @@ function toTreeData(nodes: BookmarkNode[]): Array<Record<string, unknown>> {
       return {
         key: node.id,
         title: (node.title ?? '') !== '' ? node.title : fallbackTitle,
-        icon: hasBookmarkUrl ? <BookOutlined style={{ fontSize: 12 }} /> : undefined,
+        icon: hasBookmarkUrl ? <BookOpen size={12} /> : undefined,
         children: node.children !== undefined ? toTreeData(node.children) : undefined,
         isLeaf: hasBookmarkUrl,
       };
@@ -142,11 +142,11 @@ export function BookmarkView() {
   if (!hasPermission) {
     return (
       <div style={{ textAlign: 'center', padding: '80px 0' }}>
-        <BookOutlined style={{ fontSize: 48, color: token.colorTextTertiary, marginBottom: 16 }} />
+        <BookOpen size={48} style={{ color: token.colorTextTertiary, marginBottom: 16 }} />
         <div style={{ fontSize: 14, color: token.colorTextSecondary, marginBottom: 16 }}>
           {t('bookmark.needPermission')}
         </div>
-        <Button type="primary" icon={<BookOutlined />} onClick={() => { void handleRequestPermission(); }}>
+        <Button type="primary" icon={<BookOpen size={14} />} onClick={() => { void handleRequestPermission(); }}>
           {t('bookmark.grantPermission')}
         </Button>
       </div>
@@ -158,14 +158,14 @@ export function BookmarkView() {
       {/* 搜索栏 + 操作 */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         <Input
-          prefix={<SearchOutlined />}
+          prefix={<Search size={14} />}
           placeholder={t('bookmark.searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => { void handleSearch(e.target.value); }}
           allowClear
           style={{ flex: 1 }}
         />
-        <Button icon={<PlusOutlined />} onClick={() => { void handleBookmarkAll(); }}>
+        <Button icon={<Plus size={14} />} onClick={() => { void handleBookmarkAll(); }}>
           {t('bookmark.bookmarkAll')}
         </Button>
       </div>

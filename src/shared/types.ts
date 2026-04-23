@@ -84,6 +84,15 @@ export interface UserSettings {
   defaultView: 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'bookmarks';
   theme: 'light' | 'dark' | 'system';
   /**
+   * 皮肤预设：
+   *   - 'minimal'        ：极简毛玻璃（macOS 原生风格，默认）
+   *   - 'glassmorphism'  ：液态玻璃风（WWDC 2025 / visionOS 风格）
+   *   - 'skeuomorphism'  ：拟物风（锤子 UI / iOS 6 风格）
+   *   - 'aurora'         ：极光流彩（暗色霓虹渐变风格）
+   *   - 'elegant'        ：典雅新古典（衬线标题 + 金色描边 + 纸张质感）
+   */
+  skinPreset?: 'minimal' | 'glassmorphism' | 'skeuomorphism' | 'aurora' | 'elegant';
+  /**
    * 背景渐变预设：
    *   - 'default'   ：antd 默认色，最干净
    *   - 'slate'     ：浅灰蓝渐变（浅色友好）
@@ -196,6 +205,76 @@ export interface UserSettings {
    * 未设置的动作使用 KEYBINDING_DEFS 中的默认值。
    */
   customKeybindings?: Record<string, string>;
+
+  // ── 高级外观定制 ──────────────────────────────────
+
+  /**
+   * 自定义背景图配置
+   *   - url：图片 URL（支持 https 外链或 data: base64）
+   *   - fit：填充模式，'cover' 铺满裁切 / 'contain' 完整显示 / 'repeat' 平铺
+   *   - position：定位（仅 cover/contain 生效），默认 'center'
+   * 当设置 url 后，背景图会叠加在渐变背景之上（渐变作为 fallback）。
+   */
+  backgroundImage?: {
+    url: string;
+    fit: 'cover' | 'contain' | 'repeat';
+    position?: string;
+  };
+
+  /**
+   * 背景遮罩层配置
+   *   - enabled：是否在背景图/渐变上叠加一层半透明遮罩
+   *   - color：遮罩颜色（含透明度），如 'rgba(0,0,0,0.4)'
+   *   - colorDark：深色模式遮罩颜色
+   *   - blur：遮罩下方背景模糊（px），0 为不模糊
+   * 用于让文字在复杂背景图上保持可读性。
+   */
+  backgroundOverlay?: {
+    enabled: boolean;
+    color: string;
+    colorDark: string;
+    blur: number;
+  };
+
+  /**
+   * 布局密度：
+   *   - 'compact'：紧凑（小间距、小字号、适合信息密度优先）
+   *   - 'default'（默认）：舒适平衡
+   *   - 'comfortable'：宽松（大间距、大字号、适合大屏或视觉舒适优先）
+   * 影响卡片间距、内容行间距、控件高度等全局比例。
+   */
+  layoutDensity?: 'compact' | 'default' | 'comfortable';
+
+  /**
+   * 内容区最大宽度（px），0 表示不限制
+   * 默认 1360；极客用户可能想在超宽屏上更宽或更窄。
+   */
+  contentMaxWidth?: number;
+
+  /**
+   * 减弱动效：
+   *   - 'auto'（默认）：尊重系统 prefers-reduced-motion
+   *   - 'on'：始终减弱动效（关闭过渡动画、hover 上浮等）
+   *   - 'off'：始终启用动效，忽略系统偏好
+   */
+  reducedMotion?: 'auto' | 'on' | 'off';
+
+  /**
+   * UI 区域显隐控制
+   *   - header：顶栏（品牌 + 操作按钮）
+   *   - heroSearch：Hero 区大搜索框
+   *   - viewSwitcher：视图切换标签行
+   *   - workspaceOverview：工作区概览卡片
+   *   - tidySuggestion：智能整理建议栏
+   * 关闭某区域后该区域不渲染，节省空间、减少视觉噪音。
+   */
+  uiVisibility?: {
+    header?: boolean;
+    heroSearch?: boolean;
+    viewSwitcher?: boolean;
+    workspaceOverview?: boolean;
+    tidySuggestion?: boolean;
+  };
 }
 
 // ── Undo System ───────────────────────────────────────

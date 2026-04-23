@@ -9,7 +9,7 @@
  */
 
 import { Button, theme } from 'antd';
-import { UndoOutlined, CloseOutlined } from '@ant-design/icons';
+import { Undo2, X } from 'lucide-react';
 import { useUndoStore } from '@/store';
 import { useT } from '@/shared/i18n';
 
@@ -58,7 +58,7 @@ export function UndoToast() {
         type="primary"
         shape="round"
         size="small"
-        icon={<UndoOutlined />}
+        icon={<Undo2 size={14} />}
         onClick={handleUndo}
       >
         {t('undo.action')}
@@ -68,7 +68,7 @@ export function UndoToast() {
         type="text"
         shape="circle"
         size="small"
-        icon={<CloseOutlined />}
+        icon={<X size={14} />}
         onClick={dismissToast}
         aria-label="Dismiss"
       />

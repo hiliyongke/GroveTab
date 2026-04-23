@@ -9,11 +9,11 @@
 
 import { useState, useSyncExternalStore, useCallback, useEffect } from 'react';
 import {
-  PlusOutlined,
-  SaveOutlined,
-  InfoCircleOutlined,
-  InboxOutlined,
-} from '@ant-design/icons';
+  Plus,
+  Save,
+  Info,
+  Inbox,
+} from 'lucide-react';
 import { Alert, Modal, Button, List, Empty, Spin, theme } from 'antd';
 import type { ArchivedSession } from '@/shared/types';
 import {
@@ -186,12 +186,12 @@ export function ArchivePanel({ open, onOpenChange, onSessionsChange }: ArchivePa
               color: token.colorPrimary,
             }}
           >
-            <SaveOutlined style={{ fontSize: 14, color: iconColor('archive', token) }} />
+            <Save size={14} style={{ color: iconColor('archive', token) }} />
           </div>
           <span style={{ flex: 1, fontSize: 15, fontWeight: 600 }}>{t('archive.title')}</span>
           <Button
             type="primary"
-            icon={<PlusOutlined />}
+            icon={<Plus size={14} />}
             loading={archivingCurrent}
             disabled={tabCount === 0}
             onClick={() => { void handleArchiveCurrent(); }}
@@ -206,7 +206,7 @@ export function ArchivePanel({ open, onOpenChange, onSessionsChange }: ArchivePa
         <Alert
           type="info"
           showIcon
-          icon={<InfoCircleOutlined />}
+          icon={<Info size={14} />}
           description={t('archive.description')}
           style={{
             marginBottom: 12,
@@ -224,7 +224,7 @@ export function ArchivePanel({ open, onOpenChange, onSessionsChange }: ArchivePa
           </div>
         ) : sessions.length === 0 ? (
           <Empty
-            image={<InboxOutlined style={{ fontSize: 48, color: token.colorTextTertiary }} />}
+            image={<Inbox size={48} style={{ color: token.colorTextTertiary }} />}
             description={
               <div>
                 <p style={{ fontSize: 13.5, fontWeight: 500, color: token.colorText, margin: 0 }}>

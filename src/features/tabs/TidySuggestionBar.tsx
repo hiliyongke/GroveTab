@@ -14,12 +14,12 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Alert, App, Button, Card, List, Space, Tooltip, Tag, theme } from 'antd';
 import {
-  DownOutlined,
-  CloseOutlined,
-  MergeCellsOutlined,
-  StopOutlined,
-  ThunderboltOutlined,
-} from '@ant-design/icons';
+  ChevronDown,
+  X,
+  Merge,
+  Moon,
+  Zap,
+} from 'lucide-react';
 import { useTabsStore } from '@/store';
 import { findDuplicates, type DupGroup } from '@/shared/utils/dedupe';
 import { detectIdleTabs, formatIdleTime, type IdleTabInfo } from '@/shared/utils/idle-detect';
@@ -175,7 +175,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
       <Alert
         type="info"
         showIcon
-        icon={<ThunderboltOutlined style={{ color: iconColor('tidy', token) }} />}
+        icon={<Zap size={14} style={{ color: iconColor('tidy', token) }} />}
         message={
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ flex: 1, fontSize: 13, fontWeight: 500 }}>
@@ -190,9 +190,9 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                   type="text"
                   size="small"
                   icon={
-                    <DownOutlined
+                    <ChevronDown
+                      size={12}
                       style={{
-                        fontSize: 12,
                         transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
                         transition: `transform ${token.motionDurationMid}`,
                       }}
@@ -205,7 +205,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                 <Button
                   type="text"
                   size="small"
-                  icon={<CloseOutlined style={{ fontSize: 12, color: iconColor('close', token) }} />}
+                  icon={<X size={12} style={{ color: iconColor('close', token) }} />}
                   onClick={() => setDismissed(true)}
                 />
               </Tooltip>
@@ -226,7 +226,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
           {dupGroups.length > 0 && (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                <MergeCellsOutlined style={{ fontSize: 13, color: iconColor('duplicates', token) }} />
+                <Merge size={13} style={{ color: iconColor('duplicates', token) }} />
                 <span style={{ fontSize: 12.5, fontWeight: 600, color: token.colorText }}>
                   {t('tidy.dupSection')}
                 </span>
@@ -286,7 +286,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                 marginTop: dupGroups.length > 0 ? 12 : 0,
                 marginBottom: 6,
               }}>
-                <StopOutlined style={{ fontSize: 13, color: iconColor('idle', token) }} />
+                <Moon size={13} style={{ color: iconColor('idle', token) }} />
                 <span style={{ fontSize: 12.5, fontWeight: 600, color: token.colorText }}>
                   {t('tidy.idleSection')}
                 </span>

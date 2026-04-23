@@ -19,11 +19,11 @@
 import { useState, useCallback, useMemo } from 'react';
 import { Card, Tag, Button, Tooltip, theme } from 'antd';
 import {
-  DownOutlined,
-  CloseOutlined,
-  GlobalOutlined,
-  StopOutlined,
-} from '@ant-design/icons';
+  ChevronDown,
+  X,
+  Globe,
+  Moon,
+} from 'lucide-react';
 import { Reorder } from 'motion/react';
 import type { DomainGroup } from '@/shared/utils/domain';
 import { getGroupFavicon } from '@/shared/utils/domain';
@@ -189,11 +189,15 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
         body: { padding: 0 },
       }}
       style={{
-        borderRadius: cardRadius,
+        borderRadius: cardRadius || 12,
         overflow: 'hidden',
         position: 'relative',
-        boxShadow: cardHovered ? token.boxShadowSecondary : token.boxShadowTertiary,
-        transition: `box-shadow ${token.motionDurationMid}`,
+        boxShadow: cardHovered
+          ? 'var(--canopy-shadow-card-hover)'
+          : 'var(--canopy-shadow-card)',
+        transition: `box-shadow ${token.motionDurationMid} ${token.motionEaseInOut}, transform ${token.motionDurationMid} ${token.motionEaseInOut}`,
+        transform: cardHovered ? `translateY(calc(-1 * var(--canopy-card-lift)))` : 'translateY(0)',
+        border: `1px solid ${cardHovered ? token.colorBorder : token.colorBorderSecondary}`,
       }}
     >
       {/*
@@ -251,23 +255,23 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 8,
+          gap: 10,
           width: '100%',
-          height: 44,
-          paddingLeft: 12,
-          paddingRight: 40,
-          background: headerHovered ? token.colorFillSecondary : token.colorFillQuaternary,
-          borderBottom: `1px solid ${token.colorBorderSecondary}`,
+          height: 48,
+          paddingLeft: 14,
+          paddingRight: 42,
+          background: headerHovered ? token.colorFillSecondary : 'transparent',
+          borderBottom: collapsed ? 'none' : `1px solid ${token.colorBorderSecondary}`,
           cursor: 'pointer',
           textAlign: 'left',
-          transition: `background ${token.motionDurationFast}`,
+          transition: `background ${token.motionDurationFast} ${token.motionEaseInOut}`,
           border: 'none',
           outline: 'none',
         }}
       >
-        <DownOutlined
+        <ChevronDown
+          size={11}
           style={{
-            fontSize: 11,
             color: token.colorTextTertiary,
             flexShrink: 0,
             transform: collapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
@@ -276,15 +280,15 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
         />
 
         {/*
-          域名徽章：24×24 圆角方块，底色是 accent.soft（极低透明主色）
+          域名徽章：26×26 圆角方块，底色是 accent.soft（极低透明主色）
           内部要么嵌 favicon，要么在占位图标。把"色彩=身份"的语义集中在这块小徽章里，
           多卡并排时视觉协同——左边条 + 徽章 是同色系，一眼就能把"这是什么网站"传达出去。
         */}
         <div
           style={{
-            width: 24,
-            height: 24,
-            borderRadius: 6,
+            width: 26,
+            height: 26,
+            borderRadius: 7,
             backgroundColor: accent.soft,
             display: 'flex',
             alignItems: 'center',
@@ -300,13 +304,13 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
               onError={() => setFaviconError(true)}
             />
           ) : (
-            <GlobalOutlined style={{ fontSize: 12, color: barColor }} />
+            <Globe size={12} style={{ color: barColor }} />
           )}
         </div>
 
         <span
           style={{
-            fontSize: 12.5,
+            fontSize: 13,
             fontWeight: 600,
             color: token.colorText,
             flex: 1,
@@ -339,7 +343,7 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
         <Button
           type="text"
           size="small"
-          icon={<StopOutlined style={{ fontSize: 12 }} />}
+          icon={<Moon size={12} />}
           onClick={(e) => {
             e.stopPropagation();
             void discardDomainGroup(group.domain).catch(() => { /* store 已 toast */ });
@@ -368,7 +372,7 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
           danger
           loading={closing}
           disabled={closing}
-          icon={closing ? undefined : <CloseOutlined style={{ fontSize: 12 }} />}
+          icon={closing ? undefined : <X size={12} />}
           onClick={(e: React.MouseEvent) => { void handleCloseAll(e); }}
           style={{
             position: 'absolute',
@@ -388,7 +392,7 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
 
       {/* 标签列表 — 使用 motion Reorder 实现分组内拖拽排序 */}
       {!collapsed && (
-        <div style={{ padding: '4px' }}>
+        <div style={{ padding: '6px 6px' }}>
           <Reorder.Group
             axis="y"
             values={tabOrder}

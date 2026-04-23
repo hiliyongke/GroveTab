@@ -1,22 +1,23 @@
 /**
  * WorkspaceOverview —— 首页摘要与高频操作区。
  *
- * 目标：
- * 1. 将“搜索 / 整理 / 归档”三条主路径前置，降低首次使用的认知成本。
- * 2. 用摘要指标快速说明当前工作区状态，帮助用户判断下一步最合适的动作。
- * 3. 在不打断免费版主流程的前提下，为未来会员版的高级能力预留清晰位置。
+ * 排版策略（v3 轻量条）：
+ *   - 整体做成轻量状态条而非独立大卡片，与搜索区视觉连贯
+ *   - 统计区：横排紧凑色块 + 竖线分隔，视觉更轻量不占纵向空间
+ *   - 操作区：仅保留 primary 搜索按钮，其余降级为 text，减少视觉噪音
+ *   - 整体高度压缩，留更多空间给标签列表主体内容
  */
 
 import { useMemo } from 'react';
 import { Button, Card, Space, Tag, theme } from 'antd';
 import {
-  AppstoreOutlined,
-  SearchOutlined,
-  SaveOutlined,
-  ThunderboltOutlined,
-  ApartmentOutlined,
-  HistoryOutlined,
-} from '@ant-design/icons';
+  Search,
+  Save,
+  Zap,
+  Network,
+  History,
+  LayoutGrid,
+} from 'lucide-react';
 import type { LiveTab } from '@/shared/types';
 import { findDuplicates } from '@/shared/utils/dedupe';
 import { detectIdleTabs } from '@/shared/utils/idle-detect';
@@ -42,7 +43,78 @@ interface SelectionModeNoticeProps {
 }
 
 /**
- * 首页摘要卡。
+ * 单个统计色块：图标 + 数字，紧凑排列
+ */
+function StatChip({
+  icon,
+  value,
+  colorRole,
+  token,
+}: {
+  icon: React.ReactNode;
+  value: number;
+  colorRole: IconRole;
+  token: ReturnType<typeof theme.useToken>['token'];
+}) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        padding: '6px 0',
+      }}
+    >
+      <span
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 28,
+          height: 28,
+          borderRadius: 8,
+          background: iconColorAlpha(colorRole, token),
+          flexShrink: 0,
+        }}
+      >
+        {icon}
+      </span>
+      <span
+        style={{
+          fontSize: 18,
+          fontWeight: 700,
+          color: token.colorText,
+          letterSpacing: '-0.02em',
+          fontVariantNumeric: 'tabular-nums',
+          lineHeight: 1,
+        }}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+/**
+ * 竖线分隔符
+ */
+function DividerVertical({ token }: { token: ReturnType<typeof theme.useToken>['token'] }) {
+  return (
+    <div
+      aria-hidden
+      style={{
+        width: 1,
+        height: 28,
+        background: token.colorBorderSecondary,
+        margin: '0 4px',
+        flexShrink: 0,
+      }}
+    />
+  );
+}
+
+/**
+ * 首页摘要卡
  */
 export function WorkspaceOverview({
   tabs,
@@ -65,123 +137,112 @@ export function WorkspaceOverview({
   const domainCount = new Set(tabs.map((tab) => tab.hostname)).size;
   const hasTidySuggestions = duplicateTabsCount > 0 || idleTabs.length > 0;
 
-  const statItems = [
-    { key: 'tabs', icon: <AppstoreOutlined style={{ color: iconColor('tabs', token) }} />, label: t('dashboard.tabsStat'), value: tabs.length, colorRole: 'tabs' as IconRole },
-    { key: 'domains', icon: <ApartmentOutlined style={{ color: iconColor('domains', token) }} />, label: t('dashboard.domainsStat'), value: domainCount, colorRole: 'domains' as IconRole },
-    { key: 'windows', icon: <ApartmentOutlined style={{ color: iconColor('windows', token) }} />, label: t('dashboard.windowsStat'), value: windowCount, colorRole: 'windows' as IconRole },
-    { key: 'duplicates', icon: <ThunderboltOutlined style={{ color: iconColor('duplicates', token) }} />, label: t('dashboard.duplicatesStat'), value: duplicateTabsCount, colorRole: 'duplicates' as IconRole },
-    { key: 'idle', icon: <HistoryOutlined style={{ color: iconColor('idle', token) }} />, label: t('dashboard.idleStat'), value: idleTabs.length, colorRole: 'idle' as IconRole },
-    { key: 'archives', icon: <SaveOutlined style={{ color: iconColor('sessions', token) }} />, label: t('dashboard.sessionsStat'), value: archivedSessionCount, colorRole: 'sessions' as IconRole },
+  /** 统计色块数据，按重要性排序 */
+  const stats = [
+    { key: 'tabs', icon: <LayoutGrid size={13} style={{ color: iconColor('tabs', token) }} />, value: tabs.length, colorRole: 'tabs' as IconRole },
+    { key: 'domains', icon: <Network size={13} style={{ color: iconColor('domains', token) }} />, value: domainCount, colorRole: 'domains' as IconRole },
+    { key: 'windows', icon: <Network size={13} style={{ color: iconColor('windows', token) }} />, value: windowCount, colorRole: 'windows' as IconRole },
+    { key: 'duplicates', icon: <Zap size={13} style={{ color: iconColor('duplicates', token) }} />, value: duplicateTabsCount, colorRole: 'duplicates' as IconRole },
+    { key: 'idle', icon: <History size={13} style={{ color: iconColor('idle', token) }} />, value: idleTabs.length, colorRole: 'idle' as IconRole },
+    { key: 'archives', icon: <Save size={13} style={{ color: iconColor('sessions', token) }} />, value: archivedSessionCount, colorRole: 'sessions' as IconRole },
   ];
 
   return (
-    <Card
+    <div
       style={{
-        marginBottom: 16,
-        borderRadius: token.borderRadiusLG * 1.5,
-        boxShadow: token.boxShadowTertiary,
-        overflow: 'hidden',
+        marginBottom: 12,
+        padding: '10px 18px',
+        borderRadius: 12,
+        background: token.colorFillQuaternary,
+        border: `1px solid ${token.colorBorderSecondary}`,
       }}
-      styles={{ body: { padding: 20 } }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            gap: 16,
-            flexWrap: 'wrap',
-          }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 260 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Tag color="processing" style={{ margin: 0 }}>
-                {t('dashboard.title')}
-              </Tag>
-              {hasTidySuggestions ? (
-                <Tag color="gold" style={{ margin: 0 }}>
-                  {t('dashboard.tidyReady')}
-                </Tag>
-              ) : (
-                <Tag color="green" style={{ margin: 0 }}>
-                  {t('dashboard.allClear')}
-                </Tag>
-              )}
-            </div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: token.colorText }}>
-              {t('dashboard.subtitle')}
-            </div>
-            <div style={{ fontSize: 12.5, color: token.colorTextSecondary, lineHeight: 1.6, maxWidth: 620 }}>
-              {t('dashboard.description')}
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-            <Button type="link" size="small" icon={<SaveOutlined />} onClick={onOpenArchive} style={{ paddingInline: 0 }}>
-              {t('dashboard.openArchives')}
-            </Button>
-            <span style={{ fontSize: 12, color: token.colorTextTertiary }}>
-              {latestArchiveLabel !== null
-                ? t('dashboard.latestArchive', { name: latestArchiveLabel })
-                : t('dashboard.noArchiveYet')}
-            </span>
-          </div>
-        </div>
-
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-            gap: 12,
-          }}
-        >
-          {statItems.map((item) => (
-            <div
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 16,
+        flexWrap: 'wrap',
+      }}>
+        {/* 左侧：标签 + 统计横排色块 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+          {hasTidySuggestions ? (
+            <Tag color="gold" style={{ margin: 0, borderRadius: 6, fontWeight: 500, fontSize: 11 }}>
+              {t('dashboard.tidyReady')}
+            </Tag>
+          ) : (
+            <Tag color="green" style={{ margin: 0, borderRadius: 6, fontWeight: 500, fontSize: 11 }}>
+              {t('dashboard.allClear')}
+            </Tag>
+          )}
+          <DividerVertical token={token} />
+          {stats.map((item) => (
+            <StatChip
               key={item.key}
-              style={{
-                padding: '14px 16px',
-                borderRadius: token.borderRadiusLG,
-                background: token.colorFillQuaternary,
-                border: `1px solid ${token.colorBorderSecondary}`,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 8,
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
-                <span style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: 24, height: 24,
-                  borderRadius: 6,
-                  background: iconColorAlpha(item.colorRole ?? ('tabs' as IconRole), token),
-                }}>
-                  {item.icon}
-                </span>
-                <span style={{ color: token.colorTextSecondary }}>{item.label}</span>
-              </div>
-              <div style={{ fontSize: 24, fontWeight: 700, color: token.colorText }}>
-                {item.value}
-              </div>
-            </div>
+              icon={item.icon}
+              value={item.value}
+              colorRole={item.colorRole}
+              token={token}
+            />
           ))}
         </div>
 
-        <Space size={8} wrap>
-          <Button type="primary" icon={<SearchOutlined />} onClick={onOpenSearch}>
+        {/* 右侧：操作按钮组 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Button
+            type="primary"
+            icon={<Search size={14} />}
+            onClick={onOpenSearch}
+            style={{ borderRadius: 9, fontWeight: 500 }}
+          >
             {t('dashboard.searchAction')}
           </Button>
-          <Button icon={<ThunderboltOutlined style={{ color: iconColor('tidy', token) }} />} onClick={onFocusTidy}>
-            {t('dashboard.tidyAction')}
-          </Button>
-          <Button icon={<SaveOutlined style={{ color: iconColor('archive', token) }} />} loading={archiving} disabled={tabs.length === 0} onClick={onArchiveCurrent}>
+          {hasTidySuggestions && (
+            <Button
+              type="text"
+              size="small"
+              icon={<Zap size={14} style={{ color: iconColor('tidy', token) }} />}
+              onClick={onFocusTidy}
+            >
+              {t('dashboard.tidyAction')}
+            </Button>
+          )}
+          <Button
+            type="text"
+            size="small"
+            icon={<Save size={14} style={{ color: iconColor('archive', token) }} />}
+            loading={archiving}
+            disabled={tabs.length === 0}
+            onClick={onArchiveCurrent}
+          >
             {t('dashboard.archiveAction')}
           </Button>
-        </Space>
+          <Button
+            type="text"
+            size="small"
+            icon={<Save size={14} />}
+            onClick={onOpenArchive}
+          >
+            {t('dashboard.openArchives')}
+          </Button>
+        </div>
       </div>
-    </Card>
+
+      {/* 归档提示行——仅在最近有归档记录时显示 */}
+      {latestArchiveLabel !== null && (
+        <div
+          style={{
+            marginTop: 8,
+            paddingTop: 8,
+            borderTop: `1px solid ${token.colorBorderSecondary}`,
+            fontSize: 12,
+            color: token.colorTextTertiary,
+          }}
+        >
+          {t('dashboard.latestArchive', { name: latestArchiveLabel })}
+        </div>
+      )}
+    </div>
   );
 }
 

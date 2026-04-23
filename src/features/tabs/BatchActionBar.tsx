@@ -11,13 +11,14 @@
 import { useCallback } from 'react';
 import { Button, Space, Badge, theme } from 'antd';
 import {
-  CloseOutlined,
-  StopOutlined,
-  SaveOutlined,
-  CloseCircleOutlined,
-  SelectOutlined,
-} from '@ant-design/icons';
+  X,
+  Moon,
+  Save,
+  XCircle,
+  Pointer,
+} from 'lucide-react';
 import { useSelectionStore, useTabsStore } from '@/store';
+import { useResolvedTheme } from '@/shared/hooks';
 import { iconColor } from '@/shared/utils/icon-colors';
 import { archiveSelectedTabs } from '@/services';
 import { useT } from '@/shared/i18n';
@@ -39,6 +40,7 @@ export function BatchActionBar() {
   const discardMultipleTabs = useTabsStore((s) => s.discardMultipleTabs);
   const { t } = useT();
   const { token } = theme.useToken();
+  const resolvedTheme = useResolvedTheme();
 
   const count = selectedIds.size;
 
@@ -98,22 +100,25 @@ export function BatchActionBar() {
         alignItems: 'center',
         gap: 12,
         padding: '10px 20px',
-        borderRadius: token.borderRadiusLG * 2,
-        background: `${token.colorBgElevated} / 0.92`,
-        backdropFilter: 'blur(12px)',
-        boxShadow: token.boxShadowSecondary,
+        borderRadius: 'var(--canopy-floating-radius)',
+        background: resolvedTheme === 'dark'
+          ? 'rgba(28, 28, 31, 0.88)'
+          : 'rgba(255, 255, 255, 0.88)',
+        backdropFilter: 'var(--canopy-glass-filter)',
+        WebkitBackdropFilter: 'var(--canopy-glass-filter)',
+        boxShadow: 'var(--canopy-shadow-floating)',
         border: `1px solid ${token.colorBorderSecondary}`,
       }}
     >
       <Badge count={count} size="small" color={token.colorPrimary}>
-        <SelectOutlined style={{ fontSize: 16, color: token.colorPrimary }} />
+        <Pointer size={16} style={{ color: token.colorPrimary }} />
       </Badge>
 
       <Space size={6}>
         <Button
           size="small"
           danger
-          icon={<CloseOutlined style={{ fontSize: 12, color: iconColor('close', token) }} />}
+          icon={<X size={12} style={{ color: iconColor('close', token) }} />}
           onClick={() => { void handleBatchClose(); }}
         >
           {t('batch.close')}
@@ -121,7 +126,7 @@ export function BatchActionBar() {
 
         <Button
           size="small"
-          icon={<StopOutlined style={{ fontSize: 12, color: iconColor('discard', token) }} />}
+          icon={<Moon size={12} style={{ color: iconColor('discard', token) }} />}
           onClick={() => { void handleBatchDiscard(); }}
         >
           {t('batch.discard')}
@@ -130,7 +135,7 @@ export function BatchActionBar() {
         <Button
           size="small"
           type="primary"
-          icon={<SaveOutlined style={{ fontSize: 12 }} />}
+          icon={<Save size={12} />}
           onClick={() => { void handleBatchArchive(); }}
         >
           {t('batch.archive')}
@@ -139,7 +144,7 @@ export function BatchActionBar() {
         <Button
           size="small"
           type="text"
-          icon={<CloseCircleOutlined style={{ fontSize: 12, color: iconColor('close', token) }} />}
+          icon={<XCircle size={12} style={{ color: iconColor('close', token) }} />}
           onClick={exitSelectionMode}
         >
           {t('batch.cancel')}

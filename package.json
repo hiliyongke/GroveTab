@@ -13,11 +13,11 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\""
   },
   "dependencies": {
-    "@ant-design/icons": "^6.1.1",
     "@tanstack/react-virtual": "^3.13.24",
     "antd": "^6.3.6",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.20",
+    "lucide-react": "^1.8.0",
     "minisearch": "^7.2.0",
     "motion": "^12.38.0",
     "nanoid": "^5.1.9",

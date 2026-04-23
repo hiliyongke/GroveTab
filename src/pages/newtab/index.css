@@ -1,15 +1,17 @@
 /**
  * Canopy — 全局样式
  *
- * 策略：视觉全部交给 antd v6 默认主题；这里只保留 antd 无法覆盖的内容：
+ * 策略：视觉全部交给 antd v6 主题 + 皮肤预设；这里只保留 antd 无法覆盖的内容：
  *   1. color-scheme / 盒模型等浏览器级基础重置
  *   2. body 背景色跟随 antd 的 --ant-color-bg-layout
  *   3. 滚动条微调（更素雅，不抢视觉）
  *   4. 基于 CSS columns 的瀑布流布局 utility（antd 没有内建）
  *   5. favicon 占位块（由代码生成颜色，纯结构样式）
+ *   6. 高级感增强：字体渲染、选中态、聚焦态
+ *   7. 皮肤级 CSS 变量驱动：噪点纹理、网格背景
  */
 
-:root {
+::root {
   color-scheme: light;
 }
 [data-theme='dark'] {
@@ -29,6 +31,10 @@ body {
   color: var(--ant-color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+  /* 标题字体跟随皮肤预设 */
+  font-family: var(--ant-font-family);
 }
 
 *,
@@ -37,20 +43,35 @@ body {
   box-sizing: border-box;
 }
 
+/** 选中态：用品牌色低透明度，避免默认蓝的廉价感 */
+::selection {
+  background-color: color-mix(in srgb, var(--canopy-color-primary) 18%, transparent);
+  color: inherit;
+}
+[data-theme='dark'] ::selection {
+  background-color: color-mix(in srgb, var(--canopy-color-primary) 25%, transparent);
+}
+
 /* ─── 自定义滚动条（webkit）──────────────────────── */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--ant-color-border-secondary);
-  border-radius: 4px;
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--ant-color-border);
+}
+
+/* ─── Firefox 滚动条 ─────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ant-color-border-secondary) transparent;
 }
 
 /* ─── 域名卡片瀑布流容器（antd 无对应组件） ────────── */
@@ -76,6 +97,16 @@ body {
   flex-shrink: 0;
 }
 
+/* ─── 全局聚焦态优化 ──────────────────────────────
+ * 移除默认 outline，改用柔和的 brand shadow ring；
+ * 仅在键盘导航时显示（:focus-visible），鼠标点击不出现。
+ */
+::focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--canopy-color-primary) 35%, transparent);
+  border-radius: inherit;
+}
+
 /* ─── 主题切换图标动画 ─────────────────────────────
  * 头部明暗切换按钮在 theme 变化时，icon 元素通过 key 被重建；
  * 这里给它一个轻量的「旋转 + 渐入」效果，让切换可感知。
@@ -93,4 +124,38 @@ body {
     opacity: 1;
     transform: rotate(0) scale(1);
   }
+}
+
+/* ─── 页面入场动画 ─────────────────────────────────
+ * 首屏加载完成后，主内容区做一个柔和的上滑渐入。
+ */
+@keyframes canopy-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── 皮肤纹理：噪点叠加 ──────────────────────────
+ * 当 <html> 上有 data-texture-noise 属性时，
+ * 通过 SVG filter 在 body 上叠加一层微弱噪点，增加纸张/实体质感。
+ * 由 AntdThemeProvider 动态控制此属性。
+ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  filter: url(#canopy-noise);
+  transition: opacity 0.3s ease;
+}
+
+html[data-texture-noise] body::before {
+  opacity: var(--canopy-texture-noise-opacity, 0.03);
 }

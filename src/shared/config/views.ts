@@ -5,36 +5,36 @@
  * 新增视图只需改这一处，App.tsx 和 SettingsPanel 自动同步。
  */
 
-import type { ComponentType } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import {
-  AppstoreOutlined,
-  ClockCircleOutlined,
-  UnorderedListOutlined,
-  TableOutlined,
-  FireOutlined,
-  GroupOutlined,
-  BlockOutlined,
-  BookOutlined,
-} from '@ant-design/icons';
+  LayoutGrid,
+  Clock,
+  List,
+  Table2,
+  Flame,
+  Layers,
+  Monitor,
+  BookOpen,
+} from 'lucide-react';
 
 export type ViewMode = 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'bookmarks';
 
 export interface ViewConfig {
   id: ViewMode;
   /** 图标组件引用，消费处自行 <Icon /> 渲染 */
-  Icon: ComponentType;
+  Icon: LucideIcon;
   labelKey: string;
 }
 
 export const VIEW_CONFIGS: ViewConfig[] = [
-  { id: 'domain', Icon: AppstoreOutlined, labelKey: 'view.domain' },
-  { id: 'tabgroup', Icon: GroupOutlined, labelKey: 'view.tabgroup' },
-  { id: 'window', Icon: BlockOutlined, labelKey: 'view.window' },
-  { id: 'bookmarks', Icon: BookOutlined, labelKey: 'view.bookmarks' },
-  { id: 'timeline', Icon: ClockCircleOutlined, labelKey: 'view.timeline' },
-  { id: 'compact', Icon: UnorderedListOutlined, labelKey: 'view.compact' },
-  { id: 'grid', Icon: TableOutlined, labelKey: 'view.grid' },
-  { id: 'frequency', Icon: FireOutlined, labelKey: 'view.frequency' },
+  { id: 'domain', Icon: LayoutGrid, labelKey: 'view.domain' },
+  { id: 'tabgroup', Icon: Layers, labelKey: 'view.tabgroup' },
+  { id: 'window', Icon: Monitor, labelKey: 'view.window' },
+  { id: 'bookmarks', Icon: BookOpen, labelKey: 'view.bookmarks' },
+  { id: 'timeline', Icon: Clock, labelKey: 'view.timeline' },
+  { id: 'compact', Icon: List, labelKey: 'view.compact' },
+  { id: 'grid', Icon: Table2, labelKey: 'view.grid' },
+  { id: 'frequency', Icon: Flame, labelKey: 'view.frequency' },
 ];
 
 /** 合法的 ViewMode 值数组，用于防御旧版残留值 */

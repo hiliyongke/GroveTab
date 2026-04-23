@@ -19,7 +19,7 @@
 
 import { useMemo, useState } from 'react';
 import { Card, Modal, theme } from 'antd';
-import { SoundOutlined } from '@ant-design/icons';
+import { Volume2 } from 'lucide-react';
 import { useTabsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { groupTabsByDomain, getGroupFavicon } from '@/shared/utils/domain';
@@ -242,7 +242,7 @@ function GridCard({ domain, colorKey, tabs, onJump, onOpenList, countLabel, acce
           {domain}
         </span>
         {hasAudible && (
-          <SoundOutlined style={{ fontSize: 12, color: token.colorPrimary, flexShrink: 0 }} />
+          <Volume2 size={12} style={{ color: token.colorPrimary, flexShrink: 0 }} />
         )}
       </div>
 

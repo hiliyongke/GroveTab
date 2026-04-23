@@ -9,13 +9,13 @@
 
 
 import {
-  UndoOutlined,
-  DeleteOutlined,
-  RightOutlined,
-  LinkOutlined,
-  EditOutlined,
-  SaveOutlined,
-} from '@ant-design/icons';
+  Undo2,
+  Trash2,
+  ChevronRight,
+  Link,
+  Pencil,
+  Save,
+} from 'lucide-react';
 import { Button, List, Tooltip, Input, theme } from 'antd';
 import { format } from 'date-fns';
 import { zhCN, enUS } from 'date-fns/locale';
@@ -80,9 +80,9 @@ export function SessionItem({
             type="text"
             size="small"
             icon={
-              <RightOutlined
+              <ChevronRight
+                size={11}
                 style={{
-                  fontSize: 11,
                   transition: 'transform 0.2s',
                   transform: isExpanded ? 'rotate(90deg)' : 'rotate(0)',
                 }}
@@ -108,7 +108,7 @@ export function SessionItem({
             flexShrink: 0,
           }}
         >
-          <SaveOutlined style={{ fontSize: 16 }} />
+          <Save size={16} />
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -155,14 +155,14 @@ export function SessionItem({
           <Tooltip title={t('archive.restore')}>
             <Button
               type="text"
-              icon={<UndoOutlined />}
+              icon={<Undo2 size={14} />}
               onClick={() => onRestore(session.id)}
             />
           </Tooltip>
           <Tooltip title={t('archive.rename')}>
             <Button
               type="text"
-              icon={<EditOutlined />}
+              icon={<Pencil size={14} />}
               onClick={() => onStartRenaming(session)}
             />
           </Tooltip>
@@ -170,7 +170,7 @@ export function SessionItem({
             <Button
               type="text"
               danger
-              icon={<DeleteOutlined />}
+              icon={<Trash2 size={14} />}
               onClick={() => onDelete(session.id)}
             />
           </Tooltip>
@@ -265,7 +265,7 @@ export function SessionItem({
                   <Button
                     type="text"
                     size="small"
-                    icon={<LinkOutlined />}
+                    icon={<Link size={14} />}
                     onClick={() => onOpenSingle(tab)}
                   />
                 </Tooltip>

@@ -8,7 +8,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Alert, theme, Button, App } from 'antd';
-import { UndoOutlined } from '@ant-design/icons';
+import { RotateCcw } from 'lucide-react';
 import { useT } from '@/shared/i18n';
 import { useSettingsStore } from '@/store';
 import { useResolvedKeybindings } from '@/shared/hooks/use-keybinding';
@@ -115,7 +115,7 @@ function KeybindingRecorder({
       <Button
         type="text"
         size="small"
-        icon={<UndoOutlined />}
+        icon={<RotateCcw size={14} />}
         title={t('shortcuts.resetHint')}
         onClick={onReset}
         style={{ color: token.colorTextTertiary }}
