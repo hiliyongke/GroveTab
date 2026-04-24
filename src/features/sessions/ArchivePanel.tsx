@@ -13,8 +13,10 @@ import {
   Save,
   Info,
   Inbox,
+  GitMerge,
+  CheckSquare,
 } from 'lucide-react';
-import { Alert, Modal, Button, List, Empty, Spin, theme } from 'antd';
+import { Alert, Modal, Button, List, Empty, Spin, Input, theme, Space } from 'antd';
 import type { ArchivedSession } from '@/shared/types';
 import {
   getArchivedSessions,
@@ -22,10 +24,12 @@ import {
   deleteSession,
   renameSession,
   archiveAllTabs,
+  mergeSessions,
+  exportSingleSession,
 } from '@/services';
 import { createTab, getCurrentWindow } from '@/chrome';
 import { useT } from '@/shared/i18n';
-import { useTabsStore } from '@/store';
+import { useTabsStore, useUndoStore, useMetadataStore } from '@/store';
 import { feedback } from '@/shared/ui/feedback';
 import { SessionItem } from './components/SessionItem';
 import { iconColor } from '@/shared/utils/icon-colors';
@@ -73,6 +77,13 @@ export function ArchivePanel({ open, onOpenChange, onSessionsChange }: ArchivePa
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renamingValue, setRenamingValue] = useState('');
+  /** v1.0 封板：多选模式 */
+  const [selectable, setSelectable] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  /** 高亮会话（由 UndoToast 等跳转触发） */
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  const [mergeOpen, setMergeOpen] = useState(false);
+  const [mergeName, setMergeName] = useState('');
   const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
   const tabCount = useTabsStore((s) => s.tabs.length);
   const { t, locale } = useT();
@@ -82,6 +93,23 @@ export function ArchivePanel({ open, onOpenChange, onSessionsChange }: ArchivePa
     if (!initialized) return;
     onSessionsChange?.(sessions);
   }, [initialized, onSessionsChange, sessions]);
+
+  /**
+   * 监听 canopy:highlight-session 自定义事件，来自 UndoToast / ActivityStrip 的跳转。
+   */
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ sessionId?: string }>).detail;
+      if (detail?.sessionId !== undefined) {
+        setHighlightId(detail.sessionId);
+        setExpandedId(detail.sessionId);
+        // 3s 后自动移除高亮
+        window.setTimeout(() => setHighlightId(null), 3000);
+      }
+    };
+    window.addEventListener('canopy:highlight-session', handler as EventListener);
+    return () => window.removeEventListener('canopy:highlight-session', handler as EventListener);
+  }, []);
 
   const handleAfterOpenChange = useCallback(
     (visible: boolean) => {
@@ -110,6 +138,71 @@ export function ArchivePanel({ open, onOpenChange, onSessionsChange }: ArchivePa
       await refreshSessions();
     } catch (err) {
       feedback.error(t('archive.deleteFailed'), err);
+    }
+  };
+
+  /** v1.0 封板：分享单个会话为 JSON */
+  const handleShare = async (id: string) => {
+    const payload = await exportSingleSession(id);
+    if (payload === null) {
+      feedback.error(t('archive.shareFailed'));
+      return;
+    }
+    try {
+      const blob = new Blob([payload.content], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = payload.filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      feedback.success(t('archive.shareOk'));
+    } catch (err) {
+      feedback.error(t('archive.shareFailed'), err);
+    }
+  };
+
+  /** v1.0 封板：合并多个会话 */
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const cancelSelect = () => {
+    setSelectable(false);
+    setSelectedIds(new Set());
+  };
+
+  const handleOpenMerge = () => {
+    if (selectedIds.size < 2) {
+      feedback.warning(t('archive.mergeNeedTwo'));
+      return;
+    }
+    setMergeName(t('archive.mergedDefaultName'));
+    setMergeOpen(true);
+  };
+
+  const handleConfirmMerge = async () => {
+    try {
+      const newSession = await mergeSessions(Array.from(selectedIds), mergeName);
+      await refreshSessions();
+      setMergeOpen(false);
+      cancelSelect();
+      feedback.success(t('archive.mergedOk', { count: newSession.tabCount }));
+      void useMetadataStore.getState().pushActivity({
+        id: `merge-${newSession.id}`,
+        type: 'archive',
+        ts: Date.now(),
+        summary: t('archive.mergedActivity', { count: newSession.tabCount, name: newSession.name }),
+      });
+    } catch (err) {
+      feedback.error(t('archive.mergeFailed'), err);
     }
   };
 
@@ -147,13 +240,43 @@ export function ArchivePanel({ open, onOpenChange, onSessionsChange }: ArchivePa
     if (archivingCurrent || tabCount === 0) return;
     setArchivingCurrent(true);
     try {
-      const { archivedCount, closedCount } = await archiveAllTabs();
+      const result = await archiveAllTabs();
+      const { archivedCount, closedCount, session } = result;
       await loadAllTabs({ silent: true });
       await refreshSessions();
-      feedback.success(t('archive.archivedOk', { count: archivedCount }));
-      if (closedCount < archivedCount) {
-        feedback.warning(t('archive.closeIncomplete', { count: archivedCount - closedCount }));
-      }
+
+      /**
+       * v1.0 封板：归档走 Undo ring buffer，使 UndoToast 富交互能接管展示。
+       * snapshots 用于单击"撤销"时恢复原 Tab。
+       */
+      const snapshots = session.tabs.map((tab) => ({
+        url: tab.url,
+        title: tab.title,
+        favIconUrl: tab.favIconUrl,
+        windowId: 0,
+        pinned: tab.pinned,
+      }));
+      const failCount = archivedCount - closedCount;
+      const subNote = failCount > 0 ? t('archive.closeIncomplete', { count: failCount }) : '';
+      void useUndoStore.getState().addRecord(
+        snapshots,
+        t('archive.archivedRichToast', { count: archivedCount, name: session.name }),
+        { archivedSessionId: session.id, subNote },
+      );
+
+      /** 推 Activity Strip 记录 */
+      void useMetadataStore.getState().pushActivity({
+        id: `archive-${session.id}`,
+        type: 'archive',
+        ts: Date.now(),
+        summary: t('activity.archived', { count: archivedCount, name: session.name }),
+        primaryAction: {
+          id: 'view',
+          label: t('activity.viewArchive'),
+          kind: 'open_archive',
+          payload: session.id,
+        },
+      });
     } catch (err) {
       feedback.error(t('archive.archiveFailed'), err);
     } finally {
@@ -189,16 +312,45 @@ export function ArchivePanel({ open, onOpenChange, onSessionsChange }: ArchivePa
             <Save size={14} style={{ color: iconColor('archive', token) }} />
           </div>
           <span style={{ flex: 1, fontSize: 15, fontWeight: 600 }}>{t('archive.title')}</span>
-          <Button
-            type="primary"
-            icon={<Plus size={14} />}
-            loading={archivingCurrent}
-            disabled={tabCount === 0}
-            onClick={() => { void handleArchiveCurrent(); }}
-            title={t('header.tabCount', { count: tabCount })}
-          >
-            {t('header.archive')}
-          </Button>
+          <Space size={4}>
+            {selectable ? (
+              <>
+                <span style={{ fontSize: 12, color: token.colorTextSecondary }}>
+                  {t('archive.selectedCount', { count: selectedIds.size })}
+                </span>
+                <Button
+                  size="small"
+                  icon={<GitMerge size={13} />}
+                  onClick={handleOpenMerge}
+                  disabled={selectedIds.size < 2}
+                >
+                  {t('archive.merge')}
+                </Button>
+                <Button size="small" type="text" onClick={cancelSelect}>
+                  {t('archive.cancelSelect')}
+                </Button>
+              </>
+            ) : (
+              <Button
+                size="small"
+                type="text"
+                icon={<CheckSquare size={13} />}
+                onClick={() => setSelectable(true)}
+              >
+                {t('archive.selectMode')}
+              </Button>
+            )}
+            <Button
+              type="primary"
+              icon={<Plus size={14} />}
+              loading={archivingCurrent}
+              disabled={tabCount === 0}
+              onClick={() => { void handleArchiveCurrent(); }}
+              title={t('header.tabCount', { count: tabCount })}
+            >
+              {t('header.archive')}
+            </Button>
+          </Space>
         </div>
       }
     >
@@ -248,27 +400,60 @@ export function ArchivePanel({ open, onOpenChange, onSessionsChange }: ArchivePa
           <List
             dataSource={sessions}
             renderItem={(session) => (
-              <SessionItem
-                session={session}
-                isExpanded={expandedId === session.id}
-                isRenaming={renamingId === session.id}
-                renamingValue={renamingValue}
-                locale={locale}
-                onToggleExpand={() =>
-                  setExpandedId((prev) => (prev === session.id ? null : session.id))
-                }
-                onRestore={(id) => { void handleRestore(id); }}
-                onDelete={(id) => { void handleDelete(id); }}
-                onStartRenaming={startRenaming}
-                onRenameConfirm={(id) => { void handleRenameConfirm(id); }}
-                onRenameChange={setRenamingValue}
-                onRenameCancel={() => setRenamingId(null)}
-                onOpenSingle={(tab) => { void handleOpenSingle(tab); }}
-              />
+              <div
+                style={{
+                  outline: highlightId === session.id ? `2px solid ${token.colorPrimary}` : 'none',
+                  outlineOffset: 2,
+                  borderRadius: token.borderRadius,
+                  transition: 'outline 200ms',
+                }}
+              >
+                <SessionItem
+                  session={session}
+                  isExpanded={expandedId === session.id}
+                  isRenaming={renamingId === session.id}
+                  renamingValue={renamingValue}
+                  locale={locale}
+                  onToggleExpand={() =>
+                    setExpandedId((prev) => (prev === session.id ? null : session.id))
+                  }
+                  onRestore={(id) => { void handleRestore(id); }}
+                  onDelete={(id) => { void handleDelete(id); }}
+                  onStartRenaming={startRenaming}
+                  onRenameConfirm={(id) => { void handleRenameConfirm(id); }}
+                  onRenameChange={setRenamingValue}
+                  onRenameCancel={() => setRenamingId(null)}
+                  onOpenSingle={(tab) => { void handleOpenSingle(tab); }}
+                  onShare={(id) => { void handleShare(id); }}
+                  selectable={selectable}
+                  selected={selectedIds.has(session.id)}
+                  onToggleSelect={toggleSelect}
+                />
+              </div>
             )}
           />
         )}
       </div>
+
+      {/* 合并会话 Modal */}
+      <Modal
+        open={mergeOpen}
+        title={t('archive.mergeTitle')}
+        onCancel={() => setMergeOpen(false)}
+        onOk={() => void handleConfirmMerge()}
+        okText={t('archive.merge')}
+        cancelText={t('archive.cancel')}
+        centered
+      >
+        <p style={{ margin: '0 0 12px', fontSize: 13, color: token.colorTextSecondary }}>
+          {t('archive.mergeDesc', { count: selectedIds.size })}
+        </p>
+        <Input
+          value={mergeName}
+          onChange={(e) => setMergeName(e.target.value)}
+          placeholder={t('archive.mergeNamePlaceholder')}
+        />
+      </Modal>
     </Modal>
   );
 }

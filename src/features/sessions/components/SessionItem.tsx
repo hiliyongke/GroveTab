@@ -15,6 +15,7 @@ import {
   Link,
   Pencil,
   Save,
+  Share2,
 } from 'lucide-react';
 import { Button, List, Tooltip, Input, theme } from 'antd';
 import { format } from 'date-fns';
@@ -36,6 +37,12 @@ interface SessionItemProps {
   onRenameChange: (value: string) => void;
   onRenameCancel: () => void;
   onOpenSingle: (tab: ArchivedTab) => void;
+  /** v1.0 封板：导出单个会话为 JSON（F-14 分享） */
+  onShare?: (id: string) => void;
+  /** v1.0 封板：多选复选框 */
+  selectable?: boolean;
+  selected?: boolean;
+  onToggleSelect?: (id: string) => void;
 }
 
 export function SessionItem({
@@ -52,6 +59,10 @@ export function SessionItem({
   onRenameChange,
   onRenameCancel,
   onOpenSingle,
+  onShare,
+  selectable,
+  selected,
+  onToggleSelect,
 }: SessionItemProps) {
   const { t } = useT();
   const { token } = theme.useToken();
@@ -152,6 +163,15 @@ export function SessionItem({
         </div>
 
         <div style={{ display: 'flex', gap: 4, flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
+          {selectable === true && (
+            <input
+              type="checkbox"
+              checked={selected === true}
+              onChange={() => onToggleSelect?.(session.id)}
+              style={{ marginRight: 4 }}
+              aria-label={t('archive.selectToggle')}
+            />
+          )}
           <Tooltip title={t('archive.restore')}>
             <Button
               type="text"
@@ -166,6 +186,15 @@ export function SessionItem({
               onClick={() => onStartRenaming(session)}
             />
           </Tooltip>
+          {onShare !== undefined && (
+            <Tooltip title={t('archive.share')}>
+              <Button
+                type="text"
+                icon={<Share2 size={14} />}
+                onClick={() => onShare(session.id)}
+              />
+            </Tooltip>
+          )}
           <Tooltip title={t('archive.delete')}>
             <Button
               type="text"

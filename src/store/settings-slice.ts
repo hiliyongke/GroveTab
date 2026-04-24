@@ -42,7 +42,15 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       viewSwitcher: true,
       workspaceOverview: true,
       tidySuggestion: true,
+      activityStrip: true,
     },
+    // v1.0 封板新增默认值
+    dedupStrictness: 'loose',
+    idleThresholdMinutes: 1440,
+    undoWindowSeconds: 5,
+    closeConfirmThreshold: 20,
+    autoSnapshotFrequency: '12h',
+    enableOgFetch: false,
   },
   loaded: false,
 

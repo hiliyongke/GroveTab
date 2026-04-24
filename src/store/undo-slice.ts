@@ -23,7 +23,11 @@ interface UndoState {
   activeToast: UndoRecord | null;
 
   /** Add an undo record and persist it */
-  addRecord: (tabs: ClosedTabSnapshot[], description: string) => Promise<UndoRecord>;
+  addRecord: (
+    tabs: ClosedTabSnapshot[],
+    description: string,
+    extra?: { archivedSessionId?: string; subNote?: string },
+  ) => Promise<UndoRecord>;
   /** Undo (restore) a record */
   undoRecord: (recordId: string) => Promise<void>;
   /** Dismiss the active toast without undoing */
@@ -38,13 +42,15 @@ export const useUndoStore = create<UndoState>((set, get) => ({
   records: [],
   activeToast: null,
 
-  addRecord: (tabs, description) => {
+  addRecord: (tabs, description, extra) => {
     const record: UndoRecord = {
       id: nanoid(8),
       createdAt: Date.now(),
       tabs,
       description,
       expired: false,
+      archivedSessionId: extra?.archivedSessionId,
+      subNote: extra?.subNote,
     };
 
     const records = [record, ...get().records].slice(0, MAX_UNDO_RECORDS);

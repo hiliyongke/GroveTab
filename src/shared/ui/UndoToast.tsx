@@ -1,20 +1,33 @@
 /**
- * UndoToast — 关闭标签后的撤销提示（antd 版）
+ * UndoToast — 关闭 / 归档后的撤销提示（富交互版，F-06 封板）
  *
  * 设计：
- *   - 底部居中浮动胶囊（使用 antd token 控制配色）
- *   - 撤销按钮使用 antd Button（primary）
- *   - 关闭按钮使用 antd Button（text）
- *   - 从下方滑入（原生 CSS 动画 .canopy-pulse / 自定义 transform）
+ *   - 底部居中浮动胶囊（antd token 控制配色）
+ *   - 归档场景：文案 "已归档 N 个标签到「{sessionName}」" + [查看归档] + [撤销]
+ *   - 普通关闭场景：保持原 [撤销] 单按钮形态
+ *   - 若 record.subNote 非空（如 "M 个关闭失败"），在副行展示
+ *
+ * UndoToast 通过自定义事件 `canopy:open-archive` 通知上层打开 ArchivePanel 并高亮 session。
  */
 
 import { Button, theme } from 'antd';
-import { Undo2, X } from 'lucide-react';
+import { Archive, Undo2, X } from 'lucide-react';
 import { useUndoStore } from '@/store';
 import { useT } from '@/shared/i18n';
 
 /**
- * 撤销提示浮条
+ * 触发"打开 Archive 并高亮 session"的跨组件事件。
+ * App.tsx 监听该事件并调用 setShowArchive(true)。
+ */
+function openArchivePanel(sessionId?: string) {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(
+    new CustomEvent('canopy:open-archive', { detail: { sessionId } }),
+  );
+}
+
+/**
+ * 撤销提示浮条（富交互）
  */
 export function UndoToast() {
   const activeToast = useUndoStore((s) => s.activeToast);
@@ -25,11 +38,22 @@ export function UndoToast() {
 
   if (!activeToast) return null;
 
+  /**
+   * 主文案：
+   *   - 归档场景：直接使用 record.description（形如 "已归档 32 个标签到「…」"）
+   *   - 关闭场景：按 i18n 模板生成 "关闭 X 个标签"
+   */
   const tabCount = activeToast.tabs.length;
-  const label =
-    tabCount === 1 ? t('undo.closeOne') : t('undo.close', { count: tabCount });
+  const isArchive = activeToast.archivedSessionId !== undefined;
+  const mainLabel = isArchive
+    ? activeToast.description
+    : tabCount === 1
+    ? t('undo.closeOne')
+    : t('undo.close', { count: tabCount });
 
-  const handleUndo = () => { void undoRecord(activeToast.id); };
+  const handleUndo = () => {
+    void undoRecord(activeToast.id);
+  };
 
   return (
     <div
@@ -42,36 +66,76 @@ export function UndoToast() {
         transform: 'translateX(-50%)',
         zIndex: 1100,
         display: 'flex',
+        flexDirection: 'column',
+        gap: 4,
         alignItems: 'center',
-        gap: 12,
         padding: '8px 8px 8px 20px',
-        borderRadius: 999,
+        borderRadius: 16,
         background: token.colorBgElevated,
         border: `1px solid ${token.colorBorderSecondary}`,
         boxShadow: token.boxShadow,
         backdropFilter: 'blur(16px)',
+        maxWidth: 520,
       }}
     >
-      <span style={{ fontSize: 13, fontWeight: 500, color: token.colorText }}>{label}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <span
+          style={{
+            fontSize: 13,
+            fontWeight: 500,
+            color: token.colorText,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            maxWidth: 320,
+          }}
+          title={mainLabel}
+        >
+          {mainLabel}
+        </span>
 
-      <Button
-        type="primary"
-        shape="round"
-        size="small"
-        icon={<Undo2 size={14} />}
-        onClick={handleUndo}
-      >
-        {t('undo.action')}
-      </Button>
+        {isArchive && (
+          <Button
+            type="default"
+            shape="round"
+            size="small"
+            icon={<Archive size={13} />}
+            onClick={() => openArchivePanel(activeToast.archivedSessionId)}
+          >
+            {t('activity.viewArchive')}
+          </Button>
+        )}
 
-      <Button
-        type="text"
-        shape="circle"
-        size="small"
-        icon={<X size={14} />}
-        onClick={dismissToast}
-        aria-label="Dismiss"
-      />
+        <Button
+          type="primary"
+          shape="round"
+          size="small"
+          icon={<Undo2 size={14} />}
+          onClick={handleUndo}
+        >
+          {t('undo.action')}
+        </Button>
+
+        <Button
+          type="text"
+          shape="circle"
+          size="small"
+          icon={<X size={14} />}
+          onClick={dismissToast}
+          aria-label="Dismiss"
+        />
+      </div>
+      {activeToast.subNote !== undefined && activeToast.subNote !== '' && (
+        <span
+          style={{
+            fontSize: 11.5,
+            color: token.colorWarning,
+            paddingLeft: 4,
+          }}
+        >
+          {activeToast.subNote}
+        </span>
+      )}
     </div>
   );
 }

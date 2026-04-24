@@ -89,6 +89,8 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     minify: 'esbuild',
+    // 将 chunk 阈值调紧至 300KB，超阈值在 CI 里是 warning 信号
+    chunkSizeWarningLimit: 300,
     rollupOptions: {
       input: {
         newtab: resolve(__dirname, 'src/pages/newtab/main.tsx'),
@@ -99,6 +101,35 @@ export default defineConfig({
         entryFileNames: '[name].js',
         chunkFileNames: 'chunks/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash][extname]',
+        /**
+         * 手动分片策略（v1.0 封板）：把重依赖拆到独立 chunk，
+         * 让主入口 newtab.js 保持精简（目标 ≤ 280 KB / 90 KB gz）。
+         */
+        manualChunks(id: string) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react-dom')) return 'vendor-react-dom';
+            if (id.includes('react') && !id.includes('react-router')) return 'vendor-react';
+            if (id.includes('antd') || id.includes('@ant-design')) return 'vendor-antd';
+            if (id.includes('minisearch') || id.includes('pinyin-pro') || id.includes('tldts')) {
+              return 'vendor-search';
+            }
+            if (id.includes('date-fns') || id.includes('dayjs')) return 'vendor-date';
+            if (id.includes('lucide-react')) return 'vendor-icons';
+            if (id.includes('motion') || id.includes('framer-motion')) return 'vendor-motion';
+            if (id.includes('zustand')) return 'vendor-zustand';
+            return 'vendor-misc';
+          }
+          // 把"非首屏必需"的特性模块拆到独立 chunk
+          if (id.includes('/features/settings/')) return 'feat-settings';
+          if (id.includes('/features/sessions/')) return 'feat-sessions';
+          if (id.includes('/features/search/')) return 'feat-search';
+          if (id.includes('/features/insights/')) return 'feat-insights';
+          if (id.includes('/features/workspace/')) return 'feat-workspace';
+          if (id.includes('/features/tabs/KanbanView')) return 'feat-kanban';
+          if (id.includes('/shared/theme/')) return 'shared-theme';
+          if (id.includes('/shared/utils/import-export')) return 'shared-import-export';
+          return undefined;
+        },
       },
     },
   },

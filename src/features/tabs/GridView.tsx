@@ -9,17 +9,18 @@
  *
  * 交互：
  *   - **单 tab**：点击直接跳转（快捷路径）
- *   - **多 tab**：点击弹出 Modal（居中、带遮罩、淡入），展示完整列表
- *     选用 Modal 而非 Popover 的理由：
- *       1. 卡片偏小，Popover 贴卡片显得局促，长列表易越界
- *       2. Modal 居中 + 遮罩，层次清晰，与"查看该域名全部 tab"的重操作匹配
- *       3. 无 outside-click 误判问题，交互更稳定
- *       4. 支持 Esc 关闭 + 自带淡入淡出动画
+ *   - **多 tab**：点击展开 Popover（锚定到卡片、无遮罩、带 arrow），
+ *     展示该域名下的完整列表。
+ *     选用 Popover 而非 Modal 的理由：
+ *       1. "查看同域名的几个 tab" 属于轻量心流，Modal 的遮罩过重
+ *       2. Popover 的 arrow 直接把浮层和触发卡片视觉绑定，锚点清晰
+ *       3. 支持 Esc 关闭 + outside-click 关闭，与 antd 原生一致
+ *       4. 不打断 Grid 的浏览上下文
  */
 
 import { useMemo, useState } from 'react';
-import { Card, Modal, theme } from 'antd';
-import { Volume2 } from 'lucide-react';
+import { Button, Card, Popover, theme } from 'antd';
+import { Volume2, X } from 'lucide-react';
 import { useTabsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { groupTabsByDomain, getGroupFavicon } from '@/shared/utils/domain';
@@ -41,12 +42,8 @@ export function GridView() {
 
   const groups = useMemo(() => groupTabsByDomain(tabs), [tabs]);
 
-  /** 当前打开的域名分组（null 代表关闭） */
+  /** 当前打开 Popover 的域名（null 代表全部关闭）——同时至多一个浮层 */
   const [activeDomain, setActiveDomain] = useState<string | null>(null);
-  const activeGroup = useMemo(
-    () => groups.find((g) => g.domain === activeDomain) ?? null,
-    [groups, activeDomain],
-  );
 
   /**
    * 批次内去重分配 Accent——与 DomainGroupView 同策略，
@@ -65,42 +62,38 @@ export function GridView() {
 
   if (groups.length === 0) return null;
 
-  /** 弹窗内点击「跳转」：跳完顺手关闭弹窗 */
-  const handleJumpFromModal = (tabId: number, windowId: number) => {
+  /** Popover 内点击「跳转」：跳完顺手关闭浮层 */
+  const handleJumpFromPopover = (tabId: number, windowId: number) => {
     void jumpToTab(tabId, windowId);
     setActiveDomain(null);
   };
 
   return (
-    <>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-          gap: 12,
-        }}
-      >
-        {groups.map((group) => (
-          <GridCard
-            key={group.domain}
-            domain={group.domain}
-            colorKey={group.colorKey}
-            tabs={group.tabs}
-            onJump={(id, wid) => { void jumpToTab(id, wid); }}
-            onOpenList={() => setActiveDomain(group.domain)}
-            countLabel={t('header.tabCount', { count: group.tabs.length })}
-            accentOverride={accentMap[group.colorKey]}
-          />
-        ))}
-      </div>
-
-      <DomainTabsModal
-        group={activeGroup}
-        onClose={() => setActiveDomain(null)}
-        onJump={handleJumpFromModal}
-        onCloseTab={(id) => { void closeSingleTab(id); }}
-      />
-    </>
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+        gap: 12,
+      }}
+    >
+      {groups.map((group) => (
+        <GridCard
+          key={group.domain}
+          domain={group.domain}
+          colorKey={group.colorKey}
+          tabs={group.tabs}
+          onJump={(id, wid) => { void jumpToTab(id, wid); }}
+          open={activeDomain === group.domain}
+          onOpenChange={(next) =>
+            setActiveDomain(next ? group.domain : null)
+          }
+          onJumpFromPopover={handleJumpFromPopover}
+          onCloseTab={(id) => { void closeSingleTab(id); }}
+          countLabel={t('header.tabCount', { count: group.tabs.length })}
+          accentOverride={accentMap[group.colorKey]}
+        />
+      ))}
+    </div>
   );
 }
 
@@ -109,7 +102,11 @@ interface GridCardProps {
   colorKey: string;
   tabs: LiveTab[];
   onJump: (tabId: number, windowId: number) => void;
-  onOpenList: () => void;
+  /** Popover 开合受控——true 表示当前卡片的浮层展开 */
+  open: boolean;
+  onOpenChange: (next: boolean) => void;
+  onJumpFromPopover: (tabId: number, windowId: number) => void;
+  onCloseTab: (tabId: number) => void;
   countLabel: string;
   /** 父层批次去重后的 Accent；未提供则退回单独 `useAccent` */
   accentOverride?: Accent;
@@ -118,7 +115,18 @@ interface GridCardProps {
 /**
  * 单张域名卡片
  */
-function GridCard({ domain, colorKey, tabs, onJump, onOpenList, countLabel, accentOverride }: GridCardProps) {
+function GridCard({
+  domain,
+  colorKey,
+  tabs,
+  onJump,
+  open,
+  onOpenChange,
+  onJumpFromPopover,
+  onCloseTab,
+  countLabel,
+  accentOverride,
+}: GridCardProps) {
   const [faviconError, setFaviconError] = useState(false);
   const { token } = theme.useToken();
   const hasAudible = tabs.some((tab) => tab.audible);
@@ -130,16 +138,16 @@ function GridCard({ domain, colorKey, tabs, onJump, onOpenList, countLabel, acce
   const accent = accentOverride ?? localAccent;
   const color = accent.bar;
 
-  /** 点击卡片：单 tab 直接跳，多 tab 触发弹窗 */
+  /** 点击卡片：单 tab 直接跳，多 tab 切换 Popover */
   const handleCardClick = () => {
     if (isMulti) {
-      onOpenList();
+      onOpenChange(!open);
       return;
     }
     if (first) onJump(first.id, first.windowId);
   };
 
-  return (
+  const cardNode = (
     <Card
       onClick={handleCardClick}
       className="canopy-card-interactive canopy-grid-card"
@@ -257,94 +265,205 @@ function GridCard({ domain, colorKey, tabs, onJump, onOpenList, countLabel, acce
       </span>
     </Card>
   );
+
+  // 单 tab 卡片：不需要 Popover 包裹，少一层节点
+  if (!isMulti) return cardNode;
+
+  return (
+    <Popover
+      open={open}
+      onOpenChange={onOpenChange}
+      trigger="click"
+      placement="bottom"
+      arrow
+      destroyOnHidden
+      overlayInnerStyle={{ padding: 0 }}
+      content={
+        <DomainTabsPanel
+          domain={domain}
+          tabs={tabs}
+          accentColor={color}
+          faviconSrc={first?.favIconUrl}
+          onJump={onJumpFromPopover}
+          onCloseTab={onCloseTab}
+          onClose={() => onOpenChange(false)}
+        />
+      }
+    >
+      {cardNode}
+    </Popover>
+  );
 }
 
-interface DomainTabsModalProps {
-  group: { domain: string; colorKey: string; tabs: LiveTab[] } | null;
-  onClose: () => void;
+interface DomainTabsPanelProps {
+  domain: string;
+  tabs: LiveTab[];
+  /** 域名身份色，用于标题行的左侧色条 */
+  accentColor: string;
+  faviconSrc?: string;
   onJump: (tabId: number, windowId: number) => void;
   onCloseTab: (tabId: number) => void;
+  onClose: () => void;
 }
 
 /**
- * 域名多 tab 弹窗
+ * Popover 内容：域名多 tab 快速预览面板
  *
- * 使用顶层单例而非每卡片一个 Modal：
- *   - 节省开销
- *   - 同一时刻至多一个弹窗，语义更单纯
- *   - 关闭动画走 antd 自带过渡
+ * 布局：
+ *   ┌────────────────────────────┐
+ *   │ ▍[🌐] domain      N 个  ×  │  ← 紧凑 header，带色条 + favicon + 域名 + 计数 + 关闭
+ *   ├────────────────────────────┤
+ *   │   TabItem                   │
+ *   │   TabItem                   │  ← 列表区，满高度滚动
+ *   └────────────────────────────┘
  */
-function DomainTabsModal({ group, onClose, onJump, onCloseTab }: DomainTabsModalProps) {
+function DomainTabsPanel({
+  domain,
+  tabs,
+  accentColor,
+  faviconSrc,
+  onJump,
+  onCloseTab,
+  onClose,
+}: DomainTabsPanelProps) {
   const { token } = theme.useToken();
   const { t } = useT();
-  /**
-   * 冻结最后一次 group，关闭时仍保留内容参与淡出动画
-   */
-  const [snapshot, setSnapshot] = useState<DomainTabsModalProps['group']>(null);
-  if (group && group !== snapshot) setSnapshot(group);
-
-  const display = group ?? snapshot;
-  const open = group !== null;
+  const [faviconFailed, setFaviconFailed] = useState(false);
 
   /** 同组 title 重名 id 集合 —— 驱动 URL 消歧行 */
-  const ambiguousIds = useMemo(
-    () => (display ? findAmbiguousTitleIds(display.tabs) : new Set<number>()),
-    [display],
-  );
+  const ambiguousIds = useMemo(() => findAmbiguousTitleIds(tabs), [tabs]);
 
-  if (!display) return null;
+  /**
+   * 关闭某个 tab 后如果已没东西可看就收起浮层；
+   * 由于 tabs 由父层实时下发，这里拿到的长度即为当前快照值。
+   */
+  const handleCloseTab = (id: number) => {
+    onCloseTab(id);
+    if (tabs.length <= 1) onClose();
+  };
+
+  const hasFavicon = typeof faviconSrc === 'string' && faviconSrc.length > 0;
 
   return (
-    <Modal
-      open={open}
-      onCancel={onClose}
-      afterClose={() => setSnapshot(null)}
-      footer={null}
-      width={520}
-      centered
-      destroyOnHidden
-      title={
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-          <span style={{ fontSize: 14, fontWeight: 600, color: token.colorText }}>
-            {display.domain}
-          </span>
-          <span
-            style={{
-              fontSize: 12,
-              color: token.colorTextTertiary,
-              fontVariantNumeric: 'tabular-nums',
-            }}
-          >
-            {t('header.tabCount', { count: display.tabs.length })}
-          </span>
-        </div>
-      }
-      styles={{
-        body: {
-          padding: 0,
-          maxHeight: '60vh',
-          overflowY: 'auto',
-        },
+    <div
+      style={{
+        width: 340,
+        maxWidth: 'calc(100vw - 32px)',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
+      {/* Header —— 色条 + favicon + 域名 + 计数 + 关闭 */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '10px 8px 10px 12px',
+          borderBottom: `1px solid ${token.colorBorderSecondary}`,
+        }}
+      >
+        {/* 左侧身份色条 */}
+        <span
+          aria-hidden
+          style={{
+            width: 3,
+            alignSelf: 'stretch',
+            borderRadius: 2,
+            background: accentColor,
+            flexShrink: 0,
+          }}
+        />
+        {/* favicon */}
+        {hasFavicon && !faviconFailed ? (
+          <img
+            src={faviconSrc}
+            alt=""
+            width={16}
+            height={16}
+            style={{ borderRadius: 3, flexShrink: 0 }}
+            onError={() => setFaviconFailed(true)}
+          />
+        ) : (
+          <span
+            aria-hidden
+            style={{
+              width: 16,
+              height: 16,
+              borderRadius: 3,
+              background: `${accentColor}22`,
+              color: accentColor,
+              fontSize: 10,
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            {domain.charAt(0).toUpperCase()}
+          </span>
+        )}
+        {/* 域名 —— 允许省略 */}
+        <span
+          title={domain}
+          style={{
+            flex: 1,
+            minWidth: 0,
+            fontSize: 13,
+            fontWeight: 600,
+            color: token.colorText,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            lineHeight: 1.3,
+          }}
+        >
+          {domain}
+        </span>
+        {/* 计数 —— secondary tone，tabular */}
+        <span
+          style={{
+            fontSize: 12,
+            color: token.colorTextTertiary,
+            fontVariantNumeric: 'tabular-nums',
+            flexShrink: 0,
+          }}
+        >
+          {t('header.tabCount', { count: tabs.length })}
+        </span>
+        {/* 关闭按钮 —— antd Button（键盘可达 + ant 原生样式） */}
+        <Button
+          type="text"
+          size="small"
+          aria-label="Close"
+          onClick={onClose}
+          icon={<X size={14} />}
+          style={{ flexShrink: 0 }}
+        />
+      </div>
+
+      {/* 列表区 */}
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
           gap: 2,
           padding: '4px 4px 8px',
+          maxHeight: 'min(60vh, 420px)',
+          overflowY: 'auto',
         }}
       >
-        {display.tabs.map((tab) => (
+        {tabs.map((tab) => (
           <TabItem
             key={tab.id}
             tab={tab}
             onJump={onJump}
-            onClose={onCloseTab}
+            onClose={handleCloseTab}
             showUrlHint={ambiguousIds.has(tab.id)}
           />
         ))}
       </div>
-    </Modal>
+    </div>
   );
 }

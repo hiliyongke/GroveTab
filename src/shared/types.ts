@@ -65,7 +65,15 @@ export type StorageKey =
   | 'canopy_stats'
   | 'canopy_snapshots'
   | 'canopy_meta'
-  | 'canopy_metrics';
+  | 'canopy_metrics'
+  | 'canopy_metric_counters'
+  | 'canopy_onboarding_done'
+  | 'canopy_search_history'
+  | 'canopy_activity'
+  | 'canopy_workspaces'
+  | 'canopy_kanban'
+  | 'canopy_og_index'
+  | 'canopy_auto_snapshot_meta';
 
 /** Storage metadata */
 export interface StorageMeta {
@@ -81,7 +89,7 @@ export type SearchEngineId = 'google' | 'bing' | 'baidu' | 'duckduckgo';
 
 export interface UserSettings {
   overrideNewTab: boolean;
-  defaultView: 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'bookmarks';
+  defaultView: 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'bookmarks' | 'kanban';
   theme: 'light' | 'dark' | 'system';
   /**
    * 皮肤预设：
@@ -266,6 +274,7 @@ export interface UserSettings {
    *   - viewSwitcher：视图切换标签行
    *   - workspaceOverview：工作区概览卡片
    *   - tidySuggestion：智能整理建议栏
+   *   - activityStrip：最近操作状态区（Activity Strip）
    * 关闭某区域后该区域不渲染，节省空间、减少视觉噪音。
    */
   uiVisibility?: {
@@ -274,7 +283,50 @@ export interface UserSettings {
     viewSwitcher?: boolean;
     workspaceOverview?: boolean;
     tidySuggestion?: boolean;
+    activityStrip?: boolean;
   };
+
+  // ── v1.0 封板新增字段 ──────────────────────────────
+
+  /**
+   * 去重严格度（F-13）：
+   *   - 'strict'：URL 完全相同
+   *   - 'loose'（默认）：忽略 #hash + utm_* / fbclid / gclid
+   *   - 'off'：禁用重复检测
+   */
+  dedupStrictness?: 'strict' | 'loose' | 'off';
+
+  /**
+   * 闲置阈值（分钟），用于 detectIdleTabs 与 Dashboard 闲置徽标。
+   * 候选值：360(6h) / 720(12h) / 1440(24h，默认) / 4320(3d) / 10080(7d)。
+   */
+  idleThresholdMinutes?: number;
+
+  /**
+   * Undo 撤销窗口（秒），范围 3-10，默认 5。
+   */
+  undoWindowSeconds?: number;
+
+  /**
+   * 标签页关闭阈值（多窗口合并/批量关闭前二次确认的阈值），默认 20。
+   */
+  closeConfirmThreshold?: number;
+
+  /**
+   * 会话自动快照频率（F-23）：'off' | '6h' | '12h'（默认） | '24h'。
+   */
+  autoSnapshotFrequency?: 'off' | '6h' | '12h' | '24h';
+
+  /**
+   * OG description 受控抓取开关（F-24），默认 false。
+   * 开启时会向用户申请 <all_urls> 权限。
+   */
+  enableOgFetch?: boolean;
+
+  /**
+   * 最后激活的 Workspace id（F-29），页面刷新时用于恢复选中状态。
+   */
+  lastActiveWorkspaceId?: string;
 }
 
 // ── Undo System ───────────────────────────────────────
@@ -293,6 +345,15 @@ export interface UndoRecord {
   tabs: ClosedTabSnapshot[];
   description: string;
   expired: boolean;
+  /**
+   * 归档场景专用：对应刚创建的 ArchivedSession.id，
+   * UndoToast 据此展示「查看归档」按钮。
+   */
+  archivedSessionId?: string;
+  /**
+   * 子行文案，如「（M 个关闭失败）」等次要提示。
+   */
+  subNote?: string;
 }
 
 // ── Archive / Sessions ────────────────────────────────
@@ -314,4 +375,140 @@ export interface ArchivedSession {
   tabs: ArchivedTab[];
   /** Tab count for quick display */
   tabCount: number;
+  /**
+   * 是否为隐藏会话（F-23 自动快照）。
+   * hidden=true 的会话默认在 ArchivePanel 收起到"自动快照"折叠区。
+   */
+  hidden?: boolean;
+  /**
+   * 会话来源类型，默认 'manual'。'auto' 表示由自动快照创建。
+   */
+  source?: 'manual' | 'auto' | 'import' | 'kanban';
+}
+
+// ── Activity Strip / Recent Activity (F-27) ───────────
+
+export type ActivityType =
+  | 'archive'
+  | 'restore'
+  | 'import'
+  | 'export'
+  | 'permission'
+  | 'clear_archive'
+  | 'dedup_merge'
+  | 'snapshot';
+
+export interface ActivityAction {
+  id: string;
+  label: string;
+  /** 行动按钮类型：undo 调用 undoGroup；open 跳转面板；custom 由调用方处理 */
+  kind: 'undo' | 'open_archive' | 'open_import_result' | 'custom';
+  /** 可选负载：undo 时为 undoGroupId；open_archive 时为 sessionId */
+  payload?: string;
+}
+
+export interface ActivityRecord {
+  id: string;
+  type: ActivityType;
+  ts: number;
+  /** 一句话摘要，如 "已归档 32 个标签到「4月24日 15:02」" */
+  summary: string;
+  icon?: string;
+  primaryAction?: ActivityAction;
+  secondaryAction?: ActivityAction;
+  /** 如果对应 undo-slice 中的 UndoGroup，记录其 id 以便回滚 */
+  undoGroupId?: string;
+}
+
+// ── Search History & Tag metadata (F-05b / F-12) ─────
+
+export interface SearchHistoryEntry {
+  query: string;
+  ts: number;
+  /** 累计搜索次数（用于"热门关键词"排序） */
+  count: number;
+}
+
+export interface TagEntry {
+  name: string;
+  /** 基于 tag 字符串 hash 稳定生成的 HSL 色（主色） */
+  color: string;
+  /** 使用次数 */
+  count: number;
+  /** 创建时间 */
+  createdAt: number;
+}
+
+// ── Workspace (F-29) ──────────────────────────────────
+
+export interface Workspace {
+  id: string;
+  name: string;
+  filter: {
+    tagIds?: string[];
+    domains?: string[];
+  };
+  createdAt: number;
+}
+
+// ── Kanban (F-20) ─────────────────────────────────────
+
+export interface KanbanCard {
+  url: string;
+  title: string;
+  favIconUrl?: string;
+  addedAt: number;
+}
+
+export interface KanbanColumn {
+  id: string;
+  name: string;
+  color?: string;
+  cards: KanbanCard[];
+}
+
+export interface KanbanLayout {
+  columns: KanbanColumn[];
+  updatedAt: number;
+}
+
+// ── Stats (F-11) ──────────────────────────────────────
+
+/** 按 URL × day 聚合的激活次数 */
+export interface StatsRecord {
+  /** 日期字符串 YYYY-MM-DD */
+  day: string;
+  /** URL → 激活次数 */
+  counts: Record<string, number>;
+}
+
+export interface StatsData {
+  /** 最近 30 天的日统计 */
+  daily: StatsRecord[];
+  /** 最近一次持久化时间 */
+  lastFlushAt: number;
+}
+
+// ── OG Index (F-24) ───────────────────────────────────
+
+export interface OgEntry {
+  url: string;
+  title: string;
+  description: string;
+  fetchedAt: number;
+}
+
+// ── Auto Snapshot Meta (F-23) ─────────────────────────
+
+export interface AutoSnapshotMeta {
+  /** 最后一次自动快照时间戳 */
+  lastSnapshotAt: number;
+}
+
+// ── Local Metrics (§17) ───────────────────────────────
+
+export interface MetricEvent {
+  event: string;
+  ts: number;
+  payload?: Record<string, unknown>;
 }

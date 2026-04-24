@@ -15,9 +15,10 @@ import {
   Layers,
   Monitor,
   BookOpen,
+  Columns,
 } from 'lucide-react';
 
-export type ViewMode = 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'bookmarks';
+export type ViewMode = 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'bookmarks' | 'kanban';
 
 export interface ViewConfig {
   id: ViewMode;
@@ -35,6 +36,7 @@ export const VIEW_CONFIGS: ViewConfig[] = [
   { id: 'compact', Icon: List, labelKey: 'view.compact' },
   { id: 'grid', Icon: Table2, labelKey: 'view.grid' },
   { id: 'frequency', Icon: Flame, labelKey: 'view.frequency' },
+  { id: 'kanban', Icon: Columns, labelKey: 'view.kanban' },
 ];
 
 /** 合法的 ViewMode 值数组，用于防御旧版残留值 */

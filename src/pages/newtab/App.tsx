@@ -57,16 +57,21 @@ const FrequencyView = lazy(() => import('@/features/tabs/FrequencyView').then((m
 const TabGroupView = lazy(() => import('@/features/tabs/TabGroupView').then((m) => ({ default: m.TabGroupView })));
 const WindowView = lazy(() => import('@/features/tabs/WindowView').then((m) => ({ default: m.WindowView })));
 const BookmarkView = lazy(() => import('@/features/tabs/BookmarkView').then((m) => ({ default: m.BookmarkView })));
+const KanbanView = lazy(() => import('@/features/tabs/KanbanView').then((m) => ({ default: m.KanbanView })));
 import { OnboardingCard } from '@/features/sessions/OnboardingCard';
 import { hasCompletedOnboarding } from '@/repositories';
 import type { ArchivedSession } from '@/shared/types';
-import { recordMetric } from '@/shared/utils/metrics';
+import { recordMetric, recordFcpOnce, recordFpsSampleOnce, track } from '@/shared/utils/metrics';
 import { getArchivedSessions, initArchiveStorage } from '@/services/archive-service';
 import { resolveGradient } from '@/shared/theme/gradient-presets';
 import { VIEW_CONFIGS, VALID_VIEWS, type ViewMode } from '@/shared/config/views';
 import { registerViews, getViewComponentMap } from '@/shared/config/view-registry';
 import { findDuplicates } from '@/shared/utils/dedupe';
 import { detectIdleTabs } from '@/shared/utils/idle-detect';
+import { DashboardOverview, type DashboardJumpTarget } from '@/features/dashboard/DashboardOverview';
+import { ActivityStrip } from '@/features/dashboard/ActivityStrip';
+import { WorkspaceSwitcher } from '@/features/workspace/WorkspaceSwitcher';
+const InsightsPanel = lazy(() => import('@/features/insights/InsightsPanel'));
 
 /** 懒加载抽屉/面板——非首屏必需，直接导入文件确保独立拆 chunk */
 const SearchBox = lazy(() => import('@/features/search/SearchBox').then((m) => ({ default: m.SearchBox })));
@@ -83,6 +88,7 @@ registerViews([
   { id: 'compact', component: CompactView, order: 6 },
   { id: 'grid', component: GridView, order: 7 },
   { id: 'frequency', component: FrequencyView, order: 8 },
+  { id: 'kanban', component: KanbanView, order: 9 },
 ]);
 
 const { Header, Content } = Layout;
@@ -287,6 +293,7 @@ function AppHeader({
       </div>
 
       <Space size={2} style={{ flexShrink: 0 }}>
+        <WorkspaceSwitcher />
         <Tooltip title={t('header.archiveTooltip')} placement="bottom">
           <Button
             type="text"
@@ -488,8 +495,11 @@ function AppContent() {
   const [initRunId, setInitRunId] = useState(0);
   const [showArchive, setShowArchive] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  /** tidyExpandSignal 不再需要动态更新，固定值即可 */
-  const tidyExpandSignal = 0;
+  const [showInsights, setShowInsights] = useState(false);
+  /** 记录最近归档首条，供 Dashboard Overview "最近归档"卡片显示 */
+  const [latestArchive, setLatestArchive] = useState<ArchivedSession | null>(null);
+  /** tidyExpandSignal 对 TidySuggestionBar：默认为 0，点 "一键整理" / Dashboard 卡片时 +1 触发展开 */
+  const [tidyExpandSignal, setTidyExpandSignal] = useState(0);
   /** Hero 搜索框是否已滚出视野——用于驱动 Header 吸附搜索渐显 */
   const [compactSearchVisible, setCompactSearchVisible] = useState(false);
   const mountedRef = useRef(true);
@@ -515,9 +525,10 @@ function AppContent() {
   const layoutBackground = resolveGradient(gradientPreset, resolvedDark, customGradient);
   const { t } = useT();
 
-  /** 归档数据同步回调 —— ArchivePanel 变更后触发刷新 */
-  const syncArchiveSummary = useCallback((_sessions: ArchivedSession[]) => {
-    // 不再需要本地状态存储，保留回调签名以兼容 ArchivePanel
+  /** 归档数据同步回调 —— ArchivePanel 变更后触发刷新，同时更新 latestArchive */
+  const syncArchiveSummary = useCallback((sessions: ArchivedSession[]) => {
+    // 取最新一条作为 latestArchive（会话本身按创建时间倒序传回）
+    setLatestArchive(sessions.length > 0 ? sessions[0] : null);
   }, []);
 
   const refreshArchiveSummary = useCallback(async () => {
@@ -532,6 +543,23 @@ function AppContent() {
   }, [syncArchiveSummary]);
 
   useSwBroadcast();
+
+  /**
+   * 监听全局自定义事件 `canopy:open-archive`（由 UndoToast / ActivityStrip 派发），
+   * 统一打开 ArchivePanel。
+   */
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ sessionId?: string }>).detail;
+      setShowArchive(true);
+      if (detail?.sessionId !== undefined) {
+        // 预留：将 sessionId 广播给 ArchivePanel 做高亮
+        window.dispatchEvent(new CustomEvent('canopy:highlight-session', { detail }));
+      }
+    };
+    window.addEventListener('canopy:open-archive', handler as EventListener);
+    return () => window.removeEventListener('canopy:open-archive', handler as EventListener);
+  }, []);
 
   /**
    * 全局快捷键通过 URL hash 传信号：#search → 自动聚焦搜索框
@@ -605,6 +633,9 @@ function AppContent() {
           setChecked(true);
         }
         void recordMetric('newtabOpens');
+        // v1.0 封板：首屏性能采样
+        recordFcpOnce();
+        recordFpsSampleOnce();
       }
     })();
 
@@ -661,8 +692,10 @@ function AppContent() {
   }, [checked]);
 
   const handleViewChange = useCallback((view: ViewMode) => {
+    const prev = useSettingsStore.getState().settings.defaultView;
     // 切换视图仅写 settings；viewMode 从 settings 派生，会自动更新
     void useSettingsStore.getState().updateSettings({ defaultView: view });
+    void track('view_switch', { from: prev, to: view });
   }, []);
 
   const handleOpenSearch = useCallback(() => {
@@ -689,8 +722,10 @@ function AppContent() {
   const domainCount = new Set(tabs.map((tab) => tab.hostname)).size;
 
   /** Workspace 统计摘要 —— 用于 Header 状态栏展示 */
-  const dupGroups = findDuplicates(tabs);
-  const idleTabsArr = detectIdleTabs(tabs);
+  const dedupStrictness = useSettingsStore((s) => s.settings.dedupStrictness ?? 'loose');
+  const idleThresholdMinutes = useSettingsStore((s) => s.settings.idleThresholdMinutes ?? 1440);
+  const dupGroups = findDuplicates(tabs, dedupStrictness);
+  const idleTabsArr = detectIdleTabs(tabs, idleThresholdMinutes);
   const duplicateTabsCount = dupGroups.reduce((sum, group) => sum + group.tabs.length - 1, 0);
   const idleTabsCount = idleTabsArr.length;
   const hasTidySuggestions = duplicateTabsCount > 0 || idleTabsCount > 0;
@@ -801,6 +836,54 @@ function AppContent() {
 
         {showOnboarding && <OnboardingCard onDismiss={() => setShowOnboarding(false)} />}
 
+        {/* Activity Strip —— 最近操作胶囊横条（60min 窗口内才渲染） */}
+        <ActivityStrip
+          onOpenArchive={() => setShowArchive(true)}
+          onOpenImportResult={() => setShowArchive(true)}
+        />
+
+        {/* Dashboard Overview —— 首页工作区概览（6 统计 + 3 操作） */}
+        {uiVisibility?.workspaceOverview !== false && (
+          <DashboardOverview
+            tabs={tabs}
+            duplicateCount={duplicateTabsCount}
+            idleCount={idleTabsCount}
+            latestArchive={latestArchive}
+            onJump={(target: DashboardJumpTarget) => {
+              switch (target) {
+                case 'mainView':
+                  tidySectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  break;
+                case 'domainView':
+                  handleViewChange('domain');
+                  break;
+                case 'windowView':
+                  handleViewChange('window');
+                  break;
+                case 'tidyDup':
+                case 'tidyIdle':
+                  setTidyExpandSignal((s) => s + 1);
+                  tidySectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  break;
+                case 'archive':
+                  setShowArchive(true);
+                  break;
+                default:
+                  break;
+              }
+            }}
+            onSearch={handleOpenSearch}
+            onTidy={() => {
+              setTidyExpandSignal((s) => s + 1);
+              tidySectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }}
+            onArchive={() => {
+              // 快捷入口：与 header 的归档按钮等价，打开 ArchivePanel 让用户确认或发起 SaveAll
+              setShowArchive(true);
+            }}
+          />
+        )}
+
         {selectionMode && (
           <SelectionModeNotice
             selectedTabs={selectedTabs}
@@ -869,6 +952,7 @@ function AppContent() {
         <SearchBox open={showSearch} onOpenChange={setShowSearch} />
         <ArchivePanel open={showArchive} onOpenChange={handleArchivePanelOpenChange} onSessionsChange={syncArchiveSummary} />
         <SettingsPanel open={showSettings} onOpenChange={setShowSettings} />
+        <InsightsPanel open={showInsights} onClose={() => setShowInsights(false)} />
       </Suspense>
     </Layout>
   );

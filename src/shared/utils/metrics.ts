@@ -1,9 +1,12 @@
 /**
- * Metrics — Local privacy-friendly usage analytics
- * All data stays local, never uploaded
+ * Metrics — Local privacy-friendly usage analytics（v1.0 封板事件版）
+ *
+ * 旧 API（累加计数器）继续保留以兼容现有调用点，新增事件型 track API。
+ * 事件型数据存放在 `canopy_metrics` 键下，与 InsightsPanel / 清除按钮对齐。
  */
 
 import { getData, setData } from '@/repositories';
+import type { MetricEvent } from '@/shared/types';
 
 const METRICS_KEY = 'canopy_metrics';
 
@@ -25,20 +28,99 @@ const DEFAULT_METRICS: Metrics = {
   lastUsedAt: 0,
 };
 
-async function getMetrics(): Promise<Metrics> {
-  return (await getData<Metrics>(METRICS_KEY)) || { ...DEFAULT_METRICS };
+async function getCounters(): Promise<Metrics> {
+  return (await getData<Metrics>('canopy_metric_counters')) ?? { ...DEFAULT_METRICS };
 }
 
+/**
+ * 旧版累加计数器（保持兼容）。
+ */
 export async function recordMetric(
   key: keyof Metrics,
   increment: number = 1,
 ): Promise<void> {
-  const metrics = await getMetrics();
-  const now = Date.now();
-  if (!metrics.firstUsedAt) metrics.firstUsedAt = now;
-  metrics.lastUsedAt = now;
-  if (typeof metrics[key] === 'number') {
-    (metrics[key]) += increment;
+  try {
+    const metrics = await getCounters();
+    const now = Date.now();
+    if (metrics.firstUsedAt === 0) metrics.firstUsedAt = now;
+    metrics.lastUsedAt = now;
+    if (typeof metrics[key] === 'number') {
+      (metrics[key] as number) += increment;
+    }
+    await setData('canopy_metric_counters', metrics);
+  } catch {
+    // metrics 永远不应阻塞主流程
   }
-  await setData(METRICS_KEY, metrics);
+  // 同时写入事件流，便于 InsightsPanel 展示
+  void track(key as string, { increment });
+}
+
+const MAX_EVENTS = 2000;
+
+/**
+ * 事件型埋点（v1.0 封板新增）：按时间追加，最多 2000 条（保留最近）。
+ * 所有数据本地存储，绝不上传。
+ */
+export async function track(event: string, payload?: Record<string, unknown>): Promise<void> {
+  try {
+    const list = (await getData<MetricEvent[]>(METRICS_KEY)) ?? [];
+    list.push({ event, ts: Date.now(), payload });
+    if (list.length > MAX_EVENTS) list.splice(0, list.length - MAX_EVENTS);
+    await setData(METRICS_KEY, list);
+  } catch {
+    // 静默失败
+  }
+}
+
+/**
+ * FCP 采样：在页面就绪时调用一次（首次调用生效），写入 perf_fcp 事件。
+ */
+export function recordFcpOnce(): void {
+  if (typeof window === 'undefined' || typeof PerformanceObserver === 'undefined') return;
+  try {
+    const observer = new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        if (entry.name === 'first-contentful-paint') {
+          void track('perf_fcp', { ms: Math.round(entry.startTime) });
+          observer.disconnect();
+          return;
+        }
+      }
+    });
+    observer.observe({ type: 'paint', buffered: true });
+  } catch {
+    // 部分环境下 PerformanceObserver 缺失
+  }
+}
+
+/**
+ * FPS 采样：按 10s 窗口统计 p50 / p95，写入 perf_fps_sample 事件。
+ * 仅采样一次（避免持续增加 CPU 开销）。
+ */
+export function recordFpsSampleOnce(): void {
+  if (typeof window === 'undefined' || typeof requestAnimationFrame === 'undefined') return;
+  const frameTimes: number[] = [];
+  let last = performance.now();
+  const start = last;
+  let stopped = false;
+
+  function frame(now: number) {
+    if (stopped) return;
+    frameTimes.push(now - last);
+    last = now;
+    if (now - start >= 10_000) {
+      stopped = true;
+      const fps = frameTimes.map((d) => 1000 / d).sort((a, b) => a - b);
+      const p50 = fps[Math.floor(fps.length * 0.5)] ?? 0;
+      const p95 = fps[Math.floor(fps.length * 0.95)] ?? 0;
+      void track('perf_fps_sample', {
+        p50: Math.round(p50),
+        p95: Math.round(p95),
+        samples: fps.length,
+      });
+      return;
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
 }

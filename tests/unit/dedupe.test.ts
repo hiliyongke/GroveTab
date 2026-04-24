@@ -78,4 +78,22 @@ describe('findDuplicates', () => {
     const dupes = findDuplicates(tabs);
     expect(dupes).toHaveLength(2);
   });
+
+  // v1.0 封板：strictness 三档
+  it("strict 模式下 ?page=1 和 ?page=2 不算重复（原本 loose 也不算，这里确保 strict 的 utm 被保留）", () => {
+    const tabs = [
+      makeTab({ id: 1, url: 'https://example.com/?utm_source=a', title: 'A' }),
+      makeTab({ id: 2, url: 'https://example.com/?utm_source=b', title: 'B' }),
+    ];
+    expect(findDuplicates(tabs, 'strict')).toHaveLength(0);
+    expect(findDuplicates(tabs, 'loose')).toHaveLength(1);
+  });
+
+  it("off 模式返回空数组", () => {
+    const tabs = [
+      makeTab({ id: 1, url: 'https://example.com/', title: 'A' }),
+      makeTab({ id: 2, url: 'https://example.com/', title: 'B' }),
+    ];
+    expect(findDuplicates(tabs, 'off')).toHaveLength(0);
+  });
 });

@@ -1,40 +1,51 @@
 /**
- * FrequencyView — 按使用频率（近期活跃度）排序（antd 版）
+ * FrequencyView — 按使用频率排序（F-11 升级版）
  *
- * 设计：
- *   - 顶部标题：火焰图标 + 描述（tracking-wider 小字）
- *   - 序号作为 TabItem 的 leading slot，与行整体共享 hover 高亮
- *   - 前 3 名序号使用品牌色徽章
- *   - 跨域名列表，展示 hostname 辅助识别
+ * 升级：优先使用 SW StatsCollector 写入的 canopy_stats 数据（近 7 天激活次数），
+ * 数据缺失时回退到 lastAccessed 近似并显示"数据重建中"提示。
  */
 
-import { useMemo } from 'react';
-import { useTabsStore } from '@/store';
+import { useEffect, useMemo } from 'react';
+import { useTabsStore, useStatsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { findAmbiguousTitleIds } from '@/shared/utils/url-display';
 import { TabItem } from './TabItem';
 import { Flame } from 'lucide-react';
-import { theme } from 'antd';
+import { theme, Tag } from 'antd';
 
 const MAX_DISPLAY = 30;
 
-/**
- * 频率视图
- */
 export function FrequencyView() {
   const tabs = useTabsStore((s) => s.tabs);
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
   const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
+  const loadStats = useStatsStore((s) => s.loadStats);
+  const isFallback = useStatsStore((s) => s.isFallback);
+  const getCountRecent = useStatsStore((s) => s.getCountRecent);
+  const statsLoaded = useStatsStore((s) => s.loaded);
   const { t } = useT();
   const { token } = theme.useToken();
 
-  /** 暂用 lastAccessed 近似频率；后续 SW StatsCollector 补全真实数据 */
-  const sortedTabs = useMemo(() => {
-    return [...tabs].sort((a, b) => b.lastAccessed - a.lastAccessed).slice(0, MAX_DISPLAY);
-  }, [tabs]);
+  // 首次进入视图时加载统计数据
+  useEffect(() => {
+    if (!statsLoaded) {
+      void loadStats();
+    }
+  }, [statsLoaded, loadStats]);
 
-  /** 榜单内同名 tab id 集合 */
-  const ambiguousIds = useMemo(() => findAmbiguousTitleIds(sortedTabs), [sortedTabs]);
+  const sortedTabs = useMemo(() => {
+    const withScore = tabs.map((tab) => {
+      const preciseCount = getCountRecent(tab.url, 7);
+      // 精确为 0 时回落 lastAccessed，保证 UI 仍然按"最近活跃"排序
+      const score = preciseCount > 0 ? preciseCount * 1_000_000_000 + tab.lastAccessed : tab.lastAccessed;
+      return { tab, score, count: preciseCount };
+    });
+    return withScore
+      .sort((a, b) => b.score - a.score)
+      .slice(0, MAX_DISPLAY);
+  }, [tabs, getCountRecent]);
+
+  const ambiguousIds = useMemo(() => findAmbiguousTitleIds(sortedTabs.map((x) => x.tab)), [sortedTabs]);
 
   if (tabs.length === 0) return null;
 
@@ -61,17 +72,22 @@ export function FrequencyView() {
         >
           {t('view.frequencyDesc', { count: sortedTabs.length })}
         </span>
+        {isFallback && (
+          <Tag bordered={false} color="default" style={{ fontSize: 10.5, margin: 0 }}>
+            {t('view.frequencyRebuilding')}
+          </Tag>
+        )}
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {sortedTabs.map((tab, i) => (
+        {sortedTabs.map((entry, i) => (
           <TabItem
-            key={tab.id}
-            tab={tab}
+            key={entry.tab.id}
+            tab={entry.tab}
             onJump={(id, wid) => { void jumpToTab(id, wid); }}
             onClose={(id) => { void closeSingleTab(id); }}
             showHostname
-            showUrlHint={ambiguousIds.has(tab.id)}
+            showUrlHint={ambiguousIds.has(entry.tab.id)}
             leading={
               <span
                 style={{

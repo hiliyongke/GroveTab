@@ -1,13 +1,13 @@
 /**
  * idle-detect —— 闲置标签页检测
  *
- * 基于 `lastAccessed` 时间戳计算"闲置指数"，帮助用户识别长期未用的标签页。
+ * 基于 `lastAccessed` 时间戳计算"闲置指数"。
  *
- * 闲置等级：
- *   - idle：超过 1 天未访问（建议休眠）
- *   - stale：超过 7 天未访问（建议关闭或归档）
+ * 闲置等级（相对于 threshold）：
+ *   - idle：超过 threshold 未访问
+ *   - stale：超过 threshold × 7 未访问（或硬上限 7 天，取最小）
  *
- * 所有阈值均为可配置参数，未来可开放给用户自定义。
+ * threshold 默认 24 小时；可通过 `settings.idleThresholdMinutes` 覆盖。
  */
 
 import type { LiveTab } from '@/shared/types';
@@ -23,17 +23,21 @@ export interface IdleTabInfo {
   hoursSinceAccess: number;
 }
 
-/** 闲置阈值（毫秒） */
-const IDLE_THRESHOLD = 24 * 60 * 60 * 1000; // 1 天
-const STALE_THRESHOLD = 7 * 24 * 60 * 60 * 1000; // 7 天
+const DEFAULT_IDLE_MINUTES = 1440; // 24h
+const STALE_CAP_MS = 7 * 24 * 60 * 60 * 1000; // 7 天硬上限
 
 /**
  * 检测闲置标签页
  *
  * @param tabs 所有标签页
+ * @param thresholdMinutes 自定义 idle 阈值（分钟）；默认 24h
  * @returns 按闲置等级分组的标签列表，stale 优先（更紧迫）
  */
-export function detectIdleTabs(tabs: LiveTab[]): IdleTabInfo[] {
+export function detectIdleTabs(tabs: LiveTab[], thresholdMinutes?: number): IdleTabInfo[] {
+  const minutes = thresholdMinutes !== undefined && thresholdMinutes > 0 ? thresholdMinutes : DEFAULT_IDLE_MINUTES;
+  const idleMs = minutes * 60 * 1000;
+  const staleMs = Math.max(idleMs * 7, STALE_CAP_MS);
+
   const now = Date.now();
   const result: IdleTabInfo[] = [];
 
@@ -41,17 +45,17 @@ export function detectIdleTabs(tabs: LiveTab[]): IdleTabInfo[] {
     // 固定标签不标记闲置
     if (tab.pinned) continue;
     // 已休眠的不重复标记
-    if (tab.discarded) continue;
+    if (tab.discarded === true) continue;
 
     const elapsed = now - tab.lastAccessed;
 
-    if (elapsed >= STALE_THRESHOLD) {
+    if (elapsed >= staleMs) {
       result.push({
         tab,
         level: 'stale',
         hoursSinceAccess: Math.round(elapsed / (60 * 60 * 1000)),
       });
-    } else if (elapsed >= IDLE_THRESHOLD) {
+    } else if (elapsed >= idleMs) {
       result.push({
         tab,
         level: 'idle',

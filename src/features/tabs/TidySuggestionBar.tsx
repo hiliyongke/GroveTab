@@ -20,9 +20,10 @@ import {
   Moon,
   Zap,
 } from 'lucide-react';
-import { useTabsStore } from '@/store';
+import { useTabsStore, useSettingsStore } from '@/store';
 import { findDuplicates, type DupGroup } from '@/shared/utils/dedupe';
 import { detectIdleTabs, formatIdleTime, type IdleTabInfo } from '@/shared/utils/idle-detect';
+import { DuplicatePreviewModal } from './DuplicatePreviewModal';
 import { useT } from '@/shared/i18n';
 import { iconColor } from '@/shared/utils/icon-colors';
 
@@ -42,12 +43,16 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
   const [expanded, setExpanded] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const { t } = useT();
   const { token } = theme.useToken();
   const { message } = App.useApp();
 
-  const dupGroups = useMemo(() => findDuplicates(tabs), [tabs]);
-  const idleTabs = useMemo(() => detectIdleTabs(tabs), [tabs]);
+  const dedupStrictness = useSettingsStore((s) => s.settings.dedupStrictness ?? 'loose');
+  const idleThresholdMinutes = useSettingsStore((s) => s.settings.idleThresholdMinutes ?? 1440);
+
+  const dupGroups = useMemo(() => findDuplicates(tabs, dedupStrictness), [tabs, dedupStrictness]);
+  const idleTabs = useMemo(() => detectIdleTabs(tabs, idleThresholdMinutes), [tabs, idleThresholdMinutes]);
 
   const totalDupTabs = dupGroups.reduce((sum, g) => sum + g.tabs.length - 1, 0);
   const staleCount = idleTabs.filter((i) => i.level === 'stale').length;
@@ -244,6 +249,14 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                 <Button
                   size="small"
                   type="link"
+                  onClick={() => setPreviewOpen(true)}
+                  style={{ fontSize: 12, padding: 0, height: 'auto' }}
+                >
+                  {t('dedup.preview')}
+                </Button>
+                <Button
+                  size="small"
+                  type="link"
                   loading={busy}
                   onClick={handleMergeAll}
                   style={{ fontSize: 12, padding: 0, height: 'auto' }}
@@ -347,6 +360,13 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
           )}
         </Card>
       )}
+
+      {/* 重复合并预览 Modal */}
+      <DuplicatePreviewModal
+        open={previewOpen}
+        dupGroups={dupGroups}
+        onClose={() => setPreviewOpen(false)}
+      />
     </div>
   );
 }

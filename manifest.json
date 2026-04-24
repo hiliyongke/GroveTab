@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Canopy",
-  "version": "0.1.0",
-  "description": "A beautiful new tab page that manages all your tabs, sessions, and bookmarks",
+  "name": "__MSG_appName__",
+  "version": "1.0.0",
+  "description": "__MSG_appDescription__",
   "default_locale": "zh_CN",
   "permissions": [
     "tabs",
