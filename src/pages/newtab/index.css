@@ -270,24 +270,45 @@ html[data-texture-noise] body::before {
   transform: translateY(-1px);
 }
 
-/** Hero 搜索框专用强化：hover 时加品牌色 ring + 上浮 */
-.canopy-hero-search:hover {
+/**
+ * Hero 搜索框专用强化：hover 时加品牌色 ring + 上浮。
+ *
+ * 说明：通过叠加 `.ant-input-affix-wrapper` 类选择器（2 类 > antd 原生 1 类）
+ * 提升特异性，替代 `!important`，避免样式层级失控。
+ */
+.ant-input-affix-wrapper.canopy-hero-search:hover {
   transform: translateY(-1px);
-  border-color: var(--canopy-color-primary-hover) !important;
+  border-color: var(--canopy-color-primary-hover);
   box-shadow:
     0 10px 32px color-mix(in srgb, #000 10%, transparent),
-    0 0 0 4px color-mix(in srgb, var(--canopy-color-primary) 10%, transparent) !important;
+    0 0 0 4px color-mix(in srgb, var(--canopy-color-primary) 10%, transparent);
 }
-[data-theme='dark'] .canopy-hero-search:hover {
+[data-theme='dark'] .ant-input-affix-wrapper.canopy-hero-search:hover {
   box-shadow:
     0 10px 32px rgba(0, 0, 0, 0.4),
-    0 0 0 4px color-mix(in srgb, var(--canopy-color-primary) 12%, transparent) !important;
+    0 0 0 4px color-mix(in srgb, var(--canopy-color-primary) 12%, transparent);
 }
 
-/** Header 吸附搜索按钮 hover */
+/**
+ * Header 吸附搜索按钮 hover。
+ *
+ * 元素本身是原生 <button all: unset>，不存在被 antd 覆盖的问题，
+ * 因此无需 !important。
+ */
 .canopy-compact-search:hover {
-  background: var(--ant-color-fill-secondary) !important;
-  border-color: var(--ant-color-border) !important;
+  background: var(--ant-color-fill-secondary);
+  border-color: var(--ant-color-border);
+}
+
+/**
+ * Segmented 选中态字重强化。
+ *
+ * 用纯 CSS 响应 antd 官方选中类 `.ant-segmented-item-selected`，
+ * 替代原先在 label JSX 里通过 `viewMode === v.id` 判断 fontWeight 的写法——
+ * 视觉表现完全一致，但避免了 React 在每次切换时重新构造整个 options 数组。
+ */
+.ant-segmented .ant-segmented-item-selected {
+  font-weight: 600;
 }
 
 /** ── 动效降级：尊重系统 reduced-motion 设置 ─── */

@@ -413,12 +413,12 @@ function HeroBar({
         />
       </div>
 
-      {/* 视图切换 —— 使用 antd 官方 Segmented，自动处理 hover/focus/键盘导航
-          相比手写 button 组，内置更完整的交互语义与无障碍支持。 */}
+      {/* 视图切换 —— 使用 antd 官方 Segmented，自动处理 hover/focus/键盘导航与选中态权重。
+          label 只渲染图标 + 文案，其余视觉（选中态/hover）由 Segmented 主题 token 接管。 */}
       {showViewSwitcher && (
         <Segmented<ViewMode>
           value={viewMode}
-          onChange={(v) => onViewChange(v)}
+          onChange={(v: ViewMode) => onViewChange(v)}
           options={VIEW_CONFIGS.map((v) => ({
             value: v.id,
             label: (
@@ -429,11 +429,10 @@ function HeroBar({
                   gap: 5,
                   padding: '1px 4px',
                   fontSize: 12.5,
-                  fontWeight: viewMode === v.id ? 600 : 400,
                 }}
               >
                 <v.Icon size={14} />
-                <span>{t(v.labelKey)}</span>
+                {t(v.labelKey)}
               </span>
             ),
           }))}
