@@ -128,18 +128,19 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
       </p>
 
       <Space size={8} wrap style={{ justifyContent: 'center' }}>
-        <Tag color="processing" style={{ margin: 0 }}>
+        <Tag bordered={false} color="processing" style={{ margin: 0, fontWeight: 500 }}>
           {t('onboarding.featureSearch')}
         </Tag>
-        <Tag color="gold" style={{ margin: 0 }}>
+        <Tag bordered={false} color="gold" style={{ margin: 0, fontWeight: 500 }}>
           {t('onboarding.featureArchive')}
         </Tag>
-        <Tag color="green" style={{ margin: 0 }}>
+        <Tag bordered={false} color="green" style={{ margin: 0, fontWeight: 500 }}>
           {t('onboarding.featureGroup')}
         </Tag>
       </Space>
 
       <Button
+        className="canopy-lift"
         type="primary"
         size="large"
         onClick={() => { void handleDismiss(); }}

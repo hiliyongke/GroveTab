@@ -9,7 +9,7 @@
  */
 
 import { useCallback } from 'react';
-import { Button, Space, Badge, theme } from 'antd';
+import { Button, Badge, Tooltip, theme } from 'antd';
 import {
   X,
   Moon,
@@ -18,7 +18,6 @@ import {
   Pointer,
 } from 'lucide-react';
 import { useSelectionStore, useTabsStore } from '@/store';
-import { useResolvedTheme } from '@/shared/hooks';
 import { iconColor } from '@/shared/utils/icon-colors';
 import { archiveSelectedTabs } from '@/services';
 import { useT } from '@/shared/i18n';
@@ -40,7 +39,6 @@ export function BatchActionBar() {
   const discardMultipleTabs = useTabsStore((s) => s.discardMultipleTabs);
   const { t } = useT();
   const { token } = theme.useToken();
-  const resolvedTheme = useResolvedTheme();
 
   const count = selectedIds.size;
 
@@ -90,7 +88,7 @@ export function BatchActionBar() {
 
   return (
     <div
-      className="canopy-batch-bar"
+      className="canopy-batch-bar canopy-surface-elevated"
       role="toolbar"
       aria-label={t('selection.title')}
       style={{
@@ -101,68 +99,83 @@ export function BatchActionBar() {
         zIndex: 100,
         display: 'flex',
         alignItems: 'center',
-        gap: 12,
-        padding: '10px 16px 10px 20px',
-        borderRadius: 'var(--canopy-floating-radius)',
-        background: resolvedTheme === 'dark'
-          ? 'rgba(28, 28, 31, 0.88)'
-          : 'rgba(255, 255, 255, 0.88)',
-        backdropFilter: 'var(--canopy-glass-filter)',
-        WebkitBackdropFilter: 'var(--canopy-glass-filter)',
-        boxShadow: 'var(--canopy-shadow-floating)',
-        border: `1px solid ${token.colorBorderSecondary}`,
+        gap: 10,
+        padding: '8px 10px 8px 16px',
       }}
     >
-      <Badge count={count} size="small" color={token.colorPrimary}>
-        <Pointer size={16} style={{ color: token.colorPrimary }} />
-      </Badge>
-
-      <Space size={6}>
-        <Button
-          size="small"
-          danger
-          icon={<X size={12} style={{ color: iconColor('close', token) }} />}
-          onClick={() => { void handleBatchClose(); }}
-        >
-          {t('batch.close')}
-        </Button>
-
-        <Button
-          size="small"
-          icon={<Moon size={12} style={{ color: iconColor('discard', token) }} />}
-          onClick={() => { void handleBatchDiscard(); }}
-        >
-          {t('batch.discard')}
-        </Button>
-
-        <Button
-          size="small"
-          type="primary"
-          icon={<Save size={12} />}
-          onClick={() => { void handleBatchArchive(); }}
-        >
-          {t('batch.archive')}
-        </Button>
-      </Space>
-
-      {/* 视觉分组分隔：把"取消"单独分出来 */}
+      {/* 计数标签组：图标 + 选中数 */}
       <div
         style={{
-          width: 1,
-          height: 20,
-          background: token.colorBorderSecondary,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 8,
+          paddingRight: 2,
+          color: token.colorText,
+          fontSize: 13,
+          fontWeight: 500,
         }}
-        aria-hidden
-      />
-
-      <Button
-        size="small"
-        type="text"
-        icon={<XCircle size={12} style={{ color: iconColor('close', token) }} />}
-        onClick={exitSelectionMode}
       >
-        {t('batch.cancel')}
-      </Button>
+        <Badge
+          count={count}
+          size="small"
+          color={token.colorPrimary}
+          offset={[0, 0]}
+        >
+          <Pointer size={16} style={{ color: token.colorPrimary, display: 'block' }} />
+        </Badge>
+        <span style={{ color: token.colorTextSecondary, fontSize: 12.5 }}>
+          {t('selection.title')}
+        </span>
+      </div>
+
+      <div className="canopy-divider-soft" aria-hidden />
+
+      {/* 操作组：危险→中性→主要，视觉权重递增 */}
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+        <Tooltip title={t('batch.close')} placement="top">
+          <Button
+            size="small"
+            danger
+            icon={<X size={13} style={{ color: iconColor('close', token) }} />}
+            onClick={() => { void handleBatchClose(); }}
+          >
+            {t('batch.close')}
+          </Button>
+        </Tooltip>
+
+        <Tooltip title={t('batch.discard')} placement="top">
+          <Button
+            size="small"
+            icon={<Moon size={13} style={{ color: iconColor('discard', token) }} />}
+            onClick={() => { void handleBatchDiscard(); }}
+          >
+            {t('batch.discard')}
+          </Button>
+        </Tooltip>
+
+        <Tooltip title={t('batch.archive')} placement="top">
+          <Button
+            size="small"
+            type="primary"
+            icon={<Save size={13} />}
+            onClick={() => { void handleBatchArchive(); }}
+          >
+            {t('batch.archive')}
+          </Button>
+        </Tooltip>
+      </div>
+
+      <div className="canopy-divider-soft" aria-hidden />
+
+      <Tooltip title={t('batch.cancel')} placement="top">
+        <Button
+          size="small"
+          type="text"
+          icon={<XCircle size={13} style={{ color: iconColor('close', token) }} />}
+          onClick={exitSelectionMode}
+          aria-label={t('batch.cancel')}
+        />
+      </Tooltip>
     </div>
   );
 }

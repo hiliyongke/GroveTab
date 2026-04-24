@@ -9,13 +9,23 @@
  *   5. favicon 占位块（由代码生成颜色，纯结构样式）
  *   6. 高级感增强：字体渲染、选中态、聚焦态
  *   7. 皮肤级 CSS 变量驱动：噪点纹理、网格背景
+ *   8. 跨组件复用的通用语义类：.canopy-surface / .canopy-kbd / .canopy-divider-soft
  */
 
 :root {
   color-scheme: light;
+  /* ── 跨组件共享的非主题变量 ────────────────────── */
+  --canopy-hairline-light: rgba(0, 0, 0, 0.06);
+  --canopy-hairline-dark: rgba(255, 255, 255, 0.08);
+  --canopy-hairline: var(--canopy-hairline-light);
+  --canopy-surface-elevated-bg-light: rgba(255, 255, 255, 0.88);
+  --canopy-surface-elevated-bg-dark: rgba(28, 28, 31, 0.86);
+  --canopy-surface-elevated-bg: var(--canopy-surface-elevated-bg-light);
 }
 [data-theme='dark'] {
   color-scheme: dark;
+  --canopy-hairline: var(--canopy-hairline-dark);
+  --canopy-surface-elevated-bg: var(--canopy-surface-elevated-bg-dark);
 }
 
 html,
@@ -198,4 +208,97 @@ body::before {
 
 html[data-texture-noise] body::before {
   opacity: var(--canopy-texture-noise-opacity, 0.03);
+}
+
+/* ─── 通用语义类（跨组件复用的视觉原语） ─────────────
+ *
+ * 原则：每个类只做一件事，可自由组合；凡是多处重复的"毛玻璃面板 / 键帽 / 软分隔线"
+ * 一律走这里，避免各组件各自写内联样式造成风格漂移。
+ */
+
+/** Elevated Surface —— 浮层容器（批量栏、命令面板、菜单等共用） */
+.canopy-surface-elevated {
+  background: var(--canopy-surface-elevated-bg);
+  backdrop-filter: var(--canopy-glass-filter);
+  -webkit-backdrop-filter: var(--canopy-glass-filter);
+  border: 1px solid var(--ant-color-border-secondary);
+  box-shadow: var(--canopy-shadow-floating);
+  border-radius: var(--canopy-floating-radius);
+}
+
+/** 键帽（显示快捷键） */
+.canopy-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  min-width: 20px;
+  height: 20px;
+  font-family: var(--ant-font-family-code, ui-monospace, monospace);
+  font-size: 11px;
+  line-height: 1;
+  color: var(--ant-color-text-tertiary);
+  background: var(--ant-color-fill-quaternary);
+  border: 1px solid var(--ant-color-border-secondary);
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/** 软分隔线（与 antd divider 相比更细、更柔，适合浮层内部） */
+.canopy-divider-soft {
+  width: 1px;
+  height: 20px;
+  background: var(--ant-color-border-secondary);
+  flex-shrink: 0;
+}
+.canopy-divider-soft--horizontal {
+  width: 100%;
+  height: 1px;
+}
+
+/** 吸附/悬浮状态：让元素在 hover/focus 时轻微上浮 + 柔和 ring
+ *  用法：给任意交互元素加 .canopy-lift，hover 时自动抬起。
+ *  与 prefers-reduced-motion 兼容。
+ */
+.canopy-lift {
+  transition:
+    transform var(--canopy-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow var(--canopy-motion-duration, 0.2s) ease,
+    border-color var(--canopy-motion-duration, 0.2s) ease;
+}
+.canopy-lift:hover {
+  transform: translateY(-1px);
+}
+
+/** Hero 搜索框专用强化：hover 时加品牌色 ring + 上浮 */
+.canopy-hero-search:hover {
+  transform: translateY(-1px);
+  border-color: var(--canopy-color-primary-hover) !important;
+  box-shadow:
+    0 10px 32px color-mix(in srgb, #000 10%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--canopy-color-primary) 10%, transparent) !important;
+}
+[data-theme='dark'] .canopy-hero-search:hover {
+  box-shadow:
+    0 10px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 4px color-mix(in srgb, var(--canopy-color-primary) 12%, transparent) !important;
+}
+
+/** Header 吸附搜索按钮 hover */
+.canopy-compact-search:hover {
+  background: var(--ant-color-fill-secondary) !important;
+  border-color: var(--ant-color-border) !important;
+}
+
+/** ── 动效降级：尊重系统 reduced-motion 设置 ─── */
+@media (prefers-reduced-motion: reduce) {
+  [data-canopy-content],
+  .canopy-batch-bar,
+  .canopy-accordion-panel {
+    animation: none !important;
+  }
+  .canopy-lift:hover,
+  .canopy-hero-search:hover {
+    transform: none !important;
+  }
 }

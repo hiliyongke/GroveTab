@@ -24,6 +24,7 @@ import {
   Empty,
   Spin,
   Alert,
+  Segmented,
 } from 'antd';
 import {
   Search,
@@ -123,7 +124,6 @@ function AppHeader({
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const { t } = useT();
   const { token } = antdTheme.useToken();
-  const resolvedTheme = useResolvedTheme();
 
   /** 循环切换 light → dark → system */
   const toggleTheme = useCallback(() => {
@@ -157,9 +157,7 @@ function AppHeader({
         alignItems: 'center',
         padding: '0 20px',
         background: 'var(--canopy-glass-bg)',
-        borderBottom: resolvedTheme === 'dark'
-          ? '1px solid rgba(255,255,255,0.06)'
-          : '1px solid rgba(0,0,0,0.06)',
+        borderBottom: '1px solid var(--canopy-hairline)',
         backdropFilter: 'var(--canopy-glass-filter)',
         WebkitBackdropFilter: 'var(--canopy-glass-filter)',
       }}
@@ -244,6 +242,7 @@ function AppHeader({
           type="button"
           onClick={onOpenSearch}
           aria-label={t('search.placeholder')}
+          className="canopy-compact-search"
           style={{
             all: 'unset',
             boxSizing: 'border-box',
@@ -263,16 +262,10 @@ function AppHeader({
             opacity: compactSearchVisible ? 1 : 0,
             transform: compactSearchVisible ? 'translateY(0)' : 'translateY(-6px)',
             transition:
-              'opacity 260ms ease, transform 260ms ease, max-width 300ms ease, padding 260ms ease, background 160ms ease',
+              'opacity 260ms ease, transform 260ms ease, max-width 300ms ease, padding 260ms ease, background 160ms ease, border-color 160ms ease',
             pointerEvents: compactSearchVisible ? 'auto' : 'none',
             overflow: 'hidden',
             whiteSpace: 'nowrap',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'var(--ant-color-fill-secondary)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'var(--ant-color-fill-tertiary)';
           }}
         >
           <Search size={13} style={{ flexShrink: 0, color: iconColor('search', token) }} />
@@ -286,21 +279,7 @@ function AppHeader({
           >
             {t('search.placeholder')}
           </span>
-          <span
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '1px 6px',
-              fontFamily: 'monospace',
-              fontSize: 11,
-              color: 'var(--ant-color-text-secondary)',
-              background: 'var(--ant-color-bg-container)',
-              border: '1px solid var(--ant-color-border-secondary)',
-              borderRadius: 4,
-              flexShrink: 0,
-            }}
-          >
+          <span className="canopy-kbd" aria-hidden>
             ⌘K
           </span>
         </button>
@@ -360,7 +339,6 @@ function HeroBar({
 }) {
   const { t } = useT();
   const { token } = antdTheme.useToken();
-  const resolvedTheme = useResolvedTheme();
 
   return (
     <section
@@ -407,46 +385,22 @@ function HeroBar({
         </span>
       </div>
 
-      {/* 搜索框 —— 超宽居中，大圆角 + 品牌辉光 */}
+      {/* 搜索框 —— 超宽居中，大圆角 + 品牌辉光
+          hover 态、transition 全部交给 .canopy-hero-search（CSS），
+          避免在 React 里写 onMouseEnter/Leave 副作用。 */}
       <div ref={sentinelRef} style={{ width: '100%', maxWidth: 680 }}>
         <Input
+          className="canopy-hero-search"
           size="large"
           readOnly
           placeholder={t('search.placeholder')}
           prefix={<Search size={17} style={{ color: token.colorPrimary }} />}
-          suffix={
-            <Tag
-              style={{
-                fontFamily: token.fontFamilyCode,
-                margin: 0,
-                fontSize: 11,
-                borderRadius: 6,
-                padding: '2px 8px',
-                background: token.colorFillQuaternary,
-                border: `1px solid ${token.colorBorderSecondary}`,
-                color: token.colorTextTertiary,
-              }}
-            >
-              ⌘K
-            </Tag>
-          }
+          suffix={<span className="canopy-kbd">⌘K</span>}
           onFocus={(e) => {
             e.currentTarget.blur();
             onOpenSearch();
           }}
           onClick={onOpenSearch}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = token.colorPrimaryBorderHover;
-            e.currentTarget.style.transform = 'translateY(-1px)';
-            e.currentTarget.style.boxShadow = resolvedTheme === 'dark'
-              ? '0 10px 32px rgba(0,0,0,0.35), 0 0 0 4px color-mix(in srgb, var(--canopy-color-primary) 10%, transparent)'
-              : '0 10px 32px rgba(0,0,0,0.08), 0 0 0 4px color-mix(in srgb, var(--canopy-color-primary) 10%, transparent)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = token.colorBorderSecondary;
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = 'var(--canopy-shadow-brand-glow)';
-          }}
           style={{
             borderRadius: 'var(--canopy-search-radius)',
             cursor: 'pointer',
@@ -455,74 +409,37 @@ function HeroBar({
             background: token.colorBgContainer,
             border: `1px solid ${token.colorBorderSecondary}`,
             boxShadow: 'var(--canopy-shadow-brand-glow)',
-            transition: `box-shadow ${token.motionDurationMid} ${token.motionEaseInOut}, border-color ${token.motionDurationMid} ${token.motionEaseInOut}, transform ${token.motionDurationMid} ${token.motionEaseInOut}`,
           }}
         />
       </div>
 
-      {/* 视图切换 —— 紧凑 Tab 行，居中排列，支持窄屏换行 */}
+      {/* 视图切换 —— 使用 antd 官方 Segmented，自动处理 hover/focus/键盘导航
+          相比手写 button 组，内置更完整的交互语义与无障碍支持。 */}
       {showViewSwitcher && (
-        <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: 2,
-          padding: '3px',
-          borderRadius: 10,
-          background: token.colorFillQuaternary,
-          border: `1px solid ${token.colorBorderSecondary}`,
-          maxWidth: '100%',
-        }}
-      >
-        {VIEW_CONFIGS.map((v) => {
-          const isActive = viewMode === v.id;
-          return (
-            <button
-              key={v.id}
-              type="button"
-              onClick={() => onViewChange(v.id)}
-              onMouseEnter={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.background = token.colorFillTertiary;
-                  e.currentTarget.style.color = token.colorText;
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = token.colorTextSecondary;
-                }
-              }}
-              style={{
-                all: 'unset',
-                boxSizing: 'border-box',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 5,
-                padding: '5px 12px',
-                borderRadius: 8,
-                fontSize: 12.5,
-                fontWeight: isActive ? 600 : 400,
-                color: isActive ? token.colorPrimary : token.colorTextSecondary,
-                background: isActive ? token.colorBgContainer : 'transparent',
-                boxShadow: isActive
-                  ? (resolvedTheme === 'dark'
-                    ? '0 1px 3px rgba(0,0,0,0.3)'
-                    : '0 1px 3px rgba(0,0,0,0.08)')
-                  : 'none',
-                cursor: 'pointer',
-                transition: `color ${token.motionDurationFast} ${token.motionEaseInOut}, background ${token.motionDurationFast} ${token.motionEaseInOut}, box-shadow ${token.motionDurationFast} ${token.motionEaseInOut}`,
-                whiteSpace: 'nowrap',
-              }}
-            >
-              <v.Icon size={14} />
-              <span>{t(v.labelKey)}</span>
-            </button>
-          );
-        })}
-      </div>
+        <Segmented<ViewMode>
+          value={viewMode}
+          onChange={(v) => onViewChange(v)}
+          options={VIEW_CONFIGS.map((v) => ({
+            value: v.id,
+            label: (
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  padding: '1px 4px',
+                  fontSize: 12.5,
+                  fontWeight: viewMode === v.id ? 600 : 400,
+                }}
+              >
+                <v.Icon size={14} />
+                <span>{t(v.labelKey)}</span>
+              </span>
+            ),
+          }))}
+          size="middle"
+          style={{ maxWidth: '100%' }}
+        />
       )}
     </section>
   );
