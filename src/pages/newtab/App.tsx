@@ -46,7 +46,7 @@ import { I18nProvider, useT } from '@/shared/i18n';
 import { DomainGroupView } from '@/features/tabs/DomainGroupView';
 import { TidySuggestionBar } from '@/features/tabs/TidySuggestionBar';
 import { BatchActionBar } from '@/features/tabs/BatchActionBar';
-import { SelectionModeNotice } from '@/features/tabs/WorkspaceOverview';
+import { SelectionModeNotice } from '@/features/tabs/SelectionModeNotice';
 
 /** 懒加载非默认视图——直接导入文件而非 barrel，确保每个视图独立拆 chunk */
 const TimelineView = lazy(() => import('@/features/tabs/TimelineView').then((m) => ({ default: m.TimelineView })));
@@ -774,8 +774,6 @@ function AppContent() {
             style={{ marginBottom: 16 }}
           />
         )}
-
-        {/* WorkspaceOverview 已融入 AppHeader 状态栏，此处不再渲染独立组件 */}
 
         {showOnboarding && <OnboardingCard onDismiss={() => setShowOnboarding(false)} />}
 
