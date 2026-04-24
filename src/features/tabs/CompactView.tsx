@@ -12,10 +12,11 @@ import { useMemo, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useTabsStore } from '@/store';
 import { TabItem } from './TabItem';
+import { CONFIG } from '@/shared/config';
 
-const ROW_HEIGHT = 36;
+const ROW_HEIGHT = CONFIG.ui.rowHeight;
 /** 容器最大高度（留给 Header + Hero + pb 的空间） */
-const VIEWPORT_RESERVE = 240;
+const VIEWPORT_RESERVE = CONFIG.ui.viewportReserve;
 
 /**
  * 紧凑视图：虚拟化列表

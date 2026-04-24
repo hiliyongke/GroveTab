@@ -14,6 +14,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ConfigProvider, Button, Input, Tooltip, Typography, Empty, theme } from 'antd';
 import { LayoutGrid, Save, Search, ExternalLink, X } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { archiveCurrentWindowTabs } from '@/services';
 import { BRAND } from '@/shared/config/brand';
 import { buildSearchUrl } from '@/shared/config/search-engines';
@@ -193,7 +194,7 @@ function App() {
           size="middle"
           allowClear
           placeholder="搜索标签页或上网（回车）"
-          prefix={<Search size={14} style={{ color: 'var(--ant-color-text-tertiary)' }} />}
+          prefix={<Search size={ICON_SIZE.MEDIUM} style={{ color: 'var(--ant-color-text-tertiary)' }} />}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onPressEnter={runWebSearch}
@@ -244,7 +245,7 @@ function App() {
           <Tooltip title={!hasAnyTab ? '当前没有可归档的标签页' : ''} mouseEnterDelay={0.3}>
             <Button
               type="primary"
-              icon={<Save size={14} />}
+              icon={<Save size={ICON_SIZE.MEDIUM} />}
               block
               loading={archiving}
               disabled={!hasAnyTab || archiving}
@@ -254,12 +255,12 @@ function App() {
             </Button>
           </Tooltip>
           <Button
-            icon={<LayoutGrid size={14} />}
+            icon={<LayoutGrid size={ICON_SIZE.MEDIUM} />}
             block
             onClick={openNewTab}
           >
             打开工作台
-            <ExternalLink size={10} style={{ marginLeft: 4, opacity: 0.6 }} />
+            <ExternalLink size={ICON_SIZE.MICRO} style={{ marginLeft: 4, opacity: 0.6 }} />
           </Button>
         </div>
 
@@ -396,7 +397,7 @@ function RecentTabRow({
           onMouseEnter={(e) => (e.currentTarget.style.color = token.colorError)}
           onMouseLeave={(e) => (e.currentTarget.style.color = token.colorTextTertiary)}
         >
-          <X size={12} />
+          <X size={ICON_SIZE.SMALL} />
         </button>
       )}
     </div>

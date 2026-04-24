@@ -146,6 +146,7 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
       width={720}
       onCancel={onClose}
       centered
+      destroyOnHidden
       footer={
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Space>

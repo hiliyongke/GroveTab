@@ -21,6 +21,7 @@ import {
   Search,
   Unlock,
 } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import type {
   LiveTab,
   SearchEngineId,
@@ -801,7 +802,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
           }}
           onKeyDown={handleKeyDown}
           placeholder={t('search.universalPlaceholder')}
-          prefix={<Search size={14} style={{ color: iconColor('search', token) }} />}
+prefix={<Search size={ICON_SIZE.MEDIUM} style={{ color: iconColor('search', token) }} />}
           allowClear
           variant="borderless"
           autoComplete="off"
@@ -814,7 +815,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
           value={currentEngine}
           onChange={setCurrentEngine}
           style={{ minWidth: 132 }}
-          suffixIcon={<Globe size={14} />}
+suffixIcon={<Globe size={ICON_SIZE.MEDIUM} />}
           options={enabledEngines.map((engineId) => {
             const option = getSearchEngineOption(engineId);
             return { value: option.id, label: option.label };
@@ -867,14 +868,14 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
                   {section.items.map((item, offset) => {
                     const itemIndex = startIndex + offset;
                     const active = itemIndex === activeIndex;
-                    let icon: ReactNode = <Search size={11} />;
+let icon: ReactNode = <Search size={ICON_SIZE.TINY} />;
                     let iconRole: IconRole = 'search';
-                    if (item.type === 'tab') { icon = <LayoutGrid size={11} />; iconRole = 'tab'; }
-                    if (item.type === 'history') { icon = <Link size={11} />; iconRole = 'history'; }
-                    if (item.type === 'web') { icon = <Globe size={11} />; iconRole = 'web'; }
-                    if (item.type === 'permission') { icon = <Unlock size={11} />; iconRole = 'permission'; }
-                    if (item.type === 'suggestion' && item.source === 'recent') { icon = <Clock size={11} />; iconRole = 'recent'; }
-                    if (item.type === 'suggestion' && item.source === 'hot') { icon = <Flame size={11} />; iconRole = 'hot'; }
+if (item.type === 'tab') { icon = <LayoutGrid size={ICON_SIZE.TINY} />; iconRole = 'tab'; }
+if (item.type === 'history') { icon = <Link size={ICON_SIZE.TINY} />; iconRole = 'history'; }
+if (item.type === 'web') { icon = <Globe size={ICON_SIZE.TINY} />; iconRole = 'web'; }
+if (item.type === 'permission') { icon = <Unlock size={ICON_SIZE.TINY} />; iconRole = 'permission'; }
+if (item.type === 'suggestion' && item.source === 'recent') { icon = <Clock size={ICON_SIZE.TINY} />; iconRole = 'recent'; }
+if (item.type === 'suggestion' && item.source === 'hot') { icon = <Flame size={ICON_SIZE.TINY} />; iconRole = 'hot'; }
 
                     const semanticIconColor = iconColor(iconRole, token);
                     const titleNode = renderHighlightedText(item.title, normalizedQuery, token.colorText, token.colorPrimary);
@@ -973,7 +974,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
                         </div>
                         {active && (
                           <CornerDownLeft
-                            size={12}
+size={ICON_SIZE.SMALL}
                             style={{ color: token.colorTextTertiary, flexShrink: 0 }}
                           />
                         )}

@@ -1,5 +1,6 @@
 import { Button, theme } from 'antd';
 import { GripVertical, Trash2 } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 
 interface WidgetCardProps {
   title: string;
@@ -64,7 +65,7 @@ export function WidgetCard({
               }}
               aria-hidden
             >
-              <GripVertical size={14} />
+<GripVertical size={ICON_SIZE.MEDIUM} />
             </span>
           )}
           <div
@@ -88,7 +89,7 @@ export function WidgetCard({
               type="text"
               size="small"
               danger
-              icon={<Trash2 size={14} />}
+icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
               onClick={onRemove}
               aria-label="删除该组件"
               // 避免按钮触发拖拽：这个 className 告知 react-grid-layout 的 cancel 选择器

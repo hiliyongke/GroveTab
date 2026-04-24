@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import { Dropdown, Tag, Button, theme } from 'antd';
 import { FolderOpen, X } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useMetadataStore, useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 
@@ -46,7 +47,7 @@ export function WorkspaceSwitcher() {
   if (active === undefined) {
     return (
       <Dropdown menu={{ items }} trigger={['click']}>
-        <Button size="small" type="text" icon={<FolderOpen size={13} />}>
+<Button size="small" type="text" icon={<FolderOpen size={ICON_SIZE.DEFAULT} />}>
           {t('workspace.title')}
         </Button>
       </Dropdown>
@@ -60,7 +61,7 @@ export function WorkspaceSwitcher() {
         e.preventDefault();
         handleSwitch(undefined);
       }}
-      closeIcon={<X size={10} />}
+closeIcon={<X size={ICON_SIZE.MICRO} />}
       style={{
         margin: 0,
         borderRadius: 999,
@@ -73,7 +74,7 @@ export function WorkspaceSwitcher() {
     >
       <Dropdown menu={{ items }} trigger={['click']}>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-          <FolderOpen size={11} />
+<FolderOpen size={ICON_SIZE.TINY} />
           {active.name}
         </span>
       </Dropdown>

@@ -9,6 +9,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Alert, theme, Button, App } from 'antd';
 import { RotateCcw } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
 import { useSettingsStore } from '@/store';
 import { useResolvedKeybindings } from '@/shared/hooks/use-keybinding';
@@ -118,7 +119,7 @@ function KeybindingRecorder({
       <Button
         type="text"
         size="small"
-        icon={<RotateCcw size={14} />}
+icon={<RotateCcw size={ICON_SIZE.MEDIUM} />}
         title={t('shortcuts.resetHint')}
         aria-label={t('shortcuts.resetHint')}
         onClick={onReset}

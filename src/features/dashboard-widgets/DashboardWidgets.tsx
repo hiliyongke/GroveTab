@@ -19,6 +19,7 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Dropdown, Space, theme } from 'antd';
 import { Edit3, Plus, RotateCcw, Check, EyeOff } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import type { LayoutItem } from 'react-grid-layout';
 import { useSettingsStore } from '@/store';
 import type { DashboardWidgetLayoutItem, DashboardWidgetType } from '@/shared/types';
@@ -204,10 +205,10 @@ export function DashboardWidgets() {
             }}
             trigger={['click']}
           >
-            <Button icon={<Plus size={14} />}>添加组件</Button>
+<Button icon={<Plus size={ICON_SIZE.MEDIUM} />}>添加组件</Button>
           </Dropdown>
           <Button
-            icon={editing ? <Check size={14} /> : <Edit3 size={14} />}
+icon={editing ? <Check size={ICON_SIZE.MEDIUM} /> : <Edit3 size={ICON_SIZE.MEDIUM} />}
             type={editing ? 'primary' : 'default'}
             onClick={() =>
               void updateSettings({
@@ -217,11 +218,11 @@ export function DashboardWidgets() {
           >
             {editing ? '完成编辑' : '编辑布局'}
           </Button>
-          <Button icon={<RotateCcw size={14} />} onClick={() => void resetLayout()}>
+<Button icon={<RotateCcw size={ICON_SIZE.MEDIUM} />} onClick={() => void resetLayout()}>
             重置布局
           </Button>
           <Button
-            icon={<EyeOff size={14} />}
+icon={<EyeOff size={ICON_SIZE.MEDIUM} />}
             onClick={() =>
               void updateSettings({
                 dashboardWidgets: { ...(config ?? {}), enabled: false, editMode: false },

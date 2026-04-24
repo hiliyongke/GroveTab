@@ -24,6 +24,7 @@ import {
 import { useT } from '@/shared/i18n';
 import { useMetadataStore, useSelectionStore } from '@/store';
 import { stringToColor } from '@/shared/utils/color';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { formatUrlForDisplay } from '@/shared/utils/url-display';
 import { TabContextMenu } from './TabContextMenu';
 
@@ -169,15 +170,15 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
           } as React.CSSProperties
         }
       >
-        {/* 多选 Checkbox——仅在 selectable 且处于多选模式时显示 */}
-        {selectable && (selectionMode || isSelected) && (
+        {/* 多选 Checkbox——selectable 时始终占位，非多选模式用 visibility:hidden 隐藏，避免布局跳动 */}
+        {selectable && (
           <Checkbox
             checked={isSelected}
             onClick={(e) => {
               e.stopPropagation();
               toggleSelect(tab.id, e.shiftKey, visibleTabIds);
             }}
-            style={{ flexShrink: 0 }}
+            style={{ flexShrink: 0, visibility: (selectionMode || isSelected) ? 'visible' : 'hidden' }}
           />
         )}
 
@@ -205,7 +206,7 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
                 flexShrink: 0,
               }}
             >
-              <Globe size={10} style={{ color: token.colorTextTertiary }} />
+              <Globe size={ICON_SIZE.MICRO} style={{ color: token.colorTextTertiary }} />
             </div>
           )
         )}
@@ -254,11 +255,11 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
               </span>
             )}
             {isPinned && (
-              <Pin size={10} style={{ color: token.colorPrimary, flexShrink: 0 }} />
+              <Pin size={ICON_SIZE.MICRO} style={{ color: token.colorPrimary, flexShrink: 0 }} />
             )}
             {note && (
               <MessageSquare
-                size={10}
+                size={ICON_SIZE.MICRO}
                 style={{ color: token.colorTextTertiary, flexShrink: 0 }}
               />
             )}
@@ -309,13 +310,13 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
         <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
           {tab.audible && (
             <Tooltip title={t('tabs.playing')}>
-              <Volume2 size={12} style={{ color: token.colorPrimary }} />
+              <Volume2 size={ICON_SIZE.SMALL} style={{ color: token.colorPrimary }} />
             </Tooltip>
           )}
           {!tab.isCurrentWindow && (
             <Tooltip title={t('tabs.otherWindow')}>
               {/* 使用外链箭头图标表达「跳去另一个窗口」语义，避免与 favicon 兜底的 Global 图标混淆 */}
-              <Pointer size={12} style={{ color: token.colorTextTertiary }} />
+              <Pointer size={ICON_SIZE.SMALL} style={{ color: token.colorTextTertiary }} />
             </Tooltip>
           )}
         </div>
@@ -329,7 +330,7 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
             type="text"
             size="small"
             danger
-            icon={<X size={12} />}
+            icon={<X size={ICON_SIZE.SMALL} />}
             onClick={handleClose}
             aria-label={t('tabs.close')}
             className="canopy-hover-reveal"

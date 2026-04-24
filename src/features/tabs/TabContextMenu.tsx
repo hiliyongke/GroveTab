@@ -18,11 +18,14 @@ import {
   Moon,
   MoveHorizontal,
 } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { Button, Input, Tag, Divider, Card, theme } from 'antd';
 import { useMetadataStore, useTabsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { stringToColor } from '@/shared/utils/color';
 import { splitTabToSide } from '@/chrome';
+import { Z } from '@/shared/config/z-index';
+import { CONFIG } from '@/shared/config';
 
 interface TabContextMenuProps {
   x: number;
@@ -33,7 +36,7 @@ interface TabContextMenuProps {
   onClose: () => void;
 }
 
-const MENU_WIDTH = 240;
+const MENU_WIDTH = CONFIG.ui.menuWidth;
 
 /**
  * 标签右键上下文菜单
@@ -114,7 +117,7 @@ export function TabContextMenu({ x, y, url, tabId, onClose }: TabContextMenuProp
         left: position.left,
         top: position.top,
         width: MENU_WIDTH,
-        zIndex: 1050,
+        zIndex: Z.contextMenu,
       }}
     >
       <Card
@@ -129,7 +132,7 @@ export function TabContextMenu({ x, y, url, tabId, onClose }: TabContextMenuProp
         <Button
           type="text"
           block
-          icon={<Pin size={14} />}
+          icon={<Pin size={ICON_SIZE.MEDIUM} />}
           onClick={() => {
             void togglePin(url);
             onClose();
@@ -144,7 +147,7 @@ export function TabContextMenu({ x, y, url, tabId, onClose }: TabContextMenuProp
           <Button
             type="text"
             block
-            icon={<Moon size={14} />}
+            icon={<Moon size={ICON_SIZE.MEDIUM} />}
             onClick={() => {
               void (async () => {
                 onClose();
@@ -166,7 +169,7 @@ export function TabContextMenu({ x, y, url, tabId, onClose }: TabContextMenuProp
           <Button
             type="text"
             block
-            icon={<MoveHorizontal size={14} />}
+            icon={<MoveHorizontal size={ICON_SIZE.MEDIUM} />}
             onClick={() => {
               void (async () => {
                 onClose();
@@ -189,7 +192,7 @@ export function TabContextMenu({ x, y, url, tabId, onClose }: TabContextMenuProp
         <Button
           type="text"
           block
-          icon={<TagIcon size={14} />}
+          icon={<TagIcon size={ICON_SIZE.MEDIUM} />}
           onClick={() => setShowTagInput(true)}
           style={{ textAlign: 'left', justifyContent: 'flex-start', height: 32 }}
         >
@@ -260,7 +263,7 @@ export function TabContextMenu({ x, y, url, tabId, onClose }: TabContextMenuProp
         <Button
           type="text"
           block
-          icon={<MessageSquare size={14} />}
+          icon={<MessageSquare size={ICON_SIZE.MEDIUM} />}
           onClick={() => {
             setShowNoteInput(true);
             setNoteValue(note);

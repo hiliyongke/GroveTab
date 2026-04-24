@@ -12,8 +12,10 @@
 
 import { Button, theme } from 'antd';
 import { Archive, Undo2, X } from 'lucide-react';
-import { useUndoStore } from '@/store';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
+import { useUndoStore, useSelectionStore } from '@/store';
 import { useT } from '@/shared/i18n';
+import { Z } from '@/shared/config/z-index';
 
 /**
  * 触发"打开 Archive 并高亮 session"的跨组件事件。
@@ -33,6 +35,8 @@ export function UndoToast() {
   const activeToast = useUndoStore((s) => s.activeToast);
   const undoRecord = useUndoStore((s) => s.undoRecord);
   const dismissToast = useUndoStore((s) => s.dismissToast);
+  const selectionMode = useSelectionStore((s) => s.selectionMode);
+  const selectedIds = useSelectionStore((s) => s.selectedIds);
   const { t } = useT();
   const { token } = theme.useToken();
 
@@ -55,16 +59,21 @@ export function UndoToast() {
     void undoRecord(activeToast.id);
   };
 
+  // 当批量操作栏可见时，UndoToast 上移避免重叠
+  // BatchActionBar 高度约 44px + bottom 24px，需额外间距 8px
+  const batchBarVisible = selectionMode && selectedIds.size > 0;
+  const bottomOffset = batchBarVisible ? 84 : 24;
+
   return (
     <div
       role="alert"
       aria-live="polite"
       style={{
         position: 'fixed',
-        bottom: 24,
+        bottom: bottomOffset,
         left: '50%',
         transform: 'translateX(-50%)',
-        zIndex: 1100,
+        zIndex: Z.undoToast,
         display: 'flex',
         flexDirection: 'column',
         gap: 4,
@@ -99,7 +108,7 @@ export function UndoToast() {
             type="default"
             shape="round"
             size="small"
-            icon={<Archive size={13} />}
+            icon={<Archive size={ICON_SIZE.DEFAULT} />}
             onClick={() => openArchivePanel(activeToast.archivedSessionId)}
           >
             {t('activity.viewArchive')}
@@ -110,7 +119,7 @@ export function UndoToast() {
           type="primary"
           shape="round"
           size="small"
-          icon={<Undo2 size={14} />}
+          icon={<Undo2 size={ICON_SIZE.MEDIUM} />}
           onClick={handleUndo}
         >
           {t('undo.action')}
@@ -120,7 +129,7 @@ export function UndoToast() {
           type="text"
           shape="circle"
           size="small"
-          icon={<X size={14} />}
+          icon={<X size={ICON_SIZE.MEDIUM} />}
           onClick={dismissToast}
           aria-label="Dismiss"
         />

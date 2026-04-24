@@ -18,6 +18,7 @@ import { Tag, Button, Collapse, Empty, theme } from 'antd';
 import {
   Merge,
 } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useTabsStore } from '@/store';
 import { TabItem } from './TabItem';
 import { useT } from '@/shared/i18n';
@@ -103,7 +104,7 @@ export function WindowView() {
         <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
           <Button
             type="primary"
-            icon={<Merge size={14} />}
+icon={<Merge size={ICON_SIZE.MEDIUM} />}
             loading={busy}
             onClick={() => { void handleMergeAll(); }}
           >

@@ -2,6 +2,7 @@ import type { InputRef } from 'antd';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Empty, Input, Popconfirm, Segmented, Tabs, theme, Tooltip } from 'antd';
 import { Plus, TimerReset, CheckCircle2, Circle, StickyNote, Play, Pause, GripVertical, Trash2 } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import {
   DndContext,
   KeyboardSensor,
@@ -214,7 +215,7 @@ function SortableSpeedDialTile({
               }}
               aria-hidden="true"
             >
-              <GripVertical size={11} />
+<GripVertical size={ICON_SIZE.TINY} />
             </span>
           </Tooltip>
           <Button
@@ -330,7 +331,7 @@ export function SpeedDialWidget() {
           onChange={(e) => setDraftUrl(e.target.value)}
           onPressEnter={() => void addLink()}
         />
-        <Button size="small" type="primary" icon={<Plus size={14} />} onClick={() => void addLink()} aria-label="添加快捷网站" />
+        <Button size="small" type="primary" icon={<Plus size={ICON_SIZE.MEDIUM} />} onClick={() => void addLink()} aria-label="添加快捷网站" />
       </div>
     </div>
   );
@@ -607,13 +608,13 @@ export function PomodoroWidget() {
       <div style={{ display: 'flex', gap: 8, marginTop: 'auto' }}>
         <Button
           type="primary"
-          icon={state.running ? <Pause size={14} /> : <Play size={14} />}
+          icon={state.running ? <Pause size={ICON_SIZE.MEDIUM} /> : <Play size={ICON_SIZE.MEDIUM} />}
           onClick={() => void handleToggle()}
         >
           {state.running ? '暂停' : state.elapsedMs > 0 ? '继续' : '开始'}
         </Button>
         <Tooltip title="重置本轮">
-          <Button icon={<TimerReset size={14} />} onClick={handleReset} aria-label="重置番茄钟" />
+          <Button icon={<TimerReset size={ICON_SIZE.MEDIUM} />} onClick={handleReset} aria-label="重置番茄钟" />
         </Tooltip>
       </div>
     </div>
@@ -669,7 +670,7 @@ function SortableTodoRow({
         }}
         aria-label="拖拽排序"
       >
-        <GripVertical size={12} />
+        <GripVertical size={ICON_SIZE.SMALL} />
       </span>
       <button
         type="button"
@@ -685,9 +686,9 @@ function SortableTodoRow({
         }}
       >
         {item.done ? (
-          <CheckCircle2 size={16} color={token.colorSuccess} />
+          <CheckCircle2 size={ICON_SIZE.LARGE} color={token.colorSuccess} />
         ) : (
-          <Circle size={16} color={token.colorTextTertiary} />
+          <Circle size={ICON_SIZE.LARGE} color={token.colorTextTertiary} />
         )}
         <span
           style={{
@@ -705,7 +706,7 @@ function SortableTodoRow({
           size="small"
           danger
           aria-label="删除这条待办"
-          icon={<Trash2 size={12} />}
+          icon={<Trash2 size={ICON_SIZE.SMALL} />}
           onClick={onRemove}
         />
       )}
@@ -853,9 +854,9 @@ export function TodoWidget() {
                     textDecoration: 'line-through',
                   }}
                 >
-                  <CheckCircle2 size={12} color={token.colorSuccess} />
+                  <CheckCircle2 size={ICON_SIZE.SMALL} color={token.colorSuccess} />
                   <span style={{ flex: 1 }}>{item.text}</span>
-                  <Button type="text" size="small" icon={<Trash2 size={10} />} onClick={() => void removeItem(item.id)} />
+                  <Button type="text" size="small" icon={<Trash2 size={ICON_SIZE.MICRO} />} onClick={() => void removeItem(item.id)} />
                 </div>
               ))}
             </div>
@@ -873,7 +874,7 @@ export function TodoWidget() {
           onPressEnter={() => void addItem()}
           onKeyDown={handleKeyDown}
         />
-        <Button size="small" type="primary" icon={<Plus size={14} />} onClick={() => void addItem()} aria-label="新增待办" />
+        <Button size="small" type="primary" icon={<Plus size={ICON_SIZE.MEDIUM} />} onClick={() => void addItem()} aria-label="新增待办" />
       </div>
     </div>
   );
@@ -954,7 +955,7 @@ function SortableStickyCard({
             touchAction: 'none',
           }}
         >
-          <GripVertical size={12} />
+          <GripVertical size={ICON_SIZE.SMALL} />
         </span>
         <Input.TextArea
           variant="borderless"
@@ -1005,7 +1006,7 @@ function SortableStickyCard({
             />
           ))}
           <Popconfirm title="删除这条便签？" onConfirm={onRemove}>
-            <Button type="text" size="small" danger aria-label="删除便签" icon={<Trash2 size={10} />} />
+            <Button type="text" size="small" danger aria-label="删除便签" icon={<Trash2 size={ICON_SIZE.MICRO} />} />
           </Popconfirm>
         </div>
       )}
@@ -1086,7 +1087,7 @@ export function StickyWidget() {
             ))}
             {notes.length === 0 && (
               <div style={{ fontSize: 11, color: '#8c6a00', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                <StickyNote size={12} /> 还没有便签，点下方 "+ 新便签" 开始
+                <StickyNote size={ICON_SIZE.SMALL} /> 还没有便签，点下方 "+ 新便签" 开始
               </div>
             )}
           </div>
@@ -1096,7 +1097,7 @@ export function StickyWidget() {
       <Button
         size="small"
         type="dashed"
-        icon={<Plus size={12} />}
+        icon={<Plus size={ICON_SIZE.SMALL} />}
         onClick={() => void addNote()}
         disabled={notes.length >= STICKY_MAX}
         style={{ marginTop: 'auto' }}

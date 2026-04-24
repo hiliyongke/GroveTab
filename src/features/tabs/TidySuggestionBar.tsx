@@ -20,12 +20,15 @@ import {
   Moon,
   Zap,
 } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useTabsStore, useSettingsStore } from '@/store';
 import { findDuplicates, type DupGroup } from '@/shared/utils/dedupe';
 import { detectIdleTabs, formatIdleTime, type IdleTabInfo } from '@/shared/utils/idle-detect';
 import { DuplicatePreviewModal } from './DuplicatePreviewModal';
 import { useT } from '@/shared/i18n';
 import { iconColor } from '@/shared/utils/icon-colors';
+
+const DISMISSED_KEY = 'grovetab_tidy_dismissed';
 
 interface TidySuggestionBarProps {
   /** 外部要求展开建议栏时递增该信号。 */
@@ -41,7 +44,8 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
   const discardMultipleTabs = useTabsStore((s) => s.discardMultipleTabs);
   const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
   const [expanded, setExpanded] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
+  // dismissed 持久化到 sessionStorage，避免组件重挂载后状态丢失
+  const [dismissed, setDismissed] = useState(() => sessionStorage.getItem(DISMISSED_KEY) === '1');
   const [busy, setBusy] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const { t } = useT();
@@ -64,6 +68,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
   useEffect(() => {
     if (expandSignal <= 0 || !hasSuggestions) return;
     const timer = window.setTimeout(() => {
+      sessionStorage.removeItem(DISMISSED_KEY);
       setDismissed(false);
       setExpanded(true);
     }, 0);
@@ -180,7 +185,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
       <Alert
         type="info"
         showIcon
-        icon={<Zap size={14} style={{ color: iconColor('tidy', token) }} />}
+        icon={<Zap size={ICON_SIZE.MEDIUM} style={{ color: iconColor('tidy', token) }} />}
         message={
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ flex: 1, fontSize: 13, fontWeight: 500 }}>
@@ -196,7 +201,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                   size="small"
                   icon={
                     <ChevronDown
-                      size={12}
+                      size={ICON_SIZE.SMALL}
                       style={{
                         transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
                         transition: `transform ${token.motionDurationMid}`,
@@ -210,8 +215,8 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                 <Button
                   type="text"
                   size="small"
-                  icon={<X size={12} style={{ color: iconColor('close', token) }} />}
-                  onClick={() => setDismissed(true)}
+                  icon={<X size={ICON_SIZE.SMALL} style={{ color: iconColor('close', token) }} />}
+                  onClick={() => { sessionStorage.setItem(DISMISSED_KEY, '1'); setDismissed(true); }}
                 />
               </Tooltip>
             </Space>
@@ -242,7 +247,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
           {dupGroups.length > 0 && (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                <Merge size={13} style={{ color: iconColor('duplicates', token) }} />
+                <Merge size={ICON_SIZE.DEFAULT} style={{ color: iconColor('duplicates', token) }} />
                 <span style={{ fontSize: 12.5, fontWeight: 600, color: token.colorText }}>
                   {t('tidy.dupSection')}
                 </span>
@@ -310,7 +315,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                 marginTop: dupGroups.length > 0 ? 12 : 0,
                 marginBottom: 6,
               }}>
-                <Moon size={13} style={{ color: iconColor('idle', token) }} />
+                <Moon size={ICON_SIZE.DEFAULT} style={{ color: iconColor('idle', token) }} />
                 <span style={{ fontSize: 12.5, fontWeight: 600, color: token.colorText }}>
                   {t('tidy.idleSection')}
                 </span>

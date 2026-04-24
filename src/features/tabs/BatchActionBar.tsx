@@ -9,7 +9,7 @@
  */
 
 import { useCallback } from 'react';
-import { Button, Badge, Tooltip, theme } from 'antd';
+import { Button, Badge, Tooltip, Popconfirm, theme } from 'antd';
 import {
   X,
   Moon,
@@ -24,6 +24,7 @@ import { archiveSelectedTabs } from '@/services';
 import { useT } from '@/shared/i18n';
 import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
+import { Z } from '@/shared/config/z-index';
 
 /**
  * 批量操作浮动栏
@@ -97,7 +98,7 @@ export function BatchActionBar() {
         bottom: 24,
         left: '50%',
         transform: 'translateX(-50%)',
-        zIndex: 100,
+        zIndex: Z.batchBar,
         display: 'flex',
         alignItems: 'center',
         gap: 10,
@@ -134,14 +135,22 @@ export function BatchActionBar() {
       {/* 操作组：危险→中性→主要，视觉权重递增 */}
       <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
         <Tooltip title={t('batch.close')} placement="top">
-          <Button
-            size="small"
-            danger
-            icon={<X size={ICON_SIZE.DEFAULT} style={{ color: iconColor('close', token) }} />}
-            onClick={() => { void handleBatchClose(); }}
+          <Popconfirm
+            title={t('batch.closeConfirm', { count })}
+            onConfirm={() => { void handleBatchClose(); }}
+            okText={t('batch.close')}
+            cancelText={t('archive.cancel')}
+            okButtonProps={{ danger: true, size: 'small' }}
+            cancelButtonProps={{ size: 'small' }}
           >
-            {t('batch.close')}
-          </Button>
+            <Button
+              size="small"
+              danger
+              icon={<X size={ICON_SIZE.DEFAULT} style={{ color: iconColor('close', token) }} />}
+            >
+              {t('batch.close')}
+            </Button>
+          </Popconfirm>
         </Tooltip>
 
         <Tooltip title={t('batch.discard')} placement="top">
@@ -155,14 +164,22 @@ export function BatchActionBar() {
         </Tooltip>
 
         <Tooltip title={t('batch.archive')} placement="top">
-          <Button
-            size="small"
-            type="primary"
-            icon={<Save size={ICON_SIZE.DEFAULT} />}
-            onClick={() => { void handleBatchArchive(); }}
+          <Popconfirm
+            title={t('batch.archiveConfirm', { count })}
+            onConfirm={() => { void handleBatchArchive(); }}
+            okText={t('batch.archive')}
+            cancelText={t('archive.cancel')}
+            okButtonProps={{ size: 'small' }}
+            cancelButtonProps={{ size: 'small' }}
           >
-            {t('batch.archive')}
-          </Button>
+            <Button
+              size="small"
+              type="primary"
+              icon={<Save size={ICON_SIZE.DEFAULT} />}
+            >
+              {t('batch.archive')}
+            </Button>
+          </Popconfirm>
         </Tooltip>
       </div>
 

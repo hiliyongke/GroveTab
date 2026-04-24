@@ -33,6 +33,7 @@ import {
   Sun,
   Moon,
   Monitor,
+  BarChart3,
 } from 'lucide-react';
 import { theme as antdTheme } from 'antd';
 import { iconColor } from '@/shared/utils/icon-colors';
@@ -122,6 +123,7 @@ function AppHeader({
   onArchive,
   onSettings,
   onOpenSearch,
+  onInsights,
 }: {
   tabCount: number;
   domainCount: number;
@@ -132,6 +134,7 @@ function AppHeader({
   onArchive: () => void;
   onSettings: () => void;
   onOpenSearch: () => void;
+  onInsights?: () => void;
 }) {
   const theme = useSettingsStore((s) => s.settings.theme);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
@@ -327,6 +330,16 @@ function AppHeader({
             aria-label={t('header.settings')}
           />
         </Tooltip>
+        {onInsights && (
+          <Tooltip title={t('insights.title')}>
+            <Button
+              type="text"
+              icon={<BarChart3 size={ICON_SIZE.MEDIUM} style={{ color: iconColor('insights', token) }} />}
+              onClick={onInsights}
+              aria-label={t('insights.title')}
+            />
+          </Tooltip>
+        )}
       </Space>
     </Header>
   );
@@ -459,7 +472,7 @@ function HeroBar({
           size="large"
           readOnly
           placeholder={t('search.placeholder')}
-          prefix={<Search size={17} style={{ color: token.colorPrimary }} />}
+          prefix={<Search size={ICON_SIZE.XXL} style={{ color: token.colorPrimary }} />}
           suffix={<span className="canopy-kbd">⌘K</span>}
           onFocus={(e) => {
             e.currentTarget.blur();
@@ -729,10 +742,16 @@ function AppContent() {
 
   const handleOpenSearch = useCallback(() => {
     setShowSearch(true);
+    setShowArchive(false);
+    setShowSettings(false);
+    setShowInsights(false);
   }, []);
 
   const handleOpenArchive = useCallback(() => {
     setShowArchive(true);
+    setShowSearch(false);
+    setShowSettings(false);
+    setShowInsights(false);
   }, []);
 
   const handleArchivePanelOpenChange = useCallback((open: boolean) => {
@@ -741,6 +760,20 @@ function AppContent() {
       void refreshArchiveSummary();
     }
   }, [refreshArchiveSummary]);
+
+  const handleOpenSettings = useCallback(() => {
+    setShowSettings(true);
+    setShowSearch(false);
+    setShowArchive(false);
+    setShowInsights(false);
+  }, []);
+
+  const handleOpenInsights = useCallback(() => {
+    setShowInsights(true);
+    setShowSearch(false);
+    setShowArchive(false);
+    setShowSettings(false);
+  }, []);
 
   const handleSelectAllTabs = useCallback(() => {
     selectAll(tabs.map((tab) => tab.id));
@@ -753,8 +786,9 @@ function AppContent() {
   /** Workspace 统计摘要 —— 用于 Header 状态栏展示 */
   const dedupStrictness = useSettingsStore((s) => s.settings.dedupStrictness ?? 'loose');
   const idleThresholdMinutes = useSettingsStore((s) => s.settings.idleThresholdMinutes ?? 1440);
-  const dupGroups = findDuplicates(tabs, dedupStrictness);
-  const idleTabsArr = detectIdleTabs(tabs, idleThresholdMinutes);
+  /** dupGroups / idleTabsArr 计算开销较大，用 useMemo 避免无关渲染时重复执行 */
+  const dupGroups = useMemo(() => findDuplicates(tabs, dedupStrictness), [tabs, dedupStrictness]);
+  const idleTabsArr = useMemo(() => detectIdleTabs(tabs, idleThresholdMinutes), [tabs, idleThresholdMinutes]);
   const duplicateTabsCount = dupGroups.reduce((sum, group) => sum + group.tabs.length - 1, 0);
   const idleTabsCount = idleTabsArr.length;
   const hasTidySuggestions = duplicateTabsCount > 0 || idleTabsCount > 0;
@@ -825,9 +859,10 @@ function AppContent() {
           idleTabsCount={idleTabsCount}
           hasTidySuggestions={hasTidySuggestions}
           compactSearchVisible={compactSearchVisible}
-          onArchive={handleOpenArchive}
-          onSettings={() => setShowSettings(true)}
-          onOpenSearch={handleOpenSearch}
+            onArchive={handleOpenArchive}
+            onSettings={handleOpenSettings}
+            onOpenSearch={handleOpenSearch}
+            onInsights={handleOpenInsights}
         />
       )}
 
@@ -910,6 +945,7 @@ function AppContent() {
               // 快捷入口：与 header 的归档按钮等价，打开 ArchivePanel 让用户确认或发起 SaveAll
               setShowArchive(true);
             }}
+            onInsights={handleOpenInsights}
           />
         )}
 
@@ -955,7 +991,7 @@ function AppContent() {
           <Button type="primary" icon={<Save size={ICON_SIZE.MEDIUM} />} onClick={handleOpenArchive}>
                   {t('dashboard.openArchives')}
                 </Button>
-          <Button icon={<Settings size={ICON_SIZE.MEDIUM} />} onClick={() => setShowSettings(true)}>
+          <Button icon={<Settings size={ICON_SIZE.MEDIUM} />} onClick={handleOpenSettings}>
                   {t('header.settings')}
                 </Button>
               </Space>
@@ -980,7 +1016,7 @@ function AppContent() {
       <Suspense fallback={null}>
         <SearchBox open={showSearch} onOpenChange={setShowSearch} />
         <ArchivePanel open={showArchive} onOpenChange={handleArchivePanelOpenChange} onSessionsChange={syncArchiveSummary} />
-          <SettingsPanel open={showSettings} onOpenChange={setShowSettings} defaultActiveTab={initialSettingsTab} />
+          <SettingsPanel open={showSettings} onOpenChange={(open: boolean) => { if (!open) setShowSettings(false); }} defaultActiveTab={initialSettingsTab} />
         <InsightsPanel open={showInsights} onClose={() => setShowInsights(false)} />
       </Suspense>
     </Layout>

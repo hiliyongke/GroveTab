@@ -23,9 +23,10 @@ import {
   type Quote,
   type QuoteCategory,
 } from './quotes-data';
+import { CONFIG } from '@/shared/config';
 
 const FAV_KEY = 'canopy_quote_favs';
-const MAX_FAVS = 200;
+const MAX_FAVS = CONFIG.business.maxQuoteFavorites;
 
 // ── 稳定哈希 ────────────────────────────────────────
 /**

@@ -24,6 +24,7 @@ import {
   Image,
   Trash2,
 } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
 import { useResolvedTheme } from '@/shared/hooks';
 import { GRADIENT_PRESETS, buildGradient } from '@/shared/theme/gradient-presets';
@@ -169,9 +170,9 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                       }}
                     >
                       {skin.compatibleMode === 'dark' ? (
-                        <Moon size={9} />
+                        <Moon size={ICON_SIZE.XS} />
                       ) : (
-                        <Sun size={9} style={{ color: '#333' }} />
+                        <Sun size={ICON_SIZE.XS} style={{ color: '#333' }} />
                       )}
                     </span>
                   )}
@@ -462,9 +463,9 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                       }}
                     >
                       {preset.compatibleMode === 'dark' ? (
-                        <Moon size={9} />
+                        <Moon size={ICON_SIZE.XS} />
                       ) : (
-                        <Sun size={9} style={{ color: '#333' }} />
+                        <Sun size={ICON_SIZE.XS} style={{ color: '#333' }} />
                       )}
                     </span>
                   )}
@@ -479,7 +480,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                         color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.4)',
                       }}
                     >
-                      <Pencil size={16} />
+<Pencil size={ICON_SIZE.LARGE} />
                     </span>
                   )}
                 </div>
@@ -523,13 +524,13 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
               }}
             >
               <span style={{ fontSize: 12, fontWeight: 500, color: token.colorTextSecondary }}>
-                <Pencil size={14} style={{ marginRight: 6 }} />
+<Pencil size={ICON_SIZE.MEDIUM} style={{ marginRight: 6 }} />
                 {t('gradient.customEditor')}
               </span>
               <Button
                 size="small"
                 type={showGradientEditor ? 'default' : 'link'}
-                icon={showGradientEditor ? undefined : <Pencil size={14} />}
+icon={showGradientEditor ? undefined : <Pencil size={ICON_SIZE.MEDIUM} />}
                 onClick={() => setShowGradientEditor(!showGradientEditor)}
               >
                 {showGradientEditor ? t('gradient.collapseEditor') : t('gradient.expandEditor')}
@@ -604,7 +605,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                           type="text"
                           size="small"
                           danger
-                          icon={<MinusCircle size={14} />}
+icon={<MinusCircle size={ICON_SIZE.MEDIUM} />}
                           onClick={() => {
                             const newStops = customGradient.stops.filter((_, idx) => idx !== i);
                             updateCustomGradient({ stops: newStops });
@@ -620,7 +621,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                     type="dashed"
                     size="small"
                     block
-                    icon={<Plus size={14} />}
+icon={<Plus size={ICON_SIZE.MEDIUM} />}
                     style={{ marginTop: 8 }}
                     onClick={() => {
                       const lastPos = customGradient.stops[customGradient.stops.length - 1]?.position ?? 0.5;
@@ -716,11 +717,11 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                   type="text"
                   size="small"
                   danger
-                  icon={<Trash2 size={14} />}
+icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
                   onClick={() => { void updateSettings({ backgroundImage: undefined }); }}
                 />
               ) : (
-                <Image size={14} style={{ color: token.colorTextTertiary }} />
+<Image size={ICON_SIZE.MEDIUM} style={{ color: token.colorTextTertiary }} />
               )
             }
           />
@@ -733,7 +734,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
               showUploadList={false}
               accept="image/*"
             >
-              <Button size="small" icon={<Image size={14} />}>
+<Button size="small" icon={<Image size={ICON_SIZE.MEDIUM} />}>
                 {t('bg.uploadImage')}
               </Button>
             </Upload>
@@ -955,7 +956,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
               return false; // 禁止 antd 自己上传
             }}
           >
-            <Button icon={<Image size={14} />}>
+<Button icon={<Image size={ICON_SIZE.MEDIUM} />}>
               {settings.videoBackground.fileKey !== undefined && settings.videoBackground.fileKey !== ''
                 ? t('effects.videoBgFileChange')
                 : t('effects.videoBgFileSelect')}

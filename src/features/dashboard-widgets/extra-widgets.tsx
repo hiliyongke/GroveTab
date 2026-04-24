@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button, Input, Segmented, Select, theme } from 'antd';
 import { Droplets, Check, Copy, Globe, Plus, RotateCcw, Search } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useSettingsStore } from '@/store';
 import type { HabitEntry } from '@/shared/types';
 import { feedback } from '@/shared/ui/feedback';
@@ -46,7 +47,7 @@ export function SearchBoxWidget() {
           marginTop: 'auto',
         }}
       >
-        <Search size={16} color={token.colorTextTertiary} />
+<Search size={ICON_SIZE.LARGE} color={token.colorTextTertiary} />
         <Input
           variant="borderless"
           style={{ flex: 1 }}
@@ -90,7 +91,7 @@ export function WaterReminderWidget() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10, height: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Droplets size={18} color={token.colorPrimary} />
+<Droplets size={ICON_SIZE.XLARGE} color={token.colorPrimary} />
         <div style={{ fontSize: 22, fontWeight: 800 }}>
           {current} / {goal} 杯
         </div>
@@ -114,7 +115,7 @@ export function WaterReminderWidget() {
         </Button>
         <Button
           size="small"
-          icon={<RotateCcw size={12} />}
+icon={<RotateCcw size={ICON_SIZE.SMALL} />}
           onClick={() => void updateSettings({ waterReminder: { ...(conf ?? {}), lastDate: today, currentCups: 0 } })}
         />
       </div>
@@ -172,7 +173,7 @@ export function HabitTrackerWidget() {
             <span style={{ fontSize: 16 }}>{habit.emoji ?? '⭐'}</span>
             <span style={{ flex: 1, fontSize: 13, fontWeight: 600 }}>{habit.name}</span>
             <span style={{ fontSize: 11, color: token.colorTextTertiary }}>坚持 {habit.records.length} 天</span>
-            {done && <Check size={14} color={token.colorSuccess} />}
+{done && <Check size={ICON_SIZE.MEDIUM} color={token.colorSuccess} />}
             <Button
               type="text"
               size="small"
@@ -190,7 +191,7 @@ export function HabitTrackerWidget() {
       })}
       <div style={{ display: 'flex', gap: 6, marginTop: 'auto' }}>
         <Input size="small" placeholder="新增习惯" value={draft} onChange={(e) => setDraft(e.target.value)} onPressEnter={() => void add()} />
-        <Button size="small" type="primary" icon={<Plus size={12} />} onClick={() => void add()} />
+<Button size="small" type="primary" icon={<Plus size={ICON_SIZE.SMALL} />} onClick={() => void add()} />
       </div>
     </div>
   );
@@ -237,10 +238,10 @@ export function TimestampToolWidget() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <div style={{ flex: 1, fontFamily: 'monospace', fontSize: 14, color: token.colorText }}>{nowSec}</div>
-        <Button size="small" icon={<Copy size={12} />} onClick={() => copy(nowSec)}>
+        <Button size="small" icon={<Copy size={ICON_SIZE.SMALL} />} onClick={() => copy(nowSec)}>
           秒
         </Button>
-        <Button size="small" icon={<Copy size={12} />} onClick={() => copy(now)}>
+        <Button size="small" icon={<Copy size={ICON_SIZE.SMALL} />} onClick={() => copy(now)}>
           毫秒
         </Button>
       </div>
@@ -317,7 +318,7 @@ export function JsonFormatterWidget() {
         />
         <Button
           size="small"
-          icon={<Copy size={12} />}
+          icon={<Copy size={ICON_SIZE.SMALL} />}
           disabled={output === ''}
           onClick={() => {
             void navigator.clipboard?.writeText(output);
@@ -415,7 +416,7 @@ export function NetworkInfoWidget() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 10, height: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Globe size={18} color={online ? token.colorSuccess : token.colorError} />
+        <Globe size={ICON_SIZE.XLARGE} color={online ? token.colorSuccess : token.colorError} />
         <div style={{ fontSize: 18, fontWeight: 800 }}>{online ? '在线' : '离线'}</div>
       </div>
       <div style={{ fontSize: 12, color: token.colorTextTertiary }}>

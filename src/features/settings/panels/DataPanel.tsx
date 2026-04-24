@@ -23,6 +23,7 @@ import {
   AlertTriangle,
   Sparkles,
 } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
 import { useSettingsStore } from '@/store';
 import { exportSessionsJSON, downloadFile, parseImportJSON } from '@/shared/utils/import-export';
@@ -184,7 +185,7 @@ export function DataPanel() {
           <Button
             size="small"
             type="primary"
-            icon={<Save size={14} />}
+icon={<Save size={ICON_SIZE.MEDIUM} />}
             disabled={!profileName.trim()}
             onClick={() => { void handleCreateProfile(); }}
           >
@@ -229,14 +230,14 @@ export function DataPanel() {
                   <Button
                     type="text"
                     size="small"
-                    icon={<ArrowLeftRight size={14} />}
+icon={<ArrowLeftRight size={ICON_SIZE.MEDIUM} />}
                     title={t('settings.profileApply')}
                     onClick={() => { void handleApplyProfile(p); }}
                   />
                   <Button
                     type="text"
                     size="small"
-                    icon={<Pencil size={14} />}
+icon={<Pencil size={ICON_SIZE.MEDIUM} />}
                     title={t('settings.profileRename')}
                     onClick={() => { setEditingId(p.id); setEditingName(p.name); }}
                   />
@@ -251,7 +252,7 @@ export function DataPanel() {
                       type="text"
                       size="small"
                       danger
-                      icon={<Trash2 size={14} />}
+icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
                       title={t('settings.profileDelete')}
                     />
                   </Popconfirm>
@@ -289,7 +290,7 @@ export function DataPanel() {
                 fontWeight: 500,
               }}
             >
-              <HardDrive size={14} style={{ color: token.colorInfo }} />
+<HardDrive size={ICON_SIZE.MEDIUM} style={{ color: token.colorInfo }} />
               {t('settings.storage')}
             </span>
             <span
@@ -320,10 +321,10 @@ export function DataPanel() {
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
-        <Button block icon={<Download size={14} />} onClick={() => { void handleExport(); }}>
+<Button block icon={<Download size={ICON_SIZE.MEDIUM} />} onClick={() => { void handleExport(); }}>
           {t('settings.export')}
         </Button>
-        <Button block icon={<Upload size={14} />} onClick={() => fileInputRef.current?.click()}>
+<Button block icon={<Upload size={ICON_SIZE.MEDIUM} />} onClick={() => fileInputRef.current?.click()}>
           {t('settings.import')}
         </Button>
         <input
@@ -340,7 +341,7 @@ export function DataPanel() {
         )}
       </div>
 
-      <Button block danger icon={<Trash2 size={14} />} onClick={handleClearAll}>
+<Button block danger icon={<Trash2 size={ICON_SIZE.MEDIUM} />} onClick={handleClearAll}>
         {t('settings.clearAll')}
       </Button>
 
@@ -362,7 +363,7 @@ export function DataPanel() {
           setTimeout(() => window.location.reload(), 400);
         }}
       >
-        <Button block icon={<RotateCcw size={14} />}>
+<Button block icon={<RotateCcw size={ICON_SIZE.MEDIUM} />}>
           {t('settings.resetSettings')}
         </Button>
       </Popconfirm>
@@ -376,7 +377,7 @@ export function DataPanel() {
           setTimeout(() => window.location.reload(), 400);
         }}
       >
-        <Button block icon={<Sparkles size={14} />}>
+<Button block icon={<Sparkles size={ICON_SIZE.MEDIUM} />}>
           {t('settings.replayOnboarding')}
         </Button>
       </Popconfirm>
@@ -388,7 +389,7 @@ export function DataPanel() {
       <Button
         block
         danger
-        icon={<AlertTriangle size={14} />}
+icon={<AlertTriangle size={ICON_SIZE.MEDIUM} />}
         onClick={() => {
           let confirmText = '';
           modal.confirm({

@@ -17,6 +17,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button, Card, Input, Popconfirm, theme, App as AntApp } from 'antd';
 import { Plus, Trash2, Save, PenLine, X, GripVertical } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import {
   DndContext,
   DragOverlay,
@@ -91,8 +92,14 @@ export function KanbanView() {
   const handleAddColumn = async () => {
     const name = newColumnName.trim();
     if (name === '') return;
-    await addColumn(name);
-    setNewColumnName('');
+    try {
+      await addColumn(name);
+      setNewColumnName('');
+      message.success(t('kanban.addColumnOk', { name }));
+    } catch (err) {
+      message.error(t('kanban.addFailed'));
+      console.warn('[kanban] addColumn failed', err);
+    }
   };
 
   const handleSaveAsSession = async (col: KanbanColumn) => {
@@ -105,6 +112,7 @@ export function KanbanView() {
       await archiveSelectedTabs(live.map((t) => t.id));
       message.success(t('archive.archivedOk', { count: live.length }));
     } catch (err) {
+      message.error(t('kanban.archiveFailed'));
       console.warn('[kanban] archive failed', err);
     }
   };
@@ -127,52 +135,57 @@ export function KanbanView() {
       | undefined;
     if (!activeData) return;
 
-    // 1) 源 Tab 拖入列或卡片位置 → addCard（不关闭原 Tab）
-    if (activeData.kind === 'tab-source') {
-      const destCol = overData?.kind === 'card' ? overData.columnId
-        : overData?.kind === 'column-body' ? overData.columnId
-        : overData?.kind === 'column' ? overData.columnId
-        : null;
-      if (!destCol) return;
-      await addCard(destCol, activeData.card);
-      return;
-    }
-
-    // 2) 卡片拖动
-    if (activeData.kind === 'card') {
-      // 拖到列空白处 → 移动到该列末尾
-      if (overData?.kind === 'column-body') {
-        if (overData.columnId === activeData.columnId) return;
-        await moveCard(activeData.columnId, overData.columnId, activeData.url);
+    try {
+      // 1) 源 Tab 拖入列或卡片位置 → addCard（不关闭原 Tab）
+      if (activeData.kind === 'tab-source') {
+        const destCol = overData?.kind === 'card' ? overData.columnId
+          : overData?.kind === 'column-body' ? overData.columnId
+          : overData?.kind === 'column' ? overData.columnId
+          : null;
+        if (!destCol) return;
+        await addCard(destCol, activeData.card);
         return;
       }
-      // 拖到某卡片上 → 列内 reorder 或跨列移动到该卡片前
-      if (overData?.kind === 'card') {
-        // 同列 reorder
-        if (overData.columnId === activeData.columnId) {
-          const col = columns.find((c) => c.id === activeData.columnId);
-          if (!col) return;
-          const fromIndex = col.cards.findIndex((c) => c.url === activeData.url);
-          const toIndex = col.cards.findIndex((c) => c.url === overData.url);
-          if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return;
-          await reorderCard(activeData.columnId, fromIndex, toIndex);
+
+      // 2) 卡片拖动
+      if (activeData.kind === 'card') {
+        // 拖到列空白处 → 移动到该列末尾
+        if (overData?.kind === 'column-body') {
+          if (overData.columnId === activeData.columnId) return;
+          await moveCard(activeData.columnId, overData.columnId, activeData.url);
           return;
         }
-        // 跨列移动到目标卡前
-        const destCol = columns.find((c) => c.id === overData.columnId);
-        const toIndex = destCol?.cards.findIndex((c) => c.url === overData.url) ?? undefined;
-        await moveCard(activeData.columnId, overData.columnId, activeData.url, toIndex);
-        return;
+        // 拖到某卡片上 → 列内 reorder 或跨列移动到该卡片前
+        if (overData?.kind === 'card') {
+          // 同列 reorder
+          if (overData.columnId === activeData.columnId) {
+            const col = columns.find((c) => c.id === activeData.columnId);
+            if (!col) return;
+            const fromIndex = col.cards.findIndex((c) => c.url === activeData.url);
+            const toIndex = col.cards.findIndex((c) => c.url === overData.url);
+            if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return;
+            await reorderCard(activeData.columnId, fromIndex, toIndex);
+            return;
+          }
+          // 跨列移动到目标卡前
+          const destCol = columns.find((c) => c.id === overData.columnId);
+          const toIndex = destCol?.cards.findIndex((c) => c.url === overData.url) ?? undefined;
+          await moveCard(activeData.columnId, overData.columnId, activeData.url, toIndex);
+          return;
+        }
       }
-    }
 
-    // 3) 列排序
-    if (activeData.kind === 'column' && overData?.kind === 'column') {
-      if (activeData.columnId === overData.columnId) return;
-      const fromIndex = columns.findIndex((c) => c.id === activeData.columnId);
-      const toIndex = columns.findIndex((c) => c.id === overData.columnId);
-      if (fromIndex < 0 || toIndex < 0) return;
-      await reorderColumns(fromIndex, toIndex);
+      // 3) 列排序
+      if (activeData.kind === 'column' && overData?.kind === 'column') {
+        if (activeData.columnId === overData.columnId) return;
+        const fromIndex = columns.findIndex((c) => c.id === activeData.columnId);
+        const toIndex = columns.findIndex((c) => c.id === overData.columnId);
+        if (fromIndex < 0 || toIndex < 0) return;
+        await reorderColumns(fromIndex, toIndex);
+      }
+    } catch (err) {
+      message.error(t('kanban.dragFailed'));
+      console.warn('[kanban] drag operation failed', err);
     }
   };
 
@@ -189,7 +202,7 @@ export function KanbanView() {
         <div
           style={{
             flex: '0 0 240px',
-            maxHeight: 600,
+            maxHeight: 'calc(100vh - 280px)',
             overflowY: 'auto',
             padding: 10,
             background: token.colorFillQuaternary,
@@ -235,9 +248,19 @@ export function KanbanView() {
               t={t}
               reduced={reduced}
               onRename={(name) => void renameColumn(col.id, name)}
-              onRemove={() => void removeColumn(col.id)}
+              onRemove={() => {
+                removeColumn(col.id).catch((err) => {
+                  message.error(t('kanban.removeColumnFailed'));
+                  console.warn('[kanban] removeColumn failed', err);
+                });
+              }}
               onSaveAsSession={() => void handleSaveAsSession(col)}
-              onRemoveCard={(url) => void removeCard(col.id, url)}
+              onRemoveCard={(url) => {
+                removeCard(col.id, url).catch((err) => {
+                  message.error(t('kanban.removeCardFailed'));
+                  console.warn('[kanban] removeCard failed', err);
+                });
+              }}
             />
           ))}
         </SortableContext>
@@ -253,7 +276,7 @@ export function KanbanView() {
               <Button
                 size="small"
                 type="text"
-                icon={<Plus size={12} />}
+                icon={<Plus size={ICON_SIZE.SMALL} />}
                 onClick={() => void handleAddColumn()}
               />
             }
@@ -374,7 +397,7 @@ function KanbanColumnView({
             <Button
               type="text"
               size="small"
-              icon={<GripVertical size={11} />}
+icon={<GripVertical size={ICON_SIZE.TINY} />}
               {...sortable.attributes}
               {...sortable.listeners}
               style={{ cursor: 'grab' }}
@@ -385,12 +408,12 @@ function KanbanColumnView({
             <Button
               type="text"
               size="small"
-              icon={<Save size={11} />}
+icon={<Save size={ICON_SIZE.TINY} />}
               onClick={onSaveAsSession}
               title={t('kanban.saveAsSession')}
             />
             <Popconfirm title={t('kanban.removeColumn')} onConfirm={onRemove}>
-              <Button type="text" size="small" icon={<Trash2 size={11} />} />
+              <Button type="text" size="small" icon={<Trash2 size={ICON_SIZE.TINY} />} />
             </Popconfirm>
           </div>
         }
@@ -514,7 +537,7 @@ function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: S
       <Button
         type="text"
         size="small"
-        icon={<X size={11} />}
+        icon={<X size={ICON_SIZE.TINY} />}
         onClick={(e) => {
           e.stopPropagation();
           onRemove();
@@ -553,7 +576,7 @@ function ColumnNameEditor({ col, onRename }: { col: KanbanColumn; onRename: (nam
       onDoubleClick={() => setEditing(true)}
     >
       {col.name}
-      <Button type="text" size="small" icon={<PenLine size={11} />} onClick={() => setEditing(true)} />
+      <Button type="text" size="small" icon={<PenLine size={ICON_SIZE.TINY} />} onClick={() => setEditing(true)} />
     </span>
   );
 }

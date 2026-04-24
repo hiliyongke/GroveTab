@@ -13,7 +13,7 @@
 
 import { memo, useMemo } from 'react';
 import { Card, Row, Col, Button, Space, Tag, Typography, theme } from 'antd';
-import { Search, Zap, Save, ChevronRight } from 'lucide-react';
+import { Search, Zap, Save, ChevronRight, BarChart3 } from 'lucide-react';
 import type { LiveTab, ArchivedSession } from '@/shared/types';
 import { useT } from '@/shared/i18n';
 
@@ -39,6 +39,7 @@ export interface DashboardOverviewProps {
   onSearch: () => void;
   onTidy: () => void;
   onArchive: () => void;
+  onInsights: () => void;
 }
 
 /**
@@ -110,6 +111,7 @@ export const DashboardOverview = memo(function DashboardOverview({
   onSearch,
   onTidy,
   onArchive,
+  onInsights,
 }: DashboardOverviewProps) {
   const { t } = useT();
   const { token } = theme.useToken();
@@ -172,15 +174,20 @@ export const DashboardOverview = memo(function DashboardOverview({
           )}
         </div>
         <Space size={8} wrap>
-          <Button size="small" type="primary" ghost icon={<Search size={13} />} onClick={onSearch}>
+          <Button size="small" type="primary" ghost icon={<Search size={ICON_SIZE.DEFAULT} />} onClick={onSearch}>
             {t('dashboard.searchAction')}
           </Button>
-          <Button size="small" icon={<Zap size={13} />} onClick={onTidy} disabled={duplicateCount + idleCount === 0}>
+          <Button size="small" icon={<Zap size={ICON_SIZE.DEFAULT} />} onClick={onTidy} disabled={duplicateCount + idleCount === 0}>
             {t('dashboard.tidyAction')}
           </Button>
-          <Button size="small" type="primary" icon={<Save size={13} />} onClick={onArchive} disabled={tabCount === 0}>
+          <Button size="small" type="primary" icon={<Save size={ICON_SIZE.DEFAULT} />} onClick={onArchive} disabled={tabCount === 0}>
             {t('dashboard.archiveAction')}
           </Button>
+          {onInsights && (
+            <Button size="small" icon={<BarChart3 size={ICON_SIZE.DEFAULT} />} onClick={onInsights}>
+              {t('insights.title')}
+            </Button>
+          )}
         </Space>
       </div>
 
@@ -271,7 +278,7 @@ export const DashboardOverview = memo(function DashboardOverview({
               >
                 {latestArchiveLabel}
                 {latestArchive !== null && (
-                  <ChevronRight size={12} style={{ color: token.colorTextTertiary, flexShrink: 0 }} />
+          <ChevronRight size={ICON_SIZE.SMALL} style={{ color: token.colorTextTertiary, flexShrink: 0 }} />
                 )}
               </span>
               {latestArchiveSub !== '' && (
@@ -288,3 +295,5 @@ export const DashboardOverview = memo(function DashboardOverview({
 });
 
 export default DashboardOverview;
+
+import { ICON_SIZE } from '@/shared/utils/icon-size';

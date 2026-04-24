@@ -23,6 +23,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { App, Tooltip, theme } from 'antd';
 import { Heart, Copy, RefreshCw } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
 import { useSettingsStore } from '@/store';
 import { getTodayQuote, toggleFavorite, isFavorite } from './quote-service';
@@ -179,7 +180,7 @@ export function DailyQuote() {
             onClick={() => { void handleFav(); }}
             aria-label={fav ? t('quote.unfavorite') : t('quote.favorite')}
           >
-            <Heart size={14} fill={fav ? 'currentColor' : 'none'} />
+<Heart size={ICON_SIZE.MEDIUM} fill={fav ? 'currentColor' : 'none'} />
           </button>
         </Tooltip>
         <Tooltip title={t('quote.copy')}>
@@ -189,7 +190,7 @@ export function DailyQuote() {
             onClick={() => { void handleCopy(); }}
             aria-label={t('quote.copy')}
           >
-            <Copy size={14} />
+<Copy size={ICON_SIZE.MEDIUM} />
           </button>
         </Tooltip>
         <Tooltip title={t('quote.next')}>
@@ -199,7 +200,7 @@ export function DailyQuote() {
             onClick={handleNext}
             aria-label={t('quote.next')}
           >
-            <RefreshCw size={14} />
+<RefreshCw size={ICON_SIZE.MEDIUM} />
           </button>
         </Tooltip>
       </div>

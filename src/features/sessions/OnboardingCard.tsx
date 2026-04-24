@@ -25,6 +25,7 @@ import {
   Archive as ArchiveIcon,
   Check,
 } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { markOnboardingDone } from '@/repositories';
 import { useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
@@ -44,9 +45,9 @@ interface TourStep {
 }
 
 const TOUR_STEPS: TourStep[] = [
-  { icon: <Network size={22} />, titleKey: 'onboarding.tour.overviewTitle', descKey: 'onboarding.tour.overviewDesc' },
-  { icon: <ArchiveIcon size={22} />, titleKey: 'onboarding.tour.archiveTitle', descKey: 'onboarding.tour.archiveDesc' },
-  { icon: <Keyboard size={22} />, titleKey: 'onboarding.tour.shortcutsTitle', descKey: 'onboarding.tour.shortcutsDesc' },
+  { icon: <Network size={ICON_SIZE.XXLARGE} />, titleKey: 'onboarding.tour.overviewTitle', descKey: 'onboarding.tour.overviewDesc' },
+  { icon: <ArchiveIcon size={ICON_SIZE.XXLARGE} />, titleKey: 'onboarding.tour.archiveTitle', descKey: 'onboarding.tour.archiveDesc' },
+  { icon: <Keyboard size={ICON_SIZE.XXLARGE} />, titleKey: 'onboarding.tour.shortcutsTitle', descKey: 'onboarding.tour.shortcutsDesc' },
 ];
 
 /**
@@ -154,7 +155,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
             color: token.colorPrimary,
           }}
         >
-          <Network size={26} />
+          <Network size={ICON_SIZE.XXXLARGE} />
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -172,7 +173,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
             }}
           >
             {t('onboarding.title')}
-            <Zap size={14} style={{ color: token.colorPrimary }} />
+            <Zap size={ICON_SIZE.MEDIUM} style={{ color: token.colorPrimary }} />
           </h2>
           <Text type="secondary" style={{ fontSize: 14 }}>
             {t('onboarding.desc')}
@@ -211,7 +212,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
             onClick={() => {
               void pickOverride(true);
             }}
-            icon={<Globe size={16} />}
+            icon={<Globe size={ICON_SIZE.LARGE} />}
             autoFocus
             style={{
               background: 'var(--canopy-logo-gradient)',
@@ -228,7 +229,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
             onClick={() => {
               void pickOverride(false);
             }}
-            icon={<Package size={16} />}
+            icon={<Package size={ICON_SIZE.LARGE} />}
             style={{ height: 52 }}
           >
             {t('onboarding.modePopupOnly')}
@@ -298,7 +299,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
           <Space size={8}>
             <Button
               size="small"
-              icon={<ArrowLeft size={13} />}
+              icon={<ArrowLeft size={ICON_SIZE.DEFAULT} />}
               disabled={stepIndex === 0}
               onClick={() => setStepIndex((idx) => Math.max(idx - 1, 0))}
             >
@@ -308,7 +309,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
               <Button
                 size="small"
                 type="primary"
-                icon={<ArrowRight size={13} />}
+                icon={<ArrowRight size={ICON_SIZE.DEFAULT} />}
                 iconPosition="end"
                 onClick={() => setStepIndex((idx) => Math.min(idx + 1, TOUR_STEPS.length - 1))}
               >
@@ -318,7 +319,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
               <Button
                 size="small"
                 type="primary"
-                icon={<Check size={13} />}
+                icon={<Check size={ICON_SIZE.DEFAULT} />}
                 onClick={() => void finish()}
               >
                 {t('onboarding.tour.done')}

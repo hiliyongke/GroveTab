@@ -21,6 +21,7 @@ import {
   Plus,
   Wrench,
 } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import {
   getBookmarkTree,
   searchBookmarks,
@@ -53,7 +54,7 @@ function toTreeData(nodes: BookmarkNode[]): Array<Record<string, unknown>> {
       return {
         key: node.id,
         title: (node.title ?? '') !== '' ? node.title : fallbackTitle,
-        icon: hasBookmarkUrl ? <BookOpen size={12} /> : undefined,
+        icon: hasBookmarkUrl ? <BookOpen size={ICON_SIZE.SMALL} /> : undefined,
         children: node.children !== undefined ? toTreeData(node.children) : undefined,
         isLeaf: hasBookmarkUrl,
       };
@@ -145,11 +146,11 @@ export function BookmarkView() {
   if (!hasPermission) {
     return (
       <div style={{ textAlign: 'center', padding: '80px 0' }}>
-        <BookOpen size={48} style={{ color: token.colorTextTertiary, marginBottom: 16 }} />
+          <BookOpen size={ICON_SIZE.HERO} style={{ color: token.colorTextTertiary, marginBottom: 16 }} />
         <div style={{ fontSize: 14, color: token.colorTextSecondary, marginBottom: 16 }}>
           {t('bookmark.needPermission')}
         </div>
-        <Button type="primary" icon={<BookOpen size={14} />} onClick={() => { void handleRequestPermission(); }}>
+        <Button type="primary" icon={<BookOpen size={ICON_SIZE.MEDIUM} />} onClick={() => { void handleRequestPermission(); }}>
           {t('bookmark.grantPermission')}
         </Button>
       </div>
@@ -174,18 +175,18 @@ export function BookmarkView() {
       {/* 搜索栏 + 操作（固定，不参与滚动） */}
       <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
         <Input
-          prefix={<Search size={14} />}
+          prefix={<Search size={ICON_SIZE.MEDIUM} />}
           placeholder={t('bookmark.searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => { void handleSearch(e.target.value); }}
           allowClear
           style={{ flex: 1 }}
         />
-        <Button icon={<Plus size={14} />} onClick={() => { void handleBookmarkAll(); }}>
+        <Button icon={<Plus size={ICON_SIZE.MEDIUM} />} onClick={() => { void handleBookmarkAll(); }}>
           {t('bookmark.bookmarkAll')}
         </Button>
         {/* 工具箱入口：打开 Modal 进行去重 / 失效检测 / 智能整理 */}
-        <Button icon={<Wrench size={14} />} onClick={() => setToolsOpen(true)}>
+        <Button icon={<Wrench size={ICON_SIZE.MEDIUM} />} onClick={() => setToolsOpen(true)}>
           {t('bookmark.tools.entry')}
         </Button>
       </div>

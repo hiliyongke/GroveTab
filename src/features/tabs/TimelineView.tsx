@@ -21,6 +21,7 @@
 import { useMemo, useState } from 'react';
 import { Timeline, theme } from 'antd';
 import { ChevronDown } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useTabsStore, useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { findAmbiguousTitleIds } from '@/shared/utils/url-display';
@@ -315,7 +316,7 @@ function SegmentHeader({
         {count}
       </span>
       <ChevronDown
-        size={10}
+        size={ICON_SIZE.MICRO}
         style={{
           color: token.colorTextTertiary,
           transform: collapsed ? 'rotate(-90deg)' : 'rotate(0deg)',

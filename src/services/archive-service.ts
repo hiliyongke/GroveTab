@@ -11,6 +11,7 @@
 
 import { nanoid } from 'nanoid';
 import type { ArchivedSession, ArchivedTab } from '@/shared/types';
+import { CONFIG } from '@/shared/config';
 import { getData, setData } from '@/repositories';
 import { queryAllTabs, queryTabs, closeTabs, createTab, getCurrentWindow, getFaviconUrl } from '@/chrome';
 import { extractHostname, isSelfNewTabPage, shouldDisplayUrl } from '@/chrome';
@@ -416,10 +417,11 @@ export async function createAutoSnapshot(tabs: chrome.tabs.Tab[]): Promise<Archi
   };
   const sessions = await getArchivedSessions();
   sessions.unshift(session);
-  // FIFO 上限：hidden 超过 20 自动删除最老
+  // FIFO 上限：hidden 超过配置值自动删除最老
   const hiddenList = sessions.filter((s) => s.hidden === true);
-  if (hiddenList.length > 20) {
-    const toRemove = new Set(hiddenList.slice(20).map((s) => s.id));
+  const maxHidden = CONFIG.business.maxAutoSnapshotHidden ?? 20;
+  if (hiddenList.length > maxHidden) {
+    const toRemove = new Set(hiddenList.slice(maxHidden).map((s) => s.id));
     const pruned = sessions.filter((s) => !toRemove.has(s.id));
     await saveSessions(pruned);
   } else {

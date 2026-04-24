@@ -4,11 +4,12 @@
 
 import type { ArchivedSession, ArchivedTab } from '@/shared/types';
 import { BRAND } from '@/shared/config/brand';
+import { CONFIG } from '@/shared/config';
 
 const CURRENT_EXPORT_VERSION = 1;
-const MAX_IMPORT_SESSIONS = 500;
-const MAX_IMPORT_TABS_PER_SESSION = 500;
-const MAX_STRING_LENGTH = 2048;
+const MAX_IMPORT_SESSIONS = CONFIG.business.maxImportSessions;
+const MAX_IMPORT_TABS_PER_SESSION = CONFIG.business.maxImportTabsPerSession;
+const MAX_STRING_LENGTH = CONFIG.business.maxStringLength;
 
 /** 导出归档会话为 JSON 字符串。 */
 export function exportSessionsJSON(sessions: ArchivedSession[]): string {

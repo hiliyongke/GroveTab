@@ -23,12 +23,23 @@
  * \u7c7b\u578b\u5931\u4e0b\u7a84\u6210 `number`\u3002
  */
 export const ICON_SIZE = {
+  /** 主题切换等极小图标 */
+  XS: 9,
   MICRO: 10,
   TINY: 11,
   SMALL: 12,
   DEFAULT: 13,
   MEDIUM: 14,
   LARGE: 16,
+  /** Hero 搜索框前缀图标 */
+  XXL: 17,
+  XLARGE: 18,
+  /** Onboarding tour 图标 */
+  XXLARGE: 22,
+  /** Onboarding 欢迎图标 */
+  XXXLARGE: 26,
+  /** 空状态大图标 */
+  HERO: 48,
 } as const;
 
 export type IconSize = typeof ICON_SIZE[keyof typeof ICON_SIZE];

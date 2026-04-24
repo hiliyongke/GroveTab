@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Button, Checkbox, Input, Switch } from 'antd';
 import { Upload, Trash2 } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useSettingsStore } from '@/store';
 import { Field } from '../components/Field';
 import type { CustomQuoteEntry, DashboardQuoteCategory } from '@/shared/types';
@@ -99,7 +100,7 @@ export function QuotesPanel() {
           onChange={(e) => setTextDraft(e.target.value)}
           placeholder={'所有的努力都算数 —— GroveTab\n再坚持一下，好运会来的'}
         />
-        <Button icon={<Upload size={14} />} style={{ marginTop: 8 }} onClick={() => void appendCustomQuotes(parseTextQuotes(textDraft))}>
+        <Button icon={<Upload size={ICON_SIZE.MEDIUM} />} style={{ marginTop: 8 }} onClick={() => void appendCustomQuotes(parseTextQuotes(textDraft))}>
           从文本导入
         </Button>
       </Field>
@@ -115,7 +116,7 @@ export function QuotesPanel() {
           placeholder='[{"text":"所有的努力都算数","source":"GroveTab"}]'
         />
         <Button
-          icon={<Upload size={14} />}
+          icon={<Upload size={ICON_SIZE.MEDIUM} />}
           style={{ marginTop: 8 }}
           onClick={() => {
             try {
@@ -155,7 +156,7 @@ export function QuotesPanel() {
       <Field label="清空自定义金句" hint="只删除你手工导入的 custom 分类，不影响内置 200+ 条金句。">
         <Button
           danger
-          icon={<Trash2 size={14} />}
+          icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
           onClick={() => {
             void updateSettings({
               dailyQuote: {

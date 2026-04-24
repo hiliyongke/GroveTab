@@ -14,11 +14,12 @@
  */
 
 import type { ArchivedSession } from '@/shared/types';
+import { CONFIG } from '@/shared/config';
 
 const DB_NAME = 'canopy-db';
-const DB_VERSION = 1;
+const DB_VERSION = CONFIG.cache.dbVersion;
 const SESSIONS_STORE = 'sessions';
-const QUOTA_THRESHOLD = 0.8; // 80% 使用率触发降级
+const QUOTA_THRESHOLD = CONFIG.cache.idbQuotaThreshold; // 可配置阈值
 
 /** IndexedDB 实例缓存 */
 let dbInstance: IDBDatabase | null = null;

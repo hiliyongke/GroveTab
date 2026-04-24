@@ -21,6 +21,7 @@
 import { useMemo, useState } from 'react';
 import { Button, Card, Popover, theme } from 'antd';
 import { Volume2, X } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useTabsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { groupTabsByDomain, getGroupFavicon } from '@/shared/utils/domain';
@@ -248,7 +249,7 @@ function GridCard({
           {domain}
         </span>
         {hasAudible && (
-          <Volume2 size={12} style={{ color: token.colorPrimary, flexShrink: 0 }} />
+<Volume2 size={ICON_SIZE.SMALL} style={{ color: token.colorPrimary, flexShrink: 0 }} />
         )}
       </div>
 
@@ -438,7 +439,7 @@ function DomainTabsPanel({
           size="small"
           aria-label="Close"
           onClick={onClose}
-          icon={<X size={14} />}
+          icon={<X size={ICON_SIZE.MEDIUM} />}
           style={{ flexShrink: 0 }}
         />
       </div>

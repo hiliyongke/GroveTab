@@ -17,7 +17,8 @@ import {
   Save,
   Share2,
 } from 'lucide-react';
-import { Button, List, Tooltip, Input, theme } from 'antd';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
+import { Button, List, Tooltip, Input, Popconfirm, theme } from 'antd';
 import { format } from 'date-fns';
 import { zhCN, enUS } from 'date-fns/locale';
 import type { ArchivedSession, ArchivedTab } from '@/shared/types';
@@ -92,7 +93,7 @@ export function SessionItem({
             size="small"
             icon={
               <ChevronRight
-                size={11}
+                size={ICON_SIZE.TINY}
                 style={{
                   transition: 'transform 0.2s',
                   transform: isExpanded ? 'rotate(90deg)' : 'rotate(0)',
@@ -119,7 +120,7 @@ export function SessionItem({
             flexShrink: 0,
           }}
         >
-          <Save size={16} />
+          <Save size={ICON_SIZE.LARGE} />
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -175,14 +176,14 @@ export function SessionItem({
           <Tooltip title={t('archive.restore')}>
             <Button
               type="text"
-              icon={<Undo2 size={14} />}
+              icon={<Undo2 size={ICON_SIZE.MEDIUM} />}
               onClick={() => onRestore(session.id)}
             />
           </Tooltip>
           <Tooltip title={t('archive.rename')}>
             <Button
               type="text"
-              icon={<Pencil size={14} />}
+              icon={<Pencil size={ICON_SIZE.MEDIUM} />}
               onClick={() => onStartRenaming(session)}
             />
           </Tooltip>
@@ -190,19 +191,27 @@ export function SessionItem({
             <Tooltip title={t('archive.share')}>
               <Button
                 type="text"
-                icon={<Share2 size={14} />}
+                icon={<Share2 size={ICON_SIZE.MEDIUM} />}
                 onClick={() => onShare(session.id)}
               />
             </Tooltip>
           )}
-          <Tooltip title={t('archive.delete')}>
-            <Button
-              type="text"
-              danger
-              icon={<Trash2 size={14} />}
-              onClick={() => onDelete(session.id)}
-            />
-          </Tooltip>
+          <Popconfirm
+            title={t('archive.deleteConfirmTitle')}
+            description={t('archive.deleteConfirmDesc')}
+            onConfirm={() => onDelete(session.id)}
+            okText={t('archive.deleteConfirmOk')}
+            cancelText={t('archive.deleteConfirmCancel')}
+            okButtonProps={{ danger: true }}
+          >
+            <Tooltip title={t('archive.delete')}>
+              <Button
+                type="text"
+                danger
+                icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
+              />
+            </Tooltip>
+          </Popconfirm>
         </div>
       </div>
 
@@ -292,7 +301,7 @@ export function SessionItem({
                   <Button
                     type="text"
                     size="small"
-                    icon={<Link size={14} />}
+                    icon={<Link size={ICON_SIZE.MEDIUM} />}
                     onClick={() => onOpenSingle(tab)}
                   />
                 </Tooltip>

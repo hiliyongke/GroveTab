@@ -24,6 +24,7 @@ import {
   Globe,
   Moon,
 } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { Reorder } from 'motion/react';
 import type { DomainGroup } from '@/shared/utils/domain';
 import { getGroupFavicon } from '@/shared/utils/domain';
@@ -269,7 +270,7 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
         }
       >
         <ChevronDown
-          size={11}
+          size={ICON_SIZE.TINY}
           style={{
             color: token.colorTextTertiary,
             flexShrink: 0,
@@ -303,7 +304,7 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
               onError={() => setFaviconError(true)}
             />
           ) : (
-            <Globe size={12} style={{ color: barColor }} />
+<Globe size={ICON_SIZE.SMALL} style={{ color: barColor }} />
           )}
         </div>
 
@@ -342,7 +343,7 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
         <Button
           type="text"
           size="small"
-          icon={<Moon size={12} />}
+icon={<Moon size={ICON_SIZE.SMALL} />}
           onClick={(e) => {
             e.stopPropagation();
             void discardDomainGroup(group.domain).catch(() => { /* store 已 toast */ });
@@ -371,7 +372,7 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
           danger
           loading={closing}
           disabled={closing}
-          icon={closing ? undefined : <X size={12} />}
+icon={closing ? undefined : <X size={ICON_SIZE.SMALL} />}
           onClick={(e: React.MouseEvent) => { void handleCloseAll(e); }}
           aria-label={t('tabs.closeDomain')}
           // closing 时强制显示（is-visible），其余情况由 hover/focus 驱动

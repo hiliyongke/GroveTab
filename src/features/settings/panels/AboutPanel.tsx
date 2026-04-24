@@ -30,6 +30,7 @@ import {
   ExternalLink,
   Mail,
 } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
 import { BRAND, getBrandDisplayName, getBrandSlogan } from '@/shared/config/brand';
 // 版本号在运行时读 manifest（避免 build 时字段被替换）
@@ -152,7 +153,7 @@ export function AboutPanel() {
                     flexShrink: 0,
                   }}
                 >
-                  <Icon size={16} />
+<Icon size={ICON_SIZE.LARGE} />
                 </div>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 12.5, fontWeight: 600, color: token.colorText, lineHeight: 1.3 }}>
@@ -178,7 +179,7 @@ export function AboutPanel() {
       {/* Section 3 —— 使用小贴士 */}
       <div>
         <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 10, color: token.colorText }}>
-          <Sparkles size={14} style={{ display: 'inline', marginRight: 6, verticalAlign: -2 }} />
+<Sparkles size={ICON_SIZE.MEDIUM} style={{ display: 'inline', marginRight: 6, verticalAlign: -2 }} />
           {t('about.tipsTitle')}
         </div>
         <ul
@@ -206,7 +207,7 @@ export function AboutPanel() {
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           <Button
-            icon={<Code2 size={14} />}
+icon={<Code2 size={ICON_SIZE.MEDIUM} />}
             onClick={() => {
               if (typeof chrome !== 'undefined' && chrome.tabs !== undefined) {
                 void chrome.tabs.create({ url: BRAND.productUrl });
@@ -218,7 +219,7 @@ export function AboutPanel() {
             {t('about.openSource')}
           </Button>
           <Button
-            icon={<Mail size={14} />}
+icon={<Mail size={ICON_SIZE.MEDIUM} />}
             onClick={() => {
               const url = `${BRAND.productUrl}/issues/new`;
               if (typeof chrome !== 'undefined' && chrome.tabs !== undefined) {
@@ -231,7 +232,7 @@ export function AboutPanel() {
             {t('about.feedback')}
           </Button>
           <Button
-            icon={<ExternalLink size={14} />}
+icon={<ExternalLink size={ICON_SIZE.MEDIUM} />}
             onClick={() => {
               const url = `${BRAND.productUrl}/blob/main/CHANGELOG.md`;
               if (typeof chrome !== 'undefined' && chrome.tabs !== undefined) {

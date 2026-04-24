@@ -11,9 +11,11 @@ import { useT } from '@/shared/i18n';
 import { findAmbiguousTitleIds } from '@/shared/utils/url-display';
 import { TabItem } from './TabItem';
 import { Flame } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { theme, Tag } from 'antd';
+import { CONFIG } from '@/shared/config';
 
-const MAX_DISPLAY = 30;
+const MAX_DISPLAY = CONFIG.ui.maxDisplay;
 
 export function FrequencyView() {
   const tabs = useTabsStore((s) => s.tabs);
@@ -60,7 +62,7 @@ export function FrequencyView() {
           padding: '0 10px',
         }}
       >
-        <Flame size={14} style={{ color: token.colorPrimary }} />
+        <Flame size={ICON_SIZE.MEDIUM} style={{ color: token.colorPrimary }} />
         <span
           style={{
             fontSize: 11.5,

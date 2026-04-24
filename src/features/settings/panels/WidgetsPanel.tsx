@@ -1,5 +1,6 @@
 import { Button, Input, Select, Switch, theme, Popconfirm } from 'antd';
 import { Plus, LayoutGrid, Grip, TimerReset, Trash2, FolderPlus, BookmarkPlus } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useSettingsStore } from '@/store';
 import { Field } from '../components/Field';
 import { feedback } from '@/shared/ui/feedback';
@@ -125,13 +126,13 @@ export function WidgetsPanel() {
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <Button
             type={dashboard?.enabled !== false ? 'primary' : 'default'}
-            icon={<LayoutGrid size={14} />}
+icon={<LayoutGrid size={ICON_SIZE.MEDIUM} />}
             onClick={() => void updateSettings({ dashboardWidgets: { ...(dashboard ?? {}), enabled: !(dashboard?.enabled !== false) } })}
           >
             {dashboard?.enabled !== false ? '已启用' : '已隐藏'}
           </Button>
           <Button
-            icon={<Grip size={14} />}
+icon={<Grip size={ICON_SIZE.MEDIUM} />}
             onClick={() => void updateSettings({ dashboardWidgets: { ...(dashboard ?? {}), editMode: !(dashboard?.editMode === true), enabled: true } })}
           >
             {dashboard?.editMode === true ? '退出编辑' : '进入编辑'}
@@ -173,8 +174,8 @@ export function WidgetsPanel() {
 
       <Field label="快捷网站分组管理" hint="对每个分组下的链接进行增删改；也可以从浏览器书签一键导入。">
         <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-          <Button icon={<FolderPlus size={14} />} onClick={addGroup}>新增分组</Button>
-          <Button icon={<BookmarkPlus size={14} />} onClick={() => void importFromBookmarks()}>从浏览器书签导入</Button>
+<Button icon={<FolderPlus size={ICON_SIZE.MEDIUM} />} onClick={addGroup}>新增分组</Button>
+        <Button icon={<BookmarkPlus size={ICON_SIZE.MEDIUM} />} onClick={() => void importFromBookmarks()}>从浏览器书签导入</Button>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -196,9 +197,9 @@ export function WidgetsPanel() {
                 />
                 <span style={{ fontSize: 12, color: token.colorTextTertiary }}>{group.links.length} 个链接</span>
                 <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
-                  <Button size="small" icon={<Plus size={12} />} onClick={() => addLink(group.id)}>链接</Button>
+                  <Button size="small" icon={<Plus size={ICON_SIZE.SMALL} />} onClick={() => addLink(group.id)}>链接</Button>
                   <Popconfirm title="删除该分组？" onConfirm={() => removeGroup(group.id)}>
-                    <Button size="small" danger icon={<Trash2 size={12} />} />
+                    <Button size="small" danger icon={<Trash2 size={ICON_SIZE.SMALL} />} />
                   </Popconfirm>
                 </div>
               </div>
@@ -224,7 +225,7 @@ export function WidgetsPanel() {
                       placeholder="图标"
                       onChange={(e) => updateLink(group.id, link.id, { emoji: e.target.value })}
                     />
-                    <Button size="small" danger icon={<Trash2 size={12} />} onClick={() => removeLink(group.id, link.id)} />
+                    <Button size="small" danger icon={<Trash2 size={ICON_SIZE.SMALL} />} onClick={() => removeLink(group.id, link.id)} />
                   </div>
                 ))}
               </div>
@@ -274,7 +275,7 @@ export function WidgetsPanel() {
             </div>
           ))}
           <Button
-            icon={<Plus size={14} />}
+            icon={<Plus size={ICON_SIZE.MEDIUM} />}
             onClick={() => {
               const next = [...(countdowns?.items ?? []), { id: `countdown-${Date.now()}`, title: '新的纪念日', targetDate: '2026-12-31', emoji: '🎉' }];
               void updateSettings({ countdowns: { ...(countdowns ?? {}), items: next } });
@@ -319,7 +320,7 @@ export function WidgetsPanel() {
           />
         </div>
         <Button
-          icon={<TimerReset size={14} />}
+          icon={<TimerReset size={ICON_SIZE.MEDIUM} />}
           style={{ marginTop: 8 }}
           onClick={() => {
             void updateSettings({ pomodoro: { ...(pomodoro ?? {}), focusMinutes: 25, shortBreakMinutes: 5, longBreakMinutes: 15 } });

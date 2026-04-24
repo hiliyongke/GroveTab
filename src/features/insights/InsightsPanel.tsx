@@ -118,6 +118,7 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
       message.success(t('insights.cleared'));
     } catch (err) {
       console.warn('[insights] clear failed', err);
+      message.error(t('insights.clearFailed'));
     }
   };
 
@@ -129,6 +130,7 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
       width={760}
       title={t('insights.title')}
       centered
+      destroyOnHidden
     >
       <div style={{ maxHeight: '65vh', overflowY: 'auto' }}>
         <Row gutter={[12, 12]}>

@@ -12,6 +12,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Modal, Tabs, Button, List, Tag, Progress, Alert, theme, Space } from 'antd';
 import { Copy, HeartPulse, FolderTree, Check, RefreshCw } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import type { BookmarkNode } from '@/chrome/bookmarks';
 import { getBookmarkTree } from '@/chrome/bookmarks';
 import {
@@ -152,7 +153,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
             key: 'dedupe',
             label: (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                <Copy size={14} /> {t('bookmark.tools.dedupe')}
+                <Copy size={ICON_SIZE.MEDIUM} /> {t('bookmark.tools.dedupe')}
               </span>
             ),
             children: (
@@ -163,11 +164,11 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
                   message={t('bookmark.tools.dedupeHint', { mode: dedupStrictness })}
                 />
                 <Space>
-                  <Button type="primary" loading={dupLoading} icon={<RefreshCw size={14} />} onClick={() => { void scanDuplicates(); }}>
+                  <Button type="primary" loading={dupLoading} icon={<RefreshCw size={ICON_SIZE.MEDIUM} />} onClick={() => { void scanDuplicates(); }}>
                     {t('bookmark.tools.scan')}
                   </Button>
                   {dups !== null && dups.length > 0 && (
-                    <Button danger icon={<Check size={14} />} onClick={() => { void applyDedupe(); }}>
+                    <Button danger icon={<Check size={ICON_SIZE.MEDIUM} />} onClick={() => { void applyDedupe(); }}>
                       {t('bookmark.tools.mergeAll', { count: dups.reduce((s, g) => s + g.items.length - 1, 0) })}
                     </Button>
                   )}
@@ -202,7 +203,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
             key: 'health',
             label: (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                <HeartPulse size={14} /> {t('bookmark.tools.health')}
+                <HeartPulse size={ICON_SIZE.MEDIUM} /> {t('bookmark.tools.health')}
               </span>
             ),
             children: (
@@ -216,11 +217,11 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
                   <Alert type="error" showIcon message={t('bookmark.tools.healthNeedPermission')} />
                 )}
                 <Space>
-                  <Button type="primary" loading={healthLoading} icon={<RefreshCw size={14} />} onClick={() => { void checkHealth(); }}>
+                  <Button type="primary" loading={healthLoading} icon={<RefreshCw size={ICON_SIZE.MEDIUM} />} onClick={() => { void checkHealth(); }}>
                     {t('bookmark.tools.scan')}
                   </Button>
                   {deadList.length > 0 && (
-                    <Button danger icon={<Check size={14} />} onClick={() => { void applyRemoveDead(); }}>
+                    <Button danger icon={<Check size={ICON_SIZE.MEDIUM} />} onClick={() => { void applyRemoveDead(); }}>
                       {t('bookmark.tools.removeDeadAll', { count: deadList.length })}
                     </Button>
                   )}
@@ -261,18 +262,18 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
             key: 'organize',
             label: (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                <FolderTree size={14} /> {t('bookmark.tools.organize')}
+                <FolderTree size={ICON_SIZE.MEDIUM} /> {t('bookmark.tools.organize')}
               </span>
             ),
             children: (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxHeight: 420 }}>
                 <Alert type="info" showIcon message={t('bookmark.tools.organizeHint')} />
                 <Space>
-                  <Button type="primary" loading={orgLoading} icon={<RefreshCw size={14} />} onClick={() => { void scanClusters(); }}>
+                  <Button type="primary" loading={orgLoading} icon={<RefreshCw size={ICON_SIZE.MEDIUM} />} onClick={() => { void scanClusters(); }}>
                     {t('bookmark.tools.scan')}
                   </Button>
                   {clusters !== null && clusters.length > 0 && (
-                    <Button type="primary" icon={<Check size={14} />} onClick={() => { void applyOrganize(); }}>
+                    <Button type="primary" icon={<Check size={ICON_SIZE.MEDIUM} />} onClick={() => { void applyOrganize(); }}>
                       {t('bookmark.tools.organizeApply', { count: selectedClusters.size })}
                     </Button>
                   )}

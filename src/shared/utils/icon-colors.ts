@@ -46,7 +46,14 @@ export type IconRole =
   | 'select'        // 多选 —— 主色
   | 'pin'           // 固定 —— 金
   | 'bookmark'      // 书签 —— 黄
-  | 'splitScreen';  // 分屏 —— 紫
+  | 'splitScreen'   // 分屏 —— 紫
+  | 'insights'      // 洞察 —— 蓝
+  | 'drag'          // 拖拽手柄 —— 中性灰
+  | 'expand'        // 展开/折叠 —— 中性灰
+  | 'externalLink'  // 外部链接 —— 蓝
+  | 'loading'       // 加载状态 —— 主色（旋转动画）
+  | 'empty'         // 空状态 —— 低饱和度灰
+  | 'notification'; // 通知提示 —— 橙（吸引注意）
 
 /**
  * 根据角色返回图标颜色（hex）。
@@ -55,34 +62,42 @@ export type IconRole =
  */
 export function iconColor(role: IconRole, token: GlobalToken): string {
   const map: Record<IconRole, string> = {
-    search:     token.colorPrimary,
-    archive:    '#7c3aed',          // 紫色
-    settings:   token.colorTextSecondary,
-    theme:      '#f59e0b',          // 金橙色（呼应太阳）
-    tabs:       token.colorPrimary,
-    domains:    '#10b981',          // 翠绿
-    windows:    '#06b6d4',          // 青
-    duplicates: '#f97316',          // 橙（警告感）
-    idle:       '#d97706',          // 琥珀
-    sessions:   '#8b5cf6',          // 淡紫
-    tab:        token.colorPrimary,
-    history:    '#059669',          // 深绿
-    web:        '#3b82f6',          // 亮蓝
-    suggestion: '#a855f7',          // 紫罗兰
-    hot:        '#ef4444',          // 红（热度）
-    recent:     '#14b8a6',          // 青
-    permission: '#ea580c',          // 深橙
-    close:      token.colorError,
-    discard:    '#64748b',          // 石板灰蓝
-    success:    token.colorSuccess,
-    warning:    token.colorWarning,
-    error:      token.colorError,
-    info:       token.colorInfo,
-    tidy:       '#eab308',          // 金黄
-    select:     token.colorPrimary,
-    pin:        '#f59e0b',          // 金
-    bookmark:   '#eab308',          // 金黄（书签隐喻）
-    splitScreen:'#8b5cf6',          // 紫
+    search:       token.colorPrimary,
+    archive:      '#7c3aed',          // 紫色
+    settings:     token.colorTextSecondary,
+    theme:        '#f59e0b',          // 金橙色（呼应太阳）
+    tabs:         token.colorPrimary,
+    domains:      '#10b981',          // 翠绿
+    windows:      '#06b6d4',          // 青
+    duplicates:   '#f97316',          // 橙（警告感）
+    idle:         '#d97706',          // 琥珀
+    sessions:     '#8b5cf6',          // 淡紫
+    tab:          token.colorPrimary,
+    history:      '#059669',          // 深绿
+    web:          '#3b82f6',          // 亮蓝
+    suggestion:   '#a855f7',          // 紫罗兰
+    hot:          '#ef4444',          // 红（热度）
+    recent:       '#14b8a6',          // 青
+    permission:   '#ea580c',          // 深橙
+    close:        token.colorError,
+    discard:      '#64748b',          // 石板灰蓝
+    success:      token.colorSuccess,
+    warning:      token.colorWarning,
+    error:        token.colorError,
+    info:         token.colorInfo,
+    tidy:         '#eab308',          // 金（整理）
+    select:       token.colorPrimary,
+    pin:          '#eab308',          // 金（固定）
+    bookmark:     '#eab308',          // 黄（书签）
+    splitScreen:  '#8b5cf6',          // 紫（分屏）
+    insights:     token.colorInfo,    // 蓝（洞察）
+    // 新增 6 种角色
+    drag:         token.colorTextQuaternary,  // 拖拽手柄：低优先级，弱存在感
+    expand:       token.colorTextTertiary,    // 展开/折叠：辅助操作
+    externalLink: token.colorPrimary,         // 外部链接：引导点击
+    loading:      token.colorPrimary,         // 加载状态：与主色联动（通常配合旋转动画）
+    empty:        token.colorTextQuaternary,  // 空状态：低饱和度，不抢焦点
+    notification: '#f97316',                 // 通知：橙色吸引注意，但不如 error 强烈
   };
   return map[role];
 }

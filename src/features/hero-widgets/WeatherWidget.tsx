@@ -22,6 +22,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { theme } from 'antd';
 import { Cloud, CloudOff, MapPin, RefreshCcw, Sun } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
 import { useSettingsStore } from '@/store';
 import { fetchWeatherWithFallback, type WeatherSnapshot } from './weather-providers';
@@ -168,12 +169,12 @@ export function WeatherWidget() {
       >
         {mode === 'manual' && city.trim() === '' ? (
           <>
-            <MapPin size={14} />
+<MapPin size={ICON_SIZE.MEDIUM} />
             <span>{t('heroWidgets.weather.needCity')}</span>
           </>
         ) : loading ? (
           <>
-            <Cloud size={14} />
+<Cloud size={ICON_SIZE.MEDIUM} />
             <span>{t('heroWidgets.weather.loading')}</span>
           </>
         ) : allFailed ? (
@@ -194,12 +195,12 @@ export function WeatherWidget() {
             }}
             aria-label={t('heroWidgets.weather.retry')}
           >
-            <RefreshCcw size={12} />
+<RefreshCcw size={ICON_SIZE.SMALL} />
             <span>{t('heroWidgets.weather.retry')}</span>
           </button>
         ) : (
           <>
-            <CloudOff size={14} />
+<CloudOff size={ICON_SIZE.MEDIUM} />
             <span>{t('heroWidgets.weather.unavailable')}</span>
           </>
         )}
@@ -260,7 +261,7 @@ export function WeatherWidget() {
         >
           {snapshot.desc !== '' ? (
             <>
-              <Sun size={10} />
+<Sun size={ICON_SIZE.MICRO} />
               <span>{snapshot.desc}</span>
             </>
           ) : null}

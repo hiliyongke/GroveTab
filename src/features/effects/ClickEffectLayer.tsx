@@ -17,6 +17,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useSettingsStore } from '@/store';
+import { Z } from '@/shared/config/z-index';
 
 /** 点击动效类型 */
 export type ClickEffectType = 'off' | 'ripple' | 'sparkle' | 'confetti' | 'petal';
@@ -290,7 +291,7 @@ export function ClickEffectLayer() {
         width: '100vw',
         height: '100vh',
         pointerEvents: 'none',
-        zIndex: 9999,
+        zIndex: Z.clickEffect,
       }}
     />
   );

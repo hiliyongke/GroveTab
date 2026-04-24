@@ -16,6 +16,7 @@ import {
   GitMerge,
   CheckSquare,
 } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { Alert, Modal, Button, List, Empty, Spin, Input, theme, Space } from 'antd';
 import type { ArchivedSession } from '@/shared/types';
 import {
@@ -309,7 +310,7 @@ export function ArchivePanel({ open, onOpenChange, onSessionsChange }: ArchivePa
               color: token.colorPrimary,
             }}
           >
-            <Save size={14} style={{ color: iconColor('archive', token) }} />
+            <Save size={ICON_SIZE.MEDIUM} style={{ color: iconColor('archive', token) }} />
           </div>
           <span style={{ flex: 1, fontSize: 15, fontWeight: 600 }}>{t('archive.title')}</span>
           <Space size={4}>
@@ -320,7 +321,7 @@ export function ArchivePanel({ open, onOpenChange, onSessionsChange }: ArchivePa
                 </span>
                 <Button
                   size="small"
-                  icon={<GitMerge size={13} />}
+                  icon={<GitMerge size={ICON_SIZE.DEFAULT} />}
                   onClick={handleOpenMerge}
                   disabled={selectedIds.size < 2}
                 >
@@ -334,7 +335,7 @@ export function ArchivePanel({ open, onOpenChange, onSessionsChange }: ArchivePa
               <Button
                 size="small"
                 type="text"
-                icon={<CheckSquare size={13} />}
+                icon={<CheckSquare size={ICON_SIZE.DEFAULT} />}
                 onClick={() => setSelectable(true)}
               >
                 {t('archive.selectMode')}
@@ -342,7 +343,7 @@ export function ArchivePanel({ open, onOpenChange, onSessionsChange }: ArchivePa
             )}
             <Button
               type="primary"
-              icon={<Plus size={14} />}
+              icon={<Plus size={ICON_SIZE.MEDIUM} />}
               loading={archivingCurrent}
               disabled={tabCount === 0}
               onClick={() => { void handleArchiveCurrent(); }}
@@ -358,7 +359,7 @@ export function ArchivePanel({ open, onOpenChange, onSessionsChange }: ArchivePa
         <Alert
           type="info"
           showIcon
-          icon={<Info size={14} />}
+          icon={<Info size={ICON_SIZE.MEDIUM} />}
           description={t('archive.description')}
           style={{
             marginBottom: 12,
@@ -376,7 +377,7 @@ export function ArchivePanel({ open, onOpenChange, onSessionsChange }: ArchivePa
           </div>
         ) : sessions.length === 0 ? (
           <Empty
-            image={<Inbox size={48} style={{ color: token.colorTextTertiary }} />}
+                image={<Inbox size={ICON_SIZE.HERO} style={{ color: token.colorTextTertiary }} />}
             description={
               <div>
                 <p style={{ fontSize: 13.5, fontWeight: 500, color: token.colorText, margin: 0 }}>

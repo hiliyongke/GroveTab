@@ -18,6 +18,7 @@ import {
   LayoutGrid,
   Quote,
 } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { AppearancePanel } from './panels/AppearancePanel';
@@ -56,7 +57,7 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
             key: 'appearance',
             label: (
               <span>
-                <Palette size={14} /> {t('settings.appearance')}
+<Palette size={ICON_SIZE.MEDIUM} /> {t('settings.appearance')}
               </span>
             ),
             children: <AppearancePanel settings={settings} updateSettings={updateSettings} />,
@@ -65,7 +66,7 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
             key: 'behavior',
             label: (
               <span>
-                <SlidersHorizontal size={14} /> {t('settings.behavior')}
+<SlidersHorizontal size={ICON_SIZE.MEDIUM} /> {t('settings.behavior')}
               </span>
             ),
             children: <BehaviorPanel settings={settings} updateSettings={updateSettings} />,
@@ -74,7 +75,7 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
             key: 'widgets',
             label: (
               <span>
-                <LayoutGrid size={14} /> 小组件
+<LayoutGrid size={ICON_SIZE.MEDIUM} /> 小组件
               </span>
             ),
             children: <WidgetsPanel />,
@@ -83,7 +84,7 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
             key: 'quotes',
             label: (
               <span>
-                <Quote size={14} /> 金句
+<Quote size={ICON_SIZE.MEDIUM} /> 金句
               </span>
             ),
             children: <QuotesPanel />,
@@ -92,7 +93,7 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
             key: 'data',
             label: (
               <span>
-                <Database size={14} /> {t('settings.data')}
+<Database size={ICON_SIZE.MEDIUM} /> {t('settings.data')}
               </span>
             ),
             children: <DataPanel />,
@@ -101,7 +102,7 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
             key: 'shortcuts',
             label: (
               <span>
-                <KeyRound size={14} /> {t('settings.shortcuts')}
+<KeyRound size={ICON_SIZE.MEDIUM} /> {t('settings.shortcuts')}
               </span>
             ),
             children: <ShortcutsPanel />,
@@ -110,7 +111,7 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
             key: 'about',
             label: (
               <span>
-                <Info size={14} /> {t('settings.about')}
+<Info size={ICON_SIZE.MEDIUM} /> {t('settings.about')}
               </span>
             ),
             children: <AboutPanel />,

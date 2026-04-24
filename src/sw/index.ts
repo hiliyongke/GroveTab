@@ -22,6 +22,7 @@ import {
 } from '@/repositories';
 import type { StatsData, StatsRecord } from '@/shared/types';
 import { BRAND } from '@/shared/config/brand';
+import { CONFIG } from '@/shared/config';
 
 /** 统一日志前缀：SW 内所有 console.log/warn/error 都走 SW_LOG_TAG */
 const SW_LOG_TAG = `${BRAND.logTag} SW`;
@@ -46,8 +47,9 @@ const statsMem: InMemoryCounts = {
   dirty: false,
 };
 
-const STATS_FLUSH_INTERVAL_MS = 30_000;
-const STATS_RETAIN_DAYS = 30;
+// 从 CONFIG 读取（支持运行时覆盖）
+const STATS_FLUSH_INTERVAL_MS = CONFIG.performance.statsFlushIntervalMs;
+const STATS_RETAIN_DAYS = CONFIG.performance.statsRetainDays;
 
 function urlKey(url: string): string {
   try {
@@ -336,9 +338,10 @@ try {
 
 // ── OG Fetcher（F-24） ────────────────────────────────
 let ogInFlight = 0;
-const OG_CONCURRENCY = 5;
-const OG_TIMEOUT_MS = 3000;
-const OG_MAX_BYTES = 50 * 1024;
+// 从 CONFIG 读取（支持运行时覆盖）
+const OG_CONCURRENCY = CONFIG.performance.ogConcurrency;
+const OG_TIMEOUT_MS = CONFIG.performance.ogTimeoutMs;
+const OG_MAX_BYTES = CONFIG.performance.ogMaxBytes;
 
 async function maybeFetchOg(url: string): Promise<void> {
   try {
