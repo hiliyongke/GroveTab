@@ -212,15 +212,26 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
             </Space>
           </div>
         }
-        style={{ borderRadius: token.borderRadiusLG }}
+        style={{
+          borderRadius: expanded
+            ? `${token.borderRadiusLG}px ${token.borderRadiusLG}px 0 0`
+            : token.borderRadiusLG,
+          borderBottom: expanded ? 'none' : undefined,
+          transition: `border-radius ${token.motionDurationFast} ${token.motionEaseInOut}`,
+        }}
       />
 
       {/* 详情区域 */}
       {expanded && (
         <Card
+          className="canopy-accordion-panel"
           size="small"
-          style={{ marginTop: 8, borderRadius: token.borderRadiusLG }}
-          styles={{ body: { padding: '8px 12px' } }}
+          style={{
+            marginTop: 0,
+            borderTop: 'none',
+            borderRadius: `0 0 ${token.borderRadiusLG}px ${token.borderRadiusLG}px`,
+          }}
+          styles={{ body: { padding: '10px 14px' } }}
         >
           {/* 重复标签 */}
           {dupGroups.length > 0 && (

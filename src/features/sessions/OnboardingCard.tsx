@@ -145,7 +145,15 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
         onClick={() => { void handleDismiss(); }}
         icon={<ArrowRight size={14} />}
         iconPosition="end"
-        style={{ marginTop: 4 }}
+        style={{
+          marginTop: 4,
+          background: 'var(--canopy-logo-gradient)',
+          border: 'none',
+          boxShadow: 'var(--canopy-logo-glow)',
+          fontWeight: 600,
+          letterSpacing: '0.02em',
+          paddingInline: 22,
+        }}
       >
         {t('onboarding.dismiss')}
       </Button>

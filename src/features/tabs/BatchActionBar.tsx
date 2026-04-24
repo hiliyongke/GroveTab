@@ -90,6 +90,9 @@ export function BatchActionBar() {
 
   return (
     <div
+      className="canopy-batch-bar"
+      role="toolbar"
+      aria-label={t('selection.title')}
       style={{
         position: 'fixed',
         bottom: 24,
@@ -99,7 +102,7 @@ export function BatchActionBar() {
         display: 'flex',
         alignItems: 'center',
         gap: 12,
-        padding: '10px 20px',
+        padding: '10px 16px 10px 20px',
         borderRadius: 'var(--canopy-floating-radius)',
         background: resolvedTheme === 'dark'
           ? 'rgba(28, 28, 31, 0.88)'
@@ -140,16 +143,26 @@ export function BatchActionBar() {
         >
           {t('batch.archive')}
         </Button>
-
-        <Button
-          size="small"
-          type="text"
-          icon={<XCircle size={12} style={{ color: iconColor('close', token) }} />}
-          onClick={exitSelectionMode}
-        >
-          {t('batch.cancel')}
-        </Button>
       </Space>
+
+      {/* 视觉分组分隔：把"取消"单独分出来 */}
+      <div
+        style={{
+          width: 1,
+          height: 20,
+          background: token.colorBorderSecondary,
+        }}
+        aria-hidden
+      />
+
+      <Button
+        size="small"
+        type="text"
+        icon={<XCircle size={12} style={{ color: iconColor('close', token) }} />}
+        onClick={exitSelectionMode}
+      >
+        {t('batch.cancel')}
+      </Button>
     </div>
   );
 }

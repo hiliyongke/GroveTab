@@ -4,6 +4,7 @@ const zhCN: Record<string, string> = {
   'header.archive': '归档',
   'header.archiveTooltip': '归档：把当前窗口的全部标签页快照保存下来，关掉它们，之后可一键恢复',
   'header.tabCount': '{count} 个标签页',
+  'header.pending': '待处理',
   'theme.light': '浅色',
   'theme.dark': '深色',
   'theme.system': '跟随系统',

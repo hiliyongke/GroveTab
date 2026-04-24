@@ -210,9 +210,17 @@ function AppHeader({
             transition: 'opacity 220ms ease, transform 220ms ease',
           }}
         >
-          {tabCount} {t('view.domain').toLowerCase()} · {domainCount} {t('view.domain').toLowerCase()}
+          <span style={{ color: token.colorText, fontWeight: 500 }}>{tabCount}</span> {t('dashboard.tabsStat')}
+          <span style={{ margin: '0 6px', color: token.colorBorder }}>·</span>
+          <span style={{ color: token.colorText, fontWeight: 500 }}>{domainCount}</span> {t('dashboard.domainsStat')}
           {(duplicateTabsCount > 0 || idleTabsCount > 0) && (
-            <> · <span style={{ color: hasTidySuggestions ? token.colorWarning : token.colorTextSecondary }}>{duplicateTabsCount + idleTabsCount}</span> 待处理</>
+            <>
+              <span style={{ margin: '0 6px', color: token.colorBorder }}>·</span>
+              <span style={{ color: hasTidySuggestions ? token.colorWarning : token.colorTextSecondary, fontWeight: 500 }}>
+                {duplicateTabsCount + idleTabsCount}
+              </span>{' '}
+              {t('header.pending')}
+            </>
           )}
         </span>
       </div>
@@ -427,6 +435,18 @@ function HeroBar({
             onOpenSearch();
           }}
           onClick={onOpenSearch}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = token.colorPrimaryBorderHover;
+            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.boxShadow = resolvedTheme === 'dark'
+              ? '0 10px 32px rgba(0,0,0,0.35), 0 0 0 4px color-mix(in srgb, var(--canopy-color-primary) 10%, transparent)'
+              : '0 10px 32px rgba(0,0,0,0.08), 0 0 0 4px color-mix(in srgb, var(--canopy-color-primary) 10%, transparent)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = token.colorBorderSecondary;
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = 'var(--canopy-shadow-brand-glow)';
+          }}
           style={{
             borderRadius: 'var(--canopy-search-radius)',
             cursor: 'pointer',
@@ -435,22 +455,25 @@ function HeroBar({
             background: token.colorBgContainer,
             border: `1px solid ${token.colorBorderSecondary}`,
             boxShadow: 'var(--canopy-shadow-brand-glow)',
-            transition: `box-shadow ${token.motionDurationMid} ${token.motionEaseInOut}, border-color ${token.motionDurationMid} ${token.motionEaseInOut}`,
+            transition: `box-shadow ${token.motionDurationMid} ${token.motionEaseInOut}, border-color ${token.motionDurationMid} ${token.motionEaseInOut}, transform ${token.motionDurationMid} ${token.motionEaseInOut}`,
           }}
         />
       </div>
 
-      {/* 视图切换 —— 紧凑 Tab 行，居中排列 */}
+      {/* 视图切换 —— 紧凑 Tab 行，居中排列，支持窄屏换行 */}
       {showViewSwitcher && (
         <div
         style={{
           display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
           alignItems: 'center',
           gap: 2,
           padding: '3px',
           borderRadius: 10,
           background: token.colorFillQuaternary,
           border: `1px solid ${token.colorBorderSecondary}`,
+          maxWidth: '100%',
         }}
       >
         {VIEW_CONFIGS.map((v) => {
@@ -460,6 +483,18 @@ function HeroBar({
               key={v.id}
               type="button"
               onClick={() => onViewChange(v.id)}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.background = token.colorFillTertiary;
+                  e.currentTarget.style.color = token.colorText;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = token.colorTextSecondary;
+                }
+              }}
               style={{
                 all: 'unset',
                 boxSizing: 'border-box',
@@ -478,7 +513,7 @@ function HeroBar({
                     : '0 1px 3px rgba(0,0,0,0.08)')
                   : 'none',
                 cursor: 'pointer',
-                transition: `all ${token.motionDurationFast} ${token.motionEaseInOut}`,
+                transition: `color ${token.motionDurationFast} ${token.motionEaseInOut}, background ${token.motionDurationFast} ${token.motionEaseInOut}, box-shadow ${token.motionDurationFast} ${token.motionEaseInOut}`,
                 whiteSpace: 'nowrap',
               }}
             >
@@ -791,7 +826,7 @@ function AppContent() {
         />
       )}
 
-      <Content style={{ width: '100%', maxWidth: contentMaxWidth > 0 ? contentMaxWidth : undefined, margin: '0 auto', padding: '0 32px 64px', position: 'relative', zIndex: 1 }}>
+      <Content data-canopy-content style={{ width: '100%', maxWidth: contentMaxWidth > 0 ? contentMaxWidth : undefined, margin: '0 auto', padding: '0 32px 64px', position: 'relative', zIndex: 1 }}>
         {uiVisibility?.heroSearch !== false && (
           <HeroBar
             viewMode={viewMode}
@@ -853,20 +888,20 @@ function AppContent() {
           ) : tabCount === 0 ? (
             <Empty
               description={
-                <div>
-                  <div style={{ fontWeight: 500 }}>{t('tabs.empty')}</div>
-                  <Text type="secondary" style={{ fontSize: 12 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--ant-color-text)' }}>{t('tabs.empty')}</div>
+                  <Text type="secondary" style={{ fontSize: 12.5 }}>
                     {t('tabs.emptyHint')}
                   </Text>
-                  <Text type="secondary" style={{ display: 'block', fontSize: 12, marginTop: 6 }}>
+                  <Text type="secondary" style={{ fontSize: 12, marginTop: 2 }}>
                     {t('tabs.emptyRecoveryHint')}
                   </Text>
                 </div>
               }
               style={{ padding: '80px 0' }}
             >
-              <Space wrap>
-                <Button icon={<Save size={14} />} onClick={handleOpenArchive}>
+              <Space wrap style={{ marginTop: 4 }}>
+                <Button type="primary" icon={<Save size={14} />} onClick={handleOpenArchive}>
                   {t('dashboard.openArchives')}
                 </Button>
                 <Button icon={<Settings size={14} />} onClick={() => setShowSettings(true)}>

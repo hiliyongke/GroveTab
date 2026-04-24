@@ -4,6 +4,7 @@ const en: Record<string, string> = {
   'header.archive': 'Archive',
   'header.archiveTooltip': 'Archive: snapshot all tabs in the current window, close them, and restore later with one click',
   'header.tabCount': '{count} tabs',
+  'header.pending': 'pending',
   'theme.light': 'Light',
   'theme.dark': 'Dark',
   'theme.system': 'System',
