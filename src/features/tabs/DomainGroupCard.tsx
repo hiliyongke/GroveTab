@@ -51,8 +51,6 @@ interface DomainGroupCardProps {
 export function DomainGroupCard({ group, initialCollapsed = false, accentOverride }: DomainGroupCardProps) {
   const [collapsed, setCollapsed] = useState(initialCollapsed);
   const [faviconError, setFaviconError] = useState(false);
-  const [cardHovered, setCardHovered] = useState(false);
-  const [headerHovered, setHeaderHovered] = useState(false);
   /** 关闭整个分组的 in-flight 标记，防止重复点击 + 驱动 Button loading */
   const [closing, setClosing] = useState(false);
   /**
@@ -183,22 +181,21 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
   return (
     <Card
       size="small"
-      onMouseEnter={() => setCardHovered(true)}
-      onMouseLeave={() => setCardHovered(false)}
+      className="canopy-card-interactive canopy-hover-reveal-host"
       styles={{
         body: { padding: 0 },
       }}
-      style={{
-        borderRadius: cardRadius || 12,
-        overflow: 'hidden',
-        position: 'relative',
-        boxShadow: cardHovered
-          ? 'var(--canopy-shadow-card-hover)'
-          : 'var(--canopy-shadow-card)',
-        transition: `box-shadow ${token.motionDurationMid} ${token.motionEaseInOut}, transform ${token.motionDurationMid} ${token.motionEaseInOut}`,
-        transform: cardHovered ? `translateY(calc(-1 * var(--canopy-card-lift)))` : 'translateY(0)',
-        border: `1px solid ${cardHovered ? token.colorBorder : token.colorBorderSecondary}`,
-      }}
+      style={
+        {
+          borderRadius: cardRadius || 12,
+          overflow: 'hidden',
+          position: 'relative',
+          boxShadow: 'var(--canopy-shadow-card)',
+          border: `1px solid ${token.colorBorderSecondary}`,
+          // 下发 hover 边框色，canopy-card-interactive:hover 消费
+          ['--canopy-hover-border' as string]: token.colorBorder,
+        } as React.CSSProperties
+      }
     >
       {/*
         身份色条 —— 位置依用户偏好渲染：
@@ -211,14 +208,14 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
       {barPosition === 'left' && (
         <div
           aria-hidden
+          className="canopy-accent-bar--left"
           style={{
             position: 'absolute',
             left: 0,
             top: 0,
             bottom: 0,
-            width: cardHovered ? 3 : 2,
+            width: 2,
             background: barColor,
-            transition: `width ${token.motionDurationFast}`,
             borderTopLeftRadius: cardRadius,
             borderBottomLeftRadius: cardRadius,
             pointerEvents: 'none',
@@ -229,14 +226,14 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
       {barPosition === 'top' && (
         <div
           aria-hidden
+          className="canopy-accent-bar--top"
           style={{
             position: 'absolute',
             left: 0,
             right: 0,
             top: 0,
-            height: cardHovered ? 3 : 2,
+            height: 2,
             background: barColor,
-            transition: `height ${token.motionDurationFast}`,
             borderTopLeftRadius: cardRadius,
             borderTopRightRadius: cardRadius,
             pointerEvents: 'none',
@@ -248,26 +245,28 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
       <button
         type="button"
         onClick={toggleCollapse}
-        onMouseEnter={() => setHeaderHovered(true)}
-        onMouseLeave={() => setHeaderHovered(false)}
         aria-expanded={!collapsed}
         aria-label={collapsed ? t('tabs.expand') : t('tabs.collapse')}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          width: '100%',
-          height: 48,
-          paddingLeft: 14,
-          paddingRight: 42,
-          background: headerHovered ? token.colorFillSecondary : 'transparent',
-          borderBottom: collapsed ? 'none' : `1px solid ${token.colorBorderSecondary}`,
-          cursor: 'pointer',
-          textAlign: 'left',
-          transition: `background ${token.motionDurationFast} ${token.motionEaseInOut}`,
-          border: 'none',
-          outline: 'none',
-        }}
+        className="canopy-row-hover canopy-domain-group-header"
+        style={
+          {
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            width: '100%',
+            height: 48,
+            paddingLeft: 14,
+            paddingRight: 42,
+            background: 'transparent',
+            borderBottom: collapsed ? 'none' : `1px solid ${token.colorBorderSecondary}`,
+            cursor: 'pointer',
+            textAlign: 'left',
+            border: 'none',
+            outline: 'none',
+            // header 内部 hover 色跳到 secondary（比默认 tertiary 更明显）
+            ['--canopy-row-hover-bg' as string]: token.colorFillSecondary,
+          } as React.CSSProperties
+        }
       >
         <ChevronDown
           size={11}
@@ -348,12 +347,11 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
             e.stopPropagation();
             void discardDomainGroup(group.domain).catch(() => { /* store 已 toast */ });
           }}
+          className="canopy-hover-reveal"
           style={{
             position: 'absolute',
             top: 8,
             right: 36,
-            opacity: cardHovered ? 1 : 0,
-            transition: `opacity ${token.motionDurationFast}`,
             width: 28,
             height: 28,
             padding: 0,
@@ -374,12 +372,12 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
           disabled={closing}
           icon={closing ? undefined : <X size={12} />}
           onClick={(e: React.MouseEvent) => { void handleCloseAll(e); }}
+          // closing 时强制显示（is-visible），其余情况由 hover/focus 驱动
+          className={`canopy-hover-reveal${closing ? ' is-visible' : ''}`}
           style={{
             position: 'absolute',
             top: 8,
             right: 6,
-            opacity: cardHovered || closing ? 1 : 0,
-            transition: `opacity ${token.motionDurationFast}`,
             width: 28,
             height: 28,
             padding: 0,

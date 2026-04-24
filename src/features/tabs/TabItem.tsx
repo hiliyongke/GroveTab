@@ -83,7 +83,6 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
   const enterSelectionMode = useSelectionStore((s) => s.enterSelectionMode);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [faviconError, setFaviconError] = useState(false);
-  const [hovered, setHovered] = useState(false);
   /** 休眠态——标签已被浏览器丢弃，显示灰色样式 */
   const isDiscarded = tab.discarded ?? false;
 
@@ -136,10 +135,6 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
         role="button"
         tabIndex={0}
         onClick={handleClick}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        onFocus={() => setHovered(true)}
-        onBlur={() => setHovered(false)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
@@ -152,25 +147,27 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
           }
         }}
         onContextMenu={handleContextMenu}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          width: '100%',
-          minHeight: showUrlHint ? 52 : 40,
-          padding: showUrlHint ? '8px 12px' : '4px 12px',
-          borderRadius: token.borderRadiusSM,
-          cursor: 'pointer',
-          backgroundColor: isSelected
-            ? selectedBg
-            : hovered
-              ? token.colorFillTertiary
-              : 'transparent',
-          transition: `background-color ${token.motionDurationFast} ${token.motionEaseInOut}`,
-          outline: 'none',
-          opacity: isDiscarded ? 0.5 : 1,
-          position: 'relative',
-        }}
+        className="canopy-row-hover canopy-hover-reveal-host"
+        style={
+          {
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            width: '100%',
+            minHeight: showUrlHint ? 52 : 40,
+            padding: showUrlHint ? '8px 12px' : '4px 12px',
+            borderRadius: token.borderRadiusSM,
+            cursor: 'pointer',
+            // 选中态用内联 background 强制覆盖 hover 规则；非选中态留空让 CSS
+            // .canopy-row-hover:hover 接管（空字符串/undefined 都不会产生内联规则）
+            ...(isSelected ? { backgroundColor: selectedBg } : {}),
+            outline: 'none',
+            opacity: isDiscarded ? 0.5 : 1,
+            position: 'relative',
+            // 向 .canopy-row-hover 下发自定义 hover 背景色（与原 colorFillTertiary 一致）
+            ['--canopy-row-hover-bg' as string]: token.colorFillTertiary,
+          } as React.CSSProperties
+        }
       >
         {/* 多选 Checkbox——仅在 selectable 且处于多选模式时显示 */}
         {selectable && (selectionMode || isSelected) && (
@@ -326,7 +323,7 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
         {/* 行尾附加信息（如时间戳），放在状态图标和关闭按钮之间 */}
         {trailing}
 
-        {/* 关闭按钮（hover 显示） */}
+        {/* 关闭按钮（hover/focus 时显示，由父节点 .canopy-hover-reveal-host 驱动） */}
         <Tooltip title={t('tabs.close')}>
           <Button
             type="text"
@@ -334,10 +331,9 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
             danger
             icon={<X size={12} />}
             onClick={handleClose}
+            className="canopy-hover-reveal"
             style={{
               flexShrink: 0,
-              opacity: hovered ? 1 : 0,
-              transition: `opacity ${token.motionDurationFast}`,
               width: 24,
               height: 24,
               padding: 0,

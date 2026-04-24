@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useSelectionStore, useTabsStore } from '@/store';
 import { iconColor } from '@/shared/utils/icon-colors';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { archiveSelectedTabs } from '@/services';
 import { useT } from '@/shared/i18n';
 import { feedback } from '@/shared/ui/feedback';
@@ -121,7 +122,7 @@ export function BatchActionBar() {
           color={token.colorPrimary}
           offset={[0, 0]}
         >
-          <Pointer size={16} style={{ color: token.colorPrimary, display: 'block' }} />
+          <Pointer size={ICON_SIZE.LARGE} style={{ color: token.colorPrimary, display: 'block' }} />
         </Badge>
         <span style={{ color: token.colorTextSecondary, fontSize: 12.5 }}>
           {t('selection.title')}
@@ -136,7 +137,7 @@ export function BatchActionBar() {
           <Button
             size="small"
             danger
-            icon={<X size={13} style={{ color: iconColor('close', token) }} />}
+            icon={<X size={ICON_SIZE.DEFAULT} style={{ color: iconColor('close', token) }} />}
             onClick={() => { void handleBatchClose(); }}
           >
             {t('batch.close')}
@@ -146,7 +147,7 @@ export function BatchActionBar() {
         <Tooltip title={t('batch.discard')} placement="top">
           <Button
             size="small"
-            icon={<Moon size={13} style={{ color: iconColor('discard', token) }} />}
+            icon={<Moon size={ICON_SIZE.DEFAULT} style={{ color: iconColor('discard', token) }} />}
             onClick={() => { void handleBatchDiscard(); }}
           >
             {t('batch.discard')}
@@ -157,7 +158,7 @@ export function BatchActionBar() {
           <Button
             size="small"
             type="primary"
-            icon={<Save size={13} />}
+            icon={<Save size={ICON_SIZE.DEFAULT} />}
             onClick={() => { void handleBatchArchive(); }}
           >
             {t('batch.archive')}
@@ -171,7 +172,7 @@ export function BatchActionBar() {
         <Button
           size="small"
           type="text"
-          icon={<XCircle size={13} style={{ color: iconColor('close', token) }} />}
+          icon={<XCircle size={ICON_SIZE.DEFAULT} style={{ color: iconColor('close', token) }} />}
           onClick={exitSelectionMode}
           aria-label={t('batch.cancel')}
         />

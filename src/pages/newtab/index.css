@@ -311,6 +311,83 @@ html[data-texture-noise] body::before {
   font-weight: 600;
 }
 
+/* ─── 纯 CSS Hover Primitives（消除 React onMouseEnter/Leave） ───
+ *
+ * 背景：之前多处组件（TabItem / TimelineView / GridView / DomainGroupCard /
+ * SessionItem）用 React state 驱动 hover 样式——每次鼠标进/出都触发一次
+ * 组件 re-render，对长列表非常吃 CPU。
+ *
+ * 设计：
+ *   - 所有「仅改样式」的 hover 都通过 :hover / :focus-within 纯 CSS 完成。
+ *   - 组件内联把 antd token 灌成局部 CSS 变量（如 --hover-bg），
+ *     CSS 规则再消费这些变量——既保留了主题跟随，又完全脱离 React state。
+ *   - 键盘 a11y：同步挂 :focus-within，避免只有鼠标能触发悬浮显隐的按钮。
+ */
+
+/** 行级 hover：标签页行、会话子项等。变量由组件内联注入。 */
+.canopy-row-hover {
+  transition: background-color var(--canopy-motion-duration, 0.15s) ease;
+}
+.canopy-row-hover:hover,
+.canopy-row-hover:focus-within {
+  background-color: var(--canopy-row-hover-bg, var(--ant-color-fill-tertiary));
+}
+
+/** 卡片级 hover：上浮 + 阴影提升 + 边框加深。 */
+.canopy-card-interactive {
+  transition:
+    transform var(--canopy-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow var(--canopy-motion-duration, 0.2s) ease,
+    border-color var(--canopy-motion-duration, 0.2s) ease;
+}
+.canopy-card-interactive:hover,
+.canopy-card-interactive:focus-within {
+  transform: translateY(calc(-1 * var(--canopy-card-lift, 2px)));
+  box-shadow: var(--canopy-shadow-card-hover);
+  border-color: var(--canopy-hover-border, var(--ant-color-border));
+}
+
+/**
+ * Hover 显隐：容器加 .canopy-hover-reveal-host，
+ * 被显隐的子元素加 .canopy-hover-reveal。
+ *
+ * 容器 hover 或 focus-within 时子元素淡入——支持键盘 Tab 聚焦。
+ */
+.canopy-hover-reveal {
+  opacity: 0;
+  transition: opacity var(--canopy-motion-duration, 0.15s) ease;
+}
+.canopy-hover-reveal-host:hover .canopy-hover-reveal,
+.canopy-hover-reveal-host:focus-within .canopy-hover-reveal,
+.canopy-hover-reveal.is-visible {
+  opacity: 1;
+}
+
+/** 卡片身份色条 hover 加粗（2 → 3px）。由 DomainGroupCard 使用。 */
+.canopy-card-interactive .canopy-accent-bar--left {
+  transition: width var(--canopy-motion-duration, 0.15s) ease;
+}
+.canopy-card-interactive:hover .canopy-accent-bar--left,
+.canopy-card-interactive:focus-within .canopy-accent-bar--left {
+  width: 3px;
+}
+.canopy-card-interactive .canopy-accent-bar--top {
+  transition: height var(--canopy-motion-duration, 0.15s) ease;
+}
+.canopy-card-interactive:hover .canopy-accent-bar--top,
+.canopy-card-interactive:focus-within .canopy-accent-bar--top {
+  height: 3px;
+}
+
+/** 时间线分段标题 hover 文本提亮。颜色通过局部 CSS 变量桥接 antd token。 */
+.canopy-timeline-segment-header {
+  color: var(--canopy-color, var(--ant-color-text-secondary));
+}
+.canopy-timeline-segment-header:hover,
+.canopy-timeline-segment-header:focus-visible {
+  color: var(--canopy-color-hover, var(--ant-color-text));
+}
+
 /** ── 动效降级：尊重系统 reduced-motion 设置 ─── */
 @media (prefers-reduced-motion: reduce) {
   [data-canopy-content],
@@ -319,7 +396,9 @@ html[data-texture-noise] body::before {
     animation: none !important;
   }
   .canopy-lift:hover,
-  .canopy-hero-search:hover {
+  .canopy-hero-search:hover,
+  .canopy-card-interactive:hover,
+  .canopy-card-interactive:focus-within {
     transform: none !important;
   }
 }

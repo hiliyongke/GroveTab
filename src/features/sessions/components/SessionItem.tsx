@@ -205,20 +205,18 @@ export function SessionItem({
             session.tabs.map((tab, idx) => (
               <div
                 key={`${session.id}-${idx}`}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '6px 8px',
-                  borderRadius: token.borderRadiusSM,
-                  transition: 'background 0.15s',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = token.colorFillSecondary;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
-                }}
+                className="canopy-row-hover"
+                style={
+                  {
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '6px 8px',
+                    borderRadius: token.borderRadiusSM,
+                    // 与原视觉保持一致——hover 用 secondary 填色（比默认的 tertiary 更显眼）
+                    ['--canopy-row-hover-bg' as string]: token.colorFillSecondary,
+                  } as React.CSSProperties
+                }
               >
                 {tab.favIconUrl ? (
                   <img

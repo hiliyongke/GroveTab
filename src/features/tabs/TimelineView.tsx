@@ -255,31 +255,33 @@ function SegmentHeader({
   collapsed: boolean;
   onToggle: () => void;
 }) {
-  const [hovered, setHovered] = useState(false);
   const { token } = theme.useToken();
 
   return (
     <button
       type="button"
       onClick={onToggle}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       aria-expanded={!collapsed}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 8,
-        height: 24,
-        padding: '0 8px 0 0',
-        fontSize: 13,
-        fontWeight: 600,
-        color: hovered ? token.colorText : token.colorTextSecondary,
-        transition: `color ${token.motionDurationFast}`,
-        background: 'transparent',
-        border: 'none',
-        cursor: 'pointer',
-        outline: 'none',
-      }}
+      className="canopy-timeline-segment-header"
+      style={
+        {
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 8,
+          height: 24,
+          padding: '0 8px 0 0',
+          fontSize: 13,
+          fontWeight: 600,
+          transition: `color ${token.motionDurationFast}`,
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          outline: 'none',
+          // 颜色通过 CSS 变量下发，:hover 规则里切换，避免内联 color 被覆盖
+          ['--canopy-color' as string]: token.colorTextSecondary,
+          ['--canopy-color-hover' as string]: token.colorText,
+        } as React.CSSProperties
+      }
     >
       <span>{label}</span>
       {rangeText && (

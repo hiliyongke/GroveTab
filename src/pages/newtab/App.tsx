@@ -12,7 +12,7 @@
  * 所有 UI 组件一律走 antd；不再依赖 Tailwind / 自写原子组件。
  */
 
-import { useEffect, useState, useCallback, useRef, lazy, Suspense } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
 import {
   Layout,
   Input,
@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { theme as antdTheme } from 'antd';
 import { iconColor } from '@/shared/utils/icon-colors';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useTabsStore, useSettingsStore, useUndoStore, useMetadataStore, useSelectionStore } from '@/store';
 import { useSwBroadcast, useResolvedTheme } from '@/shared/hooks';
 import { useKeybinding } from '@/shared/hooks/use-keybinding';
@@ -139,11 +140,11 @@ function AppHeader({
    */
   const themeIcon =
     theme === 'system' ? (
-      <Monitor key="sys" size={14} style={{ color: iconColor('theme', token) }} />
+                    <Monitor key="sys" size={ICON_SIZE.MEDIUM} style={{ color: iconColor('theme', token) }} />
     ) : theme === 'dark' ? (
-      <Moon key="dark" size={14} style={{ color: iconColor('theme', token) }} />
+                    <Moon key="dark" size={ICON_SIZE.MEDIUM} style={{ color: iconColor('theme', token) }} />
     ) : (
-      <Sun key="light" size={14} style={{ color: iconColor('theme', token) }} />
+                    <Sun key="light" size={ICON_SIZE.MEDIUM} style={{ color: iconColor('theme', token) }} />
     );
 
   return (
@@ -268,7 +269,7 @@ function AppHeader({
             whiteSpace: 'nowrap',
           }}
         >
-          <Search size={13} style={{ flexShrink: 0, color: iconColor('search', token) }} />
+          <Search size={ICON_SIZE.DEFAULT} style={{ flexShrink: 0, color: iconColor('search', token) }} />
           <span
             style={{
               flex: 1,
@@ -287,7 +288,7 @@ function AppHeader({
 
       <Space size={2} style={{ flexShrink: 0 }}>
         <Tooltip title={t('header.archiveTooltip')} placement="bottom">
-          <Button type="text" icon={<Save size={14} style={{ color: iconColor('archive', token) }} />} onClick={onArchive} />
+          <Button type="text" icon={<Save size={ICON_SIZE.MEDIUM} style={{ color: iconColor('archive', token) }} />} onClick={onArchive} />
         </Tooltip>
         <Tooltip title={t(`theme.${theme}`)}>
           <Button
@@ -307,7 +308,7 @@ function AppHeader({
           />
         </Tooltip>
         <Tooltip title={t('header.settings')}>
-          <Button type="text" icon={<Settings size={14} style={{ color: iconColor('settings', token) }} />} onClick={onSettings} />
+          <Button type="text" icon={<Settings size={ICON_SIZE.MEDIUM} style={{ color: iconColor('settings', token) }} />} onClick={onSettings} />
         </Tooltip>
       </Space>
     </Header>
@@ -339,6 +340,35 @@ function HeroBar({
 }) {
   const { t } = useT();
   const { token } = antdTheme.useToken();
+
+  /**
+   * Segmented 视图切换 options。
+   *
+   * 之前这里每次 AppHeader 渲染都会调用 VIEW_CONFIGS.map 重建整个数组与 label JSX，
+   * 导致 antd Segmented 内部判等失败、无意义地重新布局。此处用 useMemo 缓存，
+   * 依赖 t——i18n 语言切换时自动刷新标签文案。
+   */
+  const viewSegmentedOptions = useMemo(
+    () =>
+      VIEW_CONFIGS.map((v) => ({
+        value: v.id,
+        label: (
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5,
+              padding: '1px 4px',
+              fontSize: 12.5,
+            }}
+          >
+            <v.Icon size={ICON_SIZE.MEDIUM} />
+            {t(v.labelKey)}
+          </span>
+        ),
+      })),
+    [t],
+  );
 
   return (
     <section
@@ -419,23 +449,7 @@ function HeroBar({
         <Segmented<ViewMode>
           value={viewMode}
           onChange={(v: ViewMode) => onViewChange(v)}
-          options={VIEW_CONFIGS.map((v) => ({
-            value: v.id,
-            label: (
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 5,
-                  padding: '1px 4px',
-                  fontSize: 12.5,
-                }}
-              >
-                <v.Icon size={14} />
-                {t(v.labelKey)}
-              </span>
-            ),
-          }))}
+          options={viewSegmentedOptions}
           size="middle"
           style={{ maxWidth: '100%' }}
         />
@@ -815,10 +829,10 @@ function AppContent() {
               style={{ padding: '80px 0' }}
             >
               <Space wrap style={{ marginTop: 4 }}>
-                <Button type="primary" icon={<Save size={14} />} onClick={handleOpenArchive}>
+          <Button type="primary" icon={<Save size={ICON_SIZE.MEDIUM} />} onClick={handleOpenArchive}>
                   {t('dashboard.openArchives')}
                 </Button>
-                <Button icon={<Settings size={14} />} onClick={() => setShowSettings(true)}>
+          <Button icon={<Settings size={ICON_SIZE.MEDIUM} />} onClick={() => setShowSettings(true)}>
                   {t('header.settings')}
                 </Button>
               </Space>

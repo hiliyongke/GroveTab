@@ -120,7 +120,6 @@ interface GridCardProps {
  */
 function GridCard({ domain, colorKey, tabs, onJump, onOpenList, countLabel, accentOverride }: GridCardProps) {
   const [faviconError, setFaviconError] = useState(false);
-  const [hovered, setHovered] = useState(false);
   const { token } = theme.useToken();
   const hasAudible = tabs.some((tab) => tab.audible);
   const first = tabs[0];
@@ -142,10 +141,8 @@ function GridCard({ domain, colorKey, tabs, onJump, onOpenList, countLabel, acce
 
   return (
     <Card
-      hoverable
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       onClick={handleCardClick}
+      className="canopy-card-interactive canopy-grid-card"
       styles={{
         body: {
           padding: 12,
@@ -154,13 +151,14 @@ function GridCard({ domain, colorKey, tabs, onJump, onOpenList, countLabel, acce
           gap: 10,
         },
       }}
-      style={{
-        borderRadius: token.borderRadiusLG,
-        cursor: 'pointer',
-        transform: hovered ? 'translateY(-2px)' : 'translateY(0)',
-        borderColor: hovered ? token.colorPrimaryBorder : token.colorBorderSecondary,
-        transition: `transform ${token.motionDurationMid}, border-color ${token.motionDurationMid}, box-shadow ${token.motionDurationMid}`,
-      }}
+      style={
+        {
+          borderRadius: token.borderRadiusLG,
+          cursor: 'pointer',
+          // 下发 hover 边框色给 canopy-card-interactive 消费
+          ['--canopy-hover-border' as string]: token.colorPrimaryBorder,
+        } as React.CSSProperties
+      }
     >
       {/* 缩略图区 —— 16:10 宽高比 */}
       <div
