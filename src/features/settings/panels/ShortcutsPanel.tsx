@@ -6,7 +6,7 @@
  *   - 页面内快捷键自定义（可录制新快捷键）
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Alert, theme, Button, App } from 'antd';
 import { RotateCcw } from 'lucide-react';
 import { useT } from '@/shared/i18n';
@@ -37,7 +37,6 @@ function KeybindingRecorder({
   const { t } = useT();
   const { token } = theme.useToken();
   const [recording, setRecording] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!recording) return;
@@ -90,9 +89,13 @@ function KeybindingRecorder({
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-      <div
-        ref={ref}
+      <button
+        type="button"
         onClick={() => setRecording(true)}
+        aria-label={
+          recording ? t('shortcuts.recording') : t('shortcuts.resetHint')
+        }
+        aria-pressed={recording}
         style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -111,12 +114,13 @@ function KeybindingRecorder({
         }}
       >
         {recording ? t('shortcuts.recording') : formatDisplay(currentKeys)}
-      </div>
+      </button>
       <Button
         type="text"
         size="small"
         icon={<RotateCcw size={14} />}
         title={t('shortcuts.resetHint')}
+        aria-label={t('shortcuts.resetHint')}
         onClick={onReset}
         style={{ color: token.colorTextTertiary }}
       />
@@ -170,20 +174,7 @@ export function ShortcutsPanel() {
               }}
             >
               <span style={{ fontSize: 13, fontWeight: 500 }}>{t(item.labelKey)}</span>
-              <kbd
-                style={{
-                  fontSize: 12,
-                  fontFamily: 'inherit',
-                  padding: '3px 8px',
-                  borderRadius: token.borderRadiusSM,
-                  background: token.colorBgContainer,
-                  border: `1px solid ${token.colorBorder}`,
-                  color: token.colorTextSecondary,
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {item.keys}
-              </kbd>
+              <kbd className="canopy-kbd">{item.keys}</kbd>
             </div>
           ))}
         </div>

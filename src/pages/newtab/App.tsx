@@ -288,7 +288,12 @@ function AppHeader({
 
       <Space size={2} style={{ flexShrink: 0 }}>
         <Tooltip title={t('header.archiveTooltip')} placement="bottom">
-          <Button type="text" icon={<Save size={ICON_SIZE.MEDIUM} style={{ color: iconColor('archive', token) }} />} onClick={onArchive} />
+          <Button
+            type="text"
+            icon={<Save size={ICON_SIZE.MEDIUM} style={{ color: iconColor('archive', token) }} />}
+            onClick={onArchive}
+            aria-label={t('header.archiveTooltip')}
+          />
         </Tooltip>
         <Tooltip title={t(`theme.${theme}`)}>
           <Button
@@ -305,10 +310,16 @@ function AppHeader({
               </span>
             }
             onClick={toggleTheme}
+            aria-label={t(`theme.${theme}`)}
           />
         </Tooltip>
         <Tooltip title={t('header.settings')}>
-          <Button type="text" icon={<Settings size={ICON_SIZE.MEDIUM} style={{ color: iconColor('settings', token) }} />} onClick={onSettings} />
+          <Button
+            type="text"
+            icon={<Settings size={ICON_SIZE.MEDIUM} style={{ color: iconColor('settings', token) }} />}
+            onClick={onSettings}
+            aria-label={t('header.settings')}
+          />
         </Tooltip>
       </Space>
     </Header>

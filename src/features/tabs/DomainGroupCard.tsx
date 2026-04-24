@@ -347,6 +347,7 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
             e.stopPropagation();
             void discardDomainGroup(group.domain).catch(() => { /* store 已 toast */ });
           }}
+          aria-label={t('tabs.discardGroup')}
           className="canopy-hover-reveal"
           style={{
             position: 'absolute',
@@ -372,6 +373,7 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
           disabled={closing}
           icon={closing ? undefined : <X size={12} />}
           onClick={(e: React.MouseEvent) => { void handleCloseAll(e); }}
+          aria-label={t('tabs.closeDomain')}
           // closing 时强制显示（is-visible），其余情况由 hover/focus 驱动
           className={`canopy-hover-reveal${closing ? ' is-visible' : ''}`}
           style={{

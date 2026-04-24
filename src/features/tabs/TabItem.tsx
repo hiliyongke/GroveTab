@@ -331,6 +331,7 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
             danger
             icon={<X size={12} />}
             onClick={handleClose}
+            aria-label={t('tabs.close')}
             className="canopy-hover-reveal"
             style={{
               flexShrink: 0,
