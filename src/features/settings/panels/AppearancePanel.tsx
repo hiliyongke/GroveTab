@@ -215,6 +215,169 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
         </div>
       </Field>
 
+      {/* ── 极客模式：单 token 精细化定制 ── */}
+      <Field label={t('skin.customTitle')} hint={t('skin.customHint')}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {/*
+           * 总开关：关闭时即使 settings.skinCustom 存在，也通过清空实现"一键回到预设"。
+           * 这样 AntdThemeProvider 的 skinCustom === undefined 分支会直接使用预设原值。
+           */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: 12, color: token.colorTextSecondary }}>
+              {t('skin.customEnable')}
+            </span>
+            <Switch
+              checked={settings.skinCustom !== undefined}
+              onChange={(on) => {
+                void updateSettings({
+                  skinCustom: on
+                    ? { borderRadius: 8, fontSize: 14, controlHeight: 32, borderWidth: 1 }
+                    : undefined,
+                });
+              }}
+            />
+          </div>
+
+          {settings.skinCustom !== undefined && (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 14,
+                padding: 12,
+                borderRadius: token.borderRadiusLG,
+                background: token.colorFillQuaternary,
+              }}
+            >
+              {/* 圆角 */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{ fontSize: 12, color: token.colorText }}>{t('skin.customRadius')}</span>
+                  <span style={{ fontSize: 12, color: token.colorTextTertiary, fontFeatureSettings: '"tnum"' }}>
+                    {settings.skinCustom.borderRadius ?? 8}px
+                  </span>
+                </div>
+                <Slider
+                  min={0}
+                  max={24}
+                  step={1}
+                  value={settings.skinCustom.borderRadius ?? 8}
+                  onChange={(v) => {
+                    void updateSettings({
+                      skinCustom: { ...settings.skinCustom, borderRadius: v },
+                    });
+                  }}
+                />
+                <div style={{ fontSize: 11, color: token.colorTextTertiary }}>
+                  {t('skin.customRadiusHint')}
+                </div>
+              </div>
+
+              {/* 基础字号 */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{ fontSize: 12, color: token.colorText }}>{t('skin.customFontSize')}</span>
+                  <span style={{ fontSize: 12, color: token.colorTextTertiary, fontFeatureSettings: '"tnum"' }}>
+                    {settings.skinCustom.fontSize ?? 14}px
+                  </span>
+                </div>
+                <Slider
+                  min={12}
+                  max={16}
+                  step={1}
+                  value={settings.skinCustom.fontSize ?? 14}
+                  onChange={(v) => {
+                    void updateSettings({
+                      skinCustom: { ...settings.skinCustom, fontSize: v },
+                    });
+                  }}
+                />
+                <div style={{ fontSize: 11, color: token.colorTextTertiary }}>
+                  {t('skin.customFontSizeHint')}
+                </div>
+              </div>
+
+              {/* 控件高度 */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{ fontSize: 12, color: token.colorText }}>{t('skin.customControlHeight')}</span>
+                  <span style={{ fontSize: 12, color: token.colorTextTertiary, fontFeatureSettings: '"tnum"' }}>
+                    {settings.skinCustom.controlHeight ?? 32}px
+                  </span>
+                </div>
+                <Slider
+                  min={24}
+                  max={40}
+                  step={2}
+                  value={settings.skinCustom.controlHeight ?? 32}
+                  onChange={(v) => {
+                    void updateSettings({
+                      skinCustom: { ...settings.skinCustom, controlHeight: v },
+                    });
+                  }}
+                />
+                <div style={{ fontSize: 11, color: token.colorTextTertiary }}>
+                  {t('skin.customControlHeightHint')}
+                </div>
+              </div>
+
+              {/* 边框粗细 */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{ fontSize: 12, color: token.colorText }}>{t('skin.customBorderWidth')}</span>
+                  <span style={{ fontSize: 12, color: token.colorTextTertiary, fontFeatureSettings: '"tnum"' }}>
+                    {settings.skinCustom.borderWidth ?? 1}px
+                  </span>
+                </div>
+                <Slider
+                  min={0.5}
+                  max={2}
+                  step={0.5}
+                  value={settings.skinCustom.borderWidth ?? 1}
+                  onChange={(v) => {
+                    void updateSettings({
+                      skinCustom: { ...settings.skinCustom, borderWidth: v },
+                    });
+                  }}
+                />
+                <div style={{ fontSize: 11, color: token.colorTextTertiary }}>
+                  {t('skin.customBorderWidthHint')}
+                </div>
+              </div>
+
+              {/* 品牌主色 */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{ fontSize: 12, color: token.colorText }}>{t('skin.customColorPrimary')}</span>
+                  <ColorPicker
+                    value={settings.skinCustom.colorPrimary}
+                    size="small"
+                    showText
+                    onChange={(c) => {
+                      void updateSettings({
+                        skinCustom: { ...settings.skinCustom, colorPrimary: c.toHexString() },
+                      });
+                    }}
+                  />
+                </div>
+                <div style={{ fontSize: 11, color: token.colorTextTertiary }}>
+                  {t('skin.customColorPrimaryHint')}
+                </div>
+              </div>
+
+              <Button
+                size="small"
+                onClick={() => {
+                  void updateSettings({ skinCustom: undefined });
+                }}
+              >
+                {t('skin.customReset')}
+              </Button>
+            </div>
+          )}
+        </div>
+      </Field>
+
       {/* ── 语言选择 ── */}
       <Field label={t('settings.language')}>
         <Select
@@ -702,6 +865,124 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
           ]}
         />
       </Field>
+
+      {/* ── 点击动效（v1.2） ──
+          5 套预设：涟漪 / 星光 / 彩纸 / 樱花 / 关闭；
+          按需 chunk，默认 'off' 不会拉取 canvas 代码。 */}
+      <Field label={t('effects.clickEffect')} hint={t('effects.clickEffectHint')}>
+        <Select
+          value={settings.clickEffect ?? 'off'}
+          onChange={(v) => { void updateSettings({ clickEffect: v }); }}
+          style={{ width: '100%' }}
+          options={[
+            { value: 'off', label: t('effects.clickOff') },
+            { value: 'ripple', label: t('effects.clickRipple') },
+            { value: 'sparkle', label: t('effects.clickSparkle') },
+            { value: 'confetti', label: t('effects.clickConfetti') },
+            { value: 'petal', label: t('effects.clickPetal') },
+          ]}
+        />
+      </Field>
+
+      {/* ── 视频背景（v1.2） ──
+          支持 URL 或本地文件（IndexedDB 持久化）；速率可调；
+          提示视频会占用更多内存/电量，用户按需开启。 */}
+      <Field label={t('effects.videoBg')} hint={t('effects.videoBgHint')}>
+        <Select
+          value={settings.videoBackground?.type ?? 'none'}
+          onChange={async (v) => {
+            if (v === 'none') {
+              // 同时清掉已存的文件，避免 IndexedDB 残留
+              const old = settings.videoBackground?.fileKey;
+              if (typeof old === 'string' && old !== '') {
+                const { removeVideoFile } = await import('@/features/effects');
+                await removeVideoFile(old).catch(() => undefined);
+              }
+              void updateSettings({ videoBackground: { type: 'none' } });
+              return;
+            }
+            void updateSettings({
+              videoBackground: { ...(settings.videoBackground ?? {}), type: v },
+            });
+          }}
+          style={{ width: '100%' }}
+          options={[
+            { value: 'none', label: t('effects.videoBgNone') },
+            { value: 'url', label: t('effects.videoBgUrl') },
+            { value: 'file', label: t('effects.videoBgFile') },
+          ]}
+        />
+      </Field>
+
+      {settings.videoBackground?.type === 'url' && (
+        <Field label={t('effects.videoBgUrlLabel')} hint={t('effects.videoBgUrlHint')}>
+          <Input
+            placeholder="https://example.com/bg.mp4"
+            value={settings.videoBackground.src ?? ''}
+            onChange={(e) =>
+              void updateSettings({
+                videoBackground: {
+                  ...(settings.videoBackground ?? {}),
+                  type: 'url',
+                  src: e.target.value,
+                },
+              })
+            }
+          />
+        </Field>
+      )}
+
+      {settings.videoBackground?.type === 'file' && (
+        <Field label={t('effects.videoBgFileLabel')} hint={t('effects.videoBgFileHint')}>
+          <Upload
+            accept="video/mp4,video/webm"
+            showUploadList={false}
+            beforeUpload={async (file) => {
+              const { saveVideoFile, removeVideoFile } = await import('@/features/effects');
+              // 先清掉旧文件（若有），避免 IndexedDB 里积灰
+              const old = settings.videoBackground?.fileKey;
+              if (typeof old === 'string' && old !== '') {
+                await removeVideoFile(old).catch(() => undefined);
+              }
+              const key = await saveVideoFile(file);
+              void updateSettings({
+                videoBackground: {
+                  ...(settings.videoBackground ?? {}),
+                  type: 'file',
+                  fileKey: key,
+                },
+              });
+              return false; // 禁止 antd 自己上传
+            }}
+          >
+            <Button icon={<Image size={14} />}>
+              {settings.videoBackground.fileKey !== undefined && settings.videoBackground.fileKey !== ''
+                ? t('effects.videoBgFileChange')
+                : t('effects.videoBgFileSelect')}
+            </Button>
+          </Upload>
+        </Field>
+      )}
+
+      {settings.videoBackground?.type !== undefined && settings.videoBackground.type !== 'none' && (
+        <Field label={t('effects.videoBgRate')} hint={t('effects.videoBgRateHint')}>
+          <Slider
+            min={0.25}
+            max={2}
+            step={0.25}
+            value={settings.videoBackground?.playbackRate ?? 1}
+            onChange={(v) =>
+              void updateSettings({
+                videoBackground: {
+                  ...(settings.videoBackground ?? {}),
+                  playbackRate: v,
+                },
+              })
+            }
+            marks={{ 0.5: '0.5×', 1: '1×', 1.5: '1.5×', 2: '2×' }}
+          />
+        </Field>
+      )}
 
       {/* ══════════════════════════════════════════════════
           UI 区域显隐

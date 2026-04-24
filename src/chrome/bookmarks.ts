@@ -61,6 +61,32 @@ export async function createBookmark(bookmark: { parentId?: string; title?: stri
 }
 
 /**
+ * 删除书签或空文件夹。
+ * 用于去重合并、失效书签清理。
+ */
+export async function removeBookmark(id: string): Promise<boolean> {
+  try {
+    await safeCall('bookmarks.remove', () => chrome.bookmarks.remove(id));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * 将书签移动到指定父节点。
+ * 用于智能整理：把同域名书签批量归到新的文件夹。
+ */
+export async function moveBookmark(id: string, parentId: string): Promise<boolean> {
+  try {
+    await safeCall('bookmarks.move', () => chrome.bookmarks.move(id, { parentId }));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * 请求书签权限（optional permission 动态申请）
  */
 export async function requestBookmarksPermission(): Promise<boolean> {

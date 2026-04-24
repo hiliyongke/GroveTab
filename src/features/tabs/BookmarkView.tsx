@@ -19,6 +19,7 @@ import {
   BookOpen,
   Search,
   Plus,
+  Wrench,
 } from 'lucide-react';
 import {
   getBookmarkTree,
@@ -34,6 +35,7 @@ import { useTabsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
+import { BookmarkToolsModal } from '@/features/bookmarks/BookmarkToolsModal';
 
 /**
  * 将书签树转换为 antd Tree 数据
@@ -68,6 +70,7 @@ export function BookmarkView() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<BookmarkNode[]>([]);
   const [searching, setSearching] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
   const tabs = useTabsStore((s) => s.tabs);
   const { t } = useT();
   const { token } = theme.useToken();
@@ -154,9 +157,22 @@ export function BookmarkView() {
   }
 
   return (
-    <div>
-      {/* 搜索栏 + 操作 */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+    <div
+      style={{
+        /*
+         * 固定高度 flex 布局：
+         *   - 外层高度锁在 min(100vh - 320px, 640px)，避免搜索结果变化导致整页高度跳动。
+         *   - 搜索栏固定在顶部；结果/Tree 容器 flex:1 + overflowY:auto 独立滚动。
+         *   - Tree <-> List 视图切换时，外框尺寸恒定，页面其它区域完全不受影响。
+         */
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 12,
+        height: 'min(calc(100vh - 320px), 640px)',
+      }}
+    >
+      {/* 搜索栏 + 操作（固定，不参与滚动） */}
+      <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
         <Input
           prefix={<Search size={14} />}
           placeholder={t('bookmark.searchPlaceholder')}
@@ -168,63 +184,81 @@ export function BookmarkView() {
         <Button icon={<Plus size={14} />} onClick={() => { void handleBookmarkAll(); }}>
           {t('bookmark.bookmarkAll')}
         </Button>
+        {/* 工具箱入口：打开 Modal 进行去重 / 失效检测 / 智能整理 */}
+        <Button icon={<Wrench size={14} />} onClick={() => setToolsOpen(true)}>
+          {t('bookmark.tools.entry')}
+        </Button>
       </div>
 
-      {/* 搜索结果 */}
-      {searchQuery ? (
-        searching ? (
-          <Spin style={{ display: 'block', margin: '40px auto' }} />
-        ) : searchResults.length === 0 ? (
-          <Empty description={t('bookmark.noResults')} />
+      {/* 结果区：独立滚动容器 */}
+      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: 4 }}>
+        {searchQuery ? (
+          searching ? (
+            <Spin style={{ display: 'block', margin: '40px auto' }} />
+          ) : searchResults.length === 0 ? (
+            <Empty description={t('bookmark.noResults')} />
+          ) : (
+            <List
+              size="small"
+              dataSource={searchResults}
+              renderItem={(item) => (
+                <List.Item
+                  key={item.id}
+                  style={{ cursor: 'pointer', padding: '6px 8px' }}
+                  onClick={() => {
+                    if (item.url) {
+                      void handleOpenBookmark(item.url);
+                    }
+                  }}
+                >
+                  <List.Item.Meta
+                    title={
+                      <span style={{ fontSize: 12.5, fontWeight: 500, color: token.colorText }}>
+                        {item.title}
+                      </span>
+                    }
+                    description={
+                      <span style={{ fontSize: 11, color: token.colorTextTertiary }}>
+                        {item.url}
+                      </span>
+                    }
+                  />
+                </List.Item>
+              )}
+            />
+          )
         ) : (
-          <List
-            size="small"
-            dataSource={searchResults}
-            renderItem={(item) => (
-              <List.Item
-                key={item.id}
-                style={{ cursor: 'pointer', padding: '6px 8px' }}
-                onClick={() => {
-                  if (item.url) {
-                    void handleOpenBookmark(item.url);
-                  }
-                }}
-              >
-                <List.Item.Meta
-                  title={
-                    <span style={{ fontSize: 12.5, fontWeight: 500, color: token.colorText }}>
-                      {item.title}
-                    </span>
-                  }
-                  description={
-                    <span style={{ fontSize: 11, color: token.colorTextTertiary }}>
-                      {item.url}
-                    </span>
-                  }
-                />
-              </List.Item>
-            )}
-          />
-        )
-      ) : (
-        /* 书签树 */
-        <Tree
-          showIcon
-          defaultExpandAll={false}
-          treeData={toTreeData(bookmarks)}
-          onSelect={(keys, info) => {
-            // 如果选中的是叶子节点（书签），打开 URL
-            const node = info.node as unknown as { isLeaf?: boolean };
-            if (node?.isLeaf) {
-              // 通过 key 找到书签 URL
-              const flat = allFlatBookmarks.find((b) => b.id === keys[0]);
-              if (flat?.url) {
-                void handleOpenBookmark(flat.url);
+          /* 书签树 */
+          <Tree
+            showIcon
+            defaultExpandAll={false}
+            treeData={toTreeData(bookmarks)}
+            onSelect={(keys, info) => {
+              // 如果选中的是叶子节点（书签），打开 URL
+              const node = info.node as unknown as { isLeaf?: boolean };
+              if (node?.isLeaf) {
+                // 通过 key 找到书签 URL
+                const flat = allFlatBookmarks.find((b) => b.id === keys[0]);
+                if (flat?.url) {
+                  void handleOpenBookmark(flat.url);
+                }
               }
-            }
-          }}
-        />
-      )}
+            }}
+          />
+        )}
+      </div>
+
+      {/*
+        书签工具箱 Modal —— 去重 / 失效检测 / 智能整理
+        mutation 完成后重新拉取书签树，避免 UI 与实际数据不一致
+      */}
+      <BookmarkToolsModal
+        open={toolsOpen}
+        onClose={() => setToolsOpen(false)}
+        onMutated={() => {
+          void getBookmarkTree().then(setBookmarks);
+        }}
+      />
     </div>
   );
 }

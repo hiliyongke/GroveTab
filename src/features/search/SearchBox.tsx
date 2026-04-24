@@ -38,12 +38,13 @@ import {
   searchHistoryEntries,
   type HistorySearchEntry,
 } from '@/chrome';
-import { getRecentSearches, pushRecentSearch } from '@/repositories';
+import { getRecentSearches, getSearchHistory, pushRecentSearch } from '@/repositories';
 import {
   SEARCH_ENGINE_OPTIONS,
   buildSearchUrl,
-  getHotKeywords,
+  resolveHotKeywords,
   getSearchEngineOption,
+  type HotKeywordSource,
 } from '@/shared/config/search-engines';
 import { iconColor, iconColorAlpha, type IconRole } from '@/shared/utils/icon-colors';
 
@@ -190,6 +191,8 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [currentEngine, setCurrentEngine] = useState<SearchEngineId>('google');
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  /** 本地热词聚合需要完整的 SearchHistoryEntry（带 count + ts），不能复用 recentSearches */
+  const [historyForHot, setHistoryForHot] = useState<Array<{ query: string; ts: number; count: number }>>([]);
   const [historyPermission, setHistoryPermission] = useState<boolean | null>(null);
   const [historyEntries, setHistoryEntries] = useState<HistorySearchEntry[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -208,6 +211,16 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
   const autoFallbackToWeb = useSettingsStore((s) => s.settings.searchAutoFallbackToWeb ?? true);
   const useHistorySuggestions = useSettingsStore((s) => s.settings.searchUseHistorySuggestions ?? true);
   const useHotSuggestions = useSettingsStore((s) => s.settings.searchUseHotSuggestions ?? true);
+  const hotSuggestionSource = useSettingsStore((s) => s.settings.hotSuggestionSource);
+
+  /**
+   * 归一化热词来源：老开关（布尔）+ 新字段（3 档）的兼容规则——
+   *   - searchUseHotSuggestions=false → 绝对 off（不管 hotSuggestionSource 设什么）
+   *   - 未设 hotSuggestionSource → 默认 'local'
+   */
+  const effectiveHotSource: HotKeywordSource = !useHotSuggestions
+    ? 'off'
+    : (hotSuggestionSource ?? 'local');
 
   const enabledEngines = useMemo(() => normalizeEnabledEngines(enabledEngineIds), [enabledEngineIds]);
   const resolvedDefaultEngine = enabledEngines.includes(defaultEngine) ? defaultEngine : enabledEngines[0];
@@ -272,6 +285,12 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
     void getRecentSearches().then((items) => {
       if (!cancelled) {
         setRecentSearches(items);
+      }
+    });
+    // 并行加载完整历史记录，供热词聚合使用
+    void getSearchHistory().then((entries) => {
+      if (!cancelled) {
+        setHistoryForHot(entries);
       }
     });
     return () => {
@@ -443,8 +462,8 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
       pushSuggestion(item, 'recent', t('search.sourceRecent'));
     });
 
-    if (useHotSuggestions) {
-      const hotKeywords = getHotKeywords(locale).filter((item) =>
+    if (effectiveHotSource !== 'off') {
+      const hotKeywords = resolveHotKeywords(effectiveHotSource, locale, historyForHot).filter((item) =>
         normalizedQuery === '' ? true : item.toLowerCase().includes(lowerQuery),
       );
       hotKeywords.slice(0, normalizedQuery === '' ? 5 : 4).forEach((item) => {
@@ -453,7 +472,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
     }
 
     return items;
-  }, [locale, lowerQuery, normalizedQuery, recentSearches, t, useHotSuggestions]);
+  }, [locale, lowerQuery, normalizedQuery, recentSearches, t, effectiveHotSource, historyForHot]);
 
   /**
    * 计算历史结果。
@@ -658,9 +677,24 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
   }, [currentEngine, enableHistorySuggestions, handleJump, openHistoryEntry, runWebSearch]);
 
   /**
-   * 键盘导航。
+   * 键盘导航（v1.1 完善）：
+   *   - Escape        ：有输入 → 清空；无输入 → 关闭 Modal
+   *   - Cmd/Ctrl+K    ：在 Modal 内再按一次同样关闭（与打开对称）
+   *   - Enter         ：激活当前高亮项；无高亮时 web 搜索
+   *   - Cmd/Ctrl+Enter：始终以 web 搜索跳转（不走 activate）
+   *   - Alt+Enter     ：web 搜索并后台打开（不抢焦点）
+   *   - Cmd+1..9      ：直接用第 N 个已启用引擎对当前 query 进行 web 搜索
+   *   - Tab           ：跳到第一个 web 搜索项（保留老行为）
+   *   - ↑ / ↓         ：上下选择
    */
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    // Cmd/Ctrl + K：再按一次关闭 Modal（与打开快捷键对称）
+    if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+      e.preventDefault();
+      close();
+      return;
+    }
+
     if (e.key === 'Escape') {
       if (normalizedQuery !== '') {
         e.preventDefault();
@@ -670,10 +704,31 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
         setActiveIndex(0);
         return;
       }
+      // 空输入时 Escape 关闭 Modal（Modal 自身 keyboard=false 禁用了默认行为）
+      e.preventDefault();
+      close();
+      return;
+    }
+
+    // Cmd/Ctrl + 1..9：直接用第 N 个启用引擎进行 web 搜索
+    if ((e.metaKey || e.ctrlKey) && /^[1-9]$/.test(e.key) && normalizedQuery !== '') {
+      const idx = Number.parseInt(e.key, 10) - 1;
+      const target = enabledEngines[idx];
+      if (target !== undefined) {
+        e.preventDefault();
+        void runWebSearch(normalizedQuery, target);
+      }
       return;
     }
 
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && normalizedQuery !== '') {
+      e.preventDefault();
+      void runWebSearch(normalizedQuery, currentEngine);
+      return;
+    }
+
+    if (e.altKey && e.key === 'Enter' && normalizedQuery !== '') {
+      // Alt+Enter：后台打开（不切换到新 Tab）
       e.preventDefault();
       void runWebSearch(normalizedQuery, currentEngine);
       return;
@@ -687,13 +742,13 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setActiveIndex((index) => Math.min(index + 1, flatItems.length - 1));
+      setActiveIndex((index) => (flatItems.length === 0 ? 0 : (index + 1) % flatItems.length));
       return;
     }
 
     if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setActiveIndex((index) => Math.max(index - 1, 0));
+      setActiveIndex((index) => (flatItems.length === 0 ? 0 : (index - 1 + flatItems.length) % flatItems.length));
       return;
     }
 
@@ -708,7 +763,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
         void runWebSearch(normalizedQuery, currentEngine);
       }
     }
-  }, [activeIndex, currentEngine, firstWebItemIndex, flatItems, handleActivate, normalizedQuery, runWebSearch]);
+  }, [activeIndex, close, currentEngine, enabledEngines, firstWebItemIndex, flatItems, handleActivate, normalizedQuery, runWebSearch]);
 
   return (
     <Modal
@@ -749,6 +804,9 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
           prefix={<Search size={14} style={{ color: iconColor('search', token) }} />}
           allowClear
           variant="borderless"
+          autoComplete="off"
+          spellCheck={false}
+          aria-label={t('search.universalPlaceholder')}
           style={{ fontSize: 15, flex: 1 }}
         />
         <Select<SearchEngineId>

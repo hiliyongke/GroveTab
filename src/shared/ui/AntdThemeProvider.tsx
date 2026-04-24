@@ -46,17 +46,66 @@ function FeedbackBridge() {
   return null;
 }
 
+/** UI Token 极客定制的覆盖配置——与 UserSettings.skinCustom 对齐 */
+interface SkinCustomOverride {
+  borderRadius?: number;
+  fontSize?: number;
+  controlHeight?: number;
+  borderWidth?: number;
+  fontWeightBody?: number;
+  fontWeightHeading?: number;
+  colorPrimary?: string;
+}
+
 /**
- * 从皮肤预设生成 antd ThemeConfig
+ * 将 skinCustom 覆盖应用到预设上，得到最终生效 token。
+ *
+ * 覆盖规则：
+ *   - borderRadius：驱动五级圆角（base/LG/SM/XS）
+ *   - fontSize：驱动基础字号，标题字号按比例更新
+ *   - controlHeight：驱动三级控件高（SM/base/LG）
+ *   - borderWidth：写到 token.lineWidth
+ *   - colorPrimary：完全覆盖品牌主色
+ */
+function applySkinCustom(base: ReturnType<typeof getSkinPreset>, custom?: SkinCustomOverride): ReturnType<typeof getSkinPreset> {
+  if (custom === undefined) return base;
+  const br = custom.borderRadius;
+  const fs = custom.fontSize;
+  const ch = custom.controlHeight;
+  return {
+    ...base,
+    colorPrimary: custom.colorPrimary ?? base.colorPrimary,
+    colorPrimaryHover: custom.colorPrimary ?? base.colorPrimaryHover,
+    borderRadius: br ?? base.borderRadius,
+    borderRadiusLG: br !== undefined ? br + 4 : base.borderRadiusLG,
+    borderRadiusSM: br !== undefined ? Math.max(2, br - 2) : base.borderRadiusSM,
+    borderRadiusXS: br !== undefined ? Math.max(1, br - 4) : base.borderRadiusXS,
+    fontSize: fs ?? base.fontSize,
+    controlHeight: ch ?? base.controlHeight,
+    controlHeightLG: ch !== undefined ? ch + 8 : base.controlHeightLG,
+    controlHeightSM: ch !== undefined ? Math.max(20, ch - 8) : base.controlHeightSM,
+  };
+}
+
+/**
+ * 从皮肤预设 + 极客覆盖生成 antd ThemeConfig
  *
  * 皮肤预设定义了完整的视觉 token 包，此函数将其转换为 antd 可消费的
- * ConfigProvider theme 配置。
+ * ConfigProvider theme 配置，并允许用户覆盖单项 token。
  */
-function buildThemeConfig(skinId: SkinPresetId, isDark: boolean, density: 'compact' | 'default' | 'comfortable') {
-  const skin = getSkinPreset(skinId);
+function buildThemeConfig(
+  skinId: SkinPresetId,
+  isDark: boolean,
+  density: 'compact' | 'default' | 'comfortable',
+  custom?: SkinCustomOverride,
+) {
+  const skin = applySkinCustom(getSkinPreset(skinId), custom);
 
   /** 布局密度缩放因子 */
   const ds = density === 'compact' ? 0.85 : density === 'comfortable' ? 1.15 : 1;
+
+  /** 用户自定义线条粗细，默认 1 */
+  const lineWidth = custom?.borderWidth ?? 1;
 
   return {
     algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
@@ -101,8 +150,8 @@ function buildThemeConfig(skinId: SkinPresetId, isDark: boolean, density: 'compa
       marginLG: 16,
       marginSM: 8,
       marginXS: 4,
-      /** 线条 */
-      lineWidth: 1,
+      /** 线条（可用户自定义粗细） */
+      lineWidth,
       lineType: 'solid',
       /** 明暗模式背景色 */
       ...(isDark ? {
@@ -243,6 +292,7 @@ export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
   const skinPreset = useSettingsStore((s) => s.settings.skinPreset ?? 'minimal');
   const layoutDensity = useSettingsStore((s) => s.settings.layoutDensity ?? 'default');
   const reducedMotionSetting = useSettingsStore((s) => s.settings.reducedMotion ?? 'auto');
+  const skinCustom = useSettingsStore((s) => s.settings.skinCustom);
 
   /** 计算实际是否减弱动效 */
   const reducedMotion = reducedMotionSetting === 'on'
@@ -295,11 +345,11 @@ export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
   }, [skinVars]);
 
   /**
-   * 主题配置：从皮肤预设动态生成
+   * 主题配置：从皮肤预设 + 极客覆盖动态生成
    */
   const themeConfig = useMemo(
-    () => buildThemeConfig(skinPreset as SkinPresetId, mode === 'dark', layoutDensity),
-    [skinPreset, mode, layoutDensity],
+    () => buildThemeConfig(skinPreset as SkinPresetId, mode === 'dark', layoutDensity, skinCustom),
+    [skinPreset, mode, layoutDensity, skinCustom],
   );
 
   const locale = language === 'zh-CN' ? zhCN : enUS;

@@ -36,6 +36,21 @@ body,
   padding: 0;
 }
 
+/*
+ * ─── 抗抖动：预留滚动条槽位 ─────────────────────────────────
+ *
+ * Chrome 94+/Firefox 97+ 支持 `scrollbar-gutter: stable`，即使内容还没溢出
+ * 也为滚动条预留空间；从而在动态增删内容（如搜索结果展开、BookmarkView
+ * 在 Tree/List 之间切换）导致滚动条出现/消失时，**整页宽度保持恒定**，
+ * 用户视角下不会再出现"内容向左挤一下"的抖动。
+ *
+ * 不用 `overflow-y: scroll`（会强制显示空滚动条），也不用 JS 测量
+ * 滚动条宽度再设 padding-right（会拉长首屏）。这是最现代、零成本的方案。
+ */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   background-color: var(--ant-color-bg-layout);
   color: var(--ant-color-text);

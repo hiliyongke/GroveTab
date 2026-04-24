@@ -107,6 +107,23 @@ export default defineConfig({
          */
         manualChunks(id: string) {
           if (id.includes('node_modules')) {
+            // v1.3 评估：zod（~12KB gz）本次不引入——现有手写校验（import-export.ts / storage-repo.ts）
+            // 已覆盖 schema 版本号强校验 + 白名单剪裁，zero-cost 满足需求 8。若后续新增复杂 schema 再考虑。
+
+            // react-grid-layout / react-resizable / react-draggable 必须最优先匹配——
+            // 因为 pnpm 的存放路径形如 `react-grid-layout@2.2.3_react-dom@19.2.5__react@19.2.5`，
+            // 会同时命中后面的 `react-dom` 与 `react` 分支，需要在前面短路。
+            if (
+              id.includes('react-grid-layout') ||
+              id.includes('react-resizable') ||
+              id.includes('react-draggable')
+            ) {
+              return 'vendor-grid';
+            }
+            if (id.includes('@dnd-kit')) return 'vendor-dnd';
+            if (id.includes('lunar-typescript')) return 'vendor-lunar';
+            // tinykeys ~1KB gz，随 vendor-react 一起走，避免额外 chunk 开销
+            if (id.includes('tinykeys')) return 'vendor-react';
             if (id.includes('react-dom')) return 'vendor-react-dom';
             if (id.includes('react') && !id.includes('react-router')) return 'vendor-react';
             if (id.includes('antd') || id.includes('@ant-design')) return 'vendor-antd';

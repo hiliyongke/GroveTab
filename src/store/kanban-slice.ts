@@ -28,6 +28,8 @@ interface KanbanState {
   removeCard: (columnId: string, url: string) => Promise<void>;
   moveCard: (fromColumnId: string, toColumnId: string, url: string, toIndex?: number) => Promise<void>;
   reorderCard: (columnId: string, fromIndex: number, toIndex: number) => Promise<void>;
+  /** v1.3：列的整体重排序，由列拖拽 UI 触发 */
+  reorderColumns: (fromIndex: number, toIndex: number) => Promise<void>;
   /** 将某列的 URL 列表导出为 ArchivedSession 所需的 url 数组 */
   exportColumnUrls: (columnId: string) => string[];
   reset: () => Promise<void>;
@@ -113,6 +115,16 @@ export const useKanbanStore = create<KanbanState>((set, get) => ({
     });
     await persist(next);
     set({ columns: next });
+  },
+
+  reorderColumns: async (fromIndex, toIndex) => {
+    const columns = [...get().columns];
+    if (fromIndex < 0 || fromIndex >= columns.length) return;
+    if (toIndex < 0 || toIndex >= columns.length) return;
+    const [moved] = columns.splice(fromIndex, 1);
+    columns.splice(toIndex, 0, moved);
+    await persist(columns);
+    set({ columns });
   },
 
   exportColumnUrls: (columnId) => {

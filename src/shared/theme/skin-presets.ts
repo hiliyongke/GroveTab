@@ -19,7 +19,9 @@ export type SkinPresetId =
   | 'glassmorphism'
   | 'skeuomorphism'
   | 'aurora'
-  | 'elegant';
+  | 'elegant'
+  | 'nord'
+  | 'solarized';
 
 /** 毛玻璃配置 */
 export interface GlassConfig {
@@ -708,6 +710,158 @@ export const SKIN_PRESETS: SkinPreset[] = [
     floatingBar: {
       borderRadius: 8,
     },
+  },
+
+  // ═══════════════════════════════════════════════════
+  // 6. Nord — 北欧寒色调（冷静蓝青，兼顾深浅）
+  // ═══════════════════════════════════════════════════
+  {
+    id: 'nord',
+    labelKey: 'skin.nord',
+    descriptionKey: 'skin.nordDesc',
+    previewColors: ['#5E81AC', '#ECEFF4', '#88C0D0'],
+    compatibleMode: 'both',
+
+    colorPrimary: '#5E81AC',
+    colorPrimaryHover: '#81A1C1',
+
+    borderRadius: 6,
+    borderRadiusLG: 10,
+    borderRadiusSM: 4,
+    borderRadiusXS: 2,
+
+    controlHeight: 32,
+    controlHeightLG: 40,
+    controlHeightSM: 24,
+
+    fontFamily:
+      '-apple-system, "Inter", "SF Pro Text", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif',
+    fontFamilyHeading: 'inherit',
+    fontSize: 14,
+    padding: 16, paddingLG: 20, paddingSM: 12,
+
+    motionDurationSlow: '0.3s', motionDurationMid: '0.18s', motionDurationFast: '0.1s',
+    motionEaseInOut: 'cubic-bezier(0.4, 0, 0.2, 1)', motionEaseOut: 'cubic-bezier(0, 0, 0.2, 1)',
+
+    colorBgLayoutLight: '#ECEFF4',
+    colorBgContainerLight: '#E5E9F0',
+    colorBgElevatedLight: '#FFFFFF',
+    colorBorderSecondaryLight: '#D8DEE9',
+
+    colorBgLayoutDark: '#2E3440',
+    colorBgContainerDark: '#3B4252',
+    colorBgElevatedDark: '#434C5E',
+    colorBorderSecondaryDark: 'rgba(136,192,208,0.12)',
+
+    glass: { blur: 8, saturate: 110, bgLight: 'rgba(236,239,244,0.9)', bgDark: 'rgba(46,52,64,0.88)' },
+
+    shadow: {
+      card: {
+        light: '0 1px 2px rgba(46,52,64,0.04), 0 4px 12px rgba(46,52,64,0.04)',
+        dark: '0 1px 2px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2)',
+      },
+      cardHover: {
+        light: '0 2px 6px rgba(94,129,172,0.08), 0 8px 24px rgba(46,52,64,0.06)',
+        dark: '0 2px 6px rgba(0,0,0,0.35), 0 8px 24px rgba(94,129,172,0.12)',
+      },
+      floating: {
+        light: '0 2px 8px rgba(94,129,172,0.1), 0 8px 32px rgba(46,52,64,0.06)',
+        dark: '0 2px 8px rgba(0,0,0,0.4), 0 8px 32px rgba(94,129,172,0.1)',
+      },
+      brandGlow: {
+        light: '0 2px 12px rgba(94,129,172,0.1), 0 0 0 1px rgba(94,129,172,0.1)',
+        dark: '0 2px 12px rgba(136,192,208,0.12), 0 0 0 1px rgba(136,192,208,0.08)',
+      },
+    },
+
+    texture: {
+      noise: false, noiseOpacity: 0,
+      grid: false, gridColor: { light: 'rgba(94,129,172,0.03)', dark: 'rgba(136,192,208,0.03)' },
+    },
+    cardStyle: { borderWidth: 1, hoverBorderWidth: 1, hoverLift: true, liftDistance: 1 },
+    searchBox: { height: 46, borderRadius: 8, fontSize: 14 },
+    header: { height: 52 },
+
+    logoGradient: 'linear-gradient(135deg, #5E81AC, #88C0D0)',
+    logoGlowShadow: {
+      light: '0 2px 8px rgba(94,129,172,0.22)',
+      dark: '0 2px 8px rgba(136,192,208,0.26)',
+    },
+
+    floatingBar: { borderRadius: 10 },
+  },
+
+  // ═══════════════════════════════════════════════════
+  // 7. Solarized — 太阳化（暖米 + 青黄对比，护眼长时间使用友好）
+  // ═══════════════════════════════════════════════════
+  {
+    id: 'solarized',
+    labelKey: 'skin.solarized',
+    descriptionKey: 'skin.solarizedDesc',
+    previewColors: ['#268BD2', '#FDF6E3', '#B58900'],
+    compatibleMode: 'both',
+
+    colorPrimary: '#268BD2',
+    colorPrimaryHover: '#2AA198',
+
+    borderRadius: 4, borderRadiusLG: 8, borderRadiusSM: 3, borderRadiusXS: 2,
+    controlHeight: 32, controlHeightLG: 40, controlHeightSM: 24,
+
+    fontFamily:
+      '"Source Sans 3", -apple-system, "Inter", "PingFang SC", "Microsoft YaHei", sans-serif',
+    fontFamilyHeading: 'inherit',
+    fontSize: 14,
+    padding: 16, paddingLG: 20, paddingSM: 12,
+
+    motionDurationSlow: '0.3s', motionDurationMid: '0.18s', motionDurationFast: '0.1s',
+    motionEaseInOut: 'cubic-bezier(0.4, 0, 0.2, 1)', motionEaseOut: 'cubic-bezier(0, 0, 0.2, 1)',
+
+    colorBgLayoutLight: '#FDF6E3',
+    colorBgContainerLight: '#EEE8D5',
+    colorBgElevatedLight: '#FFFCF2',
+    colorBorderSecondaryLight: '#DDD6C1',
+
+    colorBgLayoutDark: '#002B36',
+    colorBgContainerDark: '#073642',
+    colorBgElevatedDark: '#0F4150',
+    colorBorderSecondaryDark: 'rgba(131,148,150,0.14)',
+
+    glass: { blur: 6, saturate: 110, bgLight: 'rgba(253,246,227,0.9)', bgDark: 'rgba(0,43,54,0.9)' },
+
+    shadow: {
+      card: {
+        light: '0 1px 2px rgba(88,110,117,0.06), 0 4px 10px rgba(88,110,117,0.05)',
+        dark: '0 1px 2px rgba(0,0,0,0.35), 0 4px 10px rgba(0,0,0,0.22)',
+      },
+      cardHover: {
+        light: '0 2px 6px rgba(181,137,0,0.08), 0 8px 24px rgba(88,110,117,0.06)',
+        dark: '0 2px 6px rgba(0,0,0,0.4), 0 8px 24px rgba(181,137,0,0.12)',
+      },
+      floating: {
+        light: '0 2px 8px rgba(181,137,0,0.1), 0 8px 32px rgba(88,110,117,0.06)',
+        dark: '0 2px 8px rgba(0,0,0,0.45), 0 8px 32px rgba(181,137,0,0.1)',
+      },
+      brandGlow: {
+        light: '0 2px 12px rgba(38,139,210,0.1), 0 0 0 1px rgba(38,139,210,0.08)',
+        dark: '0 2px 12px rgba(42,161,152,0.14), 0 0 0 1px rgba(42,161,152,0.1)',
+      },
+    },
+
+    texture: {
+      noise: true, noiseOpacity: 0.02,
+      grid: false, gridColor: { light: 'rgba(181,137,0,0.03)', dark: 'rgba(42,161,152,0.03)' },
+    },
+    cardStyle: { borderWidth: 1, hoverBorderWidth: 1, hoverLift: false, liftDistance: 0 },
+    searchBox: { height: 46, borderRadius: 4, fontSize: 14 },
+    header: { height: 52 },
+
+    logoGradient: 'linear-gradient(135deg, #268BD2, #B58900)',
+    logoGlowShadow: {
+      light: '0 2px 8px rgba(38,139,210,0.22)',
+      dark: '0 2px 8px rgba(42,161,152,0.24)',
+    },
+
+    floatingBar: { borderRadius: 6 },
   },
 ];
 

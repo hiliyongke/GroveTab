@@ -15,7 +15,7 @@ export type DedupStrictness = 'strict' | 'loose' | 'off';
 const TRACKING_PARAMS = /^(utm_\w+|fbclid|gclid|mc_eid|mc_cid|ref|source)$/i;
 
 /** Normalize a URL for dedup comparison based on strictness */
-function normalizeUrl(url: string, strictness: DedupStrictness): string {
+export function normalizeUrl(url: string, strictness: DedupStrictness): string {
   if (strictness === 'strict') {
     return url;
   }

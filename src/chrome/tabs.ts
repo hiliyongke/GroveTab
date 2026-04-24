@@ -180,6 +180,15 @@ export async function storageGetBytesInUse(keys?: string | string[]): Promise<nu
   return safeCall('storage.local.getBytesInUse', () => chrome.storage.local.getBytesInUse(keys));
 }
 
+/**
+ * 列出 chrome.storage.local 中的所有键。
+ * 用途：一键重置等批量操作，需先枚举全部键。
+ */
+export async function storageGetAllKeys(): Promise<string[]> {
+  const all = await safeCall('storage.local.get(null)', () => chrome.storage.local.get(null));
+  return Object.keys(all);
+}
+
 // ── Favicon ───────────────────────────────────────────
 
 /**

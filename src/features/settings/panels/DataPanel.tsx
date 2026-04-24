@@ -10,7 +10,7 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Button, Space, Progress, Alert, App, theme, Input, Popconfirm, Empty } from 'antd';
+import { Button, Space, Progress, Alert, App, theme, Input, Popconfirm, Empty, Divider } from 'antd';
 import {
   Download,
   Upload,
@@ -19,6 +19,9 @@ import {
   Save,
   ArrowLeftRight,
   Pencil,
+  RotateCcw,
+  AlertTriangle,
+  Sparkles,
 } from 'lucide-react';
 import { useT } from '@/shared/i18n';
 import { useSettingsStore } from '@/store';
@@ -33,6 +36,7 @@ import {
   type SettingsProfile,
 } from '@/shared/utils/profiles';
 import { Field } from '../components/Field';
+import { getAllDataKeys, removeData } from '@/repositories/storage-repo';
 
 interface QuotaInfo {
   usedBytes: number;
@@ -100,9 +104,16 @@ export function DataPanel() {
 
   const handleExport = async () => {
     const sessions = await getArchivedSessions();
-    const json = exportSessionsJSON(sessions);
-    downloadFile(json, `canopy-backup-${new Date().toISOString().slice(0, 10)}.json`);
-    message.success(t('settings.export'));
+    const sessionPayload = exportSessionsJSON(sessions);
+    const parsedSessions = JSON.parse(sessionPayload) as unknown;
+    const bundle = {
+      version: 2,
+      exportedAt: new Date().toISOString(),
+      sessions: parsedSessions,
+      settings,
+    };
+    downloadFile(JSON.stringify(bundle, null, 2), `canopy-backup-${new Date().toISOString().slice(0, 10)}.json`);
+    message.success('已导出归档 + 工作台配置');
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,7 +127,20 @@ export function DataPanel() {
     }
 
     const text = await file.text();
-    const { sessions, errors } = parseImportJSON(text);
+    let importText = text;
+    try {
+      const parsed = JSON.parse(text) as { sessions?: unknown; settings?: typeof settings };
+      if (parsed && Array.isArray(parsed.sessions)) {
+        importText = JSON.stringify(parsed.sessions);
+      }
+      if (parsed?.settings) {
+        await updateSettings(parsed.settings);
+      }
+    } catch {
+      // 兼容旧版仅 sessions JSON
+    }
+
+    const { sessions, errors } = parseImportJSON(importText);
     if (errors.length > 0) {
       setImportStatus(t('settings.importError', { count: errors.length }));
       if (fileInputRef.current !== null) fileInputRef.current.value = '';
@@ -126,7 +150,7 @@ export function DataPanel() {
     const existingIds = new Set(existing.map((s) => s.id));
     const newSessions = sessions.filter((s) => !existingIds.has(s.id));
     await saveSessions([...newSessions, ...existing]);
-    setImportStatus(t('settings.importSuccess', { count: newSessions.length }));
+    setImportStatus(`已导入 ${newSessions.length} 个归档，并恢复工作台配置`);
     if (fileInputRef.current !== null) fileInputRef.current.value = '';
   };
 
@@ -318,6 +342,97 @@ export function DataPanel() {
 
       <Button block danger icon={<Trash2 size={14} />} onClick={handleClearAll}>
         {t('settings.clearAll')}
+      </Button>
+
+      {/* ═════════════════════════════════════════════════════
+          危险区：一键重置三件套（v1.1）
+          ═════════════════════════════════════════════════════ */}
+      <Divider style={{ fontSize: 12, color: token.colorTextTertiary, margin: '8px 0' }}>
+        {t('settings.dangerZone')}
+      </Divider>
+
+      {/* 1）恢复默认配置：仅清空设置键，保留所有数据（归档/书签/历史不变） */}
+      <Popconfirm
+        title={t('settings.resetSettingsConfirm')}
+        description={t('settings.resetSettingsDesc')}
+        onConfirm={async () => {
+          await removeData('canopy_settings');
+          message.success(t('settings.resetSettingsDone'));
+          // 稍停后刷新让新设置生效
+          setTimeout(() => window.location.reload(), 400);
+        }}
+      >
+        <Button block icon={<RotateCcw size={14} />}>
+          {t('settings.resetSettings')}
+        </Button>
+      </Popconfirm>
+
+      {/* 2）重播 Onboarding：仅重置 canopy_onboarding_done，下次刷新重新弹欢迎屏 */}
+      <Popconfirm
+        title={t('settings.replayOnboardingConfirm')}
+        onConfirm={async () => {
+          await removeData('canopy_onboarding_done');
+          message.success(t('settings.replayOnboardingDone'));
+          setTimeout(() => window.location.reload(), 400);
+        }}
+      >
+        <Button block icon={<Sparkles size={14} />}>
+          {t('settings.replayOnboarding')}
+        </Button>
+      </Popconfirm>
+
+      {/*
+        3）全量重置为初始状态：清掉所有 canopy_* 键——等同卸载重装。
+        高风险操作，走 Modal 双层确认（输入 RESET 文本二次确认）。
+      */}
+      <Button
+        block
+        danger
+        icon={<AlertTriangle size={14} />}
+        onClick={() => {
+          let confirmText = '';
+          modal.confirm({
+            title: t('settings.factoryResetTitle'),
+            content: (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <Alert
+                  type="error"
+                  showIcon
+                  message={t('settings.factoryResetWarning')}
+                />
+                <div style={{ fontSize: 12, color: token.colorTextSecondary }}>
+                  {t('settings.factoryResetTypeHint')}
+                </div>
+                <Input
+                  placeholder="RESET"
+                  onChange={(e) => {
+                    confirmText = e.target.value;
+                  }}
+                />
+              </div>
+            ),
+            okText: t('settings.factoryResetConfirm'),
+            okButtonProps: { danger: true },
+            cancelText: t('settings.cancel'),
+            onOk: async () => {
+              if (confirmText.trim().toUpperCase() !== 'RESET') {
+                message.error(t('settings.factoryResetMustType'));
+                return Promise.reject(new Error('must type RESET'));
+              }
+              /** 清空所有 canopy_* 键 */
+              const keys = await getAllDataKeys();
+              for (const key of keys) {
+                if (key.startsWith('canopy_')) {
+                  await removeData(key);
+                }
+              }
+              message.success(t('settings.factoryResetDone'));
+              setTimeout(() => window.location.reload(), 400);
+              return undefined;            },
+          });
+        }}
+      >
+        {t('settings.factoryReset')}
       </Button>
     </div>
   );

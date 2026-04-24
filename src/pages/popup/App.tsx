@@ -13,8 +13,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ConfigProvider, Button, Input, Tooltip, Typography, Empty, theme } from 'antd';
-import { LayoutGrid, Save, Search, ExternalLink } from 'lucide-react';
+import { LayoutGrid, Save, Search, ExternalLink, X } from 'lucide-react';
 import { archiveCurrentWindowTabs } from '@/services';
+import { BRAND } from '@/shared/config/brand';
+import { buildSearchUrl } from '@/shared/config/search-engines';
+import type { SearchEngineId } from '@/shared/types';
+import { getSettings } from '@/repositories';
 
 const { Text } = Typography;
 
@@ -61,6 +65,26 @@ function App() {
   const [hasAnyTab, setHasAnyTab] = useState(true);
   const [archiving, setArchiving] = useState(false);
   const [archiveError, setArchiveError] = useState('');
+  /** 从用户设置读默认搜索引擎；暂以 Google 兑底 */
+  const [defaultEngine, setDefaultEngine] = useState<SearchEngineId>('google');
+
+  // 读设置同步默认引擎
+  useEffect(() => {
+    let alive = true;
+    void (async () => {
+      try {
+        const settings = await getSettings();
+        if (alive && settings.searchDefaultEngine) {
+          setDefaultEngine(settings.searchDefaultEngine);
+        }
+      } catch {
+        /* 兑底 google */
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (typeof chrome === 'undefined' || chrome.tabs === undefined) return;
@@ -118,13 +142,13 @@ function App() {
     }
   }, [archiving]);
 
-  /** 快速走全网搜索（回车时触发）—— 复用默认引擎 Google */
+  /** 快速走全网搜索（回车时触发）—— 使用用户默认引擎 */
   const runWebSearch = useCallback(() => {
     const q = query.trim();
     if (q === '') return;
-    void chrome.tabs?.create({ url: `https://www.google.com/search?q=${encodeURIComponent(q)}`, active: true });
+    void chrome.tabs?.create({ url: buildSearchUrl(defaultEngine, q), active: true });
     window.close();
-  }, [query]);
+  }, [query, defaultEngine]);
 
   return (
     <ConfigProvider theme={{ cssVar: { prefix: 'ant' } }}>
@@ -156,10 +180,10 @@ function App() {
               justifyContent: 'center',
             }}
           >
-            C
+            {BRAND.shortName}
           </div>
           <Text strong style={{ fontSize: 14 }}>
-            Canopy
+            {BRAND.name}
           </Text>
         </div>
 
@@ -196,7 +220,21 @@ function App() {
             </div>
           ) : (
             filteredTabs.map((tab) => (
-              <RecentTabRow key={tab.id} tab={tab} onClick={() => { void focusTab(tab).then(() => window.close()); }} />
+              <RecentTabRow
+                key={tab.id}
+                tab={tab}
+                onClick={() => {
+                  void focusTab(tab).then(() => window.close());
+                }}
+                onClose={async () => {
+                  try {
+                    await chrome.tabs.remove(tab.id);
+                    setRecentTabs((list) => list.filter((t) => t.id !== tab.id));
+                  } catch {
+                    /* 关闭失败静默 */
+                  }
+                }}
+              />
             ))
           )}
         </div>
@@ -225,6 +263,28 @@ function App() {
           </Button>
         </div>
 
+        {/* 底部"关于"链接：跳转 newtab 并自动切到 About Tab */}
+        <div style={{ marginTop: 10, textAlign: 'center' }}>
+          <button
+            type="button"
+            onClick={() => {
+              void chrome.tabs?.create({
+                url: chrome.runtime.getURL('src/pages/newtab/index.html') + '#about',
+              });
+              window.close();
+            }}
+            style={{
+              all: 'unset',
+              cursor: 'pointer',
+              fontSize: 11,
+              color: 'var(--ant-color-text-tertiary)',
+              padding: '4px 8px',
+            }}
+          >
+            关于 GroveTab
+          </button>
+        </div>
+
         {archiveError !== '' && (
           <div style={{ marginTop: 6, fontSize: 11.5, color: 'var(--ant-color-error)' }}>
             {archiveError}
@@ -236,62 +296,110 @@ function App() {
 }
 
 /** 单行最近 Tab */
-function RecentTabRow({ tab, onClick }: { tab: RecentTab; onClick: () => void }) {
+function RecentTabRow({
+  tab,
+  onClick,
+  onClose,
+}: {
+  tab: RecentTab;
+  onClick: () => void;
+  onClose: () => void;
+}) {
   const { token } = theme.useToken();
+  const [hover, setHover] = useState(false);
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="canopy-popup-row"
+    <div
+      onMouseEnter={(e) => {
+        setHover(true);
+        e.currentTarget.style.background = token.colorFillSecondary;
+      }}
+      onMouseLeave={(e) => {
+        setHover(false);
+        e.currentTarget.style.background = 'transparent';
+      }}
       style={{
-        all: 'unset',
-        cursor: 'pointer',
-        width: '100%',
-        boxSizing: 'border-box',
-        padding: '6px 10px',
         display: 'flex',
         alignItems: 'center',
         gap: 8,
+        padding: '6px 10px',
         transition: 'background 120ms ease',
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = token.colorFillSecondary)}
-      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
-      <img
-        src={tab.favIconUrl !== '' ? tab.favIconUrl : `chrome://favicon/size/16@1x/${encodeURIComponent(tab.url)}`}
-        alt=""
-        width={14}
-        height={14}
-        style={{ borderRadius: 3, flexShrink: 0 }}
-        onError={(e) => {
-          e.currentTarget.style.visibility = 'hidden';
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={`打开 ${tab.title}`}
+        style={{
+          all: 'unset',
+          cursor: 'pointer',
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          minWidth: 0,
         }}
-      />
-      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
-        <span
-          style={{
-            fontSize: 12.5,
-            color: token.colorText,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
+      >
+        <img
+          src={tab.favIconUrl !== '' ? tab.favIconUrl : `chrome://favicon/size/16@1x/${encodeURIComponent(tab.url)}`}
+          alt=""
+          width={14}
+          height={14}
+          style={{ borderRadius: 3, flexShrink: 0 }}
+          onError={(e) => {
+            e.currentTarget.style.visibility = 'hidden';
           }}
-        >
-          {tab.title}
-        </span>
-        <span
+        />
+        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
+          <span
+            style={{
+              fontSize: 12.5,
+              color: token.colorText,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {tab.title}
+          </span>
+          <span
+            style={{
+              fontSize: 11,
+              color: token.colorTextTertiary,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {tab.hostname}
+          </span>
+        </div>
+      </button>
+      {hover && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          aria-label={`关闭标签页 ${tab.title}`}
           style={{
-            fontSize: 11,
+            all: 'unset',
+            cursor: 'pointer',
+            width: 18,
+            height: 18,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 4,
             color: token.colorTextTertiary,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
           }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = token.colorError)}
+          onMouseLeave={(e) => (e.currentTarget.style.color = token.colorTextTertiary)}
         >
-          {tab.hostname}
-        </span>
-      </div>
-    </button>
+          <X size={12} />
+        </button>
+      )}
+    </div>
   );
 }
 

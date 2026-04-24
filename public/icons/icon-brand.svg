@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <!-- 背景：清爽天空蓝 -> 嫩绿，体现“呼吸感的小树林” -->
+    <linearGradient id="grove-main-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A5F3FC"/>
+      <stop offset="100%" stop-color="#BBF7D0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 外层圆角背景 -->
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#grove-main-bg)"/>
+
+  <!-- 中间标签卡片：标签页的“归属地” -->
+  <path
+    d="M34 50C34 45.6 37.6 42 42 42H64L69 50H86C90.4 50 94 53.6 94 58V82C94 86.4 90.4 90 86 90H42C37.6 90 34 86.4 34 82V50Z"
+    fill="#F9FAFB"
+    stroke="#D1FAE5"
+    stroke-width="3"
+    stroke-linejoin="round"
+  />
+
+  <!-- 左侧小芽 -->
+  <path d="M54 80V66" stroke="#22C55E" stroke-width="3" stroke-linecap="round"/>
+  <path
+    d="M54 68
+       C50.8 67.0 48.5 64.8 47.8 62.0
+       C50.6 62.1 52.9 63.1 54.4 64.6Z"
+    fill="#BBF7D0"
+    stroke="#22C55E"
+    stroke-width="2"
+    stroke-linejoin="round"
+  />
+
+  <!-- 中间主树 -->
+  <path d="M64 82V60" stroke="#16A34A" stroke-width="3.2" stroke-linecap="round"/>
+  <circle cx="64" cy="56" r="6" fill="#4ADE80" stroke="#16A34A" stroke-width="2"/>
+
+  <!-- 右侧小芽 -->
+  <path d="M74 80V66" stroke="#22C55E" stroke-width="3" stroke-linecap="round"/>
+  <path
+    d="M74 68
+       C77.2 67.0 79.5 64.8 80.2 62.0
+       C77.4 62.1 75.1 63.1 73.6 64.6Z"
+    fill="#BBF7D0"
+    stroke="#22C55E"
+    stroke-width="2"
+    stroke-linejoin="round"
+  />
+
+  <!-- 地线：一条轻微弧线，承载这一簇标签树 -->
+  <path
+    d="M50 82C54 84 60 85 64 85C68 85 74 84 78 82"
+    stroke="#0F766E"
+    stroke-width="2"
+    stroke-linecap="round"
+  />
+</svg>

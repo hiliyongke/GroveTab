@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="grove-bg-a" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A5F3FC"/>
+      <stop offset="100%" stop-color="#BBF7D0"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#grove-bg-a)"/>
+
+  <path
+    d="M36 50C36 45.6 39.6 42 44 42H64L68 50H84C88.4 50 92 53.6 92 58V82C92 86.4 88.4 90 84 90H44C39.6 90 36 86.4 36 82V50Z"
+    fill="#F9FAFB"
+    stroke="#D1FAE5"
+    stroke-width="3"
+    stroke-linejoin="round"
+  />
+
+  <path d="M52 76V64" stroke="#0F766E" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="52" cy="60" r="4" fill="#22C55E"/>
+
+  <path d="M64 78V60" stroke="#0F766E" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="64" cy="56" r="5" fill="#16A34A"/>
+
+  <path d="M76 76V64" stroke="#0F766E" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="76" cy="60" r="4" fill="#22C55E"/>
+
+  <path
+    d="M48 80C52 82 60 83 64 83C68 83 76 82 80 80"
+    stroke="#0F766E"
+    stroke-width="2"
+    stroke-linecap="round"
+  />
+</svg>

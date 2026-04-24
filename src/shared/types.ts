@@ -73,7 +73,11 @@ export type StorageKey =
   | 'canopy_workspaces'
   | 'canopy_kanban'
   | 'canopy_og_index'
-  | 'canopy_auto_snapshot_meta';
+  | 'canopy_auto_snapshot_meta'
+  /** v1.3 新增：番茄钟会话持久化（跨 Tab/重启恢复 mode + elapsed + running） */
+  | 'canopy_pomodoro_state'
+  /** v1.3 新增：StickyWidget 多便签列表（最多 10 条，老的单条内容自动迁入首条） */
+  | 'canopy_sticky_notes';
 
 /** Storage metadata */
 export interface StorageMeta {
@@ -87,6 +91,103 @@ export type SearchScopeField = 'title' | 'hostname' | 'url';
 export type SearchSortMode = 'relevance' | 'recentAccess';
 export type SearchEngineId = 'google' | 'bing' | 'baidu' | 'duckduckgo';
 
+export type DashboardWidgetType =
+  | 'clock'
+  | 'weather'
+  | 'calendar'
+  | 'dailyQuote'
+  | 'speedDial'
+  | 'pomodoro'
+  | 'todo'
+  | 'sticky'
+  | 'countdown'
+  | 'workCountdown'
+  | 'searchBox'
+  | 'waterReminder'
+  | 'habitTracker'
+  | 'timestampTool'
+  | 'jsonFormatter'
+  | 'networkInfo';
+
+export interface HabitEntry {
+  id: string;
+  name: string;
+  emoji?: string;
+  /** YYYY-MM-DD 打卡日期集合 */
+  records: string[];
+}
+
+export interface WaterReminderState {
+  goalCups?: number;
+  currentCups?: number;
+  lastDate?: string;
+  intervalMinutes?: number;
+}
+
+export type DashboardQuoteCategory = 'aphorism' | 'renmin' | 'poetry' | 'essay' | 'custom';
+
+export interface DashboardWidgetLayoutItem {
+  id: string;
+  type: DashboardWidgetType;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  title?: string;
+}
+
+export interface SpeedDialLink {
+  id: string;
+  title: string;
+  url: string;
+  emoji?: string;
+  color?: string;
+}
+
+export interface SpeedDialGroup {
+  id: string;
+  name: string;
+  links: SpeedDialLink[];
+}
+
+export interface CustomQuoteEntry {
+  id: string;
+  text: string;
+  source: string;
+  category: 'custom';
+}
+
+export interface CountdownEntry {
+  id: string;
+  title: string;
+  targetDate: string;
+  emoji?: string;
+  description?: string;
+  color?: string;
+}
+
+export interface TodoEntry {
+  id: string;
+  text: string;
+  done: boolean;
+  /** 勾选完成时的时间戳，用于"已完成超 24h 自动折叠" */
+  completedAt?: number;
+}
+
+/** StickyNote 色板代号（配合 StickyWidget 多色升级，v1.3） */
+export type StickyNoteColor = 'yellow' | 'pink' | 'green' | 'blue' | 'purple';
+
+export interface StickyNoteEntry {
+  id: string;
+  title?: string;
+  content: string;
+  /**
+   * 兼容：旧数据可能是 #RGB 色值；v1.3 起改用 StickyNoteColor 代号。
+   * 读取时由 UI 层 `resolveStickyColor` 统一解析。
+   */
+  color?: string;
+}
+
 export interface UserSettings {
   overrideNewTab: boolean;
   defaultView: 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'bookmarks' | 'kanban';
@@ -98,8 +199,36 @@ export interface UserSettings {
    *   - 'skeuomorphism'  ：拟物风（锤子 UI / iOS 6 风格）
    *   - 'aurora'         ：极光流彩（暗色霓虹渐变风格）
    *   - 'elegant'        ：典雅新古典（衬线标题 + 金色描边 + 纸张质感）
+   *   - 'nord'           ：Nord 寒色调（深蓝青冷，深浅皆宜）
+   *   - 'solarized'      ：Solarized 太阳化（暖米 + 青黄对比）
    */
-  skinPreset?: 'minimal' | 'glassmorphism' | 'skeuomorphism' | 'aurora' | 'elegant';
+  skinPreset?: 'minimal' | 'glassmorphism' | 'skeuomorphism' | 'aurora' | 'elegant' | 'nord' | 'solarized';
+
+  /**
+   * UI Token 极客定制（v1.1 新增）：在皮肤预设基础上做单项覆盖。
+   *
+   * 与预设的关系：
+   *   最终 token = getSkinPreset(skinPreset) 的默认值  ×  本字段的 override
+   * 未设置的子字段 → 保留预设默认；设置的子字段 → 覆盖。
+   * 单独给极客用户用，普通用户切预设足矣。
+   *
+   * 字段约束：
+   *   - borderRadius：0-24（px），0 为尖角、24 为高圆角
+   *   - fontSize：12-16（px）基准字号
+   *   - controlHeight：24-40（px）
+   *   - borderWidth：0.5 / 1 / 1.5 / 2
+   *   - fontWeightBody / fontWeightHeading：300-800
+   *   - colorPrimary：覆盖皮肤主色（HEX）
+   */
+  skinCustom?: {
+    borderRadius?: number;
+    fontSize?: number;
+    controlHeight?: number;
+    borderWidth?: number;
+    fontWeightBody?: number;
+    fontWeightHeading?: number;
+    colorPrimary?: string;
+  };
   /**
    * 背景渐变预设：
    *   - 'default'   ：antd 默认色，最干净
@@ -207,6 +336,16 @@ export interface UserSettings {
   searchUseHistorySuggestions?: boolean;
   searchUseHotSuggestions?: boolean;
   /**
+   * 热词来源（v1.1 新增，精细化控制）：
+   *   - 'off'       ：关闭热词（不显示）
+   *   - 'local'     ：基于本地搜索历史聚合（默认，零网络）
+   *   - 'preset'    ：使用静态预设列表（老行为，作兜底）
+   *   - 'trending'  ：预留：未来接入公开热榜时使用；目前等同 off
+   *
+   * 当 searchUseHotSuggestions === false 时视为 off；否则默认 'local'。
+   */
+  hotSuggestionSource?: 'off' | 'local' | 'preset' | 'trending';
+  /**
    * 自定义快捷键映射（页面内快捷键）
    *   - key: KeybindingAction（'search' | 'exitSelection' | 'selectAll'）
    *   - value: 快捷键字符串（如 'Mod+k'、'Escape'、'Mod+a'）
@@ -284,6 +423,160 @@ export interface UserSettings {
     workspaceOverview?: boolean;
     tidySuggestion?: boolean;
     activityStrip?: boolean;
+    /**
+     * HeroWidgets（时钟/天气/日历）总开关。默认 true。
+     */
+    heroWidgets?: boolean;
+  };
+
+  /**
+   * HeroWidgets 精细配置：时钟 / 天气 / 日历 的每项子开关与布局模式。
+   * 仅在 `uiVisibility.heroWidgets !== false` 时生效。
+   */
+  heroWidgets?: {
+    /**
+     * 布局模式：
+     *   - 'trio'（默认）：水平三联（时钟 | 天气 | 日历）
+     *   - 'clockOnly'：仅展示时钟（极简）
+     *   - 'clockWeather'：仅时钟 + 天气
+     *   - 'hidden'：全部隐藏（等效于 uiVisibility.heroWidgets=false）
+     */
+    layout?: 'trio' | 'clockOnly' | 'clockWeather' | 'hidden';
+    /** 时钟开关 */
+    clock?: { enabled?: boolean; format24?: boolean; showSeconds?: boolean };
+    /**
+     * 天气配置：
+     *   - mode：'auto'（IP 自动定位）/ 'manual'（手动输入城市）/ 'off'
+     *   - city：mode=manual 时使用
+     *   - unit：'c'（摄氏）/'f'（华氏）
+     */
+    weather?: {
+      mode?: 'auto' | 'manual' | 'off';
+      city?: string;
+      unit?: 'c' | 'f';
+    };
+    /** 日历开关：是否显示农历/节日 */
+    calendar?: {
+      enabled?: boolean;
+      showLunar?: boolean;
+      showHolidays?: boolean;
+    };
+  };
+
+  /**
+   * 每日金句 Widget 配置（v1.2）。
+   * - enabled：显隐开关（默认 true）
+   * - categories：参与抽签的分类（多选；默认四类全开）
+   * - fontSize：正文字号（12–20，默认 15）
+   * - showSource：是否显示作者/出处（默认 true）
+   */
+  dailyQuote?: {
+    enabled?: boolean;
+    categories?: DashboardQuoteCategory[];
+    fontSize?: number;
+    showSource?: boolean;
+    customQuotes?: CustomQuoteEntry[];
+  };
+
+  /**
+   * 顶部 Widget 画布（开发阶段重构版）。
+   * - enabled：总开关
+   * - editMode：是否处于自由排版编辑态
+   * - columns：桌面端网格列数，默认 12
+   * - rowHeight：行高，默认 88
+   * - gap：栅格间距，默认 12
+   * - items：各 widget 的位置信息与尺寸
+   * - availableWidgets：控制“添加组件”抽屉里各类型的启用状态
+   */
+  dashboardWidgets?: {
+    enabled?: boolean;
+    editMode?: boolean;
+    columns?: number;
+    rowHeight?: number;
+    gap?: number;
+    items?: DashboardWidgetLayoutItem[];
+    availableWidgets?: Partial<Record<DashboardWidgetType, boolean>>;
+  };
+
+  /** 网站快捷模块配置 */
+  speedDial?: {
+    enabled?: boolean;
+    groups?: SpeedDialGroup[];
+    activeGroupId?: string;
+    openInNewTab?: boolean;
+    showLabels?: boolean;
+  };
+
+  /** 番茄钟配置 */
+  pomodoro?: {
+    enabled?: boolean;
+    focusMinutes?: number;
+    shortBreakMinutes?: number;
+    longBreakMinutes?: number;
+    autoStartBreak?: boolean;
+  };
+
+  /** 倒计时与纪念日配置 */
+  countdowns?: {
+    enabled?: boolean;
+    items?: CountdownEntry[];
+    showPastEvents?: boolean;
+  };
+
+  /** 上班人下班倒计时配置 */
+  workCountdown?: {
+    enabled?: boolean;
+    workdayEnd?: string;
+    offLabel?: string;
+  };
+
+  /** 待办 widget 配置 */
+  todoWidget?: {
+    enabled?: boolean;
+    items?: TodoEntry[];
+  };
+
+  /** 便签 widget 配置 */
+  stickyNotes?: {
+    enabled?: boolean;
+    items?: StickyNoteEntry[];
+  };
+
+  /** 喝水提醒 widget */
+  waterReminder?: WaterReminderState & { enabled?: boolean };
+
+  /** 习惯打卡 widget */
+  habitTracker?: {
+    enabled?: boolean;
+    items?: HabitEntry[];
+  };
+
+  /**
+   * 全局点击动效（v1.2）。
+   *   - 'off'（默认）：无动效
+   *   - 'ripple'   ：品牌色涟漪环
+   *   - 'sparkle'  ：星光散射
+   *   - 'confetti' ：彩纸爆裂
+   *   - 'petal'    ：樱花飘落
+   * reducedMotion 为 'on' 或系统偏好 reduce 时自动禁用。
+   */
+  clickEffect?: 'off' | 'ripple' | 'sparkle' | 'confetti' | 'petal';
+
+  /**
+   * 动态视频背景（v1.2）。
+   *   - type：'none'（默认） / 'url'（外部 URL） / 'file'（本地文件 → blob URL）
+   *   - src：视频地址（url 模式）
+   *   - objectUrl：文件模式下 IndexedDB 读取后生成的 blob URL（仅内存）
+   *   - fileKey：本地 IndexedDB 里的文件主键（用于二次启动时重新恢复）
+   *   - playbackRate：0.5 ~ 1.5，默认 1
+   *   - muted：默认 true（Chrome 要求 muted 才能 autoplay）
+   */
+  videoBackground?: {
+    type?: 'none' | 'url' | 'file';
+    src?: string;
+    fileKey?: string;
+    playbackRate?: number;
+    muted?: boolean;
   };
 
   // ── v1.0 封板新增字段 ──────────────────────────────

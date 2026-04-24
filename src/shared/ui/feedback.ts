@@ -19,6 +19,10 @@
 import type { MessageInstance } from 'antd/es/message/interface';
 import type { NotificationInstance } from 'antd/es/notification/interface';
 import type { HookAPI as ModalHookAPI } from 'antd/es/modal/useModal';
+import { BRAND } from '@/shared/config/brand';
+
+/** 统一日志前缀：在构建时从 BRAND 读取，后续品牌切换自动同步 */
+const LOG_TAG = BRAND.logTag;
 
 /** 由 React 层通过 useApp() 注入的 antd 实例 */
 interface FeedbackApi {
@@ -71,19 +75,19 @@ export const feedback = {
   success(content: string): void {
     const api = resolveApi();
     if (api !== null) api.message.success(content);
-    else console.info('[Canopy/feedback:success]', content);
+    else console.info(`${LOG_TAG}/feedback:success`, content);
   },
 
   info(content: string): void {
     const api = resolveApi();
     if (api !== null) api.message.info(content);
-    else console.info('[Canopy/feedback:info]', content);
+    else console.info(`${LOG_TAG}/feedback:info`, content);
   },
 
   warning(content: string): void {
     const api = resolveApi();
     if (api !== null) api.message.warning(content);
-    else console.warn('[Canopy/feedback:warning]', content);
+    else console.warn(`${LOG_TAG}/feedback:warning`, content);
   },
 
   /**
@@ -93,8 +97,8 @@ export const feedback = {
    * @param err      可选的原始错误，仅打到 console，不展示给用户
    */
   error(content: string, err?: unknown): void {
-    if (err !== undefined) console.warn('[Canopy/feedback:error]', content, err);
-    else console.warn('[Canopy/feedback:error]', content);
+    if (err !== undefined) console.warn(`${LOG_TAG}/feedback:error`, content, err);
+    else console.warn(`${LOG_TAG}/feedback:error`, content);
     const api = resolveApi();
     if (api !== null) api.message.error(content);
   },
@@ -106,7 +110,7 @@ export const feedback = {
     error(title: string, description?: string): void {
       const api = resolveApi();
       if (api !== null) api.notification.error({ message: title, description });
-      else console.warn('[Canopy/notify:error]', title, description);
+      else console.warn(`${LOG_TAG}/notify:error`, title, description);
     },
   },
 

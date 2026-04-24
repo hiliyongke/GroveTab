@@ -1,22 +1,22 @@
 {
   "appName": {
-    "message": "Canopy",
+    "message": "GroveTab",
     "description": "Extension name"
   },
   "appDescription": {
-    "message": "你的标签，一目了然 — 新标签页标签管理器",
+    "message": "GroveTab — 你的标签页，找到归属。按域名自动分组、秒搜、归档、全本地隐私。",
     "description": "Extension description"
   },
   "context_save_all": {
-    "message": "保存所有标签到 Canopy",
+    "message": "保存所有标签到 GroveTab",
     "description": "Context menu item for saving all tabs"
   },
   "newtab_title": {
-    "message": "Canopy — 新标签页",
+    "message": "GroveTab — 新标签页",
     "description": "New tab page title"
   },
   "popup_title": {
-    "message": "Canopy",
+    "message": "GroveTab",
     "description": "Popup page title"
   },
   "header_search": {
@@ -156,11 +156,11 @@
     "description": "Undo button text"
   },
   "onboarding_title": {
-    "message": "欢迎使用 Canopy",
+    "message": "欢迎使用 GroveTab",
     "description": "Onboarding card title"
   },
   "onboarding_desc": {
-    "message": "你的标签，一目了然。",
+    "message": "你的标签页，找到归属。",
     "description": "Onboarding card subtitle"
   },
   "onboarding_detail": {

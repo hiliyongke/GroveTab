@@ -136,6 +136,37 @@ export function ShortcutsPanel() {
   const customKeybindings = useSettingsStore((s) => s.settings.customKeybindings);
   const resolved = useResolvedKeybindings();
 
+  /**
+   * 冲突检测：把所有 key 字符串（归一化）映射到 action 列表，
+   * 一个 key 对应 >1 个 action 即视为冲突。
+   * 同时还检查是否撞上 Chrome 全局快捷键（Alt+C / Alt+Shift+S / Alt+K）。
+   */
+  const conflictMap = (() => {
+    const normalize = (k: string) => k.toLowerCase().replace(/\s+/g, '').replace(/mod/g, 'mod');
+    const map = new Map<string, KeybindingAction[]>();
+    for (const item of resolved) {
+      const key = normalize(item.keys);
+      const arr = map.get(key) ?? [];
+      arr.push(item.action);
+      map.set(key, arr);
+    }
+    const dupByAction = new Map<KeybindingAction, string>();
+    for (const [key, actions] of map.entries()) {
+      if (actions.length > 1) {
+        for (const a of actions) {
+          dupByAction.set(a, t('shortcuts.conflict', { peers: actions.filter((x) => x !== a).join(', ') }));
+        }
+      }
+      // 与全局快捷键冲突（全局快捷键在 Chrome 中始终生效，无法在页面内覆盖）
+      if (key === 'alt+k' || key === 'alt+c' || key === 'alt+shift+s') {
+        for (const a of actions) {
+          dupByAction.set(a, t('shortcuts.globalConflict'));
+        }
+      }
+    }
+    return dupByAction;
+  })();
+
   const handleRecord = useCallback((action: KeybindingAction, keyStr: string) => {
     const updated = { ...customKeybindings, [action]: keyStr };
     void updateSettings({ customKeybindings: updated });
@@ -201,6 +232,20 @@ export function ShortcutsPanel() {
                   {item.hint && (
                     <div style={{ fontSize: 11, color: token.colorTextTertiary, marginTop: 2 }}>
                       {t(item.hint)}
+                    </div>
+                  )}
+                  {conflictMap.has(item.action) && (
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: token.colorErrorText,
+                        marginTop: 4,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                      }}
+                    >
+                      ⚠ {conflictMap.get(item.action)}
                     </div>
                   )}
                 </div>

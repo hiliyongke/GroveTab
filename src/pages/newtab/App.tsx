@@ -48,6 +48,8 @@ import { DomainGroupView } from '@/features/tabs/DomainGroupView';
 import { TidySuggestionBar } from '@/features/tabs/TidySuggestionBar';
 import { BatchActionBar } from '@/features/tabs/BatchActionBar';
 import { SelectionModeNotice } from '@/features/tabs/SelectionModeNotice';
+import { BRAND, getBrandDisplayName, getBrandSlogan } from '@/shared/config/brand';
+import { DashboardWidgets } from '@/features/dashboard-widgets/DashboardWidgets';
 
 /** 懒加载非默认视图——直接导入文件而非 barrel，确保每个视图独立拆 chunk */
 const TimelineView = lazy(() => import('@/features/tabs/TimelineView').then((m) => ({ default: m.TimelineView })));
@@ -77,6 +79,10 @@ const InsightsPanel = lazy(() => import('@/features/insights/InsightsPanel'));
 const SearchBox = lazy(() => import('@/features/search/SearchBox').then((m) => ({ default: m.SearchBox })));
 const ArchivePanel = lazy(() => import('@/features/sessions/ArchivePanel').then((m) => ({ default: m.ArchivePanel })));
 const SettingsPanel = lazy(() => import('@/features/settings/SettingsPanel').then((m) => ({ default: m.SettingsPanel })));
+// ClickEffectLayer —— 点击动效 Canvas 图层，默认 off 时不拉取 chunk。
+const ClickEffectLayer = lazy(() => import('@/features/effects/ClickEffectLayer').then((m) => ({ default: m.ClickEffectLayer })));
+// VideoBackground —— 视频背景层，zIndex:-1；默认 none 时不拉取 chunk。
+const VideoBackground = lazy(() => import('@/features/effects/VideoBackground').then((m) => ({ default: m.VideoBackground })));
 
 /** 注册所有视图到 ViewRegistry —— 新增视图只需在此添加一条 */
 registerViews([
@@ -171,23 +177,16 @@ function AppHeader({
     >
       {/* 左侧：小 logo + 状态摘要 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-        <div
+        <img
+          src="/icons/logo.png"
+          alt={BRAND.name}
           style={{
             width: 24,
             height: 24,
-            borderRadius: 7,
-            background: 'var(--canopy-logo-gradient)',
-            color: '#fff',
-            fontWeight: 700,
-            fontSize: 11,
-            letterSpacing: '-0.02em',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            borderRadius: 6,
+            objectFit: 'cover',
           }}
-        >
-          C
-        </div>
+        />
         {/* 状态徽标 */}
         <Tag
           color={hasTidySuggestions ? 'gold' : 'green'}
@@ -356,8 +355,12 @@ function HeroBar({
   sentinelRef: React.RefObject<HTMLDivElement | null>;
   showViewSwitcher: boolean;
 }) {
-  const { t } = useT();
+  const { t, locale } = useT();
   const { token } = antdTheme.useToken();
+
+  /** 品牌身份：名称 + slogan 均来自 BRAND 配置层，切换品牌无需改此处 */
+  const brandName = getBrandDisplayName(locale);
+  const brandSlogan = getBrandSlogan(locale);
 
   /**
    * Segmented 视图切换 options。
@@ -398,39 +401,53 @@ function HeroBar({
         gap: 16,
       }}
     >
-      {/* 品牌 Logo —— 居中展示，参考微软新标签页 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 10,
-            background: 'var(--canopy-logo-gradient)',
-            color: '#fff',
-            fontWeight: 800,
-            fontSize: 17,
-            letterSpacing: '-0.03em',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: 'var(--canopy-logo-glow)',
-          }}
-        >
-          C
+      {/* DashboardWidgets —— 自由排版的顶部工作台，承载时钟/天气/日历/金句/快捷网站等小组件 */}
+      <DashboardWidgets />
+      {/* 品牌 Logo —— 居中展示，参考微软新标签页
+          所有内容通过 BRAND 配置层读取，切换品牌预设即可整站换装 */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 6,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <img
+            src="/icons/logo.png"
+            alt={BRAND.name}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 8,
+              objectFit: 'cover',
+            }}
+          />
+          <span
+            style={{
+              fontSize: 20,
+              fontWeight: 700,
+              letterSpacing: '-0.02em',
+              color: 'var(--canopy-text-primary)',
+            }}
+          >
+            {brandName}
+          </span>
         </div>
-        <span
-          style={{
-            fontSize: 20,
-            fontWeight: 700,
-            letterSpacing: '-0.02em',
-            background: 'var(--canopy-logo-gradient)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-          }}
-        >
-          Canopy
-        </span>
+        {/* Slogan —— 低调次级展示，字号控制在 12px，避免喧宾夺主 */}
+        {brandSlogan !== '' && (
+          <span
+            style={{
+              fontSize: 12,
+              color: token.colorTextTertiary,
+              letterSpacing: '0.01em',
+              lineHeight: 1.4,
+            }}
+          >
+            {brandSlogan}
+          </span>
+        )}
       </div>
 
       {/* 搜索框 —— 超宽居中，大圆角 + 品牌辉光
@@ -494,7 +511,19 @@ function AppContent() {
   const [initError, setInitError] = useState<string | null>(null);
   const [initRunId, setInitRunId] = useState(0);
   const [showArchive, setShowArchive] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  /**
+   * 若 URL hash 为 #about，则初始直接打开 Settings 抽屉并切到 About Tab。
+   * 打开后清理 hash，避免刷新时再次弹出。
+   */
+  const [initialSettingsTab] = useState<'appearance' | 'about'>(() => {
+    if (typeof window === 'undefined') return 'appearance';
+    if (window.location.hash === '#about') {
+      history.replaceState(null, '', window.location.pathname);
+      return 'about';
+    }
+    return 'appearance';
+  });
+  const [showSettings, setShowSettings] = useState(initialSettingsTab === 'about');
   const [showInsights, setShowInsights] = useState(false);
   /** 记录最近归档首条，供 Dashboard Overview "最近归档"卡片显示 */
   const [latestArchive, setLatestArchive] = useState<ArchivedSession | null>(null);
@@ -646,7 +675,7 @@ function AppContent() {
   }, [initRunId, loadAllTabs, loadMetadata, loadSettings, loadUndoRecords, syncArchiveSummary, t]);
 
   /** 页面内快捷键：通过可配置的 useKeybinding hook 注册 */
-  useKeybinding('search', useCallback(() => setShowSearch(true), []));
+  useKeybinding('search', useCallback(() => setShowSearch((v) => !v), []));
 
   /**
    * 多选快捷键
@@ -951,7 +980,7 @@ function AppContent() {
       <Suspense fallback={null}>
         <SearchBox open={showSearch} onOpenChange={setShowSearch} />
         <ArchivePanel open={showArchive} onOpenChange={handleArchivePanelOpenChange} onSessionsChange={syncArchiveSummary} />
-        <SettingsPanel open={showSettings} onOpenChange={setShowSettings} />
+          <SettingsPanel open={showSettings} onOpenChange={setShowSettings} defaultActiveTab={initialSettingsTab} />
         <InsightsPanel open={showInsights} onClose={() => setShowInsights(false)} />
       </Suspense>
     </Layout>
@@ -962,9 +991,17 @@ function App() {
   return (
     <I18nProvider>
       <AntdThemeProvider>
+        {/* 视频背景层：zIndex:-1，位于最底；不影响其它交互 */}
+        <Suspense fallback={null}>
+          <VideoBackground />
+        </Suspense>
         <ErrorBoundary label="AppContent">
           <AppContent />
         </ErrorBoundary>
+        {/* 全局点击动效层：lazy 按需加载，默认关闭时不渲染 Canvas */}
+        <Suspense fallback={null}>
+          <ClickEffectLayer />
+        </Suspense>
       </AntdThemeProvider>
     </I18nProvider>
   );

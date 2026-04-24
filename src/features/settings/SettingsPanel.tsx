@@ -5,6 +5,7 @@
  *   - Drawer 外壳（placement="right"）
  *   - Tabs 导航组装
  *   - 向各子面板传递 settings / updateSettings
+ *   - 支持受控激活 Tab（defaultActiveTab），便于从外部 hash（#about）直接切到指定 Tab
  */
 
 import { Drawer, Tabs } from 'antd';
@@ -13,6 +14,9 @@ import {
   SlidersHorizontal,
   Database,
   KeyRound,
+  Info,
+  LayoutGrid,
+  Quote,
 } from 'lucide-react';
 import { useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
@@ -20,13 +24,18 @@ import { AppearancePanel } from './panels/AppearancePanel';
 import { BehaviorPanel } from './panels/BehaviorPanel';
 import { DataPanel } from './panels/DataPanel';
 import { ShortcutsPanel } from './panels/ShortcutsPanel';
+import { AboutPanel } from './panels/AboutPanel';
+import { WidgetsPanel } from './panels/WidgetsPanel';
+import { QuotesPanel } from './panels/QuotesPanel';
 
 interface SettingsPanelProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** 初始激活的 Tab（可选），支持 'appearance' | 'behavior' | 'data' | 'shortcuts' | 'about'。 */
+  defaultActiveTab?: string;
 }
 
-export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
+export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearance' }: SettingsPanelProps) {
   const settings = useSettingsStore((s) => s.settings);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const { t } = useT();
@@ -41,7 +50,7 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
       destroyOnHidden
     >
       <Tabs
-        defaultActiveKey="appearance"
+        defaultActiveKey={defaultActiveTab}
         items={[
           {
             key: 'appearance',
@@ -62,6 +71,24 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
             children: <BehaviorPanel settings={settings} updateSettings={updateSettings} />,
           },
           {
+            key: 'widgets',
+            label: (
+              <span>
+                <LayoutGrid size={14} /> 小组件
+              </span>
+            ),
+            children: <WidgetsPanel />,
+          },
+          {
+            key: 'quotes',
+            label: (
+              <span>
+                <Quote size={14} /> 金句
+              </span>
+            ),
+            children: <QuotesPanel />,
+          },
+          {
             key: 'data',
             label: (
               <span>
@@ -78,6 +105,15 @@ export function SettingsPanel({ open, onOpenChange }: SettingsPanelProps) {
               </span>
             ),
             children: <ShortcutsPanel />,
+          },
+          {
+            key: 'about',
+            label: (
+              <span>
+                <Info size={14} /> {t('settings.about')}
+              </span>
+            ),
+            children: <AboutPanel />,
           },
         ]}
       />

@@ -21,6 +21,10 @@ import {
   saveAutoSnapshotMeta,
 } from '@/repositories';
 import type { StatsData, StatsRecord } from '@/shared/types';
+import { BRAND } from '@/shared/config/brand';
+
+/** 统一日志前缀：SW 内所有 console.log/warn/error 都走 SW_LOG_TAG */
+const SW_LOG_TAG = `${BRAND.logTag} SW`;
 
 /** 上一次轮询时的 tab discarded 状态缓存，用于检测 discard 变化 */
 const cachedTabDiscardedState = new Map<number, boolean>();
@@ -97,7 +101,7 @@ async function flushStats(force = false): Promise<void> {
     existing.lastFlushAt = Date.now();
     await saveStats(existing);
   } catch (err) {
-    console.warn('[Canopy SW] flushStats failed', err);
+        console.warn(`${SW_LOG_TAG} flushStats failed`, err);
   }
 }
 
@@ -187,7 +191,7 @@ chrome.windows.onFocusChanged.addListener((windowId) => {
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: 'canopy-save-all',
-    title: chrome.i18n.getMessage('context_save_all') || 'Save all tabs to Canopy',
+    title: chrome.i18n.getMessage('context_save_all') || `Save all tabs to ${BRAND.name}`,
     contexts: ['action'],
   });
 });
@@ -198,22 +202,22 @@ chrome.contextMenus.onClicked.addListener((info) => {
       try {
         await archiveCurrentWindowTabs();
       } catch (err) {
-        console.error('[Canopy SW] Save all tabs failed:', err);
+        console.error(`${SW_LOG_TAG} Save all tabs failed:`, err);
       }
     }
   })();
 });
 
-// ── 全局快捷键 ────────────────────────────────────────
+// ── 全局快捷键 ──────────────────────────────────
 
 chrome.commands.onCommand.addListener((command) => {
   void (async () => {
-    if (command === 'open-canopy') {
+    if (command === 'open-grovetab') {
       try {
         const url = chrome.runtime.getURL('src/pages/newtab/index.html');
         await chrome.tabs.create({ url });
       } catch (err) {
-        console.error('[Canopy SW] Open Canopy failed:', err);
+        console.error(`${SW_LOG_TAG} Open ${BRAND.name} failed:`, err);
       }
     }
 
@@ -221,7 +225,7 @@ chrome.commands.onCommand.addListener((command) => {
       try {
         await archiveCurrentWindowTabs();
       } catch (err) {
-        console.error('[Canopy SW] Save all (command) failed:', err);
+        console.error(`${SW_LOG_TAG} Save all (command) failed:`, err);
       }
     }
 
@@ -230,12 +234,11 @@ chrome.commands.onCommand.addListener((command) => {
         const url = chrome.runtime.getURL('src/pages/newtab/index.html#search');
         await chrome.tabs.create({ url });
       } catch (err) {
-        console.error('[Canopy SW] Toggle search failed:', err);
+        console.error(`${SW_LOG_TAG} Toggle search failed:`, err);
       }
     }
   })();
 });
-
 // ── Alarms ────────────────────────────────────────────
 
 void chrome.alarms.create('canopy-stats-heartbeat', { periodInMinutes: 1 });
@@ -275,10 +278,10 @@ async function autoSnapshotIfNeeded(): Promise<void> {
     const created = await createAutoSnapshot(nonPinned);
     if (created !== null) {
       await saveAutoSnapshotMeta({ lastSnapshotAt: now });
-      console.log('[Canopy SW] auto snapshot created', created.id);
+      console.log(`${SW_LOG_TAG} auto snapshot created`, created.id);
     }
   } catch (err) {
-    console.warn('[Canopy SW] auto snapshot failed', err);
+    console.warn(`${SW_LOG_TAG} auto snapshot failed`, err);
   }
 }
 
@@ -312,11 +315,11 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 // ── Lifecycle ─────────────────────────────────────────
 
 self.addEventListener('install', () => {
-  console.log('[Canopy SW] Installed');
+  console.log(`${SW_LOG_TAG} Installed`);
 });
 
 self.addEventListener('activate', () => {
-  console.log('[Canopy SW] Activated');
+  console.log(`${SW_LOG_TAG} Activated`);
 });
 
 /**
@@ -455,7 +458,7 @@ chrome.windows.onFocusChanged.addListener((windowId) => {
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: 'canopy-save-all',
-    title: chrome.i18n.getMessage('context_save_all') || 'Save all tabs to Canopy',
+    title: chrome.i18n.getMessage('context_save_all') || `Save all tabs to ${BRAND.name}`,
     contexts: ['action'],
   });
 });
@@ -466,23 +469,23 @@ chrome.contextMenus.onClicked.addListener((info) => {
       try {
         await archiveCurrentWindowTabs();
       } catch (err) {
-        console.error('[Canopy SW] Save all tabs failed:', err);
+        console.error(`${SW_LOG_TAG} Save all tabs failed:`, err);
       }
     }
   })();
 });
 
-// ── 全局快捷键 ────────────────────────────────────────
+// ── 全局快捷键 ──────────────────────────────────
 
 chrome.commands.onCommand.addListener((command) => {
   void (async () => {
-    if (command === 'open-canopy') {
-      /** 在当前窗口打开 Canopy 新标签页 */
+    if (command === 'open-grovetab') {
+      /** 在当前窗口打开 GroveTab 新标签页 */
       try {
         const url = chrome.runtime.getURL('src/pages/newtab/index.html');
         await chrome.tabs.create({ url });
       } catch (err) {
-        console.error('[Canopy SW] Open Canopy failed:', err);
+        console.error(`${SW_LOG_TAG} Open ${BRAND.name} failed:`, err);
       }
     }
 
@@ -491,22 +494,21 @@ chrome.commands.onCommand.addListener((command) => {
       try {
         await archiveCurrentWindowTabs();
       } catch (err) {
-        console.error('[Canopy SW] Save all (command) failed:', err);
+        console.error(`${SW_LOG_TAG} Save all (command) failed:`, err);
       }
     }
 
     if (command === 'toggle-search') {
-      /** 打开 Canopy 并聚焦搜索框——通过 URL hash 传递信号 */
+      /** 打开 GroveTab 并聚焦搜索框——通过 URL hash 传递信号 */
       try {
         const url = chrome.runtime.getURL('src/pages/newtab/index.html#search');
         await chrome.tabs.create({ url });
       } catch (err) {
-        console.error('[Canopy SW] Toggle search failed:', err);
+        console.error(`${SW_LOG_TAG} Toggle search failed:`, err);
       }
     }
   })();
 });
-
 // ── Alarms ────────────────────────────────────────────
 
 void chrome.alarms.create('canopy-stats-heartbeat', { periodInMinutes: 1 });
@@ -521,9 +523,9 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 // ── Lifecycle ─────────────────────────────────────────
 
 self.addEventListener('install', () => {
-  console.log('[Canopy SW] Installed');
+  console.log(`${SW_LOG_TAG} Installed`);
 });
 
 self.addEventListener('activate', () => {
-  console.log('[Canopy SW] Activated');
+  console.log(`${SW_LOG_TAG} Activated`);
 });

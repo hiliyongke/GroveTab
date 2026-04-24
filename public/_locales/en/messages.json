@@ -1,22 +1,22 @@
 {
   "appName": {
-    "message": "Canopy",
+    "message": "GroveTab",
     "description": "Extension name"
   },
   "appDescription": {
-    "message": "Your tabs at a glance — New Tab tab manager",
+    "message": "GroveTab — where your tabs find their place. Auto-grouping, instant search, archive & 100% local.",
     "description": "Extension description"
   },
   "context_save_all": {
-    "message": "Save all tabs to Canopy",
+    "message": "Save all tabs to GroveTab",
     "description": "Context menu item for saving all tabs"
   },
   "newtab_title": {
-    "message": "Canopy — New Tab",
+    "message": "GroveTab — New Tab",
     "description": "New tab page title"
   },
   "popup_title": {
-    "message": "Canopy",
+    "message": "GroveTab",
     "description": "Popup page title"
   },
   "header_search": {
@@ -156,11 +156,11 @@
     "description": "Undo button text"
   },
   "onboarding_title": {
-    "message": "Welcome to Canopy",
+    "message": "Welcome to GroveTab",
     "description": "Onboarding card title"
   },
   "onboarding_desc": {
-    "message": "Your tabs at a glance.",
+    "message": "Where your tabs find their place.",
     "description": "Onboarding card subtitle"
   },
   "onboarding_detail": {

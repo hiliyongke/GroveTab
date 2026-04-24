@@ -3,6 +3,7 @@
  */
 
 import type { ArchivedSession, ArchivedTab } from '@/shared/types';
+import { BRAND } from '@/shared/config/brand';
 
 const CURRENT_EXPORT_VERSION = 1;
 const MAX_IMPORT_SESSIONS = 500;
@@ -174,7 +175,7 @@ export function parseImportJSON(text: string): { sessions: ArchivedSession[]; er
  * Markdown 导出：`## 会话名` + `- [title](url)`。
  */
 export function exportSessionsMarkdown(sessions: ArchivedSession[]): string {
-  const lines: string[] = [`# Canopy \u5f52\u6863 \u00b7 ${new Date().toLocaleString()}`, ''];
+  const lines: string[] = [`# ${BRAND.name} 归档 · ${new Date().toLocaleString()}`, ''];
   for (const s of sessions) {
     lines.push(`## ${s.name}`);
     for (const tab of s.tabs) {
@@ -206,7 +207,7 @@ export function exportSessionsHTML(sessions: ArchivedSession[]): string {
     '<!DOCTYPE NETSCAPE-Bookmark-file-1>',
     '<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">',
     '<TITLE>Bookmarks</TITLE>',
-    '<H1>Canopy Export</H1>',
+    `<H1>${BRAND.name} Export</H1>`,
     '<DL><p>',
   ];
   for (const s of sessions) {

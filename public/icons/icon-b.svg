@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="grove-bg-b" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#grove-bg-b)"/>
+
+  <path
+    d="M40 56C40 51.6 43.6 48 48 48H64L68 56H80C84.4 56 88 59.6 88 64V80C88 84.4 84.4 88 80 88H48C43.6 88 40 84.4 40 80V56Z"
+    fill="none"
+    stroke="#E5E7EB"
+    stroke-width="3"
+    stroke-linejoin="round"
+  />
+
+  <path d="M64 80V62" stroke="#A7F3D0" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="64" cy="58" r="6" fill="#22C55E"/>
+
+  <path
+    d="M52 80C56 82 60 83 64 83C68 83 72 82 76 80"
+    stroke="#334155"
+    stroke-width="2"
+    stroke-linecap="round"
+  />
+</svg>

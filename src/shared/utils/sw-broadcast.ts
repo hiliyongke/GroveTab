@@ -6,6 +6,7 @@
  */
 
 import type { SwBroadcastMessage, SwBroadcastType } from '@/shared/types';
+import { BRAND } from '@/shared/config/brand';
 
 const CHANNEL_NAME = 'canopy-sw-broadcast';
 
@@ -33,6 +34,6 @@ export function swBroadcast(type: SwBroadcastType, payload: Record<string, unkno
     getChannel().postMessage(message);
   } catch (err) {
     // BroadcastChannel 在某些上下文（如非 extension 页面）可能报错，静默忽略
-    console.warn('[Canopy] swBroadcast failed:', err);
+    console.warn(`${BRAND.logTag} swBroadcast failed:`, err);
   }
 }
