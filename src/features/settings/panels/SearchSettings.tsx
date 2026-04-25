@@ -17,9 +17,9 @@
 import { Select, Segmented, Switch, Checkbox, Button, Popconfirm } from 'antd';
 import type { SearchEngineId, SearchScopeField, UserSettings } from '@/shared/types';
 import { useT } from '@/shared/i18n';
-import { SEARCH_ENGINE_OPTIONS } from '@/shared/config/searchEngines';
+import { SEARCH_ENGINE_OPTIONS } from '@/shared/config/search-engines';
 import { Field } from '../components/Field';
-import { setData } from '@/repositories/storageRepo';
+import { setData } from '@/repositories/storage-repo';
 import { feedback } from '@/shared/ui/feedback';
 
 interface SearchSettingsProps {

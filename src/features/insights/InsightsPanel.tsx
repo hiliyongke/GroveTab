@@ -11,7 +11,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { Modal, Button, Card, Row, Col, Typography, theme, Popconfirm, message } from 'antd';
+import { Modal, Button, Card, Row, Col, Typography, theme, Popconfirm } from 'antd';
 import type { MetricEvent, StatsData } from '@/shared/types';
 import {
   getMetrics,
@@ -22,12 +22,21 @@ import {
   saveStats,
 } from '@/repositories';
 import { useT } from '@/shared/i18n';
+import { feedback } from '@/shared/ui/feedback';
 
 const { Text, Title } = Typography;
 
 interface InsightsPanelProps {
   open: boolean;
   onClose: () => void;
+}
+
+/** 校验 StatsData 结构完整性，防止 daily 缺失导致迭代报错 */
+function isValidStatsData(data: StatsData | undefined | null): data is StatsData {
+  if (data == null) return false;
+  if (!Array.isArray(data.daily)) return false;
+  if (typeof data.lastFlushAt !== 'number') return false;
+  return true;
 }
 
 export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
@@ -40,8 +49,8 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
     if (!open) return;
     void (async () => {
       const [m, s] = await Promise.all([getMetrics(), getStats()]);
-      setMetrics(m);
-      setStats(s ?? null);
+      setMetrics(Array.isArray(m) ? m : []);
+      setStats(isValidStatsData(s) ? s : null);
     })();
   }, [open]);
 
@@ -65,9 +74,10 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
 
   /** Top 10 访问域名 */
   const topDomains = useMemo(() => {
-    if (!stats) return [];
+    if (stats?.daily == null) return [];
     const counts = new Map<string, number>();
     for (const record of stats.daily) {
+      if (record?.counts == null) continue;
       for (const [url, c] of Object.entries(record.counts)) {
         try {
           const host = new URL(url).hostname;
@@ -115,10 +125,10 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
       await clearActivity();
       setMetrics([]);
       setStats(null);
-      message.success(t('insights.cleared'));
+      feedback.success(t('insights.cleared'));
     } catch (err) {
       console.warn('[insights] clear failed', err);
-      message.error(t('insights.clearFailed'));
+      feedback.error(t('insights.clearFailed'));
     }
   };
 
