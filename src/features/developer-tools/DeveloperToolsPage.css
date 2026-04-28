@@ -1,0 +1,430 @@
+/**
+ * 开发工具栏页面样式
+ *
+ * 采用紧凑型开发者工作台布局，避免大面积空白和笨重卡片。
+ */
+
+.devtools-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px 0 10px;
+}
+
+.devtools-shell {
+  border: 1px solid var(--canopy-hairline);
+  border-radius: 22px;
+  background: var(--canopy-glass-bg);
+  box-shadow: var(--canopy-shadow-card);
+  overflow: hidden;
+}
+
+.devtools-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  padding: 18px 20px 16px;
+  border-bottom: 1px solid var(--canopy-hairline);
+}
+
+.devtools-title-row,
+.devtools-brand,
+.devtools-stats,
+.devtools-toolbar,
+.devtools-category-label,
+.devtools-card-title,
+.devtools-panel-title,
+.devtools-actions,
+.devtools-privacy {
+  display: flex;
+  align-items: center;
+}
+
+.devtools-title-row {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.devtools-brand {
+  gap: 10px;
+  min-width: 0;
+}
+
+.devtools-logo {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--ant-color-primary-bg);
+  color: var(--ant-color-primary);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.28);
+  flex-shrink: 0;
+}
+
+.devtools-subtitle {
+  margin-top: 8px;
+  max-width: 760px;
+  color: var(--ant-color-text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.devtools-stats {
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.devtools-stat {
+  min-width: 76px;
+  padding: 8px 10px;
+  border: 1px solid var(--canopy-hairline);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--ant-color-bg-container) 72%, transparent);
+  text-align: right;
+}
+
+.devtools-stat-value {
+  display: block;
+  color: var(--ant-color-text);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.devtools-stat-label {
+  display: block;
+  margin-top: 4px;
+  color: var(--ant-color-text-tertiary);
+  font-size: 10px;
+}
+
+.devtools-toolbar {
+  gap: 10px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--canopy-hairline);
+}
+
+.devtools-segmented {
+  min-width: 0;
+  flex: 1;
+  overflow: auto;
+}
+
+.devtools-search {
+  width: min(280px, 28vw);
+  flex-shrink: 0;
+}
+
+.devtools-workbench {
+  display: grid;
+  grid-template-columns: minmax(420px, 1fr) minmax(420px, 520px);
+  gap: 0;
+  min-height: 560px;
+}
+
+.devtools-list-pane {
+  padding: 16px;
+  border-right: 1px solid var(--canopy-hairline);
+}
+
+.devtools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 10px;
+  align-content: start;
+}
+
+.devtools-card {
+  width: 100%;
+  min-height: 96px;
+  padding: 13px 14px;
+  border: 1px solid var(--canopy-hairline);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--ant-color-bg-container) 82%, transparent);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+}
+
+.devtools-card:hover,
+.devtools-card:focus-visible {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--ant-color-primary) 36%, var(--canopy-hairline));
+  box-shadow: var(--canopy-shadow-card-hover, var(--canopy-shadow-card));
+  outline: none;
+}
+
+.devtools-card.is-selected {
+  border-color: var(--ant-color-primary);
+  background: color-mix(in srgb, var(--ant-color-primary-bg) 72%, var(--ant-color-bg-container));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ant-color-primary) 22%, transparent);
+}
+
+.devtools-card-head {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.devtools-card-icon {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  background: var(--ant-color-primary-bg);
+  color: var(--ant-color-primary);
+}
+
+.devtools-card-title {
+  gap: 6px;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.devtools-card-desc {
+  margin-top: 5px;
+  color: var(--ant-color-text-secondary);
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+
+.devtools-local-badge {
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: var(--ant-color-success-bg);
+  color: var(--ant-color-success);
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.devtools-card-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.devtools-fav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  color: var(--ant-color-text-tertiary);
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.devtools-fav-btn:hover {
+  color: #ff4d4f;
+  background: rgba(255, 77, 79, 0.08);
+}
+
+.devtools-fav-btn.is-active {
+  color: #ff4d4f;
+}
+
+.devtools-panel-pane {
+  padding: 16px;
+  background: color-mix(in srgb, var(--ant-color-bg-layout) 42%, transparent);
+}
+
+.devtools-panel-card {
+  position: sticky;
+  top: 72px;
+  border: 1px solid var(--canopy-hairline);
+  border-radius: 18px;
+  background: var(--canopy-glass-bg);
+  box-shadow: var(--canopy-shadow-card);
+  overflow: hidden;
+}
+
+.devtools-panel-head {
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--canopy-hairline);
+}
+
+.devtools-panel-title {
+  gap: 9px;
+  min-width: 0;
+}
+
+.devtools-panel-icon {
+  color: var(--ant-color-primary);
+}
+
+.devtools-panel-desc {
+  margin-top: 8px;
+  color: var(--ant-color-text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.devtools-panel-body {
+  padding: 16px 18px 18px;
+}
+
+.devtools-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.devtools-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.devtools-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.devtools-field-label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--ant-color-text-secondary);
+  font-size: 11px;
+}
+
+.devtools-actions {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.devtools-output {
+  border: 1px solid var(--canopy-hairline);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--ant-color-bg-container) 88%, transparent);
+  overflow: hidden;
+}
+
+.devtools-output-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--canopy-hairline);
+}
+
+.devtools-output-body {
+  max-height: 320px;
+  overflow: auto;
+  padding: 10px;
+}
+
+.devtools-pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--ant-color-text);
+  font-size: 12px;
+  line-height: 1.55;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.devtools-diff-line {
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.devtools-diff-line.is-add {
+  color: #1a7f37;
+  background: rgba(26, 127, 55, 0.08);
+}
+
+.devtools-diff-line.is-remove {
+  color: #cf222e;
+  background: rgba(207, 34, 46, 0.08);
+}
+
+.devtools-color-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.devtools-color-swatch {
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--canopy-hairline);
+  border-radius: 13px;
+  flex-shrink: 0;
+}
+
+.devtools-error {
+  padding: 9px 11px;
+  border: 1px solid var(--ant-color-error-border);
+  border-radius: 12px;
+  background: var(--ant-color-error-bg);
+}
+
+.devtools-privacy {
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 0 0;
+  color: var(--ant-color-text-tertiary);
+  font-size: 11px;
+}
+
+@media (max-width: 980px) {
+  .devtools-hero,
+  .devtools-workbench {
+    grid-template-columns: 1fr;
+  }
+
+  .devtools-list-pane {
+    border-right: 0;
+    border-bottom: 1px solid var(--canopy-hairline);
+  }
+
+  .devtools-panel-card {
+    position: static;
+  }
+
+  .devtools-search {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .devtools-page {
+    padding-top: 16px;
+  }
+
+  .devtools-toolbar,
+  .devtools-hero,
+  .devtools-list-pane,
+  .devtools-panel-pane {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .devtools-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .devtools-grid,
+  .devtools-two-col {
+    grid-template-columns: 1fr;
+  }
+}

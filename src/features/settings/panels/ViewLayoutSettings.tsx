@@ -11,7 +11,7 @@
  */
 
 import { Select, Segmented, Switch } from 'antd';
-import type { UserSettings } from '@/shared/types';
+import type { NewtabPageMode, UserSettings } from '@/shared/types';
 import { useT } from '@/shared/i18n';
 import { VIEW_CONFIGS } from '@/shared/config/views';
 import { Field } from '../components/Field';
@@ -38,10 +38,12 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
         <Segmented
           block
           value={settings.newtabPageMode ?? 'workspace'}
-          onChange={(value) => handleSetting({ newtabPageMode: value as 'workspace' | 'fishpond' })}
+          onChange={(value) => handleSetting({ newtabPageMode: value as NewtabPageMode })}
           options={[
             { value: 'workspace', label: t('pageMode.workspace') },
             { value: 'fishpond', label: t('pageMode.fishpond') },
+            { value: 'trending', label: t('pageMode.trending') },
+            { value: 'devtools', label: t('pageMode.devtools') },
           ]}
         />
       </Field>

@@ -190,11 +190,11 @@ export interface StickyNoteEntry {
   color?: string;
 }
 
-export type NewtabPageMode = 'workspace' | 'fishpond' | 'trending';
+export type NewtabPageMode = 'workspace' | 'fishpond' | 'trending' | 'devtools';
 
 export interface UserSettings {
   overrideNewTab: boolean;
-  /** 新标签页一级空间：workspace 专注标签整理；fishpond 承载个性化与小组件。 */
+  /** 新标签页一级空间：workspace 专注标签整理；fishpond 承载个性化与小组件；trending 全网热榜；devtools 开发工具栏。 */
   newtabPageMode?: NewtabPageMode;
   defaultView: 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'bookmarks' | 'kanban';
   theme: 'light' | 'dark' | 'system';

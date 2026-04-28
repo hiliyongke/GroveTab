@@ -52,6 +52,7 @@ import { SelectionModeNotice } from '@/features/tabs/SelectionModeNotice';
 import { BRAND, getBrandDisplayName, getBrandSlogan } from '@/shared/config/brand';
 import { FishPondPage } from '@/features/fishpond/FishPondPage';
 const TrendingPage = lazy(() => import('@/features/trending/TrendingPage').then((m) => ({ default: m.TrendingPage })));
+const DeveloperToolsPage = lazy(() => import('@/features/developer-tools/DeveloperToolsPage').then((m) => ({ default: m.DeveloperToolsPage })));
 
 /** 懒加载非默认视图——直接导入文件而非 barrel，确保每个视图独立拆 chunk */
 const TimelineView = lazy(() => import('@/features/tabs/TimelineView').then((m) => ({ default: m.TimelineView })));
@@ -307,6 +308,7 @@ function AppHeader({
             { value: 'workspace', label: t('pageMode.workspace') },
             { value: 'fishpond', label: t('pageMode.fishpond') },
             { value: 'trending', label: t('pageMode.trending') },
+            { value: 'devtools', label: t('pageMode.devtools') },
           ]}
         />
         <WorkspaceSwitcher />
@@ -961,13 +963,20 @@ function AppContent() {
           />
         )}
 
-        {pageMode === 'fishpond' ? (
+        {pageMode === 'fishpond' && (
           <FishPondPage onOpenSearch={handleOpenSearch} onOpenSettings={handleOpenSettings} />
-        ) : pageMode === 'trending' ? (
+        )}
+        {pageMode === 'trending' && (
           <Suspense fallback={<div style={{ textAlign: 'center', padding: '40px 0' }}><Spin /></div>}>
             <TrendingPage />
           </Suspense>
-        ) : (
+        )}
+        {pageMode === 'devtools' && (
+          <Suspense fallback={<div style={{ textAlign: 'center', padding: '40px 0' }}><Spin /></div>}>
+            <DeveloperToolsPage />
+          </Suspense>
+        )}
+        {pageMode === 'workspace' && (
           <>
             {showOnboarding && <OnboardingCard onDismiss={() => setShowOnboarding(false)} />}
 
