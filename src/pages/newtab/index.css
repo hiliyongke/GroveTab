@@ -156,6 +156,12 @@ body {
   }
 }
 
+/** 热榜刷新按钮旋转动画 */
+@keyframes canopy-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* ─── 页面入场动画 ─────────────────────────────────
  * 首屏加载完成后，主内容区做一个柔和的上滑渐入。
  */

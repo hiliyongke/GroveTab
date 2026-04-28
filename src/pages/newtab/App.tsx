@@ -51,6 +51,7 @@ import { BatchActionBar } from '@/features/tabs/BatchActionBar';
 import { SelectionModeNotice } from '@/features/tabs/SelectionModeNotice';
 import { BRAND, getBrandDisplayName, getBrandSlogan } from '@/shared/config/brand';
 import { FishPondPage } from '@/features/fishpond/FishPondPage';
+const TrendingPage = lazy(() => import('@/features/trending/TrendingPage').then((m) => ({ default: m.TrendingPage })));
 
 /** 懒加载非默认视图——直接导入文件而非 barrel，确保每个视图独立拆 chunk */
 const TimelineView = lazy(() => import('@/features/tabs/TimelineView').then((m) => ({ default: m.TimelineView })));
@@ -305,6 +306,7 @@ function AppHeader({
           options={[
             { value: 'workspace', label: t('pageMode.workspace') },
             { value: 'fishpond', label: t('pageMode.fishpond') },
+            { value: 'trending', label: t('pageMode.trending') },
           ]}
         />
         <WorkspaceSwitcher />
@@ -961,6 +963,10 @@ function AppContent() {
 
         {pageMode === 'fishpond' ? (
           <FishPondPage onOpenSearch={handleOpenSearch} onOpenSettings={handleOpenSettings} />
+        ) : pageMode === 'trending' ? (
+          <Suspense fallback={<div style={{ textAlign: 'center', padding: '40px 0' }}><Spin /></div>}>
+            <TrendingPage />
+          </Suspense>
         ) : (
           <>
             {showOnboarding && <OnboardingCard onDismiss={() => setShowOnboarding(false)} />}

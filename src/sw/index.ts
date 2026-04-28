@@ -249,6 +249,7 @@ chrome.commands.onCommand.addListener((command) => {
 
 void chrome.alarms.create('canopy-stats-heartbeat', { periodInMinutes: 1 });
 void chrome.alarms.create('canopy-auto-snapshot', { periodInMinutes: 60 });
+void chrome.alarms.create('canopy-trending-refresh', { periodInMinutes: 30 });
 
 async function autoSnapshotIfNeeded(): Promise<void> {
   try {
@@ -315,6 +316,8 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     void flushStats(true);
   } else if (alarm.name === 'canopy-auto-snapshot') {
     void autoSnapshotIfNeeded();
+  } else if (alarm.name === 'canopy-trending-refresh') {
+    void refreshTrendingCache();
   }
 });
 
@@ -391,5 +394,79 @@ async function maybeFetchOg(url: string): Promise<void> {
     }
   } catch {
     // 静默
+  }
+}
+
+// ── Trending Cache Refresh (v1.4) ────────────────────
+
+/**
+ * 后台静默刷新热榜缓存
+ *
+ * 仅当存在缓存（说明用户使用过热榜功能）时才刷新，
+ * 避免从未用过热榜的用户产生不必要的网络请求。
+ */
+async function refreshTrendingCache(): Promise<void> {
+  try {
+    const { storageGet, storageSet } = await import('@/chrome');
+    const cache = await storageGet<Record<string, unknown>>('canopy_trending_cache');
+    // 无缓存 → 用户从未用过热榜，跳过
+    if (!cache || !cache.boards || typeof cache.boards !== 'object') return;
+
+    const boards = cache.boards as Record<string, Record<string, unknown>>;
+    const boardIds = Object.keys(boards);
+    if (boardIds.length === 0) return;
+
+    // 使用小尘API刷新每个已缓存的平台
+    const FETCH_TIMEOUT_MS = 6000;
+    const MAX_ITEMS = 20;
+    const API_BASE = 'https://api.xcvts.cn/api/hotlist';
+
+    for (const boardId of boardIds) {
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+        const resp = await fetch(`${API_BASE}?type=${encodeURIComponent(boardId)}`, {
+          signal: controller.signal,
+        });
+        clearTimeout(timer);
+
+        if (!resp.ok) continue;
+        const json = await resp.json() as {
+          success?: boolean;
+          data?: Record<string, unknown>[];
+          title?: string;
+          subtitle?: string;
+          update_time?: string;
+        };
+
+        if (json.success !== true || !Array.isArray(json.data)) continue;
+        if (json.data.length === 0) continue;
+
+        const items = json.data.slice(0, MAX_ITEMS).map((raw) => ({
+          id: String(raw.index ?? raw.id ?? ''),
+          title: String(raw.title ?? ''),
+          desc: raw.desc ? String(raw.desc) : undefined,
+          pic: raw.pics ? String(raw.pics) : undefined,
+          hot: typeof raw.hot === 'number' ? raw.hot : undefined,
+          hotLabel: typeof raw.hot === 'string' ? raw.hot : undefined,
+          url: String(raw.url ?? ''),
+          mobileUrl: raw.mobilUrl ? String(raw.mobilUrl) : undefined,
+        })).filter((item: { title: string }) => item.title !== '');
+
+        (cache.boards as Record<string, unknown>)[boardId] = {
+          ...(boards[boardId] ?? {}),
+          items,
+          updateTime: json.update_time,
+          from: 'xcvts',
+        };
+      } catch {
+        // 单平台刷新失败不影响其他
+      }
+    }
+
+    (cache as Record<string, unknown>).lastRefreshAt = Date.now();
+    await storageSet('canopy_trending_cache', cache);
+  } catch (err) {
+    console.warn(`${SW_LOG_TAG} trending cache refresh failed`, err);
   }
 }

@@ -21,7 +21,8 @@ export type SkinPresetId =
   | 'aurora'
   | 'elegant'
   | 'nord'
-  | 'solarized';
+  | 'solarized'
+  | 'pastel';
 
 /** 毛玻璃配置 */
 export interface GlassConfig {
@@ -862,6 +863,115 @@ export const SKIN_PRESETS: SkinPreset[] = [
     },
 
     floatingBar: { borderRadius: 6 },
+  },
+
+  // ═══════════════════════════════════════════════════
+  // 8. Pastel — 柔彩玻璃（温暖渐变 + 轻盈毛玻璃，如晨曦般柔和）
+  // ═══════════════════════════════════════════════════
+  {
+    id: 'pastel',
+    labelKey: 'skin.pastel',
+    descriptionKey: 'skin.pastelDesc',
+    previewColors: ['#8A94E0', 'rgba(255,255,255,0.5)', '#F0A8C0'],
+    compatibleMode: 'both',
+
+    colorPrimary: '#8A94E0',
+    colorPrimaryHover: '#A8B0F0',
+
+    borderRadius: 18,
+    borderRadiusLG: 24,
+    borderRadiusSM: 14,
+    borderRadiusXS: 10,
+
+    controlHeight: 38,
+    controlHeightLG: 46,
+    controlHeightSM: 30,
+
+    fontFamily:
+      '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Rounded", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif',
+    fontFamilyHeading:
+      '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Rounded", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif',
+    fontSize: 14,
+
+    padding: 22,
+    paddingLG: 28,
+    paddingSM: 14,
+
+    motionDurationSlow: '0.4s',
+    motionDurationMid: '0.25s',
+    motionDurationFast: '0.15s',
+    motionEaseInOut: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+    motionEaseOut: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
+
+    colorBgLayoutLight: '#FFF5F2',
+    colorBgContainerLight: 'rgba(255, 255, 255, 0.55)',
+    colorBgElevatedLight: 'rgba(255, 255, 255, 0.72)',
+    colorBorderSecondaryLight: 'rgba(0, 0, 0, 0.06)',
+
+    colorBgLayoutDark: '#1a1218',
+    colorBgContainerDark: 'rgba(45, 35, 48, 0.55)',
+    colorBgElevatedDark: 'rgba(58, 48, 62, 0.65)',
+    colorBorderSecondaryDark: 'rgba(255, 255, 255, 0.08)',
+
+    glass: {
+      blur: 48,
+      saturate: 180,
+      bgLight: 'rgba(255, 255, 255, 0.45)',
+      bgDark: 'rgba(35, 28, 40, 0.45)',
+    },
+
+    shadow: {
+      card: {
+        light: '0 2px 12px rgba(0,0,0,0.03), 0 8px 40px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.6)',
+        dark: '0 2px 12px rgba(0,0,0,0.25), 0 8px 40px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)',
+      },
+      cardHover: {
+        light: '0 4px 20px rgba(0,0,0,0.04), 0 16px 56px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.7)',
+        dark: '0 4px 20px rgba(0,0,0,0.35), 0 16px 56px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.1)',
+      },
+      floating: {
+        light: '0 4px 20px rgba(138,148,224,0.08), 0 16px 56px rgba(0,0,0,0.06)',
+        dark: '0 4px 20px rgba(138,148,224,0.1), 0 16px 56px rgba(0,0,0,0.35)',
+      },
+      brandGlow: {
+        light: '0 4px 24px rgba(138,148,224,0.08), 0 0 0 1px rgba(0,0,0,0.03)',
+        dark: '0 4px 24px rgba(138,148,224,0.1), 0 0 0 1px rgba(255,255,255,0.05)',
+      },
+    },
+
+    texture: {
+      noise: true,
+      noiseOpacity: 0.02,
+      grid: false,
+      gridColor: { light: 'rgba(138,148,224,0.02)', dark: 'rgba(240,168,192,0.02)' },
+    },
+
+    cardStyle: {
+      borderWidth: 1,
+      hoverBorderWidth: 1,
+      hoverLift: true,
+      liftDistance: 3,
+    },
+
+    searchBox: {
+      height: 58,
+      borderRadius: 24,
+      fontSize: 16,
+    },
+
+    header: {
+      height: 60,
+    },
+
+    logoGradient: 'linear-gradient(135deg, #8A94E0, #F0A8C0)',
+    logoGlowShadow: {
+      light: '0 2px 16px rgba(138,148,224,0.18)',
+      dark: '0 2px 16px rgba(138,148,224,0.15)',
+    },
+
+    floatingBar: {
+      borderRadius: 24,
+    },
   },
 ];
 

@@ -20,6 +20,7 @@ export type GradientPresetId =
   | 'sunset'
   | 'deepspace'
   | 'midnight'
+  | 'pastel'
   | 'custom';
 
 export interface GradientPreset {
@@ -109,6 +110,14 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
     dark: 'linear-gradient(135deg, #1a1a2e, #252540, #1a1a2e)',
     colors: ['#1e1b4b', '#312e81', '#1e1b4b'],
     compatibleMode: 'dark',
+  },
+  {
+    id: 'pastel',
+    labelKey: 'gradient.pastel',
+    light: 'linear-gradient(135deg, #FFF0F5, #FFE8E0, #FFF5E6)',
+    dark: 'linear-gradient(135deg, #1a1218, #201820, #1a1820)',
+    colors: ['#FFF0F5', '#FFE8E0', '#FFF5E6'],
+    compatibleMode: 'both',
   },
   {
     id: 'custom',
