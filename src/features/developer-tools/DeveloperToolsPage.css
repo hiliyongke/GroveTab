@@ -12,10 +12,10 @@
 }
 
 .devtools-shell {
-  border: 1px solid var(--canopy-hairline);
+  border: 1px solid var(--app-hairline);
   border-radius: 22px;
-  background: var(--canopy-glass-bg);
-  box-shadow: var(--canopy-shadow-card);
+  background: var(--app-glass-bg);
+  box-shadow: var(--app-shadow-card);
   overflow: hidden;
 }
 
@@ -24,7 +24,7 @@
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 18px;
   padding: 18px 20px 16px;
-  border-bottom: 1px solid var(--canopy-hairline);
+  border-bottom: 1px solid var(--app-hairline);
 }
 
 .devtools-title-row,
@@ -80,7 +80,7 @@
 .devtools-stat {
   min-width: 76px;
   padding: 8px 10px;
-  border: 1px solid var(--canopy-hairline);
+  border: 1px solid var(--app-hairline);
   border-radius: 14px;
   background: color-mix(in srgb, var(--ant-color-bg-container) 72%, transparent);
   text-align: right;
@@ -104,7 +104,7 @@
 .devtools-toolbar {
   gap: 10px;
   padding: 12px 20px;
-  border-bottom: 1px solid var(--canopy-hairline);
+  border-bottom: 1px solid var(--app-hairline);
 }
 
 .devtools-segmented {
@@ -127,7 +127,7 @@
 
 .devtools-list-pane {
   padding: 16px;
-  border-right: 1px solid var(--canopy-hairline);
+  border-right: 1px solid var(--app-hairline);
 }
 
 .devtools-grid {
@@ -141,7 +141,7 @@
   width: 100%;
   min-height: 96px;
   padding: 13px 14px;
-  border: 1px solid var(--canopy-hairline);
+  border: 1px solid var(--app-hairline);
   border-radius: 16px;
   background: color-mix(in srgb, var(--ant-color-bg-container) 82%, transparent);
   color: inherit;
@@ -153,8 +153,8 @@
 .devtools-card:hover,
 .devtools-card:focus-visible {
   transform: translateY(-1px);
-  border-color: color-mix(in srgb, var(--ant-color-primary) 36%, var(--canopy-hairline));
-  box-shadow: var(--canopy-shadow-card-hover, var(--canopy-shadow-card));
+  border-color: color-mix(in srgb, var(--ant-color-primary) 36%, var(--app-hairline));
+  box-shadow: var(--app-shadow-card-hover, var(--app-shadow-card));
   outline: none;
 }
 
@@ -228,12 +228,12 @@
 }
 
 .devtools-fav-btn:hover {
-  color: #ff4d4f;
-  background: rgba(255, 77, 79, 0.08);
+  color: var(--ant-color-error);
+  background: var(--ant-color-error-bg);
 }
 
 .devtools-fav-btn.is-active {
-  color: #ff4d4f;
+  color: var(--ant-color-error);
 }
 
 .devtools-panel-pane {
@@ -244,16 +244,16 @@
 .devtools-panel-card {
   position: sticky;
   top: 72px;
-  border: 1px solid var(--canopy-hairline);
+  border: 1px solid var(--app-hairline);
   border-radius: 18px;
-  background: var(--canopy-glass-bg);
-  box-shadow: var(--canopy-shadow-card);
+  background: var(--app-glass-bg);
+  box-shadow: var(--app-shadow-card);
   overflow: hidden;
 }
 
 .devtools-panel-head {
   padding: 16px 18px 12px;
-  border-bottom: 1px solid var(--canopy-hairline);
+  border-bottom: 1px solid var(--app-hairline);
 }
 
 .devtools-panel-title {
@@ -308,7 +308,7 @@
 }
 
 .devtools-output {
-  border: 1px solid var(--canopy-hairline);
+  border: 1px solid var(--app-hairline);
   border-radius: 14px;
   background: color-mix(in srgb, var(--ant-color-bg-container) 88%, transparent);
   overflow: hidden;
@@ -319,7 +319,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 10px;
-  border-bottom: 1px solid var(--canopy-hairline);
+  border-bottom: 1px solid var(--app-hairline);
 }
 
 .devtools-output-body {
@@ -347,13 +347,13 @@
 }
 
 .devtools-diff-line.is-add {
-  color: #1a7f37;
-  background: rgba(26, 127, 55, 0.08);
+  color: var(--ant-color-success);
+  background: var(--ant-color-success-bg);
 }
 
 .devtools-diff-line.is-remove {
-  color: #cf222e;
-  background: rgba(207, 34, 46, 0.08);
+  color: var(--ant-color-error);
+  background: var(--ant-color-error-bg);
 }
 
 .devtools-color-preview {
@@ -365,7 +365,7 @@
 .devtools-color-swatch {
   width: 46px;
   height: 46px;
-  border: 1px solid var(--canopy-hairline);
+  border: 1px solid var(--app-hairline);
   border-radius: 13px;
   flex-shrink: 0;
 }
@@ -393,7 +393,7 @@
 
   .devtools-list-pane {
     border-right: 0;
-    border-bottom: 1px solid var(--canopy-hairline);
+    border-bottom: 1px solid var(--app-hairline);
   }
 
   .devtools-panel-card {

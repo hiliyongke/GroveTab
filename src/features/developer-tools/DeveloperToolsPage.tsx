@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
+import { BRAND } from '@/shared/config/brand';
 import type { DevToolCategory, DevToolDefinition } from './tool-registry';
 import { DEV_TOOLS, getToolsByCategory, searchTools } from './tool-registry';
 import type {
@@ -200,15 +201,15 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
 
 /** 工具示例数据 */
 const TOOL_EXAMPLES: Record<string, { input?: string; input2?: string; pattern?: string; flags?: string; mode?: string }> = {
-  'json-format': { input: '{"name":"Canopy","version":"1.3","features":["tabs","widgets","devtools"]}' },
-  'json-to-ts': { input: '{"id":1,"name":"Canopy","active":true,"profile":{"role":"admin","tags":["dev","ops"]}}' },
+  'json-format': { input: JSON.stringify({ name: BRAND.name, version: '1.3', features: ['tabs', 'widgets', 'devtools'] }) },
+  'json-to-ts': { input: JSON.stringify({ id: 1, name: BRAND.name, active: true, profile: { role: 'admin', tags: ['dev', 'ops'] } }) },
   'json-path': { input: '{"user":{"name":"Tom","age":30,"address":{"city":"Beijing"}}}', pattern: '$.user.address.city' },
-  'yaml-json': { input: 'name: Canopy\nversion: "1.3"\nfeatures:\n  - tabs\n  - widgets' },
+  'yaml-json': { input: `name: ${BRAND.name}\nversion: "1.3"\nfeatures:\n  - tabs\n  - widgets` },
   'csv-json': { input: 'name,age,city\nTom,30,Beijing\nJerry,25,Shanghai' },
   'jwt-decoder': { input: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' },
   'basic-auth': { input: 'admin:secret123' },
   'sql-format': { input: 'select id,name from users where active=1 order by created_at desc limit 10' },
-  'url-parse': { input: 'https://github.com/canopy/tabs?tab=readme#overview' },
+  'url-parse': { input: `${BRAND.productUrl}?tab=readme#overview` },
   'url-query': { input: 'https://example.com/search?q=devtools&lang=zh&page=1' },
   'url-codec': { input: 'https://example.com/search?q=开发工具&page=1' },
   'curl-fetch': { input: 'curl -X POST https://api.example.com/users -H "Content-Type: application/json" -d \'{"name":"Tom"}\'' },
@@ -224,7 +225,7 @@ const TOOL_EXAMPLES: Record<string, { input?: string; input2?: string; pattern?:
   'text-stats': { input: 'Hello world!\n你好，世界！\nThis is a test.' },
   timestamp: { input: '1700000000' },
   cron: { input: '*/5 * * * *' },
-  hash: { input: 'Canopy DevTools' },
+  hash: { input: `${BRAND.name} DevTools` },
   radix: { input: '255' },
   'css-unit': { input: '16px' },
   'color-preview': { input: '#1677FF' },
@@ -492,11 +493,11 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
     switch (tool.id) {
       case 'json-format':
       case 'json-to-ts':
-        return '{"id": 1, "name": "Canopy"}';
+        return JSON.stringify({ id: 1, name: BRAND.name });
       case 'json-path':
         return '{"user":{"name":"Tom"}}';
       case 'yaml-json':
-        return yamlAction === 'yamlToJson' ? 'name: Canopy\nversion: "1.3"' : '{"name":"Canopy"}';
+        return yamlAction === 'yamlToJson' ? `name: ${BRAND.name}\nversion: "1.3"` : JSON.stringify({ name: BRAND.name });
       case 'csv-json':
         return csvAction === 'csvToJson' ? 'name,age\nTom,30' : '[{"name":"Tom","age":30}]';
       case 'jwt-decoder':
@@ -506,7 +507,7 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
       case 'sql-format':
         return 'select id,name from users where active=1';
       case 'url-parse':
-        return 'https://github.com/canopy/tabs?tab=readme#overview';
+        return `${BRAND.productUrl}?tab=readme#overview`;
       case 'url-query':
         return urlQueryAction === 'parse' ? 'https://example.com?a=1&b=2 或 a=1&b=2' : '{"a":1,"b":"hello"}';
       case 'url-codec':
@@ -765,7 +766,7 @@ export function DeveloperToolsPage() {
             {favoriteTools.length > 0 && (
               <div style={{ marginBottom: 14 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                  <Heart size={14} style={{ color: '#ff4d4f' }} />
+                  <Heart size={14} style={{ color: token.colorError }} />
                   <Text strong style={{ fontSize: 12 }}>{t('devtools.favorites')}</Text>
                 </div>
                 <div className="devtools-grid">

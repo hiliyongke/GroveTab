@@ -1,5 +1,5 @@
 /**
- * AboutPanel —— GroveTab 产品介绍页（作为设置 Tab 渲染）
+ * AboutPanel —— 产品介绍页（作为设置 Tab 渲染）
  *
  * 结构：
  *   Section 1 - 品牌头图（Logo + 名称 + Slogan + 版本号）
@@ -13,7 +13,7 @@
  *   - 版本号从 import.meta.env.PACKAGE_VERSION 或 manifest 解析（这里走 BRAND 或兜底常量）。
  *
  * 入口：
- *   1) SettingsPanel 的 "关于 GroveTab" Tab
+ *   1) SettingsPanel 的 "关于" Tab
  *   2) Popup 底部"关于"链接：打开新 Tab，URL hash #about，App 监听后自动打开设置面板并切到 about Tab
  */
 

@@ -2,21 +2,22 @@
  * IndexedDB 自动降级存储
  *
  * 当 chrome.storage.local 使用量超过阈值（默认 80%）时，
- * 自动将归档数据（canopy_sessions）迁移到 IndexedDB，
+ * 自动将归档数据迁移到 IndexedDB，
  * 释放 chrome.storage.local 空间给设置等关键数据。
  *
  * 迁移策略：
  *   1. 检测 chrome.storage.local 使用百分比
- *   2. 超过阈值时，读取 canopy_sessions 数据
- *   3. 将数据写入 IndexedDB（canopy-db → sessions store）
- *   4. 从 chrome.storage.local 中删除 canopy_sessions key
+ *   2. 超过阈值时，读取归档会话数据
+ *   3. 将数据写入 IndexedDB（应用命名空间 DB → sessions store）
+ *   4. 从 chrome.storage.local 中删除归档会话 key
  *   5. 后续归档读写自动路由到 IndexedDB
  */
 
 import type { ArchivedSession } from '@/shared/types';
 import { CONFIG } from '@/shared/config';
+import { APP_RESOURCE_NAMES, STORAGE_KEYS } from '@/shared/config/storage-keys';
 
-const DB_NAME = 'canopy-db';
+const DB_NAME = `${APP_RESOURCE_NAMES.videoDb.replace(/-video$/, '')}-db`;
 const DB_VERSION = CONFIG.cache.dbVersion;
 const SESSIONS_STORE = 'sessions';
 const QUOTA_THRESHOLD = CONFIG.cache.idbQuotaThreshold; // 可配置阈值
@@ -80,8 +81,8 @@ export async function shouldFallbackToIDB(): Promise<boolean> {
  */
 export async function migrateSessionsToIDB(): Promise<number> {
   // 1. 读取 chrome.storage.local 中的 sessions
-  const result = await chrome.storage.local.get('canopy_sessions');
-  const rawSessions: unknown = result.canopy_sessions;
+  const result = await chrome.storage.local.get(STORAGE_KEYS.sessions);
+  const rawSessions: unknown = result[STORAGE_KEYS.sessions];
   const sessions = isArchivedSessionArray(rawSessions) ? rawSessions : [];
 
   if (sessions.length === 0) return 0;
@@ -101,7 +102,7 @@ export async function migrateSessionsToIDB(): Promise<number> {
   });
 
   // 3. 从 chrome.storage.local 删除
-  await chrome.storage.local.remove('canopy_sessions');
+  await chrome.storage.local.remove(STORAGE_KEYS.sessions);
 
   console.log(`[IDB Fallback] Migrated ${sessions.length} sessions to IndexedDB`);
   return sessions.length;

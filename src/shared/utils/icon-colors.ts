@@ -62,42 +62,41 @@ export type IconRole =
  */
 export function iconColor(role: IconRole, token: GlobalToken): string {
   const map: Record<IconRole, string> = {
-    search:       token.colorPrimary,
-    archive:      '#7c3aed',          // 紫色
-    settings:     token.colorTextSecondary,
-    theme:        '#f59e0b',          // 金橙色（呼应太阳）
-    tabs:         token.colorPrimary,
-    domains:      '#10b981',          // 翠绿
-    windows:      '#06b6d4',          // 青
-    duplicates:   '#e8915a',          // 柔橙（温和提醒）
-    idle:         '#d97706',          // 琥珀
-    sessions:     '#8b5cf6',          // 淡紫
-    tab:          token.colorPrimary,
-    history:      '#059669',          // 深绿
-    web:          '#3b82f6',          // 亮蓝
-    suggestion:   '#a855f7',          // 紫罗兰
-    hot:          '#d47070',          // 柔红（热度）
-    recent:       '#14b8a6',          // 青
-    permission:   '#ea580c',          // 深橙
-    close:        token.colorError,
-    discard:      '#64748b',          // 石板灰蓝
-    success:      token.colorSuccess,
-    warning:      token.colorWarning,
-    error:        token.colorError,
-    info:         token.colorInfo,
-    tidy:         '#eab308',          // 金（整理）
-    select:       token.colorPrimary,
-    pin:          '#eab308',          // 金（固定）
-    bookmark:     '#eab308',          // 黄（书签）
-    splitScreen:  '#8b5cf6',          // 紫（分屏）
-    insights:     token.colorInfo,    // 蓝（洞察）
-    // 新增 6 种角色
-    drag:         token.colorTextQuaternary,  // 拖拽手柄：低优先级，弱存在感
-    expand:       token.colorTextTertiary,    // 展开/折叠：辅助操作
-    externalLink: token.colorPrimary,         // 外部链接：引导点击
-    loading:      token.colorPrimary,         // 加载状态：与主色联动（通常配合旋转动画）
-    empty:        token.colorTextQuaternary,  // 空状态：低饱和度，不抢焦点
-    notification: '#f97316',                 // 通知：橙色吸引注意，但不如 error 强烈
+    search: token.colorPrimary,
+    archive: token.colorInfo,
+    settings: token.colorTextSecondary,
+    theme: token.colorWarning,
+    tabs: token.colorPrimary,
+    domains: token.colorSuccess,
+    windows: token.colorInfo,
+    duplicates: token.colorWarning,
+    idle: token.colorWarning,
+    sessions: token.colorInfo,
+    tab: token.colorPrimary,
+    history: token.colorSuccess,
+    web: token.colorInfo,
+    suggestion: token.colorPrimary,
+    hot: token.colorError,
+    recent: token.colorInfo,
+    permission: token.colorWarning,
+    close: token.colorError,
+    discard: token.colorTextTertiary,
+    success: token.colorSuccess,
+    warning: token.colorWarning,
+    error: token.colorError,
+    info: token.colorInfo,
+    tidy: token.colorWarning,
+    select: token.colorPrimary,
+    pin: token.colorWarning,
+    bookmark: token.colorWarning,
+    splitScreen: token.colorPrimary,
+    insights: token.colorInfo,
+    drag: token.colorTextQuaternary,
+    expand: token.colorTextTertiary,
+    externalLink: token.colorPrimary,
+    loading: token.colorPrimary,
+    empty: token.colorTextQuaternary,
+    notification: token.colorWarning,
   };
   return map[role];
 }
@@ -110,10 +109,7 @@ export function iconColor(role: IconRole, token: GlobalToken): string {
  * @param opacity 透明度 0~1，默认 0.15
  */
 export function iconColorAlpha(role: IconRole, token: GlobalToken, opacity = 0.15): string {
-  const hex = iconColor(role, token);
-  // hex → rgba
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+  const color = iconColor(role, token);
+  const percent = Math.round(Math.min(Math.max(opacity, 0), 1) * 100);
+  return `color-mix(in srgb, ${color} ${percent}%, transparent)`;
 }

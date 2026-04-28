@@ -14,8 +14,10 @@ import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
 import { useSettingsStore } from './settings-slice';
 import { filterSafeExternalUrls } from '@/shared/utils/url-safety';
+import { BRAND } from '@/shared/config/brand';
+import { STORAGE_KEYS } from '@/shared/config/storage-keys';
 
-const UNDO_STORAGE_KEY = 'canopy_undo';
+const UNDO_STORAGE_KEY = STORAGE_KEYS.undo;
 const DEFAULT_UNDO_TTL_MS = 5_000;
 const MAX_UNDO_RECORDS = 5;
 
@@ -69,7 +71,7 @@ export const useUndoStore = create<UndoState>((set, get) => ({
     //   Undo 持久化只是为了跨会话恢复，不该成为关闭流程的硬依赖。
     set({ records, activeToast: record });
     void setData(UNDO_STORAGE_KEY, records).catch((err) => {
-      console.warn('[Canopy] undo persist failed (record still in memory)', err);
+      console.warn(`${BRAND.logTag} undo persist failed (record still in memory)`, err);
     });
 
     // Auto-expire toast after TTL

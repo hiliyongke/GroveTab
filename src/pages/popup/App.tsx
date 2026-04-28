@@ -1,17 +1,18 @@
 /**
- * Canopy — Popup 工具栏轻量版（F-26）
+ * Popup 工具栏轻量版（F-26）
  *
  * 360×520 四区：
  *   · 顶部：全局搜索框（懒加载搜索核心）
  *   · 中部：全部已打开 Tab 列表（按 lastAccessed 倒序）
  *   · 底部：归档当前窗口（大按钮，复用 archiveCurrentWindowTabs）
- *   · 底部：打开工作台（切到 Canopy 新标签页）
+ *   · 底部：打开工作台（切到扩展新标签页）
  *
  * 首屏 ≤ 200ms：不进行重的懒加载，SearchBox 以 React.lazy 延迟加载。
  * 无 Tab 时归档按钮置灰 + 提示。
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { Button, Input, Tooltip, Typography, Empty, theme } from 'antd';
 import { AntdThemeProvider } from '@/shared/ui/AntdThemeProvider';
 import { LayoutGrid, Save, Search, ExternalLink, X } from 'lucide-react';
@@ -115,7 +116,7 @@ function PopupContent() {
           .sort((a, b) => b.lastAccessed - a.lastAccessed);
         setRecentTabs(list);
       } catch (err) {
-        console.warn('[Canopy/popup] query tabs failed', err);
+        console.warn(`${BRAND.logTag}/popup query tabs failed`, err);
       }
     })();
     return () => {
@@ -150,7 +151,7 @@ function PopupContent() {
       await archiveCurrentWindowTabs();
       window.close();
     } catch (err) {
-      console.warn('[Canopy/popup] archive failed', err);
+      console.warn(`${BRAND.logTag}/popup archive failed`, err);
       setArchiveError(t('popup.archiveFailed'));
     } finally {
       setArchiving(false);
@@ -172,10 +173,10 @@ function PopupContent() {
         height: POPUP_HEIGHT,
         display: 'flex',
         flexDirection: 'column',
-        padding: 12,
+        padding: token.paddingSM,
         boxSizing: 'border-box',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        fontSize: 13,
+        fontFamily: token.fontFamily,
+        fontSize: token.fontSizeSM,
         color: token.colorText,
         background: token.colorBgLayout,
       }}
@@ -186,8 +187,8 @@ function PopupContent() {
           style={{
             width: 24,
             height: 24,
-            borderRadius: 7,
-            background: 'linear-gradient(135deg, #1677ff, #4096ff)',
+            borderRadius: token.borderRadius,
+            background: 'var(--app-logo-gradient)',
             color: '#fff',
             fontWeight: 800,
             fontSize: 12,
@@ -213,7 +214,7 @@ function PopupContent() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onPressEnter={runWebSearch}
-        style={{ borderRadius: 12, marginBottom: 8, background: token.colorBgContainer }}
+        style={{ borderRadius: token.borderRadiusLG, marginBottom: token.marginXS * 2, background: token.colorBgContainer }}
       />
 
       <div
@@ -240,8 +241,8 @@ function PopupContent() {
           flex: 1,
           overflowY: 'auto',
           scrollbarGutter: 'stable',
-          marginBottom: 10,
-          borderRadius: 12,
+          marginBottom: token.marginSM,
+          borderRadius: token.borderRadiusLG,
           background: token.colorBgContainer,
           border: `1px solid ${token.colorBorderSecondary}`,
           padding: 4,
@@ -319,7 +320,7 @@ function PopupContent() {
             padding: '4px 8px',
           }}
         >
-          {t('popup.aboutGroveTab')}
+          {t('popup.aboutGroveTab', { brand: BRAND.name })}
         </button>
       </div>
 
@@ -347,22 +348,20 @@ function RecentTabRow({
   const [hover, setHover] = useState(false);
   return (
     <div
-      onMouseEnter={(e) => {
-        setHover(true);
-        e.currentTarget.style.background = token.colorFillSecondary;
-      }}
-      onMouseLeave={(e) => {
-        setHover(false);
-        e.currentTarget.style.background = 'transparent';
-      }}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        padding: '6px 8px',
-        borderRadius: 8,
-        transition: 'background 120ms ease',
-      }}
+      className="app-row-hover"
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={
+        {
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '6px 8px',
+          borderRadius: token.borderRadius,
+          transition: 'background-color var(--app-motion-duration-fast, 0.12s) ease',
+          ['--app-row-hover-bg' as string]: token.colorFillSecondary,
+        } as CSSProperties
+      }
     >
       <button
         type="button"
@@ -430,11 +429,9 @@ function RecentTabRow({
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            borderRadius: 4,
-            color: token.colorTextTertiary,
+            borderRadius: token.borderRadiusSM,
+            color: token.colorError,
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = token.colorError)}
-          onMouseLeave={(e) => (e.currentTarget.style.color = token.colorTextTertiary)}
         >
           <X size={ICON_SIZE.SMALL} />
         </button>

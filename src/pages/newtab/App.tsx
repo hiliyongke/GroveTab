@@ -1,5 +1,5 @@
 /**
- * Canopy — 新标签页应用主入口（antd v6 版）
+ * 新标签页应用主入口（antd v6 版）
  *
  * 布局结构：
  *   ┌─ Layout.Header（sticky，毛玻璃，品牌 + 次级操作）
@@ -68,6 +68,7 @@ import { hasCompletedOnboarding } from '@/repositories';
 import type { ArchivedSession, NewtabPageMode } from '@/shared/types';
 import { recordMetric, recordFcpOnce, recordFpsSampleOnce, track } from '@/shared/utils/metrics';
 import { getArchivedSessions, initArchiveStorage } from '@/services/archive-service';
+import { APP_EVENTS } from '@/shared/config/storage-keys';
 import { resolveGradient } from '@/shared/theme/gradient-presets';
 import { VIEW_CONFIGS, VALID_VIEWS, type ViewMode } from '@/shared/config/views';
 import { registerViews, getViewComponentMap } from '@/shared/config/view-registry';
@@ -174,14 +175,14 @@ function AppHeader({
         position: 'sticky',
         top: 0,
         zIndex: 20,
-        height: 'var(--canopy-header-height)',
+        height: 'var(--app-header-height)',
         display: 'flex',
         alignItems: 'center',
         padding: '0 20px',
-        background: 'var(--canopy-glass-bg)',
-        borderBottom: '1px solid var(--canopy-hairline)',
-        backdropFilter: 'var(--canopy-glass-filter)',
-        WebkitBackdropFilter: 'var(--canopy-glass-filter)',
+        background: 'var(--app-glass-bg)',
+        borderBottom: '1px solid var(--app-hairline)',
+        backdropFilter: 'var(--app-glass-filter)',
+        WebkitBackdropFilter: 'var(--app-glass-filter)',
       }}
     >
       {/* 左侧：小 logo + 状态摘要 */}
@@ -256,7 +257,7 @@ function AppHeader({
           type="button"
           onClick={onOpenSearch}
           aria-label={t('search.placeholder')}
-          className="canopy-compact-search"
+          className="app-compact-search"
           style={{
             all: 'unset',
             boxSizing: 'border-box',
@@ -293,7 +294,7 @@ function AppHeader({
           >
             {t('search.placeholder')}
           </span>
-          <span className="canopy-kbd" aria-hidden>
+          <span className="app-kbd" aria-hidden>
             ⌘K
           </span>
         </button>
@@ -328,7 +329,7 @@ function AppHeader({
                 key={theme}
                 style={{
                   display: 'inline-flex',
-                  animation: 'canopy-theme-icon-spin 260ms ease-out',
+                  animation: 'app-theme-icon-spin 260ms ease-out',
                 }}
               >
                 {themeIcon}
@@ -470,7 +471,7 @@ function HeroBar({
                     fontSize: 20,
                     fontWeight: 700,
                     letterSpacing: '-0.02em',
-                    color: 'var(--canopy-text-primary)',
+                    color: 'var(--app-text-primary)',
                   }}
                 >
                   {brandName}
@@ -495,30 +496,30 @@ function HeroBar({
       )}
 
       {/* 搜索框 —— 超宽居中，大圆角 + 品牌辉光
-          hover 态、transition 全部交给 .canopy-hero-search（CSS），
+          hover 态、transition 全部交给 .app-hero-search（CSS），
           避免在 React 里写 onMouseEnter/Leave 副作用。 */}
       {showSearch && (
         <div ref={sentinelRef} style={{ width: '100%', maxWidth: 680 }}>
           <Input
-            className="canopy-hero-search"
+            className="app-hero-search"
             size="large"
             readOnly
             placeholder={t('search.placeholder')}
             prefix={<Search size={ICON_SIZE.XXL} style={{ color: token.colorPrimary }} />}
-            suffix={<span className="canopy-kbd">⌘K</span>}
+            suffix={<span className="app-kbd">⌘K</span>}
             onFocus={(e) => {
               e.currentTarget.blur();
               onOpenSearch();
             }}
             onClick={onOpenSearch}
             style={{
-              borderRadius: 'var(--canopy-search-radius)',
+              borderRadius: 'var(--app-search-radius)',
               cursor: 'pointer',
-              height: 'var(--canopy-search-height)',
-              fontSize: 'var(--canopy-search-font-size)',
+              height: 'var(--app-search-height)',
+              fontSize: 'var(--app-search-font-size)',
               background: token.colorBgContainer,
               border: `1px solid ${token.colorBorderSecondary}`,
-              boxShadow: 'var(--canopy-shadow-brand-glow)',
+              boxShadow: 'var(--app-shadow-brand-glow)',
             }}
           />
         </div>
@@ -615,7 +616,7 @@ function AppContent() {
       syncArchiveSummary(sessions);
       return sessions;
     } catch (err) {
-      console.warn('[Canopy] load archive summary failed', err);
+      console.warn(`${BRAND.logTag} load archive summary failed`, err);
       return [];
     }
   }, [syncArchiveSummary]);
@@ -623,7 +624,7 @@ function AppContent() {
   useSwBroadcast();
 
   /**
-   * 监听全局自定义事件 `canopy:open-archive`（由 UndoToast / ActivityStrip 派发），
+   * 监听全局自定义事件 `app:open-archive`（由 UndoToast / ActivityStrip 派发），
    * 统一打开 ArchivePanel。
    */
   useEffect(() => {
@@ -632,11 +633,11 @@ function AppContent() {
       setShowArchive(true);
       if (detail?.sessionId !== undefined) {
         // 预留：将 sessionId 广播给 ArchivePanel 做高亮
-        window.dispatchEvent(new CustomEvent('canopy:highlight-session', { detail }));
+        window.dispatchEvent(new CustomEvent('app:highlight-session', { detail }));
       }
     };
-    window.addEventListener('canopy:open-archive', handler);
-    return () => window.removeEventListener('canopy:open-archive', handler);
+    window.addEventListener(APP_EVENTS.openArchive, handler);
+    return () => window.removeEventListener(APP_EVENTS.openArchive, handler);
   }, []);
 
   /**
@@ -683,30 +684,30 @@ function AppContent() {
         if (archiveSessionsResult.status === 'fulfilled') {
           syncArchiveSummary(archiveSessionsResult.value);
         } else {
-          console.warn('[Canopy] initArchiveStorage failed', archiveSessionsResult.reason);
+          console.warn(`${BRAND.logTag} initArchiveStorage failed`, archiveSessionsResult.reason);
         }
         if (tabsResult.status === 'rejected') {
-          console.warn('[Canopy] loadAllTabs failed', tabsResult.reason);
+          console.warn(`${BRAND.logTag} loadAllTabs failed`, tabsResult.reason);
           if (!cancelled) {
             setInitError(t('tabs.loadFailed'));
           }
         }
         if (undoResult.status === 'rejected') {
-          console.warn('[Canopy] loadUndoRecords failed', undoResult.reason);
+          console.warn(`${BRAND.logTag} loadUndoRecords failed`, undoResult.reason);
         }
         if (metadataResult.status === 'rejected') {
-          console.warn('[Canopy] loadMetadata failed', metadataResult.reason);
+          console.warn(`${BRAND.logTag} loadMetadata failed`, metadataResult.reason);
         }
         if (!cancelled) {
           if (onboardingResult.status === 'fulfilled') {
             setShowOnboarding(!onboardingResult.value);
           } else {
-            console.warn('[Canopy] hasCompletedOnboarding failed', onboardingResult.reason);
+            console.warn(`${BRAND.logTag} hasCompletedOnboarding failed`, onboardingResult.reason);
             setShowOnboarding(true);
           }
         }
       } catch (err) {
-        console.warn('[Canopy] app initialization failed', err);
+        console.warn(`${BRAND.logTag} app initialization failed`, err);
         if (!cancelled) {
           setInitError(t('tabs.loadFailed'));
         }
@@ -927,7 +928,7 @@ function AppContent() {
         />
       )}
 
-      <Content data-canopy-content style={{ width: '100%', maxWidth: contentMaxWidth > 0 ? contentMaxWidth : undefined, margin: '0 auto', padding: '0 32px 64px', position: 'relative', zIndex: 1 }}>
+      <Content data-app-content style={{ width: '100%', maxWidth: contentMaxWidth > 0 ? contentMaxWidth : undefined, margin: '0 auto', padding: '0 32px 64px', position: 'relative', zIndex: 1 }}>
         {pageMode === 'workspace' && showHeroBar && (
           <HeroBar
             viewMode={viewMode}

@@ -7,6 +7,7 @@ import { useT } from '@/shared/i18n';
 import { Field } from '../components/Field';
 import type { CustomQuoteEntry, DashboardQuoteCategory } from '@/shared/types';
 import { feedback } from '@/shared/ui/feedback';
+import { BRAND } from '@/shared/config/brand';
 
 function parseTextQuotes(raw: string, t: (key: string) => string): CustomQuoteEntry[] {
   return raw
@@ -100,7 +101,7 @@ export function QuotesPanel() {
           autoSize={{ minRows: 5, maxRows: 8 }}
           value={textDraft}
           onChange={(e) => setTextDraft(e.target.value)}
-          placeholder={'所有的努力都算数 —— GroveTab\n再坚持一下，好运会来的'}
+          placeholder={`所有的努力都算数 —— ${BRAND.name}\n再坚持一下，好运会来的`}
         />
         <Button icon={<Upload size={ICON_SIZE.MEDIUM} />} style={{ marginTop: 8 }} onClick={() => void appendCustomQuotes(parseTextQuotes(textDraft, t))}>
           {t('quotes.textImportBtn')}
@@ -115,7 +116,7 @@ export function QuotesPanel() {
           autoSize={{ minRows: 5, maxRows: 8 }}
           value={jsonDraft}
           onChange={(e) => setJsonDraft(e.target.value)}
-          placeholder='[{"text":"所有的努力都算数","source":"GroveTab"}]'
+          placeholder={`[{"text":"所有的努力都算数","source":"${BRAND.name}"}]`}
         />
         <Button
           icon={<Upload size={ICON_SIZE.MEDIUM} />}

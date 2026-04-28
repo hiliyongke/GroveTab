@@ -21,6 +21,7 @@ import { SEARCH_ENGINE_OPTIONS } from '@/shared/config/search-engines';
 import { Field } from '../components/Field';
 import { setData } from '@/repositories/storage-repo';
 import { feedback } from '@/shared/ui/feedback';
+import { STORAGE_KEYS } from '@/shared/config/storage-keys';
 
 interface SearchSettingsProps {
   settings: UserSettings;
@@ -184,7 +185,7 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
         />
       </Field>
 
-      {/* 清空最近搜索 —— 将 'canopy_search_history' 键直接置为空数组 */}
+      {/* 清空最近搜索 —— 将应用命名空间下的搜索历史键直接置为空数组 */}
       <Field
         label={t('settings.clearRecentSearches')}
         hint={t('settings.clearRecentSearchesHint')}
@@ -193,7 +194,7 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
           title={t('settings.clearRecentSearchesConfirm')}
           onConfirm={async () => {
             try {
-              await setData('canopy_search_history', []);
+              await setData(STORAGE_KEYS.searchHistory, []);
               feedback.success(t('settings.clearRecentSearchesDone'));
             } catch (err) {
               console.error('[SearchSettings] clearSearchHistory failed:', err);

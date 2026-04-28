@@ -4,6 +4,26 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { writeFileSync, mkdirSync, readFileSync, readdirSync, copyFileSync } from 'node:fs';
 
+/**
+ * 构建时品牌配置（与 src/shared/config/brand.ts 保持同步）
+ *
+ * vite.config.ts 受 tsconfig.node.json 约束，无法直接 import src/ 下的模块。
+ * 如需切换品牌，请同步修改此处的 BUILD_BRAND 和 brand.ts。
+ */
+const BUILD_BRAND = {
+  name: 'GroveTab',
+  description: {
+    'zh-CN': 'GroveTab — 你的标签页，找到归属。按域名自动分组、秒搜、归档、全本地隐私。',
+    en: 'GroveTab — where your tabs find their place. Auto-grouping, instant search, archive & 100% local.',
+  },
+} as const;
+
+function pickLocaleField<T>(field: Record<string, T>, locale: string, fallback = 'en'): T {
+  if (field[locale] !== undefined) return field[locale];
+  if (field[fallback] !== undefined) return field[fallback];
+  return Object.values(field)[0];
+}
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 interface Manifest {
@@ -12,6 +32,31 @@ interface Manifest {
   action: { default_popup?: string; default_icon?: Record<string, string> };
   icons: Record<string, string>;
   [key: string]: unknown;
+}
+
+function writeBrandLocales() {
+  const localeMap = [
+    { dir: 'zh_CN', locale: 'zh-CN' },
+    { dir: 'en', locale: 'en' },
+  ] as const;
+
+  for (const item of localeMap) {
+    const file = resolve(__dirname, 'dist/_locales', item.dir, 'messages.json');
+    const messages = JSON.parse(readFileSync(file, 'utf-8')) as Record<string, { message: string; description?: string }>;
+    messages.appName.message = BUILD_BRAND.name;
+    messages.appDescription.message = pickLocaleField(BUILD_BRAND.description, item.locale);
+    messages.context_save_all.message = item.locale === 'zh-CN'
+      ? `保存所有标签到 ${BUILD_BRAND.name}`
+      : `Save all tabs to ${BUILD_BRAND.name}`;
+    messages.newtab_title.message = item.locale === 'zh-CN'
+      ? `${BUILD_BRAND.name} — 新标签页`
+      : `${BUILD_BRAND.name} — New Tab`;
+    messages.popup_title.message = BUILD_BRAND.name;
+    messages.onboarding_title.message = item.locale === 'zh-CN'
+      ? `欢迎使用 ${BUILD_BRAND.name}`
+      : `Welcome to ${BUILD_BRAND.name}`;
+    writeFileSync(file, JSON.stringify(messages, null, 2));
+  }
 }
 
 function chromeExtensionPlugin() {
@@ -40,13 +85,14 @@ function chromeExtensionPlugin() {
         resolve(__dirname, 'dist/manifest.json'),
         JSON.stringify(manifest, null, 2),
       );
+      writeBrandLocales();
 
-      // 查找生成的 CSS 文件
+      // 注入全部构建产物 CSS，避免多入口/懒加载样式因文件顺序不稳定而丢失
       const assetsDir = resolve(__dirname, 'dist/assets');
-      const cssFiles = readdirSync(assetsDir).filter((f) => f.endsWith('.css'));
-      const cssLink = cssFiles.length > 0
-        ? `<link rel="stylesheet" href="/assets/${cssFiles[0]}" />`
-        : '';
+      const cssFiles = readdirSync(assetsDir).filter((f) => f.endsWith('.css')).sort();
+      const cssLinks = cssFiles
+        .map((file) => `<link rel="stylesheet" href="/assets/${file}" />`)
+        .join('\n    ');
 
       const newtabDir = resolve(__dirname, 'dist/src/pages/newtab');
       mkdirSync(newtabDir, { recursive: true });
@@ -59,10 +105,10 @@ function chromeExtensionPlugin() {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GroveTab</title>
+    <title>${BUILD_BRAND.name}</title>
     <script src="./theme-init.js"></script>
     <link rel="stylesheet" href="./prepaint.css" />
-    ${cssLink}
+    ${cssLinks}
   </head>
   <body><div id="root"></div><script type="module" src="/newtab.js"></script></body>
 </html>`,
@@ -73,7 +119,7 @@ function chromeExtensionPlugin() {
         resolve(__dirname, 'dist/src/pages/popup/index.html'),
         `<!DOCTYPE html>
 <html lang="zh-CN">
-  <head><meta charset="UTF-8" /><title>Canopy Popup</title>${cssLink}</head>
+  <head><meta charset="UTF-8" /><title>${BUILD_BRAND.name} Popup</title>${cssLinks}</head>
   <body><div id="root"></div><script type="module" src="/popup.js"></script></body>
 </html>`,
       );

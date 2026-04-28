@@ -7,8 +7,9 @@
 
 import type { SwBroadcastMessage, SwBroadcastType } from '@/shared/types';
 import { BRAND } from '@/shared/config/brand';
+import { APP_CHANNELS } from '@/shared/config/storage-keys';
 
-const CHANNEL_NAME = 'canopy-sw-broadcast';
+const CHANNEL_NAME = APP_CHANNELS.swBroadcast;
 
 let _channel: BroadcastChannel | null = null;
 
@@ -21,7 +22,7 @@ function getChannel(): BroadcastChannel {
 }
 
 /**
- * 向所有 Canopy 窗口广播消息。
+ * 向所有扩展窗口广播消息。
  * SW 和 newtab 页面都可以调用。
  */
 export function swBroadcast(type: SwBroadcastType, payload: Record<string, unknown> = {}): void {

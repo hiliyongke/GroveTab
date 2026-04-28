@@ -33,6 +33,7 @@ import { useT } from '@/shared/i18n';
 import { useTabsStore, useUndoStore, useMetadataStore } from '@/store';
 import { feedback } from '@/shared/ui/feedback';
 import { SessionItem } from './components/SessionItem';
+import { APP_EVENTS } from '@/shared/config/storage-keys';
 import { iconColor } from '@/shared/utils/icon-colors';
 import { isSafeExternalUrl } from '@/shared/utils/url-safety';
 
@@ -97,7 +98,7 @@ export function ArchivePanel({ open, onOpenChange, onSessionsChange }: ArchivePa
   }, [initialized, onSessionsChange, sessions]);
 
   /**
-   * 监听 canopy:highlight-session 自定义事件，来自 UndoToast / ActivityStrip 的跳转。
+   * 监听 app:highlight-session 自定义事件，来自 UndoToast / ActivityStrip 的跳转。
    */
   useEffect(() => {
     const handler = (e: Event) => {
@@ -109,8 +110,8 @@ export function ArchivePanel({ open, onOpenChange, onSessionsChange }: ArchivePa
         window.setTimeout(() => setHighlightId(null), 3000);
       }
     };
-    window.addEventListener('canopy:highlight-session', handler);
-    return () => window.removeEventListener('canopy:highlight-session', handler);
+    window.addEventListener(APP_EVENTS.highlightSession, handler);
+    return () => window.removeEventListener(APP_EVENTS.highlightSession, handler);
   }, []);
 
   const handleAfterOpenChange = useCallback(

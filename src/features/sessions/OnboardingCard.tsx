@@ -7,7 +7,7 @@
  *      - 🧩 仅工具栏按钮
  *   2. 若选"接管"：进入 3 步微引导（工作台总览 → 归档演示 → 快捷键帮助）
  *      键盘：←/→ 切换、Esc 跳过
- *   3. 完成后写 `canopy_onboarded=true`，后续不再自动弹出
+ *   3. 完成后写入引导完成标志，后续不再自动弹出
  *
  * 注：组件在 App.tsx 里仅在 `!onboarded` 时挂载，本组件内仅负责 UI 与写盘。
  */
@@ -29,6 +29,7 @@ import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { markOnboardingDone } from '@/repositories';
 import { useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
+import { BRAND } from '@/shared/config/brand';
 
 const { Text, Paragraph } = Typography;
 
@@ -172,7 +173,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
               gap: 8,
             }}
           >
-            {t('onboarding.title')}
+            {t('onboarding.title', { brand: BRAND.name })}
             <Zap size={ICON_SIZE.MEDIUM} style={{ color: token.colorPrimary }} />
           </h2>
           <Text type="secondary" style={{ fontSize: 14 }}>
@@ -206,7 +207,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
           }}
         >
           <Button
-            className="canopy-lift"
+            className="app-lift"
             type="primary"
             size="large"
             onClick={() => {
@@ -215,9 +216,9 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
             icon={<Globe size={ICON_SIZE.LARGE} />}
             autoFocus
             style={{
-              background: 'var(--canopy-logo-gradient)',
+              background: 'var(--app-logo-gradient)',
               border: 'none',
-              boxShadow: 'var(--canopy-logo-glow)',
+              boxShadow: 'var(--app-logo-glow)',
               fontWeight: 600,
               height: 52,
             }}
@@ -282,7 +283,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
         </div>
 
         <Paragraph type="secondary" style={{ margin: 0, fontSize: 13.5, lineHeight: 1.7 }}>
-          {t(step.descKey)}
+          {t(step.descKey, { brand: BRAND.name })}
         </Paragraph>
 
         <Progress percent={progressPercent} size="small" showInfo={false} />

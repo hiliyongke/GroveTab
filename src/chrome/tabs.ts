@@ -6,9 +6,13 @@
  *   2. 每个调用包一层「超时 + 错误归一化 + 标准日志」
  *      - 超时：防止 Service Worker 沉睡/通信异常导致的 Promise hang 死
  *      - 错误归一化：`chrome.runtime.lastError` 和 rejection 统一成 Error 抛出
- *      - 标准日志：出错时打 `[Canopy/chrome]` 前缀 + 接口名，便于线上排查
+ *      - 标准日志：出错时打品牌化前缀 + 接口名，便于线上排查
  *   3. 只做「封装」不做「兜底」——失败一律抛出，由上层 store/UI 决定是否 toast
  */
+
+import { BRAND } from '@/shared/config/brand';
+
+const CHROME_LOG_TAG = `${BRAND.logTag}/chrome`;
 
 /**
  * 将一个可能永远不 resolve 的 Promise 用超时包住
@@ -21,7 +25,7 @@
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const timer = setTimeout(() => {
-      reject(new Error(`[Canopy/chrome] ${label} timeout after ${ms}ms`));
+      reject(new Error(`${CHROME_LOG_TAG} ${label} timeout after ${ms}ms`));
     }, ms);
     promise.then(
       (v) => {
@@ -45,14 +49,14 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
 function normalizeError(err: unknown, label: string): Error {
   if (err instanceof Error) {
     // 保留原 stack，仅在 message 前加上下文
-    err.message = `[Canopy/chrome] ${label}: ${err.message}`;
+    err.message = `${CHROME_LOG_TAG} ${label}: ${err.message}`;
     return err;
   }
   const msg =
     typeof err === 'string'
       ? err
       : (err as { message?: string })?.message ?? JSON.stringify(err);
-  return new Error(`[Canopy/chrome] ${label}: ${msg}`);
+  return new Error(`${CHROME_LOG_TAG} ${label}: ${msg}`);
 }
 
 /** 常规 chrome API 的默认超时（ms）—— 足够覆盖正常执行但能兜住 SW 沉睡导致的 hang */
@@ -270,7 +274,7 @@ export async function splitTabToSide(tabId: number): Promise<number> {
   const newWindow = await safeCall('windows.create', () =>
     chrome.windows.create({ tabId, focused: true }),
   );
-  if (!newWindow?.id) throw new Error('[Canopy/chrome] splitTabToSide: new window has no id');
+  if (!newWindow?.id) throw new Error(`${CHROME_LOG_TAG} splitTabToSide: new window has no id`);
 
   // 3. 计算半屏位置
   const halfWidth = Math.floor(ow / 2);

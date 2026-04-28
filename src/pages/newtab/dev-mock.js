@@ -11,7 +11,7 @@
  *   新版实现：
  *   1. 维护可变 `mockTabs` 数组作为单一数据源
  *   2. remove / update 真的改数据
- *   3. 改完后通过 `BroadcastChannel('canopy-sw-broadcast')` 广播
+ *   3. 改完后通过 `BroadcastChannel('app-sw-broadcast')` 广播
  *      对应的 tab-removed / tab-updated / tab-activated / tab-moved，
  *      让前端 `useSwBroadcast` 收到消息，走正常的 store 更新路径
  *   4. 同步也触发 `chrome.tabs.onRemoved/onActivated` 等监听器，
@@ -104,7 +104,7 @@
    * 与前端 `useSwBroadcast` 对齐的 channel，模拟 Service Worker 的广播行为。
    * —— 关键：前端是通过这个 channel 来增量更新 tabs 状态的
    */
-  const CHANNEL_NAME = 'canopy-sw-broadcast';
+  const CHANNEL_NAME = 'app-sw-broadcast';
   let swChannel = null;
   try {
     swChannel = new BroadcastChannel(CHANNEL_NAME);
@@ -134,14 +134,14 @@
     //    hook 现在只监听 BroadcastChannel，但为了兜底未来可能的独立 tab 预览，
     //    这里放一条自定义事件，方便外部探针。
     try {
-      window.dispatchEvent(new CustomEvent('canopy:sw-message', { detail: message }));
+      window.dispatchEvent(new CustomEvent('app:sw-message', { detail: message }));
     } catch (e) {}
   }
 
   /**
    * BroadcastChannel 规范不会把消息投递给发布者自己的 channel 实例。
    * 为了让 dev-mock 与前端 `useSwBroadcast` 在同一个 window 内也能联通，
-   * 这里 **猴子补丁** 全局 `BroadcastChannel`：对 `canopy-sw-broadcast` 通道额外开一条
+   * 这里 **猴子补丁** 全局 `BroadcastChannel`：对 `app-sw-broadcast` 通道额外开一条
    * 内存旁路，让 mock 的 postMessage 也能送达前端监听器。
    */
   (function patchBroadcastChannel() {
@@ -378,5 +378,5 @@
     },
   };
 
-  console.warn('[Canopy] dev-mock 已注入：chrome.* API 为假数据，仅用于浏览器预览（关闭/更新/跳转均可实时生效）');
+  console.warn('[DevMock] chrome.* API 为假数据，仅用于浏览器预览（关闭/更新/跳转均可实时生效）');
 })();

@@ -151,7 +151,7 @@ function GridCard({
   const cardNode = (
     <Card
       onClick={handleCardClick}
-      className="canopy-card-interactive canopy-grid-card"
+      className="app-card-interactive app-grid-card"
       styles={{
         body: {
           padding: 12,
@@ -164,8 +164,8 @@ function GridCard({
         {
           borderRadius: token.borderRadiusLG,
           cursor: 'pointer',
-          // 下发 hover 边框色给 canopy-card-interactive 消费
-          ['--canopy-hover-border' as string]: token.colorPrimaryBorder,
+          // 下发 hover 边框色给 app-card-interactive 消费
+          ['--app-hover-border' as string]: token.colorPrimaryBorder,
         } as React.CSSProperties
       }
     >

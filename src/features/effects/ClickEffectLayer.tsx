@@ -204,7 +204,7 @@ export function ClickEffectLayer() {
     if (ctx === null) return undefined;
 
     // 读取当前主题主色（供 ripple 使用）
-    const cssBrand = getComputedStyle(document.documentElement).getPropertyValue('--grovetab-brand')
+    const cssBrand = getComputedStyle(document.documentElement).getPropertyValue('--app-brand')
       .trim();
     if (cssBrand !== '') brandColorRef.current = cssBrand;
 

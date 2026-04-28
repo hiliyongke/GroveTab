@@ -1,5 +1,5 @@
 /**
- * Canopy — Chrome Extension Type Definitions
+ * Chrome Extension Type Definitions
  * Shared types for the entire extension.
  */
 
@@ -53,33 +53,8 @@ export interface SwBroadcastMessage {
   timestamp: number;
 }
 
-/** Storage keys for partitioned storage */
-export type StorageKey =
-  | 'canopy_tabs'
-  | 'canopy_sessions'
-  | 'canopy_settings'
-  | 'canopy_tags'
-  | 'canopy_notes'
-  | 'canopy_pins'
-  | 'canopy_undo'
-  | 'canopy_stats'
-  | 'canopy_snapshots'
-  | 'canopy_meta'
-  | 'canopy_metrics'
-  | 'canopy_metric_counters'
-  | 'canopy_onboarding_done'
-  | 'canopy_search_history'
-  | 'canopy_activity'
-  | 'canopy_workspaces'
-  | 'canopy_kanban'
-  | 'canopy_og_index'
-  | 'canopy_auto_snapshot_meta'
-  /** v1.3 新增：番茄钟会话持久化（跨 Tab/重启恢复 mode + elapsed + running） */
-  | 'canopy_pomodoro_state'
-  /** v1.3 新增：StickyWidget 多便签列表（最多 10 条，老的单条内容自动迁入首条） */
-  | 'canopy_sticky_notes'
-  /** v1.4 新增：热榜聚合缓存（按平台存储榜单数据与更新时间） */
-  | 'canopy_trending_cache';
+/** 分区存储键；实际前缀由品牌命名空间配置生成。 */
+export type StorageKey = `${string}_${string}`;
 
 /** Storage metadata */
 export interface StorageMeta {

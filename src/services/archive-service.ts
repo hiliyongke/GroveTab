@@ -23,8 +23,10 @@ import {
   saveSessionsToIDB,
   autoFallbackIfNeeded,
 } from '@/shared/utils/idb-fallback';
+import { BRAND } from '@/shared/config/brand';
+import { APP_RESOURCE_NAMES, STORAGE_KEYS } from '@/shared/config/storage-keys';
 
-const SESSIONS_KEY = 'canopy_sessions';
+const SESSIONS_KEY = STORAGE_KEYS.sessions;
 
 /** 归档结果：快照一定已落盘，关闭标签页可能部分失败。 */
 export interface ArchiveOperationResult {
@@ -158,7 +160,7 @@ async function archiveTabs(tabs: chrome.tabs.Tab[]): Promise<ArchiveOperationRes
   try {
     await closeTabs(tabIds);
   } catch (err) {
-    console.warn('[Canopy] archive: close tabs failed after snapshot saved', err);
+    console.warn(`${BRAND.logTag} archive: close tabs failed after snapshot saved`, err);
     closedCount = 0;
   }
 
@@ -381,13 +383,13 @@ export async function exportSingleSession(sessionId: string): Promise<{ filename
   const session = sessions.find((s) => s.id === sessionId);
   if (session === undefined) return null;
   const payload = {
-    __canopy: 'session-export',
+    __app: 'session-export',
     version: 1,
     exportedAt: Date.now(),
     session,
   };
   return {
-    filename: `canopy-session-${session.id}.json`,
+    filename: `${APP_RESOURCE_NAMES.sessionFilePrefix}-${session.id}.json`,
     content: JSON.stringify(payload, null, 2),
   };
 }

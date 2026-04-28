@@ -1,5 +1,5 @@
 /**
- * Canopy i18n —— React 侧入口
+ * i18n —— React 侧入口
  *
  * 组件 / Hook 留在这里；字典与纯函数（translate / formatDate / formatNumber）
  * 拆到 ./core.ts，满足 `react-refresh/only-export-components` 的组件纯净要求。

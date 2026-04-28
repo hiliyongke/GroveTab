@@ -38,6 +38,7 @@ import {
 } from '@/shared/utils/profiles';
 import { Field } from '../components/Field';
 import { getAllDataKeys, removeData } from '@/repositories/storage-repo';
+import { APP_RESOURCE_NAMES, STORAGE_KEYS, isAppStorageKey } from '@/shared/config/storage-keys';
 
 interface QuotaInfo {
   usedBytes: number;
@@ -114,7 +115,7 @@ export function DataPanel() {
       sessions: parsedSessions,
       settings,
     };
-    downloadFile(JSON.stringify(bundle, null, 2), `canopy-backup-${new Date().toISOString().slice(0, 10)}.json`);
+    downloadFile(JSON.stringify(bundle, null, 2), `${APP_RESOURCE_NAMES.backupFilePrefix}-${new Date().toISOString().slice(0, 10)}.json`);
     message.success(t('settings.exportDone'));
   };
 
@@ -376,12 +377,12 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
         </Button>
       </Popconfirm>
 
-      {/* 2）重播 Onboarding：仅重置 canopy_onboarding_done，下次刷新重新弹欢迎屏 */}
+      {/* 2）重播 Onboarding：仅重置应用命名空间下的引导完成标志，下次刷新重新弹欢迎屏 */}
       <Popconfirm
         title={t('settings.replayOnboardingConfirm')}
         onConfirm={async () => {
           try {
-            await removeData('canopy_onboarding_done');
+            await removeData(STORAGE_KEYS.onboardingDone);
             message.success(t('settings.replayOnboardingDone'));
           } catch (err) {
             console.error('[DataPanel] replayOnboarding failed:', err);
@@ -394,7 +395,7 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
       </Popconfirm>
 
       {/*
-        3）全量重置为初始状态：清掉所有 canopy_* 键——等同卸载重装。
+        3）全量重置为初始状态：清掉所有应用命名空间存储键——等同卸载重装。
         高风险操作，走 Modal 双层确认（输入 RESET 文本二次确认）。
       */}
       <Button
@@ -432,10 +433,10 @@ icon={<AlertTriangle size={ICON_SIZE.MEDIUM} />}
                 return Promise.reject(new Error('must type RESET'));
               }
               try {
-                /** 清空所有 canopy_* 键 */
+                /** 清空所有应用命名空间存储键 */
                 const keys = await getAllDataKeys();
                 for (const key of keys) {
-                  if (key.startsWith('canopy_')) {
+                  if (isAppStorageKey(key)) {
                     await removeData(key);
                   }
                 }

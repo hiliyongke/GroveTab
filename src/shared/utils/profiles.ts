@@ -4,11 +4,12 @@
  * 允许用户保存、加载、切换和删除配置预设，
  * 类似 VS Code 的 Settings Profile 功能。
  *
- * 预设存储在 chrome.storage.local 的 canopy_profiles key 下。
+ * 预设存储在 chrome.storage.local 的应用命名空间 key 下。
  */
 
 import type { UserSettings } from '@/shared/types';
 import { storageGet, storageSet } from '@/chrome';
+import { STORAGE_KEYS } from '@/shared/config/storage-keys';
 
 /** 预设数据结构 */
 export interface SettingsProfile {
@@ -18,7 +19,7 @@ export interface SettingsProfile {
   settings: Partial<UserSettings>;
 }
 
-const PROFILES_KEY = 'canopy_profiles' as const;
+const PROFILES_KEY = STORAGE_KEYS.profiles;
 
 /** 获取所有预设 */
 export async function getProfiles(): Promise<SettingsProfile[]> {

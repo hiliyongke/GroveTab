@@ -6,7 +6,7 @@
  *   - 视频文件可能 10~50MB，最合适的方案是 IndexedDB。
  *
  * 数据结构：
- *   DB:    grovetab-video
+ *   DB:    由应用命名空间统一生成
  *   Store: files
  *   Row:   { key: string, blob: Blob, name: string, savedAt: number }
  *
@@ -16,7 +16,9 @@
  *   - removeVideoFile(key)
  */
 
-const DB_NAME = 'grovetab-video';
+import { APP_RESOURCE_NAMES } from '@/shared/config/storage-keys';
+
+const DB_NAME = APP_RESOURCE_NAMES.videoDb;
 const STORE = 'files';
 const DB_VERSION = 1;
 

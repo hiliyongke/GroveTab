@@ -38,9 +38,9 @@
     "128": "public/icons/icon-128.png"
   },
   "commands": {
-    "open-grovetab": {
+    "open-workspace": {
       "suggested_key": { "default": "Alt+C" },
-      "description": "Open GroveTab new tab page"
+      "description": "Open __MSG_appName__ new tab page"
     },
     "save-all-tabs": {
       "suggested_key": { "default": "Alt+Shift+S" },
@@ -48,7 +48,7 @@
     },
     "toggle-search": {
       "suggested_key": { "default": "Alt+K" },
-      "description": "Open search in GroveTab"
+      "description": "Open search in __MSG_appName__"
     }
   },
   "incognito": "split"

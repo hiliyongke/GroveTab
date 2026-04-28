@@ -31,9 +31,9 @@ function TodaySummary() {
     <Card
       style={{
         borderRadius: 24,
-        background: 'var(--canopy-glass-bg)',
-        border: '1px solid var(--canopy-hairline)',
-        boxShadow: 'var(--canopy-shadow-card)',
+        background: 'var(--app-glass-bg)',
+        border: '1px solid var(--app-hairline)',
+        boxShadow: 'var(--app-shadow-card)',
       }}
       styles={{ body: { padding: 24 } }}
     >
@@ -166,8 +166,8 @@ export function FishPondPage({ onOpenSearch, onOpenSettings }: FishPondPageProps
         <Card
           style={{
             borderRadius: 18,
-            background: 'var(--canopy-glass-bg)',
-            border: '1px dashed var(--canopy-hairline)',
+            background: 'var(--app-glass-bg)',
+            border: '1px dashed var(--app-hairline)',
           }}
           styles={{ body: { padding: 24, textAlign: 'center' } }}
         >

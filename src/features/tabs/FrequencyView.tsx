@@ -1,7 +1,7 @@
 /**
  * FrequencyView — 按使用频率排序（F-11 升级版）
  *
- * 升级：优先使用 SW StatsCollector 写入的 canopy_stats 数据（近 7 天激活次数），
+ * 升级：优先使用 SW StatsCollector 写入的统计数据（近 7 天激活次数），
  * 数据缺失时回退到 lastAccessed 近似并显示"数据重建中"提示。
  */
 
@@ -14,6 +14,7 @@ import { Flame } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { theme, Tag } from 'antd';
 import { CONFIG } from '@/shared/config';
+import { STORAGE_KEYS } from '@/shared/config/storage-keys';
 
 const MAX_DISPLAY = CONFIG.ui.maxDisplay;
 
@@ -38,7 +39,7 @@ export function FrequencyView() {
   useEffect(() => {
     if (typeof chrome === 'undefined' || chrome.storage?.onChanged === undefined) return;
     const listener = (changes: Record<string, chrome.storage.StorageChange>, areaName: string) => {
-      if (areaName === 'local' && changes.canopy_stats !== undefined) {
+      if (areaName === 'local' && changes[STORAGE_KEYS.stats] !== undefined) {
         void loadStats();
       }
     };

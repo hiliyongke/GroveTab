@@ -5,6 +5,7 @@
 import { create } from 'zustand';
 import type { UserSettings } from '@/shared/types';
 import { getSettings, saveSettings, removeData } from '@/repositories';
+import { STORAGE_KEYS } from '@/shared/config/storage-keys';
 
 interface SettingsState {
   settings: UserSettings;
@@ -148,12 +149,12 @@ export const useSettingsStore = create<SettingsState>((set) => ({
 
   /**
    * 恢复默认配置：
-   *   1. 删除 storage 中的 canopy_settings 键
+   *   1. 删除 storage 中的设置键
    *   2. 重新 loadSettings → getSettings 在 storage 为空时自动返回 DEFAULT_SETTINGS
    *   3. 内存 + storage 同步重置，无需刷新页面
    */
   resetSettings: async () => {
-    await removeData('canopy_settings');
+    await removeData(STORAGE_KEYS.settings);
     const settings = await getSettings();
     set({ settings, loaded: true });
   },

@@ -1,12 +1,13 @@
 /**
  * StorageRepo — Partitioned chrome.storage.local wrapper
  *
- * Data is stored under namespaced keys (canopy_tabs, canopy_settings, etc.)
+ * Data is stored under brand-configured namespaced keys.
  * to avoid reading all data on every access.
  */
 
 import { storageGet, storageSet } from '@/chrome';
 import { storageRemove, storageGetAllKeys } from '@/chrome/tabs';
+import { STORAGE_KEYS } from '@/shared/config/storage-keys';
 import type {
   ActivityRecord,
   AutoSnapshotMeta,
@@ -22,10 +23,10 @@ import type {
 } from '@/shared/types';
 
 // ── Schema Version & Migration ────────────────────────
-// v1 → v2: Canopy v1.0 封板。新增 dedupStrictness / idleThresholdMinutes /
+// v1 → v2: v1.0 封板。新增 dedupStrictness / idleThresholdMinutes /
 // autoSnapshotFrequency / enableOgFetch / lastActiveWorkspaceId 等字段；
-// 新增 canopy_activity / canopy_workspaces / canopy_kanban / canopy_og_index 等独立存储键。
-// v2 → v3: GroveTab 开发阶段引入自由 Widget 画布、网站快捷模块、自定义金句与生产力小组件设置。
+// 新增 activity / workspaces / kanban / ogIndex 等独立存储键。
+// v2 → v3: 引入自由 Widget 画布、网站快捷模块、自定义金句与生产力小组件设置。
 // 所有新字段走"缺失即默认"策略，不需要破坏性迁移。
 const CURRENT_SCHEMA_VERSION = 3;
 
@@ -216,25 +217,25 @@ export async function getData<T>(key: StorageKey): Promise<T | undefined> {
 
 export async function setData<T>(key: StorageKey, value: T): Promise<void> {
   await storageSet(key, value);
-  if (key !== 'canopy_meta') {
+  if (key !== STORAGE_KEYS.meta) {
     await updateMetaTimestamp();
   }
 }
 
 /**
  * 删除指定 key 对应的数据。
- * 用于一键重置：清除设置 / Onboarding 标志 / 工厂重置遍历全部 canopy_* 键。
+ * 用于一键重置：清除设置 / Onboarding 标志 / 工厂重置遍历全部应用命名空间键。
  */
 export async function removeData(key: string): Promise<void> {
   await storageRemove(key);
-  if (key !== 'canopy_meta') {
+  if (key !== STORAGE_KEYS.meta) {
     await updateMetaTimestamp();
   }
 }
 
 /**
  * 列出 chrome.storage.local 中的所有键。
- * 用于一键重置：遍历并删除所有 canopy_* 键以恢复出厂状态。
+ * 用于一键重置：遍历并删除所有应用命名空间键以恢复出厂状态。
  */
 export async function getAllDataKeys(): Promise<string[]> {
   return storageGetAllKeys();
@@ -243,7 +244,7 @@ export async function getAllDataKeys(): Promise<string[]> {
 // ── Settings ──────────────────────────────────────────
 
 export async function getSettings(): Promise<UserSettings> {
-  const settings = await getData<UserSettings>('canopy_settings');
+  const settings = await getData<UserSettings>(STORAGE_KEYS.settings);
   if (settings === undefined) return { ...DEFAULT_SETTINGS };
   /**
    * 旧值迁移：aurora → slate，sunrise → warm
@@ -420,14 +421,14 @@ export async function saveSettings(settings: Partial<UserSettings>): Promise<Use
       items: settings.habitTracker.items ?? current.habitTracker?.items,
     };
   }
-  await setData('canopy_settings', merged);
+  await setData(STORAGE_KEYS.settings, merged);
   return merged;
 }
 
 // ── Meta ──────────────────────────────────────────────
 
 async function getMeta(): Promise<StorageMeta | undefined> {
-  return getData<StorageMeta>('canopy_meta');
+  return getData<StorageMeta>(STORAGE_KEYS.meta);
 }
 
 async function ensureMeta(): Promise<StorageMeta> {
@@ -438,13 +439,13 @@ async function ensureMeta(): Promise<StorageMeta> {
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
-    await setData('canopy_meta', meta);
+    await setData(STORAGE_KEYS.meta, meta);
   } else if (meta.schemaVersion < CURRENT_SCHEMA_VERSION) {
     // 执行 schema 升级（目前为空迁移，仅 bump 版本号）
     await runMigrations(meta.schemaVersion, CURRENT_SCHEMA_VERSION);
     meta.schemaVersion = CURRENT_SCHEMA_VERSION;
     meta.updatedAt = Date.now();
-    await setData('canopy_meta', meta);
+    await setData(STORAGE_KEYS.meta, meta);
   }
   return meta;
 }
@@ -458,9 +459,9 @@ async function runMigrations(fromVersion: number, toVersion: number): Promise<vo
   for (let v = fromVersion; v < toVersion; v++) {
     if (v === 1) {
       // v1 → v2：确保 settings 的新字段被物化落盘（可选，提升一致性）
-      const current = await getData<UserSettings>('canopy_settings');
+      const current = await getData<UserSettings>(STORAGE_KEYS.settings);
       if (current !== undefined) {
-        await setData('canopy_settings', withDefaults(current));
+        await setData(STORAGE_KEYS.settings, withDefaults(current));
       }
     }
   }
@@ -470,19 +471,19 @@ async function updateMetaTimestamp(): Promise<void> {
   const meta = await getMeta();
   if (meta !== undefined) {
     meta.updatedAt = Date.now();
-    await setData('canopy_meta', meta);
+    await setData(STORAGE_KEYS.meta, meta);
   }
 }
 
 // ── Onboarding ────────────────────────────────────────
 
 export async function hasCompletedOnboarding(): Promise<boolean> {
-  const done = await getData<boolean>('canopy_onboarding_done');
+  const done = await getData<boolean>(STORAGE_KEYS.onboardingDone);
   return done ?? false;
 }
 
 export async function markOnboardingDone(): Promise<void> {
-  await setData('canopy_onboarding_done', true);
+  await setData(STORAGE_KEYS.onboardingDone, true);
 }
 
 // ── Search History ─────────────────────────────────────
@@ -494,7 +495,7 @@ const MAX_RECENT_SEARCHES = 20;
  * 为兼容 v0 旧数据（纯字符串数组），读取时自动升级结构。
  */
 export async function getSearchHistory(): Promise<SearchHistoryEntry[]> {
-  const raw = (await getData<SearchHistoryEntry[] | string[]>('canopy_search_history')) ?? [];
+  const raw = (await getData<SearchHistoryEntry[] | string[]>(STORAGE_KEYS.searchHistory)) ?? [];
   if (raw.length === 0) return [];
   // 旧数据兼容：string[] → SearchHistoryEntry[]
   if (typeof raw[0] === 'string') {
@@ -530,13 +531,13 @@ export async function pushRecentSearch(query: string): Promise<string[]> {
     count: (hit?.count ?? 0) + 1,
   };
   const next = [newEntry, ...rest].slice(0, MAX_RECENT_SEARCHES);
-  await setData('canopy_search_history', next);
+  await setData(STORAGE_KEYS.searchHistory, next);
   return next.map((e) => e.query);
 }
 
 /** 清空搜索历史。 */
 export async function clearSearchHistory(): Promise<void> {
-  await setData('canopy_search_history', []);
+  await setData(STORAGE_KEYS.searchHistory, []);
 }
 
 // ── Recent Activity (F-27) ─────────────────────────────
@@ -545,7 +546,7 @@ const MAX_ACTIVITY = 20;
 const ACTIVITY_TTL_MS = 72 * 3600 * 1000;
 
 export async function getRecentActivity(): Promise<ActivityRecord[]> {
-  const raw = (await getData<ActivityRecord[]>('canopy_activity')) ?? [];
+  const raw = (await getData<ActivityRecord[]>(STORAGE_KEYS.activity)) ?? [];
   const cutoff = Date.now() - ACTIVITY_TTL_MS;
   return raw.filter((r) => r.ts >= cutoff);
 }
@@ -553,12 +554,12 @@ export async function getRecentActivity(): Promise<ActivityRecord[]> {
 export async function pushActivity(record: ActivityRecord): Promise<ActivityRecord[]> {
   const existing = await getRecentActivity();
   const next = [record, ...existing].slice(0, MAX_ACTIVITY);
-  await setData('canopy_activity', next);
+  await setData(STORAGE_KEYS.activity, next);
   return next;
 }
 
 export async function clearActivity(): Promise<void> {
-  await setData('canopy_activity', []);
+  await setData(STORAGE_KEYS.activity, []);
 }
 
 // ── Workspaces (F-29) ──────────────────────────────────
@@ -566,42 +567,42 @@ export async function clearActivity(): Promise<void> {
 const MAX_WORKSPACES = 3;
 
 export async function getWorkspaces(): Promise<Workspace[]> {
-  return (await getData<Workspace[]>('canopy_workspaces')) ?? [];
+  return (await getData<Workspace[]>(STORAGE_KEYS.workspaces)) ?? [];
 }
 
 export async function saveWorkspaces(list: Workspace[]): Promise<void> {
-  await setData('canopy_workspaces', list.slice(0, MAX_WORKSPACES));
+  await setData(STORAGE_KEYS.workspaces, list.slice(0, MAX_WORKSPACES));
 }
 
 // ── Kanban (F-20) ──────────────────────────────────────
 
 export async function getKanbanLayout(): Promise<KanbanLayout | undefined> {
-  return getData<KanbanLayout>('canopy_kanban');
+  return getData<KanbanLayout>(STORAGE_KEYS.kanban);
 }
 
 export async function saveKanbanLayout(layout: KanbanLayout): Promise<void> {
-  await setData('canopy_kanban', layout);
+  await setData(STORAGE_KEYS.kanban, layout);
 }
 
 // ── Stats (F-11) ───────────────────────────────────────
 
 export async function getStats(): Promise<StatsData | undefined> {
-  return getData<StatsData>('canopy_stats');
+  return getData<StatsData>(STORAGE_KEYS.stats);
 }
 
 export async function saveStats(stats: StatsData): Promise<void> {
-  await setData('canopy_stats', stats);
+  await setData(STORAGE_KEYS.stats, stats);
 }
 
 // ── OG Index (F-24) ────────────────────────────────────
 
 export async function getOgEntry(url: string): Promise<OgEntry | undefined> {
-  const index = (await getData<Record<string, OgEntry>>('canopy_og_index')) ?? {};
+  const index = (await getData<Record<string, OgEntry>>(STORAGE_KEYS.ogIndex)) ?? {};
   return index[url];
 }
 
 export async function saveOgEntry(entry: OgEntry): Promise<void> {
-  const index = (await getData<Record<string, OgEntry>>('canopy_og_index')) ?? {};
+  const index = (await getData<Record<string, OgEntry>>(STORAGE_KEYS.ogIndex)) ?? {};
   index[entry.url] = entry;
   // LRU：超过 10000 条时淘汰最老 1000 条
   const keys = Object.keys(index);
@@ -609,21 +610,21 @@ export async function saveOgEntry(entry: OgEntry): Promise<void> {
     const sorted = keys.sort((a, b) => (index[a].fetchedAt ?? 0) - (index[b].fetchedAt ?? 0));
     for (const k of sorted.slice(0, 1000)) delete index[k];
   }
-  await setData('canopy_og_index', index);
+  await setData(STORAGE_KEYS.ogIndex, index);
 }
 
 export async function clearOgIndex(): Promise<void> {
-  await setData('canopy_og_index', {});
+  await setData(STORAGE_KEYS.ogIndex, {});
 }
 
 // ── Auto Snapshot Meta (F-23) ──────────────────────────
 
 export async function getAutoSnapshotMeta(): Promise<AutoSnapshotMeta | undefined> {
-  return getData<AutoSnapshotMeta>('canopy_auto_snapshot_meta');
+  return getData<AutoSnapshotMeta>(STORAGE_KEYS.autoSnapshotMeta);
 }
 
 export async function saveAutoSnapshotMeta(meta: AutoSnapshotMeta): Promise<void> {
-  await setData('canopy_auto_snapshot_meta', meta);
+  await setData(STORAGE_KEYS.autoSnapshotMeta, meta);
 }
 
 // ── Metrics (§17) ──────────────────────────────────────
@@ -631,18 +632,18 @@ export async function saveAutoSnapshotMeta(meta: AutoSnapshotMeta): Promise<void
 const MAX_METRICS = 2000;
 
 export async function getMetrics(): Promise<MetricEvent[]> {
-  return (await getData<MetricEvent[]>('canopy_metrics')) ?? [];
+  return (await getData<MetricEvent[]>(STORAGE_KEYS.metrics)) ?? [];
 }
 
 export async function pushMetric(event: MetricEvent): Promise<void> {
   const list = await getMetrics();
   list.push(event);
   if (list.length > MAX_METRICS) list.splice(0, list.length - MAX_METRICS);
-  await setData('canopy_metrics', list);
+  await setData(STORAGE_KEYS.metrics, list);
 }
 
 export async function clearMetrics(): Promise<void> {
-  await setData('canopy_metrics', []);
+  await setData(STORAGE_KEYS.metrics, []);
 }
 
 // Initialize meta on module load

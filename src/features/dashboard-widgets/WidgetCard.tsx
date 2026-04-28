@@ -48,7 +48,7 @@ export function WidgetCard({
 
   return (
     <div
-      className={`canopy-card-interactive grovetab-widget-card${editing ? ' grovetab-widget-card--editing' : ''}`}
+      className={`app-card-interactive app-widget-card${editing ? ' app-widget-card--editing' : ''}`}
       role="group"
       aria-label={`${title} 小组件`}
       style={
@@ -56,17 +56,17 @@ export function WidgetCard({
           position: 'relative',
           height: '100%',
           borderRadius: token.borderRadiusLG + 10,
-          background: 'var(--canopy-glass-bg)',
+          background: 'var(--app-glass-bg)',
           border: `1px solid ${editing ? token.colorPrimaryBorder : token.colorBorderSecondary}`,
-          boxShadow: editing ? token.boxShadowTertiary : 'var(--canopy-shadow-card)',
-          backdropFilter: 'var(--canopy-glass-filter)',
-          WebkitBackdropFilter: 'var(--canopy-glass-filter)',
+          boxShadow: editing ? token.boxShadowTertiary : 'var(--app-shadow-card)',
+          backdropFilter: 'var(--app-glass-filter)',
+          WebkitBackdropFilter: 'var(--app-glass-filter)',
           padding: 14,
           display: 'flex',
           flexDirection: 'column',
           gap: 10,
           overflow: 'hidden',
-          ['--canopy-hover-border' as string]: editing
+          ['--app-hover-border' as string]: editing
             ? token.colorPrimaryBorderHover
             : token.colorBorder,
         } as React.CSSProperties
@@ -138,14 +138,14 @@ export function WidgetCard({
             icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
             onClick={onRemove}
             aria-label={`删除 ${title}`}
-            className="grovetab-dashboard__no-drag"
+            className="app-dashboard__no-drag"
             style={{ flexShrink: 0 }}
           />
         )}
       </div>
 
       <div
-        className="grovetab-widget-card__body"
+        className="app-widget-card__body"
         style={{
           flex: 1,
           minHeight: 0,

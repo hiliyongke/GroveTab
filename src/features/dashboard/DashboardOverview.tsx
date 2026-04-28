@@ -77,8 +77,8 @@ const StatCard = memo(function StatCard({ label, value, sub, tone = 'default', d
       style={{
         height: '100%',
         borderRadius: 12,
-        background: 'var(--canopy-glass-bg)',
-        borderColor: 'var(--canopy-hairline)',
+        background: 'var(--app-glass-bg)',
+        borderColor: 'var(--app-hairline)',
         opacity: disabled === true ? 0.6 : 1,
         cursor: clickable ? 'pointer' : 'default',
         transition: 'transform 160ms ease, box-shadow 160ms ease',
@@ -168,10 +168,10 @@ export const DashboardOverview = memo(function DashboardOverview({
         margin: '8px 0 16px',
         padding: '16px 20px',
         borderRadius: 16,
-        background: 'var(--canopy-glass-bg)',
-        border: '1px solid var(--canopy-hairline)',
-        backdropFilter: 'var(--canopy-glass-filter)',
-        WebkitBackdropFilter: 'var(--canopy-glass-filter)',
+        background: 'var(--app-glass-bg)',
+        border: '1px solid var(--app-hairline)',
+        backdropFilter: 'var(--app-glass-filter)',
+        WebkitBackdropFilter: 'var(--app-glass-filter)',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
@@ -270,8 +270,8 @@ export const DashboardOverview = memo(function DashboardOverview({
             style={{
               height: '100%',
               borderRadius: 12,
-              background: 'var(--canopy-glass-bg)',
-              borderColor: 'var(--canopy-hairline)',
+              background: 'var(--app-glass-bg)',
+              borderColor: 'var(--app-hairline)',
               opacity: latestArchive === null ? 0.6 : 1,
               cursor: latestArchive !== null ? 'pointer' : 'default',
             }}

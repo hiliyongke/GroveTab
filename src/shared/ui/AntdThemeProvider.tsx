@@ -6,7 +6,7 @@
  *      在「跟随系统」模式下也能即时响应系统明暗切换
  *   2. 写 `<html data-theme="...">` 以兼容存量 CSS 变量引用
  *   3. 从皮肤预设（skinPreset）动态生成 antd theme config + CSS 变量
- *   4. 注入皮肤级 CSS 变量到 `:root`，供组件内通过 `var(--canopy-xxx)` 消费
+ *   4. 注入皮肤级 CSS 变量到 `:root`，供组件内通过 `var(--app-xxx)` 消费
  *   5. 挂载 antd 的 App 容器（提供 message/notification/modal 的静态调用上下文）
  */
 
@@ -20,6 +20,7 @@ import { useSettingsStore } from '@/store';
 import { useResolvedTheme } from '@/shared/hooks';
 import { bindFeedback, unbindFeedback } from './feedback';
 import { getSkinPreset, type SkinPresetId } from '@/shared/theme/skin-presets';
+import { LOCAL_CACHE_KEYS } from '@/shared/config/storage-keys';
 
 /** AntdApp 容器的稳定样式常量，避免每次渲染创建新对象 */
 const ANT_APP_STYLE: React.CSSProperties = { minHeight: '100vh' };
@@ -109,7 +110,7 @@ function buildThemeConfig(
 
   return {
     algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
-    cssVar: { key: 'canopy' },
+    cssVar: { key: 'app' },
     hashed: false,
     token: {
       /** 品牌主色 */
@@ -208,7 +209,7 @@ function buildThemeConfig(
 /**
  * 从皮肤预设生成 CSS 变量，注入到 :root
  *
- * 这些变量供组件内通过 `var(--canopy-skin-xxx)` 消费，
+ * 这些变量供组件内通过 `var(--app-skin-xxx)` 消费，
  * 实现皮肤驱动的视觉一致性，消灭硬编码色值。
  */
 function buildSkinCSSVars(
@@ -216,67 +217,85 @@ function buildSkinCSSVars(
   isDark: boolean,
   density: 'compact' | 'default' | 'comfortable',
   reducedMotion: boolean,
+  custom?: SkinCustomOverride,
 ): Record<string, string> {
-  const skin = getSkinPreset(skinId);
+  const skin = applySkinCustom(getSkinPreset(skinId), custom);
 
   /** 布局密度缩放因子 */
   const densityScale = density === 'compact' ? 0.8 : density === 'comfortable' ? 1.25 : 1;
+  const searchRadius = custom?.borderRadius !== undefined ? skin.borderRadiusLG : skin.searchBox.borderRadius;
+  const floatingRadius = custom?.borderRadius !== undefined ? skin.borderRadiusLG : skin.floatingBar.borderRadius;
 
   const vars: Record<string, string> = {
     // ── 毛玻璃 ──
-    '--canopy-glass-blur': `${skin.glass.blur}px`,
-    '--canopy-glass-saturate': `${skin.glass.saturate}%`,
-    '--canopy-glass-bg': isDark ? skin.glass.bgDark : skin.glass.bgLight,
-    '--canopy-glass-filter': `blur(${skin.glass.blur}px) saturate(${skin.glass.saturate}%)`,
+    '--app-glass-blur': `${skin.glass.blur}px`,
+    '--app-glass-saturate': `${skin.glass.saturate}%`,
+    '--app-glass-bg': isDark ? skin.glass.bgDark : skin.glass.bgLight,
+    '--app-glass-filter': `blur(${skin.glass.blur}px) saturate(${skin.glass.saturate}%)`,
 
     // ── 阴影 ──
-    '--canopy-shadow-card': isDark ? skin.shadow.card.dark : skin.shadow.card.light,
-    '--canopy-shadow-card-hover': isDark ? skin.shadow.cardHover.dark : skin.shadow.cardHover.light,
-    '--canopy-shadow-floating': isDark ? skin.shadow.floating.dark : skin.shadow.floating.light,
-    '--canopy-shadow-brand-glow': isDark ? skin.shadow.brandGlow.dark : skin.shadow.brandGlow.light,
+    '--app-shadow-card': isDark ? skin.shadow.card.dark : skin.shadow.card.light,
+    '--app-shadow-card-hover': isDark ? skin.shadow.cardHover.dark : skin.shadow.cardHover.light,
+    '--app-shadow-floating': isDark ? skin.shadow.floating.dark : skin.shadow.floating.light,
+    '--app-shadow-brand-glow': isDark ? skin.shadow.brandGlow.dark : skin.shadow.brandGlow.light,
 
     // ── Logo ──
-    '--canopy-logo-gradient': skin.logoGradient,
-    '--canopy-logo-glow': isDark ? skin.logoGlowShadow.dark : skin.logoGlowShadow.light,
+    '--app-logo-gradient': custom?.colorPrimary
+      ? `linear-gradient(135deg, ${skin.colorPrimary}, color-mix(in srgb, ${skin.colorPrimary} 70%, white))`
+      : skin.logoGradient,
+    '--app-logo-glow': isDark ? skin.logoGlowShadow.dark : skin.logoGlowShadow.light,
 
     // ── 搜索框 ──
-    '--canopy-search-height': `${Math.round(skin.searchBox.height * densityScale)}px`,
-    '--canopy-search-radius': `${skin.searchBox.borderRadius}px`,
-    '--canopy-search-font-size': `${skin.searchBox.fontSize}px`,
+    '--app-search-height': `${Math.round(skin.searchBox.height * densityScale)}px`,
+    '--app-search-radius': `${searchRadius}px`,
+    '--app-search-font-size': `${skin.searchBox.fontSize}px`,
 
     // ── Header ──
-    '--canopy-header-height': `${Math.round(skin.header.height * densityScale)}px`,
+    '--app-header-height': `${Math.round(skin.header.height * densityScale)}px`,
 
     // ── 浮动栏 ──
-    '--canopy-floating-radius': `${skin.floatingBar.borderRadius}px`,
+    '--app-floating-radius': `${floatingRadius}px`,
 
     // ── 卡片风格 ──
-    '--canopy-card-lift': skin.cardStyle.hoverLift && !reducedMotion ? `${skin.cardStyle.liftDistance}px` : '0px',
+    '--app-card-radius': `${skin.borderRadiusLG}px`,
+    '--app-card-lift': skin.cardStyle.hoverLift && !reducedMotion ? `${skin.cardStyle.liftDistance}px` : '0px',
 
     // ── 纹理 ──
-    '--canopy-texture-noise': skin.texture.noise ? '1' : '0',
-    '--canopy-texture-noise-opacity': `${skin.texture.noiseOpacity}`,
-    '--canopy-texture-grid': skin.texture.grid ? '1' : '0',
-    '--canopy-texture-grid-color': isDark ? skin.texture.gridColor.dark : skin.texture.gridColor.light,
+    '--app-texture-noise': skin.texture.noise ? '1' : '0',
+    '--app-texture-noise-opacity': `${skin.texture.noiseOpacity}`,
+    '--app-texture-grid': skin.texture.grid ? '1' : '0',
+    '--app-texture-grid-color': isDark ? skin.texture.gridColor.dark : skin.texture.gridColor.light,
 
-    // ── 品牌色 ──
-    '--canopy-color-primary': skin.colorPrimary,
-    '--canopy-color-primary-hover': skin.colorPrimaryHover,
+    // ── 语义色 ──
+    '--app-brand': skin.colorPrimary,
+    '--app-color-primary': skin.colorPrimary,
+    '--app-color-primary-hover': skin.colorPrimaryHover,
+    '--app-color-success': 'var(--ant-color-success)',
+    '--app-color-warning': 'var(--ant-color-warning)',
+    '--app-color-error': 'var(--ant-color-error)',
+    '--app-color-info': 'var(--ant-color-info)',
+
+    // ── 文本与面板 ──
+    '--app-text-primary': 'var(--ant-color-text)',
+    '--app-text-secondary': 'var(--ant-color-text-secondary)',
+    '--app-text-tertiary': 'var(--ant-color-text-tertiary)',
+    '--app-surface-bg': 'var(--ant-color-bg-container)',
+    '--app-surface-elevated-bg': 'var(--ant-color-bg-elevated)',
 
     // ── 边框 ──
-    '--canopy-border-hover': isDark ? 'var(--ant-color-border)' : 'var(--ant-color-border)',
+    '--app-border-hover': 'var(--ant-color-border)',
 
     // ── 布局密度缩放 ──
-    '--canopy-density-scale': `${densityScale}`,
-    '--canopy-spacing-unit': `${Math.round(4 * densityScale)}px`,
-    '--canopy-card-gap': `${Math.round(16 * densityScale)}px`,
-    '--canopy-card-padding': `${Math.round(16 * densityScale)}px`,
-    '--canopy-section-gap': `${Math.round(24 * densityScale)}px`,
+    '--app-density-scale': `${densityScale}`,
+    '--app-spacing-unit': `${Math.round(4 * densityScale)}px`,
+    '--app-card-gap': `${Math.round(16 * densityScale)}px`,
+    '--app-card-padding': `${Math.round(16 * densityScale)}px`,
+    '--app-section-gap': `${Math.round(24 * densityScale)}px`,
 
     // ── 动效 ──
-    '--canopy-motion-duration': reducedMotion ? '0s' : '0.2s',
-    '--canopy-motion-duration-slow': reducedMotion ? '0s' : '0.3s',
-    '--canopy-motion-duration-fast': reducedMotion ? '0s' : '0.12s',
+    '--app-motion-duration': reducedMotion ? '0s' : '0.2s',
+    '--app-motion-duration-slow': reducedMotion ? '0s' : '0.3s',
+    '--app-motion-duration-fast': reducedMotion ? '0s' : '0.12s',
   };
 
   return vars;
@@ -306,7 +325,7 @@ export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.style.backgroundColor = mode === 'dark' ? '#141414' : '';
     document.documentElement.style.colorScheme = mode;
     try {
-      window.localStorage.setItem('grovetab_prepaint_theme', mode);
+      window.localStorage.setItem(LOCAL_CACHE_KEYS.prepaintTheme, mode);
     } catch {
       // localStorage 不可用时忽略；下一次仍可通过系统主题兜底。
     }
@@ -335,8 +354,8 @@ export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
    * 且避免闪烁（同步写入而非异步）。
    */
   const skinVars = useMemo(
-    () => buildSkinCSSVars(skinPreset, mode === 'dark', layoutDensity, reducedMotion),
-    [skinPreset, mode, layoutDensity, reducedMotion],
+    () => buildSkinCSSVars(skinPreset, mode === 'dark', layoutDensity, reducedMotion, skinCustom),
+    [skinPreset, mode, layoutDensity, reducedMotion, skinCustom],
   );
 
   useEffect(() => {

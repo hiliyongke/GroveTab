@@ -14,6 +14,7 @@ import { Select, Segmented, Switch } from 'antd';
 import type { UserSettings } from '@/shared/types';
 import { useT } from '@/shared/i18n';
 import { Field } from '../components/Field';
+import { BRAND } from '@/shared/config/brand';
 
 interface GeneralSettingsProps {
   settings: UserSettings;
@@ -52,7 +53,7 @@ export function GeneralSettings({ settings, updateSettings }: GeneralSettingsPro
       {/* ── 接管新标签页 ── */}
       <Field
         label={t('settings.overrideNewTab')}
-        hint={t('settings.overrideNewTabHint')}
+        hint={t('settings.overrideNewTabHint', { brand: BRAND.name })}
       >
         <Switch
           checked={settings.overrideNewTab !== false}

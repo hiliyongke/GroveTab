@@ -1,7 +1,7 @@
 /**
  * Zustand Store — Stats Slice (F-11 使用频率视图)
  *
- * 在新标签页侧消费 SW `StatsCollector` 写入 `canopy_stats` 的激活计数数据，
+ * 在新标签页侧消费 SW `StatsCollector` 写入的激活计数数据，
  * 按"最近 7 天合计激活次数"为 `FrequencyView` 排序。
  *
  * 读取流程：

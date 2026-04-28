@@ -182,7 +182,7 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
   return (
     <Card
       size="small"
-      className="canopy-card-interactive canopy-hover-reveal-host"
+      className="app-card-interactive app-hover-reveal-host"
       styles={{
         body: { padding: 0 },
       }}
@@ -191,10 +191,10 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
           borderRadius: cardRadius || 12,
           overflow: 'hidden',
           position: 'relative',
-          boxShadow: 'var(--canopy-shadow-card)',
+          boxShadow: 'var(--app-shadow-card)',
           border: `1px solid ${token.colorBorderSecondary}`,
-          // 下发 hover 边框色，canopy-card-interactive:hover 消费
-          ['--canopy-hover-border' as string]: token.colorBorder,
+          // 下发 hover 边框色，app-card-interactive:hover 消费
+          ['--app-hover-border' as string]: token.colorBorder,
         } as React.CSSProperties
       }
     >
@@ -209,7 +209,7 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
       {barPosition === 'left' && (
         <div
           aria-hidden
-          className="canopy-accent-bar--left"
+          className="app-accent-bar--left"
           style={{
             position: 'absolute',
             left: 0,
@@ -227,7 +227,7 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
       {barPosition === 'top' && (
         <div
           aria-hidden
-          className="canopy-accent-bar--top"
+          className="app-accent-bar--top"
           style={{
             position: 'absolute',
             left: 0,
@@ -248,7 +248,7 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
         onClick={toggleCollapse}
         aria-expanded={!collapsed}
         aria-label={collapsed ? t('tabs.expand') : t('tabs.collapse')}
-        className="canopy-row-hover canopy-domain-group-header"
+        className="app-row-hover app-domain-group-header"
         style={
           {
             display: 'flex',
@@ -265,7 +265,7 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
             border: 'none',
             outline: 'none',
             // header 内部 hover 色跳到 secondary（比默认 tertiary 更明显）
-            ['--canopy-row-hover-bg' as string]: token.colorFillSecondary,
+            ['--app-row-hover-bg' as string]: token.colorFillSecondary,
           } as React.CSSProperties
         }
       >
@@ -349,7 +349,7 @@ icon={<Moon size={ICON_SIZE.SMALL} />}
             void discardDomainGroup(group.domain).catch(() => { /* store 已 toast */ });
           }}
           aria-label={t('tabs.discardGroup')}
-          className="canopy-hover-reveal"
+          className="app-hover-reveal"
           style={{
             position: 'absolute',
             top: 8,
@@ -376,7 +376,7 @@ icon={closing ? undefined : <X size={ICON_SIZE.SMALL} />}
           onClick={(e: React.MouseEvent) => { void handleCloseAll(e); }}
           aria-label={t('tabs.closeDomain')}
           // closing 时强制显示（is-visible），其余情况由 hover/focus 驱动
-          className={`canopy-hover-reveal${closing ? ' is-visible' : ''}`}
+          className={`app-hover-reveal${closing ? ' is-visible' : ''}`}
           style={{
             position: 'absolute',
             top: 8,

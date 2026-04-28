@@ -27,8 +27,9 @@ import { detectIdleTabs, formatIdleTime, type IdleTabInfo } from '@/shared/utils
 import { DuplicatePreviewModal } from './DuplicatePreviewModal';
 import { useT } from '@/shared/i18n';
 import { iconColor } from '@/shared/utils/icon-colors';
+import { LOCAL_CACHE_KEYS } from '@/shared/config/storage-keys';
 
-const DISMISSED_KEY = 'grovetab_tidy_dismissed';
+const DISMISSED_KEY = LOCAL_CACHE_KEYS.tidyDismissed;
 
 interface TidySuggestionBarProps {
   /** 外部要求展开建议栏时递增该信号。 */
@@ -245,7 +246,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
       {/* 详情区域 */}
       {expanded && (
         <Card
-          className="canopy-accordion-panel"
+          className="app-accordion-panel"
           size="small"
           style={{
             marginTop: 0,

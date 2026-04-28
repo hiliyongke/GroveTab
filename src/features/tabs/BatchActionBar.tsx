@@ -90,7 +90,7 @@ export function BatchActionBar() {
 
   return (
     <div
-      className="canopy-batch-bar canopy-surface-elevated"
+      className="app-batch-bar app-surface-elevated"
       role="toolbar"
       aria-label={t('selection.title')}
       style={{
@@ -130,7 +130,7 @@ export function BatchActionBar() {
         </span>
       </div>
 
-      <div className="canopy-divider-soft" aria-hidden />
+      <div className="app-divider-soft" aria-hidden />
 
       {/* 操作组：危险→中性→主要，视觉权重递增 */}
       <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
@@ -183,7 +183,7 @@ export function BatchActionBar() {
         </Tooltip>
       </div>
 
-      <div className="canopy-divider-soft" aria-hidden />
+      <div className="app-divider-soft" aria-hidden />
 
       <Tooltip title={t('batch.cancel')} placement="top">
         <Button

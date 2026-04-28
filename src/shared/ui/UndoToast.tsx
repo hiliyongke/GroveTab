@@ -7,7 +7,7 @@
  *   - 普通关闭场景：保持原 [撤销] 单按钮形态
  *   - 若 record.subNote 非空（如 "M 个关闭失败"），在副行展示
  *
- * UndoToast 通过自定义事件 `canopy:open-archive` 通知上层打开 ArchivePanel 并高亮 session。
+ * UndoToast 通过自定义事件 `app:open-archive` 通知上层打开 ArchivePanel 并高亮 session。
  */
 
 import { Button, theme } from 'antd';
@@ -16,6 +16,7 @@ import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useUndoStore, useSelectionStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { Z } from '@/shared/config/z-index';
+import { APP_EVENTS } from '@/shared/config/storage-keys';
 
 /**
  * 触发"打开 Archive 并高亮 session"的跨组件事件。
@@ -24,7 +25,7 @@ import { Z } from '@/shared/config/z-index';
 function openArchivePanel(sessionId?: string) {
   if (typeof window === 'undefined') return;
   window.dispatchEvent(
-    new CustomEvent('canopy:open-archive', { detail: { sessionId } }),
+    new CustomEvent(APP_EVENTS.openArchive, { detail: { sessionId } }),
   );
 }
 

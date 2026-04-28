@@ -1,5 +1,5 @@
 /**
- * Canopy — Service Worker
+ * Service Worker
  *
  * Responsibilities:
  * 1. Listen to chrome.tabs / chrome.windows events
@@ -23,6 +23,7 @@ import {
 import type { StatsData, StatsRecord } from '@/shared/types';
 import { BRAND } from '@/shared/config/brand';
 import { CONFIG } from '@/shared/config';
+import { APP_INTERNAL_IDS, STORAGE_KEYS } from '@/shared/config/storage-keys';
 
 /** 统一日志前缀：SW 内所有 console.log/warn/error 都走 SW_LOG_TAG */
 const SW_LOG_TAG = `${BRAND.logTag} SW`;
@@ -196,7 +197,7 @@ chrome.windows.onFocusChanged.addListener((windowId) => {
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
-    id: 'canopy-save-all',
+    id: 'app-save-all',
     title: chrome.i18n.getMessage('context_save_all') || `Save all tabs to ${BRAND.name}`,
     contexts: ['action'],
   });
@@ -204,7 +205,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 chrome.contextMenus.onClicked.addListener((info) => {
   void (async () => {
-    if (info.menuItemId === 'canopy-save-all') {
+    if (info.menuItemId === 'app-save-all') {
       try {
         await archiveCurrentWindowTabs();
       } catch (err) {
@@ -218,7 +219,7 @@ chrome.contextMenus.onClicked.addListener((info) => {
 
 chrome.commands.onCommand.addListener((command) => {
   void (async () => {
-    if (command === 'open-grovetab') {
+    if (command === APP_INTERNAL_IDS.openWorkspaceCommand) {
       try {
         const url = chrome.runtime.getURL('src/pages/newtab/index.html');
         await chrome.tabs.create({ url });
@@ -247,9 +248,9 @@ chrome.commands.onCommand.addListener((command) => {
 });
 // ── Alarms ────────────────────────────────────────────
 
-void chrome.alarms.create('canopy-stats-heartbeat', { periodInMinutes: 1 });
-void chrome.alarms.create('canopy-auto-snapshot', { periodInMinutes: 60 });
-void chrome.alarms.create('canopy-trending-refresh', { periodInMinutes: 30 });
+void chrome.alarms.create('app-stats-heartbeat', { periodInMinutes: 1 });
+void chrome.alarms.create('app-auto-snapshot', { periodInMinutes: 60 });
+void chrome.alarms.create('app-trending-refresh', { periodInMinutes: 30 });
 
 async function autoSnapshotIfNeeded(): Promise<void> {
   try {
@@ -311,12 +312,12 @@ async function checkDiscardedTabs(): Promise<void> {
 }
 
 chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === 'canopy-stats-heartbeat') {
+  if (alarm.name === APP_INTERNAL_IDS.statsHeartbeatAlarm) {
     void checkDiscardedTabs();
     void flushStats(true);
-  } else if (alarm.name === 'canopy-auto-snapshot') {
+  } else if (alarm.name === APP_INTERNAL_IDS.autoSnapshotAlarm) {
     void autoSnapshotIfNeeded();
-  } else if (alarm.name === 'canopy-trending-refresh') {
+  } else if (alarm.name === APP_INTERNAL_IDS.trendingRefreshAlarm) {
     void refreshTrendingCache();
   }
 });
@@ -408,7 +409,7 @@ async function maybeFetchOg(url: string): Promise<void> {
 async function refreshTrendingCache(): Promise<void> {
   try {
     const { storageGet, storageSet } = await import('@/chrome');
-    const cache = await storageGet<Record<string, unknown>>('canopy_trending_cache');
+    const cache = await storageGet<Record<string, unknown>>(STORAGE_KEYS.trendingCache);
     // 无缓存 → 用户从未用过热榜，跳过
     if (!cache || !cache.boards || typeof cache.boards !== 'object') return;
 
@@ -465,7 +466,7 @@ async function refreshTrendingCache(): Promise<void> {
     }
 
     (cache as Record<string, unknown>).lastRefreshAt = Date.now();
-    await storageSet('canopy_trending_cache', cache);
+    await storageSet(STORAGE_KEYS.trendingCache, cache);
   } catch (err) {
     console.warn(`${SW_LOG_TAG} trending cache refresh failed`, err);
   }

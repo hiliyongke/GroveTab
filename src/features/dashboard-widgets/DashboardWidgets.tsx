@@ -11,7 +11,7 @@
  *   1. `react-grid-layout` 体积 ~30KB gz，通过 `React.lazy` 只在本组件挂载时
  *      加载 `vendor-grid` chunk，首屏 0 影响。
  *   2. `layout-migrator` 把旧的 `{id,x,y,w,h}` 结构转换为 RGL 的 `LayoutItem`。
- *   3. 拖拽句柄用 `.grovetab-dashboard__drag-handle` 类精准指定，避免
+ *   3. 拖拽句柄用 `.app-dashboard__drag-handle` 类精准指定，避免
  *      影响 widget 内部控件（input / button）。
  *   4. 编辑模式外禁用 drag/resize，防止误操作。
  */
@@ -62,7 +62,7 @@ const ResponsiveGridLayout = lazy(async () => {
 });
 
 const BREAKPOINTS = { lg: 1024, md: 768, sm: 0 } as const;
-const DRAG_HANDLE_CLASS = 'grovetab-dashboard__drag-handle';
+const DRAG_HANDLE_CLASS = 'app-dashboard__drag-handle';
 
 function isDashboardWidgetEnabled(settings: UserSettings, type: DashboardWidgetType): boolean {
   switch (type) {
@@ -383,7 +383,7 @@ export function DashboardWidgets({
             minHeight: 160,
             padding: 24,
             borderRadius: 18,
-            background: 'var(--canopy-glass-bg)',
+            background: 'var(--app-glass-bg)',
             border: `1px dashed ${token.colorBorderSecondary}`,
             color: token.colorTextSecondary,
             textAlign: 'center',
@@ -412,7 +412,7 @@ export function DashboardWidgets({
 
       <div
         ref={containerRef}
-        className={editing ? 'grovetab-dashboard--editing' : ''}
+        className={editing ? 'app-dashboard--editing' : ''}
         style={{
           width: '100%',
           display: visibleItems.length === 0 ? 'none' : undefined,

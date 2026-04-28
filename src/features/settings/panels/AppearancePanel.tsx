@@ -31,6 +31,7 @@ import { GRADIENT_PRESETS, buildGradient } from '@/shared/theme/gradient-presets
 import { SKIN_PRESETS } from '@/shared/theme/skin-presets';
 import type { UserSettings } from '@/shared/types';
 import { Field } from '../components/Field';
+import { BRAND } from '@/shared/config/brand';
 
 interface AppearancePanelProps {
   settings: UserSettings;
@@ -154,7 +155,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
       void optimizeBackgroundImage(file)
         .then((dataUrl) => updateBgImage({ url: dataUrl }))
         .catch((err) => {
-          console.warn('[GroveTab] background image optimize failed', err);
+          console.warn(`${BRAND.logTag} background image optimize failed`, err);
           void message.warning(err instanceof Error ? err.message : '图片处理失败');
         });
     },

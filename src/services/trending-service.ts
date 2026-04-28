@@ -9,12 +9,13 @@
 
 import { storageGet, storageSet } from '@/chrome';
 import type { HotBoardData, TrendingCache, TrendingCategory, TrendingItem } from '@/shared/types';
+import { STORAGE_KEYS } from '@/shared/config/storage-keys';
 
 /** 缓存有效期（毫秒），30 分钟 */
 const CACHE_TTL_MS = 30 * 60 * 1000;
 
 /** 存储 key */
-const CACHE_KEY = 'canopy_trending_cache';
+const CACHE_KEY = STORAGE_KEYS.trendingCache;
 
 /** API 基础地址 */
 const API_BASE = 'https://api.xcvts.cn/api/hotlist';

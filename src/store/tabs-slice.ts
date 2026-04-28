@@ -25,6 +25,7 @@ import { swBroadcast } from '@/shared/utils/sw-broadcast';
 import { useUndoStore } from './undo-slice';
 import { useSelectionStore } from './selection-slice';
 import { useSettingsStore } from './settings-slice';
+import { BRAND } from '@/shared/config/brand';
 
 interface TabsState {
   /** All live tabs (filtered for display) */
@@ -240,7 +241,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       if (!silent) {
         feedback.error(translate('tabs.loadFailed'), err);
       } else {
-        console.warn('[Canopy] silent refresh failed', err);
+        console.warn(`${BRAND.logTag} silent refresh failed`, err);
       }
       set(silent ? { error: String(err) } : { loading: false, error: String(err) });
     }
@@ -361,7 +362,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
         .getState()
         .addRecord(snapshots, `关闭 "${tab.title}"`)
         .catch((err) => {
-          console.warn('[Canopy] addRecord failed, undo will be unavailable', err);
+          console.warn(`${BRAND.logTag} addRecord failed, undo will be unavailable`, err);
         });
       await closeTab(tabId);
       // 关闭成功后不强制刷新——SW broadcast 的 tab-removed 会驱动 UI 移除
@@ -392,7 +393,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
         .getState()
         .addRecord(snapshots, `关闭 ${targets.length} 个标签页`)
         .catch((err) => {
-          console.warn('[Canopy] addRecord failed, undo will be unavailable', err);
+          console.warn(`${BRAND.logTag} addRecord failed, undo will be unavailable`, err);
         });
       await closeTabs(tabIds);
     } catch (err) {
@@ -440,7 +441,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
         .getState()
         .addRecord(snapshots, `关闭 ${domain} 的 ${nonPinned.length} 个标签页`)
         .catch((err) => {
-          console.warn('[Canopy] addRecord failed, undo will be unavailable', err);
+          console.warn(`${BRAND.logTag} addRecord failed, undo will be unavailable`, err);
         });
       await closeTabs(nonPinned.map((t) => t.id));
       // 批量操作给出成功反馈，让用户明确感知"点了就有结果"
@@ -482,7 +483,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
         .getState()
         .addRecord(snapshots, `关闭全部 ${nonPinned.length} 个非固定标签页`)
         .catch((err) => {
-          console.warn('[Canopy] addRecord failed, undo will be unavailable', err);
+          console.warn(`${BRAND.logTag} addRecord failed, undo will be unavailable`, err);
         });
       await closeTabs(nonPinned.map((t) => t.id));
       feedback.success(translate('tabs.closedCount', { count: nonPinned.length }));

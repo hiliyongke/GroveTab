@@ -8,8 +8,9 @@
 import { useEffect, useRef } from 'react';
 import { useTabsStore } from '@/store';
 import type { SwBroadcastMessage } from '@/shared/types';
+import { APP_CHANNELS } from '@/shared/config/storage-keys';
 
-const CHANNEL_NAME = 'canopy-sw-broadcast';
+const CHANNEL_NAME = APP_CHANNELS.swBroadcast;
 
 export function useSwBroadcast() {
   const handleBroadcast = useTabsStore((s) => s.handleBroadcast);

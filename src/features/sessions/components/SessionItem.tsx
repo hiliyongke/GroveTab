@@ -243,7 +243,7 @@ export function SessionItem({
             session.tabs.map((tab, idx) => (
               <div
                 key={`${session.id}-${idx}`}
-                className="canopy-row-hover"
+                className="app-row-hover"
                 style={
                   {
                     display: 'flex',
@@ -252,7 +252,7 @@ export function SessionItem({
                     padding: '6px 8px',
                     borderRadius: token.borderRadiusSM,
                     // 与原视觉保持一致——hover 用 secondary 填色（比默认的 tertiary 更显眼）
-                    ['--canopy-row-hover-bg' as string]: token.colorFillSecondary,
+                    ['--app-row-hover-bg' as string]: token.colorFillSecondary,
                   } as React.CSSProperties
                 }
               >

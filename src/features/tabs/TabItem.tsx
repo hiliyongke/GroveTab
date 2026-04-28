@@ -148,7 +148,7 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
           }
         }}
         onContextMenu={handleContextMenu}
-        className="canopy-row-hover canopy-hover-reveal-host"
+        className="app-row-hover app-hover-reveal-host"
         style={
           {
             display: 'flex',
@@ -160,13 +160,13 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
             borderRadius: token.borderRadiusSM,
             cursor: 'pointer',
             // 选中态用内联 background 强制覆盖 hover 规则；非选中态留空让 CSS
-            // .canopy-row-hover:hover 接管（空字符串/undefined 都不会产生内联规则）
+            // .app-row-hover:hover 接管（空字符串/undefined 都不会产生内联规则）
             ...(isSelected ? { backgroundColor: selectedBg } : {}),
             outline: 'none',
             opacity: isDiscarded ? 0.5 : 1,
             position: 'relative',
-            // 向 .canopy-row-hover 下发自定义 hover 背景色（与原 colorFillTertiary 一致）
-            ['--canopy-row-hover-bg' as string]: token.colorFillTertiary,
+            // 向 .app-row-hover 下发自定义 hover 背景色（与原 colorFillTertiary 一致）
+            ['--app-row-hover-bg' as string]: token.colorFillTertiary,
           } as React.CSSProperties
         }
       >
@@ -324,7 +324,7 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
         {/* 行尾附加信息（如时间戳），放在状态图标和关闭按钮之间 */}
         {trailing}
 
-        {/* 关闭按钮（hover/focus 时显示，由父节点 .canopy-hover-reveal-host 驱动） */}
+        {/* 关闭按钮（hover/focus 时显示，由父节点 .app-hover-reveal-host 驱动） */}
         <Tooltip title={t('tabs.close')}>
           <Button
             type="text"
@@ -333,7 +333,7 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
             icon={<X size={ICON_SIZE.SMALL} />}
             onClick={handleClose}
             aria-label={t('tabs.close')}
-            className="canopy-hover-reveal"
+            className="app-hover-reveal"
             style={{
               flexShrink: 0,
               width: 24,

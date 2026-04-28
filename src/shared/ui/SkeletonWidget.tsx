@@ -26,7 +26,7 @@ export function SkeletonWidget({ rows = 3, showHeader = true, label }: SkeletonW
   const pulse: React.CSSProperties = {
     background: base,
     borderRadius: 6,
-    animation: 'grovetab-skeleton-pulse 1.4s ease-in-out infinite',
+    animation: 'app-skeleton-pulse 1.4s ease-in-out infinite',
   };
 
   return (
@@ -60,7 +60,7 @@ export function SkeletonWidget({ rows = 3, showHeader = true, label }: SkeletonW
       ))}
       {/* 仅定义一次全局 keyframes */}
       <style>
-        {`@keyframes grovetab-skeleton-pulse {
+        {`@keyframes app-skeleton-pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.5; }
         }

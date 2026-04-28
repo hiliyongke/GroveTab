@@ -2,13 +2,14 @@
  * Metrics — Local privacy-friendly usage analytics（v1.0 封板事件版）
  *
  * 旧 API（累加计数器）继续保留以兼容现有调用点，新增事件型 track API。
- * 事件型数据存放在 `canopy_metrics` 键下，与 InsightsPanel / 清除按钮对齐。
+ * 事件型数据存放在应用命名空间键下，与 InsightsPanel / 清除按钮对齐。
  */
 
 import { getData, setData } from '@/repositories';
 import type { MetricEvent } from '@/shared/types';
+import { STORAGE_KEYS } from '@/shared/config/storage-keys';
 
-const METRICS_KEY = 'canopy_metrics';
+const METRICS_KEY = STORAGE_KEYS.metrics;
 
 export interface Metrics {
   newtabOpens: number;
@@ -29,7 +30,7 @@ const DEFAULT_METRICS: Metrics = {
 };
 
 async function getCounters(): Promise<Metrics> {
-  return (await getData<Metrics>('canopy_metric_counters')) ?? { ...DEFAULT_METRICS };
+  return (await getData<Metrics>(STORAGE_KEYS.metricCounters)) ?? { ...DEFAULT_METRICS };
 }
 
 /**
@@ -47,7 +48,7 @@ export async function recordMetric(
     if (typeof metrics[key] === 'number') {
       (metrics[key] as number) += increment;
     }
-    await setData('canopy_metric_counters', metrics);
+    await setData(STORAGE_KEYS.metricCounters, metrics);
   } catch {
     // metrics 永远不应阻塞主流程
   }

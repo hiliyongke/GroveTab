@@ -41,9 +41,9 @@ export function extractHostname(url: string): string {
 }
 
 /**
- * Check if a tab is the Canopy new tab page itself
+ * Check if a tab is the extension new tab page itself
  */
-function isCanopyNewTab(url: string): boolean {
+function isExtensionNewTab(url: string): boolean {
   return url.startsWith('chrome-extension://') && url.includes('/newtab/');
 }
 
@@ -52,5 +52,5 @@ function isCanopyNewTab(url: string): boolean {
  */
 export function isSelfNewTabPage(tab: { url?: string; pendingUrl?: string }): boolean {
   const url = tab.url || tab.pendingUrl || '';
-  return isCanopyNewTab(url);
+  return isExtensionNewTab(url);
 }

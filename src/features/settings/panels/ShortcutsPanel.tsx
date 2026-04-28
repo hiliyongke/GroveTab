@@ -15,6 +15,7 @@ import { useSettingsStore } from '@/store';
 import { useResolvedKeybindings } from '@/shared/hooks/use-keybinding';
 import type { KeybindingAction } from '@/shared/config/keybindings';
 import { Field } from '../components/Field';
+import { BRAND } from '@/shared/config/brand';
 
 /** Chrome 全局快捷键（只读） */
 const GLOBAL_SHORTCUTS = [
@@ -205,8 +206,8 @@ export function ShortcutsPanel() {
                 border: `1px solid ${token.colorBorderSecondary}`,
               }}
             >
-              <span style={{ fontSize: 13, fontWeight: 500 }}>{t(item.labelKey)}</span>
-              <kbd className="canopy-kbd">{item.keys}</kbd>
+              <span style={{ fontSize: 13, fontWeight: 500 }}>{t(item.labelKey, { brand: BRAND.name })}</span>
+              <kbd className="app-kbd">{item.keys}</kbd>
             </div>
           ))}
         </div>
@@ -232,7 +233,7 @@ export function ShortcutsPanel() {
                   <div style={{ fontSize: 13, fontWeight: 500 }}>{t(item.label)}</div>
                   {item.hint && (
                     <div style={{ fontSize: 11, color: token.colorTextTertiary, marginTop: 2 }}>
-                      {t(item.hint)}
+                      {t(item.hint, { brand: BRAND.name })}
                     </div>
                   )}
                   {conflictMap.has(item.action) && (

@@ -1,5 +1,5 @@
 /**
- * Canopy — 全局样式
+ * 全局样式
  *
  * 策略：视觉全部交给 antd v6 主题 + 皮肤预设；这里只保留 antd 无法覆盖的内容：
  *   1. color-scheme / 盒模型等浏览器级基础重置
@@ -9,23 +9,23 @@
  *   5. favicon 占位块（由代码生成颜色，纯结构样式）
  *   6. 高级感增强：字体渲染、选中态、聚焦态
  *   7. 皮肤级 CSS 变量驱动：噪点纹理、网格背景
- *   8. 跨组件复用的通用语义类：.canopy-surface / .canopy-kbd / .canopy-divider-soft
+ *   8. 跨组件复用的通用语义类：.app-surface / .app-kbd / .app-divider-soft
  */
 
 :root {
   color-scheme: light;
   /* ── 跨组件共享的非主题变量 ────────────────────── */
-  --canopy-hairline-light: rgba(0, 0, 0, 0.06);
-  --canopy-hairline-dark: rgba(255, 255, 255, 0.08);
-  --canopy-hairline: var(--canopy-hairline-light);
-  --canopy-surface-elevated-bg-light: rgba(255, 255, 255, 0.88);
-  --canopy-surface-elevated-bg-dark: rgba(28, 28, 31, 0.86);
-  --canopy-surface-elevated-bg: var(--canopy-surface-elevated-bg-light);
+  --app-hairline-light: rgba(0, 0, 0, 0.06);
+  --app-hairline-dark: rgba(255, 255, 255, 0.08);
+  --app-hairline: var(--app-hairline-light);
+  --app-surface-elevated-bg-light: rgba(255, 255, 255, 0.88);
+  --app-surface-elevated-bg-dark: rgba(28, 28, 31, 0.86);
+  --app-surface-elevated-bg: var(--app-surface-elevated-bg-light);
 }
 [data-theme='dark'] {
   color-scheme: dark;
-  --canopy-hairline: var(--canopy-hairline-dark);
-  --canopy-surface-elevated-bg: var(--canopy-surface-elevated-bg-dark);
+  --app-hairline: var(--app-hairline-dark);
+  --app-surface-elevated-bg: var(--app-surface-elevated-bg-dark);
 }
 
 html,
@@ -75,11 +75,11 @@ body {
 
 /** 选中态：用品牌色低透明度，避免默认蓝的廉价感 */
 ::selection {
-  background-color: color-mix(in srgb, var(--canopy-color-primary) 18%, transparent);
+  background-color: color-mix(in srgb, var(--app-color-primary) 18%, transparent);
   color: inherit;
 }
 [data-theme='dark'] ::selection {
-  background-color: color-mix(in srgb, var(--canopy-color-primary) 25%, transparent);
+  background-color: color-mix(in srgb, var(--app-color-primary) 25%, transparent);
 }
 
 /* ─── 自定义滚动条（webkit）──────────────────────── */
@@ -105,18 +105,18 @@ body {
 }
 
 /* ─── 域名卡片瀑布流容器（antd 无对应组件） ────────── */
-.canopy-domain-masonry {
+.app-domain-masonry {
   column-gap: 16px;
   column-fill: balance;
 }
-.canopy-domain-masonry-item {
+.app-domain-masonry-item {
   break-inside: avoid;
   page-break-inside: avoid;
   margin-bottom: 14px;
 }
 
 /* ─── favicon 占位块（无图时的字母色块） ──────────── */
-.canopy-favicon-fallback {
+.app-favicon-fallback {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -133,7 +133,7 @@ body {
  */
 :focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--canopy-color-primary) 35%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-color-primary) 35%, transparent);
   border-radius: inherit;
 }
 
@@ -141,7 +141,7 @@ body {
  * 头部明暗切换按钮在 theme 变化时，icon 元素通过 key 被重建；
  * 这里给它一个轻量的「旋转 + 渐入」效果，让切换可感知。
  */
-@keyframes canopy-theme-icon-spin {
+@keyframes app-theme-icon-spin {
   0% {
     opacity: 0;
     transform: rotate(-90deg) scale(0.6);
@@ -157,7 +157,7 @@ body {
 }
 
 /** 热榜刷新按钮旋转动画 */
-@keyframes canopy-spin {
+@keyframes app-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
@@ -165,7 +165,7 @@ body {
 /* ─── 页面入场动画 ─────────────────────────────────
  * 首屏加载完成后，主内容区做一个柔和的上滑渐入。
  */
-@keyframes canopy-fade-in-up {
+@keyframes app-fade-in-up {
   from {
     opacity: 0;
     transform: translateY(8px);
@@ -176,15 +176,15 @@ body {
   }
 }
 
-/* 主内容入场：由 [data-canopy-content] 元素触发 */
-[data-canopy-content] {
-  animation: canopy-fade-in-up 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+/* 主内容入场：由 [data-app-content] 元素触发 */
+[data-app-content] {
+  animation: app-fade-in-up 0.36s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ─── 底部浮动操作栏入场 ───────────────────────────
  * 上滑 + 渐入，配合 scale 让点击感更有物理性。
  */
-@keyframes canopy-float-in {
+@keyframes app-float-in {
   from {
     opacity: 0;
     transform: translate(-50%, 16px) scale(0.96);
@@ -195,12 +195,12 @@ body {
   }
 }
 
-.canopy-batch-bar {
-  animation: canopy-float-in 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+.app-batch-bar {
+  animation: app-float-in 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ─── Tidy 建议栏展开动画 ─────────────────────────── */
-@keyframes canopy-accordion-in {
+@keyframes app-accordion-in {
   from {
     opacity: 0;
     transform: translateY(-4px);
@@ -211,8 +211,8 @@ body {
   }
 }
 
-.canopy-accordion-panel {
-  animation: canopy-accordion-in 0.22s ease-out;
+.app-accordion-panel {
+  animation: app-accordion-in 0.22s ease-out;
   transform-origin: top center;
 }
 
@@ -228,12 +228,12 @@ body::before {
   z-index: 1;
   pointer-events: none;
   opacity: 0;
-  filter: url(#canopy-noise);
+  filter: url(#app-noise);
   transition: opacity 0.3s ease;
 }
 
 html[data-texture-noise] body::before {
-  opacity: var(--canopy-texture-noise-opacity, 0.03);
+  opacity: var(--app-texture-noise-opacity, 0.03);
 }
 
 /* ─── 通用语义类（跨组件复用的视觉原语） ─────────────
@@ -243,17 +243,17 @@ html[data-texture-noise] body::before {
  */
 
 /** Elevated Surface —— 浮层容器（批量栏、命令面板、菜单等共用） */
-.canopy-surface-elevated {
-  background: var(--canopy-surface-elevated-bg);
-  backdrop-filter: var(--canopy-glass-filter);
-  -webkit-backdrop-filter: var(--canopy-glass-filter);
+.app-surface-elevated {
+  background: var(--app-surface-elevated-bg);
+  backdrop-filter: var(--app-glass-filter);
+  -webkit-backdrop-filter: var(--app-glass-filter);
   border: 1px solid var(--ant-color-border-secondary);
-  box-shadow: var(--canopy-shadow-floating);
-  border-radius: var(--canopy-floating-radius);
+  box-shadow: var(--app-shadow-floating);
+  border-radius: var(--app-floating-radius);
 }
 
 /** 键帽（显示快捷键） */
-.canopy-kbd {
+.app-kbd {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -271,28 +271,28 @@ html[data-texture-noise] body::before {
 }
 
 /** 软分隔线（与 antd divider 相比更细、更柔，适合浮层内部） */
-.canopy-divider-soft {
+.app-divider-soft {
   width: 1px;
   height: 20px;
   background: var(--ant-color-border-secondary);
   flex-shrink: 0;
 }
-.canopy-divider-soft--horizontal {
+.app-divider-soft--horizontal {
   width: 100%;
   height: 1px;
 }
 
 /** 吸附/悬浮状态：让元素在 hover/focus 时轻微上浮 + 柔和 ring
- *  用法：给任意交互元素加 .canopy-lift，hover 时自动抬起。
+ *  用法：给任意交互元素加 .app-lift，hover 时自动抬起。
  *  与 prefers-reduced-motion 兼容。
  */
-.canopy-lift {
+.app-lift {
   transition:
-    transform var(--canopy-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow var(--canopy-motion-duration, 0.2s) ease,
-    border-color var(--canopy-motion-duration, 0.2s) ease;
+    transform var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow var(--app-motion-duration, 0.2s) ease,
+    border-color var(--app-motion-duration, 0.2s) ease;
 }
-.canopy-lift:hover {
+.app-lift:hover {
   transform: translateY(-1px);
 }
 
@@ -302,17 +302,17 @@ html[data-texture-noise] body::before {
  * 说明：通过叠加 `.ant-input-affix-wrapper` 类选择器（2 类 > antd 原生 1 类）
  * 提升特异性，替代 `!important`，避免样式层级失控。
  */
-.ant-input-affix-wrapper.canopy-hero-search:hover {
+.ant-input-affix-wrapper.app-hero-search:hover {
   transform: translateY(-1px);
-  border-color: var(--canopy-color-primary-hover);
+  border-color: var(--app-color-primary-hover);
   box-shadow:
     0 10px 32px color-mix(in srgb, #000 10%, transparent),
-    0 0 0 4px color-mix(in srgb, var(--canopy-color-primary) 10%, transparent);
+    0 0 0 4px color-mix(in srgb, var(--app-color-primary) 10%, transparent);
 }
-[data-theme='dark'] .ant-input-affix-wrapper.canopy-hero-search:hover {
+[data-theme='dark'] .ant-input-affix-wrapper.app-hero-search:hover {
   box-shadow:
     0 10px 32px rgba(0, 0, 0, 0.4),
-    0 0 0 4px color-mix(in srgb, var(--canopy-color-primary) 12%, transparent);
+    0 0 0 4px color-mix(in srgb, var(--app-color-primary) 12%, transparent);
 }
 
 /**
@@ -321,7 +321,7 @@ html[data-texture-noise] body::before {
  * 元素本身是原生 <button all: unset>，不存在被 antd 覆盖的问题，
  * 因此无需 !important。
  */
-.canopy-compact-search:hover {
+.app-compact-search:hover {
   background: var(--ant-color-fill-secondary);
   border-color: var(--ant-color-border);
 }
@@ -351,80 +351,80 @@ html[data-texture-noise] body::before {
  */
 
 /** 行级 hover：标签页行、会话子项等。变量由组件内联注入。 */
-.canopy-row-hover {
-  transition: background-color var(--canopy-motion-duration, 0.15s) ease;
+.app-row-hover {
+  transition: background-color var(--app-motion-duration, 0.15s) ease;
 }
-.canopy-row-hover:hover,
-.canopy-row-hover:focus-within {
-  background-color: var(--canopy-row-hover-bg, var(--ant-color-fill-tertiary));
+.app-row-hover:hover,
+.app-row-hover:focus-within {
+  background-color: var(--app-row-hover-bg, var(--ant-color-fill-tertiary));
 }
 
 /** 卡片级 hover：上浮 + 阴影提升 + 边框加深。 */
-.canopy-card-interactive {
+.app-card-interactive {
   transition:
-    transform var(--canopy-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow var(--canopy-motion-duration, 0.2s) ease,
-    border-color var(--canopy-motion-duration, 0.2s) ease;
+    transform var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow var(--app-motion-duration, 0.2s) ease,
+    border-color var(--app-motion-duration, 0.2s) ease;
 }
-.canopy-card-interactive:hover,
-.canopy-card-interactive:focus-within {
-  transform: translateY(calc(-1 * var(--canopy-card-lift, 2px)));
-  box-shadow: var(--canopy-shadow-card-hover);
-  border-color: var(--canopy-hover-border, var(--ant-color-border));
+.app-card-interactive:hover,
+.app-card-interactive:focus-within {
+  transform: translateY(calc(-1 * var(--app-card-lift, 2px)));
+  box-shadow: var(--app-shadow-card-hover);
+  border-color: var(--app-hover-border, var(--ant-color-border));
 }
 
 /**
- * Hover 显隐：容器加 .canopy-hover-reveal-host，
- * 被显隐的子元素加 .canopy-hover-reveal。
+ * Hover 显隐：容器加 .app-hover-reveal-host，
+ * 被显隐的子元素加 .app-hover-reveal。
  *
  * 容器 hover 或 focus-within 时子元素淡入——支持键盘 Tab 聚焦。
  */
-.canopy-hover-reveal {
+.app-hover-reveal {
   opacity: 0;
-  transition: opacity var(--canopy-motion-duration, 0.15s) ease;
+  transition: opacity var(--app-motion-duration, 0.15s) ease;
 }
-.canopy-hover-reveal-host:hover .canopy-hover-reveal,
-.canopy-hover-reveal-host:focus-within .canopy-hover-reveal,
-.canopy-hover-reveal.is-visible {
+.app-hover-reveal-host:hover .app-hover-reveal,
+.app-hover-reveal-host:focus-within .app-hover-reveal,
+.app-hover-reveal.is-visible {
   opacity: 1;
 }
 
 /** 卡片身份色条 hover 加粗（2 → 3px）。由 DomainGroupCard 使用。 */
-.canopy-card-interactive .canopy-accent-bar--left {
-  transition: width var(--canopy-motion-duration, 0.15s) ease;
+.app-card-interactive .app-accent-bar--left {
+  transition: width var(--app-motion-duration, 0.15s) ease;
 }
-.canopy-card-interactive:hover .canopy-accent-bar--left,
-.canopy-card-interactive:focus-within .canopy-accent-bar--left {
+.app-card-interactive:hover .app-accent-bar--left,
+.app-card-interactive:focus-within .app-accent-bar--left {
   width: 3px;
 }
-.canopy-card-interactive .canopy-accent-bar--top {
-  transition: height var(--canopy-motion-duration, 0.15s) ease;
+.app-card-interactive .app-accent-bar--top {
+  transition: height var(--app-motion-duration, 0.15s) ease;
 }
-.canopy-card-interactive:hover .canopy-accent-bar--top,
-.canopy-card-interactive:focus-within .canopy-accent-bar--top {
+.app-card-interactive:hover .app-accent-bar--top,
+.app-card-interactive:focus-within .app-accent-bar--top {
   height: 3px;
 }
 
 /** 时间线分段标题 hover 文本提亮。颜色通过局部 CSS 变量桥接 antd token。 */
-.canopy-timeline-segment-header {
-  color: var(--canopy-color, var(--ant-color-text-secondary));
+.app-timeline-segment-header {
+  color: var(--app-color, var(--ant-color-text-secondary));
 }
-.canopy-timeline-segment-header:hover,
-.canopy-timeline-segment-header:focus-visible {
-  color: var(--canopy-color-hover, var(--ant-color-text));
+.app-timeline-segment-header:hover,
+.app-timeline-segment-header:focus-visible {
+  color: var(--app-color-hover, var(--ant-color-text));
 }
 
 /** ── 动效降级：尊重系统 reduced-motion 设置 ─── */
 @media (prefers-reduced-motion: reduce) {
-  [data-canopy-content],
-  .canopy-batch-bar,
-  .canopy-accordion-panel {
+  [data-app-content],
+  .app-batch-bar,
+  .app-accordion-panel {
     animation: none !important;
   }
-  .canopy-lift:hover,
-  .canopy-hero-search:hover,
-  .canopy-card-interactive:hover,
-  .canopy-card-interactive:focus-within {
+  .app-lift:hover,
+  .app-hero-search:hover,
+  .app-card-interactive:hover,
+  .app-card-interactive:focus-within {
     transform: none !important;
   }
 }

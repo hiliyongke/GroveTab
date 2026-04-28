@@ -49,6 +49,8 @@ import { feedback } from '@/shared/ui/feedback';
 import { useT } from '@/shared/i18n';
 import { getData, setData } from '@/repositories/storage-repo';
 import { isSafeExternalUrl, normalizeExternalUrl } from '@/shared/utils/url-safety';
+import { BRAND } from '@/shared/config/brand';
+import { STORAGE_KEYS } from '@/shared/config/storage-keys';
 import {
   DEFAULT_POMODORO_CONFIG,
   computeRemaining,
@@ -493,7 +495,7 @@ export function WorkCountdownWidget() {
 }
 
 // ── Pomodoro 持久化 ──────────────────────────────────
-const POMODORO_STORAGE_KEY = 'canopy_pomodoro_state' as const;
+const POMODORO_STORAGE_KEY = STORAGE_KEYS.pomodoroState;
 
 /** 把存储里的原始对象做最小字段校验（宽松迁移，坏数据直接丢弃回落默认） */
 function sanitizeStoredPomodoroState(raw: unknown): PomodoroState | null {
@@ -614,7 +616,7 @@ export function PomodoroWidget() {
       const msg = finishedMode === 'focus' ? '专注结束，稍作休息 🌿' : '休息结束，回到专注吧 ⚡';
       if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
         try {
-          new Notification('GroveTab · 番茄钟', { body: msg });
+          new Notification(`${BRAND.name} · 番茄钟`, { body: msg });
         } catch {
           /* ignore */
         }

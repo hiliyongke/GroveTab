@@ -263,7 +263,7 @@ function SegmentHeader({
       type="button"
       onClick={onToggle}
       aria-expanded={!collapsed}
-      className="canopy-timeline-segment-header"
+      className="app-timeline-segment-header"
       style={
         {
           display: 'inline-flex',
@@ -279,8 +279,8 @@ function SegmentHeader({
           cursor: 'pointer',
           outline: 'none',
           // 颜色通过 CSS 变量下发，:hover 规则里切换，避免内联 color 被覆盖
-          ['--canopy-color' as string]: token.colorTextSecondary,
-          ['--canopy-color-hover' as string]: token.colorText,
+          ['--app-color' as string]: token.colorTextSecondary,
+          ['--app-color-hover' as string]: token.colorText,
         } as React.CSSProperties
       }
     >

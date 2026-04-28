@@ -1,5 +1,5 @@
 /**
- * DailyQuote —— GroveTab 每日金句 Widget
+ * DailyQuote —— 每日金句 Widget
  *
  * 布局：
  *   独立一行，在 HeroWidgets 三联之下，HeroBar 之上。
@@ -108,7 +108,7 @@ export function DailyQuote() {
        *   - 卡片轻量背景（fillQuaternary）+ 圆角；不使用强边框，保持克制。
        *   - group hover 时才升起操作按钮，避免图标抢视觉。
        */
-      className="grovetab-daily-quote"
+      className="app-daily-quote"
       style={{
         maxWidth: 720,
         margin: '0 auto 8px',

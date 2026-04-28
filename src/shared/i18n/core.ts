@@ -1,5 +1,5 @@
 /**
- * Canopy i18n 纯函数核心
+ * i18n 纯函数核心
  *
  * 把字典、类型定义以及非 React 环境下使用的 `translate` / `formatDate` / `formatNumber`
  * 从 `index.tsx` 拆出来，避免「同文件同时导出组件与常量/纯函数」导致的

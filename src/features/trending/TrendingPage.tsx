@@ -129,9 +129,9 @@ function StealthDisguise({ disguise }: { disguise: StealthModeConfig['disguise']
       <Card
         style={{
           borderRadius: 18,
-          background: 'var(--canopy-glass-bg)',
-          border: '1px solid var(--canopy-hairline)',
-          boxShadow: 'var(--canopy-shadow-card)',
+          background: 'var(--app-glass-bg)',
+          border: '1px solid var(--app-hairline)',
+          boxShadow: 'var(--app-shadow-card)',
         }}
         styles={{ body: { padding: 24 } }}
       >
@@ -307,9 +307,9 @@ function HotBoardSkeletonCard({
       style={{
         minHeight: 420,
         borderRadius: 18,
-        background: 'var(--canopy-glass-bg)',
-        border: '1px solid var(--canopy-hairline)',
-        boxShadow: 'var(--canopy-shadow-card)',
+        background: 'var(--app-glass-bg)',
+        border: '1px solid var(--app-hairline)',
+        boxShadow: 'var(--app-shadow-card)',
       }}
       styles={{ body: { padding: '14px 16px' } }}
     >
@@ -342,7 +342,7 @@ function HotBoardSkeletonCard({
               <RefreshCw
                 size={ICON_SIZE.SMALL}
                 style={{
-                  animation: refreshing ? 'canopy-spin 1s linear infinite' : 'none',
+                  animation: refreshing ? 'app-spin 1s linear infinite' : 'none',
                 }}
               />
             }
@@ -402,9 +402,9 @@ function HotBoardCard({
       style={{
         minHeight: 420,
         borderRadius: 18,
-        background: 'var(--canopy-glass-bg)',
-        border: '1px solid var(--canopy-hairline)',
-        boxShadow: 'var(--canopy-shadow-card)',
+        background: 'var(--app-glass-bg)',
+        border: '1px solid var(--app-hairline)',
+        boxShadow: 'var(--app-shadow-card)',
         display: 'flex',
         flexDirection: 'column',
       }}
@@ -439,7 +439,7 @@ function HotBoardCard({
               <RefreshCw
                 size={ICON_SIZE.SMALL}
                 style={{
-                  animation: refreshing ? 'canopy-spin 1s linear infinite' : 'none',
+                  animation: refreshing ? 'app-spin 1s linear infinite' : 'none',
                 }}
               />
             }
@@ -602,9 +602,9 @@ export function TrendingPage() {
       <Card
         style={{
           borderRadius: 24,
-          background: 'var(--canopy-glass-bg)',
-          border: '1px solid var(--canopy-hairline)',
-          boxShadow: 'var(--canopy-shadow-card)',
+          background: 'var(--app-glass-bg)',
+          border: '1px solid var(--app-hairline)',
+          boxShadow: 'var(--app-shadow-card)',
         }}
         styles={{ body: { padding: '18px 20px' } }}
       >
@@ -633,7 +633,7 @@ export function TrendingPage() {
                 <Button
                   type="text"
                   size="small"
-                  icon={<RefreshCw size={ICON_SIZE.SMALL} style={{ animation: loading ? 'canopy-spin 1s linear infinite' : 'none' }} />}
+                  icon={<RefreshCw size={ICON_SIZE.SMALL} style={{ animation: loading ? 'app-spin 1s linear infinite' : 'none' }} />}
                   onClick={handleRefreshAll}
                   loading={loading}
                 />

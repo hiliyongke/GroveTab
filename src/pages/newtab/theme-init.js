@@ -3,7 +3,8 @@
  * Chrome MV3 禁止内联脚本，因此必须作为扩展内置外部脚本加载。
  */
 (function () {
-  var PREPAINT_KEY = 'grovetab_prepaint_theme';
+  var PREPAINT_KEY = 'app_prepaint_theme';
+  var LEGACY_PREPAINT_KEY = 'grovetab_prepaint_theme';
 
   function getSystemTheme() {
     try {
@@ -29,7 +30,7 @@
 
   var cachedTheme = null;
   try {
-    cachedTheme = normalizeTheme(window.localStorage.getItem(PREPAINT_KEY));
+    cachedTheme = normalizeTheme(window.localStorage.getItem(PREPAINT_KEY)) || normalizeTheme(window.localStorage.getItem(LEGACY_PREPAINT_KEY));
   } catch (e) {
     cachedTheme = null;
   }
@@ -37,8 +38,9 @@
   applyTheme(cachedTheme || getSystemTheme());
 
   try {
-    chrome.storage.local.get('canopy_settings', function (result) {
-      var settings = result && result.canopy_settings;
+  // 注：此键名需与 STORAGE_KEYS.settings 保持一致（由品牌 storagePrefix + 'settings' 拼接）。
+  chrome.storage.local.get('canopy_settings', function (result) {
+    var settings = result && result.canopy_settings;
       var userTheme = settings && settings.theme;
       var resolvedTheme = userTheme === 'system' || userTheme === undefined
         ? getSystemTheme()

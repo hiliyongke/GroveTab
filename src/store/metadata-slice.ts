@@ -13,10 +13,11 @@ import {
   getWorkspaces,
   saveWorkspaces,
 } from '@/repositories';
+import { STORAGE_KEYS } from '@/shared/config/storage-keys';
 
-const TAGS_KEY = 'canopy_tags';
-const NOTES_KEY = 'canopy_notes';
-const PINS_KEY = 'canopy_pins';
+const TAGS_KEY = STORAGE_KEYS.tags;
+const NOTES_KEY = STORAGE_KEYS.notes;
+const PINS_KEY = STORAGE_KEYS.pins;
 
 /**
  * 稳定的空数组引用。

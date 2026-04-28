@@ -14,7 +14,7 @@
  *
  * 行为：
  *   - 组件挂载/依赖变化时发起一次请求
- *   - 30 分钟本地缓存（localStorage key=grovetab_weather_cache）
+ *   - 30 分钟本地缓存（localStorage key 由应用命名空间统一生成）
  *   - 请求失败但有缓存时，展示最后一次有效值 + "离线"标
  *   - 请求耗时 > 5s 超时
  */
@@ -26,6 +26,7 @@ import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
 import { useSettingsStore } from '@/store';
 import { fetchWeatherWithFallback, type WeatherSnapshot } from './weather-providers';
+import { LOCAL_CACHE_KEYS } from '@/shared/config/storage-keys';
 
 export type { WeatherSnapshot };
 
@@ -37,7 +38,7 @@ interface WeatherCache {
   ts: number;
 }
 
-const CACHE_KEY = 'grovetab_weather_cache';
+const CACHE_KEY = LOCAL_CACHE_KEYS.weather;
 const CACHE_TTL_MS = 30 * 60_000; // 30 min
 
 function readCache(): WeatherCache | null {

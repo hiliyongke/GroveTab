@@ -1,5 +1,5 @@
 /**
- * GroveTab · 金句服务
+ * 金句服务
  *
  * 职责：
  *   1. 按日期稳定选取今日金句（保证全天同一设备看到同一句）。
@@ -7,7 +7,7 @@
  *   3. 收藏夹：读 / 写 / 清空 / 是否已收藏。
  *
  * 存储：
- *   - `canopy_quote_favs`：string[]（收藏 quote.id 列表，LRU，最多 200 条）
+ *   - 应用命名空间金句收藏键：string[]（收藏 quote.id 列表，LRU，最多 200 条）
  *
  * 数据流：
  *   UI ──read──► getTodayQuote(settings.quoteCategories) ──filter──► QUOTES
@@ -24,8 +24,9 @@ import {
   type QuoteCategory,
 } from './quotes-data';
 import { CONFIG } from '@/shared/config';
+import { STORAGE_KEYS } from '@/shared/config/storage-keys';
 
-const FAV_KEY = 'canopy_quote_favs';
+const FAV_KEY = STORAGE_KEYS.quoteFavs;
 const MAX_FAVS = CONFIG.business.maxQuoteFavorites;
 
 // ── 稳定哈希 ────────────────────────────────────────
