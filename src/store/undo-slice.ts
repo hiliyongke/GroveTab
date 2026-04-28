@@ -12,10 +12,18 @@ import { getData, setData } from '@/repositories';
 import { createTab, getCurrentWindow } from '@/chrome';
 import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
+import { useSettingsStore } from './settings-slice';
+import { filterSafeExternalUrls } from '@/shared/utils/url-safety';
 
 const UNDO_STORAGE_KEY = 'canopy_undo';
-const UNDO_TTL = 30_000; // 30 seconds to undo
+const DEFAULT_UNDO_TTL_MS = 5_000;
 const MAX_UNDO_RECORDS = 5;
+
+function getUndoTtlMs(): number {
+  const seconds = useSettingsStore.getState().settings.undoWindowSeconds;
+  if (typeof seconds !== 'number' || !Number.isFinite(seconds)) return DEFAULT_UNDO_TTL_MS;
+  return Math.min(10, Math.max(3, seconds)) * 1_000;
+}
 
 interface UndoState {
   records: UndoRecord[];
@@ -78,7 +86,7 @@ export const useUndoStore = create<UndoState>((set, get) => ({
       void setData(UNDO_STORAGE_KEY, updated).catch(() => {
         /* 过期标记持久化失败无所谓——下次加载会用 createdAt 过滤 */
       });
-    }, UNDO_TTL);
+    }, getUndoTtlMs());
 
     return Promise.resolve(record);
   },
@@ -87,7 +95,7 @@ export const useUndoStore = create<UndoState>((set, get) => ({
     const record = get().records.find((r) => r.id === recordId);
     if (!record || record.expired) return;
 
-    const urls = record.tabs.map((t) => t.url).filter(Boolean);
+    const urls = filterSafeExternalUrls(record.tabs.map((t) => t.url).filter(Boolean));
 
     /**
      * 撤销恢复策略（用户反馈调整）：
@@ -130,8 +138,9 @@ export const useUndoStore = create<UndoState>((set, get) => ({
     if (records) {
       // Filter out expired records
       const now = Date.now();
+      const ttl = getUndoTtlMs();
       const valid = records.filter(
-        (r) => !r.expired && now - r.createdAt < UNDO_TTL,
+        (r) => !r.expired && now - r.createdAt < ttl,
       );
       set({ records: valid });
     }
@@ -139,8 +148,9 @@ export const useUndoStore = create<UndoState>((set, get) => ({
 
   cleanExpired: async () => {
     const now = Date.now();
+    const ttl = getUndoTtlMs();
     const records = get().records.filter(
-      (r) => !r.expired && now - r.createdAt < UNDO_TTL,
+      (r) => !r.expired && now - r.createdAt < ttl,
     );
     set({ records });
     await setData(UNDO_STORAGE_KEY, records);

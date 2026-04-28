@@ -10,6 +10,7 @@
  */
 
 import type { UserSettings } from '@/shared/types';
+import { useT } from '@/shared/i18n';
 import { GeneralSettings } from './GeneralSettings';
 import { ViewLayoutSettings } from './ViewLayoutSettings';
 import { TimelineSettings } from './TimelineSettings';
@@ -27,12 +28,13 @@ interface BehaviorPanelProps {
  * 组合多个子组件，按功能模块展示所有行为相关设置项。
  */
 export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) {
+  const { t } = useT();
   return (
     <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 32 }}>
       {/* 通用行为设置 */}
       <section>
         <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: 'inherit' }}>
-          通用行为
+          {t('settings.sectionGeneral')}
         </h3>
         <GeneralSettings settings={settings} updateSettings={updateSettings} />
       </section>
@@ -40,7 +42,7 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
       {/* 视图与布局设置 */}
       <section>
         <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: 'inherit' }}>
-          视图与布局
+          {t('settings.sectionViewLayout')}
         </h3>
         <ViewLayoutSettings settings={settings} updateSettings={updateSettings} />
       </section>
@@ -48,7 +50,7 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
       {/* 时间轴设置 */}
       <section>
         <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: 'inherit' }}>
-          时间轴
+          {t('settings.sectionTimeline')}
         </h3>
         <TimelineSettings settings={settings} updateSettings={updateSettings} />
       </section>
@@ -56,7 +58,7 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
       {/* 搜索设置 */}
       <section>
         <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: 'inherit' }}>
-          搜索
+          {t('settings.sectionSearch')}
         </h3>
         <SearchSettings settings={settings} updateSettings={updateSettings} />
       </section>
@@ -64,7 +66,7 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
       {/* 每日金句设置 */}
       <section>
         <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: 'inherit' }}>
-          每日金句
+          {t('settings.sectionDailyQuote')}
         </h3>
         <DailyQuoteSettings settings={settings} updateSettings={updateSettings} />
       </section>

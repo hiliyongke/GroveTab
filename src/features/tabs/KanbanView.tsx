@@ -44,6 +44,7 @@ import { useKanbanStore, useTabsStore } from '@/store';
 import { archiveSelectedTabs } from '@/services';
 import { useT } from '@/shared/i18n';
 import { useReducedMotionPreference } from '@/shared/hooks/use-reduced-motion';
+import { activateTab, createTab } from '@/chrome';
 
 /** 拖拽数据类型：区分「源 tab」「列内卡片」「列自身」 */
 type DragData =
@@ -477,15 +478,14 @@ function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: S
   const handleActivate = () => {
     if (offline) {
       try {
-        void chrome.tabs?.create({ url: card.url, active: true });
+        void createTab({ url: card.url, active: true });
       } catch {
         /* ignore */
       }
     } else {
       const live = tabs.find((tt) => tt.url === card.url);
       if (live) {
-        void chrome.tabs?.update(live.id, { active: true });
-        void chrome.windows?.update(live.windowId, { focused: true });
+        void activateTab(live.id, live.windowId);
       }
     }
   };
@@ -542,7 +542,7 @@ function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: S
           e.stopPropagation();
           onRemove();
         }}
-        aria-label="删除卡片"
+        aria-label={t('kanban.removeCard')}
       />
     </div>
   );
@@ -584,6 +584,7 @@ function ColumnNameEditor({ col, onRename }: { col: KanbanColumn; onRename: (nam
 // ── 子组件：DragOverlay 抬升副本 ──────────────────────────────────
 function DragPreview({ active }: { active: ActiveDrag }) {
   const { token } = theme.useToken();
+  const { t } = useT();
   if (active.data.kind === 'column') {
     return (
       <div
@@ -598,7 +599,7 @@ function DragPreview({ active }: { active: ActiveDrag }) {
           opacity: 0.9,
         }}
       >
-        拖动列中…
+        {t('kanban.draggingColumn')}
       </div>
     );
   }
@@ -623,7 +624,7 @@ function DragPreview({ active }: { active: ActiveDrag }) {
         <img src={card.favIconUrl} alt="" width={12} height={12} style={{ borderRadius: 2 }} />
       )}
       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {card ? card.title : '拖动卡片中…'}
+        {card ? card.title : t('kanban.draggingCard')}
       </span>
     </div>
   );

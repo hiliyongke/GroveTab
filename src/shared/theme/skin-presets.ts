@@ -174,11 +174,11 @@ export const SKIN_PRESETS: SkinPreset[] = [
     id: 'minimal',
     labelKey: 'skin.minimal',
     descriptionKey: 'skin.minimalDesc',
-    previewColors: ['#4F46E5', '#f8f8fa', '#818CF8'],
+    previewColors: ['#1677ff', '#f5f5f5', '#4096ff'],
     compatibleMode: 'both',
 
-    colorPrimary: '#4F46E5',
-    colorPrimaryHover: '#6366F1',
+    colorPrimary: '#1677ff',
+    colorPrimaryHover: '#4096ff',
 
     borderRadius: 10,
     borderRadiusLG: 12,
@@ -205,21 +205,21 @@ export const SKIN_PRESETS: SkinPreset[] = [
     motionEaseInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
     motionEaseOut: 'cubic-bezier(0, 0, 0.2, 1)',
 
-    colorBgLayoutLight: '#f8f8fa',
+    colorBgLayoutLight: '#f5f5f5',
     colorBgContainerLight: '#ffffff',
     colorBgElevatedLight: '#ffffff',
-    colorBorderSecondaryLight: '#e8e8ec',
+    colorBorderSecondaryLight: '#f0f0f0',
 
-    colorBgLayoutDark: '#0a0a0b',
-    colorBgContainerDark: '#141416',
-    colorBgElevatedDark: '#1c1c1f',
+    colorBgLayoutDark: '#141414',
+    colorBgContainerDark: '#1f1f1f',
+    colorBgElevatedDark: '#262626',
     colorBorderSecondaryDark: 'rgba(255,255,255,0.06)',
 
     glass: {
       blur: 20,
-      saturate: 180,
+      saturate: 140,
       bgLight: 'rgba(255, 255, 255, 0.72)',
-      bgDark: 'rgba(20, 20, 22, 0.72)',
+      bgDark: 'rgba(20, 20, 20, 0.78)',
     },
 
     shadow: {
@@ -232,11 +232,11 @@ export const SKIN_PRESETS: SkinPreset[] = [
         dark: '0 2px 8px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.28)',
       },
       floating: {
-        light: '0 2px 8px rgba(79,70,229,0.08), 0 8px 32px rgba(0,0,0,0.08)',
+        light: '0 2px 8px rgba(22,119,255,0.06), 0 8px 32px rgba(0,0,0,0.08)',
         dark: '0 2px 8px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.3)',
       },
       brandGlow: {
-        light: '0 2px 12px rgba(79,70,229,0.06), 0 0 0 1px rgba(0,0,0,0.03)',
+        light: '0 2px 12px rgba(22,119,255,0.04), 0 0 0 1px rgba(0,0,0,0.03)',
         dark: '0 2px 12px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.04)',
       },
     },
@@ -265,10 +265,10 @@ export const SKIN_PRESETS: SkinPreset[] = [
       height: 56,
     },
 
-    logoGradient: 'linear-gradient(135deg, #4F46E5, #818CF8)',
+    logoGradient: 'linear-gradient(135deg, #1677ff, #4096ff)',
     logoGlowShadow: {
-      light: '0 2px 8px rgba(79,70,229,0.3)',
-      dark: '0 2px 8px rgba(79,70,229,0.4)',
+      light: '0 2px 8px rgba(22,119,255,0.15)',
+      dark: '0 2px 8px rgba(22,119,255,0.12)',
     },
 
     floatingBar: {
@@ -283,11 +283,11 @@ export const SKIN_PRESETS: SkinPreset[] = [
     id: 'glassmorphism',
     labelKey: 'skin.glassmorphism',
     descriptionKey: 'skin.glassmorphismDesc',
-    previewColors: ['#007AFF', 'rgba(255,255,255,0.4)', '#5AC8FA'],
+    previewColors: ['#5BA4E6', 'rgba(255,255,255,0.4)', '#7BB8F0'],
     compatibleMode: 'both',
 
-    colorPrimary: '#007AFF',
-    colorPrimaryHover: '#0A84FF',
+    colorPrimary: '#5BA4E6',
+    colorPrimaryHover: '#7BB8F0',
 
     borderRadius: 16,
     borderRadiusLG: 20,
@@ -341,12 +341,12 @@ export const SKIN_PRESETS: SkinPreset[] = [
         dark: '0 4px 16px rgba(0,0,0,0.4), 0 16px 48px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.12)',
       },
       floating: {
-        light: '0 4px 16px rgba(0,122,255,0.1), 0 16px 48px rgba(0,0,0,0.08)',
-        dark: '0 4px 16px rgba(0,122,255,0.15), 0 16px 48px rgba(0,0,0,0.4)',
+        light: '0 4px 16px rgba(91,164,230,0.08), 0 16px 48px rgba(0,0,0,0.08)',
+        dark: '0 4px 16px rgba(91,164,230,0.1), 0 16px 48px rgba(0,0,0,0.4)',
       },
       brandGlow: {
-        light: '0 4px 24px rgba(0,122,255,0.12), 0 0 0 1px rgba(0,0,0,0.04)',
-        dark: '0 4px 24px rgba(10,132,255,0.15), 0 0 0 1px rgba(255,255,255,0.06)',
+        light: '0 4px 24px rgba(91,164,230,0.08), 0 0 0 1px rgba(0,0,0,0.04)',
+        dark: '0 4px 24px rgba(91,164,230,0.1), 0 0 0 1px rgba(255,255,255,0.06)',
       },
     },
 
@@ -374,10 +374,10 @@ export const SKIN_PRESETS: SkinPreset[] = [
       height: 58,
     },
 
-    logoGradient: 'linear-gradient(135deg, #007AFF, #5AC8FA)',
+    logoGradient: 'linear-gradient(135deg, #5BA4E6, #7BB8F0)',
     logoGlowShadow: {
-      light: '0 2px 12px rgba(0,122,255,0.3)',
-      dark: '0 2px 12px rgba(10,132,255,0.4)',
+      light: '0 2px 12px rgba(91,164,230,0.2)',
+      dark: '0 2px 12px rgba(91,164,230,0.18)',
     },
 
     floatingBar: {
@@ -392,11 +392,11 @@ export const SKIN_PRESETS: SkinPreset[] = [
     id: 'skeuomorphism',
     labelKey: 'skin.skeuomorphism',
     descriptionKey: 'skin.skeuomorphismDesc',
-    previewColors: ['#8B6914', '#f5f0e8', '#C4A35A'],
+    previewColors: ['#B8956A', '#f5f0e8', '#C9A87C'],
     compatibleMode: 'light',
 
-    colorPrimary: '#8B6914',
-    colorPrimaryHover: '#A07B1A',
+    colorPrimary: '#B8956A',
+    colorPrimaryHover: '#C9A87C',
 
     borderRadius: 8,
     borderRadiusLG: 10,
@@ -442,19 +442,19 @@ export const SKIN_PRESETS: SkinPreset[] = [
 
     shadow: {
       card: {
-        light: '0 1px 3px rgba(139,105,20,0.1), 0 3px 10px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)',
+        light: '0 1px 3px rgba(184,149,106,0.08), 0 3px 10px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)',
         dark: '0 1px 3px rgba(0,0,0,0.5), 0 3px 10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
       },
       cardHover: {
-        light: '0 2px 6px rgba(139,105,20,0.15), 0 6px 20px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.7)',
+        light: '0 2px 6px rgba(184,149,106,0.1), 0 6px 20px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.7)',
         dark: '0 2px 6px rgba(0,0,0,0.6), 0 6px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)',
       },
       floating: {
-        light: '0 3px 10px rgba(139,105,20,0.15), 0 10px 40px rgba(0,0,0,0.1)',
+        light: '0 3px 10px rgba(184,149,106,0.1), 0 10px 40px rgba(0,0,0,0.1)',
         dark: '0 3px 10px rgba(0,0,0,0.6), 0 10px 40px rgba(0,0,0,0.5)',
       },
       brandGlow: {
-        light: '0 2px 12px rgba(139,105,20,0.08), 0 0 0 1px rgba(196,163,90,0.2)',
+        light: '0 2px 12px rgba(184,149,106,0.06), 0 0 0 1px rgba(196,163,90,0.2)',
         dark: '0 2px 12px rgba(196,163,90,0.1), 0 0 0 1px rgba(196,163,90,0.15)',
       },
     },
@@ -463,7 +463,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
       noise: true,
       noiseOpacity: 0.04,
       grid: false,
-      gridColor: { light: 'rgba(139,105,20,0.04)', dark: 'rgba(196,163,90,0.03)' },
+      gridColor: { light: 'rgba(184,149,106,0.03)', dark: 'rgba(196,163,90,0.03)' },
     },
 
     cardStyle: {
@@ -483,10 +483,10 @@ export const SKIN_PRESETS: SkinPreset[] = [
       height: 52,
     },
 
-    logoGradient: 'linear-gradient(135deg, #8B6914, #C4A35A)',
+    logoGradient: 'linear-gradient(135deg, #B8956A, #C9A87C)',
     logoGlowShadow: {
-      light: '0 2px 8px rgba(139,105,20,0.25)',
-      dark: '0 2px 8px rgba(196,163,90,0.3)',
+      light: '0 2px 8px rgba(184,149,106,0.18)',
+      dark: '0 2px 8px rgba(184,149,106,0.15)',
     },
 
     floatingBar: {
@@ -501,11 +501,11 @@ export const SKIN_PRESETS: SkinPreset[] = [
     id: 'aurora',
     labelKey: 'skin.aurora',
     descriptionKey: 'skin.auroraDesc',
-    previewColors: ['#A855F7', '#0f0f1a', '#06B6D4'],
+    previewColors: ['#9B8EC4', '#0f0f1a', '#7ABFB8'],
     compatibleMode: 'dark',
 
-    colorPrimary: '#A855F7',
-    colorPrimaryHover: '#C084FC',
+    colorPrimary: '#9B8EC4',
+    colorPrimaryHover: '#B3A8D4',
 
     borderRadius: 14,
     borderRadiusLG: 18,
@@ -540,31 +540,31 @@ export const SKIN_PRESETS: SkinPreset[] = [
     colorBgLayoutDark: '#0a0a14',
     colorBgContainerDark: '#12121e',
     colorBgElevatedDark: '#1a1a2e',
-    colorBorderSecondaryDark: 'rgba(168, 85, 247, 0.12)',
+    colorBorderSecondaryDark: 'rgba(155, 142, 196, 0.1)',
 
     glass: {
       blur: 24,
       saturate: 200,
       bgLight: 'rgba(255, 255, 255, 0.75)',
-      bgDark: 'rgba(18, 18, 30, 0.7)',
+      bgDark: 'rgba(18, 18, 28, 0.7)',
     },
 
     shadow: {
       card: {
-        light: '0 1px 3px rgba(168,85,247,0.06), 0 4px 16px rgba(0,0,0,0.05)',
-        dark: '0 0 1px rgba(168,85,247,0.3), 0 2px 8px rgba(0,0,0,0.4), 0 4px 20px rgba(168,85,247,0.08)',
+        light: '0 1px 3px rgba(155,142,196,0.05), 0 4px 16px rgba(0,0,0,0.05)',
+        dark: '0 0 1px rgba(155,142,196,0.12), 0 2px 8px rgba(0,0,0,0.4), 0 4px 20px rgba(155,142,196,0.05)',
       },
       cardHover: {
-        light: '0 2px 8px rgba(168,85,247,0.1), 0 8px 28px rgba(0,0,0,0.08)',
-        dark: '0 0 1px rgba(168,85,247,0.5), 0 4px 16px rgba(0,0,0,0.5), 0 8px 32px rgba(168,85,247,0.15)',
+        light: '0 2px 8px rgba(155,142,196,0.07), 0 8px 28px rgba(0,0,0,0.08)',
+        dark: '0 0 1px rgba(155,142,196,0.16), 0 4px 16px rgba(0,0,0,0.5), 0 8px 32px rgba(155,142,196,0.1)',
       },
       floating: {
-        light: '0 4px 16px rgba(168,85,247,0.12), 0 8px 32px rgba(0,0,0,0.06)',
-        dark: '0 0 1px rgba(168,85,247,0.4), 0 4px 20px rgba(0,0,0,0.5), 0 12px 40px rgba(168,85,247,0.12)',
+        light: '0 4px 16px rgba(155,142,196,0.08), 0 8px 32px rgba(0,0,0,0.06)',
+        dark: '0 0 1px rgba(168,85,247,0.4), 0 4px 20px rgba(0,0,0,0.5), 0 12px 40px rgba(155,142,196,0.08)',
       },
       brandGlow: {
-        light: '0 4px 20px rgba(168,85,247,0.12), 0 0 0 1px rgba(168,85,247,0.08)',
-        dark: '0 0 20px rgba(168,85,247,0.2), 0 0 40px rgba(6,182,212,0.08)',
+        light: '0 4px 20px rgba(155,142,196,0.08), 0 0 0 1px rgba(155,142,196,0.05)',
+        dark: '0 0 20px rgba(155,142,196,0.12), 0 0 40px rgba(122,191,184,0.06)',
       },
     },
 
@@ -572,7 +572,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
       noise: false,
       noiseOpacity: 0,
       grid: false,
-      gridColor: { light: 'rgba(168,85,247,0.03)', dark: 'rgba(168,85,247,0.03)' },
+      gridColor: { light: 'rgba(155,142,196,0.02)', dark: 'rgba(155,142,196,0.02)' },
     },
 
     cardStyle: {
@@ -592,10 +592,10 @@ export const SKIN_PRESETS: SkinPreset[] = [
       height: 56,
     },
 
-    logoGradient: 'linear-gradient(135deg, #A855F7, #06B6D4)',
+    logoGradient: 'linear-gradient(135deg, #9B8EC4, #7ABFB8)',
     logoGlowShadow: {
-      light: '0 2px 12px rgba(168,85,247,0.3)',
-      dark: '0 2px 16px rgba(168,85,247,0.4), 0 0 30px rgba(6,182,212,0.15)',
+      light: '0 2px 12px rgba(155,142,196,0.18)',
+      dark: '0 2px 16px rgba(155,142,196,0.15), 0 0 30px rgba(122,191,184,0.08)',
     },
 
     floatingBar: {
@@ -610,11 +610,11 @@ export const SKIN_PRESETS: SkinPreset[] = [
     id: 'elegant',
     labelKey: 'skin.elegant',
     descriptionKey: 'skin.elegantDesc',
-    previewColors: ['#1a1a2e', '#faf8f4', '#B8860B'],
+    previewColors: ['#8B7D6B', '#faf8f4', '#B8A898'],
     compatibleMode: 'both',
 
-    colorPrimary: '#1a1a2e',
-    colorPrimaryHover: '#2d2d4e',
+    colorPrimary: '#8B7D6B',
+    colorPrimaryHover: '#A09080',
 
     borderRadius: 6,
     borderRadiusLG: 8,
@@ -646,10 +646,10 @@ export const SKIN_PRESETS: SkinPreset[] = [
     colorBgElevatedLight: '#ffffff',
     colorBorderSecondaryLight: '#d4cfc6',
 
-    colorBgLayoutDark: '#0e0e18',
-    colorBgContainerDark: '#16162a',
-    colorBgElevatedDark: '#1e1e38',
-    colorBorderSecondaryDark: 'rgba(184,134,11,0.12)',
+    colorBgLayoutDark: '#141412',
+    colorBgContainerDark: '#1c1b18',
+    colorBgElevatedDark: '#242320',
+    colorBorderSecondaryDark: 'rgba(139,125,107,0.08)',
 
     glass: {
       blur: 12,
@@ -660,20 +660,20 @@ export const SKIN_PRESETS: SkinPreset[] = [
 
     shadow: {
       card: {
-        light: '0 1px 2px rgba(26,26,46,0.05), 0 4px 12px rgba(26,26,46,0.04)',
+        light: '0 1px 2px rgba(139,125,107,0.04), 0 4px 12px rgba(139,125,107,0.03)',
         dark: '0 1px 2px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.25)',
       },
       cardHover: {
-        light: '0 2px 6px rgba(26,26,46,0.08), 0 8px 24px rgba(26,26,46,0.06)',
+        light: '0 2px 6px rgba(139,125,107,0.06), 0 8px 24px rgba(139,125,107,0.05)',
         dark: '0 2px 6px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.35)',
       },
       floating: {
-        light: '0 2px 8px rgba(26,26,46,0.08), 0 8px 32px rgba(26,26,46,0.06)',
+        light: '0 2px 8px rgba(139,125,107,0.06), 0 8px 32px rgba(139,125,107,0.05)',
         dark: '0 2px 8px rgba(0,0,0,0.5), 0 8px 32px rgba(0,0,0,0.4)',
       },
       brandGlow: {
-        light: '0 2px 12px rgba(184,134,11,0.06), 0 0 0 1px rgba(184,134,11,0.15)',
-        dark: '0 2px 12px rgba(184,134,11,0.08), 0 0 0 1px rgba(184,134,11,0.12)',
+        light: '0 2px 12px rgba(139,125,107,0.05), 0 0 0 1px rgba(139,125,107,0.1)',
+        dark: '0 2px 12px rgba(139,125,107,0.06), 0 0 0 1px rgba(139,125,107,0.08)',
       },
     },
 
@@ -681,7 +681,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
       noise: true,
       noiseOpacity: 0.025,
       grid: false,
-      gridColor: { light: 'rgba(26,26,46,0.03)', dark: 'rgba(184,134,11,0.03)' },
+      gridColor: { light: 'rgba(139,125,107,0.02)', dark: 'rgba(139,125,107,0.02)' },
     },
 
     cardStyle: {
@@ -701,10 +701,10 @@ export const SKIN_PRESETS: SkinPreset[] = [
       height: 54,
     },
 
-    logoGradient: 'linear-gradient(135deg, #1a1a2e, #B8860B)',
+    logoGradient: 'linear-gradient(135deg, #8B7D6B, #B8A898)',
     logoGlowShadow: {
-      light: '0 2px 8px rgba(184,134,11,0.2)',
-      dark: '0 2px 8px rgba(184,134,11,0.3)',
+      light: '0 2px 8px rgba(139,125,107,0.15)',
+      dark: '0 2px 8px rgba(139,125,107,0.12)',
     },
 
     floatingBar: {
@@ -798,11 +798,11 @@ export const SKIN_PRESETS: SkinPreset[] = [
     id: 'solarized',
     labelKey: 'skin.solarized',
     descriptionKey: 'skin.solarizedDesc',
-    previewColors: ['#268BD2', '#FDF6E3', '#B58900'],
+    previewColors: ['#3D8EB9', '#FDF6E3', '#B58900'],
     compatibleMode: 'both',
 
-    colorPrimary: '#268BD2',
-    colorPrimaryHover: '#2AA198',
+    colorPrimary: '#3D8EB9',
+    colorPrimaryHover: '#4FA3C4',
 
     borderRadius: 4, borderRadiusLG: 8, borderRadiusSM: 3, borderRadiusXS: 2,
     controlHeight: 32, controlHeightLG: 40, controlHeightSM: 24,
@@ -842,7 +842,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
         dark: '0 2px 8px rgba(0,0,0,0.45), 0 8px 32px rgba(181,137,0,0.1)',
       },
       brandGlow: {
-        light: '0 2px 12px rgba(38,139,210,0.1), 0 0 0 1px rgba(38,139,210,0.08)',
+        light: '0 2px 12px rgba(61,142,185,0.08), 0 0 0 1px rgba(61,142,185,0.06)',
         dark: '0 2px 12px rgba(42,161,152,0.14), 0 0 0 1px rgba(42,161,152,0.1)',
       },
     },
@@ -855,10 +855,10 @@ export const SKIN_PRESETS: SkinPreset[] = [
     searchBox: { height: 46, borderRadius: 4, fontSize: 14 },
     header: { height: 52 },
 
-    logoGradient: 'linear-gradient(135deg, #268BD2, #B58900)',
+    logoGradient: 'linear-gradient(135deg, #3D8EB9, #B58900)',
     logoGlowShadow: {
-      light: '0 2px 8px rgba(38,139,210,0.22)',
-      dark: '0 2px 8px rgba(42,161,152,0.24)',
+      light: '0 2px 8px rgba(61,142,185,0.16)',
+      dark: '0 2px 8px rgba(42,161,152,0.15)',
     },
 
     floatingBar: { borderRadius: 6 },

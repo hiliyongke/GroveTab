@@ -87,6 +87,18 @@ describe('clampLayout: 越界夹紧', () => {
     expect(out[0].w).toBeGreaterThanOrEqual(2);
     expect(out[0].h).toBeGreaterThanOrEqual(2);
   });
+
+  it('按 8 列夹紧时不会保留 12 列坐标', () => {
+    const source = [ITEM({ id: 'a', x: 10, w: 4 })];
+    const out = clampLayout(source, 8);
+    expect(out[0].x + out[0].w).toBeLessThanOrEqual(8);
+  });
+
+  it('单列夹紧时允许宽度降到 1', () => {
+    const source = [ITEM({ id: 'a', x: 4, w: 3 })];
+    const out = clampLayout(source, 1);
+    expect(out[0]).toMatchObject({ x: 0, w: 1 });
+  });
 });
 
 describe('compactLayoutVertical: 垂直紧凑', () => {
@@ -119,5 +131,37 @@ describe('compactLayoutVertical: 垂直紧凑', () => {
     const out = compactLayoutVertical(source);
     expect(out[0].y).toBe(0);
     expect(out[1].y).toBe(3); // 叠到 a 下方
+  });
+
+  it('过滤掉左侧 item 后，右侧 item 自动左移填补空隙', () => {
+    const source: DashboardWidgetLayoutItem[] = [
+      ITEM({ id: 'a', x: 0, y: 0, w: 3, h: 2 }),
+      ITEM({ id: 'b', x: 3, y: 0, w: 3, h: 2 }),
+      ITEM({ id: 'c', x: 6, y: 0, w: 3, h: 2 }),
+      ITEM({ id: 'd', x: 9, y: 0, w: 3, h: 2 }),
+    ];
+    // 模拟 b 被过滤掉
+    const filtered = source.filter((item) => item.id !== 'b');
+    const out = compactLayoutVertical(filtered);
+    // c 和 d 应该向左移动填补 b 的空隙
+    const c = out.find((item) => item.id === 'c')!;
+    const d = out.find((item) => item.id === 'd')!;
+    expect(c.x).toBe(3); // 原来 6，左移到 3
+    expect(d.x).toBe(6); // 原来 9，左移到 6
+  });
+
+  it('下方 item 在 y 压缩后也能向左填充', () => {
+    const source: DashboardWidgetLayoutItem[] = [
+      ITEM({ id: 'a', x: 0, y: 0, w: 4, h: 2 }),
+      ITEM({ id: 'b', x: 6, y: 0, w: 4, h: 2 }),
+      ITEM({ id: 'c', x: 6, y: 2, w: 4, h: 2 }), // 位于 b 正下方
+    ];
+    // 模拟 b 被过滤掉
+    const filtered = source.filter((item) => item.id !== 'b');
+    const out = compactLayoutVertical(filtered);
+    const c = out.find((item) => item.id === 'c')!;
+    // c 可以向上到 y=0，并向左移到 x=4（a 占 0-4，c 宽 4 放 x=4 占 4-8，不冲突）
+    expect(c.y).toBe(0);
+    expect(c.x).toBe(4);
   });
 });

@@ -35,6 +35,17 @@ export function FrequencyView() {
     }
   }, [statsLoaded, loadStats]);
 
+  useEffect(() => {
+    if (typeof chrome === 'undefined' || chrome.storage?.onChanged === undefined) return;
+    const listener = (changes: Record<string, chrome.storage.StorageChange>, areaName: string) => {
+      if (areaName === 'local' && changes.canopy_stats !== undefined) {
+        void loadStats();
+      }
+    };
+    chrome.storage.onChanged.addListener(listener);
+    return () => chrome.storage.onChanged.removeListener(listener);
+  }, [loadStats]);
+
   const sortedTabs = useMemo(() => {
     const withScore = tabs.map((tab) => {
       const preciseCount = getCountRecent(tab.url, 7);

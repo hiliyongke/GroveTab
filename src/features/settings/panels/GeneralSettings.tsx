@@ -96,7 +96,7 @@ export function GeneralSettings({ settings, updateSettings }: GeneralSettingsPro
           value={settings.undoWindowSeconds ?? 5}
           onChange={(value) => handleSetting({ undoWindowSeconds: value })}
           style={{ width: '100%' }}
-          options={[3, 5, 7, 10].map((n) => ({ value: n, label: `${n} 秒` }))}
+          options={[3, 5, 7, 10].map((n) => ({ value: n, label: t('settings.undoWindowSeconds', { n }) }))}
         />
       </Field>
 

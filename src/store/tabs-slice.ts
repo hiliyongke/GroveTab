@@ -17,12 +17,14 @@
 
 import { create } from 'zustand';
 import type { LiveTab, SwBroadcastMessage, WindowInfo, ClosedTabSnapshot } from '@/shared/types';
-import { queryAllTabs, getAllWindows, activateTab, closeTab, closeTabs, getFaviconUrl, discardTab as chromeDiscardTab, queryTabGroups, type ChromeTabGroup } from '@/chrome';
+import { queryAllTabs, getAllWindows, getCurrentWindow, activateTab, closeTab, closeTabs, getFaviconUrl, discardTab as chromeDiscardTab, queryTabGroups, type ChromeTabGroup } from '@/chrome';
 import { extractHostname, shouldDisplayUrl, isSelfNewTabPage } from '@/chrome';
 import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
 import { swBroadcast } from '@/shared/utils/sw-broadcast';
 import { useUndoStore } from './undo-slice';
+import { useSelectionStore } from './selection-slice';
+import { useSettingsStore } from './settings-slice';
 
 interface TabsState {
   /** All live tabs (filtered for display) */
@@ -66,6 +68,7 @@ interface TabsState {
 }
 
 function tabToLiveTab(tab: chrome.tabs.Tab, currentWindowId: number): LiveTab | null {
+  if (tab.id == null) return null;
   const url = tab.url ?? tab.pendingUrl ?? '';
   if (isSelfNewTabPage(tab)) return null;
   if (!shouldDisplayUrl(url)) return null;
@@ -88,7 +91,7 @@ function tabToLiveTab(tab: chrome.tabs.Tab, currentWindowId: number): LiveTab | 
   const favIconUrl = extensionFavicon !== '' ? extensionFavicon : (tab.favIconUrl ?? '');
 
   return {
-    id: tab.id!,
+    id: tab.id,
     url,
     title: tab.title ?? url,
     favIconUrl,
@@ -159,9 +162,26 @@ async function discardTabsBatch(tabIds: number[]): Promise<{ succeededIds: numbe
   return { succeededIds, failedIds };
 }
 
+function getCloseConfirmThreshold(): number {
+  const value = useSettingsStore.getState().settings.closeConfirmThreshold;
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : 20;
+}
+
+function getWindowIdNone(): number {
+  return typeof chrome !== 'undefined' && chrome.windows !== undefined
+    ? chrome.windows.WINDOW_ID_NONE
+    : -1;
+}
+
+function getInitialCurrentWindowId(): number {
+  return typeof chrome !== 'undefined' && chrome.windows !== undefined
+    ? chrome.windows.WINDOW_ID_CURRENT
+    : -1;
+}
+
 export const useTabsStore = create<TabsState>((set, get) => ({
   tabs: [],
-  currentWindowId: chrome.windows?.WINDOW_ID_CURRENT ?? -1,
+  currentWindowId: getInitialCurrentWindowId(),
   windows: new Map(),
   loading: false,
   error: null,
@@ -177,11 +197,11 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     try {
       const [allTabs, currentWindow, tabGroupsResult] = await Promise.all([
         queryAllTabs(),
-        chrome.windows.getCurrent(),
+        getCurrentWindow(),
         queryTabGroups(), // 获取所有 Tab Group 信息
       ]);
 
-      const currentWindowId = currentWindow.id!;
+      const currentWindowId = currentWindow.id ?? getInitialCurrentWindowId();
 
       /** 构建 groupId → groupInfo 的快速查找表 */
       const groupMap = new Map<number, ChromeTabGroup>();
@@ -238,27 +258,34 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       case 'tab-updated': {
         const { id, url, title, favIconUrl } = message.payload;
         set({
-          tabs: tabs.map((t) => {
-            if (t.id !== id) return t;
+          tabs: tabs.flatMap((t) => {
+            if (t.id !== id) return [t];
             const incomingUrl = typeof url === 'string' ? url : t.url;
+            if (typeof url === 'string' && (isSelfNewTabPage({ url }) || !shouldDisplayUrl(url))) {
+              useSelectionStore.getState().removeIds([t.id]);
+              return [];
+            }
             // 同步沿用 tabToLiveTab 的策略：若有 URL 就走扩展同源 favicon，
             // 避免 sw 广播把远程 favIconUrl 写回 store 导致 `<img>` 跨域报错。
             const extensionFavicon = incomingUrl !== '' ? getFaviconUrl(incomingUrl) : '';
             const incomingTitle = typeof title === 'string' && title !== '' ? title : t.title;
             const incomingFavicon = typeof favIconUrl === 'string' ? favIconUrl : t.favIconUrl;
-            return {
+            return [{
               ...t,
               url: incomingUrl,
               title: incomingTitle,
               favIconUrl: extensionFavicon !== '' ? extensionFavicon : incomingFavicon,
               hostname: typeof url === 'string' && url !== '' ? extractHostname(url) : t.hostname,
-            };
+            }];
           }),
         });
         break;
       }
       case 'tab-removed': {
         const { id } = message.payload;
+        if (typeof id === 'number') {
+          useSelectionStore.getState().removeIds([id]);
+        }
         set({ tabs: tabs.filter((t) => t.id !== id) });
         break;
       }
@@ -285,7 +312,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       }
       case 'window-focus-changed': {
         const { windowId } = message.payload;
-        if (typeof windowId === 'number' && windowId !== chrome.windows.WINDOW_ID_NONE) {
+        if (typeof windowId === 'number' && windowId !== getWindowIdNone()) {
           set({
             currentWindowId: windowId,
             tabs: tabs.map((t) => ({
@@ -395,7 +422,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
      * 使用 antd Modal.confirm 让用户二次确认，避免误操作。
      * 确认后才执行关闭；取消则静默返回。
      */
-    if (nonPinned.length > 20) {
+    if (nonPinned.length > getCloseConfirmThreshold()) {
       const confirmed = await new Promise<boolean>((resolve) => {
         feedback.modal.confirm({
           title: translate('tabs.closeConfirmTitle'),
@@ -437,7 +464,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
      * 使用 antd Modal.confirm 让用户二次确认，避免误操作。
      * 确认后才执行关闭；取消则静默返回。
      */
-    if (nonPinned.length > 20) {
+    if (nonPinned.length > getCloseConfirmThreshold()) {
       const confirmed = await new Promise<boolean>((resolve) => {
         feedback.modal.confirm({
           title: translate('tabs.closeConfirmTitle'),

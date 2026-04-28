@@ -59,8 +59,8 @@ const FEATURES: FeatureCard[] = [
   { icon: Archive, titleKey: 'about.feature.archive.title', descKey: 'about.feature.archive.desc', color: '#F59E0B' },
   { icon: SearchIcon, titleKey: 'about.feature.search.title', descKey: 'about.feature.search.desc', color: '#8B5CF6' },
   { icon: BookmarkIcon, titleKey: 'about.feature.bookmark.title', descKey: 'about.feature.bookmark.desc', color: '#10B981' },
-  { icon: Palette, titleKey: 'about.feature.skin.title', descKey: 'about.feature.skin.desc', color: '#EC4899' },
-  { icon: QuoteIcon, titleKey: 'about.feature.quote.title', descKey: 'about.feature.quote.desc', color: '#059669' },
+  { icon: Palette, titleKey: 'about.feature.skin.title', descKey: 'about.feature.skin.desc', color: '#9B8EC4' },
+  { icon: QuoteIcon, titleKey: 'about.feature.quote.title', descKey: 'about.feature.quote.desc', color: '#3D8EB9' },
 ];
 
 export function AboutPanel() {
@@ -212,7 +212,7 @@ icon={<Code2 size={ICON_SIZE.MEDIUM} />}
               if (typeof chrome !== 'undefined' && chrome.tabs !== undefined) {
                 void chrome.tabs.create({ url: BRAND.productUrl });
               } else {
-                window.open(BRAND.productUrl, '_blank');
+                window.open(BRAND.productUrl, '_blank', 'noopener,noreferrer');
               }
             }}
           >
@@ -225,7 +225,7 @@ icon={<Mail size={ICON_SIZE.MEDIUM} />}
               if (typeof chrome !== 'undefined' && chrome.tabs !== undefined) {
                 void chrome.tabs.create({ url });
               } else {
-                window.open(url, '_blank');
+                window.open(url, '_blank', 'noopener,noreferrer');
               }
             }}
           >
@@ -238,7 +238,7 @@ icon={<ExternalLink size={ICON_SIZE.MEDIUM} />}
               if (typeof chrome !== 'undefined' && chrome.tabs !== undefined) {
                 void chrome.tabs.create({ url });
               } else {
-                window.open(url, '_blank');
+                window.open(url, '_blank', 'noopener,noreferrer');
               }
             }}
           >

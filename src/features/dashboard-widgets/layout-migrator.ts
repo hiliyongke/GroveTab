@@ -27,18 +27,27 @@ import {
  * 把老结构转换为 RGL 的 LayoutItem[]
  * 老字段 `id/type/title` 里只有 `id` 会落入 RGL 的 `i`，其余靠外部 items[] 数组通过 id 反查
  */
-export function toRglLayout(items: DashboardWidgetLayoutItem[]): LayoutItem[] {
-  return items.map<LayoutItem>((item) => ({
-    i: item.id,
-    x: clampInt(item.x, 0, DASHBOARD_GRID_COLUMNS - 1),
-    y: Math.max(0, Math.floor(item.y)),
-    w: clampInt(item.w, DASHBOARD_MIN_ITEM_W, DASHBOARD_MAX_ITEM_W),
-    h: clampInt(item.h, DASHBOARD_MIN_ITEM_H, DASHBOARD_MAX_ITEM_H),
-    minW: DASHBOARD_MIN_ITEM_W,
-    minH: DASHBOARD_MIN_ITEM_H,
-    maxW: DASHBOARD_MAX_ITEM_W,
-    maxH: DASHBOARD_MAX_ITEM_H,
-  }));
+export function toRglLayout(
+  items: DashboardWidgetLayoutItem[],
+  columns: number = DASHBOARD_GRID_COLUMNS,
+): LayoutItem[] {
+  const normalizedColumns = Math.max(1, Math.floor(columns));
+  const minW = Math.min(DASHBOARD_MIN_ITEM_W, normalizedColumns);
+  const maxW = Math.max(minW, Math.min(DASHBOARD_MAX_ITEM_W, normalizedColumns));
+  return items.map<LayoutItem>((item) => {
+    const w = clampInt(item.w, minW, maxW);
+    return {
+      i: item.id,
+      x: clampInt(item.x, 0, normalizedColumns - w),
+      y: Math.max(0, Math.floor(item.y)),
+      w,
+      h: clampInt(item.h, DASHBOARD_MIN_ITEM_H, DASHBOARD_MAX_ITEM_H),
+      minW,
+      minH: DASHBOARD_MIN_ITEM_H,
+      maxW,
+      maxH: DASHBOARD_MAX_ITEM_H,
+    };
+  });
 }
 
 /**
@@ -48,17 +57,22 @@ export function toRglLayout(items: DashboardWidgetLayoutItem[]): LayoutItem[] {
 export function fromRglLayout(
   layout: readonly LayoutItem[],
   source: DashboardWidgetLayoutItem[],
+  columns: number = DASHBOARD_GRID_COLUMNS,
 ): DashboardWidgetLayoutItem[] {
+  const normalizedColumns = Math.max(1, Math.floor(columns));
+  const minW = Math.min(DASHBOARD_MIN_ITEM_W, normalizedColumns);
+  const maxW = Math.max(minW, Math.min(DASHBOARD_MAX_ITEM_W, normalizedColumns));
   const byId = new Map(source.map((s) => [s.id, s] as const));
   return layout
     .map<DashboardWidgetLayoutItem | null>((l) => {
       const src = byId.get(l.i);
       if (!src) return null; // 数据偏差：RGL 返回了不存在的项，直接丢弃
+      const w = clampInt(l.w, minW, maxW);
       return {
         ...src,
-        x: clampInt(l.x, 0, DASHBOARD_GRID_COLUMNS - 1),
+        x: clampInt(l.x, 0, normalizedColumns - w),
         y: Math.max(0, Math.floor(l.y)),
-        w: clampInt(l.w, DASHBOARD_MIN_ITEM_W, DASHBOARD_MAX_ITEM_W),
+        w,
         h: clampInt(l.h, DASHBOARD_MIN_ITEM_H, DASHBOARD_MAX_ITEM_H),
       };
     })
@@ -72,37 +86,58 @@ export function clampLayout(
   items: DashboardWidgetLayoutItem[],
   columns: number = DASHBOARD_GRID_COLUMNS,
 ): DashboardWidgetLayoutItem[] {
+  const normalizedColumns = Math.max(1, Math.floor(columns));
+  const minW = Math.min(DASHBOARD_MIN_ITEM_W, normalizedColumns);
+  const maxW = Math.max(minW, Math.min(DASHBOARD_MAX_ITEM_W, normalizedColumns));
   return items.map((item) => {
-    const w = clampInt(item.w, DASHBOARD_MIN_ITEM_W, Math.min(DASHBOARD_MAX_ITEM_W, columns));
+    const w = clampInt(item.w, minW, maxW);
     const h = clampInt(item.h, DASHBOARD_MIN_ITEM_H, DASHBOARD_MAX_ITEM_H);
-    const x = clampInt(item.x, 0, columns - w);
+    const x = clampInt(item.x, 0, normalizedColumns - w);
     const y = Math.max(0, Math.floor(item.y));
     return { ...item, x, y, w, h };
   });
 }
 
 /**
- * 垂直紧凑 —— 把每个 item 的 y 往上尽量压缩，同时避免重叠。
- * 行为等价于 react-grid-layout 的 `compactType: 'vertical'`，但作为纯函数便于测试。
+ * 网格紧凑 —— 把每个 item 向"左上"尽量压缩，同时避免重叠。
+ * 相比纯垂直紧凑，本函数还会在同一行内尝试向左填充空隙，
+ * 使过滤掉某些组件后的布局更整齐。
  */
 export function compactLayoutVertical(
   items: DashboardWidgetLayoutItem[],
+  columns: number = DASHBOARD_GRID_COLUMNS,
 ): DashboardWidgetLayoutItem[] {
+  const normalizedColumns = Math.max(1, Math.floor(columns));
   // 按 (y, x) 排序，保证稳定的"先上后左"顺序
   const sorted = [...items].sort((a, b) => a.y - b.y || a.x - b.x);
   const placed: DashboardWidgetLayoutItem[] = [];
 
   for (const item of sorted) {
-    // 找到当前 item 在 y 轴上能"落到最低"（数值最小）的位置
+    // 先找能放下的最小 y
     let targetY = 0;
     for (const p of placed) {
-      // 水平投影是否相交
       const overlapX = !(item.x + item.w <= p.x || p.x + p.w <= item.x);
       if (overlapX) {
         targetY = Math.max(targetY, p.y + p.h);
       }
     }
-    placed.push({ ...item, y: targetY });
+
+    // 再尝试在同一行内向左移动（贪心：从 0 开始试，找到不冲突的最小 x）
+    let targetX = item.x;
+    for (let tryX = 0; tryX <= item.x; tryX++) {
+      if (tryX + item.w > normalizedColumns) continue;
+      const conflict = placed.some((p) => {
+        const overlapX = !(tryX + item.w <= p.x || p.x + p.w <= tryX);
+        const overlapY = !(targetY + item.h <= p.y || p.y + p.h <= targetY);
+        return overlapX && overlapY;
+      });
+      if (!conflict) {
+        targetX = tryX;
+        break;
+      }
+    }
+
+    placed.push({ ...item, x: targetX, y: targetY });
   }
   return placed;
 }

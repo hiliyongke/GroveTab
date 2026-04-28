@@ -84,7 +84,7 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
             key: 'quotes',
             label: (
               <span>
-<Quote size={ICON_SIZE.MEDIUM} /> 金句
+<Quote size={ICON_SIZE.MEDIUM} /> {t('settings.quotes')}
               </span>
             ),
             children: <QuotesPanel />,

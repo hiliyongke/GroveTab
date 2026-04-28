@@ -107,8 +107,8 @@ const BRAND_PRESETS: Record<string, BrandIdentity> = {
       'zh-CN': 'GroveTab — 你的标签页，找到归属。按域名自动分组、秒搜、归档、隐私全本地。',
       en: 'GroveTab — where your tabs find their place. Auto-grouping, instant search, archive & 100% local.',
     },
-    accentColor: '#059669',
-    accentColorEnd: '#22C55E',
+    accentColor: '#1677ff',
+    accentColorEnd: '#4096ff',
     productUrl: 'https://github.com/hiliyongke/GroveTab',
     logTag: '[GroveTab]',
     storagePrefix: 'canopy_',
@@ -138,7 +138,7 @@ const ACTIVE_BRAND_ID = (() => {
  * 上层任何位置只需 `import { BRAND } from '@/shared/config/brand'` 即可拿到；
  * 不要在运行时试图修改它——品牌身份在进程生命周期内是不可变的。
  */
-export const BRAND: BrandIdentity = Object.freeze(BRAND_PRESETS[ACTIVE_BRAND_ID]!);
+export const BRAND: BrandIdentity = Object.freeze(BRAND_PRESETS[ACTIVE_BRAND_ID]);
 
 /**
  * 语言相关的品牌文案解析辅助：从多语言字段中取出当前语言版本。

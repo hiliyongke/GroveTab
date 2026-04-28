@@ -34,6 +34,18 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <Field label={t('settings.defaultPageMode')} hint={t('settings.defaultPageModeHint')}>
+        <Segmented
+          block
+          value={settings.newtabPageMode ?? 'workspace'}
+          onChange={(value) => handleSetting({ newtabPageMode: value as 'workspace' | 'fishpond' })}
+          options={[
+            { value: 'workspace', label: t('pageMode.workspace') },
+            { value: 'fishpond', label: t('pageMode.fishpond') },
+          ]}
+        />
+      </Field>
+
       <Field label={t('settings.defaultView')}>
         <Select
           value={settings.defaultView}
@@ -64,6 +76,7 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
             { value: '3', label: '3' },
             { value: '4', label: '4' },
             { value: '5', label: '5' },
+            { value: '6', label: '6' },
           ]}
         />
       </Field>

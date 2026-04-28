@@ -31,9 +31,10 @@ const CURRENT_SCHEMA_VERSION = 3;
 
 const DEFAULT_SETTINGS: UserSettings = {
   overrideNewTab: true,
+  newtabPageMode: 'workspace',
   defaultView: 'domain',
   theme: 'system',
-  gradientPreset: 'slate',
+  gradientPreset: 'default',
   skinPreset: 'minimal',
   showIncognito: false,
   language: 'zh-CN',
@@ -54,6 +55,9 @@ const DEFAULT_SETTINGS: UserSettings = {
   reducedMotion: 'auto',
   uiVisibility: {
     header: true,
+    heroLogo: true,
+    heroTitle: true,
+    heroSlogan: true,
     heroSearch: true,
     viewSwitcher: true,
     workspaceOverview: true,
@@ -85,19 +89,12 @@ const DEFAULT_SETTINGS: UserSettings = {
       { id: 'clock-main', type: 'clock', x: 0, y: 0, w: 3, h: 2, title: '时钟' },
       { id: 'weather-main', type: 'weather', x: 3, y: 0, w: 3, h: 2, title: '天气' },
       { id: 'calendar-main', type: 'calendar', x: 6, y: 0, w: 3, h: 2, title: '日历' },
-      { id: 'work-countdown-main', type: 'workCountdown', x: 9, y: 0, w: 3, h: 2, title: '距离下班' },
+      { id: 'work-countdown-main', type: 'workCountdown', x: 9, y: 0, w: 3, h: 2, title: '下班倒计时' },
       { id: 'search-main', type: 'searchBox', x: 0, y: 2, w: 6, h: 2, title: '极速搜索' },
-      { id: 'water-main', type: 'waterReminder', x: 6, y: 2, w: 3, h: 2, title: '喝水提醒' },
-      { id: 'network-main', type: 'networkInfo', x: 9, y: 2, w: 3, h: 2, title: '网络信息' },
-      { id: 'speed-dial-main', type: 'speedDial', x: 0, y: 4, w: 6, h: 3, title: '常用网站' },
-      { id: 'countdown-main', type: 'countdown', x: 6, y: 4, w: 3, h: 3, title: '纪念日' },
-      { id: 'pomodoro-main', type: 'pomodoro', x: 9, y: 4, w: 3, h: 3, title: '番茄钟' },
-      { id: 'habit-main', type: 'habitTracker', x: 0, y: 7, w: 4, h: 3, title: '习惯打卡' },
-      { id: 'todo-main', type: 'todo', x: 4, y: 7, w: 4, h: 3, title: '待办' },
-      { id: 'sticky-main', type: 'sticky', x: 8, y: 7, w: 4, h: 3, title: '便签' },
-      { id: 'timestamp-main', type: 'timestampTool', x: 0, y: 10, w: 4, h: 2, title: '时间戳' },
-      { id: 'json-main', type: 'jsonFormatter', x: 4, y: 10, w: 4, h: 4, title: 'JSON 格式化' },
-      { id: 'daily-quote-main', type: 'dailyQuote', x: 8, y: 10, w: 4, h: 3, title: '金句' },
+      { id: 'speed-dial-main', type: 'speedDial', x: 6, y: 2, w: 6, h: 3, title: '常用网站' },
+      { id: 'todo-main', type: 'todo', x: 0, y: 5, w: 4, h: 3, title: '待办' },
+      { id: 'pomodoro-main', type: 'pomodoro', x: 4, y: 5, w: 4, h: 3, title: '番茄钟' },
+      { id: 'daily-quote-main', type: 'dailyQuote', x: 8, y: 5, w: 4, h: 3, title: '每日金句' },
     ],
     availableWidgets: {
       clock: true,
@@ -219,7 +216,9 @@ export async function getData<T>(key: StorageKey): Promise<T | undefined> {
 
 export async function setData<T>(key: StorageKey, value: T): Promise<void> {
   await storageSet(key, value);
-  await updateMetaTimestamp();
+  if (key !== 'canopy_meta') {
+    await updateMetaTimestamp();
+  }
 }
 
 /**
@@ -228,7 +227,9 @@ export async function setData<T>(key: StorageKey, value: T): Promise<void> {
  */
 export async function removeData(key: string): Promise<void> {
   await storageRemove(key);
-  await updateMetaTimestamp();
+  if (key !== 'canopy_meta') {
+    await updateMetaTimestamp();
+  }
 }
 
 /**

@@ -4,21 +4,77 @@
 
 import { create } from 'zustand';
 import type { UserSettings } from '@/shared/types';
-import { getSettings, saveSettings } from '@/repositories';
+import { getSettings, saveSettings, removeData } from '@/repositories';
 
 interface SettingsState {
   settings: UserSettings;
   loaded: boolean;
   loadSettings: () => Promise<void>;
   updateSettings: (partial: Partial<UserSettings>) => Promise<void>;
+  /** 恢复默认配置：同步重置 store 内存状态 + 删除 storage 键，无需刷新页面 */
+  resetSettings: () => Promise<void>;
+}
+
+let settingsWriteQueue: Promise<unknown> = Promise.resolve();
+
+/** 合并设置内存快照，避免嵌套设置被浅合并误覆盖。 */
+function mergeSettingsForStore(current: UserSettings, partial: Partial<UserSettings>): UserSettings {
+  return {
+    ...current,
+    ...partial,
+    uiVisibility: partial.uiVisibility === undefined
+      ? current.uiVisibility
+      : { ...current.uiVisibility, ...partial.uiVisibility },
+    dashboardWidgets: partial.dashboardWidgets === undefined
+      ? current.dashboardWidgets
+      : {
+          ...current.dashboardWidgets,
+          ...partial.dashboardWidgets,
+          items: partial.dashboardWidgets.items ?? current.dashboardWidgets?.items,
+          availableWidgets: partial.dashboardWidgets.availableWidgets === undefined
+            ? current.dashboardWidgets?.availableWidgets
+            : { ...current.dashboardWidgets?.availableWidgets, ...partial.dashboardWidgets.availableWidgets },
+        },
+    speedDial: partial.speedDial === undefined
+      ? current.speedDial
+      : { ...current.speedDial, ...partial.speedDial, groups: partial.speedDial.groups ?? current.speedDial?.groups },
+    dailyQuote: partial.dailyQuote === undefined
+      ? current.dailyQuote
+      : {
+          ...current.dailyQuote,
+          ...partial.dailyQuote,
+          categories: partial.dailyQuote.categories ?? current.dailyQuote?.categories,
+          customQuotes: partial.dailyQuote.customQuotes ?? current.dailyQuote?.customQuotes,
+        },
+    pomodoro: partial.pomodoro === undefined ? current.pomodoro : { ...current.pomodoro, ...partial.pomodoro },
+    countdowns: partial.countdowns === undefined
+      ? current.countdowns
+      : { ...current.countdowns, ...partial.countdowns, items: partial.countdowns.items ?? current.countdowns?.items },
+    workCountdown: partial.workCountdown === undefined
+      ? current.workCountdown
+      : { ...current.workCountdown, ...partial.workCountdown },
+    todoWidget: partial.todoWidget === undefined
+      ? current.todoWidget
+      : { ...current.todoWidget, ...partial.todoWidget, items: partial.todoWidget.items ?? current.todoWidget?.items },
+    stickyNotes: partial.stickyNotes === undefined
+      ? current.stickyNotes
+      : { ...current.stickyNotes, ...partial.stickyNotes, items: partial.stickyNotes.items ?? current.stickyNotes?.items },
+    waterReminder: partial.waterReminder === undefined
+      ? current.waterReminder
+      : { ...current.waterReminder, ...partial.waterReminder },
+    habitTracker: partial.habitTracker === undefined
+      ? current.habitTracker
+      : { ...current.habitTracker, ...partial.habitTracker, items: partial.habitTracker.items ?? current.habitTracker?.items },
+  };
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
   settings: {
     overrideNewTab: true,
+    newtabPageMode: 'workspace',
     defaultView: 'domain',
     theme: 'system',
-    gradientPreset: 'slate',
+    gradientPreset: 'default',
     skinPreset: 'minimal',
     showIncognito: false,
     language: 'zh-CN',
@@ -38,6 +94,9 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     reducedMotion: 'auto',
     uiVisibility: {
       header: true,
+      heroLogo: true,
+      heroTitle: true,
+      heroSlogan: true,
       heroSearch: true,
       viewSwitcher: true,
       workspaceOverview: true,
@@ -75,12 +134,27 @@ export const useSettingsStore = create<SettingsState>((set) => ({
    */
   updateSettings: async (partial) => {
     // 1) 同步乐观更新：立刻反映到 UI
-    set((state) => ({ settings: { ...state.settings, ...partial } }));
-    // 2) 后台落盘
+    set((state) => ({ settings: mergeSettingsForStore(state.settings, partial) }));
+    // 2) 串行落盘：避免多个 chrome.storage 写入基于旧快照相互覆盖
+    const writeTask = settingsWriteQueue.then(() => saveSettings(partial));
+    settingsWriteQueue = writeTask.catch(() => undefined);
     try {
-      await saveSettings(partial);
+      const persisted = await writeTask;
+      set({ settings: persisted, loaded: true });
     } catch (err) {
       console.error('[settings] saveSettings failed:', err);
     }
+  },
+
+  /**
+   * 恢复默认配置：
+   *   1. 删除 storage 中的 canopy_settings 键
+   *   2. 重新 loadSettings → getSettings 在 storage 为空时自动返回 DEFAULT_SETTINGS
+   *   3. 内存 + storage 同步重置，无需刷新页面
+   */
+  resetSettings: async () => {
+    await removeData('canopy_settings');
+    const settings = await getSettings();
+    set({ settings, loaded: true });
   },
 }));

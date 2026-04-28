@@ -5,6 +5,7 @@
 import type { ArchivedSession, ArchivedTab } from '@/shared/types';
 import { BRAND } from '@/shared/config/brand';
 import { CONFIG } from '@/shared/config';
+import { isSafeExternalUrl } from '@/shared/utils/url-safety';
 
 const CURRENT_EXPORT_VERSION = 1;
 const MAX_IMPORT_SESSIONS = CONFIG.business.maxImportSessions;
@@ -38,14 +39,9 @@ function normalizeString(value: unknown, fallback = ''): string {
   return value.trim().slice(0, MAX_STRING_LENGTH);
 }
 
-/** URL 基础校验。 */
+/** URL 基础校验：仅允许可安全打开的 http/https 外部网页。 */
 function isValidUrl(value: string): boolean {
-  try {
-    const url = new URL(value);
-    return !['chrome:', 'chrome-extension:', 'about:'].includes(url.protocol);
-  } catch {
-    return false;
-  }
+  return isSafeExternalUrl(value);
 }
 
 /** 从 URL 推导 hostname，供导入时兜底。 */
@@ -256,7 +252,7 @@ export function parseImportHTML(text: string): { sessions: ArchivedSession[]; er
       const name = h3.textContent?.trim() ?? '未命名';
       const dl = h3.nextElementSibling;
       if (!dl || dl.tagName !== 'DL') continue;
-      const anchors = Array.from(dl.querySelectorAll('a')) as HTMLAnchorElement[];
+      const anchors = Array.from(dl.querySelectorAll('a'));
       const tabs: ArchivedTab[] = [];
       for (const a of anchors) {
         handled.add(a);
@@ -283,7 +279,7 @@ export function parseImportHTML(text: string): { sessions: ArchivedSession[]; er
     }
 
     // 兜底：未分组的 A
-    const allAnchors = Array.from(doc.querySelectorAll('a')) as HTMLAnchorElement[];
+    const allAnchors = Array.from(doc.querySelectorAll('a'));
     const orphanTabs: ArchivedTab[] = [];
     for (const a of allAnchors) {
       if (handled.has(a)) continue;

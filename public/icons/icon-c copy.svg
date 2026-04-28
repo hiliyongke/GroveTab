@@ -1,48 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <!-- 透明背景，仅保留外框和线稿元素 -->
-  <rect x="16" y="16" width="96" height="96" rx="24" fill="none" stroke="#0F172A" stroke-width="2"/>
-
-  <!-- 标签页轮廓 -->
-  <path
-    d="M40 54C40 49.6 43.6 46 48 46H64L68 54H80C84.4 54 88 57.6 88 62V82C88 86.4 84.4 90 80 90H48C43.6 90 40 86.4 40 82V54Z"
-    fill="none"
-    stroke="#0F172A"
-    stroke-width="3"
-    stroke-linejoin="round"
-  />
-
-  <!-- 豆芽：细茎 + 两片线稿小叶子，更具“萌芽”意象 -->
-  <!-- 茎 -->
-  <path
-    d="M64 80V66"
-    stroke="#16A34A"
-    stroke-width="3"
-    stroke-linecap="round"
-  />
-
-  <!-- 左叶（线稿） -->
-  <path
-    d="M64 68C60.5 66.5 58.5 64 58.5 61C60.7 61.1 62.8 61.9 64.2 63.4Z"
-    fill="none"
-    stroke="#16A34A"
-    stroke-width="2.2"
-    stroke-linejoin="round"
-  />
-
-  <!-- 右叶（线稿） -->
-  <path
-    d="M64 68C67.5 66.5 69.5 64 69.5 61C67.3 61.1 65.2 61.9 63.8 63.4Z"
-    fill="none"
-    stroke="#16A34A"
-    stroke-width="2.2"
-    stroke-linejoin="round"
-  />
-
-  <!-- 地线 -->
-  <path
-    d="M52 80C56 82 60 83 64 83C68 83 72 82 76 80"
-    stroke="#0F172A"
-    stroke-width="2"
-    stroke-linecap="round"
-  />
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="GroveTab logo">
+  <defs>
+    <linearGradient id="leaf" x1="26" y1="16" x2="104" y2="108" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#B7E48A"/>
+      <stop offset="0.52" stop-color="#52B788"/>
+      <stop offset="1" stop-color="#2D6A4F"/>
+    </linearGradient>
+    <linearGradient id="trunk" x1="50" y1="48" x2="78" y2="116" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#B08968"/>
+      <stop offset="1" stop-color="#7F5539"/>
+    </linearGradient>
+  </defs>
+  <path d="M64 111C67 91 68 70 64 47" fill="none" stroke="url(#trunk)" stroke-width="9" stroke-linecap="round"/>
+  <path d="M64 69C51 57 41 45 37 28C52 31 63 39 70 53C76 42 88 34 104 30C102 48 91 61 75 70C88 74 98 84 103 99C86 99 73 92 64 80C55 91 42 99 25 99C30 84 40 74 64 69Z" fill="url(#leaf)"/>
+  <path d="M64 69C54 62 48 53 45 41M70 53C77 47 84 43 94 40M64 80C56 87 47 91 36 93M75 70C84 75 91 81 96 91" fill="none" stroke="#F1F8E9" stroke-opacity="0.72" stroke-width="3" stroke-linecap="round"/>
 </svg>

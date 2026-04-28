@@ -52,14 +52,19 @@ html {
 }
 
 body {
-  background-color: var(--ant-color-bg-layout);
-  color: var(--ant-color-text);
+  background-color: var(--ant-color-bg-layout, #f5f5f5);
+  color: var(--ant-color-text, #1f1f1f);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   font-feature-settings: 'kern' 1, 'liga' 1;
   /* 标题字体跟随皮肤预设 */
   font-family: var(--ant-font-family);
+}
+
+[data-theme='dark'] body {
+  background-color: var(--ant-color-bg-layout, #141414);
+  color: var(--ant-color-text, #f5f5f5);
 }
 
 *,

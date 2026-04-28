@@ -36,6 +36,8 @@ interface SelectionState {
   clearSelection: () => void;
   /** 批量操作后清空选中并退出多选模式 */
   resetAfterBatch: () => void;
+  /** 从选区中移除已经不存在的标签页。 */
+  removeIds: (tabIds: number[]) => void;
   /** 检查某个 tabId 是否被选中 */
   isSelected: (tabId: number) => boolean;
 }
@@ -96,6 +98,17 @@ export const useSelectionStore = create<SelectionState>((set, get) => ({
 
   resetAfterBatch: () => {
     set({ selectedIds: new Set<number>(), selectionMode: false, lastClickedId: null });
+  },
+
+  removeIds: (tabIds) => {
+    if (tabIds.length === 0) return;
+    const staleIds = new Set(tabIds);
+    const next = new Set([...get().selectedIds].filter((id) => !staleIds.has(id)));
+    set({
+      selectedIds: next,
+      selectionMode: next.size > 0 ? get().selectionMode : false,
+      lastClickedId: next.has(get().lastClickedId ?? -1) ? get().lastClickedId : null,
+    });
   },
 
   isSelected: (tabId) => get().selectedIds.has(tabId),

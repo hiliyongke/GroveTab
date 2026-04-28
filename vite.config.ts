@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { writeFileSync, mkdirSync, readFileSync, readdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync, readFileSync, readdirSync, copyFileSync } from 'node:fs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -48,12 +48,22 @@ function chromeExtensionPlugin() {
         ? `<link rel="stylesheet" href="/assets/${cssFiles[0]}" />`
         : '';
 
-      mkdirSync(resolve(__dirname, 'dist/src/pages/newtab'), { recursive: true });
+      const newtabDir = resolve(__dirname, 'dist/src/pages/newtab');
+      mkdirSync(newtabDir, { recursive: true });
+      copyFileSync(resolve(__dirname, 'src/pages/newtab/theme-init.js'), resolve(newtabDir, 'theme-init.js'));
+      copyFileSync(resolve(__dirname, 'src/pages/newtab/prepaint.css'), resolve(newtabDir, 'prepaint.css'));
       writeFileSync(
-        resolve(__dirname, 'dist/src/pages/newtab/index.html'),
+        resolve(newtabDir, 'index.html'),
         `<!DOCTYPE html>
 <html lang="zh-CN">
-  <head><meta charset="UTF-8" /><title>Canopy</title>${cssLink}</head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GroveTab</title>
+    <script src="./theme-init.js"></script>
+    <link rel="stylesheet" href="./prepaint.css" />
+    ${cssLink}
+  </head>
   <body><div id="root"></div><script type="module" src="/newtab.js"></script></body>
 </html>`,
       );

@@ -574,6 +574,15 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
     [flatItems],
   );
 
+  /**
+   * 将高频变化的键盘导航状态缓存到 ref 中，
+   * 使 handleKeyDown 的依赖稳定，避免频繁重建导致 Input 重新渲染。
+   */
+  const navStateRef = useRef({ activeIndex, flatItems, firstWebItemIndex, normalizedQuery, currentEngine, enabledEngines });
+  useEffect(() => {
+    navStateRef.current = { activeIndex, flatItems, firstWebItemIndex, normalizedQuery, currentEngine, enabledEngines };
+  }, [activeIndex, flatItems, firstWebItemIndex, normalizedQuery, currentEngine, enabledEngines]);
+
   const close = useCallback(() => onOpenChange(false), [onOpenChange]);
 
   /**
@@ -613,7 +622,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
       close();
     } catch (err) {
       try {
-        window.open(entry.url, '_blank');
+        window.open(entry.url, '_blank', 'noopener,noreferrer');
         close();
       } catch {
         /* 彻底失败时静默处理 */
@@ -689,6 +698,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
    *   - ↑ / ↓         ：上下选择
    */
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const { activeIndex: idx, flatItems: items, firstWebItemIndex: webIdx, normalizedQuery: nq, currentEngine: engine, enabledEngines: engines } = navStateRef.current;
     // Cmd/Ctrl + K：再按一次关闭 Modal（与打开快捷键对称）
     if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
       e.preventDefault();
@@ -697,7 +707,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
     }
 
     if (e.key === 'Escape') {
-      if (normalizedQuery !== '') {
+      if (nq !== '') {
         e.preventDefault();
         e.stopPropagation();
         setQuery('');
@@ -712,59 +722,59 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
     }
 
     // Cmd/Ctrl + 1..9：直接用第 N 个启用引擎进行 web 搜索
-    if ((e.metaKey || e.ctrlKey) && /^[1-9]$/.test(e.key) && normalizedQuery !== '') {
-      const idx = Number.parseInt(e.key, 10) - 1;
-      const target = enabledEngines[idx];
+    if ((e.metaKey || e.ctrlKey) && /^[1-9]$/.test(e.key) && nq !== '') {
+      const engineIdx = Number.parseInt(e.key, 10) - 1;
+      const target = engines[engineIdx];
       if (target !== undefined) {
         e.preventDefault();
-        void runWebSearch(normalizedQuery, target);
+        void runWebSearch(nq, target);
       }
       return;
     }
 
-    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && normalizedQuery !== '') {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && nq !== '') {
       e.preventDefault();
-      void runWebSearch(normalizedQuery, currentEngine);
+      void runWebSearch(nq, engine);
       return;
     }
 
-    if (e.altKey && e.key === 'Enter' && normalizedQuery !== '') {
+    if (e.altKey && e.key === 'Enter' && nq !== '') {
       // Alt+Enter：后台打开（不切换到新 Tab）
       e.preventDefault();
-      void runWebSearch(normalizedQuery, currentEngine);
+      void runWebSearch(nq, engine);
       return;
     }
 
-    if (e.key === 'Tab' && firstWebItemIndex >= 0) {
+    if (e.key === 'Tab' && webIdx >= 0) {
       e.preventDefault();
-      setActiveIndex(firstWebItemIndex);
+      setActiveIndex(webIdx);
       return;
     }
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setActiveIndex((index) => (flatItems.length === 0 ? 0 : (index + 1) % flatItems.length));
+      setActiveIndex((index) => (items.length === 0 ? 0 : (index + 1) % items.length));
       return;
     }
 
     if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setActiveIndex((index) => (flatItems.length === 0 ? 0 : (index - 1 + flatItems.length) % flatItems.length));
+      setActiveIndex((index) => (items.length === 0 ? 0 : (index - 1 + items.length) % items.length));
       return;
     }
 
     if (e.key === 'Enter') {
       e.preventDefault();
-      const activeItem = flatItems[activeIndex];
+      const activeItem = items[idx];
       if (activeItem !== undefined) {
         handleActivate(activeItem);
         return;
       }
-      if (normalizedQuery !== '') {
-        void runWebSearch(normalizedQuery, currentEngine);
+      if (nq !== '') {
+        void runWebSearch(nq, engine);
       }
     }
-  }, [activeIndex, close, currentEngine, enabledEngines, firstWebItemIndex, flatItems, handleActivate, normalizedQuery, runWebSearch]);
+  }, [close, handleActivate, runWebSearch]);
 
   return (
     <Modal

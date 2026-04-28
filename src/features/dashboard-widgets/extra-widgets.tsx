@@ -1,10 +1,12 @@
+import { nanoid } from 'nanoid';
 import { useEffect, useMemo, useState } from 'react';
-import { Button, Input, Segmented, Select, theme } from 'antd';
+import { Button, Input, Select, theme } from 'antd';
 import { Droplets, Check, Copy, Globe, Plus, RotateCcw, Search } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useSettingsStore } from '@/store';
 import type { HabitEntry } from '@/shared/types';
 import { feedback } from '@/shared/ui/feedback';
+import { useT } from '@/shared/i18n';
 
 // ── 极速搜索盒子 ────────────────────────────────────
 
@@ -18,45 +20,59 @@ const ENGINES = [
 
 export function SearchBoxWidget() {
   const { token } = theme.useToken();
-  const [engine, setEngine] = useState('bing');
+  const defaultEngine = useSettingsStore((s) => s.settings.searchDefaultEngine ?? 'bing');
+  const [engine, setEngine] = useState(() =>
+    ENGINES.some((item) => item.value === defaultEngine) ? defaultEngine : 'bing',
+  );
   const [query, setQuery] = useState('');
 
   const submit = () => {
     const target = ENGINES.find((e) => e.value === engine);
-    if (!target || !query.trim()) return;
-    window.open(`${target.url}${encodeURIComponent(query.trim())}`, '_blank', 'noopener,noreferrer');
+    if (target === undefined || query.trim() === '') return;
+    window.open(
+      `${target.url}${encodeURIComponent(query.trim())}`,
+      '_blank',
+      'noopener,noreferrer',
+    );
+    setQuery('');
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10, height: '100%' }}>
-      <Segmented
-        size="small"
-        value={engine}
-        onChange={(value) => setEngine(value as string)}
-        options={ENGINES.map((e) => ({ value: e.value, label: e.label }))}
-      />
+      <div
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}
+      >
+        <span style={{ fontSize: 12, color: token.colorTextTertiary }}>快速搜索</span>
+        <Select
+          size="small"
+          value={engine}
+          onChange={setEngine}
+          options={ENGINES.map((item) => ({ value: item.value, label: item.label }))}
+          style={{ minWidth: 118 }}
+        />
+      </div>
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: 8,
-          padding: '10px 12px',
+          padding: '8px 10px',
           borderRadius: token.borderRadiusLG,
-          background: token.colorBgContainer,
-          border: `1px solid ${token.colorBorder}`,
+          background: token.colorFillQuaternary,
+          border: `1px solid ${token.colorBorderSecondary}`,
           marginTop: 'auto',
         }}
       >
-<Search size={ICON_SIZE.LARGE} color={token.colorTextTertiary} />
+        <Search size={ICON_SIZE.LARGE} color={token.colorTextTertiary} />
         <Input
           variant="borderless"
-          style={{ flex: 1 }}
-          placeholder="输入关键词，回车开搜"
+          style={{ flex: 1, minWidth: 0 }}
+          placeholder="关键词，回车开搜"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onPressEnter={submit}
         />
-        <Button type="primary" size="small" onClick={submit}>
+        <Button type="primary" size="small" onClick={submit} disabled={query.trim() === ''}>
           搜索
         </Button>
       </div>
@@ -71,13 +87,32 @@ function todayKey(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
+function computeHabitStreak(records: string[], anchor = new Date()): number {
+  const recordSet = new Set(records);
+  let streak = 0;
+  const cursor = new Date(anchor);
+  cursor.setHours(0, 0, 0, 0);
+
+  while (
+    recordSet.has(
+      `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}-${String(cursor.getDate()).padStart(2, '0')}`,
+    )
+  ) {
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  return streak;
+}
+
 export function WaterReminderWidget() {
   const { token } = theme.useToken();
   const conf = useSettingsStore((s) => s.settings.waterReminder);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const goal = conf?.goalCups ?? 8;
+  const intervalMinutes = conf?.intervalMinutes ?? 60;
   const today = todayKey();
-  const current = conf?.lastDate === today ? conf?.currentCups ?? 0 : 0;
+  const current = conf?.lastDate === today ? (conf?.currentCups ?? 0) : 0;
 
   const add = async (delta: number) => {
     const next = Math.max(0, Math.min(goal * 2, current + delta));
@@ -91,12 +126,22 @@ export function WaterReminderWidget() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10, height: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-<Droplets size={ICON_SIZE.XLARGE} color={token.colorPrimary} />
+        <Droplets size={ICON_SIZE.XLARGE} color={token.colorPrimary} />
         <div style={{ fontSize: 22, fontWeight: 800 }}>
           {current} / {goal} 杯
         </div>
       </div>
-      <div style={{ height: 8, background: token.colorFillTertiary, borderRadius: 4, overflow: 'hidden' }}>
+      <div style={{ fontSize: 12, color: token.colorTextTertiary }}>
+        目标 {goal} 杯 · 建议每 {intervalMinutes} 分钟打卡一次
+      </div>
+      <div
+        style={{
+          height: 8,
+          background: token.colorFillTertiary,
+          borderRadius: 4,
+          overflow: 'hidden',
+        }}
+      >
         <div
           style={{
             width: `${percent}%`,
@@ -115,8 +160,12 @@ export function WaterReminderWidget() {
         </Button>
         <Button
           size="small"
-icon={<RotateCcw size={ICON_SIZE.SMALL} />}
-          onClick={() => void updateSettings({ waterReminder: { ...(conf ?? {}), lastDate: today, currentCups: 0 } })}
+          icon={<RotateCcw size={ICON_SIZE.SMALL} />}
+          onClick={() =>
+            void updateSettings({
+              waterReminder: { ...(conf ?? {}), lastDate: today, currentCups: 0 },
+            })
+          }
         />
       </div>
     </div>
@@ -142,19 +191,30 @@ export function HabitTrackerWidget() {
 
   const add = async () => {
     if (!draft.trim()) return;
-    const nextItems = [...items, { id: `habit-${Date.now()}`, name: draft.trim(), emoji: '⭐', records: [] }];
+    const nextItems = [
+      ...items,
+      { id: `habit-${nanoid(8)}`, name: draft.trim(), emoji: '⭐', records: [] },
+    ];
     await updateSettings({ habitTracker: { ...(conf ?? {}), items: nextItems } });
     setDraft('');
   };
 
   const remove = async (id: string) => {
-    await updateSettings({ habitTracker: { ...(conf ?? {}), items: items.filter((h) => h.id !== id) } });
+    await updateSettings({
+      habitTracker: { ...(conf ?? {}), items: items.filter((h) => h.id !== id) },
+    });
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%' }}>
+      {items.length === 0 && (
+        <div style={{ fontSize: 12, color: token.colorTextTertiary, padding: '8px 2px' }}>
+          暂无习惯，先添加一个每天想坚持的小目标。
+        </div>
+      )}
       {items.slice(0, 5).map((habit) => {
         const done = habit.records.includes(today);
+        const streak = computeHabitStreak(habit.records);
         return (
           <div
             key={habit.id}
@@ -172,8 +232,10 @@ export function HabitTrackerWidget() {
           >
             <span style={{ fontSize: 16 }}>{habit.emoji ?? '⭐'}</span>
             <span style={{ flex: 1, fontSize: 13, fontWeight: 600 }}>{habit.name}</span>
-            <span style={{ fontSize: 11, color: token.colorTextTertiary }}>坚持 {habit.records.length} 天</span>
-{done && <Check size={ICON_SIZE.MEDIUM} color={token.colorSuccess} />}
+            <span style={{ fontSize: 11, color: token.colorTextTertiary }}>
+              连续 {streak} 天 · 累计 {habit.records.length}
+            </span>
+            {done && <Check size={ICON_SIZE.MEDIUM} color={token.colorSuccess} />}
             <Button
               type="text"
               size="small"
@@ -190,8 +252,19 @@ export function HabitTrackerWidget() {
         );
       })}
       <div style={{ display: 'flex', gap: 6, marginTop: 'auto' }}>
-        <Input size="small" placeholder="新增习惯" value={draft} onChange={(e) => setDraft(e.target.value)} onPressEnter={() => void add()} />
-<Button size="small" type="primary" icon={<Plus size={ICON_SIZE.SMALL} />} onClick={() => void add()} />
+        <Input
+          size="small"
+          placeholder="新增习惯"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onPressEnter={() => void add()}
+        />
+        <Button
+          size="small"
+          type="primary"
+          icon={<Plus size={ICON_SIZE.SMALL} />}
+          onClick={() => void add()}
+        />
       </div>
     </div>
   );
@@ -201,7 +274,8 @@ export function HabitTrackerWidget() {
 
 export function TimestampToolWidget() {
   const { token } = theme.useToken();
-  const [now, setNow] = useState(Date.now());
+  const { t } = useT();
+  const [now, setNow] = useState(() => new Date().getTime());
   const [draft, setDraft] = useState('');
 
   useEffect(() => {
@@ -231,13 +305,15 @@ export function TimestampToolWidget() {
 
   const copy = (text: string | number) => {
     void navigator.clipboard?.writeText(String(text));
-    feedback.success('已复制');
+    feedback.success(t('dashboard.copied'));
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ flex: 1, fontFamily: 'monospace', fontSize: 14, color: token.colorText }}>{nowSec}</div>
+        <div style={{ flex: 1, fontFamily: 'monospace', fontSize: 14, color: token.colorText }}>
+          {nowSec}
+        </div>
         <Button size="small" icon={<Copy size={ICON_SIZE.SMALL} />} onClick={() => copy(nowSec)}>
           秒
         </Button>
@@ -275,6 +351,7 @@ import { tokenizeJson, parseJsonErrorPosition, type JsonToken } from './json-hig
 
 export function JsonFormatterWidget() {
   const { token } = theme.useToken();
+  const { t } = useT();
   const [input, setInput] = useState('');
   const [indent, setIndent] = useState<number>(2);
 
@@ -322,7 +399,7 @@ export function JsonFormatterWidget() {
           disabled={output === ''}
           onClick={() => {
             void navigator.clipboard?.writeText(output);
-            feedback.success('已复制结果');
+            feedback.success(t('dashboard.copiedResult'));
           }}
         >
           复制结果
@@ -368,15 +445,13 @@ export function JsonFormatterWidget() {
             wordBreak: 'break-all',
           }}
         >
-          {tokens.length === 0 ? (
-            '结果将显示在这里'
-          ) : (
-            tokens.map((tk, idx) => (
-              <span key={idx} style={{ color: colorMap[tk.type] }}>
-                {tk.text}
-              </span>
-            ))
-          )}
+          {tokens.length === 0
+            ? '结果将显示在这里'
+            : tokens.map((tk, idx) => (
+                <span key={idx} style={{ color: colorMap[tk.type] }}>
+                  {tk.text}
+                </span>
+              ))}
         </pre>
       )}
     </div>
@@ -385,26 +460,34 @@ export function JsonFormatterWidget() {
 
 // ── 网络信息 ────────────────────────────────────────
 
+interface NavigatorConnection extends EventTarget {
+  effectiveType?: string;
+}
+
+function getNavigatorConnection(): NavigatorConnection | undefined {
+  return (navigator as Navigator & { connection?: NavigatorConnection }).connection;
+}
+
 export function NetworkInfoWidget() {
   const { token } = theme.useToken();
-  const [online, setOnline] = useState(navigator.onLine);
-  const [connType, setConnType] = useState<string>('unknown');
+  const [online, setOnline] = useState(() => navigator.onLine);
+  const [connType, setConnType] = useState<string>(
+    () => getNavigatorConnection()?.effectiveType ?? 'unknown',
+  );
 
   useEffect(() => {
     const onOnline = () => setOnline(true);
     const onOffline = () => setOnline(false);
     window.addEventListener('online', onOnline);
     window.addEventListener('offline', onOffline);
-    // @ts-expect-error connection is experimental
-    const conn = navigator.connection;
-    if (conn) {
-      setConnType(conn.effectiveType || 'unknown');
-      const onChange = () => setConnType(conn.effectiveType || 'unknown');
-      conn.addEventListener?.('change', onChange);
+    const conn = getNavigatorConnection();
+    if (conn !== undefined) {
+      const onChange = () => setConnType(conn.effectiveType ?? 'unknown');
+      conn.addEventListener('change', onChange);
       return () => {
         window.removeEventListener('online', onOnline);
         window.removeEventListener('offline', onOffline);
-        conn.removeEventListener?.('change', onChange);
+        conn.removeEventListener('change', onChange);
       };
     }
     return () => {
@@ -414,14 +497,20 @@ export function NetworkInfoWidget() {
   }, []);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 10, height: '100%' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        gap: 10,
+        height: '100%',
+      }}
+    >
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <Globe size={ICON_SIZE.XLARGE} color={online ? token.colorSuccess : token.colorError} />
         <div style={{ fontSize: 18, fontWeight: 800 }}>{online ? '在线' : '离线'}</div>
       </div>
-      <div style={{ fontSize: 12, color: token.colorTextTertiary }}>
-        连接类型：{connType}
-      </div>
+      <div style={{ fontSize: 12, color: token.colorTextTertiary }}>连接类型：{connType}</div>
       <div style={{ fontSize: 11, color: token.colorTextTertiary }}>
         User Agent：{navigator.userAgent.slice(0, 40)}…
       </div>

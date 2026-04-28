@@ -1,9 +1,11 @@
 import { Button, theme } from 'antd';
 import { GripVertical, Trash2 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
+import type { DashboardWidgetType } from '@/shared/types';
 
 interface WidgetCardProps {
   title: string;
+  type?: DashboardWidgetType;
   editing: boolean;
   onRemove?: () => void;
   children: React.ReactNode;
@@ -14,63 +16,108 @@ interface WidgetCardProps {
   dragHandleClassName?: string;
 }
 
+const TYPE_TONE: Partial<Record<DashboardWidgetType, string>> = {
+  clock: '#6a9bcc',
+  weather: '#6a9bcc',
+  calendar: '#788c5d',
+  dailyQuote: '#d97757',
+  speedDial: '#6a9bcc',
+  pomodoro: '#d97757',
+  todo: '#788c5d',
+  sticky: '#d97757',
+  countdown: '#d97757',
+  workCountdown: '#788c5d',
+  searchBox: '#6a9bcc',
+  waterReminder: '#6a9bcc',
+  habitTracker: '#788c5d',
+  timestampTool: '#6a9bcc',
+  jsonFormatter: '#788c5d',
+  networkInfo: '#6a9bcc',
+};
+
 export function WidgetCard({
   title,
+  type,
   editing,
   onRemove,
   children,
   dragHandleClassName,
 }: WidgetCardProps) {
   const { token } = theme.useToken();
+  const tone = type !== undefined ? (TYPE_TONE[type] ?? token.colorPrimary) : token.colorPrimary;
 
   return (
     <div
-      style={{
-        position: 'relative',
-        height: '100%',
-        borderRadius: token.borderRadiusLG + 8,
-        background: token.colorBgContainer,
-        border: `1px solid ${token.colorBorderSecondary}`,
-        boxShadow: token.boxShadowSecondary,
-        padding: 16,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 12,
-        overflow: 'hidden',
-      }}
+      className={`canopy-card-interactive grovetab-widget-card${editing ? ' grovetab-widget-card--editing' : ''}`}
+      role="group"
+      aria-label={`${title} 小组件`}
+      style={
+        {
+          position: 'relative',
+          height: '100%',
+          borderRadius: token.borderRadiusLG + 10,
+          background: 'var(--canopy-glass-bg)',
+          border: `1px solid ${editing ? token.colorPrimaryBorder : token.colorBorderSecondary}`,
+          boxShadow: editing ? token.boxShadowTertiary : 'var(--canopy-shadow-card)',
+          backdropFilter: 'var(--canopy-glass-filter)',
+          WebkitBackdropFilter: 'var(--canopy-glass-filter)',
+          padding: 14,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 10,
+          overflow: 'hidden',
+          ['--canopy-hover-border' as string]: editing
+            ? token.colorPrimaryBorderHover
+            : token.colorBorder,
+        } as React.CSSProperties
+      }
     >
       <div
-        className={editing ? dragHandleClassName : undefined}
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: 12,
-          cursor: editing && dragHandleClassName ? 'grab' : undefined,
-          userSelect: editing ? 'none' : undefined,
+          gap: 10,
+          minHeight: 28,
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
           {editing && (
-            <span
+            <button
+              type="button"
+              className={dragHandleClassName}
+              aria-label={`拖拽移动 ${title}`}
               style={{
                 width: 28,
                 height: 28,
+                border: 0,
                 borderRadius: 10,
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 background: token.colorFillTertiary,
                 color: token.colorTextTertiary,
+                cursor: 'grab',
+                flexShrink: 0,
               }}
-              aria-hidden
             >
-<GripVertical size={ICON_SIZE.MEDIUM} />
-            </span>
+              <GripVertical size={ICON_SIZE.MEDIUM} />
+            </button>
           )}
+          <span
+            aria-hidden
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: 999,
+              background: tone,
+              boxShadow: `0 0 0 4px ${tone}18`,
+              flexShrink: 0,
+            }}
+          />
           <div
             style={{
-              fontSize: 13,
+              fontSize: 12.5,
               fontWeight: 700,
               color: token.colorTextSecondary,
               letterSpacing: '0.02em',
@@ -84,22 +131,30 @@ export function WidgetCard({
         </div>
 
         {editing && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <Button
-              type="text"
-              size="small"
-              danger
-icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
-              onClick={onRemove}
-              aria-label="删除该组件"
-              // 避免按钮触发拖拽：这个 className 告知 react-grid-layout 的 cancel 选择器
-              className="grovetab-dashboard__no-drag"
-            />
-          </div>
+          <Button
+            type="text"
+            size="small"
+            danger
+            icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
+            onClick={onRemove}
+            aria-label={`删除 ${title}`}
+            className="grovetab-dashboard__no-drag"
+            style={{ flexShrink: 0 }}
+          />
         )}
       </div>
 
-      <div style={{ flex: 1, minHeight: 0 }}>{children}</div>
+      <div
+        className="grovetab-widget-card__body"
+        style={{
+          flex: 1,
+          minHeight: 0,
+          overflow: 'auto',
+          scrollbarWidth: 'thin',
+        }}
+      >
+        {children}
+      </div>
     </div>
   );
 }

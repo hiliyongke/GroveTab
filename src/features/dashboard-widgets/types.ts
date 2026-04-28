@@ -34,11 +34,11 @@ export const WIDGET_DEFINITIONS: WidgetDefinition[] = [
   { type: 'sticky', title: '便签', defaultSize: { w: 4, h: 3 }, description: '随手记录灵感和备忘' },
   { type: 'dailyQuote', title: '金句', defaultSize: { w: 4, h: 3 }, description: '支持自定义导入的每日金句' },
   { type: 'searchBox', title: '极速搜索', defaultSize: { w: 6, h: 2 }, description: '多引擎快速搜索盒子' },
-  { type: 'waterReminder', title: '喝水提醒', defaultSize: { w: 3, h: 2 }, description: '每天 8 杯水，一键打卡' },
-  { type: 'habitTracker', title: '习惯打卡', defaultSize: { w: 4, h: 3 }, description: '每日习惯追踪，查看坚持天数' },
+  { type: 'waterReminder', title: '喝水打卡', defaultSize: { w: 3, h: 2 }, description: '每天 8 杯水，记录饮水进度' },
+  { type: 'habitTracker', title: '习惯打卡', defaultSize: { w: 4, h: 3 }, description: '每日习惯追踪，查看连续与累计天数' },
   { type: 'timestampTool', title: '时间戳', defaultSize: { w: 4, h: 2 }, description: '极客必备，时间戳与日期互转' },
   { type: 'jsonFormatter', title: 'JSON 格式化', defaultSize: { w: 6, h: 4 }, description: '极客必备，粘贴即格式化' },
-  { type: 'networkInfo', title: '网络信息', defaultSize: { w: 3, h: 2 }, description: '显示 IP 与网络状态' },
+  { type: 'networkInfo', title: '网络状态', defaultSize: { w: 3, h: 2 }, description: '显示在线状态、连接类型与浏览器信息' },
 ];
 
 export function getWidgetDefinition(type: DashboardWidgetType): WidgetDefinition {
@@ -49,12 +49,19 @@ export function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-export function normalizeLayoutItem(item: DashboardWidgetLayoutItem): DashboardWidgetLayoutItem {
+export function normalizeLayoutItem(
+  item: DashboardWidgetLayoutItem,
+  columns: number = DASHBOARD_GRID_COLUMNS,
+): DashboardWidgetLayoutItem {
+  const normalizedColumns = Math.max(1, Math.floor(columns));
+  const minW = Math.min(DASHBOARD_MIN_ITEM_W, normalizedColumns);
+  const maxW = Math.max(minW, Math.min(DASHBOARD_MAX_ITEM_W, normalizedColumns));
+  const w = clamp(item.w, minW, maxW);
   return {
     ...item,
-    x: clamp(item.x, 0, DASHBOARD_GRID_COLUMNS - 1),
+    x: clamp(item.x, 0, normalizedColumns - w),
     y: Math.max(0, item.y),
-    w: clamp(item.w, DASHBOARD_MIN_ITEM_W, DASHBOARD_MAX_ITEM_W),
+    w,
     h: clamp(item.h, DASHBOARD_MIN_ITEM_H, DASHBOARD_MAX_ITEM_H),
   };
 }

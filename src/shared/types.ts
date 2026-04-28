@@ -188,8 +188,12 @@ export interface StickyNoteEntry {
   color?: string;
 }
 
+export type NewtabPageMode = 'workspace' | 'fishpond';
+
 export interface UserSettings {
   overrideNewTab: boolean;
+  /** 新标签页一级空间：workspace 专注标签整理；fishpond 承载个性化与小组件。 */
+  newtabPageMode?: NewtabPageMode;
   defaultView: 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'bookmarks' | 'kanban';
   theme: 'light' | 'dark' | 'system';
   /**
@@ -418,6 +422,12 @@ export interface UserSettings {
    */
   uiVisibility?: {
     header?: boolean;
+    /** Hero 区品牌 Logo。 */
+    heroLogo?: boolean;
+    /** Hero 区品牌标题。 */
+    heroTitle?: boolean;
+    /** Hero 区品牌副标题。 */
+    heroSlogan?: boolean;
     heroSearch?: boolean;
     viewSwitcher?: boolean;
     workspaceOverview?: boolean;

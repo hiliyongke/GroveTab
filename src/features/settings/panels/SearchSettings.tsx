@@ -192,8 +192,12 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
         <Popconfirm
           title={t('settings.clearRecentSearchesConfirm')}
           onConfirm={async () => {
-            await setData('canopy_search_history', []);
-            feedback.success(t('settings.clearRecentSearchesDone'));
+            try {
+              await setData('canopy_search_history', []);
+              feedback.success(t('settings.clearRecentSearchesDone'));
+            } catch (err) {
+              console.error('[SearchSettings] clearSearchHistory failed:', err);
+            }
           }}
         >
           <Button size="small" danger>

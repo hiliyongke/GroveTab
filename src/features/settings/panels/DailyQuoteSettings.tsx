@@ -112,10 +112,13 @@ export function DailyQuoteSettings({ settings, updateSettings }: DailyQuoteSetti
             <Popconfirm
               title={t('settings.dailyQuoteClearFavsConfirm')}
               onConfirm={async () => {
-                // 动态 import，避免 BehaviorPanel 静态依赖 quotes chunk
-                const { clearFavorites } = await import('@/features/quotes');
-                await clearFavorites();
-                feedback.success(t('settings.dailyQuoteClearFavsDone'));
+                try {
+                  const { clearFavorites } = await import('@/features/quotes');
+                  await clearFavorites();
+                  feedback.success(t('settings.dailyQuoteClearFavsDone'));
+                } catch (err) {
+                  console.error('[DailyQuoteSettings] clearFavorites failed:', err);
+                }
               }}
             >
               <Button size="small" danger>

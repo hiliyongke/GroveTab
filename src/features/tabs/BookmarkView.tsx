@@ -37,6 +37,7 @@ import { useT } from '@/shared/i18n';
 import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
 import { BookmarkToolsModal } from '@/features/bookmarks/BookmarkToolsModal';
+import { isSafeExternalUrl } from '@/shared/utils/url-safety';
 
 /**
  * 将书签树转换为 antd Tree 数据
@@ -114,6 +115,10 @@ export function BookmarkView() {
 
   /** 打开书签。 */
   const handleOpenBookmark = useCallback(async (url: string) => {
+    if (!isSafeExternalUrl(url)) {
+      feedback.error(translate('bookmark.openFailed'));
+      return;
+    }
     try {
       await createTab({ url });
     } catch (err) {

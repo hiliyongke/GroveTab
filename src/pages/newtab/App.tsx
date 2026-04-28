@@ -50,7 +50,7 @@ import { TidySuggestionBar } from '@/features/tabs/TidySuggestionBar';
 import { BatchActionBar } from '@/features/tabs/BatchActionBar';
 import { SelectionModeNotice } from '@/features/tabs/SelectionModeNotice';
 import { BRAND, getBrandDisplayName, getBrandSlogan } from '@/shared/config/brand';
-import { DashboardWidgets } from '@/features/dashboard-widgets/DashboardWidgets';
+import { FishPondPage } from '@/features/fishpond/FishPondPage';
 
 /** 懒加载非默认视图——直接导入文件而非 barrel，确保每个视图独立拆 chunk */
 const TimelineView = lazy(() => import('@/features/tabs/TimelineView').then((m) => ({ default: m.TimelineView })));
@@ -63,7 +63,7 @@ const BookmarkView = lazy(() => import('@/features/tabs/BookmarkView').then((m) 
 const KanbanView = lazy(() => import('@/features/tabs/KanbanView').then((m) => ({ default: m.KanbanView })));
 import { OnboardingCard } from '@/features/sessions/OnboardingCard';
 import { hasCompletedOnboarding } from '@/repositories';
-import type { ArchivedSession } from '@/shared/types';
+import type { ArchivedSession, NewtabPageMode } from '@/shared/types';
 import { recordMetric, recordFcpOnce, recordFpsSampleOnce, track } from '@/shared/utils/metrics';
 import { getArchivedSessions, initArchiveStorage } from '@/services/archive-service';
 import { resolveGradient } from '@/shared/theme/gradient-presets';
@@ -120,6 +120,8 @@ function AppHeader({
   idleTabsCount,
   hasTidySuggestions,
   compactSearchVisible,
+  pageMode,
+  onPageModeChange,
   onArchive,
   onSettings,
   onOpenSearch,
@@ -131,6 +133,8 @@ function AppHeader({
   idleTabsCount: number;
   hasTidySuggestions: boolean;
   compactSearchVisible: boolean;
+  pageMode: NewtabPageMode;
+  onPageModeChange: (mode: NewtabPageMode) => void;
   onArchive: () => void;
   onSettings: () => void;
   onOpenSearch: () => void;
@@ -186,8 +190,7 @@ function AppHeader({
           style={{
             width: 24,
             height: 24,
-            borderRadius: 6,
-            objectFit: 'cover',
+            objectFit: 'contain',
           }}
         />
         {/* 状态徽标 */}
@@ -294,7 +297,16 @@ function AppHeader({
         </button>
       </div>
 
-      <Space size={2} style={{ flexShrink: 0 }}>
+      <Space size={8} style={{ flexShrink: 0 }}>
+        <Segmented<NewtabPageMode>
+          size="small"
+          value={pageMode}
+          onChange={(value) => onPageModeChange(value)}
+          options={[
+            { value: 'workspace', label: t('pageMode.workspace') },
+            { value: 'fishpond', label: t('pageMode.fishpond') },
+          ]}
+        />
         <WorkspaceSwitcher />
         <Tooltip title={t('header.archiveTooltip')} placement="bottom">
           <Button
@@ -360,12 +372,20 @@ function HeroBar({
   onViewChange,
   onOpenSearch,
   sentinelRef,
+  showLogo,
+  showTitle,
+  showSlogan,
+  showSearch,
   showViewSwitcher,
 }: {
   viewMode: ViewMode;
   onViewChange: (v: ViewMode) => void;
   onOpenSearch: () => void;
   sentinelRef: React.RefObject<HTMLDivElement | null>;
+  showLogo: boolean;
+  showTitle: boolean;
+  showSlogan: boolean;
+  showSearch: boolean;
   showViewSwitcher: boolean;
 }) {
   const { t, locale } = useT();
@@ -374,6 +394,8 @@ function HeroBar({
   /** 品牌身份：名称 + slogan 均来自 BRAND 配置层，切换品牌无需改此处 */
   const brandName = getBrandDisplayName(locale);
   const brandSlogan = getBrandSlogan(locale);
+  const shouldShowBrandRow = showLogo || showTitle;
+  const shouldShowSlogan = showSlogan && brandSlogan !== '';
 
   /**
    * Segmented 视图切换 options。
@@ -414,82 +436,89 @@ function HeroBar({
         gap: 16,
       }}
     >
-      {/* DashboardWidgets —— 自由排版的顶部工作台，承载时钟/天气/日历/金句/快捷网站等小组件 */}
-      <DashboardWidgets />
       {/* 品牌 Logo —— 居中展示，参考微软新标签页
           所有内容通过 BRAND 配置层读取，切换品牌预设即可整站换装 */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 6,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <img
-            src="/icons/logo.png"
-            alt={BRAND.name}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 8,
-              objectFit: 'cover',
-            }}
-          />
-          <span
-            style={{
-              fontSize: 20,
-              fontWeight: 700,
-              letterSpacing: '-0.02em',
-              color: 'var(--canopy-text-primary)',
-            }}
-          >
-            {brandName}
-          </span>
+      {(shouldShowBrandRow || shouldShowSlogan) && (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 6,
+          }}
+        >
+          {shouldShowBrandRow && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              {showLogo && (
+                <img
+                  src="/icons/logo.png"
+                  alt={BRAND.name}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    objectFit: 'contain',
+                  }}
+                />
+              )}
+              {showTitle && (
+                <span
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 700,
+                    letterSpacing: '-0.02em',
+                    color: 'var(--canopy-text-primary)',
+                  }}
+                >
+                  {brandName}
+                </span>
+              )}
+            </div>
+          )}
+          {/* Slogan —— 低调次级展示，字号控制在 12px，避免喧宾夺主 */}
+          {shouldShowSlogan && (
+            <span
+              style={{
+                fontSize: 12,
+                color: token.colorTextTertiary,
+                letterSpacing: '0.01em',
+                lineHeight: 1.4,
+              }}
+            >
+              {brandSlogan}
+            </span>
+          )}
         </div>
-        {/* Slogan —— 低调次级展示，字号控制在 12px，避免喧宾夺主 */}
-        {brandSlogan !== '' && (
-          <span
-            style={{
-              fontSize: 12,
-              color: token.colorTextTertiary,
-              letterSpacing: '0.01em',
-              lineHeight: 1.4,
-            }}
-          >
-            {brandSlogan}
-          </span>
-        )}
-      </div>
+      )}
 
       {/* 搜索框 —— 超宽居中，大圆角 + 品牌辉光
           hover 态、transition 全部交给 .canopy-hero-search（CSS），
           避免在 React 里写 onMouseEnter/Leave 副作用。 */}
-      <div ref={sentinelRef} style={{ width: '100%', maxWidth: 680 }}>
-        <Input
-          className="canopy-hero-search"
-          size="large"
-          readOnly
-          placeholder={t('search.placeholder')}
-          prefix={<Search size={ICON_SIZE.XXL} style={{ color: token.colorPrimary }} />}
-          suffix={<span className="canopy-kbd">⌘K</span>}
-          onFocus={(e) => {
-            e.currentTarget.blur();
-            onOpenSearch();
-          }}
-          onClick={onOpenSearch}
-          style={{
-            borderRadius: 'var(--canopy-search-radius)',
-            cursor: 'pointer',
-            height: 'var(--canopy-search-height)',
-            fontSize: 'var(--canopy-search-font-size)',
-            background: token.colorBgContainer,
-            border: `1px solid ${token.colorBorderSecondary}`,
-            boxShadow: 'var(--canopy-shadow-brand-glow)',
-          }}
-        />
-      </div>
+      {showSearch && (
+        <div ref={sentinelRef} style={{ width: '100%', maxWidth: 680 }}>
+          <Input
+            className="canopy-hero-search"
+            size="large"
+            readOnly
+            placeholder={t('search.placeholder')}
+            prefix={<Search size={ICON_SIZE.XXL} style={{ color: token.colorPrimary }} />}
+            suffix={<span className="canopy-kbd">⌘K</span>}
+            onFocus={(e) => {
+              e.currentTarget.blur();
+              onOpenSearch();
+            }}
+            onClick={onOpenSearch}
+            style={{
+              borderRadius: 'var(--canopy-search-radius)',
+              cursor: 'pointer',
+              height: 'var(--canopy-search-height)',
+              fontSize: 'var(--canopy-search-font-size)',
+              background: token.colorBgContainer,
+              border: `1px solid ${token.colorBorderSecondary}`,
+              boxShadow: 'var(--canopy-shadow-brand-glow)',
+            }}
+          />
+        </div>
+      )}
 
       {/* 视图切换 —— 使用 antd 官方 Segmented，自动处理 hover/focus/键盘导航与选中态权重。
           label 只渲染图标 + 文案，其余视觉（选中态/hover）由 Segmented 主题 token 接管。 */}
@@ -526,16 +555,20 @@ function AppContent() {
   const [showArchive, setShowArchive] = useState(false);
   /**
    * 若 URL hash 为 #about，则初始直接打开 Settings 抽屉并切到 About Tab。
-   * 打开后清理 hash，避免刷新时再次弹出。
+   * 清理 hash 放在 useEffect 中，避免严格模式下 useState 初始化函数执行两次导致 replaceState 重复调用。
    */
   const [initialSettingsTab] = useState<'appearance' | 'about'>(() => {
     if (typeof window === 'undefined') return 'appearance';
     if (window.location.hash === '#about') {
-      history.replaceState(null, '', window.location.pathname);
       return 'about';
     }
     return 'appearance';
   });
+  useEffect(() => {
+    if (initialSettingsTab === 'about' && window.location.hash === '#about') {
+      history.replaceState(null, '', window.location.pathname);
+    }
+  }, [initialSettingsTab]);
   const [showSettings, setShowSettings] = useState(initialSettingsTab === 'about');
   const [showInsights, setShowInsights] = useState(false);
   /** 记录最近归档首条，供 Dashboard Overview "最近归档"卡片显示 */
@@ -551,10 +584,9 @@ function AppContent() {
    * viewMode 直接从 settings 派生 —— 这样「设置里修改默认视图」会即时反映到当前页面，
    * 不需要刷新。切视图时通过 updateSettings 写回 store，两个入口自动同步。
    */
+  const pageMode = useSettingsStore((s) => s.settings.newtabPageMode ?? 'workspace');
   const defaultView = useSettingsStore((s) => s.settings.defaultView);
-  const viewMode: ViewMode = VALID_VIEWS.includes(defaultView)
-    ? (defaultView)
-    : 'domain';
+  const viewMode: ViewMode = VALID_VIEWS.includes(defaultView) ? defaultView : 'domain';
 
   /** 背景预设 → CSS gradient，统一走 resolveGradient 消灭硬编码 */
   const gradientPreset = useSettingsStore((s) => s.settings.gradientPreset);
@@ -599,8 +631,8 @@ function AppContent() {
         window.dispatchEvent(new CustomEvent('canopy:highlight-session', { detail }));
       }
     };
-    window.addEventListener('canopy:open-archive', handler as EventListener);
-    return () => window.removeEventListener('canopy:open-archive', handler as EventListener);
+    window.addEventListener('canopy:open-archive', handler);
+    return () => window.removeEventListener('canopy:open-archive', handler);
   }, []);
 
   /**
@@ -614,11 +646,15 @@ function AppContent() {
     if (typeof window === 'undefined') return false;
     const hash = window.location.hash;
     if (hash === '#search') {
-      history.replaceState(null, '', window.location.pathname);
       return true;
     }
     return false;
   });
+  useEffect(() => {
+    if (searchFromHash && window.location.hash === '#search') {
+      history.replaceState(null, '', window.location.pathname);
+    }
+  }, [searchFromHash]);
   const [showSearch, setShowSearch] = useState(searchFromHash);
 
   useEffect(() => {
@@ -740,6 +776,16 @@ function AppContent() {
     void track('view_switch', { from: prev, to: view });
   }, []);
 
+  const handlePageModeChange = useCallback((mode: NewtabPageMode) => {
+    const prev = useSettingsStore.getState().settings.newtabPageMode ?? 'workspace';
+    void useSettingsStore.getState().updateSettings({ newtabPageMode: mode });
+    setShowSearch(false);
+    setShowArchive(false);
+    setShowSettings(false);
+    setShowInsights(false);
+    void track('newtab_page_mode_switch', { from: prev, to: mode });
+  }, []);
+
   const handleOpenSearch = useCallback(() => {
     setShowSearch(true);
     setShowArchive(false);
@@ -792,6 +838,12 @@ function AppContent() {
   const duplicateTabsCount = dupGroups.reduce((sum, group) => sum + group.tabs.length - 1, 0);
   const idleTabsCount = idleTabsArr.length;
   const hasTidySuggestions = duplicateTabsCount > 0 || idleTabsCount > 0;
+  const showHeroLogo = uiVisibility?.heroLogo !== false;
+  const showHeroTitle = uiVisibility?.heroTitle !== false;
+  const showHeroSlogan = uiVisibility?.heroSlogan !== false;
+  const showHeroSearch = uiVisibility?.heroSearch !== false;
+  const showViewSwitcher = uiVisibility?.viewSwitcher !== false;
+  const showHeroBar = showHeroLogo || showHeroTitle || showHeroSlogan || showHeroSearch || showViewSwitcher;
 
   if (!checked) {
     return (
@@ -825,14 +877,17 @@ function AppContent() {
 
   /** 如果有背景图，叠加在渐变之上 */
   if (backgroundImage?.url) {
+    const isEmbeddedImage = backgroundImage.url.startsWith('data:') || backgroundImage.url.startsWith('blob:');
     layoutStyle.backgroundImage = `url("${backgroundImage.url}")`;
     layoutStyle.backgroundSize = backgroundImage.fit === 'repeat' ? 'auto' : backgroundImage.fit;
     layoutStyle.backgroundRepeat = backgroundImage.fit === 'repeat' ? 'repeat' : 'no-repeat';
     layoutStyle.backgroundPosition = backgroundImage.position ?? 'center';
-    layoutStyle.backgroundAttachment = 'fixed';
+    layoutStyle.backgroundAttachment = isEmbeddedImage ? 'scroll' : 'fixed';
     /** 渐变作为 fallback */
     layoutStyle.backgroundColor = layoutBackground;
   }
+
+  const overlayBlur = Math.min(Math.max(backgroundOverlay?.blur ?? 0, 0), 12);
 
   return (
     <Layout style={layoutStyle}>
@@ -845,8 +900,8 @@ function AppContent() {
             zIndex: 0,
             pointerEvents: 'none',
             background: resolvedDark ? backgroundOverlay.colorDark : backgroundOverlay.color,
-            backdropFilter: backgroundOverlay.blur > 0 ? `blur(${backgroundOverlay.blur}px)` : undefined,
-            WebkitBackdropFilter: backgroundOverlay.blur > 0 ? `blur(${backgroundOverlay.blur}px)` : undefined,
+            backdropFilter: overlayBlur > 0 ? `blur(${overlayBlur}px)` : undefined,
+            WebkitBackdropFilter: overlayBlur > 0 ? `blur(${overlayBlur}px)` : undefined,
           }}
         />
       )}
@@ -859,21 +914,27 @@ function AppContent() {
           idleTabsCount={idleTabsCount}
           hasTidySuggestions={hasTidySuggestions}
           compactSearchVisible={compactSearchVisible}
-            onArchive={handleOpenArchive}
-            onSettings={handleOpenSettings}
-            onOpenSearch={handleOpenSearch}
-            onInsights={handleOpenInsights}
+          pageMode={pageMode}
+          onPageModeChange={handlePageModeChange}
+          onArchive={handleOpenArchive}
+          onSettings={handleOpenSettings}
+          onOpenSearch={handleOpenSearch}
+          onInsights={handleOpenInsights}
         />
       )}
 
       <Content data-canopy-content style={{ width: '100%', maxWidth: contentMaxWidth > 0 ? contentMaxWidth : undefined, margin: '0 auto', padding: '0 32px 64px', position: 'relative', zIndex: 1 }}>
-        {uiVisibility?.heroSearch !== false && (
+        {pageMode === 'workspace' && showHeroBar && (
           <HeroBar
             viewMode={viewMode}
             onViewChange={handleViewChange}
             onOpenSearch={handleOpenSearch}
             sentinelRef={heroSearchRef}
-            showViewSwitcher={uiVisibility?.viewSwitcher !== false}
+            showLogo={showHeroLogo}
+            showTitle={showHeroTitle}
+            showSlogan={showHeroSlogan}
+            showSearch={showHeroSearch}
+            showViewSwitcher={showViewSwitcher}
           />
         )}
 
@@ -898,9 +959,13 @@ function AppContent() {
           />
         )}
 
-        {showOnboarding && <OnboardingCard onDismiss={() => setShowOnboarding(false)} />}
+        {pageMode === 'fishpond' ? (
+          <FishPondPage onOpenSearch={handleOpenSearch} onOpenSettings={handleOpenSettings} />
+        ) : (
+          <>
+            {showOnboarding && <OnboardingCard onDismiss={() => setShowOnboarding(false)} />}
 
-        {/* Activity Strip —— 最近操作胶囊横条（60min 窗口内才渲染） */}
+            {/* Activity Strip —— 最近操作胶囊横条（60min 窗口内才渲染） */}
         <ActivityStrip
           onOpenArchive={() => setShowArchive(true)}
           onOpenImportResult={() => setShowArchive(true)}
@@ -1007,6 +1072,8 @@ function AppContent() {
               : <DomainGroupView />;
           })()}
         </section>
+          </>
+        )}
       </Content>
 
       <UndoToast />

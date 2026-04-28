@@ -54,6 +54,7 @@ export function DataPanel() {
   const { modal, message } = App.useApp();
   const settings = useSettingsStore((s) => s.settings);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
+  const resetSettings = useSettingsStore((s) => s.resetSettings);
 
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [quotaInfo, setQuotaInfo] = useState<QuotaInfo | null>(null);
@@ -114,7 +115,7 @@ export function DataPanel() {
       settings,
     };
     downloadFile(JSON.stringify(bundle, null, 2), `canopy-backup-${new Date().toISOString().slice(0, 10)}.json`);
-    message.success('已导出归档 + 工作台配置');
+    message.success(t('settings.exportDone'));
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -151,7 +152,7 @@ export function DataPanel() {
     const existingIds = new Set(existing.map((s) => s.id));
     const newSessions = sessions.filter((s) => !existingIds.has(s.id));
     await saveSessions([...newSessions, ...existing]);
-    setImportStatus(`已导入 ${newSessions.length} 个归档，并恢复工作台配置`);
+    setImportStatus(t('settings.importDone', { count: newSessions.length }));
     if (fileInputRef.current !== null) fileInputRef.current.value = '';
   };
 
@@ -163,8 +164,12 @@ export function DataPanel() {
       okText: t('settings.clearAll'),
       cancelText: t('context.cancel'),
       onOk: async () => {
-        await saveSessions([]);
-        message.success(t('settings.clearAll'));
+        try {
+          await saveSessions([]);
+          message.success(t('settings.clearAll'));
+        } catch (err) {
+          console.error('[DataPanel] clearAll failed:', err);
+        }
       },
     });
   };
@@ -357,10 +362,13 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
         title={t('settings.resetSettingsConfirm')}
         description={t('settings.resetSettingsDesc')}
         onConfirm={async () => {
-          await removeData('canopy_settings');
-          message.success(t('settings.resetSettingsDone'));
-          // 稍停后刷新让新设置生效
-          setTimeout(() => window.location.reload(), 400);
+          try {
+            await resetSettings();
+            message.success(t('settings.resetSettingsDone'));
+          } catch (err) {
+            console.error('[DataPanel] resetSettings failed:', err);
+            message.error(t('settings.resetSettingsFailed'));
+          }
         }}
       >
 <Button block icon={<RotateCcw size={ICON_SIZE.MEDIUM} />}>
@@ -372,9 +380,12 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
       <Popconfirm
         title={t('settings.replayOnboardingConfirm')}
         onConfirm={async () => {
-          await removeData('canopy_onboarding_done');
-          message.success(t('settings.replayOnboardingDone'));
-          setTimeout(() => window.location.reload(), 400);
+          try {
+            await removeData('canopy_onboarding_done');
+            message.success(t('settings.replayOnboardingDone'));
+          } catch (err) {
+            console.error('[DataPanel] replayOnboarding failed:', err);
+          }
         }}
       >
 <Button block icon={<Sparkles size={ICON_SIZE.MEDIUM} />}>
@@ -420,16 +431,25 @@ icon={<AlertTriangle size={ICON_SIZE.MEDIUM} />}
                 message.error(t('settings.factoryResetMustType'));
                 return Promise.reject(new Error('must type RESET'));
               }
-              /** 清空所有 canopy_* 键 */
-              const keys = await getAllDataKeys();
-              for (const key of keys) {
-                if (key.startsWith('canopy_')) {
-                  await removeData(key);
+              try {
+                /** 清空所有 canopy_* 键 */
+                const keys = await getAllDataKeys();
+                for (const key of keys) {
+                  if (key.startsWith('canopy_')) {
+                    await removeData(key);
+                  }
                 }
+                /** 重置 store 内存状态 */
+                await resetSettings();
+                message.success(t('settings.factoryResetDone'));
+                setTimeout(() => window.location.reload(), 400);
+              } catch (err) {
+                console.error('[DataPanel] factoryReset failed:', err);
+                message.error(t('settings.factoryResetMustType'));
+                return Promise.reject(err);
               }
-              message.success(t('settings.factoryResetDone'));
-              setTimeout(() => window.location.reload(), 400);
-              return undefined;            },
+              return undefined;
+            },
           });
         }}
       >

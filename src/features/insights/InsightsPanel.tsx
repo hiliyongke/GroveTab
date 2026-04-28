@@ -39,6 +39,13 @@ function isValidStatsData(data: StatsData | undefined | null): data is StatsData
   return true;
 }
 
+function toLocalDayKey(date: Date): string {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
   const { token } = theme.useToken();
   const { t } = useT();
@@ -54,19 +61,19 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
     })();
   }, [open]);
 
-  /** 近 7 天新标签页打开次数 */
+  /** 近 7 天新标签页打开次数——将 now 提到 useMemo 之外避免水合不匹配 */
+  const [now] = useState(() => new Date());
   const dailyOpens = useMemo(() => {
     const map = new Map<string, number>();
-    const now = new Date();
     for (let i = 6; i >= 0; i--) {
       const d = new Date(now);
       d.setDate(now.getDate() - i);
-      const key = d.toISOString().slice(0, 10);
+      const key = toLocalDayKey(d);
       map.set(key, 0);
     }
     for (const ev of metrics) {
       if (ev.event !== 'newtab_open') continue;
-      const key = new Date(ev.ts).toISOString().slice(0, 10);
+      const key = toLocalDayKey(new Date(ev.ts));
       if (map.has(key)) map.set(key, (map.get(key) ?? 0) + 1);
     }
     return Array.from(map.entries()).map(([day, count]) => ({ day, count }));
@@ -137,7 +144,7 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
       open={open}
       onCancel={onClose}
       footer={null}
-      width={760}
+      width="min(760px, calc(100vw - 24px))"
       title={t('insights.title')}
       centered
       destroyOnHidden
@@ -245,6 +252,7 @@ function LineChart({ data, labels, color }: { data: number[]; labels: string[]; 
 
 /** 条形列表（轻量柱状） */
 function BarList({ items, color }: { items: Array<{ label: string; value: number }>; color: string }) {
+  const { token } = theme.useToken();
   const max = Math.max(1, ...items.map((i) => i.value));
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -255,7 +263,7 @@ function BarList({ items, color }: { items: Array<{ label: string; value: number
             <span style={{ fontSize: 11.5, flex: '0 0 40%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {it.label}
             </span>
-            <div style={{ flex: 1, position: 'relative', height: 14, background: 'rgba(0,0,0,0.04)', borderRadius: 4 }}>
+            <div style={{ flex: 1, position: 'relative', height: 14, background: token.colorFillTertiary, borderRadius: 4 }}>
               <div style={{ width: `${w}%`, height: '100%', background: color, borderRadius: 4 }} />
             </div>
             <span style={{ fontSize: 11.5, fontVariantNumeric: 'tabular-nums' }}>{it.value}</span>

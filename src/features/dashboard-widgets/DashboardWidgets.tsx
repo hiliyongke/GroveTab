@@ -17,20 +17,25 @@
  */
 
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Dropdown, Space, theme } from 'antd';
-import { Edit3, Plus, RotateCcw, Check, EyeOff } from 'lucide-react';
+import { Button, Dropdown, Space, Tag, theme } from 'antd';
+import { Check, EyeOff, LayoutGrid, Plus, RotateCcw, Sparkles } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import type { LayoutItem } from 'react-grid-layout';
 import { useSettingsStore } from '@/store';
-import type { DashboardWidgetLayoutItem, DashboardWidgetType } from '@/shared/types';
+import type { DashboardWidgetLayoutItem, DashboardWidgetType, UserSettings } from '@/shared/types';
 import { ensureReactGridLayoutCss } from '@/shared/lazy-deps';
 import { ErrorBoundary } from '@/shared/ui/ErrorBoundary';
 import { SkeletonWidget } from '@/shared/ui/SkeletonWidget';
 import { WidgetCard } from './WidgetCard';
-import { WIDGET_DEFINITIONS, DASHBOARD_GRID_COLUMNS, DASHBOARD_GAP, DASHBOARD_ROW_HEIGHT } from './types';
+import {
+  WIDGET_DEFINITIONS,
+  DASHBOARD_GRID_COLUMNS,
+  DASHBOARD_GAP,
+  DASHBOARD_ROW_HEIGHT,
+} from './types';
 import {
   createWidgetLayoutItem,
-  getNextWidgetY,
+  findBestWidgetPosition,
   normalizeWidgetLayout,
   removeWidgetItem,
 } from './utils';
@@ -41,19 +46,12 @@ const DEFAULT_LAYOUT: DashboardWidgetLayoutItem[] = [
   { id: 'clock-main', type: 'clock', x: 0, y: 0, w: 3, h: 2, title: '时钟' },
   { id: 'weather-main', type: 'weather', x: 3, y: 0, w: 3, h: 2, title: '天气' },
   { id: 'calendar-main', type: 'calendar', x: 6, y: 0, w: 3, h: 2, title: '日历' },
-  { id: 'work-countdown-main', type: 'workCountdown', x: 9, y: 0, w: 3, h: 2, title: '距离下班' },
+  { id: 'work-countdown-main', type: 'workCountdown', x: 9, y: 0, w: 3, h: 2, title: '下班倒计时' },
   { id: 'search-main', type: 'searchBox', x: 0, y: 2, w: 6, h: 2, title: '极速搜索' },
-  { id: 'water-main', type: 'waterReminder', x: 6, y: 2, w: 3, h: 2, title: '喝水提醒' },
-  { id: 'network-main', type: 'networkInfo', x: 9, y: 2, w: 3, h: 2, title: '网络信息' },
-  { id: 'speed-dial-main', type: 'speedDial', x: 0, y: 4, w: 6, h: 3, title: '常用网站' },
-  { id: 'countdown-main', type: 'countdown', x: 6, y: 4, w: 3, h: 3, title: '纪念日' },
-  { id: 'pomodoro-main', type: 'pomodoro', x: 9, y: 4, w: 3, h: 3, title: '番茄钟' },
-  { id: 'habit-main', type: 'habitTracker', x: 0, y: 7, w: 4, h: 3, title: '习惯打卡' },
-  { id: 'todo-main', type: 'todo', x: 4, y: 7, w: 4, h: 3, title: '待办' },
-  { id: 'sticky-main', type: 'sticky', x: 8, y: 7, w: 4, h: 3, title: '便签' },
-  { id: 'timestamp-main', type: 'timestampTool', x: 0, y: 10, w: 4, h: 2, title: '时间戳' },
-  { id: 'json-main', type: 'jsonFormatter', x: 4, y: 10, w: 4, h: 4, title: 'JSON 格式化' },
-  { id: 'daily-quote-main', type: 'dailyQuote', x: 8, y: 10, w: 4, h: 3, title: '金句' },
+  { id: 'speed-dial-main', type: 'speedDial', x: 6, y: 2, w: 6, h: 3, title: '常用网站' },
+  { id: 'todo-main', type: 'todo', x: 0, y: 5, w: 4, h: 3, title: '待办' },
+  { id: 'pomodoro-main', type: 'pomodoro', x: 4, y: 5, w: 4, h: 3, title: '番茄钟' },
+  { id: 'daily-quote-main', type: 'dailyQuote', x: 8, y: 5, w: 4, h: 3, title: '每日金句' },
 ];
 
 // 动态 import —— RGL 进 vendor-grid chunk，首屏不加载。
@@ -64,42 +62,124 @@ const ResponsiveGridLayout = lazy(async () => {
 });
 
 const BREAKPOINTS = { lg: 1024, md: 768, sm: 0 } as const;
-const COLS = { lg: DASHBOARD_GRID_COLUMNS, md: 8, sm: 1 } as const;
-
 const DRAG_HANDLE_CLASS = 'grovetab-dashboard__drag-handle';
 
-export function DashboardWidgets() {
+function isDashboardWidgetEnabled(settings: UserSettings, type: DashboardWidgetType): boolean {
+  switch (type) {
+    case 'clock':
+      return settings.heroWidgets?.clock?.enabled !== false;
+    case 'weather':
+      return settings.heroWidgets?.weather?.mode !== 'off';
+    case 'calendar':
+      return settings.heroWidgets?.calendar?.enabled !== false;
+    case 'dailyQuote':
+      return settings.dailyQuote?.enabled !== false;
+    case 'speedDial':
+      return settings.speedDial?.enabled !== false;
+    case 'pomodoro':
+      return settings.pomodoro?.enabled !== false;
+    case 'todo':
+      return settings.todoWidget?.enabled !== false;
+    case 'sticky':
+      return settings.stickyNotes?.enabled !== false;
+    case 'countdown':
+      return settings.countdowns?.enabled !== false;
+    case 'workCountdown':
+      return settings.workCountdown?.enabled !== false;
+    case 'waterReminder':
+      return settings.waterReminder?.enabled !== false;
+    case 'habitTracker':
+      return settings.habitTracker?.enabled !== false;
+    case 'searchBox':
+    case 'timestampTool':
+    case 'jsonFormatter':
+    case 'networkInfo':
+      return true;
+  }
+}
+
+interface DashboardWidgetsProps {
+  title?: string;
+  description?: string;
+}
+
+export function DashboardWidgets({
+  title = '小组件工作台',
+  description = '精选常用工具，支持拖拽排序、缩放尺寸和按需添加。',
+}: DashboardWidgetsProps = {}) {
   const { token } = theme.useToken();
   const settings = useSettingsStore((s) => s.settings);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const config = settings.dashboardWidgets;
   const enabled = config?.enabled !== false;
-  const legacyVisible = settings.uiVisibility?.heroWidgets !== false;
   const editing = config?.editMode === true;
 
   const rowHeight = config?.rowHeight ?? DASHBOARD_ROW_HEIGHT;
   const gap = config?.gap ?? DASHBOARD_GAP;
+  const desktopColumns = config?.columns ?? DASHBOARD_GRID_COLUMNS;
+  const cols = useMemo(
+    () => ({ lg: desktopColumns, md: Math.min(8, desktopColumns), sm: 1 }),
+    [desktopColumns],
+  );
+  const [activeColumns, setActiveColumns] = useState(desktopColumns);
+
+  useEffect(() => {
+    setActiveColumns(desktopColumns);
+  }, [desktopColumns]);
 
   // 存量数据：先走 clampLayout 清洗（防御旧数据里超界的坐标），再 normalize
   const storedItems = useMemo(
-    () => normalizeWidgetLayout(clampLayout(config?.items ?? DEFAULT_LAYOUT)),
-    [config?.items],
+    () =>
+      normalizeWidgetLayout(
+        clampLayout(config?.items ?? DEFAULT_LAYOUT, desktopColumns),
+        desktopColumns,
+      ),
+    [config?.items, desktopColumns],
   );
+  const visibleItems = useMemo(
+    () =>
+      storedItems.filter(
+        (item) =>
+          config?.availableWidgets?.[item.type] !== false &&
+          isDashboardWidgetEnabled(settings, item.type),
+      ),
+    [config?.availableWidgets, settings, storedItems],
+  );
+  const usedTypes = useMemo(() => new Set(visibleItems.map((item) => item.type)), [visibleItems]);
+  const addMenuItems = useMemo(() => {
+    const candidates = WIDGET_DEFINITIONS.filter(
+      (item) =>
+        config?.availableWidgets?.[item.type] !== false &&
+        isDashboardWidgetEnabled(settings, item.type) &&
+        !usedTypes.has(item.type),
+    );
+    if (candidates.length === 0) {
+      return [{ key: '__empty', label: '所有可用组件都已添加', disabled: true }];
+    }
+    return candidates.map((item) => ({
+      key: item.type,
+      label: `${item.title} · ${item.description}`,
+    }));
+  }, [config?.availableWidgets, settings, usedTypes]);
 
-  // 生成 RGL layouts：lg 与 md 走同一份；sm 强制单列
+  // 生成 RGL layouts：各断点分别夹紧，避免中屏复用桌面布局导致越界。
   const layouts = useMemo<Record<'lg' | 'md' | 'sm', LayoutItem[]>>(() => {
-    const lg = toRglLayout(storedItems);
-    const sm: LayoutItem[] = storedItems.map((item, idx) => ({
+    const mdColumns = cols.md;
+    const lg = toRglLayout(clampLayout(visibleItems, desktopColumns), desktopColumns);
+    const md = toRglLayout(clampLayout(visibleItems, mdColumns), mdColumns);
+    const sm: LayoutItem[] = visibleItems.map((item, idx) => ({
       i: item.id,
       x: 0,
       y: idx * 3,
       w: 1,
       h: Math.max(2, item.h),
+      minW: 1,
       minH: 2,
+      maxW: 1,
       maxH: 6,
     }));
-    return { lg, md: lg, sm };
-  }, [storedItems]);
+    return { lg, md, sm };
+  }, [cols.md, desktopColumns, visibleItems]);
 
   // 只在首次挂载时加载 RGL 样式（幂等）
   useEffect(() => {
@@ -129,7 +209,7 @@ export function DashboardWidgets() {
       await updateSettings({
         dashboardWidgets: {
           ...(config ?? {}),
-          items: normalizeWidgetLayout(clampLayout(nextItems)),
+          items: normalizeWidgetLayout(clampLayout(nextItems, desktopColumns), desktopColumns),
         },
       });
     },
@@ -141,24 +221,43 @@ export function DashboardWidgets() {
     (current: readonly LayoutItem[]) => {
       // 只在编辑模式下才写回（编辑关闭时 RGL 也可能触发一次初始 compact，忽略即可）
       if (!editing) return;
-      const next = fromRglLayout(current, storedItems);
+      const nextVisible = fromRglLayout(current, visibleItems, activeColumns);
+      const visibleIds = new Set(visibleItems.map((item) => item.id));
+      const hiddenItems = storedItems.filter((item) => !visibleIds.has(item.id));
+      const next = normalizeWidgetLayout([...nextVisible, ...hiddenItems], desktopColumns);
       // 若无实质变化则跳过（避免循环）
       const sameShape =
         next.length === storedItems.length &&
         next.every((n, i) => {
           const s = storedItems[i];
-          return Boolean(s) && s.id === n.id && s.x === n.x && s.y === n.y && s.w === n.w && s.h === n.h;
+          return (
+            Boolean(s) && s.id === n.id && s.x === n.x && s.y === n.y && s.w === n.w && s.h === n.h
+          );
         });
       if (sameShape) return;
       void saveItems(next);
     },
-    [editing, storedItems, saveItems],
+    [activeColumns, desktopColumns, editing, storedItems, visibleItems, saveItems],
   );
 
   const addWidget = async (type: DashboardWidgetType) => {
-    const nextItem = createWidgetLayoutItem(type, getNextWidgetY(storedItems));
+    if (usedTypes.has(type) || config?.availableWidgets?.[type] === false) return;
+    const def = WIDGET_DEFINITIONS.find((item) => item.type === type);
+    if (!def) return;
+    const pos = findBestWidgetPosition(
+      visibleItems,
+      def.defaultSize.w,
+      def.defaultSize.h,
+      desktopColumns,
+    );
+    const nextItem = createWidgetLayoutItem(type, pos.y);
+    nextItem.x = pos.x;
+    nextItem.w = def.defaultSize.w;
+    nextItem.h = def.defaultSize.h;
     await saveItems([...storedItems, nextItem]);
   };
+
+  const hiddenCount = storedItems.length - visibleItems.length;
 
   const removeWidget = async (id: string) => {
     await saveItems(removeWidgetItem(storedItems, id));
@@ -168,13 +267,13 @@ export function DashboardWidgets() {
     await updateSettings({
       dashboardWidgets: {
         ...(config ?? {}),
-        items: DEFAULT_LAYOUT,
+        items: normalizeWidgetLayout(clampLayout(DEFAULT_LAYOUT, desktopColumns), desktopColumns),
         editMode: false,
       },
     });
   };
 
-  if (!enabled || !legacyVisible) return null;
+  if (!enabled) return null;
 
   return (
     <section style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -185,30 +284,66 @@ export function DashboardWidgets() {
           justifyContent: 'space-between',
           gap: 12,
           flexWrap: 'wrap',
+          width: '100%',
+          padding: '10px 12px',
+          borderRadius: 16,
+          background: token.colorFillQuaternary,
+          border: `1px solid ${token.colorBorderSecondary}`,
         }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: token.colorText }}>顶部工作台</div>
-          <div style={{ fontSize: 12, color: token.colorTextTertiary }}>
-            点击"编辑布局"后，可从卡片顶部拖拽移动、拖拽右下角缩放；松手自动避让。
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+          <span
+            style={{
+              width: 30,
+              height: 30,
+              borderRadius: 10,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: token.colorPrimary,
+              background: token.colorPrimaryBg,
+              flexShrink: 0,
+            }}
+          >
+            <LayoutGrid size={ICON_SIZE.MEDIUM} />
+          </span>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: token.colorText }}>{title}</span>
+              <Tag
+                color={editing ? 'processing' : 'default'}
+                style={{ margin: 0, fontSize: 11, border: 0 }}
+              >
+                {editing ? '正在编辑' : `${visibleItems.length} 个组件`}
+              </Tag>
+              {hiddenCount > 0 && (
+                <Tag color="default" style={{ margin: 0, fontSize: 11, border: 0 }}>
+                  已隐藏 {hiddenCount}
+                </Tag>
+              )}
+            </div>
+            <div style={{ fontSize: 12, color: token.colorTextTertiary, marginTop: 2 }}>
+              {description}
+            </div>
           </div>
         </div>
 
-        <Space wrap>
+        <Space wrap size={8}>
           <Dropdown
             menu={{
-              items: WIDGET_DEFINITIONS.map((item) => ({
-                key: item.type,
-                label: `${item.title} · ${item.description}`,
-              })),
-              onClick: ({ key }) => void addWidget(key as DashboardWidgetType),
+              items: addMenuItems,
+              onClick: ({ key }) => {
+                if (key !== '__empty') void addWidget(key as DashboardWidgetType);
+              },
             }}
             trigger={['click']}
           >
-<Button icon={<Plus size={ICON_SIZE.MEDIUM} />}>添加组件</Button>
+            <Button icon={<Plus size={ICON_SIZE.MEDIUM} />}>添加</Button>
           </Dropdown>
           <Button
-icon={editing ? <Check size={ICON_SIZE.MEDIUM} /> : <Edit3 size={ICON_SIZE.MEDIUM} />}
+            icon={
+              editing ? <Check size={ICON_SIZE.MEDIUM} /> : <Sparkles size={ICON_SIZE.MEDIUM} />
+            }
             type={editing ? 'primary' : 'default'}
             onClick={() =>
               void updateSettings({
@@ -216,13 +351,16 @@ icon={editing ? <Check size={ICON_SIZE.MEDIUM} /> : <Edit3 size={ICON_SIZE.MEDIU
               })
             }
           >
-            {editing ? '完成编辑' : '编辑布局'}
+            {editing ? '完成' : '自定义'}
           </Button>
-<Button icon={<RotateCcw size={ICON_SIZE.MEDIUM} />} onClick={() => void resetLayout()}>
-            重置布局
-          </Button>
+          {editing && (
+            <Button icon={<RotateCcw size={ICON_SIZE.MEDIUM} />} onClick={() => void resetLayout()}>
+              精选布局
+            </Button>
+          )}
           <Button
-icon={<EyeOff size={ICON_SIZE.MEDIUM} />}
+            type="text"
+            icon={<EyeOff size={ICON_SIZE.MEDIUM} />}
             onClick={() =>
               void updateSettings({
                 dashboardWidgets: { ...(config ?? {}), enabled: false, editMode: false },
@@ -234,11 +372,50 @@ icon={<EyeOff size={ICON_SIZE.MEDIUM} />}
         </Space>
       </div>
 
+      {visibleItems.length === 0 && (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 10,
+            minHeight: 160,
+            padding: 24,
+            borderRadius: 18,
+            background: 'var(--canopy-glass-bg)',
+            border: `1px dashed ${token.colorBorderSecondary}`,
+            color: token.colorTextSecondary,
+            textAlign: 'center',
+          }}
+        >
+          <LayoutGrid size={ICON_SIZE.XXL} color={token.colorTextTertiary} />
+          <div style={{ fontSize: 14, fontWeight: 700, color: token.colorText }}>
+            暂无可见小组件
+          </div>
+          <div style={{ fontSize: 12 }}>可以在组件库重新启用，或添加尚未放入工作台的工具。</div>
+          <Dropdown
+            menu={{
+              items: addMenuItems,
+              onClick: ({ key }) => {
+                if (key !== '__empty') void addWidget(key as DashboardWidgetType);
+              },
+            }}
+            trigger={['click']}
+          >
+            <Button type="primary" icon={<Plus size={ICON_SIZE.MEDIUM} />}>
+              添加组件
+            </Button>
+          </Dropdown>
+        </div>
+      )}
+
       <div
         ref={containerRef}
         className={editing ? 'grovetab-dashboard--editing' : ''}
         style={{
           width: '100%',
+          display: visibleItems.length === 0 ? 'none' : undefined,
           background: editing ? token.colorFillQuaternary : 'transparent',
           borderRadius: 16,
           padding: editing ? 4 : 0,
@@ -251,7 +428,7 @@ icon={<EyeOff size={ICON_SIZE.MEDIUM} />}
             width={containerWidth}
             layouts={layouts}
             breakpoints={BREAKPOINTS}
-            cols={COLS}
+            cols={cols}
             rowHeight={rowHeight}
             margin={[gap, gap]}
             containerPadding={[0, 0]}
@@ -268,11 +445,13 @@ icon={<EyeOff size={ICON_SIZE.MEDIUM} />}
             compactor={undefined /* 默认 vertical */}
             autoSize={true}
             onLayoutChange={onLayoutChange}
+            onBreakpointChange={(_, nextColumns) => setActiveColumns(nextColumns)}
           >
-            {storedItems.map((item) => (
+            {visibleItems.map((item) => (
               <div key={item.id} data-widget-id={item.id}>
                 <WidgetCard
                   title={item.title ?? getWidgetTitle(item.type)}
+                  type={item.type}
                   editing={editing}
                   onRemove={() => void removeWidget(item.id)}
                   dragHandleClassName={DRAG_HANDLE_CLASS}

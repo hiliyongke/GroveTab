@@ -15,6 +15,7 @@ import { CONFIG } from '@/shared/config';
 import { getData, setData } from '@/repositories';
 import { queryAllTabs, queryTabs, closeTabs, createTab, getCurrentWindow, getFaviconUrl } from '@/chrome';
 import { extractHostname, isSelfNewTabPage, shouldDisplayUrl } from '@/chrome';
+import { filterSafeExternalUrls } from '@/shared/utils/url-safety';
 import {
   shouldFallbackToIDB,
   hasIDBData,
@@ -225,9 +226,9 @@ export async function restoreSession(
   const session = sessions.find((s) => s.id === sessionId);
   if (session === undefined) throw new Error('Session not found');
 
-  const sessionUrls = session.tabs.map((tab) => tab.url).filter((url): url is string => url !== '');
+  const sessionUrls = filterSafeExternalUrls(session.tabs.map((tab) => tab.url).filter((url): url is string => url !== ''));
   const strategy: RestoreStrategy = options.strategy ?? 'new_window';
-  const targetUrls = strategy === 'partial' ? (options.urls ?? sessionUrls) : sessionUrls;
+  const targetUrls = filterSafeExternalUrls(strategy === 'partial' ? (options.urls ?? sessionUrls) : sessionUrls);
   if (targetUrls.length === 0) return { restored: 0, batches: 0, cancelled: false };
 
   const batchSize = options.batchSize ?? 10;

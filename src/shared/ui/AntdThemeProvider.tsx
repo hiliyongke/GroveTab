@@ -303,12 +303,19 @@ export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!loaded) return;
     document.documentElement.setAttribute('data-theme', mode);
+    document.documentElement.style.backgroundColor = mode === 'dark' ? '#141414' : '';
+    document.documentElement.style.colorScheme = mode;
+    try {
+      window.localStorage.setItem('grovetab_prepaint_theme', mode);
+    } catch {
+      // localStorage 不可用时忽略；下一次仍可通过系统主题兜底。
+    }
   }, [mode, loaded]);
 
   // 同步皮肤纹理属性到 <html>
   useEffect(() => {
     if (!loaded) return;
-    const skin = getSkinPreset(skinPreset as SkinPresetId);
+    const skin = getSkinPreset(skinPreset);
     if (skin.texture.noise) {
       document.documentElement.setAttribute('data-texture-noise', '');
     } else {
@@ -328,7 +335,7 @@ export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
    * 且避免闪烁（同步写入而非异步）。
    */
   const skinVars = useMemo(
-    () => buildSkinCSSVars(skinPreset as SkinPresetId, mode === 'dark', layoutDensity, reducedMotion),
+    () => buildSkinCSSVars(skinPreset, mode === 'dark', layoutDensity, reducedMotion),
     [skinPreset, mode, layoutDensity, reducedMotion],
   );
 
@@ -348,7 +355,7 @@ export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
    * 主题配置：从皮肤预设 + 极客覆盖动态生成
    */
   const themeConfig = useMemo(
-    () => buildThemeConfig(skinPreset as SkinPresetId, mode === 'dark', layoutDensity, skinCustom),
+    () => buildThemeConfig(skinPreset, mode === 'dark', layoutDensity, skinCustom),
     [skinPreset, mode, layoutDensity, skinCustom],
   );
 

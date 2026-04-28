@@ -1,27 +1,58 @@
 /**
- * theme-init.js — Runs before React to prevent FOUC
- * Chrome Extension MV3 CSP allows extension-bundled scripts, but NOT inline scripts.
- * This external script sets data-theme before React renders.
+ * theme-init.js — 在 React 启动前设置 data-theme，避免暗色模式首屏白闪。
+ * Chrome MV3 禁止内联脚本，因此必须作为扩展内置外部脚本加载。
  */
 (function () {
-  // Step 1: Detect system preference immediately (synchronous)
-  var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  // Step 2: Apply system theme as default (no flash)
-  var defaultTheme = systemDark ? 'dark' : 'light';
-  document.documentElement.setAttribute('data-theme', defaultTheme);
-  // Step 3: Async load user preference and correct if needed
+  var PREPAINT_KEY = 'grovetab_prepaint_theme';
+
+  function getSystemTheme() {
+    try {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    } catch (e) {
+      return 'light';
+    }
+  }
+
+  function normalizeTheme(value) {
+    if (value === 'dark' || value === 'light') return value;
+    return null;
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.style.backgroundColor = theme === 'dark' ? '#141414' : '#f5f5f5';
+    document.documentElement.style.colorScheme = theme;
+    if (document.body) {
+      document.body.style.backgroundColor = theme === 'dark' ? '#141414' : '#f5f5f5';
+    }
+  }
+
+  var cachedTheme = null;
+  try {
+    cachedTheme = normalizeTheme(window.localStorage.getItem(PREPAINT_KEY));
+  } catch (e) {
+    cachedTheme = null;
+  }
+
+  applyTheme(cachedTheme || getSystemTheme());
+
   try {
     chrome.storage.local.get('canopy_settings', function (result) {
-      if (result.canopy_settings && result.canopy_settings.theme) {
-        var userTheme = result.canopy_settings.theme;
-        if (userTheme === 'system') {
-          // Already applied system preference, no change needed
-        } else {
-          document.documentElement.setAttribute('data-theme', userTheme);
+      var settings = result && result.canopy_settings;
+      var userTheme = settings && settings.theme;
+      var resolvedTheme = userTheme === 'system' || userTheme === undefined
+        ? getSystemTheme()
+        : normalizeTheme(userTheme);
+      if (resolvedTheme !== null) {
+        applyTheme(resolvedTheme);
+        try {
+          window.localStorage.setItem(PREPAINT_KEY, resolvedTheme);
+        } catch (e) {
+          // ignore
         }
       }
     });
   } catch (e) {
-    // chrome.storage not available (e.g. in dev mode), system theme is fine
+    // chrome.storage 不可用时，保留同步预判主题。
   }
 })();

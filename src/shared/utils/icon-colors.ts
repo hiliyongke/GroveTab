@@ -69,14 +69,14 @@ export function iconColor(role: IconRole, token: GlobalToken): string {
     tabs:         token.colorPrimary,
     domains:      '#10b981',          // 翠绿
     windows:      '#06b6d4',          // 青
-    duplicates:   '#f97316',          // 橙（警告感）
+    duplicates:   '#e8915a',          // 柔橙（温和提醒）
     idle:         '#d97706',          // 琥珀
     sessions:     '#8b5cf6',          // 淡紫
     tab:          token.colorPrimary,
     history:      '#059669',          // 深绿
     web:          '#3b82f6',          // 亮蓝
     suggestion:   '#a855f7',          // 紫罗兰
-    hot:          '#ef4444',          // 红（热度）
+    hot:          '#d47070',          // 柔红（热度）
     recent:       '#14b8a6',          // 青
     permission:   '#ea580c',          // 深橙
     close:        token.colorError,

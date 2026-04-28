@@ -1,34 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="GroveTab logo">
   <defs>
-    <linearGradient id="grove-bg-a" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#A5F3FC"/>
-      <stop offset="100%" stop-color="#BBF7D0"/>
+    <linearGradient id="leaf" x1="26" y1="16" x2="104" y2="108" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#B7E48A"/>
+      <stop offset="0.52" stop-color="#52B788"/>
+      <stop offset="1" stop-color="#2D6A4F"/>
+    </linearGradient>
+    <linearGradient id="trunk" x1="50" y1="48" x2="78" y2="116" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#B08968"/>
+      <stop offset="1" stop-color="#7F5539"/>
     </linearGradient>
   </defs>
-
-  <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#grove-bg-a)"/>
-
-  <path
-    d="M36 50C36 45.6 39.6 42 44 42H64L68 50H84C88.4 50 92 53.6 92 58V82C92 86.4 88.4 90 84 90H44C39.6 90 36 86.4 36 82V50Z"
-    fill="#F9FAFB"
-    stroke="#D1FAE5"
-    stroke-width="3"
-    stroke-linejoin="round"
-  />
-
-  <path d="M52 76V64" stroke="#0F766E" stroke-width="3" stroke-linecap="round"/>
-  <circle cx="52" cy="60" r="4" fill="#22C55E"/>
-
-  <path d="M64 78V60" stroke="#0F766E" stroke-width="3" stroke-linecap="round"/>
-  <circle cx="64" cy="56" r="5" fill="#16A34A"/>
-
-  <path d="M76 76V64" stroke="#0F766E" stroke-width="3" stroke-linecap="round"/>
-  <circle cx="76" cy="60" r="4" fill="#22C55E"/>
-
-  <path
-    d="M48 80C52 82 60 83 64 83C68 83 76 82 80 80"
-    stroke="#0F766E"
-    stroke-width="2"
-    stroke-linecap="round"
-  />
+  <path d="M64 111C67 91 68 70 64 47" fill="none" stroke="url(#trunk)" stroke-width="9" stroke-linecap="round"/>
+  <path d="M64 69C51 57 41 45 37 28C52 31 63 39 70 53C76 42 88 34 104 30C102 48 91 61 75 70C88 74 98 84 103 99C86 99 73 92 64 80C55 91 42 99 25 99C30 84 40 74 64 69Z" fill="url(#leaf)"/>
+  <path d="M64 69C54 62 48 53 45 41M70 53C77 47 84 43 94 40M64 80C56 87 47 91 36 93M75 70C84 75 91 81 96 91" fill="none" stroke="#F1F8E9" stroke-opacity="0.72" stroke-width="3" stroke-linecap="round"/>
 </svg>

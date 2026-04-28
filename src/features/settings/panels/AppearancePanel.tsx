@@ -14,7 +14,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { Select, Button, Slider, ColorPicker, Space, Switch, InputNumber, Input, Upload, Divider, theme } from 'antd';
+import { App, Select, Button, Slider, ColorPicker, Space, Switch, InputNumber, Input, Upload, Divider, theme } from 'antd';
 import {
   Pencil,
   Plus,
@@ -37,9 +37,56 @@ interface AppearancePanelProps {
   updateSettings: (patch: Partial<UserSettings>) => void | Promise<void>;
 }
 
+const MAX_BACKGROUND_IMAGE_SOURCE_BYTES = 20 * 1024 * 1024;
+const MAX_BACKGROUND_IMAGE_EDGE = 1920;
+const BACKGROUND_IMAGE_QUALITY = 0.84;
+const MAX_VIDEO_BACKGROUND_FILE_BYTES = 50 * 1024 * 1024;
+
+/** 将上传背景图压缩为 WebP data URL，避免原图 base64 长期占用 storage 与渲染内存。 */
+async function optimizeBackgroundImage(file: File): Promise<string> {
+  if (!file.type.startsWith('image/')) {
+    throw new Error('请选择图片文件');
+  }
+  if (file.size > MAX_BACKGROUND_IMAGE_SOURCE_BYTES) {
+    throw new Error('图片不能超过 20MB');
+  }
+
+  const objectUrl = URL.createObjectURL(file);
+  const image = new window.Image();
+  try {
+    image.decoding = 'async';
+    image.src = objectUrl;
+    await image.decode();
+
+    const sourceWidth = image.naturalWidth;
+    const sourceHeight = image.naturalHeight;
+    if (sourceWidth <= 0 || sourceHeight <= 0) {
+      throw new Error('图片尺寸无效');
+    }
+
+    const scale = Math.min(1, MAX_BACKGROUND_IMAGE_EDGE / Math.max(sourceWidth, sourceHeight));
+    const targetWidth = Math.max(1, Math.round(sourceWidth * scale));
+    const targetHeight = Math.max(1, Math.round(sourceHeight * scale));
+    const canvas = document.createElement('canvas');
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    const ctx = canvas.getContext('2d', { alpha: true });
+    if (ctx === null) throw new Error('无法处理图片');
+    ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
+    const dataUrl = canvas.toDataURL('image/webp', BACKGROUND_IMAGE_QUALITY);
+    canvas.width = 1;
+    canvas.height = 1;
+    return dataUrl;
+  } finally {
+    image.src = '';
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
 export function AppearancePanel({ settings, updateSettings }: AppearancePanelProps) {
   const { t } = useT();
   const { token } = theme.useToken();
+  const { message } = App.useApp();
   const isDark = useResolvedTheme() === 'dark';
   const [showGradientEditor, setShowGradientEditor] = useState(false);
 
@@ -101,17 +148,17 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
     [settings.uiVisibility, updateSettings],
   );
 
-  /** 处理文件上传 → 转为 base64 data URL */
+  /** 处理文件上传：先压缩降采样，再写入背景图配置。 */
   const handleFileUpload = useCallback(
     (file: File) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const dataUrl = e.target?.result as string;
-        updateBgImage({ url: dataUrl });
-      };
-      reader.readAsDataURL(file);
+      void optimizeBackgroundImage(file)
+        .then((dataUrl) => updateBgImage({ url: dataUrl }))
+        .catch((err) => {
+          console.warn('[GroveTab] background image optimize failed', err);
+          void message.warning(err instanceof Error ? err.message : '图片处理失败');
+        });
     },
-    [updateBgImage],
+    [message, updateBgImage],
   );
 
   return (
@@ -797,8 +844,8 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
                 </span>
                 <Slider
                   min={0}
-                  max={20}
-                  value={settings.backgroundOverlay?.blur ?? 0}
+                  max={12}
+                  value={Math.min(settings.backgroundOverlay?.blur ?? 0, 12)}
                   onChange={(v) => updateBgOverlay({ blur: v })}
                 />
               </div>
@@ -891,20 +938,22 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
       <Field label={t('effects.videoBg')} hint={t('effects.videoBgHint')}>
         <Select
           value={settings.videoBackground?.type ?? 'none'}
-          onChange={async (v) => {
-            if (v === 'none') {
-              // 同时清掉已存的文件，避免 IndexedDB 残留
-              const old = settings.videoBackground?.fileKey;
-              if (typeof old === 'string' && old !== '') {
-                const { removeVideoFile } = await import('@/features/effects');
-                await removeVideoFile(old).catch(() => undefined);
+          onChange={(v) => {
+            void (async () => {
+              if (v === 'none') {
+                // 同时清掉已存的文件，避免 IndexedDB 残留
+                const old = settings.videoBackground?.fileKey;
+                if (typeof old === 'string' && old !== '') {
+                  const { removeVideoFile } = await import('@/features/effects');
+                  await removeVideoFile(old).catch(() => undefined);
+                }
+                void updateSettings({ videoBackground: { type: 'none' } });
+                return;
               }
-              void updateSettings({ videoBackground: { type: 'none' } });
-              return;
-            }
-            void updateSettings({
-              videoBackground: { ...(settings.videoBackground ?? {}), type: v },
-            });
+              void updateSettings({
+                videoBackground: { ...(settings.videoBackground ?? {}), type: v },
+              });
+            })();
           }}
           style={{ width: '100%' }}
           options={[
@@ -938,21 +987,31 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
           <Upload
             accept="video/mp4,video/webm"
             showUploadList={false}
-            beforeUpload={async (file) => {
-              const { saveVideoFile, removeVideoFile } = await import('@/features/effects');
-              // 先清掉旧文件（若有），避免 IndexedDB 里积灰
-              const old = settings.videoBackground?.fileKey;
-              if (typeof old === 'string' && old !== '') {
-                await removeVideoFile(old).catch(() => undefined);
-              }
-              const key = await saveVideoFile(file);
-              void updateSettings({
-                videoBackground: {
-                  ...(settings.videoBackground ?? {}),
-                  type: 'file',
-                  fileKey: key,
-                },
-              });
+            beforeUpload={(file) => {
+              void (async () => {
+                if (file.size > MAX_VIDEO_BACKGROUND_FILE_BYTES) {
+                  void message.warning('视频不能超过 50MB');
+                  return;
+                }
+                if (file.type !== '' && !['video/mp4', 'video/webm'].includes(file.type)) {
+                  void message.warning('请选择 MP4 或 WebM 视频');
+                  return;
+                }
+                const { saveVideoFile, removeVideoFile } = await import('@/features/effects');
+                // 先清掉旧文件（若有），避免 IndexedDB 里积灰
+                const old = settings.videoBackground?.fileKey;
+                if (typeof old === 'string' && old !== '') {
+                  await removeVideoFile(old).catch(() => undefined);
+                }
+                const key = await saveVideoFile(file);
+                void updateSettings({
+                  videoBackground: {
+                    ...(settings.videoBackground ?? {}),
+                    type: 'file',
+                    fileKey: key,
+                  },
+                });
+              })();
               return false; // 禁止 antd 自己上传
             }}
           >
@@ -996,6 +1055,9 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
         <Space direction="vertical" size={10} style={{ width: '100%' }}>
           {([
             ['header', t('uiVisibility.header'), t('uiVisibility.headerHint')],
+            ['heroLogo', t('uiVisibility.heroLogo'), t('uiVisibility.heroLogoHint')],
+            ['heroTitle', t('uiVisibility.heroTitle'), t('uiVisibility.heroTitleHint')],
+            ['heroSlogan', t('uiVisibility.heroSlogan'), t('uiVisibility.heroSloganHint')],
             ['heroSearch', t('uiVisibility.heroSearch'), t('uiVisibility.heroSearchHint')],
             ['viewSwitcher', t('uiVisibility.viewSwitcher'), t('uiVisibility.viewSwitcherHint')],
             ['workspaceOverview', t('uiVisibility.workspaceOverview'), t('uiVisibility.workspaceOverviewHint')],

@@ -169,6 +169,15 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
   // 条件渲染放在所有 hooks 之后
   if (dismissed || !hasSuggestions) return null;
 
+  const alertBackground = token.colorFillQuaternary;
+  const alertBorder = token.colorBorderSecondary;
+  const alertActionStyle: React.CSSProperties = {
+    background: token.colorFillSecondary,
+    borderColor: token.colorBorderSecondary,
+    color: token.colorText,
+    boxShadow: 'none',
+  };
+
   /** 构建建议摘要 */
   const summaryParts: string[] = [];
   if (totalDupTabs > 0) {
@@ -185,14 +194,14 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
       <Alert
         type="info"
         showIcon
-        icon={<Zap size={ICON_SIZE.MEDIUM} style={{ color: iconColor('tidy', token) }} />}
+        icon={<Zap size={ICON_SIZE.MEDIUM} style={{ color: token.colorTextTertiary }} />}
         message={
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ flex: 1, fontSize: 13, fontWeight: 500 }}>
               {summaryParts.join('；')}
             </span>
             <Space size={4}>
-              <Button type="primary" size="small" loading={busy} onClick={() => { void handleTidyAll(); }}>
+              <Button size="small" loading={busy} onClick={() => { void handleTidyAll(); }} style={alertActionStyle}>
                 {t('tidy.tidyAll')}
               </Button>
               <Tooltip title={expanded ? t('tabs.collapse') : t('tabs.expand')}>
@@ -215,7 +224,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                 <Button
                   type="text"
                   size="small"
-                  icon={<X size={ICON_SIZE.SMALL} style={{ color: iconColor('close', token) }} />}
+                  icon={<X size={ICON_SIZE.SMALL} style={{ color: token.colorTextTertiary }} />}
                   onClick={() => { sessionStorage.setItem(DISMISSED_KEY, '1'); setDismissed(true); }}
                 />
               </Tooltip>
@@ -226,7 +235,9 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
           borderRadius: expanded
             ? `${token.borderRadiusLG}px ${token.borderRadiusLG}px 0 0`
             : token.borderRadiusLG,
+          borderColor: alertBorder,
           borderBottom: expanded ? 'none' : undefined,
+          background: alertBackground,
           transition: `border-radius ${token.motionDurationFast} ${token.motionEaseInOut}`,
         }}
       />

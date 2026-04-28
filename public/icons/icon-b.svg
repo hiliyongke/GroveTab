@@ -1,28 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="GroveTab logo">
   <defs>
-    <linearGradient id="grove-bg-b" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0F172A"/>
-      <stop offset="100%" stop-color="#020617"/>
+    <linearGradient id="leaf" x1="26" y1="16" x2="104" y2="108" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#B7E48A"/>
+      <stop offset="0.52" stop-color="#52B788"/>
+      <stop offset="1" stop-color="#2D6A4F"/>
+    </linearGradient>
+    <linearGradient id="trunk" x1="50" y1="48" x2="78" y2="116" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#B08968"/>
+      <stop offset="1" stop-color="#7F5539"/>
     </linearGradient>
   </defs>
-
-  <rect x="8" y="8" width="112" height="112" rx="28" fill="url(#grove-bg-b)"/>
-
-  <path
-    d="M40 56C40 51.6 43.6 48 48 48H64L68 56H80C84.4 56 88 59.6 88 64V80C88 84.4 84.4 88 80 88H48C43.6 88 40 84.4 40 80V56Z"
-    fill="none"
-    stroke="#E5E7EB"
-    stroke-width="3"
-    stroke-linejoin="round"
-  />
-
-  <path d="M64 80V62" stroke="#A7F3D0" stroke-width="3" stroke-linecap="round"/>
-  <circle cx="64" cy="58" r="6" fill="#22C55E"/>
-
-  <path
-    d="M52 80C56 82 60 83 64 83C68 83 72 82 76 80"
-    stroke="#334155"
-    stroke-width="2"
-    stroke-linecap="round"
-  />
+  <path d="M64 111C67 91 68 70 64 47" fill="none" stroke="url(#trunk)" stroke-width="9" stroke-linecap="round"/>
+  <path d="M64 69C51 57 41 45 37 28C52 31 63 39 70 53C76 42 88 34 104 30C102 48 91 61 75 70C88 74 98 84 103 99C86 99 73 92 64 80C55 91 42 99 25 99C30 84 40 74 64 69Z" fill="url(#leaf)"/>
+  <path d="M64 69C54 62 48 53 45 41M70 53C77 47 84 43 94 40M64 80C56 87 47 91 36 93M75 70C84 75 91 81 96 91" fill="none" stroke="#F1F8E9" stroke-opacity="0.72" stroke-width="3" stroke-linecap="round"/>
 </svg>

@@ -3,7 +3,7 @@
  *
  * 360×520 四区：
  *   · 顶部：全局搜索框（懒加载搜索核心）
- *   · 中部：最近 10 个激活 Tab 列表（按 lastAccessed 倒序）
+ *   · 中部：全部已打开 Tab 列表（按 lastAccessed 倒序）
  *   · 底部：归档当前窗口（大按钮，复用 archiveCurrentWindowTabs）
  *   · 底部：打开工作台（切到 Canopy 新标签页）
  *
@@ -12,7 +12,8 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ConfigProvider, Button, Input, Tooltip, Typography, Empty, theme } from 'antd';
+import { Button, Input, Tooltip, Typography, Empty, theme } from 'antd';
+import { AntdThemeProvider } from '@/shared/ui/AntdThemeProvider';
 import { LayoutGrid, Save, Search, ExternalLink, X } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { archiveCurrentWindowTabs } from '@/services';
@@ -20,12 +21,13 @@ import { BRAND } from '@/shared/config/brand';
 import { buildSearchUrl } from '@/shared/config/search-engines';
 import type { SearchEngineId } from '@/shared/types';
 import { getSettings } from '@/repositories';
+import { activateTab, closeTab, createTab, getFaviconUrl, queryAllTabs } from '@/chrome';
+import { I18nProvider, useT } from '@/shared/i18n';
 
 const { Text } = Typography;
 
-const POPUP_WIDTH = 360;
-const POPUP_HEIGHT = 520;
-const RECENT_LIMIT = 10;
+const POPUP_WIDTH = 380;
+const POPUP_HEIGHT = 600;
 
 interface RecentTab {
   id: number;
@@ -45,22 +47,21 @@ function extractHostname(url: string): string {
   }
 }
 
-/** 打开一个 Tab：更新该 Tab 为 active，并聚焦其窗口 */
+/** 打开一个 Tab：激活该 Tab 并聚焦其窗口 */
 async function focusTab(tab: RecentTab): Promise<void> {
   try {
-    await chrome.tabs.update(tab.id, { active: true });
-    await chrome.windows.update(tab.windowId, { focused: true });
+    await activateTab(tab.id, tab.windowId);
   } catch {
-    // 若目标 Tab 不存在（已关闭），兜底：在当前窗口新开该 URL
+    // 若目标 Tab 不存在（已关闭），兜底：新开该 URL
     try {
-      await chrome.tabs.create({ url: tab.url, active: true });
+      await createTab({ url: tab.url, active: true });
     } catch {
       // ignore
     }
   }
 }
 
-function App() {
+function PopupContent() {
   const [query, setQuery] = useState('');
   const [recentTabs, setRecentTabs] = useState<RecentTab[]>([]);
   const [hasAnyTab, setHasAnyTab] = useState(true);
@@ -68,6 +69,8 @@ function App() {
   const [archiveError, setArchiveError] = useState('');
   /** 从用户设置读默认搜索引擎；暂以 Google 兑底 */
   const [defaultEngine, setDefaultEngine] = useState<SearchEngineId>('google');
+  const { t } = useT();
+  const { token } = theme.useToken();
 
   // 读设置同步默认引擎
   useEffect(() => {
@@ -88,43 +91,54 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (typeof chrome === 'undefined' || chrome.tabs === undefined) return;
+    let alive = true;
     void (async () => {
       try {
-        const all = await chrome.tabs.query({});
+        const all = await queryAllTabs();
+        if (!alive) return;
         setHasAnyTab(all.length > 0);
         const list: RecentTab[] = all
-          .filter((t) => t.id !== undefined && t.url !== undefined && t.url !== '')
-          .map((t) => ({
-            id: t.id!,
-            windowId: t.windowId,
-            title: t.title ?? t.url!,
-            url: t.url!,
-            favIconUrl: t.favIconUrl ?? '',
-            hostname: extractHostname(t.url!),
-            lastAccessed: t.lastAccessed ?? 0,
-          }))
-          .sort((a, b) => b.lastAccessed - a.lastAccessed)
-          .slice(0, RECENT_LIMIT);
+          .filter((tab) => tab.id !== undefined && tab.url !== undefined && tab.url !== '')
+          .map((tab) => {
+            const url = tab.url ?? '';
+            const extensionFavicon = getFaviconUrl(url);
+            return {
+              id: tab.id!,
+              windowId: tab.windowId,
+              title: tab.title ?? url,
+              url,
+              favIconUrl: extensionFavicon !== '' ? extensionFavicon : (tab.favIconUrl ?? ''),
+              hostname: extractHostname(url),
+              lastAccessed: tab.lastAccessed ?? 0,
+            };
+          })
+          .sort((a, b) => b.lastAccessed - a.lastAccessed);
         setRecentTabs(list);
       } catch (err) {
         console.warn('[Canopy/popup] query tabs failed', err);
       }
     })();
+    return () => {
+      alive = false;
+    };
   }, []);
 
   const filteredTabs = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (q === '') return recentTabs;
-    return recentTabs.filter((t) =>
-      t.title.toLowerCase().includes(q) ||
-      t.url.toLowerCase().includes(q) ||
-      t.hostname.toLowerCase().includes(q),
+    return recentTabs.filter((tab) =>
+      tab.title.toLowerCase().includes(q) ||
+      tab.url.toLowerCase().includes(q) ||
+      tab.hostname.toLowerCase().includes(q),
     );
   }, [recentTabs, query]);
+  const isSearching = query.trim() !== '';
+  const tabCountLabel = isSearching
+    ? t('popup.matchingTabs', { matched: filteredTabs.length, total: recentTabs.length })
+    : t('popup.allTabs', { count: recentTabs.length });
 
   const openNewTab = useCallback(() => {
-    void chrome.tabs?.create({ url: chrome.runtime.getURL('src/pages/newtab/index.html') });
+    void createTab({ url: chrome.runtime.getURL('src/pages/newtab/index.html') });
     window.close();
   }, []);
 
@@ -137,162 +151,184 @@ function App() {
       window.close();
     } catch (err) {
       console.warn('[Canopy/popup] archive failed', err);
-      setArchiveError('归档失败，请重试');
+      setArchiveError(t('popup.archiveFailed'));
     } finally {
       setArchiving(false);
     }
-  }, [archiving]);
+  }, [archiving, t]);
 
   /** 快速走全网搜索（回车时触发）—— 使用用户默认引擎 */
   const runWebSearch = useCallback(() => {
     const q = query.trim();
     if (q === '') return;
-    void chrome.tabs?.create({ url: buildSearchUrl(defaultEngine, q), active: true });
+    void createTab({ url: buildSearchUrl(defaultEngine, q), active: true });
     window.close();
   }, [query, defaultEngine]);
 
   return (
-    <ConfigProvider theme={{ cssVar: { prefix: 'ant' } }}>
-      <div
-        style={{
-          width: POPUP_WIDTH,
-          height: POPUP_HEIGHT,
-          display: 'flex',
-          flexDirection: 'column',
-          padding: 12,
-          boxSizing: 'border-box',
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-          fontSize: 13,
-        }}
-      >
-        {/* 顶部品牌 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-          <div
-            style={{
-              width: 24,
-              height: 24,
-              borderRadius: 7,
-              background: 'linear-gradient(135deg, #1677ff, #69b1ff)',
-              color: '#fff',
-              fontWeight: 800,
-              fontSize: 12,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            {BRAND.shortName}
-          </div>
-          <Text strong style={{ fontSize: 14 }}>
-            {BRAND.name}
-          </Text>
-        </div>
-
-        {/* 顶部搜索框 */}
-        <Input
-          autoFocus
-          size="middle"
-          allowClear
-          placeholder="搜索标签页或上网（回车）"
-          prefix={<Search size={ICON_SIZE.MEDIUM} style={{ color: 'var(--ant-color-text-tertiary)' }} />}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onPressEnter={runWebSearch}
-          style={{ borderRadius: 10, marginBottom: 10 }}
-        />
-
-        {/* 中部：最近 10 Tab 列表 */}
+    <div
+      style={{
+        width: POPUP_WIDTH,
+        height: POPUP_HEIGHT,
+        display: 'flex',
+        flexDirection: 'column',
+        padding: 12,
+        boxSizing: 'border-box',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        fontSize: 13,
+        color: token.colorText,
+        background: token.colorBgLayout,
+      }}
+    >
+      {/* 顶部品牌 */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
         <div
           style={{
-            flex: 1,
-            overflowY: 'auto',
-            marginBottom: 10,
-            borderRadius: 8,
-            background: 'var(--ant-color-fill-quaternary)',
-            padding: '4px 0',
+            width: 24,
+            height: 24,
+            borderRadius: 7,
+            background: 'linear-gradient(135deg, #1677ff, #4096ff)',
+            color: '#fff',
+            fontWeight: 800,
+            fontSize: 12,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          {filteredTabs.length === 0 ? (
-            <div style={{ padding: '20px 12px', textAlign: 'center' }}>
-              <Empty
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                description={<Text type="secondary" style={{ fontSize: 12 }}>暂无最近标签</Text>}
-              />
-            </div>
-          ) : (
-            filteredTabs.map((tab) => (
-              <RecentTabRow
-                key={tab.id}
-                tab={tab}
-                onClick={() => {
-                  void focusTab(tab).then(() => window.close());
-                }}
-                onClose={async () => {
+          {BRAND.shortName}
+        </div>
+        <Text strong style={{ fontSize: 14, color: token.colorText }}>
+          {BRAND.name}
+        </Text>
+      </div>
+
+      {/* 顶部搜索框 */}
+      <Input
+        autoFocus
+        size="middle"
+        allowClear
+        placeholder={t('popup.searchPlaceholder')}
+        prefix={<Search size={ICON_SIZE.MEDIUM} style={{ color: token.colorTextTertiary }} />}
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        onPressEnter={runWebSearch}
+        style={{ borderRadius: 12, marginBottom: 8, background: token.colorBgContainer }}
+      />
+
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 8,
+          marginBottom: 6,
+          padding: '0 2px',
+        }}
+      >
+        <Text type="secondary" style={{ fontSize: 11.5 }}>{tabCountLabel}</Text>
+        {filteredTabs.length > 0 && (
+          <Text type="secondary" style={{ fontSize: 11 }}>
+            {t('popup.scrollHint')}
+          </Text>
+        )}
+      </div>
+
+      {/* 中部：全部 Tab 列表 */}
+      <div
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          scrollbarGutter: 'stable',
+          marginBottom: 10,
+          borderRadius: 12,
+          background: token.colorBgContainer,
+          border: `1px solid ${token.colorBorderSecondary}`,
+          padding: 4,
+        }}
+      >
+        {filteredTabs.length === 0 ? (
+          <div style={{ padding: '20px 12px', textAlign: 'center' }}>
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description={<Text type="secondary" style={{ fontSize: 12 }}>{t('popup.noRecentTabs')}</Text>}
+            />
+          </div>
+        ) : (
+          filteredTabs.map((tab) => (
+            <RecentTabRow
+              key={tab.id}
+              tab={tab}
+              onClick={() => {
+                void focusTab(tab).then(() => window.close());
+              }}
+              onClose={() => {
+                void (async () => {
                   try {
-                    await chrome.tabs.remove(tab.id);
+                    await closeTab(tab.id);
                     setRecentTabs((list) => list.filter((t) => t.id !== tab.id));
                   } catch {
                     /* 关闭失败静默 */
                   }
-                }}
-              />
-            ))
-          )}
-        </div>
-
-        {/* 底部：两个操作按钮 */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          <Tooltip title={!hasAnyTab ? '当前没有可归档的标签页' : ''} mouseEnterDelay={0.3}>
-            <Button
-              type="primary"
-              icon={<Save size={ICON_SIZE.MEDIUM} />}
-              block
-              loading={archiving}
-              disabled={!hasAnyTab || archiving}
-              onClick={() => { void archiveAll(); }}
-            >
-              归档当前窗口
-            </Button>
-          </Tooltip>
-          <Button
-            icon={<LayoutGrid size={ICON_SIZE.MEDIUM} />}
-            block
-            onClick={openNewTab}
-          >
-            打开工作台
-            <ExternalLink size={ICON_SIZE.MICRO} style={{ marginLeft: 4, opacity: 0.6 }} />
-          </Button>
-        </div>
-
-        {/* 底部"关于"链接：跳转 newtab 并自动切到 About Tab */}
-        <div style={{ marginTop: 10, textAlign: 'center' }}>
-          <button
-            type="button"
-            onClick={() => {
-              void chrome.tabs?.create({
-                url: chrome.runtime.getURL('src/pages/newtab/index.html') + '#about',
-              });
-              window.close();
-            }}
-            style={{
-              all: 'unset',
-              cursor: 'pointer',
-              fontSize: 11,
-              color: 'var(--ant-color-text-tertiary)',
-              padding: '4px 8px',
-            }}
-          >
-            关于 GroveTab
-          </button>
-        </div>
-
-        {archiveError !== '' && (
-          <div style={{ marginTop: 6, fontSize: 11.5, color: 'var(--ant-color-error)' }}>
-            {archiveError}
-          </div>
+                })();
+              }}
+            />
+          ))
         )}
       </div>
-    </ConfigProvider>
+
+      {/* 底部：两个操作按钮 */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        <Tooltip title={!hasAnyTab ? t('popup.noTabsToArchive') : ''} mouseEnterDelay={0.3}>
+          <Button
+            type="primary"
+            icon={<Save size={ICON_SIZE.MEDIUM} />}
+            block
+            loading={archiving}
+            disabled={!hasAnyTab || archiving}
+            onClick={() => { void archiveAll(); }}
+          >
+            {t('popup.archiveWindow')}
+          </Button>
+        </Tooltip>
+        <Button
+          icon={<LayoutGrid size={ICON_SIZE.MEDIUM} />}
+          block
+          onClick={openNewTab}
+        >
+          {t('popup.openWorkspace')}
+          <ExternalLink size={ICON_SIZE.MICRO} style={{ marginLeft: 4, opacity: 0.6 }} />
+        </Button>
+      </div>
+
+      {/* 底部"关于"链接：跳转 newtab 并自动切到 About Tab */}
+      <div style={{ marginTop: 10, textAlign: 'center' }}>
+        <button
+          type="button"
+          onClick={() => {
+            void createTab({
+              url: chrome.runtime.getURL('src/pages/newtab/index.html') + '#about',
+            });
+            window.close();
+          }}
+          style={{
+            all: 'unset',
+            cursor: 'pointer',
+            fontSize: 11,
+            color: token.colorTextTertiary,
+            padding: '4px 8px',
+          }}
+        >
+          {t('popup.aboutGroveTab')}
+        </button>
+      </div>
+
+      {archiveError !== '' && (
+        <div style={{ marginTop: 6, fontSize: 11.5, color: token.colorError }}>
+          {archiveError}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -306,6 +342,7 @@ function RecentTabRow({
   onClick: () => void;
   onClose: () => void;
 }) {
+  const { t } = useT();
   const { token } = theme.useToken();
   const [hover, setHover] = useState(false);
   return (
@@ -322,14 +359,15 @@ function RecentTabRow({
         display: 'flex',
         alignItems: 'center',
         gap: 8,
-        padding: '6px 10px',
+        padding: '6px 8px',
+        borderRadius: 8,
         transition: 'background 120ms ease',
       }}
     >
       <button
         type="button"
         onClick={onClick}
-        aria-label={`打开 ${tab.title}`}
+        aria-label={t('popup.openTab', { title: tab.title })}
         style={{
           all: 'unset',
           cursor: 'pointer',
@@ -341,10 +379,11 @@ function RecentTabRow({
         }}
       >
         <img
-          src={tab.favIconUrl !== '' ? tab.favIconUrl : `chrome://favicon/size/16@1x/${encodeURIComponent(tab.url)}`}
+          src={tab.favIconUrl}
           alt=""
           width={14}
           height={14}
+          referrerPolicy="no-referrer"
           style={{ borderRadius: 3, flexShrink: 0 }}
           onError={(e) => {
             e.currentTarget.style.visibility = 'hidden';
@@ -382,7 +421,7 @@ function RecentTabRow({
             e.stopPropagation();
             onClose();
           }}
-          aria-label={`关闭标签页 ${tab.title}`}
+          aria-label={t('popup.closeTab', { title: tab.title })}
           style={{
             all: 'unset',
             cursor: 'pointer',
@@ -401,6 +440,16 @@ function RecentTabRow({
         </button>
       )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AntdThemeProvider>
+      <I18nProvider>
+        <PopupContent />
+      </I18nProvider>
+    </AntdThemeProvider>
   );
 }
 

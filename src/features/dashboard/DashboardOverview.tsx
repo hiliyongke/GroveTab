@@ -149,6 +149,18 @@ export const DashboardOverview = memo(function DashboardOverview({
     }
   }, [latestArchive]);
 
+  const subtleActionStyle: React.CSSProperties = {
+    background: token.colorFillQuaternary,
+    borderColor: token.colorBorderSecondary,
+    color: token.colorTextSecondary,
+    boxShadow: 'none',
+  };
+
+  const subtlePrimaryActionStyle: React.CSSProperties = {
+    ...subtleActionStyle,
+    color: token.colorText,
+  };
+
   return (
     <section
       aria-label={t('dashboard.subtitle')}
@@ -168,26 +180,33 @@ export const DashboardOverview = memo(function DashboardOverview({
             {t('dashboard.subtitle')}
           </Text>
           {duplicateCount + idleCount > 0 && (
-            <Tag color="gold" bordered={false} style={{ margin: 0, fontWeight: 500, fontSize: 11 }}>
+            <Tag
+              bordered={false}
+              style={{
+                margin: 0,
+                fontWeight: 500,
+                fontSize: 11,
+                color: token.colorTextSecondary,
+                background: token.colorFillSecondary,
+              }}
+            >
               {t('dashboard.tidyReady')}
             </Tag>
           )}
         </div>
         <Space size={8} wrap>
-          <Button size="small" type="primary" ghost icon={<Search size={ICON_SIZE.DEFAULT} />} onClick={onSearch}>
+          <Button size="small" icon={<Search size={ICON_SIZE.DEFAULT} />} onClick={onSearch} style={subtleActionStyle}>
             {t('dashboard.searchAction')}
           </Button>
-          <Button size="small" icon={<Zap size={ICON_SIZE.DEFAULT} />} onClick={onTidy} disabled={duplicateCount + idleCount === 0}>
+          <Button size="small" icon={<Zap size={ICON_SIZE.DEFAULT} />} onClick={onTidy} disabled={duplicateCount + idleCount === 0} style={subtleActionStyle}>
             {t('dashboard.tidyAction')}
           </Button>
-          <Button size="small" type="primary" icon={<Save size={ICON_SIZE.DEFAULT} />} onClick={onArchive} disabled={tabCount === 0}>
+          <Button size="small" icon={<Save size={ICON_SIZE.DEFAULT} />} onClick={onArchive} disabled={tabCount === 0} style={subtlePrimaryActionStyle}>
             {t('dashboard.archiveAction')}
           </Button>
-          {onInsights && (
-            <Button size="small" icon={<BarChart3 size={ICON_SIZE.DEFAULT} />} onClick={onInsights}>
-              {t('insights.title')}
-            </Button>
-          )}
+          <Button size="small" icon={<BarChart3 size={ICON_SIZE.DEFAULT} />} onClick={onInsights} style={subtleActionStyle}>
+            {t('insights.title')}
+          </Button>
         </Space>
       </div>
 

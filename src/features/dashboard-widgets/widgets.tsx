@@ -1,7 +1,18 @@
+import { nanoid } from 'nanoid';
 import type { InputRef } from 'antd';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Empty, Input, Popconfirm, Segmented, Tabs, theme, Tooltip } from 'antd';
-import { Plus, TimerReset, CheckCircle2, Circle, StickyNote, Play, Pause, GripVertical, Trash2 } from 'lucide-react';
+import {
+  Plus,
+  TimerReset,
+  CheckCircle2,
+  Circle,
+  StickyNote,
+  Play,
+  Pause,
+  GripVertical,
+  Trash2,
+} from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import {
   DndContext,
@@ -35,7 +46,9 @@ import type {
   TodoEntry,
 } from '@/shared/types';
 import { feedback } from '@/shared/ui/feedback';
+import { useT } from '@/shared/i18n';
 import { getData, setData } from '@/repositories/storage-repo';
+import { isSafeExternalUrl, normalizeExternalUrl } from '@/shared/utils/url-safety';
 import {
   DEFAULT_POMODORO_CONFIG,
   computeRemaining,
@@ -48,7 +61,13 @@ import {
   type PomodoroMode,
   type PomodoroState,
 } from './pomodoro-engine';
-import { buildFaviconUrl, formatDaysLeft, formatTimeLeftTo, getHostnameLabel, getInitials } from './utils';
+import {
+  buildFaviconUrl,
+  formatDaysLeft,
+  formatTimeLeftTo,
+  getHostnameLabel,
+  getInitials,
+} from './utils';
 import {
   SearchBoxWidget,
   WaterReminderWidget,
@@ -59,7 +78,13 @@ import {
 } from './extra-widgets';
 
 function MiniEmpty({ text }: { text: string }) {
-  return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={text} style={{ margin: 0, padding: '12px 0' }} />;
+  return (
+    <Empty
+      image={Empty.PRESENTED_IMAGE_SIMPLE}
+      description={text}
+      style={{ margin: 0, padding: '12px 0' }}
+    />
+  );
 }
 
 /** SpeedDial Tile —— Sortable 版：支持点击打开 URL + 拖拽重排序（v1.3） */
@@ -89,6 +114,10 @@ function SortableSpeedDialTile({
       e.preventDefault();
       return;
     }
+    if (!isSafeExternalUrl(link.url)) {
+      feedback.error('链接格式无效');
+      return;
+    }
     if (!openInNewTab) {
       window.location.href = link.url;
       return;
@@ -108,6 +137,12 @@ function SortableSpeedDialTile({
       }}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      onFocusCapture={() => setHover(true)}
+      onBlurCapture={(event) => {
+        const nextTarget = event.relatedTarget;
+        if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget))
+          setHover(false);
+      }}
     >
       <div
         {...attributes}
@@ -215,7 +250,7 @@ function SortableSpeedDialTile({
               }}
               aria-hidden="true"
             >
-<GripVertical size={ICON_SIZE.TINY} />
+              <GripVertical size={ICON_SIZE.TINY} />
             </span>
           </Tooltip>
           <Button
@@ -241,6 +276,7 @@ function SortableSpeedDialTile({
 export function SpeedDialWidget() {
   const settings = useSettingsStore((s) => s.settings.speedDial);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
+  const { t } = useT();
   const groups = settings?.groups ?? [];
   const activeGroupId = settings?.activeGroupId ?? groups[0]?.id;
   const activeGroup = groups.find((item) => item.id === activeGroupId) ?? groups[0];
@@ -256,27 +292,32 @@ export function SpeedDialWidget() {
 
   const addLink = async () => {
     if (!activeGroup || !draftUrl.trim()) return;
-    let finalUrl = draftUrl.trim();
-    if (!/^https?:\/\//i.test(finalUrl)) finalUrl = `https://${finalUrl}`;
+    const finalUrl = normalizeExternalUrl(draftUrl, { assumeHttpsWhenMissingProtocol: true });
+    if (finalUrl === null) {
+      feedback.error('链接格式无效');
+      return;
+    }
     const title = draftTitle.trim() || getHostnameLabel(finalUrl);
     const nextGroups = groups.map((group) =>
       group.id === activeGroup.id
         ? {
             ...group,
-            links: [...group.links, { id: `link-${Date.now()}`, title, url: finalUrl }],
+            links: [...group.links, { id: `link-${nanoid(8)}`, title, url: finalUrl }],
           }
         : group,
     );
     await updateSettings({ speedDial: { ...(settings ?? {}), groups: nextGroups } });
     setDraftTitle('');
     setDraftUrl('');
-    feedback.success('已添加');
+    feedback.success(t('dashboard.added'));
   };
 
   const removeLink = async (id: string) => {
     if (!activeGroup) return;
     const nextGroups = groups.map((group) =>
-      group.id === activeGroup.id ? { ...group, links: group.links.filter((l) => l.id !== id) } : group,
+      group.id === activeGroup.id
+        ? { ...group, links: group.links.filter((l) => l.id !== id) }
+        : group,
     );
     await updateSettings({ speedDial: { ...(settings ?? {}), groups: nextGroups } });
   };
@@ -302,13 +343,25 @@ export function SpeedDialWidget() {
       <Tabs
         size="small"
         activeKey={activeGroup.id}
-        onChange={(value) => void updateSettings({ speedDial: { ...(settings ?? {}), activeGroupId: value } })}
+        onChange={(value) =>
+          void updateSettings({ speedDial: { ...(settings ?? {}), activeGroupId: value } })
+        }
         items={groups.map((group) => ({ key: group.id, label: group.name }))}
       />
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => void onDragEnd(e)}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={(e) => void onDragEnd(e)}
+      >
         <SortableContext items={activeGroup.links.map((l) => l.id)} strategy={rectSortingStrategy}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(92px, 1fr))', gap: 10 }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(92px, 1fr))',
+              gap: 10,
+            }}
+          >
             {activeGroup.links.map((link) => (
               <SortableSpeedDialTile
                 key={link.id}
@@ -322,8 +375,20 @@ export function SpeedDialWidget() {
         </SortableContext>
       </DndContext>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr auto', gap: 8, marginTop: 'auto' }}>
-        <Input size="small" placeholder="名称（可选）" value={draftTitle} onChange={(e) => setDraftTitle(e.target.value)} />
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1.4fr auto',
+          gap: 8,
+          marginTop: 'auto',
+        }}
+      >
+        <Input
+          size="small"
+          placeholder="名称（可选）"
+          value={draftTitle}
+          onChange={(e) => setDraftTitle(e.target.value)}
+        />
         <Input
           size="small"
           placeholder="粘贴网址即可"
@@ -331,7 +396,13 @@ export function SpeedDialWidget() {
           onChange={(e) => setDraftUrl(e.target.value)}
           onPressEnter={() => void addLink()}
         />
-        <Button size="small" type="primary" icon={<Plus size={ICON_SIZE.MEDIUM} />} onClick={() => void addLink()} aria-label="添加快捷网站" />
+        <Button
+          size="small"
+          type="primary"
+          icon={<Plus size={ICON_SIZE.MEDIUM} />}
+          onClick={() => void addLink()}
+          aria-label="添加快捷网站"
+        />
       </div>
     </div>
   );
@@ -340,13 +411,18 @@ export function SpeedDialWidget() {
 export function CountdownWidget() {
   const countdowns = useSettingsStore((s) => s.settings.countdowns);
   const items = countdowns?.items ?? [];
+  const showPastEvents = countdowns?.showPastEvents === true;
   const { token } = theme.useToken();
+  const visibleItems = items
+    .filter((item) => showPastEvents || !formatDaysLeft(item.targetDate).overdue)
+    .slice(0, 4);
 
-  if (items.length === 0) return <MiniEmpty text="暂无倒计时" />;
+  if (visibleItems.length === 0)
+    return <MiniEmpty text={items.length === 0 ? '暂无倒计时' : '过期事项已隐藏'} />;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {items.slice(0, 4).map((item) => {
+      {visibleItems.map((item) => {
         const info = formatDaysLeft(item.targetDate);
         return (
           <div
@@ -362,10 +438,18 @@ export function CountdownWidget() {
             }}
           >
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700 }}>{item.emoji ? `${item.emoji} ${item.title}` : item.title}</div>
+              <div style={{ fontSize: 13, fontWeight: 700 }}>
+                {item.emoji ? `${item.emoji} ${item.title}` : item.title}
+              </div>
               <div style={{ fontSize: 11, color: token.colorTextTertiary }}>{item.targetDate}</div>
             </div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: info.overdue ? token.colorError : token.colorPrimary }}>
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 700,
+                color: info.overdue ? token.colorError : token.colorPrimary,
+              }}
+            >
               {info.label}
             </div>
           </div>
@@ -382,11 +466,28 @@ export function WorkCountdownWidget() {
   const finishedLabel = conf?.offLabel?.trim() || '今天收工啦';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%', gap: 10 }}>
-      <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.04em', color: info.finished ? token.colorSuccess : token.colorPrimary }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        height: '100%',
+        gap: 10,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 28,
+          fontWeight: 800,
+          letterSpacing: '-0.04em',
+          color: info.finished ? token.colorSuccess : token.colorPrimary,
+        }}
+      >
         {info.finished ? finishedLabel : info.label}
       </div>
-      <div style={{ fontSize: 12, color: token.colorTextTertiary }}>目标下班时间：{conf?.workdayEnd ?? '18:30'}</div>
+      <div style={{ fontSize: 12, color: token.colorTextTertiary }}>
+        目标下班时间：{conf?.workdayEnd ?? '18:30'}
+      </div>
     </div>
   );
 }
@@ -426,7 +527,9 @@ async function ensureNotificationPermission(): Promise<NotificationPermission> {
 /** 用 WebAudio 发一个轻柔的提示音（不引入新资源） */
 function playBeep() {
   try {
-    const Ctor = (window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext);
+    const Ctor =
+      window.AudioContext ??
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!Ctor) return;
     const ctx = new Ctor();
     const osc = ctx.createOscillator();
@@ -440,7 +543,9 @@ function playBeep() {
     gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.5);
     osc.start();
     osc.stop(ctx.currentTime + 0.55);
-    osc.onended = () => { void ctx.close(); };
+    osc.onended = () => {
+      void ctx.close();
+    };
   } catch {
     /* 用户未曾交互时 AudioContext 可能抛错，静默忽略 */
   }
@@ -457,14 +562,14 @@ export function PomodoroWidget() {
   const { token } = theme.useToken();
 
   // 配置从 settings 计算，变动立刻生效
-  const config = useMemo<PomodoroConfig>(() => ({
-    focusMinutes: conf?.focusMinutes ?? DEFAULT_POMODORO_CONFIG.focusMinutes,
-    shortBreakMinutes: conf?.shortBreakMinutes ?? DEFAULT_POMODORO_CONFIG.shortBreakMinutes,
-    longBreakMinutes: conf?.longBreakMinutes ?? DEFAULT_POMODORO_CONFIG.longBreakMinutes,
-  }), [conf?.focusMinutes, conf?.shortBreakMinutes, conf?.longBreakMinutes]);
-
-  const configRef = useRef(config);
-  configRef.current = config;
+  const config = useMemo<PomodoroConfig>(
+    () => ({
+      focusMinutes: conf?.focusMinutes ?? DEFAULT_POMODORO_CONFIG.focusMinutes,
+      shortBreakMinutes: conf?.shortBreakMinutes ?? DEFAULT_POMODORO_CONFIG.shortBreakMinutes,
+      longBreakMinutes: conf?.longBreakMinutes ?? DEFAULT_POMODORO_CONFIG.longBreakMinutes,
+    }),
+    [conf?.focusMinutes, conf?.shortBreakMinutes, conf?.longBreakMinutes],
+  );
 
   // 直接用 useState 托管完整 PomodoroState —— 首屏给默认值，
   // useEffect 里异步从 storage 读取后再 setState 覆盖
@@ -472,7 +577,7 @@ export function PomodoroWidget() {
 
   /** 将 action 应用到当前 state 并落盘 */
   const dispatch = (action: PomodoroAction) => {
-    setState((prev) => pomodoroReducer(prev, action, configRef.current));
+    setState((prev) => pomodoroReducer(prev, action, config));
   };
 
   // 首屏从存储恢复（仅一次）
@@ -483,9 +588,9 @@ export function PomodoroWidget() {
     void getData<PomodoroState>(POMODORO_STORAGE_KEY).then((raw) => {
       const snap = sanitizeStoredPomodoroState(raw);
       if (!snap) return;
-      setState(reviveState(snap, configRef.current));
+      setState(reviveState(snap, config));
     });
-  }, []);
+  }, [config]);
 
   // 每秒刷新 UI（仅运行中）
   const [, setTick] = useState(0);
@@ -506,10 +611,13 @@ export function PomodoroWidget() {
     if (remaining <= 0 && !completedOnceRef.current) {
       completedOnceRef.current = true;
       const finishedMode = state.mode;
-      const msg =
-        finishedMode === 'focus' ? '专注结束，稍作休息 🌿' : '休息结束，回到专注吧 ⚡';
+      const msg = finishedMode === 'focus' ? '专注结束，稍作休息 🌿' : '休息结束，回到专注吧 ⚡';
       if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-        try { new Notification('GroveTab · 番茄钟', { body: msg }); } catch { /* ignore */ }
+        try {
+          new Notification('GroveTab · 番茄钟', { body: msg });
+        } catch {
+          /* ignore */
+        }
       } else {
         feedback.info(msg);
       }
@@ -525,7 +633,9 @@ export function PomodoroWidget() {
       firstWriteRef.current = false;
       return;
     }
-    void setData(POMODORO_STORAGE_KEY, state).catch(() => { /* 失败忽略 */ });
+    void setData(POMODORO_STORAGE_KEY, state).catch(() => {
+      /* 失败忽略 */
+    });
   }, [state]);
 
   // 跨日检查：每分钟一次
@@ -591,7 +701,14 @@ export function PomodoroWidget() {
       >
         {minutes}:{seconds}
       </div>
-      <div style={{ height: 4, background: token.colorFillQuaternary, borderRadius: 999, overflow: 'hidden' }}>
+      <div
+        style={{
+          height: 4,
+          background: token.colorFillQuaternary,
+          borderRadius: 999,
+          overflow: 'hidden',
+        }}
+      >
         <div
           style={{
             width: `${Math.round(progress * 100)}%`,
@@ -601,20 +718,33 @@ export function PomodoroWidget() {
           }}
         />
       </div>
-      <div style={{ fontSize: 12, color: token.colorTextTertiary, display: 'flex', justifyContent: 'space-between' }}>
+      <div
+        style={{
+          fontSize: 12,
+          color: token.colorTextTertiary,
+          display: 'flex',
+          justifyContent: 'space-between',
+        }}
+      >
         <span>当前：{MODE_LABEL[state.mode]}</span>
         <span>今日 🍅 {state.todayFocus}</span>
       </div>
       <div style={{ display: 'flex', gap: 8, marginTop: 'auto' }}>
         <Button
           type="primary"
-          icon={state.running ? <Pause size={ICON_SIZE.MEDIUM} /> : <Play size={ICON_SIZE.MEDIUM} />}
+          icon={
+            state.running ? <Pause size={ICON_SIZE.MEDIUM} /> : <Play size={ICON_SIZE.MEDIUM} />
+          }
           onClick={() => void handleToggle()}
         >
           {state.running ? '暂停' : state.elapsedMs > 0 ? '继续' : '开始'}
         </Button>
         <Tooltip title="重置本轮">
-          <Button icon={<TimerReset size={ICON_SIZE.MEDIUM} />} onClick={handleReset} aria-label="重置番茄钟" />
+          <Button
+            icon={<TimerReset size={ICON_SIZE.MEDIUM} />}
+            onClick={handleReset}
+            aria-label="重置番茄钟"
+          />
         </Tooltip>
       </div>
     </div>
@@ -637,7 +767,9 @@ function SortableTodoRow({
 }) {
   const { token } = theme.useToken();
   const [hover, setHover] = useState(false);
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.id,
+  });
 
   return (
     <div
@@ -658,6 +790,10 @@ function SortableTodoRow({
       }}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      onFocusCapture={() => setHover(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setHover(false);
+      }}
     >
       <span
         {...attributes}
@@ -731,11 +867,15 @@ export function TodoWidget() {
 
   // 分组：活跃（未完成 + 刚完成 24h 内） vs 已折叠（完成超 24h）
   const { active: activeItems, collapsed } = useMemo(() => {
-    const now = Date.now();
+    const now = new Date().getTime();
     const active: TodoEntry[] = [];
     const collapsed: TodoEntry[] = [];
     for (const item of items) {
-      if (item.done && typeof item.completedAt === 'number' && now - item.completedAt >= TODO_COLLAPSE_MS) {
+      if (
+        item.done &&
+        typeof item.completedAt === 'number' &&
+        now - item.completedAt >= TODO_COLLAPSE_MS
+      ) {
         collapsed.push(item);
       } else {
         active.push(item);
@@ -748,7 +888,7 @@ export function TodoWidget() {
   const doneCount = items.filter((item) => item.done).length;
 
   const toggleItem = async (item: TodoEntry) => {
-    const nowTs = Date.now();
+    const nowTs = new Date().getTime();
     const nextItems = items.map((entry) =>
       entry.id === item.id
         ? { ...entry, done: !entry.done, completedAt: entry.done ? undefined : nowTs }
@@ -767,7 +907,7 @@ export function TodoWidget() {
     await updateSettings({
       todoWidget: {
         ...(settings ?? {}),
-        items: [...items, { id: `todo-${Date.now()}`, text: draft.trim(), done: false }],
+        items: [...items, { id: `todo-${nanoid(8)}`, text: draft.trim(), done: false }],
       },
     });
     setDraft('');
@@ -814,8 +954,15 @@ export function TodoWidget() {
         </span>
       </div>
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => void onDragEnd(e)}>
-        <SortableContext items={activeItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={(e) => void onDragEnd(e)}
+      >
+        <SortableContext
+          items={activeItems.map((i) => i.id)}
+          strategy={verticalListSortingStrategy}
+        >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {activeItems.map((item) => (
               <SortableTodoRow
@@ -856,7 +1003,12 @@ export function TodoWidget() {
                 >
                   <CheckCircle2 size={ICON_SIZE.SMALL} color={token.colorSuccess} />
                   <span style={{ flex: 1 }}>{item.text}</span>
-                  <Button type="text" size="small" icon={<Trash2 size={ICON_SIZE.MICRO} />} onClick={() => void removeItem(item.id)} />
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<Trash2 size={ICON_SIZE.MICRO} />}
+                    onClick={() => void removeItem(item.id)}
+                  />
                 </div>
               ))}
             </div>
@@ -874,7 +1026,13 @@ export function TodoWidget() {
           onPressEnter={() => void addItem()}
           onKeyDown={handleKeyDown}
         />
-        <Button size="small" type="primary" icon={<Plus size={ICON_SIZE.MEDIUM} />} onClick={() => void addItem()} aria-label="新增待办" />
+        <Button
+          size="small"
+          type="primary"
+          icon={<Plus size={ICON_SIZE.MEDIUM} />}
+          onClick={() => void addItem()}
+          aria-label="新增待办"
+        />
       </div>
     </div>
   );
@@ -914,22 +1072,27 @@ function SortableStickyCard({
   onRemove: () => void;
   onColorChange: (key: StickyColorKey) => void;
 }) {
+  const { t } = useT();
   const colorKey = resolveStickyColor(note.color);
   const palette = STICKY_PALETTE[colorKey];
-  const [draft, setDraft] = useState(note.content);
+  const [draftState, setDraftState] = useState(() => ({ id: note.id, content: note.content }));
+  const draft = draftState.id === note.id ? draftState.content : note.content;
   const [hover, setHover] = useState(false);
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: note.id });
-
-  // 外部 note.content 变更时同步
-  useEffect(() => {
-    setDraft(note.content);
-  }, [note.content]);
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: note.id,
+  });
 
   return (
     <div
       ref={setNodeRef}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      onFocusCapture={() => setHover(true)}
+      onBlurCapture={(event) => {
+        const nextTarget = event.relatedTarget;
+        if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget))
+          setHover(false);
+      }}
       style={{
         position: 'relative',
         padding: 8,
@@ -961,14 +1124,20 @@ function SortableStickyCard({
           variant="borderless"
           autoSize={{ minRows: 2, maxRows: 6 }}
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => setDraftState({ id: note.id, content: e.target.value })}
           onBlur={() => {
             const next = draft.trim();
             // 空内容自动删除（此处沿用：失焦时若内容为空则回写空，外层统一处理）
             onChange(next === '' ? '' : draft);
           }}
           placeholder="写一条随手便签…"
-          style={{ background: 'transparent', color: palette.text, padding: 0, fontSize: 12.5, resize: 'none' }}
+          style={{
+            background: 'transparent',
+            color: palette.text,
+            padding: 0,
+            fontSize: 12.5,
+            resize: 'none',
+          }}
           aria-label="便签内容"
         />
       </div>
@@ -998,15 +1167,22 @@ function SortableStickyCard({
                 width: 12,
                 height: 12,
                 padding: 0,
-                border: key === colorKey ? '2px solid #333' : `1px solid ${STICKY_PALETTE[key].border}`,
+                border:
+                  key === colorKey ? '2px solid #333' : `1px solid ${STICKY_PALETTE[key].border}`,
                 background: STICKY_PALETTE[key].bg,
                 borderRadius: 4,
                 cursor: 'pointer',
               }}
             />
           ))}
-          <Popconfirm title="删除这条便签？" onConfirm={onRemove}>
-            <Button type="text" size="small" danger aria-label="删除便签" icon={<Trash2 size={ICON_SIZE.MICRO} />} />
+          <Popconfirm title={t('dashboard.deleteSticky')} onConfirm={onRemove}>
+            <Button
+              type="text"
+              size="small"
+              danger
+              aria-label="删除便签"
+              icon={<Trash2 size={ICON_SIZE.MICRO} />}
+            />
           </Popconfirm>
         </div>
       )}
@@ -1040,7 +1216,7 @@ export function StickyWidget() {
     const nextColor = colors[notes.length % colors.length];
     await saveNotes([
       ...notes,
-      { id: `sticky-${Date.now()}`, title: '便签', content: '', color: nextColor },
+      { id: `sticky-${nanoid(8)}`, title: '便签', content: '', color: nextColor },
     ]);
   };
 
@@ -1073,7 +1249,11 @@ export function StickyWidget() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%' }}>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => void onDragEnd(e)}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={(e) => void onDragEnd(e)}
+      >
         <SortableContext items={notes.map((n) => n.id)} strategy={verticalListSortingStrategy}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto' }}>
             {notes.map((note) => (
@@ -1086,7 +1266,15 @@ export function StickyWidget() {
               />
             ))}
             {notes.length === 0 && (
-              <div style={{ fontSize: 11, color: '#8c6a00', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: '#8c6a00',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                }}
+              >
                 <StickyNote size={ICON_SIZE.SMALL} /> 还没有便签，点下方 "+ 新便签" 开始
               </div>
             )}
@@ -1161,11 +1349,11 @@ export function getWidgetTitle(type: DashboardWidgetType): string {
     countdown: '纪念日',
     workCountdown: '距离下班',
     searchBox: '极速搜索',
-    waterReminder: '喝水提醒',
+    waterReminder: '喝水打卡',
     habitTracker: '习惯打卡',
     timestampTool: '时间戳',
     jsonFormatter: 'JSON 格式化',
-    networkInfo: '网络信息',
+    networkInfo: '网络状态',
   };
   return titles[type];
 }

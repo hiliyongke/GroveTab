@@ -50,7 +50,10 @@ export function VideoBackground() {
       }
       if (type === 'file' && fileKey !== '') {
         const url = await loadVideoBlobUrl(fileKey);
-        if (cancelled) return;
+        if (cancelled) {
+          if (url !== null) URL.revokeObjectURL(url);
+          return;
+        }
         if (url !== null) {
           blobUrl = url;
           setResolvedSrc(url);
@@ -66,6 +69,12 @@ export function VideoBackground() {
 
     return () => {
       cancelled = true;
+      const video = videoRef.current;
+      if (video !== null && video.src === blobUrl) {
+        video.pause();
+        video.removeAttribute('src');
+        video.load();
+      }
       if (blobUrl !== null) URL.revokeObjectURL(blobUrl);
     };
   }, [type, rawSrc, fileKey]);

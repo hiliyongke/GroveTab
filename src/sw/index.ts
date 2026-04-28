@@ -80,9 +80,6 @@ async function flushStats(force = false): Promise<void> {
   if (!statsMem.dirty) return;
   if (!force && Date.now() - statsMem.lastFlushAt < STATS_FLUSH_INTERVAL_MS) return;
   const snapshot = new Map(statsMem.byUrl);
-  statsMem.byUrl.clear();
-  statsMem.dirty = false;
-  statsMem.lastFlushAt = Date.now();
   try {
     const existing: StatsData = (await getStats()) ?? { daily: [], lastFlushAt: 0 };
     const today = todayStr();
@@ -102,8 +99,15 @@ async function flushStats(force = false): Promise<void> {
     existing.daily = existing.daily.filter((r: StatsRecord) => r.day >= cutoffStr);
     existing.lastFlushAt = Date.now();
     await saveStats(existing);
+    statsMem.byUrl.clear();
+    statsMem.dirty = false;
+    statsMem.lastFlushAt = Date.now();
   } catch (err) {
-        console.warn(`${SW_LOG_TAG} flushStats failed`, err);
+    console.warn(`${SW_LOG_TAG} flushStats failed`, err);
+    for (const [url, count] of snapshot.entries()) {
+      statsMem.byUrl.set(url, (statsMem.byUrl.get(url) ?? 0) + count);
+    }
+    statsMem.dirty = true;
   }
 }
 
@@ -389,146 +393,3 @@ async function maybeFetchOg(url: string): Promise<void> {
     // 静默
   }
 }
-
-// ── Tab Event Listeners ───────────────────────────────
-
-chrome.tabs.onCreated.addListener((tab) => {
-  swBroadcast('tab-created', {
-    id: tab.id,
-    url: tab.url ?? tab.pendingUrl ?? '',
-    title: tab.title ?? '',
-    windowId: tab.windowId,
-    pinned: tab.pinned,
-    incognito: tab.incognito,
-  });
-});
-
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  // Only broadcast meaningful changes
-  if (changeInfo.url || changeInfo.title || changeInfo.favIconUrl || changeInfo.status === 'complete') {
-    swBroadcast('tab-updated', {
-      id: tabId,
-      url: tab.url ?? '',
-      title: tab.title ?? '',
-      favIconUrl: tab.favIconUrl ?? '',
-      windowId: tab.windowId,
-      status: changeInfo.status,
-    });
-  }
-
-  // 检测 discarded 状态变化（Chrome Memory Saver 或其他扩展触发）——
-  // 注意：changeInfo.discarded 不一定每次都存在，需要拿 tab 对象本身的 discarded 做比对
-  const discarded = tab.discarded ?? false;
-  const prev = cachedTabDiscardedState.get(tabId);
-  if (prev !== discarded) {
-    cachedTabDiscardedState.set(tabId, discarded);
-    swBroadcast('tab-discarded', { id: tabId, discarded, windowId: tab.windowId });
-  }
-});
-
-chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
-  swBroadcast('tab-removed', {
-    id: tabId,
-    windowId: removeInfo.windowId,
-    isWindowClosing: removeInfo.isWindowClosing,
-  });
-});
-
-chrome.tabs.onActivated.addListener((activeInfo) => {
-  swBroadcast('tab-activated', {
-    id: activeInfo.tabId,
-    windowId: activeInfo.windowId,
-  });
-});
-
-chrome.tabs.onMoved.addListener((tabId, moveInfo) => {
-  swBroadcast('tab-moved', {
-    id: tabId,
-    windowId: moveInfo.windowId,
-    fromIndex: moveInfo.fromIndex,
-    toIndex: moveInfo.toIndex,
-  });
-});
-
-// ── Window Event Listeners ────────────────────────────
-
-chrome.windows.onFocusChanged.addListener((windowId) => {
-  swBroadcast('window-focus-changed', { windowId });
-});
-
-// ── Context Menu ──────────────────────────────────────
-
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.contextMenus.create({
-    id: 'canopy-save-all',
-    title: chrome.i18n.getMessage('context_save_all') || `Save all tabs to ${BRAND.name}`,
-    contexts: ['action'],
-  });
-});
-
-chrome.contextMenus.onClicked.addListener((info) => {
-  void (async () => {
-    if (info.menuItemId === 'canopy-save-all') {
-      try {
-        await archiveCurrentWindowTabs();
-      } catch (err) {
-        console.error(`${SW_LOG_TAG} Save all tabs failed:`, err);
-      }
-    }
-  })();
-});
-
-// ── 全局快捷键 ──────────────────────────────────
-
-chrome.commands.onCommand.addListener((command) => {
-  void (async () => {
-    if (command === 'open-grovetab') {
-      /** 在当前窗口打开 GroveTab 新标签页 */
-      try {
-        const url = chrome.runtime.getURL('src/pages/newtab/index.html');
-        await chrome.tabs.create({ url });
-      } catch (err) {
-        console.error(`${SW_LOG_TAG} Open ${BRAND.name} failed:`, err);
-      }
-    }
-
-    if (command === 'save-all-tabs') {
-      /** 归档当前窗口所有标签——复用 archive-handler 公共逻辑 */
-      try {
-        await archiveCurrentWindowTabs();
-      } catch (err) {
-        console.error(`${SW_LOG_TAG} Save all (command) failed:`, err);
-      }
-    }
-
-    if (command === 'toggle-search') {
-      /** 打开 GroveTab 并聚焦搜索框——通过 URL hash 传递信号 */
-      try {
-        const url = chrome.runtime.getURL('src/pages/newtab/index.html#search');
-        await chrome.tabs.create({ url });
-      } catch (err) {
-        console.error(`${SW_LOG_TAG} Toggle search failed:`, err);
-      }
-    }
-  })();
-});
-// ── Alarms ────────────────────────────────────────────
-
-void chrome.alarms.create('canopy-stats-heartbeat', { periodInMinutes: 1 });
-
-chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === 'canopy-stats-heartbeat') {
-    // 检查 tab discarded 状态变化（用于跨窗口同步）
-    void checkDiscardedTabs();
-  }
-});
-
-// ── Lifecycle ─────────────────────────────────────────
-
-self.addEventListener('install', () => {
-  console.log(`${SW_LOG_TAG} Installed`);
-});
-
-self.addEventListener('activate', () => {
-  console.log(`${SW_LOG_TAG} Activated`);
-});

@@ -34,6 +34,7 @@ import { useTabsStore, useUndoStore, useMetadataStore } from '@/store';
 import { feedback } from '@/shared/ui/feedback';
 import { SessionItem } from './components/SessionItem';
 import { iconColor } from '@/shared/utils/icon-colors';
+import { isSafeExternalUrl } from '@/shared/utils/url-safety';
 
 /* ---------- 简易外部 store 同步归档列表 ---------- */
 let sessionsCache: ArchivedSession[] = [];
@@ -108,8 +109,8 @@ export function ArchivePanel({ open, onOpenChange, onSessionsChange }: ArchivePa
         window.setTimeout(() => setHighlightId(null), 3000);
       }
     };
-    window.addEventListener('canopy:highlight-session', handler as EventListener);
-    return () => window.removeEventListener('canopy:highlight-session', handler as EventListener);
+    window.addEventListener('canopy:highlight-session', handler);
+    return () => window.removeEventListener('canopy:highlight-session', handler);
   }, []);
 
   const handleAfterOpenChange = useCallback(
@@ -229,6 +230,10 @@ export function ArchivePanel({ open, onOpenChange, onSessionsChange }: ArchivePa
   };
 
   const handleOpenSingle = async (tab: { url: string }) => {
+    if (!isSafeExternalUrl(tab.url)) {
+      feedback.error(t('archive.restoreFailed'));
+      return;
+    }
     try {
       const currentWindow = await getCurrentWindow();
       await createTab({ url: tab.url, windowId: currentWindow?.id, active: true });
