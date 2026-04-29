@@ -22,7 +22,8 @@ export type SkinPresetId =
   | 'elegant'
   | 'nord'
   | 'solarized'
-  | 'pastel';
+  | 'pastel'
+  | 'apple';
 
 /** 毛玻璃配置 */
 export interface GlassConfig {
@@ -206,10 +207,10 @@ export const SKIN_PRESETS: SkinPreset[] = [
     motionEaseInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
     motionEaseOut: 'cubic-bezier(0, 0, 0.2, 1)',
 
-    colorBgLayoutLight: '#F3F6FB',
-    colorBgContainerLight: '#FFFFFF',
-    colorBgElevatedLight: '#FCFDFF',
-    colorBorderSecondaryLight: '#DCE5F2',
+    colorBgLayoutLight: '#F2F3F5',
+    colorBgContainerLight: '#FAFAFB',
+    colorBgElevatedLight: '#FFFFFF',
+    colorBorderSecondaryLight: '#E5E6EB',
 
     colorBgLayoutDark: '#0F1726',
     colorBgContainerDark: '#162033',
@@ -219,7 +220,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
     glass: {
       blur: 18,
       saturate: 132,
-      bgLight: 'rgba(252, 253, 255, 0.78)',
+      bgLight: 'rgba(250, 250, 251, 0.78)',
       bgDark: 'rgba(13, 22, 36, 0.76)',
     },
 
@@ -278,84 +279,94 @@ export const SKIN_PRESETS: SkinPreset[] = [
   },
 
   // ═══════════════════════════════════════════════════
-  // 2. Glassmorphism — 液态玻璃风（WWDC 2025 / visionOS 风格）
+  // 2. Glassmorphism — 微软 Fluent Acrylic（液态玻璃）
+  //
+  // 设计参考：
+  //   Microsoft Fluent Design System —— Acrylic Material
+  //   核心特征：
+  //     · 多层半透明叠加（底色 tint → 模糊层 → 噪点层 → 辉光层）
+  //     · 高模糊度（40-60px）+ 高饱和度（180-200%）让底层色彩"溢出"
+  //     · 显性噪点纹理（0.04-0.06，Fluent Acrylic 的标志）
+  //     · 柔和的 inset 顶部高光线（模拟光线折射）
+  //     · 微软 Fluent Blue (#0078D4) 品牌色
+  //   暗色模式参考 Mica Alt（更深、更沉浸的半透明）
   // ═══════════════════════════════════════════════════
   {
     id: 'glassmorphism',
     labelKey: 'skin.glassmorphism',
     descriptionKey: 'skin.glassmorphismDesc',
-    previewColors: ['#5BA4E6', 'rgba(255,255,255,0.4)', '#7BB8F0'],
+    previewColors: ['#0078D4', 'rgba(255,255,255,0.45)', '#2B88D8'],
     compatibleMode: 'both',
 
-    colorPrimary: '#5BA4E6',
-    colorPrimaryHover: '#7BB8F0',
+    colorPrimary: '#0078D4',
+    colorPrimaryHover: '#2B88D8',
 
-    borderRadius: 16,
-    borderRadiusLG: 20,
-    borderRadiusSM: 12,
-    borderRadiusXS: 8,
+    borderRadius: 8,
+    borderRadiusLG: 12,
+    borderRadiusSM: 6,
+    borderRadiusXS: 4,
 
-    controlHeight: 38,
-    controlHeightLG: 46,
-    controlHeightSM: 30,
+    controlHeight: 36,
+    controlHeightLG: 44,
+    controlHeightSM: 28,
 
     fontFamily:
-      '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Rounded", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif',
+      '"Segoe UI Variable", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Roboto, Arial, "Noto Sans SC", "Microsoft YaHei", sans-serif',
     fontFamilyHeading:
-      '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Rounded", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif',
+      '"Segoe UI Variable Display", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Roboto, Arial, "Noto Sans SC", "Microsoft YaHei", sans-serif',
     fontSize: 14,
 
-    padding: 22,
-    paddingLG: 28,
-    paddingSM: 14,
+    padding: 20,
+    paddingLG: 24,
+    paddingSM: 12,
 
-    motionDurationSlow: '0.4s',
+    motionDurationSlow: '0.367s',
     motionDurationMid: '0.25s',
     motionDurationFast: '0.15s',
-    motionEaseInOut: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+    motionEaseInOut: 'cubic-bezier(0.16, 1, 0.3, 1)',
     motionEaseOut: 'cubic-bezier(0.0, 0.0, 0.2, 1)',
 
-    colorBgLayoutLight: '#f0f0f5',
+    colorBgLayoutLight: '#F3F3F3',
     colorBgContainerLight: 'rgba(255, 255, 255, 0.55)',
-    colorBgElevatedLight: 'rgba(255, 255, 255, 0.7)',
-    colorBorderSecondaryLight: 'rgba(0, 0, 0, 0.08)',
+    colorBgElevatedLight: 'rgba(255, 255, 255, 0.72)',
+    colorBorderSecondaryLight: 'rgba(0, 0, 0, 0.06)',
 
-    colorBgLayoutDark: '#0d0d12',
-    colorBgContainerDark: 'rgba(40, 40, 50, 0.5)',
-    colorBgElevatedDark: 'rgba(55, 55, 68, 0.6)',
-    colorBorderSecondaryDark: 'rgba(255, 255, 255, 0.1)',
+    colorBgLayoutDark: '#202020',
+    colorBgContainerDark: 'rgba(44, 44, 44, 0.65)',
+    colorBgElevatedDark: 'rgba(59, 59, 59, 0.72)',
+    colorBorderSecondaryDark: 'rgba(255, 255, 255, 0.08)',
 
     glass: {
-      blur: 40,
+      blur: 60,
       saturate: 200,
-      bgLight: 'rgba(255, 255, 255, 0.5)',
-      bgDark: 'rgba(30, 30, 40, 0.5)',
+      bgLight: 'rgba(252, 252, 252, 0.65)',
+      bgDark: 'rgba(44, 44, 44, 0.58)',
     },
 
     shadow: {
       card: {
-        light: '0 2px 8px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.5)',
-        dark: '0 2px 8px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.08)',
+        light: '0 1px 2px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.48)',
+        dark: '0 1px 2px rgba(0,0,0,0.28), 0 2px 8px rgba(0,0,0,0.22), 0 8px 24px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.06)',
       },
       cardHover: {
-        light: '0 4px 16px rgba(0,0,0,0.06), 0 16px 48px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)',
-        dark: '0 4px 16px rgba(0,0,0,0.4), 0 16px 48px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.12)',
+        light: '0 2px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.08), 0 12px 32px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.56)',
+        dark: '0 2px 4px rgba(0,0,0,0.36), 0 4px 16px rgba(0,0,0,0.28), 0 12px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)',
       },
       floating: {
-        light: '0 4px 16px rgba(91,164,230,0.08), 0 16px 48px rgba(0,0,0,0.08)',
-        dark: '0 4px 16px rgba(91,164,230,0.1), 0 16px 48px rgba(0,0,0,0.4)',
+        light: '0 4px 16px rgba(0,0,0,0.06), 0 16px 48px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.4)',
+        dark: '0 4px 16px rgba(0,0,0,0.4), 0 16px 48px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.06)',
       },
       brandGlow: {
-        light: '0 4px 24px rgba(91,164,230,0.08), 0 0 0 1px rgba(0,0,0,0.04)',
-        dark: '0 4px 24px rgba(91,164,230,0.1), 0 0 0 1px rgba(255,255,255,0.06)',
+        light: '0 2px 16px rgba(0,120,212,0.1), 0 0 0 1px rgba(0,0,0,0.03)',
+        dark: '0 2px 16px rgba(0,120,212,0.12), 0 0 0 1px rgba(255,255,255,0.04)',
       },
     },
 
     texture: {
       noise: true,
-      noiseOpacity: 0.03,
+      noiseOpacity: 0.05,
       grid: false,
-      gridColor: { light: 'rgba(0,0,0,0.02)', dark: 'rgba(255,255,255,0.02)' },
+      gridColor: { light: 'rgba(0,0,0,0.015)', dark: 'rgba(255,255,255,0.015)' },
     },
 
     cardStyle: {
@@ -366,23 +377,23 @@ export const SKIN_PRESETS: SkinPreset[] = [
     },
 
     searchBox: {
-      height: 56,
-      borderRadius: 20,
-      fontSize: 16,
+      height: 44,
+      borderRadius: 8,
+      fontSize: 15,
     },
 
     header: {
-      height: 58,
+      height: 48,
     },
 
-    logoGradient: 'linear-gradient(135deg, #5BA4E6, #7BB8F0)',
+    logoGradient: 'linear-gradient(135deg, #0078D4, #2B88D8)',
     logoGlowShadow: {
-      light: '0 2px 12px rgba(91,164,230,0.2)',
-      dark: '0 2px 12px rgba(91,164,230,0.18)',
+      light: '0 2px 10px rgba(0,120,212,0.18)',
+      dark: '0 2px 10px rgba(0,120,212,0.14)',
     },
 
     floatingBar: {
-      borderRadius: 20,
+      borderRadius: 8,
     },
   },
 
@@ -971,6 +982,115 @@ export const SKIN_PRESETS: SkinPreset[] = [
 
     floatingBar: {
       borderRadius: 24,
+    },
+  },
+
+  // ═══════════════════════════════════════════════════
+  // 9. Apple — Apple 官网设计语言（SF Pro、双色节奏、Apple Blue 强调）
+  // ═══════════════════════════════════════════════════
+  {
+    id: 'apple',
+    labelKey: 'skin.apple',
+    descriptionKey: 'skin.appleDesc',
+    previewColors: ['#0071e3', '#f5f5f7', '#1d1d1f'],
+    compatibleMode: 'both',
+
+    colorPrimary: '#0071e3',
+    colorPrimaryHover: '#2997ff',
+
+    borderRadius: 8,
+    borderRadiusLG: 12,
+    borderRadiusSM: 5,
+    borderRadiusXS: 4,
+
+    controlHeight: 36,
+    controlHeightLG: 44,
+    controlHeightSM: 28,
+
+    fontFamily:
+      '"SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Roboto, Arial, "Noto Sans SC", "PingFang SC", sans-serif',
+    fontFamilyHeading:
+      '"SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", Roboto, Arial, "Noto Sans SC", "PingFang SC", sans-serif',
+    fontSize: 14,
+
+    padding: 20,
+    paddingLG: 24,
+    paddingSM: 12,
+
+    motionDurationSlow: '0.35s',
+    motionDurationMid: '0.22s',
+    motionDurationFast: '0.12s',
+    motionEaseInOut: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
+    motionEaseOut: 'cubic-bezier(0, 0, 0.2, 1)',
+
+    colorBgLayoutLight: '#f5f5f7',
+    colorBgContainerLight: '#ffffff',
+    colorBgElevatedLight: '#fafafc',
+    colorBorderSecondaryLight: 'rgba(0, 0, 0, 0.04)',
+
+    colorBgLayoutDark: '#000000',
+    colorBgContainerDark: '#1c1c1e',
+    colorBgElevatedDark: '#2c2c2e',
+    colorBorderSecondaryDark: 'rgba(255, 255, 255, 0.08)',
+
+    glass: {
+      blur: 20,
+      saturate: 180,
+      bgLight: 'rgba(251, 251, 253, 0.82)',
+      bgDark: 'rgba(0, 0, 0, 0.8)',
+    },
+
+    shadow: {
+      card: {
+        light: 'rgba(0, 0, 0, 0.22) 3px 5px 30px 0px',
+        dark: 'rgba(0, 0, 0, 0.44) 3px 5px 30px 0px',
+      },
+      cardHover: {
+        light: 'rgba(0, 0, 0, 0.22) 5px 8px 36px 0px',
+        dark: 'rgba(0, 0, 0, 0.52) 5px 8px 36px 0px',
+      },
+      floating: {
+        light: 'rgba(0, 0, 0, 0.22) 3px 5px 30px 0px',
+        dark: 'rgba(0, 0, 0, 0.44) 3px 5px 30px 0px',
+      },
+      brandGlow: {
+        light: '0 0 0 2px #0071e3',
+        dark: '0 0 0 2px #0071e3',
+      },
+    },
+
+    texture: {
+      noise: false,
+      noiseOpacity: 0,
+      grid: false,
+      gridColor: { light: 'rgba(0,0,0,0.02)', dark: 'rgba(255,255,255,0.02)' },
+    },
+
+    cardStyle: {
+      borderWidth: 0,
+      hoverBorderWidth: 0,
+      hoverLift: false,
+      liftDistance: 0,
+    },
+
+    searchBox: {
+      height: 44,
+      borderRadius: 11,
+      fontSize: 15,
+    },
+
+    header: {
+      height: 48,
+    },
+
+    logoGradient: 'linear-gradient(135deg, #0071e3, #2997ff)',
+    logoGlowShadow: {
+      light: '0 0 0 2px #0071e3',
+      dark: '0 0 0 2px #0071e3',
+    },
+
+    floatingBar: {
+      borderRadius: 11,
     },
   },
 ];

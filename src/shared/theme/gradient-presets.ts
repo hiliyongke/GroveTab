@@ -52,7 +52,7 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
     labelKey: 'gradient.default',
     light: 'var(--ant-color-bg-layout)',
     dark: 'var(--ant-color-bg-layout)',
-    colors: ['#ffffff', '#f5f5f5', '#e8e8e8'],
+    colors: ['#FAFAFB', '#F2F3F5', '#E8E9ED'],
     compatibleMode: 'both',
   },
   {

@@ -72,7 +72,6 @@ import { VIEW_CONFIGS, VALID_VIEWS, type ViewMode } from '@/shared/config/views'
 import { registerViews, getViewComponentMap } from '@/shared/config/view-registry';
 import { findDuplicates } from '@/shared/utils/dedupe';
 import { detectIdleTabs } from '@/shared/utils/idle-detect';
-import { DashboardOverview, type DashboardJumpTarget } from '@/features/dashboard/DashboardOverview';
 import { ActivityStrip } from '@/features/dashboard/ActivityStrip';
 import { WorkspaceSwitcher } from '@/features/workspace/WorkspaceSwitcher';
 const InsightsPanel = lazy(() => import('@/features/insights/InsightsPanel'));
@@ -127,6 +126,7 @@ function AppHeader({
   onSettings,
   onOpenSearch,
   onInsights,
+  onTidy,
 }: {
   tabCount: number;
   domainCount: number;
@@ -140,6 +140,8 @@ function AppHeader({
   onSettings: () => void;
   onOpenSearch: () => void;
   onInsights?: () => void;
+  /** 一键整理回调 */
+  onTidy?: () => void;
 }) {
   const theme = useSettingsStore((s) => s.settings.theme);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
@@ -197,6 +199,15 @@ function AppHeader({
                 {duplicateTabsCount + idleTabsCount}
               </span>{' '}
               {t('header.pending')}
+              {onTidy && (
+                <button
+                  type="button"
+                  className="app-header-tidy-link"
+                  onClick={onTidy}
+                >
+                  {t('dashboard.tidyAction')}
+                </button>
+              )}
             </>
           )}
         </span>
@@ -448,9 +459,7 @@ function AppContent() {
   }, [initialSettingsTab]);
   const [showSettings, setShowSettings] = useState(initialSettingsTab === 'about');
   const [showInsights, setShowInsights] = useState(false);
-  /** 记录最近归档首条，供 Dashboard Overview "最近归档"卡片显示 */
-  const [latestArchive, setLatestArchive] = useState<ArchivedSession | null>(null);
-  /** tidyExpandSignal 对 TidySuggestionBar：默认为 0，点 "一键整理" / Dashboard 卡片时 +1 触发展开 */
+  /** tidyExpandSignal 对 TidySuggestionBar：默认为 0，点 "一键整理" 时 +1 触发展开 */
   const [tidyExpandSignal, setTidyExpandSignal] = useState(0);
   /** Hero 搜索框是否已滚出视野——用于驱动 Header 吸附搜索渐显 */
   const [compactSearchVisible, setCompactSearchVisible] = useState(false);
@@ -476,10 +485,10 @@ function AppContent() {
   const layoutBackground = resolveGradient(gradientPreset, resolvedDark, customGradient);
   const { t } = useT();
 
-  /** 归档数据同步回调 —— ArchivePanel 变更后触发刷新，同时更新 latestArchive */
-  const syncArchiveSummary = useCallback((sessions: ArchivedSession[]) => {
-    // 取最新一条作为 latestArchive（会话本身按创建时间倒序传回）
-    setLatestArchive(sessions.length > 0 ? sessions[0] : null);
+  /** 归档数据同步回调（ArchivePanel 变更后触发） */
+  const syncArchiveSummary = useCallback((_sessions: ArchivedSession[]) => {
+    // 保留回调签名供 ArchivePanel onSessionsChange 使用
+    // DashboardOverview 已移除，不再需要追踪 latestArchive
   }, []);
 
   const refreshArchiveSummary = useCallback(async () => {
@@ -795,6 +804,10 @@ function AppContent() {
           onSettings={handleOpenSettings}
           onOpenSearch={handleOpenSearch}
           onInsights={handleOpenInsights}
+          onTidy={() => {
+            setTidyExpandSignal((s) => s + 1);
+            tidySectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }}
         />
       )}
 
@@ -856,53 +869,10 @@ function AppContent() {
             {showOnboarding && <OnboardingCard onDismiss={() => setShowOnboarding(false)} />}
 
             {/* Activity Strip —— 最近操作胶囊横条（60min 窗口内才渲染） */}
-        <ActivityStrip
+            <ActivityStrip
           onOpenArchive={() => setShowArchive(true)}
           onOpenImportResult={() => setShowArchive(true)}
         />
-
-        {/* Dashboard Overview —— 首页工作区概览（6 统计 + 3 操作） */}
-        {uiVisibility?.workspaceOverview !== false && (
-          <DashboardOverview
-            tabs={tabs}
-            duplicateCount={duplicateTabsCount}
-            idleCount={idleTabsCount}
-            latestArchive={latestArchive}
-            onJump={(target: DashboardJumpTarget) => {
-              switch (target) {
-                case 'mainView':
-                  tidySectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  break;
-                case 'domainView':
-                  handleViewChange('domain');
-                  break;
-                case 'windowView':
-                  handleViewChange('window');
-                  break;
-                case 'tidyDup':
-                case 'tidyIdle':
-                  setTidyExpandSignal((s) => s + 1);
-                  tidySectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  break;
-                case 'archive':
-                  setShowArchive(true);
-                  break;
-                default:
-                  break;
-              }
-            }}
-            onSearch={handleOpenSearch}
-            onTidy={() => {
-              setTidyExpandSignal((s) => s + 1);
-              tidySectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }}
-            onArchive={() => {
-              // 快捷入口：与 header 的归档按钮等价，打开 ArchivePanel 让用户确认或发起 SaveAll
-              setShowArchive(true);
-            }}
-            onInsights={handleOpenInsights}
-          />
-        )}
 
         {selectionMode && (
           <SelectionModeNotice

@@ -183,7 +183,7 @@ export interface UserSettings {
    *   - 'nord'           ：Nord 寒色调（深蓝青冷，深浅皆宜）
    *   - 'solarized'      ：Solarized 太阳化（暖米 + 青黄对比）
    */
-  skinPreset?: 'minimal' | 'glassmorphism' | 'skeuomorphism' | 'aurora' | 'elegant' | 'nord' | 'solarized' | 'pastel';
+  skinPreset?: 'minimal' | 'glassmorphism' | 'skeuomorphism' | 'aurora' | 'elegant' | 'nord' | 'solarized' | 'pastel' | 'apple';
 
   /**
    * UI Token 极客定制（v1.1 新增）：在皮肤预设基础上做单项覆盖。

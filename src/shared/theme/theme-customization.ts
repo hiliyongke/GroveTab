@@ -139,24 +139,24 @@ export function buildAntdThemeConfig(
             colorBgContainer: skin.colorBgContainerDark,
             colorBgElevated: skin.colorBgElevatedDark,
             colorBgLayout: skin.colorBgLayoutDark,
-            colorBgSpotlight: '#262629',
+            colorBgSpotlight: skinId === 'apple' ? '#2c2c2e' : '#262629',
             colorBorderSecondary: skin.colorBorderSecondaryDark,
-            colorText: 'rgba(244, 248, 255, 0.92)',
-            colorTextSecondary: 'rgba(212, 223, 242, 0.78)',
-            colorTextTertiary: 'rgba(173, 194, 227, 0.58)',
-            colorFillQuaternary: 'rgba(154, 183, 229, 0.1)',
-            colorFillTertiary: 'rgba(154, 183, 229, 0.14)',
+            colorText: skinId === 'apple' ? '#ffffff' : 'rgba(244, 248, 255, 0.92)',
+            colorTextSecondary: skinId === 'apple' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(212, 223, 242, 0.78)',
+            colorTextTertiary: skinId === 'apple' ? 'rgba(255, 255, 255, 0.48)' : 'rgba(173, 194, 227, 0.58)',
+            colorFillQuaternary: skinId === 'apple' ? 'rgba(255, 255, 255, 0.06)' : 'rgba(154, 183, 229, 0.1)',
+            colorFillTertiary: skinId === 'apple' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(154, 183, 229, 0.14)',
           }
         : {
             colorBgLayout: skin.colorBgLayoutLight,
             colorBgContainer: skin.colorBgContainerLight,
             colorBgElevated: skin.colorBgElevatedLight,
             colorBorderSecondary: skin.colorBorderSecondaryLight,
-            colorText: '#1A2740',
-            colorTextSecondary: '#4D5D79',
-            colorTextTertiary: '#6F809B',
-            colorFillQuaternary: 'rgba(43, 107, 255, 0.06)',
-            colorFillTertiary: 'rgba(43, 107, 255, 0.1)',
+            colorText: skinId === 'apple' ? '#1d1d1f' : '#1F2329',
+            colorTextSecondary: skinId === 'apple' ? 'rgba(0, 0, 0, 0.8)' : '#646A73',
+            colorTextTertiary: skinId === 'apple' ? 'rgba(0, 0, 0, 0.48)' : '#8F959E',
+            colorFillQuaternary: skinId === 'apple' ? 'rgba(0, 0, 0, 0.04)' : 'rgba(31, 35, 41, 0.04)',
+            colorFillTertiary: skinId === 'apple' ? 'rgba(0, 0, 0, 0.06)' : 'rgba(31, 35, 41, 0.06)',
           }),
     },
     components: {
@@ -193,8 +193,12 @@ export function buildAntdThemeConfig(
       Segmented: {
         borderRadius: skin.borderRadius,
         borderRadiusSM: skin.borderRadiusSM,
-        itemActiveBg: isDark ? 'rgba(98, 140, 255, 0.18)' : 'rgba(43, 107, 255, 0.14)',
-        itemSelectedBg: isDark ? 'rgba(98, 140, 255, 0.22)' : '#ffffff',
+        itemActiveBg: isDark
+          ? (skinId === 'apple' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(98, 140, 255, 0.18)')
+          : (skinId === 'apple' ? 'rgba(0, 0, 0, 0.06)' : 'rgba(43, 107, 255, 0.14)'),
+        itemSelectedBg: isDark
+          ? (skinId === 'apple' ? 'rgba(255, 255, 255, 0.16)' : 'rgba(98, 140, 255, 0.22)')
+          : (skinId === 'apple' ? '#ffffff' : '#ffffff'),
       },
       Tabs: {
         itemColor: isDark ? 'rgba(212, 223, 242, 0.72)' : '#60708A',
@@ -206,10 +210,14 @@ export function buildAntdThemeConfig(
         borderRadiusSM: skin.borderRadiusXS,
       },
       Select: {
-        optionSelectedBg: isDark ? 'rgba(98, 140, 255, 0.18)' : 'rgba(43, 107, 255, 0.1)',
+        optionSelectedBg: isDark
+          ? (skinId === 'apple' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(98, 140, 255, 0.18)')
+          : (skinId === 'apple' ? 'rgba(0, 113, 227, 0.08)' : 'rgba(43, 107, 255, 0.1)'),
       },
       Dropdown: {
-        controlItemBgHover: isDark ? 'rgba(98, 140, 255, 0.16)' : 'rgba(43, 107, 255, 0.08)',
+        controlItemBgHover: isDark
+          ? (skinId === 'apple' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(98, 140, 255, 0.16)')
+          : (skinId === 'apple' ? 'rgba(0, 0, 0, 0.04)' : 'rgba(43, 107, 255, 0.08)'),
       },
       Tooltip: {
         colorBgSpotlight: isDark ? 'rgba(18, 28, 44, 0.94)' : 'rgba(24, 37, 59, 0.9)',
@@ -245,8 +253,12 @@ export function buildAppThemeVars(
     '--app-glass-saturate': `${skin.glass.saturate}%`,
     '--app-glass-bg': isDark ? skin.glass.bgDark : skin.glass.bgLight,
     '--app-page-gradient': isDark
-      ? 'radial-gradient(circle at top, rgba(78, 119, 214, 0.16), transparent 42%), linear-gradient(180deg, #0F1726 0%, #10192A 54%, #0C1422 100%)'
-      : 'radial-gradient(circle at top, rgba(74, 123, 255, 0.16), transparent 38%), linear-gradient(180deg, #F7FAFF 0%, #F0F5FD 52%, #E9EFF9 100%)',
+      ? skinId === 'apple'
+        ? 'none'
+        : 'radial-gradient(circle at top, rgba(78, 119, 214, 0.12), transparent 42%), linear-gradient(180deg, #0F1726 0%, #10192A 54%, #0C1422 100%)'
+      : skinId === 'apple'
+        ? 'none'
+        : 'radial-gradient(circle at top, rgba(120, 130, 160, 0.08), transparent 38%), linear-gradient(180deg, #F5F5F7 0%, #F0F0F3 52%, #E9E9ED 100%)',
     '--app-glass-filter': `blur(${skin.glass.blur}px) saturate(${skin.glass.saturate}%)`,
 
     '--app-shadow-card': isDark ? skin.shadow.card.dark : skin.shadow.card.light,

@@ -194,7 +194,7 @@ export const DashboardOverview = memo(function DashboardOverview({
             icon={<Zap size={ICON_SIZE.DEFAULT} />}
             onClick={onTidy}
             disabled={pendingCount === 0}
-            className="dashboard-overview__action-btn"
+            className="dashboard-overview__action-btn dashboard-overview__action-btn--tidy"
           >
             {t('dashboard.tidyAction')}
           </Button>

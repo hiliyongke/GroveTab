@@ -421,3 +421,435 @@ html[data-texture-noise] body::before {
     transform: none !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════
+ * Apple 皮肤覆盖样式（data-skin="apple"）
+ *
+ * 核心设计语言：
+ *   - 导航栏：深色半透明毛玻璃（rgba(0,0,0,0.8) + blur 20px）
+ *   - 按钮：pill 形（980px radius）、Apple Blue (#0071e3) 强调
+ *   - 卡片：无边框、无 hover 上浮、柔和阴影
+ *   - 排版：SF Pro Display/Text、紧凑行高、负字间距
+ *   - 背景：纯色无渐变，#f5f5f7 (light) / #000000 (dark)
+ * ═══════════════════════════════════════════════════════ */
+
+[data-skin='apple'] {
+  /* ── 导航栏：深色半透明毛玻璃（Apple 标志性效果）── */
+  --app-apple-nav-bg: rgba(0, 0, 0, 0.8);
+  --app-apple-nav-filter: saturate(180%) blur(20px);
+  --app-apple-nav-text: #ffffff;
+  --app-apple-nav-text-hover: rgba(255, 255, 255, 0.7);
+  --app-apple-link-light: #0066cc;
+  --app-apple-link-dark: #2997ff;
+
+  /* Apple 专属字体特征 */
+  --app-apple-letter-spacing-body: -0.01em;
+  --app-apple-letter-spacing-heading: -0.02em;
+
+  /* ── 排版微调 ── */
+  letter-spacing: var(--app-apple-letter-spacing-body);
+}
+
+/* Apple 皮肤标题负字间距 */
+[data-skin='apple'] h1,
+[data-skin='apple'] h2,
+[data-skin='apple'] h3,
+[data-skin='apple'] h4,
+[data-skin='apple'] .app-hero-title {
+  letter-spacing: var(--app-apple-letter-spacing-heading);
+}
+
+/* ── Apple 导航栏样式覆盖 ── */
+[data-skin='apple'] .app-header-shell {
+  background: var(--app-apple-nav-bg);
+  backdrop-filter: var(--app-apple-nav-filter);
+  -webkit-backdrop-filter: var(--app-apple-nav-filter);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  color: var(--app-apple-nav-text);
+}
+
+/* 导航栏文本颜色 */
+[data-skin='apple'] .app-header-shell .ant-tag {
+  color: var(--app-apple-nav-text);
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+[data-skin='apple'] .app-header-metrics,
+[data-skin='apple'] .app-header-metric-strong,
+[data-skin='apple'] .app-header-dot {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+[data-skin='apple'] .app-header-metric-strong {
+  color: #ffffff;
+}
+
+/* 导航栏图标颜色 */
+[data-skin='apple'] .app-header-shell .app-icon--theme {
+  color: #ffffff;
+}
+
+[data-skin='apple'] .app-header-shell .app-icon--settings,
+[data-skin='apple'] .app-header-shell .app-icon--archive,
+[data-skin='apple'] .app-header-shell .app-icon--insights {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+[data-skin='apple'] .app-header-shell .app-icon--search {
+  color: #ffffff;
+}
+
+/* 导航栏搜索触发器 */
+[data-skin='apple'] .app-header-search-trigger {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+[data-skin='apple'] .app-header-search-trigger.is-visible {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+[data-skin='apple'] .app-header-search-trigger .app-kbd {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 11px;
+}
+
+/* ── Apple Segmented 视图切换器 ── */
+[data-skin='apple'] .ant-segmented {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme='dark'][data-skin='apple'] .ant-segmented {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ═══════════════════════════════════════════════════════
+ * Apple 皮肤扩展覆盖
+ *
+ * 注：导航栏、Hero 搜索框等核心覆盖在 app-shell.css 中
+ * 这里补充全局组件级覆盖
+ * ═══════════════════════════════════════════════════════ */
+
+/* ── Apple 卡片：无边框 ── */
+[data-skin='apple'] .ant-card {
+  border: none;
+}
+
+[data-skin='apple'] .ant-card:hover {
+  transform: none !important;
+}
+
+/* ── Apple 按钮：pill 形 CTA ── */
+[data-skin='apple'] .ant-btn-primary {
+  border-radius: 980px;
+}
+
+/* ── Apple 链接色 ── */
+[data-skin='apple'] a,
+[data-skin='apple'] .ant-typography a {
+  color: var(--app-apple-link-light);
+}
+
+[data-theme='dark'][data-skin='apple'] a,
+[data-theme='dark'][data-skin='apple'] .ant-typography a {
+  color: var(--app-apple-link-dark);
+}
+
+/* ── Apple 聚焦态 ── */
+[data-skin='apple'] :focus-visible {
+  outline: 2px solid #0071e3;
+  outline-offset: 2px;
+}
+
+/* ── Apple DomainGroupCard：无边框、柔和阴影 ── */
+[data-skin='apple'] .app-card-interactive {
+  border: none !important;
+  border-radius: 12px;
+  box-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px 0px;
+}
+
+[data-theme='dark'][data-skin='apple'] .app-card-interactive {
+  box-shadow: rgba(0, 0, 0, 0.44) 3px 5px 30px 0px;
+}
+
+/* Apple：卡片 hover 不上浮，仅微调阴影 */
+[data-skin='apple'] .app-card-interactive:hover,
+[data-skin='apple'] .app-card-interactive:focus-within {
+  transform: none !important;
+  box-shadow: rgba(0, 0, 0, 0.26) 5px 8px 36px 0px;
+  border-color: transparent !important;
+}
+
+[data-theme='dark'][data-skin='apple'] .app-card-interactive:hover,
+[data-theme='dark'][data-skin='apple'] .app-card-interactive:focus-within {
+  box-shadow: rgba(0, 0, 0, 0.52) 5px 8px 36px 0px;
+}
+
+/* Apple：行级 hover 更柔 */
+[data-skin='apple'] .app-row-hover:hover,
+[data-skin='apple'] .app-row-hover:focus-within {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme='dark'][data-skin='apple'] .app-row-hover:hover,
+[data-theme='dark'][data-skin='apple'] .app-row-hover:focus-within {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* ── Apple ActivityStrip：pill 胶囊风格 ── */
+[data-skin='apple'] .activity-strip__item {
+  border: none;
+  border-radius: 980px;
+  background: rgba(0, 0, 0, 0.04);
+  font-size: 13px;
+  letter-spacing: -0.01em;
+}
+
+[data-theme='dark'][data-skin='apple'] .activity-strip__item {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+[data-skin='apple'] .activity-strip__icon {
+  color: #0071e3;
+}
+
+[data-theme='dark'][data-skin='apple'] .activity-strip__icon {
+  color: #2997ff;
+}
+
+[data-skin='apple'] .activity-strip__action-btn {
+  color: #0071e3 !important;
+}
+
+[data-theme='dark'][data-skin='apple'] .activity-strip__action-btn {
+  color: #2997ff !important;
+}
+
+/* ── Apple 域名分组头 ── */
+[data-skin='apple'] .app-domain-group-header {
+  letter-spacing: -0.01em;
+}
+
+/* Apple：分组内 favicon 徽章更圆润 */
+[data-skin='apple'] .app-domain-group-header div[style*="border-radius: 7px"] {
+  border-radius: 8px !important;
+}
+
+/* ── Apple Tag 标签 ── */
+[data-skin='apple'] .ant-tag {
+  border-radius: 980px;
+  border: none;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* ── Apple Segmented 视图切换器 ── */
+[data-skin='apple'] .ant-segmented {
+  border-radius: 9px;
+}
+
+[data-skin='apple'] .ant-segmented .ant-segmented-item-selected {
+  font-weight: 600;
+}
+
+/* ── Apple 空状态 ── */
+[data-skin='apple'] .app-empty-state-title {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+}
+
+[data-skin='apple'] .app-empty-state-actions .ant-btn-primary {
+  border-radius: 980px;
+}
+
+/* ── Apple TidySuggestionBar ── */
+[data-skin='apple'] .app-accordion-panel {
+  border: none;
+  border-radius: 12px;
+  box-shadow: rgba(0, 0, 0, 0.12) 2px 4px 20px 0px;
+}
+
+[data-theme='dark'][data-skin='apple'] .app-accordion-panel {
+  box-shadow: rgba(0, 0, 0, 0.32) 2px 4px 20px 0px;
+}
+
+/* ── Apple 选中态通知栏 ── */
+[data-skin='apple'] .ant-alert {
+  border-radius: 12px;
+  border: none;
+}
+
+/* ── Apple WidgetCard 覆盖 ── */
+[data-skin='apple'] .app-widget-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px 0px;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+[data-theme='dark'][data-skin='apple'] .app-widget-card {
+  box-shadow: rgba(0, 0, 0, 0.44) 3px 5px 30px 0px;
+}
+
+[data-skin='apple'] .app-widget-card:hover {
+  transform: none !important;
+}
+
+/* ── Apple 滚动条 ── */
+[data-skin='apple'] ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 999px;
+}
+
+[data-theme='dark'][data-skin='apple'] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ── Apple 选中态文字 ── */
+[data-skin='apple'] ::selection {
+  background-color: rgba(0, 113, 227, 0.18);
+  color: inherit;
+}
+
+[data-theme='dark'][data-skin='apple'] ::selection {
+  background-color: rgba(0, 113, 227, 0.32);
+}
+
+/* ═══════════════════════════════════════════════════════
+ * Fluent Acrylic（Glassmorphism）皮肤覆盖
+ *
+ * Microsoft Fluent Design System —— Acrylic Material
+ * 核心视觉：
+ *   · 多层半透明叠加（tint → blur → noise → highlight）
+ *   · 显性噪点纹理（Fluent 标志性特征）
+ *   · 柔和的 inset 顶部高光线（模拟光线折射）
+ *   · Fluent Blue (#0078D4) 强调
+ *   · 圆角回归 Fluent 标准（8px）
+ * ═══════════════════════════════════════════════════════ */
+
+/* ── Fluent Header：Acrylic 半透明底栏 ── */
+[data-skin='glassmorphism'] .app-header-shell {
+  background: var(--app-glass-bg);
+  backdrop-filter: var(--app-glass-filter);
+  -webkit-backdrop-filter: var(--app-glass-filter);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ── Fluent 卡片：多层 Acrylic 效果 ── */
+[data-skin='glassmorphism'] .app-card-interactive {
+  border-color: rgba(255, 255, 255, 0.08);
+  transition: transform 0.367s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.367s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s ease;
+}
+
+[data-skin='glassmorphism'] .app-card-interactive:hover,
+[data-skin='glassmorphism'] .app-card-interactive:focus-within {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme='dark'][data-skin='glassmorphism'] .app-card-interactive:hover,
+[data-theme='dark'][data-skin='glassmorphism'] .app-card-interactive:focus-within {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* ── Fluent 行级 hover ── */
+[data-skin='glassmorphism'] .app-row-hover:hover,
+[data-skin='glassmorphism'] .app-row-hover:focus-within {
+  background-color: rgba(0, 120, 212, 0.04);
+}
+
+[data-theme='dark'][data-skin='glassmorphism'] .app-row-hover:hover,
+[data-theme='dark'][data-skin='glassmorphism'] .app-row-hover:focus-within {
+  background-color: rgba(0, 120, 212, 0.08);
+}
+
+/* ── Fluent ActivityStrip ── */
+[data-skin='glassmorphism'] .activity-strip__item {
+  border-radius: 6px;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-skin='glassmorphism'] .activity-strip__icon {
+  color: #0078D4;
+}
+
+[data-theme='dark'][data-skin='glassmorphism'] .activity-strip__icon {
+  color: #60CDFF;
+}
+
+[data-skin='glassmorphism'] .activity-strip__action-btn {
+  color: #0078D4 !important;
+}
+
+[data-theme='dark'][data-skin='glassmorphism'] .activity-strip__action-btn {
+  color: #60CDFF !important;
+}
+
+/* ── Fluent 链接色 ── */
+[data-skin='glassmorphism'] a,
+[data-skin='glassmorphism'] .ant-typography a {
+  color: #0078D4;
+}
+
+[data-theme='dark'][data-skin='glassmorphism'] a,
+[data-theme='dark'][data-skin='glassmorphism'] .ant-typography a {
+  color: #60CDFF;
+}
+
+/* ── Fluent 按钮 ── */
+[data-skin='glassmorphism'] .ant-btn-primary {
+  background: #0078D4;
+  border-color: #0078D4;
+  border-radius: 6px;
+}
+
+[data-skin='glassmorphism'] .ant-btn-primary:hover {
+  background: #2B88D8;
+  border-color: #2B88D8;
+}
+
+/* ── Fluent 聚焦态 ── */
+[data-skin='glassmorphism'] :focus-visible {
+  outline: 2px solid #0078D4;
+  outline-offset: 1px;
+}
+
+/* ── Fluent WidgetCard ── */
+[data-skin='glassmorphism'] .app-widget-card {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* ── Fluent 滚动条 ── */
+[data-skin='glassmorphism'] ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+[data-theme='dark'][data-skin='glassmorphism'] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Fluent 选中态 ── */
+[data-skin='glassmorphism'] ::selection {
+  background-color: rgba(0, 120, 212, 0.2);
+  color: inherit;
+}
+
+[data-theme='dark'][data-skin='glassmorphism'] ::selection {
+  background-color: rgba(0, 120, 212, 0.36);
+}
+
+/* ── Fluent 噪点纹理：Acrylic 标志性特征 ──
+ * 增强噪点可见度（基础 skin 配置已设 noiseOpacity: 0.05，
+ * 这里通过 CSS 进一步增强 Acrylic 的液态质感）
+ */
+[data-skin='glassmorphism'] body::before {
+  mix-blend-mode: overlay;
+}

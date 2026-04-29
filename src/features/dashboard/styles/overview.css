@@ -1,50 +1,51 @@
+/* ═══════════════════════════════════════════════════════
+ * DashboardOverview → 纤细摘要行
+ *
+ * 设计策略：
+ *   信息通过排版传达，不靠大面板。
+ *   Header 已有：标签数 + 域名数 + 待处理数 + 搜索/归档/洞察按钮
+ *   6 格 metrics grid 与 Header 高度重复 → 隐藏。
+ *
+ *   保留：一行居中摘要 + 状态药丸 + "一键整理"
+ * ═══════════════════════════════════════════════════════ */
+
+/* ── 容器：透明融入页面 ── */
 .dashboard-overview {
-  margin: 8px 0 14px;
-  padding: 14px 16px 16px;
-  border: 1px solid var(--app-hairline);
-  border-radius: 20px;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--app-glass-bg) 92%, transparent) 0%,
-      color-mix(in srgb, var(--ant-color-bg-container) 96%, transparent) 100%
-    );
-  backdrop-filter: var(--app-glass-filter);
-  -webkit-backdrop-filter: var(--app-glass-filter);
-  box-shadow: 0 10px 28px rgba(24, 41, 74, 0.06);
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
 }
 
+/* ── 布局基础 ── */
 .dashboard-overview__header,
-.dashboard-overview__heading,
-.dashboard-overview__title-row,
-.dashboard-overview__tile,
-.dashboard-overview__tile-head {
+.dashboard-overview__heading {
   display: flex;
 }
 
-.dashboard-overview__header,
-.dashboard-overview__title-row,
-.dashboard-overview__tile-head {
-  align-items: center;
-  justify-content: space-between;
-}
-
 .dashboard-overview__header {
-  gap: 14px;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 0;
+  flex-wrap: nowrap;
 }
 
 .dashboard-overview__heading {
   min-width: 0;
-  flex: 1 1 280px;
-  flex-direction: column;
-  gap: 5px;
+  flex: 0 1 auto;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 }
 
+/* ── 隐藏标题——摘要文本已够清晰 ── */
 .dashboard-overview__title-row {
-  gap: 8px;
-  flex-wrap: wrap;
+  display: none;
 }
 
 .dashboard-overview__title {
@@ -52,6 +53,18 @@
   letter-spacing: -0.01em;
 }
 
+/* ── meta 摘要 → 视觉主体 ── */
+.dashboard-overview__meta {
+  display: block;
+  overflow: hidden;
+  font-size: 13px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--ant-color-text-secondary);
+  letter-spacing: -0.01em;
+}
+
+/* ── 状态药丸 ── */
 .dashboard-overview__state-pill {
   display: inline-flex;
   align-items: center;
@@ -75,41 +88,182 @@
   border-color: color-mix(in srgb, var(--ant-color-warning) 22%, var(--app-hairline));
 }
 
-.dashboard-overview__meta {
-  display: block;
-  overflow: hidden;
-  font-size: 12px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
+/* ── 操作按钮区 → 仅保留"一键整理" ── */
 .dashboard-overview__actions {
-  flex-wrap: wrap;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0;
 }
 
-.dashboard-overview__action-btn {
-  color: var(--ant-color-text-secondary);
-  background: color-mix(in srgb, var(--ant-color-bg-container) 94%, var(--ant-color-fill-quaternary));
-  border-color: var(--app-hairline);
+/* 隐藏搜索/归档/洞察按钮（Header 已有），仅保留"一键整理" */
+.dashboard-overview__action-btn:not(.dashboard-overview__action-btn--tidy) {
+  display: none;
+}
+
+/* "一键整理"按钮 → 描边 pill 风格 */
+.dashboard-overview__action-btn--tidy,
+.dashboard-overview__action-btn.dashboard-overview__action-btn--tidy {
+  display: inline-flex;
+  border-radius: 980px;
+  border: 1px solid var(--app-color-primary);
+  background: transparent;
+  color: var(--app-color-primary);
   box-shadow: none;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  padding: 3px 14px;
+  font-size: 12px;
+  height: auto;
 }
 
-.dashboard-overview__action-btn:hover,
-.dashboard-overview__action-btn:focus-visible {
-  color: var(--ant-color-text);
-  border-color: color-mix(in srgb, var(--app-color-primary) 20%, var(--app-hairline));
-  background: color-mix(in srgb, var(--ant-color-bg-container) 88%, var(--app-color-primary) 5%);
+.dashboard-overview__action-btn--tidy:hover,
+.dashboard-overview__action-btn--tidy:focus-visible {
+  background: var(--app-color-primary);
+  color: #ffffff;
+  border-color: var(--app-color-primary);
 }
 
-.dashboard-overview__action-btn--primary {
-  color: var(--ant-color-text);
-  background: color-mix(in srgb, var(--app-color-primary) 6%, var(--ant-color-bg-container));
+/* "一键整理" disabled 态 → 隐藏 */
+.dashboard-overview__action-btn--tidy:disabled,
+.dashboard-overview__action-btn--tidy.ant-btn-disabled {
+  display: none;
 }
 
+/* ═══ 核心决策：隐藏 metrics grid ═══ */
 .dashboard-overview__metrics {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
+  display: none;
+}
+
+/* ═══════════════════════════════════════════════════════
+ * Apple 皮肤覆盖
+ * ═══════════════════════════════════════════════════════ */
+
+/* Apple：微调间距 */
+[data-skin='apple'] .dashboard-overview {
+  margin: 4px 0 0;
+}
+
+[data-skin='apple'] .dashboard-overview__header {
   gap: 10px;
+}
+
+[data-skin='apple'] .dashboard-overview__heading {
+  gap: 8px;
+}
+
+/* Apple：meta → Apple 弱化色 */
+[data-skin='apple'] .dashboard-overview__meta {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.48);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+[data-theme='dark'][data-skin='apple'] .dashboard-overview__meta {
+  color: rgba(255, 255, 255, 0.48);
+}
+
+/* Apple：状态药丸 - 紧凑 inline、无边框 */
+[data-skin='apple'] .dashboard-overview__state-pill {
+  font-size: 11px;
+  border: none;
+  border-radius: 980px;
+  padding: 3px 10px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+[data-skin='apple'] .dashboard-overview__state-pill.is-calm {
+  background: rgba(0, 0, 0, 0.04);
+  color: rgba(0, 0, 0, 0.48);
+}
+
+[data-theme='dark'][data-skin='apple'] .dashboard-overview__state-pill.is-calm {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.48);
+}
+
+[data-skin='apple'] .dashboard-overview__state-pill.is-alert {
+  background: rgba(255, 149, 0, 0.1);
+  border-color: transparent;
+  color: #c93400;
+}
+
+[data-theme='dark'][data-skin='apple'] .dashboard-overview__state-pill.is-alert {
+  background: rgba(255, 159, 10, 0.16);
+  color: #ff9f0a;
+}
+
+/* Apple：操作按钮区 */
+[data-skin='apple'] .dashboard-overview__actions {
+  flex-wrap: nowrap;
+  gap: 0;
+}
+
+/* Apple：隐藏非整理按钮 */
+[data-skin='apple'] .dashboard-overview__action-btn:not(.dashboard-overview__action-btn--tidy) {
+  display: none;
+}
+
+/* Apple："一键整理"按钮 → Apple Blue pill link 风格 */
+[data-skin='apple'] .dashboard-overview__action-btn--tidy,
+[data-skin='apple'] .dashboard-overview__action-btn.dashboard-overview__action-btn--tidy {
+  display: inline-flex;
+  border-radius: 980px;
+  border: 1px solid #0071e3;
+  background: transparent;
+  color: #0071e3;
+  box-shadow: none;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  padding: 3px 14px;
+  font-size: 12px;
+  height: auto;
+}
+
+[data-skin='apple'] .dashboard-overview__action-btn--tidy:hover,
+[data-skin='apple'] .dashboard-overview__action-btn--tidy:focus-visible {
+  background: #0071e3;
+  color: #ffffff;
+  border-color: #0071e3;
+}
+
+[data-theme='dark'][data-skin='apple'] .dashboard-overview__action-btn--tidy,
+[data-theme='dark'][data-skin='apple'] .dashboard-overview__action-btn.dashboard-overview__action-btn--tidy {
+  border-color: #2997ff;
+  color: #2997ff;
+}
+
+[data-theme='dark'][data-skin='apple'] .dashboard-overview__action-btn--tidy:hover,
+[data-theme='dark'][data-skin='apple'] .dashboard-overview__action-btn--tidy:focus-visible {
+  background: #2997ff;
+  color: #ffffff;
+  border-color: #2997ff;
+}
+
+/* Apple："一键整理" disabled 态 */
+[data-skin='apple'] .dashboard-overview__action-btn--tidy:disabled,
+[data-skin='apple'] .dashboard-overview__action-btn--tidy.ant-btn-disabled {
+  display: none;
+}
+
+/* Apple：隐藏 metrics grid（默认已隐藏） */
+[data-skin='apple'] .dashboard-overview__metrics {
+  display: none;
+}
+
+/* ═══════════════════════════════════════════════════════
+ * StatTile 样式（已隐藏，保留供未来恢复）
+ * ═══════════════════════════════════════════════════════ */
+
+.dashboard-overview__tile,
+.dashboard-overview__tile-head {
+  display: flex;
+}
+
+.dashboard-overview__tile-head {
+  align-items: center;
+  justify-content: space-between;
 }
 
 .dashboard-overview__tile {
@@ -211,63 +365,4 @@
   font-size: 11px;
   white-space: nowrap;
   text-overflow: ellipsis;
-}
-
-@media (max-width: 1200px) {
-  .dashboard-overview__metrics {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
-
-  .dashboard-overview__tile {
-    grid-column: span 2;
-  }
-
-  .dashboard-overview__tile.is-wide {
-    grid-column: span 6;
-  }
-}
-
-@media (max-width: 768px) {
-  .dashboard-overview {
-    padding: 14px;
-    border-radius: 18px;
-  }
-
-  .dashboard-overview__header {
-    margin-bottom: 10px;
-  }
-
-  .dashboard-overview__metrics {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-  }
-
-  .dashboard-overview__tile,
-  .dashboard-overview__tile.is-wide {
-    min-height: 72px;
-    grid-column: span 1;
-  }
-
-  .dashboard-overview__tile-value {
-    font-size: 22px;
-  }
-
-  .dashboard-overview__tile.has-text-value .dashboard-overview__tile-value {
-    font-size: 13px;
-  }
-}
-
-@media (max-width: 480px) {
-  .dashboard-overview__meta {
-    white-space: normal;
-  }
-
-  .dashboard-overview__actions {
-    width: 100%;
-  }
-
-  .dashboard-overview__tile,
-  .dashboard-overview__tile.is-wide {
-    grid-column: span 2;
-  }
 }

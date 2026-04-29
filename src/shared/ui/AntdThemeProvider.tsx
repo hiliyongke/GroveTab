@@ -55,7 +55,8 @@ export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!loaded) return;
     document.documentElement.setAttribute('data-theme', mode);
-    document.documentElement.style.backgroundColor = mode === 'dark' ? '#141414' : '';
+    document.documentElement.setAttribute('data-skin', skinPreset);
+    document.documentElement.style.backgroundColor = mode === 'dark' ? '#141414' : '#F5F5F7';
     document.documentElement.style.colorScheme = mode;
 
     try {

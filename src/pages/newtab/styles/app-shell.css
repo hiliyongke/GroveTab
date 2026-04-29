@@ -97,6 +97,26 @@
   color: var(--ant-color-border);
 }
 
+/* 一键整理链接（整合自 DashboardOverview） */
+.app-header-tidy-link {
+  all: unset;
+  margin-left: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--app-color-primary);
+  letter-spacing: -0.01em;
+  transition: opacity 160ms ease;
+}
+
+.app-header-tidy-link:hover {
+  opacity: 0.72;
+}
+
+.app-header-tidy-link:active {
+  opacity: 0.52;
+}
+
 .app-header-center {
   flex: 1;
   min-width: 0;
@@ -239,6 +259,115 @@
 
 .app-view-switcher {
   max-width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════
+ * Apple 皮肤：Hero 区覆盖
+ *
+ * 核心改变：
+ *   - Hero 区更大留白，类似 Apple 产品页 Hero
+ *   - 搜索框样式改为 Apple 搜索/筛选按钮风格
+ *     （3px solid 边框、#fafafc 底色、11px 圆角）
+ *   - 品牌标题更紧凑（line-height 1.14）
+ * ═══════════════════════════════════════════════════════ */
+
+/* Apple：Hero 区更大留白 */
+[data-skin='apple'] .app-hero {
+  gap: 20px;
+  padding: 48px 0 32px;
+}
+
+/* Apple：品牌标题 Apple 风格 */
+[data-skin='apple'] .app-hero-title {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+}
+
+/* Apple：slogan 更低调 */
+[data-skin='apple'] .app-hero-slogan {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.48);
+}
+
+[data-theme='dark'][data-skin='apple'] .app-hero-slogan {
+  color: rgba(255, 255, 255, 0.48);
+}
+
+/* Apple：Hero 搜索框 - 改为 Apple Filter/Search 按钮风格 */
+[data-skin='apple'] .ant-input-affix-wrapper.app-hero-search {
+  height: 44px;
+  border: 3px solid rgba(0, 0, 0, 0.04);
+  border-radius: 11px;
+  background: #fafafc;
+  box-shadow: none;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+
+[data-skin='apple'] .ant-input-affix-wrapper.app-hero-search:hover {
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: none;
+  transform: none;
+}
+
+[data-theme='dark'][data-skin='apple'] .ant-input-affix-wrapper.app-hero-search {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme='dark'][data-skin='apple'] .ant-input-affix-wrapper.app-hero-search:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+  transform: none;
+}
+
+/* Apple：搜索框图标色 */
+[data-skin='apple'] .app-hero-search-icon {
+  color: rgba(0, 0, 0, 0.48) !important;
+}
+
+[data-theme='dark'][data-skin='apple'] .app-hero-search-icon {
+  color: rgba(255, 255, 255, 0.48) !important;
+}
+
+/* Apple：搜索框 ⌘K 键帽 */
+[data-skin='apple'] .app-hero-search .app-kbd {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 5px;
+  color: rgba(0, 0, 0, 0.48);
+}
+
+[data-theme='dark'][data-skin='apple'] .app-hero-search .app-kbd {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.48);
+}
+
+/* Apple：视图切换器 - 更紧凑圆润 */
+[data-skin='apple'] .app-view-switcher {
+  margin-top: 4px;
+}
+
+[data-skin='apple'] .app-view-switcher .ant-segmented {
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 9px;
+}
+
+[data-theme='dark'][data-skin='apple'] .app-view-switcher .ant-segmented {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+[data-skin='apple'] .app-view-option {
+  font-size: 12px;
+  letter-spacing: -0.01em;
+}
+
+/* Apple：Content 区更大呼吸感 */
+[data-skin='apple'] .app-content-shell {
+  padding-bottom: 80px;
 }
 
 .app-page-loading,
