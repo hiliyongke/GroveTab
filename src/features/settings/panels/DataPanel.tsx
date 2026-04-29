@@ -10,7 +10,7 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Button, Space, Progress, Alert, App, theme, Input, Popconfirm, Empty, Divider } from 'antd';
+import { Button, Space, Progress, Alert, App, Input, Popconfirm, Empty, Divider } from 'antd';
 import {
   Download,
   Upload,
@@ -39,6 +39,7 @@ import {
 import { Field } from '../components/Field';
 import { getAllDataKeys, removeData } from '@/repositories/storage-repo';
 import { APP_RESOURCE_NAMES, STORAGE_KEYS, isAppStorageKey } from '@/shared/config/storage-keys';
+import './styles/data.css';
 
 interface QuotaInfo {
   usedBytes: number;
@@ -51,7 +52,6 @@ const MAX_IMPORT_FILE_BYTES = 2 * 1024 * 1024;
 
 export function DataPanel() {
   const { t } = useT();
-  const { token } = theme.useToken();
   const { modal, message } = App.useApp();
   const settings = useSettingsStore((s) => s.settings);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
@@ -70,7 +70,6 @@ export function DataPanel() {
     void getProfiles().then(setProfiles);
   }, []);
 
-  /** 创建新预设 */
   const handleCreateProfile = useCallback(async () => {
     if (!profileName.trim()) return;
     await createProfile(profileName.trim(), settings);
@@ -80,13 +79,11 @@ export function DataPanel() {
     message.success(t('settings.profileCreated'));
   }, [profileName, settings, message, t]);
 
-  /** 应用预设 */
   const handleApplyProfile = useCallback((profile: SettingsProfile) => {
     void updateSettings(profile.settings);
     message.success(t('settings.profileApplied', { name: profile.name }));
   }, [updateSettings, message, t]);
 
-  /** 删除预设 */
   const handleDeleteProfile = useCallback(async (id: string) => {
     await deleteProfile(id);
     const updated = await getProfiles();
@@ -94,7 +91,6 @@ export function DataPanel() {
     message.success(t('settings.profileDeleted'));
   }, [message, t]);
 
-  /** 重命名预设 */
   const handleRenameProfile = useCallback(async (id: string) => {
     if (!editingName.trim()) return;
     await renameProfile(id, editingName.trim());
@@ -115,7 +111,10 @@ export function DataPanel() {
       sessions: parsedSessions,
       settings,
     };
-    downloadFile(JSON.stringify(bundle, null, 2), `${APP_RESOURCE_NAMES.backupFilePrefix}-${new Date().toISOString().slice(0, 10)}.json`);
+    downloadFile(
+      JSON.stringify(bundle, null, 2),
+      `${APP_RESOURCE_NAMES.backupFilePrefix}-${new Date().toISOString().slice(0, 10)}.json`,
+    );
     message.success(t('settings.exportDone'));
   };
 
@@ -150,8 +149,8 @@ export function DataPanel() {
       return;
     }
     const existing = await getArchivedSessions();
-    const existingIds = new Set(existing.map((s) => s.id));
-    const newSessions = sessions.filter((s) => !existingIds.has(s.id));
+    const existingIds = new Set(existing.map((session) => session.id));
+    const newSessions = sessions.filter((session) => !existingIds.has(session.id));
     await saveSessions([...newSessions, ...existing]);
     setImportStatus(t('settings.importDone', { count: newSessions.length }));
     if (fileInputRef.current !== null) fileInputRef.current.value = '';
@@ -176,22 +175,21 @@ export function DataPanel() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, width: '100%' }}>
-      {/* ── 配置预设 ── */}
+    <div className="data-panel">
       <Field label={t('settings.profiles')} hint={t('settings.profilesHint')}>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+        <div className="data-panel__profile-create">
           <Input
             size="small"
             placeholder={t('settings.profileNamePlaceholder')}
             value={profileName}
             onChange={(e) => setProfileName(e.target.value)}
             onPressEnter={() => { void handleCreateProfile(); }}
-            style={{ flex: 1 }}
+            className="data-panel__profile-input"
           />
           <Button
             size="small"
             type="primary"
-icon={<Save size={ICON_SIZE.MEDIUM} />}
+            icon={<Save size={ICON_SIZE.MEDIUM} />}
             disabled={!profileName.trim()}
             onClick={() => { void handleCreateProfile(); }}
           >
@@ -202,54 +200,43 @@ icon={<Save size={ICON_SIZE.MEDIUM} />}
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}
             description={t('settings.noProfiles')}
-            style={{ margin: '8px 0' }}
+            className="data-panel__empty"
           />
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {profiles.map((p) => (
-              <div
-                key={p.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '8px 12px',
-                  borderRadius: token.borderRadiusLG,
-                  background: token.colorFillQuaternary,
-                  border: `1px solid ${token.colorBorderSecondary}`,
-                }}
-              >
-                {editingId === p.id ? (
+          <div className="data-panel__profile-list">
+            {profiles.map((profile) => (
+              <div key={profile.id} className="data-panel__profile-card">
+                {editingId === profile.id ? (
                   <Input
                     size="small"
                     value={editingName}
                     onChange={(e) => setEditingName(e.target.value)}
-                    onPressEnter={() => { void handleRenameProfile(p.id); }}
-                    onBlur={() => { void handleRenameProfile(p.id); }}
-                    style={{ flex: 1, marginRight: 8 }}
+                    onPressEnter={() => { void handleRenameProfile(profile.id); }}
+                    onBlur={() => { void handleRenameProfile(profile.id); }}
+                    className="data-panel__profile-edit-input"
                     autoFocus
                   />
                 ) : (
-                  <span style={{ fontSize: 13, fontWeight: 500, flex: 1 }}>{p.name}</span>
+                  <span className="data-panel__profile-name">{profile.name}</span>
                 )}
                 <Space size={4}>
                   <Button
                     type="text"
                     size="small"
-icon={<ArrowLeftRight size={ICON_SIZE.MEDIUM} />}
+                    icon={<ArrowLeftRight size={ICON_SIZE.MEDIUM} />}
                     title={t('settings.profileApply')}
-                    onClick={() => { void handleApplyProfile(p); }}
+                    onClick={() => { void handleApplyProfile(profile); }}
                   />
                   <Button
                     type="text"
                     size="small"
-icon={<Pencil size={ICON_SIZE.MEDIUM} />}
+                    icon={<Pencil size={ICON_SIZE.MEDIUM} />}
                     title={t('settings.profileRename')}
-                    onClick={() => { setEditingId(p.id); setEditingName(p.name); }}
+                    onClick={() => { setEditingId(profile.id); setEditingName(profile.name); }}
                   />
                   <Popconfirm
                     title={t('settings.profileDeleteConfirm')}
-                    onConfirm={() => { void handleDeleteProfile(p.id); }}
+                    onConfirm={() => { void handleDeleteProfile(profile.id); }}
                     okText={t('settings.profileDelete')}
                     cancelText={t('context.cancel')}
                     okButtonProps={{ danger: true }}
@@ -258,7 +245,7 @@ icon={<Pencil size={ICON_SIZE.MEDIUM} />}
                       type="text"
                       size="small"
                       danger
-icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
+                      icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
                       title={t('settings.profileDelete')}
                     />
                   </Popconfirm>
@@ -269,43 +256,14 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
         )}
       </Field>
 
-      {/* ── 存储配额 ── */}
       {quotaInfo !== null && (
-        <div
-          style={{
-            padding: 14,
-            borderRadius: token.borderRadiusLG,
-            background: token.colorFillQuaternary,
-            border: `1px solid ${token.colorBorderSecondary}`,
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: 10,
-            }}
-          >
-            <span
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-                fontSize: 12.5,
-                fontWeight: 500,
-              }}
-            >
-<HardDrive size={ICON_SIZE.MEDIUM} style={{ color: token.colorInfo }} />
+        <div className="data-panel__quota">
+          <div className="data-panel__quota-header">
+            <span className="data-panel__quota-label">
+              <HardDrive size={ICON_SIZE.MEDIUM} className="data-panel__quota-icon" />
               {t('settings.storage')}
             </span>
-            <span
-              style={{
-                fontSize: 11.5,
-                fontVariantNumeric: 'tabular-nums',
-                color: quotaInfo.isWarning ? token.colorError : token.colorTextTertiary,
-              }}
-            >
+            <span className={`data-panel__quota-meta${quotaInfo.isWarning ? ' is-warning' : ''}`}>
               {formatBytes(quotaInfo.usedBytes)} / {formatBytes(quotaInfo.totalBytes)}
             </span>
           </div>
@@ -320,45 +278,37 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
               type="error"
               showIcon
               description={t('settings.quotaWarning')}
-              style={{ marginTop: 10 }}
+              className="data-panel__quota-alert"
             />
           )}
         </div>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
-<Button block icon={<Download size={ICON_SIZE.MEDIUM} />} onClick={() => { void handleExport(); }}>
+      <div className="data-panel__actions">
+        <Button block icon={<Download size={ICON_SIZE.MEDIUM} />} onClick={() => { void handleExport(); }}>
           {t('settings.export')}
         </Button>
-<Button block icon={<Upload size={ICON_SIZE.MEDIUM} />} onClick={() => fileInputRef.current?.click()}>
+        <Button block icon={<Upload size={ICON_SIZE.MEDIUM} />} onClick={() => fileInputRef.current?.click()}>
           {t('settings.import')}
         </Button>
         <input
           ref={fileInputRef}
           type="file"
           accept=".json"
-          style={{ display: 'none' }}
+          className="data-panel__file-input"
           onChange={(e) => { void handleImport(e); }}
         />
         {importStatus !== null && (
-          <div style={{ fontSize: 11.5, color: token.colorTextTertiary, padding: '0 4px' }}>
-            {importStatus}
-          </div>
+          <div className="data-panel__import-status">{importStatus}</div>
         )}
       </div>
 
-<Button block danger icon={<Trash2 size={ICON_SIZE.MEDIUM} />} onClick={handleClearAll}>
+      <Button block danger icon={<Trash2 size={ICON_SIZE.MEDIUM} />} onClick={handleClearAll}>
         {t('settings.clearAll')}
       </Button>
 
-      {/* ═════════════════════════════════════════════════════
-          危险区：一键重置三件套（v1.1）
-          ═════════════════════════════════════════════════════ */}
-      <Divider style={{ fontSize: 12, color: token.colorTextTertiary, margin: '8px 0' }}>
-        {t('settings.dangerZone')}
-      </Divider>
+      <Divider className="data-panel__divider">{t('settings.dangerZone')}</Divider>
 
-      {/* 1）恢复默认配置：仅清空设置键，保留所有数据（归档/书签/历史不变） */}
       <Popconfirm
         title={t('settings.resetSettingsConfirm')}
         description={t('settings.resetSettingsDesc')}
@@ -372,12 +322,11 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
           }
         }}
       >
-<Button block icon={<RotateCcw size={ICON_SIZE.MEDIUM} />}>
+        <Button block icon={<RotateCcw size={ICON_SIZE.MEDIUM} />}>
           {t('settings.resetSettings')}
         </Button>
       </Popconfirm>
 
-      {/* 2）重播 Onboarding：仅重置应用命名空间下的引导完成标志，下次刷新重新弹欢迎屏 */}
       <Popconfirm
         title={t('settings.replayOnboardingConfirm')}
         onConfirm={async () => {
@@ -389,33 +338,27 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
           }
         }}
       >
-<Button block icon={<Sparkles size={ICON_SIZE.MEDIUM} />}>
+        <Button block icon={<Sparkles size={ICON_SIZE.MEDIUM} />}>
           {t('settings.replayOnboarding')}
         </Button>
       </Popconfirm>
 
-      {/*
-        3）全量重置为初始状态：清掉所有应用命名空间存储键——等同卸载重装。
-        高风险操作，走 Modal 双层确认（输入 RESET 文本二次确认）。
-      */}
       <Button
         block
         danger
-icon={<AlertTriangle size={ICON_SIZE.MEDIUM} />}
+        icon={<AlertTriangle size={ICON_SIZE.MEDIUM} />}
         onClick={() => {
           let confirmText = '';
           modal.confirm({
             title: t('settings.factoryResetTitle'),
             content: (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div className="data-panel__factory-confirm">
                 <Alert
                   type="error"
                   showIcon
                   message={t('settings.factoryResetWarning')}
                 />
-                <div style={{ fontSize: 12, color: token.colorTextSecondary }}>
-                  {t('settings.factoryResetTypeHint')}
-                </div>
+                <div className="data-panel__factory-copy">{t('settings.factoryResetTypeHint')}</div>
                 <Input
                   placeholder="RESET"
                   onChange={(e) => {
@@ -433,14 +376,12 @@ icon={<AlertTriangle size={ICON_SIZE.MEDIUM} />}
                 return Promise.reject(new Error('must type RESET'));
               }
               try {
-                /** 清空所有应用命名空间存储键 */
                 const keys = await getAllDataKeys();
                 for (const key of keys) {
                   if (isAppStorageKey(key)) {
                     await removeData(key);
                   }
                 }
-                /** 重置 store 内存状态 */
                 await resetSettings();
                 message.success(t('settings.factoryResetDone'));
                 setTimeout(() => window.location.reload(), 400);

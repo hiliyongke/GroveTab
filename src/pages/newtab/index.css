@@ -14,18 +14,9 @@
 
 :root {
   color-scheme: light;
-  /* ── 跨组件共享的非主题变量 ────────────────────── */
-  --app-hairline-light: rgba(0, 0, 0, 0.06);
-  --app-hairline-dark: rgba(255, 255, 255, 0.08);
-  --app-hairline: var(--app-hairline-light);
-  --app-surface-elevated-bg-light: rgba(255, 255, 255, 0.88);
-  --app-surface-elevated-bg-dark: rgba(28, 28, 31, 0.86);
-  --app-surface-elevated-bg: var(--app-surface-elevated-bg-light);
 }
 [data-theme='dark'] {
   color-scheme: dark;
-  --app-hairline: var(--app-hairline-dark);
-  --app-surface-elevated-bg: var(--app-surface-elevated-bg-dark);
 }
 
 html,
@@ -52,18 +43,39 @@ html {
 }
 
 body {
-  background-color: var(--ant-color-bg-layout, #f5f5f5);
+  background-color: var(--app-page-bg, var(--ant-color-bg-layout, #f5f5f5));
+  background-image: var(--app-page-gradient, none);
   color: var(--ant-color-text, #1f1f1f);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   font-feature-settings: 'kern' 1, 'liga' 1;
-  /* 标题字体跟随皮肤预设 */
   font-family: var(--ant-font-family);
+  font-weight: var(--app-font-weight-body, 400);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.ant-typography {
+  font-family: var(--app-font-family-heading, var(--ant-font-family));
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: var(--app-font-weight-heading, 600);
 }
 
 [data-theme='dark'] body {
-  background-color: var(--ant-color-bg-layout, #141414);
+  background-color: var(--app-page-bg, var(--ant-color-bg-layout, #141414));
+  background-image: var(--app-page-gradient, none);
   color: var(--ant-color-text, #f5f5f5);
 }
 
@@ -294,25 +306,6 @@ html[data-texture-noise] body::before {
 }
 .app-lift:hover {
   transform: translateY(-1px);
-}
-
-/**
- * Hero 搜索框专用强化：hover 时加品牌色 ring + 上浮。
- *
- * 说明：通过叠加 `.ant-input-affix-wrapper` 类选择器（2 类 > antd 原生 1 类）
- * 提升特异性，替代 `!important`，避免样式层级失控。
- */
-.ant-input-affix-wrapper.app-hero-search:hover {
-  transform: translateY(-1px);
-  border-color: var(--app-color-primary-hover);
-  box-shadow:
-    0 10px 32px color-mix(in srgb, #000 10%, transparent),
-    0 0 0 4px color-mix(in srgb, var(--app-color-primary) 10%, transparent);
-}
-[data-theme='dark'] .ant-input-affix-wrapper.app-hero-search:hover {
-  box-shadow:
-    0 10px 32px rgba(0, 0, 0, 0.4),
-    0 0 0 4px color-mix(in srgb, var(--app-color-primary) 12%, transparent);
 }
 
 /**

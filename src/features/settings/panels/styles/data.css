@@ -1,0 +1,119 @@
+.data-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.data-panel__profile-create {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.data-panel__profile-input,
+.data-panel__profile-edit-input {
+  flex: 1;
+}
+
+.data-panel__profile-edit-input {
+  margin-right: 8px;
+}
+
+.data-panel__empty {
+  margin: 8px 0;
+}
+
+.data-panel__profile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.data-panel__profile-card,
+.data-panel__quota {
+  padding: 12px 14px;
+  border: 1px solid var(--ant-color-border-secondary);
+  border-radius: var(--ant-border-radius-lg);
+  background: var(--ant-color-fill-quaternary);
+}
+
+.data-panel__profile-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.data-panel__profile-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.data-panel__quota-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.data-panel__quota-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.data-panel__quota-icon {
+  color: var(--ant-color-info);
+}
+
+.data-panel__quota-meta {
+  color: var(--ant-color-text-tertiary);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.data-panel__quota-meta.is-warning {
+  color: var(--ant-color-error);
+}
+
+.data-panel__quota-alert {
+  margin-top: 10px;
+}
+
+.data-panel__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.data-panel__file-input {
+  display: none;
+}
+
+.data-panel__import-status {
+  padding: 0 4px;
+  color: var(--ant-color-text-tertiary);
+  font-size: 11.5px;
+}
+
+.data-panel__divider {
+  margin: 8px 0;
+  color: var(--ant-color-text-tertiary);
+  font-size: 12px;
+}
+
+.data-panel__factory-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.data-panel__factory-copy {
+  color: var(--ant-color-text-secondary);
+  font-size: 12px;
+}

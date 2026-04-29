@@ -1,0 +1,124 @@
+.tidy-suggestion {
+  margin-bottom: 20px;
+}
+
+.tidy-suggestion__alert {
+  background: var(--ant-color-fill-quaternary);
+  border-color: var(--ant-color-border-secondary);
+  border-radius: var(--ant-border-radius-lg);
+  transition: border-radius var(--ant-motion-duration-fast) var(--ant-motion-ease-in-out);
+}
+
+.tidy-suggestion.is-expanded .tidy-suggestion__alert {
+  border-bottom: none;
+  border-radius: var(--ant-border-radius-lg) var(--ant-border-radius-lg) 0 0;
+}
+
+.tidy-suggestion__summary,
+.tidy-suggestion__section-header {
+  display: flex;
+  align-items: center;
+}
+
+.tidy-suggestion__summary {
+  gap: 10px;
+}
+
+.tidy-suggestion__summary-text {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.tidy-suggestion__alert-icon,
+.tidy-suggestion__dismiss-icon {
+  color: var(--ant-color-text-tertiary);
+}
+
+.tidy-suggestion__solid-action {
+  color: var(--ant-color-text);
+  background: var(--ant-color-fill-secondary);
+  border-color: var(--ant-color-border-secondary);
+  box-shadow: none;
+}
+
+.tidy-suggestion__chevron {
+  transition: transform var(--ant-motion-duration-mid);
+}
+
+.tidy-suggestion.is-expanded .tidy-suggestion__chevron {
+  transform: rotate(180deg);
+}
+
+.tidy-suggestion__panel {
+  margin-top: 0;
+  border-top: none;
+  border-radius: 0 0 var(--ant-border-radius-lg) var(--ant-border-radius-lg);
+}
+
+.tidy-suggestion__panel-body {
+  padding: 10px 14px;
+}
+
+.tidy-suggestion__section-header {
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.tidy-suggestion__section-header.has-offset {
+  margin-top: 12px;
+}
+
+.tidy-suggestion__section-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ant-color-text);
+}
+
+.tidy-suggestion__section-icon--dup,
+.tidy-suggestion__section-icon--idle {
+  color: var(--ant-color-warning);
+}
+
+.tidy-suggestion__link-action {
+  height: auto;
+  padding: 0;
+  font-size: 12px;
+}
+
+.tidy-suggestion__list-item {
+  padding: 4px 0;
+  border-bottom: none;
+}
+
+.tidy-suggestion__item-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ant-color-text);
+}
+
+.tidy-suggestion__item-desc {
+  font-size: 11px;
+  color: var(--ant-color-text-tertiary);
+}
+
+.tidy-suggestion__level-tag {
+  margin: 0;
+  font-size: 10px;
+}
+
+@media (max-width: 720px) {
+  .tidy-suggestion__summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .tidy-suggestion__summary-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .tidy-suggestion__section-header {
+    flex-wrap: wrap;
+  }
+}

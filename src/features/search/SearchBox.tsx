@@ -8,7 +8,7 @@
  * 4. 保持键盘优先与轻量界面，确保输入响应足够快。
  */
 
-import { useState, useMemo, useRef, useCallback, useEffect, type ReactNode } from 'react';
+import { useState, useMemo, useRef, useCallback, useEffect, type CSSProperties, type ReactNode } from 'react';
 import { Modal, Input, theme, Empty, Select, Tag } from 'antd';
 import type { InputRef } from 'antd';
 import {
@@ -48,6 +48,7 @@ import {
   type HotKeywordSource,
 } from '@/shared/config/search-engines';
 import { iconColor, iconColorAlpha, type IconRole } from '@/shared/utils/icon-colors';
+import './SearchBox.css';
 
 const DEFAULT_SEARCH_SCOPE: SearchScopeField[] = ['title', 'hostname', 'url'];
 const DEFAULT_ENABLED_ENGINES: SearchEngineId[] = SEARCH_ENGINE_OPTIONS.map((item) => item.id);
@@ -112,38 +113,25 @@ interface SearchSection {
   items: UniversalSearchItem[];
 }
 
+function cx(...classNames: Array<string | false | undefined>) {
+  return classNames.filter(Boolean).join(' ');
+}
+
+function cssVars(vars: Record<string, string>): CSSProperties {
+  return vars as CSSProperties;
+}
+
 /**
  * 小键盘提示胶囊。
  */
 function Kbd({ children }: { children: ReactNode }) {
-  const { token } = theme.useToken();
-  return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minWidth: 18,
-        height: 18,
-        padding: '0 5px',
-        fontSize: 10.5,
-        fontFamily: 'var(--font-family-mono, monospace)',
-        color: token.colorTextSecondary,
-        background: token.colorFillTertiary,
-        border: `1px solid ${token.colorBorderSecondary}`,
-        borderRadius: 4,
-        lineHeight: 1,
-      }}
-    >
-      {children}
-    </span>
-  );
+  return <span className="search-box-kbd">{children}</span>;
 }
 
 /**
  * 对文本中的命中片段做高亮。
  */
-function renderHighlightedText(text: string, query: string, activeColor: string, accentColor: string): ReactNode {
+function renderHighlightedText(text: string, query: string): ReactNode {
   const normalizedQuery = query.trim();
   if (normalizedQuery === '' || text === '') return text;
 
@@ -152,26 +140,37 @@ function renderHighlightedText(text: string, query: string, activeColor: string,
   const parts = text.split(matcher);
 
   return parts.map((part, index) => {
-    const matched = part.localeCompare(normalizedQuery, undefined, { sensitivity: 'accent' }) === 0
+    const matched =
+      part.localeCompare(normalizedQuery, undefined, { sensitivity: 'accent' }) === 0
       || part.toLowerCase() === normalizedQuery.toLowerCase();
+
     return matched ? (
-      <mark
-        key={`${part}-${index}`}
-        style={{
-          padding: 0,
-          color: accentColor,
-          background: 'transparent',
-          fontWeight: 700,
-        }}
-      >
+      <mark key={`${part}-${index}`} className="search-box-highlight">
         {part}
       </mark>
     ) : (
-      <span key={`${part}-${index}`} style={{ color: activeColor }}>
-        {part}
-      </span>
+      part
     );
   });
+}
+
+function getItemIconMeta(item: UniversalSearchItem): { icon: ReactNode; iconRole: IconRole } {
+  switch (item.type) {
+    case 'tab':
+      return { icon: <LayoutGrid size={ICON_SIZE.TINY} />, iconRole: 'tab' };
+    case 'history':
+      return { icon: <Link size={ICON_SIZE.TINY} />, iconRole: 'history' };
+    case 'web':
+      return { icon: <Globe size={ICON_SIZE.TINY} />, iconRole: 'web' };
+    case 'permission':
+      return { icon: <Unlock size={ICON_SIZE.TINY} />, iconRole: 'permission' };
+    case 'suggestion':
+      return item.source === 'hot'
+        ? { icon: <Flame size={ICON_SIZE.TINY} />, iconRole: 'hot' }
+        : { icon: <Clock size={ICON_SIZE.TINY} />, iconRole: 'recent' };
+    default:
+      return { icon: <Search size={ICON_SIZE.TINY} />, iconRole: 'search' };
+  }
 }
 
 /**
@@ -228,6 +227,23 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
   const currentEngineOption = getSearchEngineOption(currentEngine);
   const normalizedQuery = query.trim();
   const lowerQuery = normalizedQuery.toLowerCase();
+
+  const rootVars = useMemo(
+    () => cssVars({
+      '--searchbox-border': token.colorBorderSecondary,
+      '--searchbox-text': token.colorText,
+      '--searchbox-text-secondary': token.colorTextSecondary,
+      '--searchbox-text-tertiary': token.colorTextTertiary,
+      '--searchbox-fill-secondary': token.colorFillSecondary,
+      '--searchbox-fill-tertiary': token.colorFillTertiary,
+      '--searchbox-fill-quaternary': token.colorFillQuaternary,
+      '--searchbox-accent': token.colorPrimary,
+      '--searchbox-radius': `${token.borderRadiusLG}px`,
+      '--searchbox-transition': token.motionDurationFast,
+      '--searchbox-search-icon': iconColor('search', token),
+    }),
+    [token],
+  );
 
   /**
    * MiniSearch 索引（异步构建）。
@@ -573,6 +589,16 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
     () => flatItems.findIndex((item) => item.type === 'web'),
     [flatItems],
   );
+  const shortcutHints = useMemo(
+    () => [
+      { id: 'navigate', keys: ['↑', '↓'], label: t('search.navigate') },
+      { id: 'open', keys: ['↵'], label: t('search.open') },
+      { id: 'web', keys: ['⌘↵'], label: t('search.web') },
+      { id: 'switch', keys: ['Tab'], label: t('search.switchToWeb') },
+      { id: 'close', keys: ['esc'], label: t('search.close') },
+    ],
+    [t],
+  );
 
   /**
    * 将高频变化的键盘导航状态缓存到 ref 中，
@@ -787,255 +813,142 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
       keyboard={false}
       width={720}
       centered={false}
+      rootClassName="search-box-modal"
       styles={{
         mask: { backdropFilter: 'blur(8px)' },
         body: { padding: 0 },
       }}
       style={{ top: '12vh' }}
     >
-      <div
-        style={{
-          padding: '14px 16px',
-          borderBottom: `1px solid ${token.colorBorderSecondary}`,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-        }}
-      >
-        <Input
-          ref={inputRef}
-          size="large"
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setActiveIndex(0);
-          }}
-          onKeyDown={handleKeyDown}
-          placeholder={t('search.universalPlaceholder')}
-prefix={<Search size={ICON_SIZE.MEDIUM} style={{ color: iconColor('search', token) }} />}
-          allowClear
-          variant="borderless"
-          autoComplete="off"
-          spellCheck={false}
-          aria-label={t('search.universalPlaceholder')}
-          style={{ fontSize: 15, flex: 1 }}
-        />
-        <Select<SearchEngineId>
-          size="small"
-          value={currentEngine}
-          onChange={setCurrentEngine}
-          style={{ minWidth: 132 }}
-suffixIcon={<Globe size={ICON_SIZE.MEDIUM} />}
-          options={enabledEngines.map((engineId) => {
-            const option = getSearchEngineOption(engineId);
-            return { value: option.id, label: option.label };
-          })}
-        />
-      </div>
+      <div className="search-box-shell" style={rootVars}>
+        <div className="search-box-header">
+          <Input
+            ref={inputRef}
+            size="large"
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setActiveIndex(0);
+            }}
+            onKeyDown={handleKeyDown}
+            placeholder={t('search.universalPlaceholder')}
+            prefix={<Search size={ICON_SIZE.MEDIUM} className="search-box-input-prefix" />}
+            allowClear
+            variant="borderless"
+            autoComplete="off"
+            spellCheck={false}
+            aria-label={t('search.universalPlaceholder')}
+            className="search-box-input"
+          />
+          <Select<SearchEngineId>
+            size="small"
+            value={currentEngine}
+            onChange={setCurrentEngine}
+            className="search-box-engine"
+            suffixIcon={<Globe size={ICON_SIZE.MEDIUM} className="search-box-engine-icon" />}
+            options={enabledEngines.map((engineId) => {
+              const option = getSearchEngineOption(engineId);
+              return { value: option.id, label: option.label };
+            })}
+          />
+        </div>
 
-      <div style={{ maxHeight: '52vh', overflowY: 'auto', padding: '6px 0' }}>
-        {flatItems.length === 0 ? (
-          <div style={{ padding: '32px 24px' }}>
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description={
-                <span style={{ fontSize: 13, color: token.colorTextSecondary }}>
-                  {historyLoading ? t('search.loadingHistory') : normalizedQuery !== '' ? t('search.tryOther') : t('search.emptyIdle')}
-                </span>
-              }
-            />
-          </div>
-        ) : (
-          sections.map((section) => {
-            const startIndex = flatItems.findIndex((item) => item.id === section.items[0]?.id);
-            return (
-              <section key={section.key} style={{ paddingTop: 4 }}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '8px 18px 6px',
-                    fontSize: 11,
-                    color: token.colorTextTertiary,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                  }}
-                >
-                  <span>{section.title}</span>
-                  <span>{section.items.length}</span>
-                </div>
-                <ul
-                  role="listbox"
-                  style={{
-                    listStyle: 'none',
-                    margin: 0,
-                    padding: '0 0 4px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}
-                >
-                  {section.items.map((item, offset) => {
-                    const itemIndex = startIndex + offset;
-                    const active = itemIndex === activeIndex;
-let icon: ReactNode = <Search size={ICON_SIZE.TINY} />;
-                    let iconRole: IconRole = 'search';
-if (item.type === 'tab') { icon = <LayoutGrid size={ICON_SIZE.TINY} />; iconRole = 'tab'; }
-if (item.type === 'history') { icon = <Link size={ICON_SIZE.TINY} />; iconRole = 'history'; }
-if (item.type === 'web') { icon = <Globe size={ICON_SIZE.TINY} />; iconRole = 'web'; }
-if (item.type === 'permission') { icon = <Unlock size={ICON_SIZE.TINY} />; iconRole = 'permission'; }
-if (item.type === 'suggestion' && item.source === 'recent') { icon = <Clock size={ICON_SIZE.TINY} />; iconRole = 'recent'; }
-if (item.type === 'suggestion' && item.source === 'hot') { icon = <Flame size={ICON_SIZE.TINY} />; iconRole = 'hot'; }
+        <div className="search-box-list-area">
+          {flatItems.length === 0 ? (
+            <div className="search-box-empty">
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description={
+                  <span className="search-box-empty-text">
+                    {historyLoading ? t('search.loadingHistory') : normalizedQuery !== '' ? t('search.tryOther') : t('search.emptyIdle')}
+                  </span>
+                }
+              />
+            </div>
+          ) : (
+            sections.map((section) => {
+              const startIndex = flatItems.findIndex((item) => item.id === section.items[0]?.id);
+              return (
+                <section key={section.key} className="search-box-section">
+                  <div className="search-box-section-header">
+                    <span>{section.title}</span>
+                    <span>{section.items.length}</span>
+                  </div>
+                  <ul role="listbox" className="search-box-list">
+                    {section.items.map((item, offset) => {
+                      const itemIndex = startIndex + offset;
+                      const active = itemIndex === activeIndex;
+                      const { icon, iconRole } = getItemIconMeta(item);
+                      const titleNode = renderHighlightedText(item.title, normalizedQuery);
+                      const subtitleNode = renderHighlightedText(item.subtitle, normalizedQuery);
+                      const itemVars = cssVars({
+                        '--searchbox-item-icon-bg': iconColorAlpha(iconRole, token, active ? 0.2 : 0.1),
+                        '--searchbox-item-icon-color': iconColor(iconRole, token),
+                      });
 
-                    const semanticIconColor = iconColor(iconRole, token);
-                    const titleNode = renderHighlightedText(item.title, normalizedQuery, token.colorText, token.colorPrimary);
-                    const subtitleNode = renderHighlightedText(item.subtitle, normalizedQuery, token.colorTextTertiary, token.colorPrimary);
-
-                    return (
-                      <li
-                        key={item.id}
-                        role="option"
-                        aria-selected={active}
-                        onMouseEnter={() => setActiveIndex(itemIndex)}
-                        onClick={() => handleActivate(item)}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 12,
-                          margin: '0 8px',
-                          padding: '10px 12px',
-                          borderRadius: token.borderRadiusLG,
-                          cursor: 'pointer',
-                          background: active ? token.colorFillSecondary : 'transparent',
-                          transition: `background ${token.motionDurationFast}`,
-                        }}
-                      >
-                        {item.type === 'tab' && item.tab.favIconUrl !== '' ? (
-                          <img
-                            src={item.tab.favIconUrl}
-                            alt=""
-                            style={{ width: 18, height: 18, borderRadius: 4, flexShrink: 0 }}
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          <span
-                            style={{
-                              width: 18,
-                              height: 18,
-                              borderRadius: 4,
-                              background: iconColorAlpha(iconRole, token, active ? 0.2 : 0.1),
-                              color: semanticIconColor,
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              flexShrink: 0,
-                              fontSize: 11,
-                            }}
-                          >
-                            {icon}
-                          </span>
-                        )}
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 8,
-                              minWidth: 0,
-                            }}
-                          >
-                            <div
-                              style={{
-                                fontSize: 13.5,
-                                fontWeight: 500,
-                                color: token.colorText,
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                lineHeight: 1.3,
+                      return (
+                        <li
+                          key={item.id}
+                          role="option"
+                          aria-selected={active}
+                          onMouseEnter={() => setActiveIndex(itemIndex)}
+                          onClick={() => handleActivate(item)}
+                          className={cx('search-box-item', active && 'is-active')}
+                          style={itemVars}
+                        >
+                          {item.type === 'tab' && item.tab.favIconUrl !== '' ? (
+                            <img
+                              src={item.tab.favIconUrl}
+                              alt=""
+                              className="search-box-item-favicon"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
                               }}
-                            >
-                              {titleNode}
+                            />
+                          ) : (
+                            <span className="search-box-item-icon">{icon}</span>
+                          )}
+                          <div className="search-box-item-main">
+                            <div className="search-box-item-head">
+                              <div className="search-box-item-title">{titleNode}</div>
+                              {item.type === 'tab' && item.badge !== undefined && (
+                                <Tag className="search-box-tag">{item.badge}</Tag>
+                              )}
+                              {item.type === 'suggestion' && (
+                                <Tag className="search-box-tag" color={item.source === 'hot' ? 'gold' : 'default'}>
+                                  {item.source === 'hot' ? t('search.sourceHot') : t('search.sourceRecent')}
+                                </Tag>
+                              )}
                             </div>
-                            {item.type === 'tab' && item.badge !== undefined && (
-                              <Tag style={{ margin: 0, fontSize: 10 }}>{item.badge}</Tag>
-                            )}
-                            {item.type === 'suggestion' && (
-                              <Tag style={{ margin: 0, fontSize: 10 }} color={item.source === 'hot' ? 'gold' : 'default'}>
-                                {item.source === 'hot' ? t('search.sourceHot') : t('search.sourceRecent')}
-                              </Tag>
-                            )}
+                            <div className="search-box-item-subtitle">{subtitleNode}</div>
                           </div>
-                          <div
-                            style={{
-                              fontSize: 11.5,
-                              color: token.colorTextTertiary,
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              marginTop: 2,
-                              lineHeight: 1.3,
-                            }}
-                          >
-                            {subtitleNode}
-                          </div>
-                        </div>
-                        {active && (
-                          <CornerDownLeft
-size={ICON_SIZE.SMALL}
-                            style={{ color: token.colorTextTertiary, flexShrink: 0 }}
-                          />
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </section>
-            );
-          })
-        )}
-      </div>
+                          {active && <CornerDownLeft size={ICON_SIZE.SMALL} className="search-box-enter-icon" />}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
+              );
+            })
+          )}
+        </div>
 
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 20px',
-          height: 42,
-          borderTop: `1px solid ${token.colorBorderSecondary}`,
-          background: token.colorFillQuaternary,
-          fontSize: 11.5,
-          color: token.colorTextTertiary,
-        }}
-      >
-        <span>
-          {flatItems.length > 0 ? t('search.results', { count: flatItems.length }) : t('search.statusIdle')}
-        </span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-            <Kbd>↑</Kbd>
-            <Kbd>↓</Kbd>
-            <span>{t('search.navigate')}</span>
+        <div className="search-box-footer">
+          <span className="search-box-status-text">
+            {flatItems.length > 0 ? t('search.results', { count: flatItems.length }) : t('search.statusIdle')}
           </span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-            <Kbd>↵</Kbd>
-            <span>{t('search.open')}</span>
-          </span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-            <Kbd>⌘↵</Kbd>
-            <span>{t('search.web')}</span>
-          </span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-            <Kbd>Tab</Kbd>
-            <span>{t('search.switchToWeb')}</span>
-          </span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-            <Kbd>esc</Kbd>
-            <span>{t('search.close')}</span>
-          </span>
+          <div className="search-box-shortcuts">
+            {shortcutHints.map((shortcut) => (
+              <span key={shortcut.id} className="search-box-shortcut">
+                <span className="search-box-shortcut-keys">
+                  {shortcut.keys.map((key) => (
+                    <Kbd key={`${shortcut.id}-${key}`}>{key}</Kbd>
+                  ))}
+                </span>
+                <span>{shortcut.label}</span>
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </Modal>

@@ -11,11 +11,12 @@
  */
 
 import { memo, useMemo } from 'react';
-import { Button, Space, theme } from 'antd';
+import { Button, Space } from 'antd';
 import { Archive, RotateCcw, Upload, Download, ShieldCheck, Trash2, Copy, Camera, Eye } from 'lucide-react';
 import type { ActivityAction, ActivityRecord, ActivityType } from '@/shared/types';
 import { useMetadataStore, useSettingsStore, useUndoStore } from '@/store';
 import { useT } from '@/shared/i18n';
+import './styles/activity-strip.css';
 
 const VISIBLE_WINDOW_MS = 60 * 60 * 1000;
 
@@ -54,7 +55,6 @@ export const ActivityStrip = memo(function ActivityStrip({ onOpenArchive, onOpen
   const activityVisible = useSettingsStore((s) => s.settings.uiVisibility?.activityStrip);
   const undoRecord = useUndoStore((s) => s.undoRecord);
   const { t } = useT();
-  const { token } = theme.useToken();
 
   const shouldRender = useMemo(() => {
     if (activityVisible === false) return false;
@@ -87,56 +87,26 @@ export const ActivityStrip = memo(function ActivityStrip({ onOpenArchive, onOpen
   };
 
   return (
-    <section
-      aria-label={t('activity.title')}
-      style={{
-        display: 'flex',
-        gap: 8,
-        overflowX: 'auto',
-        padding: '6px 2px 10px',
-        margin: '0 0 4px',
-        scrollbarWidth: 'thin',
-      }}
-    >
+    <section aria-label={t('activity.title')} className="activity-strip">
       {recentActivity.map((record) => {
         const iconBase = iconFor(record.type);
         return (
-          <div
-            key={record.id}
-            style={{
-              flexShrink: 0,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '6px 10px 6px 8px',
-              borderRadius: 999,
-              background: token.colorFillTertiary,
-              border: `1px solid ${token.colorBorderSecondary}`,
-              maxWidth: 520,
-            }}
-          >
-            <span style={{ display: 'inline-flex', color: token.colorTextSecondary }}>{iconBase}</span>
+          <div key={record.id} className="activity-strip__item">
+            <span className="activity-strip__icon">{iconBase}</span>
             <span
-              style={{
-                fontSize: 12.5,
-                color: token.colorText,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                flex: '0 1 auto',
-              }}
+              className="activity-strip__summary"
               title={record.summary}
             >
               {record.summary}
             </span>
             {(record.primaryAction !== undefined || record.secondaryAction !== undefined) && (
-              <Space size={4} style={{ flexShrink: 0 }}>
+              <Space size={4} className="activity-strip__actions">
                 {record.primaryAction !== undefined && (
                   <Button
                     size="small"
                     type="link"
                     onClick={() => handleAction(record.primaryAction!, record)}
-                    style={{ padding: '0 4px', fontSize: 12 }}
+                    className="activity-strip__action-btn"
                   >
                     {record.primaryAction.label}
                   </Button>
@@ -146,7 +116,7 @@ export const ActivityStrip = memo(function ActivityStrip({ onOpenArchive, onOpen
                     size="small"
                     type="link"
                     onClick={() => handleAction(record.secondaryAction!, record)}
-                    style={{ padding: '0 4px', fontSize: 12, color: token.colorTextSecondary }}
+                    className="activity-strip__action-btn activity-strip__action-btn--secondary"
                   >
                     {record.secondaryAction.label}
                   </Button>

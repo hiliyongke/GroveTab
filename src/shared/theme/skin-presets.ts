@@ -175,20 +175,20 @@ export const SKIN_PRESETS: SkinPreset[] = [
     id: 'minimal',
     labelKey: 'skin.minimal',
     descriptionKey: 'skin.minimalDesc',
-    previewColors: ['#1677ff', '#f5f5f5', '#4096ff'],
+    previewColors: ['#2B6BFF', '#EAF1FF', '#8DB2FF'],
     compatibleMode: 'both',
 
-    colorPrimary: '#1677ff',
-    colorPrimaryHover: '#4096ff',
+    colorPrimary: '#2B6BFF',
+    colorPrimaryHover: '#5A8CFF',
 
-    borderRadius: 10,
-    borderRadiusLG: 12,
-    borderRadiusSM: 8,
-    borderRadiusXS: 6,
+    borderRadius: 12,
+    borderRadiusLG: 16,
+    borderRadiusSM: 9,
+    borderRadiusXS: 7,
 
-    controlHeight: 36,
-    controlHeightLG: 44,
-    controlHeightSM: 28,
+    controlHeight: 38,
+    controlHeightLG: 46,
+    controlHeightSM: 30,
 
     fontFamily:
       '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif',
@@ -196,49 +196,49 @@ export const SKIN_PRESETS: SkinPreset[] = [
       '-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif',
     fontSize: 14,
 
-    padding: 20,
-    paddingLG: 24,
-    paddingSM: 12,
+    padding: 22,
+    paddingLG: 28,
+    paddingSM: 14,
 
-    motionDurationSlow: '0.3s',
-    motionDurationMid: '0.2s',
-    motionDurationFast: '0.12s',
+    motionDurationSlow: '0.32s',
+    motionDurationMid: '0.22s',
+    motionDurationFast: '0.14s',
     motionEaseInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
     motionEaseOut: 'cubic-bezier(0, 0, 0.2, 1)',
 
-    colorBgLayoutLight: '#f5f5f5',
-    colorBgContainerLight: '#ffffff',
-    colorBgElevatedLight: '#ffffff',
-    colorBorderSecondaryLight: '#f0f0f0',
+    colorBgLayoutLight: '#F3F6FB',
+    colorBgContainerLight: '#FFFFFF',
+    colorBgElevatedLight: '#FCFDFF',
+    colorBorderSecondaryLight: '#DCE5F2',
 
-    colorBgLayoutDark: '#141414',
-    colorBgContainerDark: '#1f1f1f',
-    colorBgElevatedDark: '#262626',
-    colorBorderSecondaryDark: 'rgba(255,255,255,0.06)',
+    colorBgLayoutDark: '#0F1726',
+    colorBgContainerDark: '#162033',
+    colorBgElevatedDark: '#1B2840',
+    colorBorderSecondaryDark: 'rgba(173, 194, 227, 0.14)',
 
     glass: {
-      blur: 20,
-      saturate: 140,
-      bgLight: 'rgba(255, 255, 255, 0.72)',
-      bgDark: 'rgba(20, 20, 20, 0.78)',
+      blur: 18,
+      saturate: 132,
+      bgLight: 'rgba(252, 253, 255, 0.78)',
+      bgDark: 'rgba(13, 22, 36, 0.76)',
     },
 
     shadow: {
       card: {
-        light: '0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.06)',
-        dark: '0 1px 2px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2)',
+        light: '0 1px 2px rgba(19, 37, 63, 0.05), 0 10px 28px rgba(29, 64, 128, 0.08)',
+        dark: '0 8px 24px rgba(5, 10, 20, 0.36), 0 1px 2px rgba(5, 10, 20, 0.34)',
       },
       cardHover: {
-        light: '0 2px 8px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.08)',
-        dark: '0 2px 8px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.28)',
+        light: '0 10px 26px rgba(43, 107, 255, 0.12), 0 12px 32px rgba(21, 44, 87, 0.08)',
+        dark: '0 12px 30px rgba(4, 10, 24, 0.44), 0 0 0 1px rgba(113, 157, 255, 0.08)',
       },
       floating: {
-        light: '0 2px 8px rgba(22,119,255,0.06), 0 8px 32px rgba(0,0,0,0.08)',
-        dark: '0 2px 8px rgba(0,0,0,0.4), 0 8px 32px rgba(0,0,0,0.3)',
+        light: '0 12px 32px rgba(43, 107, 255, 0.12), 0 2px 10px rgba(23, 44, 88, 0.08)',
+        dark: '0 14px 34px rgba(3, 9, 20, 0.46), 0 2px 8px rgba(3, 9, 20, 0.34)',
       },
       brandGlow: {
-        light: '0 2px 12px rgba(22,119,255,0.04), 0 0 0 1px rgba(0,0,0,0.03)',
-        dark: '0 2px 12px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.04)',
+        light: '0 8px 22px rgba(43, 107, 255, 0.18), 0 0 0 1px rgba(43, 107, 255, 0.08)',
+        dark: '0 10px 24px rgba(16, 46, 104, 0.24), 0 0 0 1px rgba(122, 165, 255, 0.1)',
       },
     },
 
@@ -253,27 +253,27 @@ export const SKIN_PRESETS: SkinPreset[] = [
       borderWidth: 1,
       hoverBorderWidth: 1,
       hoverLift: true,
-      liftDistance: 1,
+      liftDistance: 2,
     },
 
     searchBox: {
-      height: 52,
-      borderRadius: 16,
+      height: 54,
+      borderRadius: 20,
       fontSize: 15,
     },
 
     header: {
-      height: 56,
+      height: 58,
     },
 
-    logoGradient: 'linear-gradient(135deg, #1677ff, #4096ff)',
+    logoGradient: 'linear-gradient(135deg, #2B6BFF, #7EA8FF)',
     logoGlowShadow: {
-      light: '0 2px 8px rgba(22,119,255,0.15)',
-      dark: '0 2px 8px rgba(22,119,255,0.12)',
+      light: '0 8px 18px rgba(43,107,255,0.22)',
+      dark: '0 8px 18px rgba(43,107,255,0.18)',
     },
 
     floatingBar: {
-      borderRadius: 16,
+      borderRadius: 20,
     },
   },
 

@@ -12,8 +12,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { CSSProperties } from 'react';
-import { Button, Input, Tooltip, Typography, Empty, theme } from 'antd';
+import { Button, Input, Tooltip, Typography, Empty } from 'antd';
 import { AntdThemeProvider } from '@/shared/ui/AntdThemeProvider';
 import { LayoutGrid, Save, Search, ExternalLink, X } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
@@ -26,9 +25,6 @@ import { activateTab, closeTab, createTab, getFaviconUrl, queryAllTabs } from '@
 import { I18nProvider, useT } from '@/shared/i18n';
 
 const { Text } = Typography;
-
-const POPUP_WIDTH = 380;
-const POPUP_HEIGHT = 600;
 
 interface RecentTab {
   id: number;
@@ -71,7 +67,6 @@ function PopupContent() {
   /** 从用户设置读默认搜索引擎；暂以 Google 兑底 */
   const [defaultEngine, setDefaultEngine] = useState<SearchEngineId>('google');
   const { t } = useT();
-  const { token } = theme.useToken();
 
   // 读设置同步默认引擎
   useEffect(() => {
@@ -167,39 +162,13 @@ function PopupContent() {
   }, [query, defaultEngine]);
 
   return (
-    <div
-      style={{
-        width: POPUP_WIDTH,
-        height: POPUP_HEIGHT,
-        display: 'flex',
-        flexDirection: 'column',
-        padding: token.paddingSM,
-        boxSizing: 'border-box',
-        fontFamily: token.fontFamily,
-        fontSize: token.fontSizeSM,
-        color: token.colorText,
-        background: token.colorBgLayout,
-      }}
-    >
+    <div className="popup-shell">
       {/* 顶部品牌 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-        <div
-          style={{
-            width: 24,
-            height: 24,
-            borderRadius: token.borderRadius,
-            background: 'var(--app-logo-gradient)',
-            color: '#fff',
-            fontWeight: 800,
-            fontSize: 12,
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
+      <div className="popup-brand">
+        <div className="popup-brand-mark">
           {BRAND.shortName}
         </div>
-        <Text strong style={{ fontSize: 14, color: token.colorText }}>
+        <Text strong className="popup-brand-name">
           {BRAND.name}
         </Text>
       </div>
@@ -209,50 +178,30 @@ function PopupContent() {
         autoFocus
         size="middle"
         allowClear
+        className="popup-search"
         placeholder={t('popup.searchPlaceholder')}
-        prefix={<Search size={ICON_SIZE.MEDIUM} style={{ color: token.colorTextTertiary }} />}
+        prefix={<Search size={ICON_SIZE.MEDIUM} className="popup-search-icon" />}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onPressEnter={runWebSearch}
-        style={{ borderRadius: token.borderRadiusLG, marginBottom: token.marginXS * 2, background: token.colorBgContainer }}
       />
 
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 8,
-          marginBottom: 6,
-          padding: '0 2px',
-        }}
-      >
-        <Text type="secondary" style={{ fontSize: 11.5 }}>{tabCountLabel}</Text>
+      <div className="popup-meta">
+        <Text type="secondary" className="popup-meta-text">{tabCountLabel}</Text>
         {filteredTabs.length > 0 && (
-          <Text type="secondary" style={{ fontSize: 11 }}>
+          <Text type="secondary" className="popup-meta-hint">
             {t('popup.scrollHint')}
           </Text>
         )}
       </div>
 
       {/* 中部：全部 Tab 列表 */}
-      <div
-        style={{
-          flex: 1,
-          overflowY: 'auto',
-          scrollbarGutter: 'stable',
-          marginBottom: token.marginSM,
-          borderRadius: token.borderRadiusLG,
-          background: token.colorBgContainer,
-          border: `1px solid ${token.colorBorderSecondary}`,
-          padding: 4,
-        }}
-      >
+      <div className="popup-list">
         {filteredTabs.length === 0 ? (
-          <div style={{ padding: '20px 12px', textAlign: 'center' }}>
+          <div className="popup-list-empty">
             <Empty
               image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description={<Text type="secondary" style={{ fontSize: 12 }}>{t('popup.noRecentTabs')}</Text>}
+              description={<Text type="secondary" className="popup-empty-text">{t('popup.noRecentTabs')}</Text>}
             />
           </div>
         ) : (
@@ -279,7 +228,7 @@ function PopupContent() {
       </div>
 
       {/* 底部：两个操作按钮 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+      <div className="popup-actions">
         <Tooltip title={!hasAnyTab ? t('popup.noTabsToArchive') : ''} mouseEnterDelay={0.3}>
           <Button
             type="primary"
@@ -298,12 +247,12 @@ function PopupContent() {
           onClick={openNewTab}
         >
           {t('popup.openWorkspace')}
-          <ExternalLink size={ICON_SIZE.MICRO} style={{ marginLeft: 4, opacity: 0.6 }} />
+          <ExternalLink size={ICON_SIZE.MICRO} className="popup-external-icon" />
         </Button>
       </div>
 
       {/* 底部"关于"链接：跳转 newtab 并自动切到 About Tab */}
-      <div style={{ marginTop: 10, textAlign: 'center' }}>
+      <div className="popup-about">
         <button
           type="button"
           onClick={() => {
@@ -312,20 +261,14 @@ function PopupContent() {
             });
             window.close();
           }}
-          style={{
-            all: 'unset',
-            cursor: 'pointer',
-            fontSize: 11,
-            color: token.colorTextTertiary,
-            padding: '4px 8px',
-          }}
+          className="popup-about-link"
         >
           {t('popup.aboutGroveTab', { brand: BRAND.name })}
         </button>
       </div>
 
       {archiveError !== '' && (
-        <div style={{ marginTop: 6, fontSize: 11.5, color: token.colorError }}>
+        <div className="popup-error">
           {archiveError}
         </div>
       )}
@@ -344,38 +287,15 @@ function RecentTabRow({
   onClose: () => void;
 }) {
   const { t } = useT();
-  const { token } = theme.useToken();
-  const [hover, setHover] = useState(false);
   return (
     <div
-      className="app-row-hover"
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={
-        {
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          padding: '6px 8px',
-          borderRadius: token.borderRadius,
-          transition: 'background-color var(--app-motion-duration-fast, 0.12s) ease',
-          ['--app-row-hover-bg' as string]: token.colorFillSecondary,
-        } as CSSProperties
-      }
+      className="popup-row app-hover-reveal-host"
     >
       <button
         type="button"
         onClick={onClick}
         aria-label={t('popup.openTab', { title: tab.title })}
-        style={{
-          all: 'unset',
-          cursor: 'pointer',
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          minWidth: 0,
-        }}
+        className="popup-row-main"
       >
         <img
           src={tab.favIconUrl}
@@ -383,59 +303,31 @@ function RecentTabRow({
           width={14}
           height={14}
           referrerPolicy="no-referrer"
-          style={{ borderRadius: 3, flexShrink: 0 }}
+          className="popup-row-favicon"
           onError={(e) => {
             e.currentTarget.style.visibility = 'hidden';
           }}
         />
-        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
-          <span
-            style={{
-              fontSize: 12.5,
-              color: token.colorText,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
+        <div className="popup-row-content">
+          <span className="popup-row-title">
             {tab.title}
           </span>
-          <span
-            style={{
-              fontSize: 11,
-              color: token.colorTextTertiary,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
+          <span className="popup-row-host">
             {tab.hostname}
           </span>
         </div>
       </button>
-      {hover && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }}
-          aria-label={t('popup.closeTab', { title: tab.title })}
-          style={{
-            all: 'unset',
-            cursor: 'pointer',
-            width: 18,
-            height: 18,
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: token.borderRadiusSM,
-            color: token.colorError,
-          }}
-        >
-          <X size={ICON_SIZE.SMALL} />
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onClose();
+        }}
+        aria-label={t('popup.closeTab', { title: tab.title })}
+        className="popup-row-close app-hover-reveal"
+      >
+        <X size={ICON_SIZE.SMALL} />
+      </button>
     </div>
   );
 }

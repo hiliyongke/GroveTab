@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
-import { Button, Input, Select, Switch, theme, Popconfirm } from 'antd';
-import { Plus, LayoutGrid, Grip, TimerReset, Trash2, FolderPlus, BookmarkPlus } from 'lucide-react';
+import { Button, Input, Popconfirm, Select, Switch } from 'antd';
+import { BookmarkPlus, FolderPlus, Grip, LayoutGrid, Plus, TimerReset, Trash2 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
@@ -14,6 +14,7 @@ import {
 import type { DashboardWidgetType, SpeedDialGroup, SpeedDialLink } from '@/shared/types';
 import { isSafeExternalUrl, normalizeExternalUrl } from '@/shared/utils/url-safety';
 import { WIDGET_DEFINITIONS } from '@/features/dashboard-widgets/types';
+import './styles/widgets.css';
 
 function isValidDateText(value: string): boolean {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
@@ -43,7 +44,6 @@ function isValidHourMinute(value: string): boolean {
 }
 
 export function WidgetsPanel() {
-  const { token } = theme.useToken();
   const { t } = useT();
   const settings = useSettingsStore((s) => s.settings);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
@@ -65,43 +65,50 @@ export function WidgetsPanel() {
   };
 
   const renameGroup = (id: string, name: string) => {
-    void saveSpeedDial(speedDialGroups.map((g) => (g.id === id ? { ...g, name } : g)));
+    void saveSpeedDial(speedDialGroups.map((group) => (group.id === id ? { ...group, name } : group)));
   };
 
   const removeGroup = (id: string) => {
-    void saveSpeedDial(speedDialGroups.filter((g) => g.id !== id));
+    void saveSpeedDial(speedDialGroups.filter((group) => group.id !== id));
   };
 
   const addLink = (groupId: string) => {
     void saveSpeedDial(
-      speedDialGroups.map((g) =>
-        g.id === groupId
+      speedDialGroups.map((group) =>
+        group.id === groupId
           ? {
-              ...g,
+              ...group,
               links: [
-                ...g.links,
+                ...group.links,
                 { id: `link-${nanoid(8)}`, title: t('widgets.newSite'), url: 'https://' },
               ],
             }
-          : g,
+          : group,
       ),
     );
   };
 
   const updateLink = (groupId: string, linkId: string, patch: Partial<SpeedDialLink>) => {
     void saveSpeedDial(
-      speedDialGroups.map((g) =>
-        g.id === groupId
-          ? { ...g, links: g.links.map((l) => (l.id === linkId ? { ...l, ...patch } : l)) }
-          : g,
+      speedDialGroups.map((group) =>
+        group.id === groupId
+          ? {
+              ...group,
+              links: group.links.map((link) =>
+                link.id === linkId ? { ...link, ...patch } : link,
+              ),
+            }
+          : group,
       ),
     );
   };
 
   const removeLink = (groupId: string, linkId: string) => {
     void saveSpeedDial(
-      speedDialGroups.map((g) =>
-        g.id === groupId ? { ...g, links: g.links.filter((l) => l.id !== linkId) } : g,
+      speedDialGroups.map((group) =>
+        group.id === groupId
+          ? { ...group, links: group.links.filter((link) => link.id !== linkId) }
+          : group,
       ),
     );
   };
@@ -132,33 +139,36 @@ export function WidgetsPanel() {
       const root = tree[0]?.children ?? [];
       const bar =
         root.find(
-          (n) => n.title === '书签栏' || n.title === 'Bookmarks bar' || n.title === 'Bookmarks Bar',
+          (node) =>
+            node.title === '书签栏'
+            || node.title === 'Bookmarks bar'
+            || node.title === 'Bookmarks Bar',
         ) ?? root[0];
-      const folders = (bar?.children ?? []).filter((n) => n.children && n.children.length > 0);
-      const existingGroupNames = new Set(speedDialGroups.map((g) => g.name));
+      const folders = (bar?.children ?? []).filter((node) => node.children && node.children.length > 0);
+      const existingGroupNames = new Set(speedDialGroups.map((group) => group.name));
       const newGroups: SpeedDialGroup[] = folders
-        .filter((f) => !existingGroupNames.has(f.title ?? t('widgets.unnamed')))
+        .filter((folder) => !existingGroupNames.has(folder.title ?? t('widgets.unnamed')))
         .map((folder) => ({
           id: `group-${nanoid(8)}-${folder.id}`,
           name: folder.title ?? t('widgets.unnamed'),
           links: (folder.children ?? [])
-            .filter((n) => typeof n.url === 'string' && isSafeExternalUrl(n.url))
+            .filter((node) => typeof node.url === 'string' && isSafeExternalUrl(node.url))
             .slice(0, 30)
-            .map((bm, idx) => ({
-              id: `link-${nanoid(8)}-${bm.id}-${idx}`,
-              title: bm.title || bm.url || t('widgets.unnamed'),
-              url: bm.url ?? '',
+            .map((bookmark, index) => ({
+              id: `link-${nanoid(8)}-${bookmark.id}-${index}`,
+              title: bookmark.title || bookmark.url || t('widgets.unnamed'),
+              url: bookmark.url ?? '',
             })),
         }))
-        .filter((g) => g.links.length > 0);
+        .filter((group) => group.links.length > 0);
 
       const rootLinks: SpeedDialLink[] = (bar?.children ?? [])
-        .filter((n) => typeof n.url === 'string' && isSafeExternalUrl(n.url))
+        .filter((node) => typeof node.url === 'string' && isSafeExternalUrl(node.url))
         .slice(0, 30)
-        .map((bm, idx) => ({
-          id: `link-${nanoid(8)}-root-${bm.id}-${idx}`,
-          title: bm.title || bm.url || t('widgets.unnamed'),
-          url: bm.url ?? '',
+        .map((bookmark, index) => ({
+          id: `link-${nanoid(8)}-root-${bookmark.id}-${index}`,
+          title: bookmark.title || bookmark.url || t('widgets.unnamed'),
+          url: bookmark.url ?? '',
         }));
       if (rootLinks.length > 0 && !existingGroupNames.has(t('widgets.bookmarkBar'))) {
         newGroups.unshift({
@@ -184,9 +194,9 @@ export function WidgetsPanel() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div className="widgets-panel">
       <Field label={t('widgets.dashboard')} hint={t('widgets.dashboardHint')}>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div className="widgets-panel__row-actions">
           <Button
             type={dashboard?.enabled !== false ? 'primary' : 'default'}
             icon={<LayoutGrid size={ICON_SIZE.MEDIUM} />}
@@ -219,7 +229,7 @@ export function WidgetsPanel() {
       </Field>
 
       <Field label={t('widgets.gridDensity')} hint={t('widgets.gridDensityHint')}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        <div className="widgets-panel__grid-two">
           <Select
             value={dashboard?.columns ?? 12}
             options={[8, 10, 12].map((value) => ({
@@ -244,30 +254,10 @@ export function WidgetsPanel() {
       </Field>
 
       <Field label="组件库" hint="关闭后会从工作台隐藏，但保留原布局；重新开启后可继续使用。">
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(132px, 1fr))',
-            gap: 8,
-          }}
-        >
+        <div className="widgets-panel__widget-library">
           {WIDGET_DEFINITIONS.map((item) => (
-            <div
-              key={item.type}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 8,
-                padding: '8px 10px',
-                borderRadius: token.borderRadiusLG,
-                background: token.colorFillQuaternary,
-                border: `1px solid ${token.colorBorderSecondary}`,
-              }}
-            >
-              <span style={{ fontSize: 12, fontWeight: 500, color: token.colorTextSecondary }}>
-                {item.title}
-              </span>
+            <div key={item.type} className="widgets-panel__widget-card">
+              <span className="widgets-panel__widget-title">{item.title}</span>
               <Switch
                 size="small"
                 checked={dashboard?.availableWidgets?.[item.type] !== false}
@@ -279,11 +269,9 @@ export function WidgetsPanel() {
       </Field>
 
       <Field label={t('widgets.speedDial')} hint={t('widgets.speedDialHint')}>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 12, color: token.colorTextSecondary }}>
-              {t('widgets.enable')}
-            </span>
+        <div className="widgets-panel__toggle-group">
+          <div className="widgets-panel__toggle-item">
+            <span className="widgets-panel__toggle-label">{t('widgets.enable')}</span>
             <Switch
               checked={speedDial?.enabled !== false}
               onChange={(value) =>
@@ -291,10 +279,8 @@ export function WidgetsPanel() {
               }
             />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 12, color: token.colorTextSecondary }}>
-              {t('widgets.showLabels')}
-            </span>
+          <div className="widgets-panel__toggle-item">
+            <span className="widgets-panel__toggle-label">{t('widgets.showLabels')}</span>
             <Switch
               checked={speedDial?.showLabels !== false}
               onChange={(value) =>
@@ -302,10 +288,8 @@ export function WidgetsPanel() {
               }
             />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 12, color: token.colorTextSecondary }}>
-              {t('widgets.openInNewTab')}
-            </span>
+          <div className="widgets-panel__toggle-item">
+            <span className="widgets-panel__toggle-label">{t('widgets.openInNewTab')}</span>
             <Switch
               checked={speedDial?.openInNewTab !== false}
               onChange={(value) =>
@@ -317,7 +301,7 @@ export function WidgetsPanel() {
       </Field>
 
       <Field label={t('widgets.speedDialGroups')} hint={t('widgets.speedDialGroupsHint')}>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+        <div className="widgets-panel__actions">
           <Button icon={<FolderPlus size={ICON_SIZE.MEDIUM} />} onClick={addGroup}>
             {t('widgets.addGroup')}
           </Button>
@@ -329,27 +313,19 @@ export function WidgetsPanel() {
           </Button>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="widgets-panel__group-list">
           {speedDialGroups.map((group) => (
-            <div
-              key={group.id}
-              style={{
-                padding: 12,
-                borderRadius: token.borderRadiusLG,
-                background: token.colorFillQuaternary,
-                border: `1px solid ${token.colorBorderSecondary}`,
-              }}
-            >
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+            <div key={group.id} className="widgets-panel__group-card">
+              <div className="widgets-panel__group-header">
                 <Input
                   value={group.name}
                   onChange={(e) => renameGroup(group.id, e.target.value)}
-                  style={{ maxWidth: 220 }}
+                  className="widgets-panel__group-name"
                 />
-                <span style={{ fontSize: 12, color: token.colorTextTertiary }}>
+                <span className="widgets-panel__group-count">
                   {t('widgets.linkCount', { n: group.links.length })}
                 </span>
-                <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
+                <div className="widgets-panel__group-actions">
                   <Button
                     size="small"
                     icon={<Plus size={ICON_SIZE.SMALL} />}
@@ -357,21 +333,15 @@ export function WidgetsPanel() {
                   >
                     {t('widgets.addLink')}
                   </Button>
-                  <Popconfirm
-                    title={t('widgets.removeGroup')}
-                    onConfirm={() => removeGroup(group.id)}
-                  >
+                  <Popconfirm title={t('widgets.removeGroup')} onConfirm={() => removeGroup(group.id)}>
                     <Button size="small" danger icon={<Trash2 size={ICON_SIZE.SMALL} />} />
                   </Popconfirm>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div className="widgets-panel__link-list">
                 {group.links.map((link) => (
-                  <div
-                    key={link.id}
-                    style={{ display: 'grid', gridTemplateColumns: '1fr 1.6fr 60px auto', gap: 6 }}
-                  >
+                  <div key={link.id} className="widgets-panel__link-row">
                     <Input
                       size="small"
                       value={link.title}
@@ -382,9 +352,7 @@ export function WidgetsPanel() {
                       size="small"
                       value={link.url}
                       placeholder="https://..."
-                      status={
-                        link.url.trim() !== '' && !isSafeExternalUrl(link.url) ? 'error' : undefined
-                      }
+                      status={link.url.trim() !== '' && !isSafeExternalUrl(link.url) ? 'error' : undefined}
                       onChange={(e) => updateLink(group.id, link.id, { url: e.target.value })}
                       onBlur={() => {
                         const normalized = normalizeExternalUrl(link.url, {
@@ -431,20 +399,9 @@ export function WidgetsPanel() {
       </Field>
 
       <Field label={t('widgets.countdown')} hint={t('widgets.countdownHint')}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="widgets-panel__countdown-list">
           {(countdowns?.items ?? []).map((item) => (
-            <div
-              key={item.id}
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1.2fr 1fr',
-                gap: 8,
-                padding: 10,
-                borderRadius: token.borderRadiusLG,
-                background: token.colorFillQuaternary,
-                border: `1px solid ${token.colorBorderSecondary}`,
-              }}
-            >
+            <div key={item.id} className="widgets-panel__countdown-item">
               <Input
                 value={item.title}
                 onChange={(e) => {
@@ -492,7 +449,7 @@ export function WidgetsPanel() {
       </Field>
 
       <Field label={t('widgets.workCountdown')} hint={t('widgets.workCountdownHint')}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        <div className="widgets-panel__work-countdown widgets-panel__grid-two">
           <Input
             value={workCountdown?.workdayEnd ?? '18:30'}
             placeholder="18:30"
@@ -516,7 +473,7 @@ export function WidgetsPanel() {
       </Field>
 
       <Field label={t('widgets.pomodoro')} hint={t('widgets.pomodoroHint')}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+        <div className="widgets-panel__pomodoro-grid widgets-panel__grid-three">
           <Select
             value={pomodoro?.focusMinutes ?? 25}
             options={[20, 25, 30, 45, 60].map((value) => ({
@@ -550,7 +507,7 @@ export function WidgetsPanel() {
         </div>
         <Button
           icon={<TimerReset size={ICON_SIZE.MEDIUM} />}
-          style={{ marginTop: 8 }}
+          className="widgets-panel__reset-button"
           onClick={() => {
             void updateSettings({
               pomodoro: {

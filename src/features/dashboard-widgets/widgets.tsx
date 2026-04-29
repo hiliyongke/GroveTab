@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid';
 import type { InputRef } from 'antd';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Empty, Input, Popconfirm, Segmented, Tabs, theme, Tooltip } from 'antd';
+import { Button, Empty, Input, Popconfirm, Segmented, Tabs, Tooltip } from 'antd';
 import {
   Plus,
   TimerReset,
@@ -84,10 +84,11 @@ function MiniEmpty({ text }: { text: string }) {
     <Empty
       image={Empty.PRESENTED_IMAGE_SIMPLE}
       description={text}
-      style={{ margin: 0, padding: '12px 0' }}
+      className="dashboard-widget-empty"
     />
   );
 }
+
 
 /** SpeedDial Tile —— Sortable 版：支持点击打开 URL + 拖拽重排序（v1.3） */
 function SortableSpeedDialTile({
@@ -101,17 +102,22 @@ function SortableSpeedDialTile({
   openInNewTab: boolean;
   onRemove: () => void;
 }) {
-  const { token } = theme.useToken();
   const [imageFailed, setImageFailed] = useState(false);
-  const [hover, setHover] = useState(false);
   const iconUrl = buildFaviconUrl(link.url);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: link.id,
   });
 
+  const itemStyle = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+  } as React.CSSProperties;
+  const iconStyle = link.color
+    ? ({ '--dashboard-speed-dial-color': link.color } as React.CSSProperties)
+    : undefined;
+
   const handleClick = (e: React.MouseEvent) => {
-    // 拖拽激活时 @dnd-kit 会阻止 click；这里仅作保险
     if (isDragging) {
       e.preventDefault();
       return;
@@ -130,28 +136,16 @@ function SortableSpeedDialTile({
   return (
     <div
       ref={setNodeRef}
-      style={{
-        position: 'relative',
-        opacity: isDragging ? 0.4 : 1,
-        transform: CSS.Translate.toString(transform),
-        transition,
-        touchAction: 'none',
-      }}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onFocusCapture={() => setHover(true)}
-      onBlurCapture={(event) => {
-        const nextTarget = event.relatedTarget;
-        if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget))
-          setHover(false);
-      }}
+      className="dashboard-speed-dial__item app-hover-reveal-host"
+      data-dragging={isDragging || undefined}
+      style={itemStyle}
     >
       <div
         {...attributes}
         {...listeners}
         role="button"
         tabIndex={0}
-        aria-label={`${link.title}（拖拽重排或按 Enter 打开）`}
+        aria-label={link.title + '（拖拽重排或按 Enter 打开）'}
         onClick={handleClick}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -159,99 +153,36 @@ function SortableSpeedDialTile({
             handleClick(e as unknown as React.MouseEvent);
           }
         }}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 8,
-          padding: 10,
-          borderRadius: token.borderRadiusLG,
-          background: token.colorFillQuaternary,
-          border: `1px solid ${token.colorBorderSecondary}`,
-          color: token.colorText,
-          cursor: isDragging ? 'grabbing' : 'pointer',
-          userSelect: 'none',
-        }}
+        className="dashboard-speed-dial__tile"
       >
-        <div
-          style={{
-            width: 42,
-            height: 42,
-            borderRadius: 14,
-            background: link.color ?? token.colorPrimaryBg,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden',
-            color: '#fff',
-            fontSize: 18,
-            fontWeight: 700,
-          }}
-        >
+        <div className="dashboard-speed-dial__icon" style={iconStyle}>
           {link.emoji ? (
             <span>{link.emoji}</span>
           ) : iconUrl && !imageFailed ? (
-            <img src={iconUrl} alt="" width={22} height={22} onError={() => setImageFailed(true)} />
+            <img
+              src={iconUrl}
+              alt=""
+              width={22}
+              height={22}
+              className="dashboard-speed-dial__icon-image"
+              onError={() => setImageFailed(true)}
+            />
           ) : (
             <span>{getInitials(link.title)}</span>
           )}
         </div>
         {showLabels && (
-          <div style={{ textAlign: 'center', minWidth: 0 }}>
-            <div
-              style={{
-                fontSize: 12,
-                fontWeight: 600,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                maxWidth: 92,
-              }}
-            >
-              {link.title}
-            </div>
-            <div
-              style={{
-                fontSize: 11,
-                color: token.colorTextTertiary,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                maxWidth: 92,
-              }}
-            >
-              {getHostnameLabel(link.url)}
-            </div>
+          <div className="dashboard-speed-dial__copy">
+            <div className="dashboard-speed-dial__title">{link.title}</div>
+            <div className="dashboard-speed-dial__host">{getHostnameLabel(link.url)}</div>
           </div>
         )}
       </div>
 
-      {/* hover 时右上角暴露拖拽把手 + 删除按钮 */}
-      {hover && !isDragging && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 4,
-            right: 4,
-            display: 'flex',
-            gap: 2,
-            background: 'rgba(255,255,255,0.95)',
-            borderRadius: 8,
-            padding: 2,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-          }}
-        >
+      {!isDragging && (
+        <div className="dashboard-speed-dial__overlay app-hover-reveal">
           <Tooltip title="按住拖拽排序">
-            <span
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                padding: '2px 4px',
-                color: token.colorTextTertiary,
-                cursor: 'grab',
-              }}
-              aria-hidden="true"
-            >
+            <span className="dashboard-speed-dial__drag" aria-hidden="true">
               <GripVertical size={ICON_SIZE.TINY} />
             </span>
           </Tooltip>
@@ -259,8 +190,8 @@ function SortableSpeedDialTile({
             type="text"
             size="small"
             danger
-            aria-label={`删除 ${link.title}`}
-            style={{ padding: '0 4px', height: 20, fontSize: 10 }}
+            aria-label={'删除 ' + link.title}
+            className="dashboard-speed-dial__remove app-dashboard__no-drag"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -275,6 +206,7 @@ function SortableSpeedDialTile({
   );
 }
 
+
 export function SpeedDialWidget() {
   const settings = useSettingsStore((s) => s.settings.speedDial);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
@@ -285,7 +217,6 @@ export function SpeedDialWidget() {
   const [draftTitle, setDraftTitle] = useState('');
   const [draftUrl, setDraftUrl] = useState('');
 
-  // 激活距离 6px，避免点击误触发拖拽（与 Kanban 一致）
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
@@ -304,7 +235,7 @@ export function SpeedDialWidget() {
       group.id === activeGroup.id
         ? {
             ...group,
-            links: [...group.links, { id: `link-${nanoid(8)}`, title, url: finalUrl }],
+            links: [...group.links, { id: 'link-' + nanoid(8), title, url: finalUrl }],
           }
         : group,
     );
@@ -341,7 +272,7 @@ export function SpeedDialWidget() {
   if (!activeGroup) return <MiniEmpty text="暂无快捷网站分组" />;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%' }}>
+    <div className="dashboard-speed-dial">
       <Tabs
         size="small"
         activeKey={activeGroup.id}
@@ -357,13 +288,7 @@ export function SpeedDialWidget() {
         onDragEnd={(e) => void onDragEnd(e)}
       >
         <SortableContext items={activeGroup.links.map((l) => l.id)} strategy={rectSortingStrategy}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(92px, 1fr))',
-              gap: 10,
-            }}
-          >
+          <div className="dashboard-speed-dial__grid">
             {activeGroup.links.map((link) => (
               <SortableSpeedDialTile
                 key={link.id}
@@ -377,14 +302,7 @@ export function SpeedDialWidget() {
         </SortableContext>
       </DndContext>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1.4fr auto',
-          gap: 8,
-          marginTop: 'auto',
-        }}
-      >
+      <div className="dashboard-speed-dial__add-row">
         <Input
           size="small"
           placeholder="名称（可选）"
@@ -410,50 +328,35 @@ export function SpeedDialWidget() {
   );
 }
 
+
 export function CountdownWidget() {
   const countdowns = useSettingsStore((s) => s.settings.countdowns);
   const items = countdowns?.items ?? [];
   const showPastEvents = countdowns?.showPastEvents === true;
-  const { token } = theme.useToken();
   const visibleItems = items
     .filter((item) => showPastEvents || !formatDaysLeft(item.targetDate).overdue)
     .slice(0, 4);
 
-  if (visibleItems.length === 0)
+  if (visibleItems.length === 0) {
     return <MiniEmpty text={items.length === 0 ? '暂无倒计时' : '过期事项已隐藏'} />;
+  }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <div className="dashboard-countdown">
       {visibleItems.map((item) => {
         const info = formatDaysLeft(item.targetDate);
         return (
           <div
             key={item.id}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '10px 12px',
-              borderRadius: token.borderRadiusLG,
-              background: token.colorFillQuaternary,
-              border: `1px solid ${token.colorBorderSecondary}`,
-            }}
+            className={'dashboard-countdown__item' + (info.overdue ? ' is-overdue' : '')}
           >
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 700 }}>
-                {item.emoji ? `${item.emoji} ${item.title}` : item.title}
+            <div className="dashboard-countdown__item-main">
+              <div className="dashboard-countdown__title">
+                {item.emoji ? item.emoji + ' ' + item.title : item.title}
               </div>
-              <div style={{ fontSize: 11, color: token.colorTextTertiary }}>{item.targetDate}</div>
+              <div className="dashboard-countdown__date">{item.targetDate}</div>
             </div>
-            <div
-              style={{
-                fontSize: 12,
-                fontWeight: 700,
-                color: info.overdue ? token.colorError : token.colorPrimary,
-              }}
-            >
-              {info.label}
-            </div>
+            <div className="dashboard-countdown__badge">{info.label}</div>
           </div>
         );
       })}
@@ -461,38 +364,24 @@ export function CountdownWidget() {
   );
 }
 
+
 export function WorkCountdownWidget() {
   const conf = useSettingsStore((s) => s.settings.workCountdown);
-  const { token } = theme.useToken();
   const info = formatTimeLeftTo(conf?.workdayEnd ?? '18:30');
   const finishedLabel = conf?.offLabel?.trim() || '今天收工啦';
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        height: '100%',
-        gap: 10,
-      }}
-    >
-      <div
-        style={{
-          fontSize: 28,
-          fontWeight: 800,
-          letterSpacing: '-0.04em',
-          color: info.finished ? token.colorSuccess : token.colorPrimary,
-        }}
-      >
+    <div className={'dashboard-work-countdown' + (info.finished ? ' is-finished' : '')}>
+      <div className="dashboard-work-countdown__value">
         {info.finished ? finishedLabel : info.label}
       </div>
-      <div style={{ fontSize: 12, color: token.colorTextTertiary }}>
+      <div className="dashboard-work-countdown__meta">
         目标下班时间：{conf?.workdayEnd ?? '18:30'}
       </div>
     </div>
   );
 }
+
 
 // ── Pomodoro 持久化 ──────────────────────────────────
 const POMODORO_STORAGE_KEY = STORAGE_KEYS.pomodoroState;
@@ -561,9 +450,7 @@ const MODE_LABEL: Record<PomodoroMode, string> = {
 
 export function PomodoroWidget() {
   const conf = useSettingsStore((s) => s.settings.pomodoro);
-  const { token } = theme.useToken();
 
-  // 配置从 settings 计算，变动立刻生效
   const config = useMemo<PomodoroConfig>(
     () => ({
       focusMinutes: conf?.focusMinutes ?? DEFAULT_POMODORO_CONFIG.focusMinutes,
@@ -573,16 +460,12 @@ export function PomodoroWidget() {
     [conf?.focusMinutes, conf?.shortBreakMinutes, conf?.longBreakMinutes],
   );
 
-  // 直接用 useState 托管完整 PomodoroState —— 首屏给默认值，
-  // useEffect 里异步从 storage 读取后再 setState 覆盖
   const [state, setState] = useState<PomodoroState>(() => createInitialState('focus'));
 
-  /** 将 action 应用到当前 state 并落盘 */
   const dispatch = (action: PomodoroAction) => {
     setState((prev) => pomodoroReducer(prev, action, config));
   };
 
-  // 首屏从存储恢复（仅一次）
   const revivedRef = useRef(false);
   useEffect(() => {
     if (revivedRef.current) return;
@@ -594,7 +477,6 @@ export function PomodoroWidget() {
     });
   }, [config]);
 
-  // 每秒刷新 UI（仅运行中）
   const [, setTick] = useState(0);
   useEffect(() => {
     if (!state.running) return;
@@ -602,21 +484,20 @@ export function PomodoroWidget() {
     return () => window.clearInterval(id);
   }, [state.running]);
 
-  // 到期自动切换 —— 检查 computeRemaining 是否 ≤ 0
   const completedOnceRef = useRef(false);
   useEffect(() => {
     if (!state.running) {
       completedOnceRef.current = false;
       return;
     }
-    const remaining = computeRemaining(state, config);
-    if (remaining <= 0 && !completedOnceRef.current) {
+    const remainingMs = computeRemaining(state, config);
+    if (remainingMs <= 0 && !completedOnceRef.current) {
       completedOnceRef.current = true;
       const finishedMode = state.mode;
       const msg = finishedMode === 'focus' ? '专注结束，稍作休息 🌿' : '休息结束，回到专注吧 ⚡';
       if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
         try {
-          new Notification(`${BRAND.name} · 番茄钟`, { body: msg });
+          new Notification(BRAND.name + ' · 番茄钟', { body: msg });
         } catch {
           /* ignore */
         }
@@ -628,7 +509,6 @@ export function PomodoroWidget() {
     }
   }, [state, config]);
 
-  // 持久化 —— state 变动就回写（首次恢复前不写，避免抖掉默认值）
   const firstWriteRef = useRef(true);
   useEffect(() => {
     if (firstWriteRef.current) {
@@ -640,7 +520,6 @@ export function PomodoroWidget() {
     });
   }, [state]);
 
-  // 跨日检查：每分钟一次
   useEffect(() => {
     const id = window.setInterval(() => dispatch({ type: 'roll-date' }), 60_000);
     return () => window.clearInterval(id);
@@ -656,10 +535,10 @@ export function PomodoroWidget() {
   };
 
   const handleReset = () => dispatch({ type: 'reset', mode: state.mode });
-  const handleSwitch = (m: PomodoroMode) => dispatch({ type: 'switch', mode: m });
+  const handleSwitch = (mode: PomodoroMode) => dispatch({ type: 'switch', mode });
 
   const remaining = computeRemaining(state, config);
-  const { minutes, seconds } = formatRemaining(remaining);
+  const formatted = formatRemaining(remaining);
   const totalMinutes =
     state.mode === 'focus'
       ? config.focusMinutes
@@ -668,16 +547,15 @@ export function PomodoroWidget() {
         : config.longBreakMinutes;
   const totalDuration = Math.max(1, totalMinutes) * 60 * 1000;
   const progress = totalDuration > 0 ? 1 - remaining / totalDuration : 0;
-
-  const accentColor =
-    state.mode === 'focus'
-      ? token.colorPrimary
-      : state.mode === 'short'
-        ? token.colorSuccess
-        : token.colorWarning;
+  const pomodoroStyle = {
+    '--dashboard-pomodoro-progress': Math.round(progress * 100) + '%',
+  } as React.CSSProperties;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%' }}>
+    <div
+      className={'dashboard-pomodoro dashboard-pomodoro--' + state.mode}
+      style={pomodoroStyle}
+    >
       <Segmented
         block
         size="small"
@@ -692,51 +570,22 @@ export function PomodoroWidget() {
       <div
         role="timer"
         aria-live="polite"
-        aria-label={`${MODE_LABEL[state.mode]} 剩余 ${minutes} 分 ${seconds} 秒`}
-        style={{
-          fontSize: 42,
-          fontWeight: 800,
-          letterSpacing: '-0.04em',
-          color: token.colorText,
-          fontVariantNumeric: 'tabular-nums',
-        }}
+        aria-label={MODE_LABEL[state.mode] + ' 剩余 ' + formatted.minutes + ' 分 ' + formatted.seconds + ' 秒'}
+        className="dashboard-pomodoro__timer"
       >
-        {minutes}:{seconds}
+        {formatted.minutes}:{formatted.seconds}
       </div>
-      <div
-        style={{
-          height: 4,
-          background: token.colorFillQuaternary,
-          borderRadius: 999,
-          overflow: 'hidden',
-        }}
-      >
-        <div
-          style={{
-            width: `${Math.round(progress * 100)}%`,
-            height: '100%',
-            background: accentColor,
-            transition: 'width 0.5s linear',
-          }}
-        />
+      <div className="dashboard-pomodoro__progress">
+        <div className="dashboard-pomodoro__progress-fill" />
       </div>
-      <div
-        style={{
-          fontSize: 12,
-          color: token.colorTextTertiary,
-          display: 'flex',
-          justifyContent: 'space-between',
-        }}
-      >
+      <div className="dashboard-pomodoro__meta">
         <span>当前：{MODE_LABEL[state.mode]}</span>
         <span>今日 🍅 {state.todayFocus}</span>
       </div>
-      <div style={{ display: 'flex', gap: 8, marginTop: 'auto' }}>
+      <div className="dashboard-pomodoro__actions">
         <Button
           type="primary"
-          icon={
-            state.running ? <Pause size={ICON_SIZE.MEDIUM} /> : <Play size={ICON_SIZE.MEDIUM} />
-          }
+          icon={state.running ? <Pause size={ICON_SIZE.MEDIUM} /> : <Play size={ICON_SIZE.MEDIUM} />}
           onClick={() => void handleToggle()}
         >
           {state.running ? '暂停' : state.elapsedMs > 0 ? '继续' : '开始'}
@@ -753,6 +602,7 @@ export function PomodoroWidget() {
   );
 }
 
+
 // ── TodoWidget · v1.3 ───────────────────────────────────
 // 新增：排序拖拽 / 删除 / 完成率 / 已完成超 24h 折叠 / Esc 清空输入
 
@@ -767,95 +617,54 @@ function SortableTodoRow({
   onToggle: () => void;
   onRemove: () => void;
 }) {
-  const { token } = theme.useToken();
-  const [hover, setHover] = useState(false);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
   });
+  const rowStyle = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+  } as React.CSSProperties;
 
   return (
     <div
       ref={setNodeRef}
-      style={{
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        padding: '8px 10px',
-        borderRadius: token.borderRadiusLG,
-        background: token.colorFillQuaternary,
-        border: `1px solid ${token.colorBorderSecondary}`,
-        opacity: isDragging ? 0.4 : 1,
-        transform: CSS.Translate.toString(transform),
-        transition,
-        touchAction: 'none',
-      }}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onFocusCapture={() => setHover(true)}
-      onBlurCapture={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) setHover(false);
-      }}
+      className={'dashboard-todo-row app-hover-reveal-host' + (item.done ? ' is-done' : '')}
+      data-dragging={isDragging || undefined}
+      style={rowStyle}
     >
-      <span
-        {...attributes}
-        {...listeners}
-        style={{
-          display: 'inline-flex',
-          cursor: 'grab',
-          color: token.colorTextTertiary,
-          opacity: hover ? 1 : 0.3,
-        }}
-        aria-label="拖拽排序"
-      >
+      <span {...attributes} {...listeners} className="dashboard-todo-row__drag" aria-label="拖拽排序">
         <GripVertical size={ICON_SIZE.SMALL} />
       </span>
       <button
         type="button"
         onClick={onToggle}
         aria-label={item.done ? '标记为未完成' : '标记为完成'}
-        style={{
-          all: 'unset',
-          cursor: 'pointer',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 8,
-          flex: 1,
-        }}
+        className="dashboard-todo-row__toggle"
       >
         {item.done ? (
-          <CheckCircle2 size={ICON_SIZE.LARGE} color={token.colorSuccess} />
+          <CheckCircle2 size={ICON_SIZE.LARGE} className="dashboard-todo-row__status--done" />
         ) : (
-          <Circle size={ICON_SIZE.LARGE} color={token.colorTextTertiary} />
+          <Circle size={ICON_SIZE.LARGE} className="dashboard-todo-row__status--pending" />
         )}
-        <span
-          style={{
-            fontSize: 13,
-            textDecoration: item.done ? 'line-through' : 'none',
-            color: item.done ? token.colorTextTertiary : token.colorText,
-          }}
-        >
-          {item.text}
-        </span>
+        <span className="dashboard-todo-row__text">{item.text}</span>
       </button>
-      {hover && (
-        <Button
-          type="text"
-          size="small"
-          danger
-          aria-label="删除这条待办"
-          icon={<Trash2 size={ICON_SIZE.SMALL} />}
-          onClick={onRemove}
-        />
-      )}
+      <Button
+        type="text"
+        size="small"
+        danger
+        aria-label="删除这条待办"
+        icon={<Trash2 size={ICON_SIZE.SMALL} />}
+        onClick={onRemove}
+        className="dashboard-todo-row__remove app-hover-reveal app-dashboard__no-drag"
+      />
     </div>
   );
 }
 
+
 export function TodoWidget() {
   const settings = useSettingsStore((s) => s.settings.todoWidget);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
-  const { token } = theme.useToken();
   const items = settings?.items ?? [];
   const [draft, setDraft] = useState('');
   const [showCompleted, setShowCompleted] = useState(false);
@@ -867,7 +676,6 @@ export function TodoWidget() {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
-  // 分组：活跃（未完成 + 刚完成 24h 内） vs 已折叠（完成超 24h）
   const { active: activeItems, collapsed } = useMemo(() => {
     const now = new Date().getTime();
     const active: TodoEntry[] = [];
@@ -900,7 +708,7 @@ export function TodoWidget() {
   };
 
   const removeItem = async (id: string) => {
-    const nextItems = items.filter((e) => e.id !== id);
+    const nextItems = items.filter((entry) => entry.id !== id);
     await updateSettings({ todoWidget: { ...(settings ?? {}), items: nextItems } });
   };
 
@@ -909,7 +717,7 @@ export function TodoWidget() {
     await updateSettings({
       todoWidget: {
         ...(settings ?? {}),
-        items: [...items, { id: `todo-${nanoid(8)}`, text: draft.trim(), done: false }],
+        items: [...items, { id: 'todo-' + nanoid(8), text: draft.trim(), done: false }],
       },
     });
     setDraft('');
@@ -918,39 +726,27 @@ export function TodoWidget() {
   const onDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const fromIndex = items.findIndex((i) => i.id === active.id);
-    const toIndex = items.findIndex((i) => i.id === over.id);
+    const fromIndex = items.findIndex((item) => item.id === active.id);
+    const toIndex = items.findIndex((item) => item.id === over.id);
     if (fromIndex < 0 || toIndex < 0) return;
     const nextItems = arrayMove(items, fromIndex, toIndex);
     await updateSettings({ todoWidget: { ...(settings ?? {}), items: nextItems } });
   };
 
-  const handleKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
-    if (e.key === 'Escape') {
-      // Esc 清空输入并保留焦点
-      e.preventDefault();
+  const handleKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (event) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
       setDraft('');
       inputRef.current?.focus();
     }
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, height: '100%' }}>
-      {/* 完成率胶囊 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <div className="dashboard-todo">
+      <div className="dashboard-todo__summary">
         <span
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 4,
-            padding: '2px 10px',
-            borderRadius: 999,
-            fontSize: 11,
-            fontWeight: 600,
-            background: token.colorPrimaryBg,
-            color: token.colorPrimary,
-          }}
-          aria-label={`今日完成率 ${doneCount} 分之 ${totalCount}`}
+          className="dashboard-todo__badge"
+          aria-label={'今日完成率 ' + doneCount + ' 分之 ' + totalCount}
         >
           {doneCount}/{totalCount} 完成
         </span>
@@ -959,13 +755,10 @@ export function TodoWidget() {
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
-        onDragEnd={(e) => void onDragEnd(e)}
+        onDragEnd={(event) => void onDragEnd(event)}
       >
-        <SortableContext
-          items={activeItems.map((i) => i.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <SortableContext items={activeItems.map((item) => item.id)} strategy={verticalListSortingStrategy}>
+          <div className="dashboard-todo__list">
             {activeItems.map((item) => (
               <SortableTodoRow
                 key={item.id}
@@ -983,28 +776,17 @@ export function TodoWidget() {
           <Button
             type="text"
             size="small"
-            onClick={() => setShowCompleted((v) => !v)}
-            style={{ fontSize: 11, color: token.colorTextTertiary, padding: '0 4px' }}
+            onClick={() => setShowCompleted((value) => !value)}
+            className="dashboard-todo__toggle-completed"
           >
             {showCompleted ? '收起' : '展开'}已完成（{collapsed.length}）
           </Button>
           {showCompleted && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 4 }}>
+            <div className="dashboard-todo-collapsed">
               {collapsed.map((item) => (
-                <div
-                  key={item.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    padding: '4px 10px',
-                    fontSize: 12,
-                    color: token.colorTextTertiary,
-                    textDecoration: 'line-through',
-                  }}
-                >
-                  <CheckCircle2 size={ICON_SIZE.SMALL} color={token.colorSuccess} />
-                  <span style={{ flex: 1 }}>{item.text}</span>
+                <div key={item.id} className="dashboard-todo-collapsed__row">
+                  <CheckCircle2 size={ICON_SIZE.SMALL} className="dashboard-todo-row__status--done" />
+                  <span className="dashboard-todo-collapsed__text">{item.text}</span>
                   <Button
                     type="text"
                     size="small"
@@ -1018,7 +800,7 @@ export function TodoWidget() {
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: 8, marginTop: 'auto' }}>
+      <div className="dashboard-todo__add-row">
         <Input
           ref={inputRef}
           size="small"
@@ -1027,6 +809,7 @@ export function TodoWidget() {
           onChange={(e) => setDraft(e.target.value)}
           onPressEnter={() => void addItem()}
           onKeyDown={handleKeyDown}
+          className="dashboard-todo__input"
         />
         <Button
           size="small"
@@ -1039,6 +822,7 @@ export function TodoWidget() {
     </div>
   );
 }
+
 
 // ── StickyWidget · v1.3 ─────────────────────────────────
 // 从单条升级为最多 10 条、5 色可选、行内编辑、拖拽排序
@@ -1079,47 +863,26 @@ function SortableStickyCard({
   const palette = STICKY_PALETTE[colorKey];
   const [draftState, setDraftState] = useState(() => ({ id: note.id, content: note.content }));
   const draft = draftState.id === note.id ? draftState.content : note.content;
-  const [hover, setHover] = useState(false);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: note.id,
   });
+  const stickyStyle = {
+    '--dashboard-sticky-bg': palette.bg,
+    '--dashboard-sticky-border': palette.border,
+    '--dashboard-sticky-text': palette.text,
+    transform: CSS.Translate.toString(transform),
+    transition,
+  } as React.CSSProperties;
 
   return (
     <div
       ref={setNodeRef}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onFocusCapture={() => setHover(true)}
-      onBlurCapture={(event) => {
-        const nextTarget = event.relatedTarget;
-        if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget))
-          setHover(false);
-      }}
-      style={{
-        position: 'relative',
-        padding: 8,
-        borderRadius: 10,
-        background: palette.bg,
-        border: `1px solid ${palette.border}`,
-        color: palette.text,
-        opacity: isDragging ? 0.4 : 1,
-        transform: CSS.Translate.toString(transform),
-        transition,
-      }}
+      className="dashboard-sticky-card app-hover-reveal-host"
+      data-dragging={isDragging || undefined}
+      style={stickyStyle}
     >
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
-        <span
-          {...attributes}
-          {...listeners}
-          aria-label="拖拽排序便签"
-          style={{
-            marginTop: 4,
-            cursor: 'grab',
-            color: palette.text,
-            opacity: hover ? 0.8 : 0.3,
-            touchAction: 'none',
-          }}
-        >
+      <div className="dashboard-sticky-card__body">
+        <span {...attributes} {...listeners} aria-label="拖拽排序便签" className="dashboard-sticky-card__drag">
           <GripVertical size={ICON_SIZE.SMALL} />
         </span>
         <Input.TextArea
@@ -1129,74 +892,46 @@ function SortableStickyCard({
           onChange={(e) => setDraftState({ id: note.id, content: e.target.value })}
           onBlur={() => {
             const next = draft.trim();
-            // 空内容自动删除（此处沿用：失焦时若内容为空则回写空，外层统一处理）
             onChange(next === '' ? '' : draft);
           }}
           placeholder="写一条随手便签…"
-          style={{
-            background: 'transparent',
-            color: palette.text,
-            padding: 0,
-            fontSize: 12.5,
-            resize: 'none',
-          }}
+          className="dashboard-sticky-editor"
           aria-label="便签内容"
         />
       </div>
 
-      {/* 右上角：色板切换 + 删除确认 */}
-      {hover && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 4,
-            right: 4,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4,
-            background: 'rgba(255,255,255,0.9)',
-            borderRadius: 8,
-            padding: 2,
-          }}
-        >
+      <div className="dashboard-sticky-card__tools app-hover-reveal">
+        <div className="dashboard-sticky-card__swatches">
           {STICKY_COLOR_KEYS.map((key) => (
             <button
               key={key}
               type="button"
               onClick={() => onColorChange(key)}
-              aria-label={`切换为 ${key} 色`}
-              style={{
-                width: 12,
-                height: 12,
-                padding: 0,
-                border:
-                  key === colorKey ? '2px solid #333' : `1px solid ${STICKY_PALETTE[key].border}`,
-                background: STICKY_PALETTE[key].bg,
-                borderRadius: 4,
-                cursor: 'pointer',
-              }}
+              aria-label={'切换为 ' + key + ' 色'}
+              className={
+                'dashboard-sticky-swatch dashboard-sticky-swatch--' + key + (key === colorKey ? ' is-active' : '')
+              }
             />
           ))}
-          <Popconfirm title={t('dashboard.deleteSticky')} onConfirm={onRemove}>
-            <Button
-              type="text"
-              size="small"
-              danger
-              aria-label="删除便签"
-              icon={<Trash2 size={ICON_SIZE.MICRO} />}
-            />
-          </Popconfirm>
         </div>
-      )}
+        <Popconfirm title={t('dashboard.deleteSticky')} onConfirm={onRemove}>
+          <Button
+            type="text"
+            size="small"
+            danger
+            aria-label="删除便签"
+            icon={<Trash2 size={ICON_SIZE.MICRO} />}
+          />
+        </Popconfirm>
+      </div>
     </div>
   );
 }
 
+
 export function StickyWidget() {
   const settings = useSettingsStore((s) => s.settings.stickyNotes);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
-
-  // 兼容：老用户可能只有 1 条；直接全量读取即可（迁移逻辑在 storage-repo 层做）
   const notes = settings?.items ?? [];
 
   const sensors = useSensors(
@@ -1211,53 +946,50 @@ export function StickyWidget() {
 
   const addNote = async () => {
     if (notes.length >= STICKY_MAX) {
-      feedback.info(`最多 ${STICKY_MAX} 条便签`);
+      feedback.info('最多 ' + STICKY_MAX + ' 条便签');
       return;
     }
-    const colors = STICKY_COLOR_KEYS;
-    const nextColor = colors[notes.length % colors.length];
+    const nextColor = STICKY_COLOR_KEYS[notes.length % STICKY_COLOR_KEYS.length];
     await saveNotes([
       ...notes,
-      { id: `sticky-${nanoid(8)}`, title: '便签', content: '', color: nextColor },
+      { id: 'sticky-' + nanoid(8), title: '便签', content: '', color: nextColor },
     ]);
   };
 
   const updateNote = async (id: string, content: string) => {
-    // 空内容在失焦后会触发：若内容空且不是正在新建，直接移除
-    const trimmed = content.trim();
-    if (trimmed === '') {
-      await saveNotes(notes.filter((n) => n.id !== id));
+    if (content.trim() === '') {
+      await saveNotes(notes.filter((note) => note.id !== id));
       return;
     }
-    await saveNotes(notes.map((n) => (n.id === id ? { ...n, content } : n)));
+    await saveNotes(notes.map((note) => (note.id === id ? { ...note, content } : note)));
   };
 
   const removeNote = async (id: string) => {
-    await saveNotes(notes.filter((n) => n.id !== id));
+    await saveNotes(notes.filter((note) => note.id !== id));
   };
 
   const changeColor = async (id: string, color: StickyColorKey) => {
-    await saveNotes(notes.map((n) => (n.id === id ? { ...n, color } : n)));
+    await saveNotes(notes.map((note) => (note.id === id ? { ...note, color } : note)));
   };
 
   const onDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const fromIndex = notes.findIndex((n) => n.id === active.id);
-    const toIndex = notes.findIndex((n) => n.id === over.id);
+    const fromIndex = notes.findIndex((note) => note.id === active.id);
+    const toIndex = notes.findIndex((note) => note.id === over.id);
     if (fromIndex < 0 || toIndex < 0) return;
     await saveNotes(arrayMove(notes, fromIndex, toIndex));
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%' }}>
+    <div className="dashboard-sticky">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
-        onDragEnd={(e) => void onDragEnd(e)}
+        onDragEnd={(event) => void onDragEnd(event)}
       >
-        <SortableContext items={notes.map((n) => n.id)} strategy={verticalListSortingStrategy}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto' }}>
+        <SortableContext items={notes.map((note) => note.id)} strategy={verticalListSortingStrategy}>
+          <div className="dashboard-sticky__list">
             {notes.map((note) => (
               <SortableStickyCard
                 key={note.id}
@@ -1268,15 +1000,7 @@ export function StickyWidget() {
               />
             ))}
             {notes.length === 0 && (
-              <div
-                style={{
-                  fontSize: 11,
-                  color: '#8c6a00',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                }}
-              >
+              <div className="dashboard-sticky__empty">
                 <StickyNote size={ICON_SIZE.SMALL} /> 还没有便签，点下方 "+ 新便签" 开始
               </div>
             )}
@@ -1290,7 +1014,7 @@ export function StickyWidget() {
         icon={<Plus size={ICON_SIZE.SMALL} />}
         onClick={() => void addNote()}
         disabled={notes.length >= STICKY_MAX}
-        style={{ marginTop: 'auto' }}
+        className="dashboard-sticky__add"
         aria-label="新建便签"
       >
         新便签（{notes.length}/{STICKY_MAX}）
@@ -1298,6 +1022,7 @@ export function StickyWidget() {
     </div>
   );
 }
+
 
 export function renderWidgetBody(item: DashboardWidgetLayoutItem): React.ReactNode {
   switch (item.type) {

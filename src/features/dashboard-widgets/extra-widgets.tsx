@@ -1,12 +1,13 @@
 import { nanoid } from 'nanoid';
 import { useEffect, useMemo, useState } from 'react';
-import { Button, Input, Select, theme } from 'antd';
+import { Button, Input, Select } from 'antd';
 import { Droplets, Check, Copy, Globe, Plus, RotateCcw, Search } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useSettingsStore } from '@/store';
 import type { HabitEntry } from '@/shared/types';
 import { feedback } from '@/shared/ui/feedback';
 import { useT } from '@/shared/i18n';
+import { tokenizeJson, parseJsonErrorPosition, type JsonToken } from './json-highlighter';
 
 // ── 极速搜索盒子 ────────────────────────────────────
 
@@ -19,7 +20,6 @@ const ENGINES = [
 ];
 
 export function SearchBoxWidget() {
-  const { token } = theme.useToken();
   const defaultEngine = useSettingsStore((s) => s.settings.searchDefaultEngine ?? 'bing');
   const [engine, setEngine] = useState(() =>
     ENGINES.some((item) => item.value === defaultEngine) ? defaultEngine : 'bing',
@@ -38,35 +38,22 @@ export function SearchBoxWidget() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, height: '100%' }}>
-      <div
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}
-      >
-        <span style={{ fontSize: 12, color: token.colorTextTertiary }}>快速搜索</span>
+    <div className="dashboard-search-widget">
+      <div className="dashboard-search-widget__head">
+        <span className="dashboard-search-widget__label">快速搜索</span>
         <Select
           size="small"
           value={engine}
           onChange={setEngine}
           options={ENGINES.map((item) => ({ value: item.value, label: item.label }))}
-          style={{ minWidth: 118 }}
+          className="dashboard-search-widget__select"
         />
       </div>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          padding: '8px 10px',
-          borderRadius: token.borderRadiusLG,
-          background: token.colorFillQuaternary,
-          border: `1px solid ${token.colorBorderSecondary}`,
-          marginTop: 'auto',
-        }}
-      >
-        <Search size={ICON_SIZE.LARGE} color={token.colorTextTertiary} />
+      <div className="dashboard-search-widget__field">
+        <Search size={ICON_SIZE.LARGE} className="dashboard-search-widget__icon" />
         <Input
           variant="borderless"
-          style={{ flex: 1, minWidth: 0 }}
+          className="dashboard-search-widget__input"
           placeholder="关键词，回车开搜"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -106,7 +93,6 @@ function computeHabitStreak(records: string[], anchor = new Date()): number {
 }
 
 export function WaterReminderWidget() {
-  const { token } = theme.useToken();
   const conf = useSettingsStore((s) => s.settings.waterReminder);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const goal = conf?.goalCups ?? 8;
@@ -124,34 +110,23 @@ export function WaterReminderWidget() {
   const percent = Math.min(100, (current / goal) * 100);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, height: '100%' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Droplets size={ICON_SIZE.XLARGE} color={token.colorPrimary} />
-        <div style={{ fontSize: 22, fontWeight: 800 }}>
+    <div className="dashboard-water-widget">
+      <div className="dashboard-water-widget__hero">
+        <Droplets size={ICON_SIZE.XLARGE} className="dashboard-water-widget__icon" />
+        <div className="dashboard-water-widget__value">
           {current} / {goal} 杯
         </div>
       </div>
-      <div style={{ fontSize: 12, color: token.colorTextTertiary }}>
+      <div className="dashboard-water-widget__copy">
         目标 {goal} 杯 · 建议每 {intervalMinutes} 分钟打卡一次
       </div>
-      <div
-        style={{
-          height: 8,
-          background: token.colorFillTertiary,
-          borderRadius: 4,
-          overflow: 'hidden',
-        }}
-      >
+      <div className="dashboard-water-widget__progress">
         <div
-          style={{
-            width: `${percent}%`,
-            height: '100%',
-            background: `linear-gradient(90deg, ${token.colorPrimary}, #4fc3f7)`,
-            transition: 'width 0.3s ease',
-          }}
+          className="dashboard-water-widget__progress-fill"
+          style={{ width: `${percent}%` }}
         />
       </div>
-      <div style={{ display: 'flex', gap: 6, marginTop: 'auto' }}>
+      <div className="dashboard-water-widget__actions">
         <Button size="small" type="primary" onClick={() => void add(1)}>
           +1 杯
         </Button>
@@ -175,7 +150,6 @@ export function WaterReminderWidget() {
 // ── 习惯打卡 ────────────────────────────────────────
 
 export function HabitTrackerWidget() {
-  const { token } = theme.useToken();
   const conf = useSettingsStore((s) => s.settings.habitTracker);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const items = conf?.items ?? [];
@@ -206,9 +180,9 @@ export function HabitTrackerWidget() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%' }}>
+    <div className="dashboard-habit-widget dashboard-widget-stack--tight">
       {items.length === 0 && (
-        <div style={{ fontSize: 12, color: token.colorTextTertiary, padding: '8px 2px' }}>
+        <div className="dashboard-habit-widget__empty">
           暂无习惯，先添加一个每天想坚持的小目标。
         </div>
       )}
@@ -218,29 +192,22 @@ export function HabitTrackerWidget() {
         return (
           <div
             key={habit.id}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '8px 10px',
-              borderRadius: token.borderRadiusLG,
-              background: done ? `${token.colorSuccess}1a` : token.colorFillQuaternary,
-              border: `1px solid ${done ? token.colorSuccess : token.colorBorderSecondary}`,
-              cursor: 'pointer',
-            }}
+            className={`dashboard-habit-item${done ? ' is-done' : ''}`}
             onClick={() => void toggle(habit)}
           >
-            <span style={{ fontSize: 16 }}>{habit.emoji ?? '⭐'}</span>
-            <span style={{ flex: 1, fontSize: 13, fontWeight: 600 }}>{habit.name}</span>
-            <span style={{ fontSize: 11, color: token.colorTextTertiary }}>
-              连续 {streak} 天 · 累计 {habit.records.length}
+            <span className="dashboard-habit-item__emoji">{habit.emoji ?? '⭐'}</span>
+            <span className="dashboard-habit-item__main">
+              <span className="dashboard-habit-item__name">{habit.name}</span>
+              <span className="dashboard-habit-item__meta">
+                连续 {streak} 天 · 累计 {habit.records.length}
+              </span>
             </span>
-            {done && <Check size={ICON_SIZE.MEDIUM} color={token.colorSuccess} />}
+            {done && <Check size={ICON_SIZE.MEDIUM} className="dashboard-habit-item__check" />}
             <Button
               type="text"
               size="small"
               danger
-              style={{ padding: '0 4px' }}
+              className="dashboard-habit-item__remove"
               onClick={(e) => {
                 e.stopPropagation();
                 void remove(habit.id);
@@ -251,7 +218,7 @@ export function HabitTrackerWidget() {
           </div>
         );
       })}
-      <div style={{ display: 'flex', gap: 6, marginTop: 'auto' }}>
+      <div className="dashboard-habit-widget__actions">
         <Input
           size="small"
           placeholder="新增习惯"
@@ -273,14 +240,13 @@ export function HabitTrackerWidget() {
 // ── 时间戳工具 ──────────────────────────────────────
 
 export function TimestampToolWidget() {
-  const { token } = theme.useToken();
   const { t } = useT();
   const [now, setNow] = useState(() => new Date().getTime());
   const [draft, setDraft] = useState('');
 
   useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
   }, []);
 
   const nowSec = Math.floor(now / 1000);
@@ -309,11 +275,9 @@ export function TimestampToolWidget() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ flex: 1, fontFamily: 'monospace', fontSize: 14, color: token.colorText }}>
-          {nowSec}
-        </div>
+    <div className="dashboard-timestamp-widget">
+      <div className="dashboard-timestamp-widget__hero">
+        <div className="dashboard-timestamp-widget__value">{nowSec}</div>
         <Button size="small" icon={<Copy size={ICON_SIZE.SMALL} />} onClick={() => copy(nowSec)}>
           秒
         </Button>
@@ -327,17 +291,7 @@ export function TimestampToolWidget() {
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
       />
-      <div
-        style={{
-          padding: '8px 10px',
-          borderRadius: 8,
-          background: token.colorFillQuaternary,
-          fontSize: 12,
-          color: token.colorTextSecondary,
-          minHeight: 32,
-          fontFamily: 'monospace',
-        }}
-      >
+      <div className="dashboard-timestamp-widget__result">
         {parsed || '输入后自动转换'}
       </div>
     </div>
@@ -345,12 +299,12 @@ export function TimestampToolWidget() {
 }
 
 // ── JSON 格式化 · v1.3 语法高亮 ──────────────────────
-// 纯函数抽至 ./json-highlighter.ts，便于独立单测
 
-import { tokenizeJson, parseJsonErrorPosition, type JsonToken } from './json-highlighter';
+function getJsonTokenClass(type: JsonToken['type']): string {
+  return `dashboard-json-token dashboard-json-token--${type}`;
+}
 
 export function JsonFormatterWidget() {
-  const { token } = theme.useToken();
   const { t } = useT();
   const [input, setInput] = useState('');
   const [indent, setIndent] = useState<number>(2);
@@ -368,24 +322,13 @@ export function JsonFormatterWidget() {
     }
   }, [input, indent]);
 
-  // 颜色：沿用主题变量，保证深浅皆可读
-  const colorMap: Record<JsonToken['type'], string> = {
-    key: token.colorInfoText,
-    string: token.colorSuccessText,
-    number: token.colorWarningText,
-    boolean: token.colorError,
-    null: token.colorTextTertiary,
-    punct: token.colorText,
-    ws: token.colorText,
-  };
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%' }}>
-      <div style={{ display: 'flex', gap: 6 }}>
+    <div className="dashboard-json-widget">
+      <div className="dashboard-json-widget__toolbar">
         <Select
           size="small"
           value={indent}
-          style={{ width: 100 }}
+          className="dashboard-json-widget__indent"
           options={[
             { value: 2, label: '缩进 2' },
             { value: 4, label: '缩进 4' },
@@ -412,43 +355,13 @@ export function JsonFormatterWidget() {
         autoSize={{ minRows: 3, maxRows: 5 }}
       />
       {error !== null ? (
-        <pre
-          style={{
-            flex: 1,
-            margin: 0,
-            padding: 10,
-            background: token.colorErrorBg,
-            color: token.colorErrorText,
-            borderRadius: 8,
-            fontSize: 11,
-            fontFamily: 'monospace',
-            overflow: 'auto',
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-all',
-          }}
-        >
-          解析失败：{error}
-        </pre>
+        <pre className="dashboard-json-widget__error">解析失败：{error}</pre>
       ) : (
-        <pre
-          aria-label="格式化结果"
-          style={{
-            flex: 1,
-            margin: 0,
-            padding: 10,
-            background: token.colorFillQuaternary,
-            borderRadius: 8,
-            fontSize: 11,
-            fontFamily: 'monospace',
-            overflow: 'auto',
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-all',
-          }}
-        >
+        <pre aria-label="格式化结果" className="dashboard-json-widget__output">
           {tokens.length === 0
             ? '结果将显示在这里'
             : tokens.map((tk, idx) => (
-                <span key={idx} style={{ color: colorMap[tk.type] }}>
+                <span key={idx} className={getJsonTokenClass(tk.type)}>
                   {tk.text}
                 </span>
               ))}
@@ -469,7 +382,6 @@ function getNavigatorConnection(): NavigatorConnection | undefined {
 }
 
 export function NetworkInfoWidget() {
-  const { token } = theme.useToken();
   const [online, setOnline] = useState(() => navigator.onLine);
   const [connType, setConnType] = useState<string>(
     () => getNavigatorConnection()?.effectiveType ?? 'unknown',
@@ -497,21 +409,13 @@ export function NetworkInfoWidget() {
   }, []);
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        gap: 10,
-        height: '100%',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Globe size={ICON_SIZE.XLARGE} color={online ? token.colorSuccess : token.colorError} />
-        <div style={{ fontSize: 18, fontWeight: 800 }}>{online ? '在线' : '离线'}</div>
+    <div className={`dashboard-network-widget${online ? ' is-online' : ' is-offline'}`}>
+      <div className="dashboard-network-widget__hero">
+        <Globe size={ICON_SIZE.XLARGE} />
+        <div className="dashboard-network-widget__status">{online ? '在线' : '离线'}</div>
       </div>
-      <div style={{ fontSize: 12, color: token.colorTextTertiary }}>连接类型：{connType}</div>
-      <div style={{ fontSize: 11, color: token.colorTextTertiary }}>
+      <div className="dashboard-network-widget__meta">连接类型：{connType}</div>
+      <div className="dashboard-network-widget__ua">
         User Agent：{navigator.userAgent.slice(0, 40)}…
       </div>
     </div>

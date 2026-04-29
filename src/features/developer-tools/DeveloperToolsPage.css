@@ -33,9 +33,15 @@
 .devtools-toolbar,
 .devtools-category-label,
 .devtools-card-title,
+.devtools-card-body,
 .devtools-panel-title,
 .devtools-actions,
-.devtools-privacy {
+.devtools-privacy,
+.devtools-section-head,
+.devtools-section-shell,
+.devtools-option-arrow,
+.devtools-output-meta,
+.devtools-empty-state {
   display: flex;
   align-items: center;
 }
@@ -61,6 +67,29 @@
   color: var(--ant-color-primary);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.28);
   flex-shrink: 0;
+}
+
+.devtools-title,
+.devtools-panel-heading {
+  margin: 0;
+}
+
+.devtools-title {
+  font-size: 17px;
+}
+
+.devtools-panel-heading {
+  min-width: 0;
+}
+
+.devtools-tag,
+.devtools-mode-badge {
+  margin: 0;
+}
+
+.devtools-tag--local,
+.devtools-tag--realtime {
+  line-height: 30px;
 }
 
 .devtools-subtitle {
@@ -130,6 +159,38 @@
   border-right: 1px solid var(--app-hairline);
 }
 
+.devtools-section {
+  margin-bottom: 14px;
+}
+
+.devtools-section-head {
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.devtools-section-shell {
+  min-width: 0;
+}
+
+.devtools-section-icon--favorite {
+  color: var(--ant-color-error);
+}
+
+.devtools-section-icon--recent {
+  color: var(--ant-color-primary);
+}
+
+.devtools-section-title,
+.devtools-output-label,
+.devtools-output-meta-text,
+.devtools-error-text {
+  font-size: 12px;
+}
+
+.devtools-section-title {
+  font-weight: 600;
+}
+
 .devtools-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
@@ -180,6 +241,10 @@
   border-radius: 11px;
   background: var(--ant-color-primary-bg);
   color: var(--ant-color-primary);
+}
+
+.devtools-card-body {
+  min-width: 0;
 }
 
 .devtools-card-title {
@@ -289,6 +354,22 @@
   align-items: center;
 }
 
+.devtools-option-arrow {
+  color: var(--ant-color-text-tertiary);
+}
+
+.devtools-field-size--root {
+  width: 140px;
+}
+
+.devtools-field-size--base {
+  width: 160px;
+}
+
+.devtools-field-size--random {
+  width: 130px;
+}
+
 .devtools-two-col {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -302,9 +383,27 @@
   font-size: 11px;
 }
 
+.devtools-input-mono textarea {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
 .devtools-actions {
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.devtools-color-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.devtools-color-swatch {
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--app-hairline);
+  border-radius: 13px;
+  flex-shrink: 0;
 }
 
 .devtools-output {
@@ -326,6 +425,19 @@
   max-height: 320px;
   overflow: auto;
   padding: 10px;
+}
+
+.devtools-output-meta {
+  padding: 0 10px 10px;
+}
+
+.devtools-output-label,
+.devtools-output-meta-text {
+  font-size: 12px;
+}
+
+.devtools-output-meta-text {
+  font-size: 11px;
 }
 
 .devtools-pre {
@@ -356,25 +468,21 @@
   background: var(--ant-color-error-bg);
 }
 
-.devtools-color-preview {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.devtools-color-swatch {
-  width: 46px;
-  height: 46px;
-  border: 1px solid var(--app-hairline);
-  border-radius: 13px;
-  flex-shrink: 0;
-}
-
 .devtools-error {
   padding: 9px 11px;
   border: 1px solid var(--ant-color-error-border);
   border-radius: 12px;
   background: var(--ant-color-error-bg);
+}
+
+.devtools-error-text {
+  font-size: 12px;
+}
+
+.devtools-empty-state {
+  justify-content: center;
+  grid-column: 1 / -1;
+  padding: 48px 0;
 }
 
 .devtools-privacy {

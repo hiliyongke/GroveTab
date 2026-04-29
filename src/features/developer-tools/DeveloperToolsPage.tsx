@@ -10,7 +10,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Empty, Input, Segmented, Tag, Tooltip, Typography, theme } from 'antd';
+import { Button, Empty, Input, Segmented, Tag, Tooltip, Typography } from 'antd';
 import {
   Activity,
   ArrowRightLeft,
@@ -252,7 +252,7 @@ function ToolCard({ tool, title, description, selected, favorited, onClick, onTo
     >
       <div className="devtools-card-head">
         <span className="devtools-card-icon">{TOOL_ICONS[tool.id] ?? <Wrench size={ICON_SIZE.LARGE} />}</span>
-        <div style={{ minWidth: 0 }}>
+        <div className="devtools-card-body">
           <div className="devtools-card-title">
             <span>{title}</span>
             <span className="devtools-card-actions">
@@ -282,7 +282,6 @@ interface ToolPanelProps {
 
 function ToolPanel({ tool, onUse }: ToolPanelProps) {
   const { t } = useT();
-  const { token } = theme.useToken();
   const [input, setInput] = useState('');
   const [input2, setInput2] = useState('');
   const [output, setOutput] = useState('');
@@ -556,7 +555,7 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
           <Segmented size="small" value={jsonAction} onChange={(value) => setJsonAction(value as JsonAction)} options={[{ value: 'format', label: '格式化' }, { value: 'minify', label: '压缩' }, { value: 'validate', label: '校验' }]} />
         )}
         {tool.id === 'json-to-ts' && (
-          <Input size="small" value={rootName} onChange={(event) => setRootName(event.target.value)} placeholder="Root" style={{ width: 140 }} />
+          <Input size="small" value={rootName} onChange={(event) => setRootName(event.target.value)} placeholder="Root" className="devtools-field-size--root" />
         )}
         {tool.id === 'yaml-json' && (
           <Segmented size="small" value={yamlAction} onChange={(value) => setYamlAction(value as 'yamlToJson' | 'jsonToYaml')} options={[{ value: 'yamlToJson', label: 'YAML → JSON' }, { value: 'jsonToYaml', label: 'JSON → YAML' }]} />
@@ -588,18 +587,18 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
         {tool.id === 'radix' && (
           <>
             <Segmented size="small" value={fromRadix} onChange={setFromRadix} options={[{ value: 'bin', label: '2' }, { value: 'oct', label: '8' }, { value: 'dec', label: '10' }, { value: 'hex', label: '16' }]} />
-            <ArrowRightLeft size={14} style={{ color: token.colorTextTertiary }} />
+            <ArrowRightLeft size={14} className="devtools-option-arrow" />
             <Segmented size="small" value={toRadix} onChange={setToRadix} options={[{ value: 'bin', label: '2' }, { value: 'oct', label: '8' }, { value: 'dec', label: '10' }, { value: 'hex', label: '16' }]} />
           </>
         )}
         {tool.id === 'css-unit' && (
-          <Input size="small" type="number" value={baseFontSize} onChange={(event) => setBaseFontSize(Number(event.target.value) || 16)} addonBefore="Base" addonAfter="px" style={{ width: 160 }} />
+          <Input size="small" type="number" value={baseFontSize} onChange={(event) => setBaseFontSize(Number(event.target.value) || 16)} addonBefore="Base" addonAfter="px" className="devtools-field-size--base" />
         )}
         {tool.id === 'random-gen' && (
           <Segmented size="small" value={randomAction} onChange={(value) => setRandomAction(value as RandomAction)} options={[{ value: 'uuid', label: 'UUID' }, { value: 'randomInt', label: '随机整数' }, { value: 'randomHex', label: '随机 HEX' }]} />
         )}
         {tool.id === 'random-gen' && randomAction !== 'uuid' && (
-          <Input size="small" type="number" value={randomLen} onChange={(event) => setRandomLen(Number(event.target.value) || 1)} min={1} max={128} addonBefore="长度" style={{ width: 130 }} />
+          <Input size="small" type="number" value={randomLen} onChange={(event) => setRandomLen(Number(event.target.value) || 1)} min={1} max={128} addonBefore="长度" className="devtools-field-size--random" />
         )}
         {tool.id === 'basic-auth' && (
           <Segmented size="small" value={basicAuthAction} onChange={(value) => setBasicAuthAction(value as 'encode' | 'decode')} options={[{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }]} />
@@ -632,7 +631,7 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
       ) : tool.id !== 'random-gen' && (
         <label>
           <span className="devtools-field-label">{t('devtools.input')}</span>
-          <Input.TextArea value={input} onChange={(event) => setInput(event.target.value)} rows={6} placeholder={placeholder} style={{ fontFamily: isMonospace ? 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace' : undefined }} />
+          <Input.TextArea value={input} onChange={(event) => setInput(event.target.value)} rows={6} placeholder={placeholder} className={isMonospace ? 'devtools-input-mono' : undefined} />
         </label>
       )}
 
@@ -640,7 +639,7 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
         {!isAutoExecute && (
           <Button type="primary" onClick={handleExecute} loading={computing}>{t('devtools.execute')}</Button>
         )}
-        {isAutoExecute && <Tag color="blue" style={{ margin: 0, lineHeight: '30px' }}>{t('devtools.realtime')}</Tag>}
+        {isAutoExecute && <Tag color="blue" className="devtools-tag devtools-tag--realtime">{t('devtools.realtime')}</Tag>}
         {isBidirectional && <Button onClick={handleSwap} icon={<ArrowRightLeft size={14} />}>{t('devtools.swap')}</Button>}
         <Button onClick={handleClear} icon={<Trash2 size={14} />}>{t('devtools.clear')}</Button>
         {TOOL_EXAMPLES[tool.id] && <Button onClick={handleFillExample} icon={<Terminal size={14} />}>{t('devtools.example')}</Button>}
@@ -657,7 +656,7 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
       {output && (
         <div className="devtools-output">
           <div className="devtools-output-head">
-            <Text type="secondary" style={{ fontSize: 12 }}>{t('devtools.output')}</Text>
+            <Text type="secondary" className="devtools-output-label">{t('devtools.output')}</Text>
             <Tooltip title={copied ? t('devtools.copied') : t('devtools.copy')}>
               <Button size="small" type="text" onClick={handleCopy} icon={copied ? <Check size={14} /> : <Copy size={14} />} />
             </Tooltip>
@@ -665,13 +664,13 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
           <div className="devtools-output-body">
             {tool.id === 'text-diff' ? renderDiffOutput(output) : <pre className="devtools-pre">{output}</pre>}
           </div>
-          {meta && <div style={{ padding: '0 10px 10px' }}><Text type="secondary" style={{ fontSize: 11 }}>{meta}</Text></div>}
+          {meta && <div className="devtools-output-meta"><Text type="secondary" className="devtools-output-meta-text">{meta}</Text></div>}
         </div>
       )}
 
       {error && (
         <div className="devtools-error">
-          <Text type="danger" style={{ fontSize: 12 }}>{error}</Text>
+          <Text type="danger" className="devtools-error-text">{error}</Text>
         </div>
       )}
     </div>
@@ -680,7 +679,6 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
 
 export function DeveloperToolsPage() {
   const { t } = useT();
-  const { token } = theme.useToken();
   const [category, setCategory] = useState<DevToolCategory | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedToolId, setSelectedToolId] = useState(DEV_TOOLS[0]?.id ?? 'json-format');
@@ -742,9 +740,9 @@ export function DeveloperToolsPage() {
             <div className="devtools-title-row">
               <div className="devtools-brand">
                 <span className="devtools-logo"><Wrench size={ICON_SIZE.LARGE} /></span>
-                <Title level={4} style={{ margin: 0, fontSize: 17 }}>{t('devtools.title')}</Title>
+                <Title level={4} className="devtools-title">{t('devtools.title')}</Title>
               </div>
-              <Tag color="green" style={{ margin: 0 }}>{t('devtools.localOnly')}</Tag>
+              <Tag color="green" className="devtools-tag devtools-tag--local">{t('devtools.localOnly')}</Tag>
             </div>
             <div className="devtools-subtitle">{t('devtools.subtitle')}</div>
           </div>
@@ -764,10 +762,10 @@ export function DeveloperToolsPage() {
           <div className="devtools-list-pane">
             {/* 收藏区 */}
             {favoriteTools.length > 0 && (
-              <div style={{ marginBottom: 14 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                  <Heart size={14} style={{ color: token.colorError }} />
-                  <Text strong style={{ fontSize: 12 }}>{t('devtools.favorites')}</Text>
+              <div className="devtools-section">
+                <div className="devtools-section-head">
+                  <Heart size={14} className="devtools-section-icon--favorite" />
+                  <Text strong className="devtools-section-title">{t('devtools.favorites')}</Text>
                 </div>
                 <div className="devtools-grid">
                   {favoriteTools.map((tool) => (
@@ -788,10 +786,10 @@ export function DeveloperToolsPage() {
 
             {/* 最近使用区 */}
             {recentTools.length > 0 && !searchQuery.trim() && category === 'all' && (
-              <div style={{ marginBottom: 14 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                  <Clock size={14} style={{ color: token.colorPrimary }} />
-                  <Text strong style={{ fontSize: 12 }}>{t('devtools.recent')}</Text>
+              <div className="devtools-section">
+                <div className="devtools-section-head">
+                  <Clock size={14} className="devtools-section-icon--recent" />
+                  <Text strong className="devtools-section-title">{t('devtools.recent')}</Text>
                 </div>
                 <div className="devtools-grid">
                   {recentTools.map((tool) => (
@@ -813,7 +811,7 @@ export function DeveloperToolsPage() {
             {/* 全部工具 */}
             <div className="devtools-grid">
               {filteredTools.length === 0 ? (
-                <Empty description={t('devtools.searchPlaceholder')} style={{ gridColumn: '1 / -1', padding: '48px 0' }} />
+                <Empty description={t('devtools.searchPlaceholder')} className="devtools-empty-state" />
               ) : filteredTools.map((tool) => (
                 <ToolCard
                   key={tool.id}
@@ -834,7 +832,7 @@ export function DeveloperToolsPage() {
               <div className="devtools-panel-head">
                 <div className="devtools-panel-title">
                   <span className="devtools-panel-icon">{TOOL_ICONS[selectedTool.id] ?? <Wrench size={ICON_SIZE.LARGE} />}</span>
-                  <Title level={5} style={{ margin: 0 }}>{t(selectedTool.titleKey)}</Title>
+                  <Title level={5} className="devtools-panel-heading">{t(selectedTool.titleKey)}</Title>
                   <span
                     className={`devtools-fav-btn${favorites.includes(selectedTool.id) ? ' is-active' : ''}`}
                     onClick={() => handleToggleFavorite(selectedTool.id)}

@@ -17,7 +17,7 @@
  */
 
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Dropdown, Space, Tag, theme } from 'antd';
+import { Button, Dropdown, Space, Tag } from 'antd';
 import { Check, EyeOff, LayoutGrid, Plus, RotateCcw, Sparkles } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import type { LayoutItem } from 'react-grid-layout';
@@ -27,6 +27,7 @@ import { ensureReactGridLayoutCss } from '@/shared/lazy-deps';
 import { ErrorBoundary } from '@/shared/ui/ErrorBoundary';
 import { SkeletonWidget } from '@/shared/ui/SkeletonWidget';
 import { WidgetCard } from './WidgetCard';
+import './styles/dashboard-widgets.css';
 import {
   WIDGET_DEFINITIONS,
   DASHBOARD_GRID_COLUMNS,
@@ -107,7 +108,6 @@ export function DashboardWidgets({
   title = '小组件工作台',
   description = '精选常用工具，支持拖拽排序、缩放尺寸和按需添加。',
 }: DashboardWidgetsProps = {}) {
-  const { token } = theme.useToken();
   const settings = useSettingsStore((s) => s.settings);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const config = settings.dashboardWidgets;
@@ -276,53 +276,28 @@ export function DashboardWidgets({
   if (!enabled) return null;
 
   return (
-    <section style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 12,
-          flexWrap: 'wrap',
-          width: '100%',
-          padding: '10px 12px',
-          borderRadius: 16,
-          background: token.colorFillQuaternary,
-          border: `1px solid ${token.colorBorderSecondary}`,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-          <span
-            style={{
-              width: 30,
-              height: 30,
-              borderRadius: 10,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: token.colorPrimary,
-              background: token.colorPrimaryBg,
-              flexShrink: 0,
-            }}
-          >
+    <section className="dashboard-widgets">
+      <div className={`dashboard-widgets__toolbar${editing ? ' is-editing' : ''}`}>
+        <div className="dashboard-widgets__toolbar-main">
+          <span className="dashboard-widgets__toolbar-icon">
             <LayoutGrid size={ICON_SIZE.MEDIUM} />
           </span>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 14, fontWeight: 700, color: token.colorText }}>{title}</span>
+          <div className="dashboard-widgets__toolbar-copy">
+            <div className="dashboard-widgets__toolbar-title">
+              <span className="dashboard-widgets__title">{title}</span>
               <Tag
                 color={editing ? 'processing' : 'default'}
-                style={{ margin: 0, fontSize: 11, border: 0 }}
+                className="dashboard-widgets__tag"
               >
                 {editing ? '正在编辑' : `${visibleItems.length} 个组件`}
               </Tag>
               {hiddenCount > 0 && (
-                <Tag color="default" style={{ margin: 0, fontSize: 11, border: 0 }}>
+                <Tag color="default" className="dashboard-widgets__tag">
                   已隐藏 {hiddenCount}
                 </Tag>
               )}
             </div>
-            <div style={{ fontSize: 12, color: token.colorTextTertiary, marginTop: 2 }}>
+            <div className="dashboard-widgets__subtitle">
               {description}
             </div>
           </div>
@@ -373,27 +348,12 @@ export function DashboardWidgets({
       </div>
 
       {visibleItems.length === 0 && (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 10,
-            minHeight: 160,
-            padding: 24,
-            borderRadius: 18,
-            background: 'var(--app-glass-bg)',
-            border: `1px dashed ${token.colorBorderSecondary}`,
-            color: token.colorTextSecondary,
-            textAlign: 'center',
-          }}
-        >
-          <LayoutGrid size={ICON_SIZE.XXL} color={token.colorTextTertiary} />
-          <div style={{ fontSize: 14, fontWeight: 700, color: token.colorText }}>
+        <div className="dashboard-widgets__empty">
+          <LayoutGrid size={ICON_SIZE.XXL} />
+          <div className="dashboard-widgets__empty-title">
             暂无可见小组件
           </div>
-          <div style={{ fontSize: 12 }}>可以在组件库重新启用，或添加尚未放入工作台的工具。</div>
+          <div className="dashboard-widgets__empty-copy">可以在组件库重新启用，或添加尚未放入工作台的工具。</div>
           <Dropdown
             menu={{
               items: addMenuItems,
@@ -412,15 +372,7 @@ export function DashboardWidgets({
 
       <div
         ref={containerRef}
-        className={editing ? 'app-dashboard--editing' : ''}
-        style={{
-          width: '100%',
-          display: visibleItems.length === 0 ? 'none' : undefined,
-          background: editing ? token.colorFillQuaternary : 'transparent',
-          borderRadius: 16,
-          padding: editing ? 4 : 0,
-          transition: 'background 0.2s ease',
-        }}
+        className={`dashboard-widgets__grid-shell${editing ? ' is-editing' : ''}${visibleItems.length === 0 ? ' is-hidden' : ''} ${editing ? 'app-dashboard--editing' : ''}`.trim()}
       >
         <Suspense fallback={<SkeletonWidget rows={4} label="组件加载中" />}>
           <ResponsiveGridLayout

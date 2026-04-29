@@ -14,7 +14,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { App, Select, Button, Slider, ColorPicker, Space, Switch, InputNumber, Input, Upload, Divider, theme } from 'antd';
+import { App, Select, Button, Slider, ColorPicker, Space, Switch, InputNumber, Input, Upload, Divider } from 'antd';
 import {
   Pencil,
   Plus,
@@ -29,9 +29,11 @@ import { useT } from '@/shared/i18n';
 import { useResolvedTheme } from '@/shared/hooks';
 import { GRADIENT_PRESETS, buildGradient } from '@/shared/theme/gradient-presets';
 import { SKIN_PRESETS } from '@/shared/theme/skin-presets';
+import { getSkinCustomBaseValues } from '@/shared/theme/theme-customization';
 import type { UserSettings } from '@/shared/types';
 import { Field } from '../components/Field';
 import { BRAND } from '@/shared/config/brand';
+import './styles/appearance.css';
 
 interface AppearancePanelProps {
   settings: UserSettings;
@@ -42,6 +44,95 @@ const MAX_BACKGROUND_IMAGE_SOURCE_BYTES = 20 * 1024 * 1024;
 const MAX_BACKGROUND_IMAGE_EDGE = 1920;
 const BACKGROUND_IMAGE_QUALITY = 0.84;
 const MAX_VIDEO_BACKGROUND_FILE_BYTES = 50 * 1024 * 1024;
+
+function ModeBadge({ mode }: { mode: 'light' | 'dark' }) {
+  return (
+    <span className={`appearance-mode-badge is-${mode}`}>
+      {mode === 'dark' ? <Moon size={ICON_SIZE.XS} /> : <Sun size={ICON_SIZE.XS} />}
+    </span>
+  );
+}
+
+function SliderField({
+  label,
+  value,
+  min,
+  max,
+  step,
+  hint,
+  suffix = 'px',
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  hint: string;
+  suffix?: string;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <div className="appearance-slider-group">
+      <div className="appearance-slider-header">
+        <span className="appearance-slider-label">{label}</span>
+        <span className="appearance-slider-value">{value}{suffix}</span>
+      </div>
+      <Slider min={min} max={max} step={step} value={value} onChange={onChange} />
+      <div className="appearance-slider-hint">{hint}</div>
+    </div>
+  );
+}
+
+function VisibilityRow({
+  label,
+  hint,
+  checked,
+  onChange,
+}: {
+  label: string;
+  hint: string;
+  checked: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  return (
+    <div className="appearance-visibility-row">
+      <div>
+        <div className="appearance-visibility-title">{label}</div>
+        <div className="appearance-visibility-hint">{hint}</div>
+      </div>
+      <Switch size="small" checked={checked} onChange={onChange} />
+    </div>
+  );
+}
+
+function PresetCard({
+  selected,
+  preview,
+  label,
+  description,
+  onClick,
+}: {
+  selected: boolean;
+  preview: React.ReactNode;
+  label: string;
+  description?: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`appearance-preset-card${selected ? ' is-selected' : ''}`}
+    >
+      {preview}
+      <div className="appearance-preset-meta">
+        <div className={`appearance-preset-title${selected ? ' is-selected' : ''}`}>{label}</div>
+        {description && <div className="appearance-preset-description">{description}</div>}
+      </div>
+    </button>
+  );
+}
 
 /** 将上传背景图压缩为 WebP data URL，避免原图 base64 长期占用 storage 与渲染内存。 */
 async function optimizeBackgroundImage(file: File): Promise<string> {
@@ -86,10 +177,10 @@ async function optimizeBackgroundImage(file: File): Promise<string> {
 
 export function AppearancePanel({ settings, updateSettings }: AppearancePanelProps) {
   const { t } = useT();
-  const { token } = theme.useToken();
   const { message } = App.useApp();
   const isDark = useResolvedTheme() === 'dark';
   const [showGradientEditor, setShowGradientEditor] = useState(false);
+  const skinCustomBase = getSkinCustomBaseValues(settings.skinPreset ?? 'minimal');
 
   const customGradient = settings.customGradient ?? {
     stops: [
@@ -163,102 +254,29 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
   );
 
   return (
-    <Space direction="vertical" size={24} style={{ width: '100%' }}>
+    <Space direction="vertical" size={24} className="appearance-panel">
       {/* ── 皮肤预设选择器 ── */}
       <Field label={t('skin.title')} hint={t('skin.hint')}>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 10,
-          }}
-        >
+        <div className="appearance-grid">
           {SKIN_PRESETS.map((skin) => {
             const isSelected = settings.skinPreset === skin.id || (!settings.skinPreset && skin.id === 'minimal');
             const gradientBg = `linear-gradient(135deg, ${skin.previewColors[0]}, ${skin.previewColors[1]}, ${skin.previewColors[2] ?? skin.previewColors[1]})`;
             return (
-              <button
+              <PresetCard
                 key={skin.id}
-                type="button"
+                selected={isSelected}
                 onClick={() => { void updateSettings({ skinPreset: skin.id }); }}
-                style={{
-                  all: 'unset',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'stretch',
-                  borderRadius: token.borderRadiusLG,
-                  overflow: 'hidden',
-                  border: isSelected
-                    ? `2px solid ${token.colorPrimary}`
-                    : `1px solid ${token.colorBorderSecondary}`,
-                  transition: 'border-color 160ms ease, box-shadow 160ms ease',
-                  boxShadow: isSelected ? `0 0 0 1px ${token.colorPrimary}` : 'none',
-                }}
-              >
-                <div style={{ height: 52, background: gradientBg, position: 'relative' }}>
-                  {skin.compatibleMode !== 'both' && (
-                    <span
-                      style={{
-                        position: 'absolute',
-                        top: 4,
-                        right: 4,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: 16,
-                        height: 16,
-                        borderRadius: 4,
-                        fontSize: 9,
-                        color: '#fff',
-                        background:
-                          skin.compatibleMode === 'dark'
-                            ? 'rgba(0,0,0,0.5)'
-                            : 'rgba(255,255,255,0.7)',
-                      }}
-                    >
-                      {skin.compatibleMode === 'dark' ? (
-                        <Moon size={ICON_SIZE.XS} />
-                      ) : (
-                        <Sun size={ICON_SIZE.XS} style={{ color: '#333' }} />
-                      )}
-                    </span>
-                  )}
-                </div>
-                <div
-                  style={{
-                    padding: '4px 6px',
-                    background: token.colorBgContainer,
-                  }}
-                >
+                label={t(skin.labelKey)}
+                description={t(skin.descriptionKey)}
+                preview={(
                   <div
-                    style={{
-                      fontSize: 11,
-                      fontWeight: isSelected ? 600 : 500,
-                      color: isSelected ? token.colorPrimary : token.colorText,
-                      textAlign: 'center',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
+                    className="appearance-preset-preview appearance-preset-preview--skin"
+                    style={{ ['--appearance-preview-bg' as string]: gradientBg } as React.CSSProperties}
                   >
-                    {t(skin.labelKey)}
+                    {skin.compatibleMode !== 'both' && <ModeBadge mode={skin.compatibleMode} />}
                   </div>
-                  <div
-                    style={{
-                      fontSize: 10,
-                      color: token.colorTextTertiary,
-                      textAlign: 'center',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      marginTop: 1,
-                    }}
-                  >
-                    {t(skin.descriptionKey)}
-                  </div>
-                </div>
-              </button>
+                )}
+              />
             );
           })}
         </div>
@@ -266,13 +284,9 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
 
       {/* ── 极客模式：单 token 精细化定制 ── */}
       <Field label={t('skin.customTitle')} hint={t('skin.customHint')}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {/*
-           * 总开关：关闭时即使 settings.skinCustom 存在，也通过清空实现"一键回到预设"。
-           * 这样 AntdThemeProvider 的 skinCustom === undefined 分支会直接使用预设原值。
-           */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: 12, color: token.colorTextSecondary }}>
+        <div className="appearance-toggle-group">
+          <div className="appearance-toggle-row">
+            <span className="appearance-toggle-label">
               {t('skin.customEnable')}
             </span>
             <Switch
@@ -280,7 +294,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
               onChange={(on) => {
                 void updateSettings({
                   skinCustom: on
-                    ? { borderRadius: 8, fontSize: 14, controlHeight: 32, borderWidth: 1 }
+                    ? skinCustomBase
                     : undefined,
                 });
               }}
@@ -288,118 +302,68 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
           </div>
 
           {settings.skinCustom !== undefined && (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 14,
-                padding: 12,
-                borderRadius: token.borderRadiusLG,
-                background: token.colorFillQuaternary,
-              }}
-            >
-              {/* 圆角 */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ fontSize: 12, color: token.colorText }}>{t('skin.customRadius')}</span>
-                  <span style={{ fontSize: 12, color: token.colorTextTertiary, fontFeatureSettings: '"tnum"' }}>
-                    {settings.skinCustom.borderRadius ?? 8}px
-                  </span>
-                </div>
-                <Slider
-                  min={0}
-                  max={24}
-                  step={1}
-                  value={settings.skinCustom.borderRadius ?? 8}
-                  onChange={(v) => {
-                    void updateSettings({
-                      skinCustom: { ...settings.skinCustom, borderRadius: v },
-                    });
-                  }}
-                />
-                <div style={{ fontSize: 11, color: token.colorTextTertiary }}>
-                  {t('skin.customRadiusHint')}
-                </div>
-              </div>
+            <div className="appearance-custom-box">
+              <SliderField
+                label={t('skin.customRadius')}
+                value={settings.skinCustom.borderRadius ?? skinCustomBase.borderRadius}
+                min={0}
+                max={24}
+                step={1}
+                hint={t('skin.customRadiusHint')}
+                onChange={(value) => {
+                  void updateSettings({
+                    skinCustom: { ...settings.skinCustom, borderRadius: value },
+                  });
+                }}
+              />
 
-              {/* 基础字号 */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ fontSize: 12, color: token.colorText }}>{t('skin.customFontSize')}</span>
-                  <span style={{ fontSize: 12, color: token.colorTextTertiary, fontFeatureSettings: '"tnum"' }}>
-                    {settings.skinCustom.fontSize ?? 14}px
-                  </span>
-                </div>
-                <Slider
-                  min={12}
-                  max={16}
-                  step={1}
-                  value={settings.skinCustom.fontSize ?? 14}
-                  onChange={(v) => {
-                    void updateSettings({
-                      skinCustom: { ...settings.skinCustom, fontSize: v },
-                    });
-                  }}
-                />
-                <div style={{ fontSize: 11, color: token.colorTextTertiary }}>
-                  {t('skin.customFontSizeHint')}
-                </div>
-              </div>
+              <SliderField
+                label={t('skin.customFontSize')}
+                value={settings.skinCustom.fontSize ?? skinCustomBase.fontSize}
+                min={12}
+                max={16}
+                step={1}
+                hint={t('skin.customFontSizeHint')}
+                onChange={(value) => {
+                  void updateSettings({
+                    skinCustom: { ...settings.skinCustom, fontSize: value },
+                  });
+                }}
+              />
 
-              {/* 控件高度 */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ fontSize: 12, color: token.colorText }}>{t('skin.customControlHeight')}</span>
-                  <span style={{ fontSize: 12, color: token.colorTextTertiary, fontFeatureSettings: '"tnum"' }}>
-                    {settings.skinCustom.controlHeight ?? 32}px
-                  </span>
-                </div>
-                <Slider
-                  min={24}
-                  max={40}
-                  step={2}
-                  value={settings.skinCustom.controlHeight ?? 32}
-                  onChange={(v) => {
-                    void updateSettings({
-                      skinCustom: { ...settings.skinCustom, controlHeight: v },
-                    });
-                  }}
-                />
-                <div style={{ fontSize: 11, color: token.colorTextTertiary }}>
-                  {t('skin.customControlHeightHint')}
-                </div>
-              </div>
+              <SliderField
+                label={t('skin.customControlHeight')}
+                value={settings.skinCustom.controlHeight ?? skinCustomBase.controlHeight}
+                min={24}
+                max={40}
+                step={2}
+                hint={t('skin.customControlHeightHint')}
+                onChange={(value) => {
+                  void updateSettings({
+                    skinCustom: { ...settings.skinCustom, controlHeight: value },
+                  });
+                }}
+              />
 
-              {/* 边框粗细 */}
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ fontSize: 12, color: token.colorText }}>{t('skin.customBorderWidth')}</span>
-                  <span style={{ fontSize: 12, color: token.colorTextTertiary, fontFeatureSettings: '"tnum"' }}>
-                    {settings.skinCustom.borderWidth ?? 1}px
-                  </span>
-                </div>
-                <Slider
-                  min={0.5}
-                  max={2}
-                  step={0.5}
-                  value={settings.skinCustom.borderWidth ?? 1}
-                  onChange={(v) => {
-                    void updateSettings({
-                      skinCustom: { ...settings.skinCustom, borderWidth: v },
-                    });
-                  }}
-                />
-                <div style={{ fontSize: 11, color: token.colorTextTertiary }}>
-                  {t('skin.customBorderWidthHint')}
-                </div>
-              </div>
+              <SliderField
+                label={t('skin.customBorderWidth')}
+                value={settings.skinCustom.borderWidth ?? skinCustomBase.borderWidth}
+                min={0.5}
+                max={2}
+                step={0.5}
+                hint={t('skin.customBorderWidthHint')}
+                onChange={(value) => {
+                  void updateSettings({
+                    skinCustom: { ...settings.skinCustom, borderWidth: value },
+                  });
+                }}
+              />
 
-              {/* 品牌主色 */}
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ fontSize: 12, color: token.colorText }}>{t('skin.customColorPrimary')}</span>
+              <div className="appearance-slider-group">
+                <div className="appearance-toggle-row">
+                  <span className="appearance-slider-label">{t('skin.customColorPrimary')}</span>
                   <ColorPicker
-                    value={settings.skinCustom.colorPrimary}
+                    value={settings.skinCustom.colorPrimary ?? skinCustomBase.colorPrimary}
                     size="small"
                     showText
                     onChange={(c) => {
@@ -409,9 +373,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                     }}
                   />
                 </div>
-                <div style={{ fontSize: 11, color: token.colorTextTertiary }}>
-                  {t('skin.customColorPrimaryHint')}
-                </div>
+                <div className="appearance-slider-hint">{t('skin.customColorPrimaryHint')}</div>
               </div>
 
               <Button
@@ -432,7 +394,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
         <Select
           value={settings.language}
           onChange={(v) => { void updateSettings({ language: v }); }}
-          style={{ width: '100%' }}
+          className="appearance-full-width"
           options={[
             { value: 'zh-CN', label: '中文' },
             { value: 'en', label: 'English' },
@@ -443,19 +405,13 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
       {/* ══════════════════════════════════════════════════
           背景定制区
           ══════════════════════════════════════════════════ */}
-      <Divider style={{ fontSize: 12, color: token.colorTextTertiary, margin: '8px 0' }}>
+      <Divider className="appearance-divider">
         {t('bg.sectionTitle')}
       </Divider>
 
       {/* ── 渐变背景预设 ── */}
       <Field label={t('gradient.title')} hint={t('gradient.hint')}>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 10,
-          }}
-        >
+        <div className="appearance-grid">
           {GRADIENT_PRESETS.map((preset) => {
             const isSelected = settings.gradientPreset === preset.id;
             const previewBg =
@@ -474,77 +430,19 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                   void updateSettings({ gradientPreset: preset.id });
                   if (preset.id === 'custom') setShowGradientEditor(true);
                 }}
-                style={{
-                  all: 'unset',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'stretch',
-                  borderRadius: token.borderRadiusLG,
-                  overflow: 'hidden',
-                  border: isSelected
-                    ? `2px solid ${token.colorPrimary}`
-                    : `1px solid ${token.colorBorderSecondary}`,
-                  transition: 'border-color 160ms ease, box-shadow 160ms ease',
-                  boxShadow: isSelected ? `0 0 0 1px ${token.colorPrimary}` : 'none',
-                }}
+                className={`appearance-preset-card${isSelected ? ' is-selected' : ''}`}
               >
-                <div style={{ height: 48, background: previewBg, position: 'relative' }}>
-                  {preset.compatibleMode !== 'both' && (
-                    <span
-                      style={{
-                        position: 'absolute',
-                        top: 4,
-                        right: 4,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: 16,
-                        height: 16,
-                        borderRadius: 4,
-                        fontSize: 9,
-                        color: '#fff',
-                        background:
-                          preset.compatibleMode === 'dark'
-                            ? 'rgba(0,0,0,0.5)'
-                            : 'rgba(255,255,255,0.7)',
-                      }}
-                    >
-                      {preset.compatibleMode === 'dark' ? (
-                        <Moon size={ICON_SIZE.XS} />
-                      ) : (
-                        <Sun size={ICON_SIZE.XS} style={{ color: '#333' }} />
-                      )}
-                    </span>
-                  )}
-                  {preset.id === 'custom' && (
-                    <span
-                      style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        fontSize: 16,
-                        color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.4)',
-                      }}
-                    >
-<Pencil size={ICON_SIZE.LARGE} />
-                    </span>
-                  )}
-                </div>
                 <div
+                  className="appearance-preset-preview appearance-preset-preview--gradient"
                   style={{
-                    padding: '4px 6px',
-                    fontSize: 11,
-                    fontWeight: isSelected ? 600 : 400,
-                    color: isSelected ? token.colorPrimary : token.colorTextSecondary,
-                    background: token.colorBgContainer,
-                    textAlign: 'center',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
+                    ['--appearance-preview-bg' as string]: previewBg,
+                    ['--appearance-edit-icon' as string]: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.4)',
+                  } as React.CSSProperties}
                 >
+                  {preset.compatibleMode !== 'both' && <ModeBadge mode={preset.compatibleMode} />}
+                  {preset.id === 'custom' && <Pencil size={ICON_SIZE.LARGE} className="appearance-preset-edit-icon" />}
+                </div>
+                <div className={`appearance-preset-label-only${isSelected ? ' is-selected' : ''}`}>
                   {t(preset.labelKey)}
                 </div>
               </button>
@@ -554,25 +452,10 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
 
         {/* 自定义渐变编辑器 */}
         {settings.gradientPreset === 'custom' && (
-          <div
-            style={{
-              marginTop: 8,
-              padding: 14,
-              borderRadius: token.borderRadiusLG,
-              border: `1px solid ${token.colorBorderSecondary}`,
-              background: token.colorFillQuaternary,
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: 12,
-              }}
-            >
-              <span style={{ fontSize: 12, fontWeight: 500, color: token.colorTextSecondary }}>
-<Pencil size={ICON_SIZE.MEDIUM} style={{ marginRight: 6 }} />
+          <div className="appearance-editor-shell">
+            <div className="appearance-editor-header">
+              <span className="appearance-editor-title">
+                <Pencil size={ICON_SIZE.MEDIUM} className="appearance-editor-icon" />
                 {t('gradient.customEditor')}
               </span>
               <Button
@@ -586,10 +469,9 @@ icon={showGradientEditor ? undefined : <Pencil size={ICON_SIZE.MEDIUM} />}
             </div>
 
             <div
+              className={`appearance-editor-preview${showGradientEditor ? '' : ' is-collapsed'}`}
               style={{
-                height: 32,
-                borderRadius: token.borderRadius,
-                background: buildGradient(
+                ['--appearance-preview-bg' as string]: buildGradient(
                   customGradient?.stops ?? [
                     { color: '#667eea', position: 0 },
                     { color: '#764ba2', position: 0.5 },
@@ -597,37 +479,25 @@ icon={showGradientEditor ? undefined : <Pencil size={ICON_SIZE.MEDIUM} />}
                   ],
                   customGradient?.angle ?? 135,
                 ),
-                marginBottom: showGradientEditor ? 12 : 0,
-              }}
+              } as React.CSSProperties}
             />
 
             {showGradientEditor && (
               <>
-                <div style={{ marginBottom: 12 }}>
-                  <div style={{ fontSize: 11, color: token.colorTextTertiary, marginBottom: 4 }}>
-                    {t('gradient.angle')}: {customGradient.angle}°
-                  </div>
-                  <Slider
-                    min={0}
-                    max={360}
-                    value={customGradient.angle}
-                    onChange={(v) => updateCustomGradient({ angle: v })}
-                  />
-                </div>
+                <SliderField
+                  label={t('gradient.angle')}
+                  value={customGradient.angle}
+                  min={0}
+                  max={360}
+                  step={1}
+                  suffix="°"
+                  hint=""
+                  onChange={(value) => updateCustomGradient({ angle: value })}
+                />
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div className="appearance-editor-stops">
                   {customGradient.stops.map((stop, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 8,
-                        padding: '6px 8px',
-                        borderRadius: token.borderRadiusSM,
-                        background: token.colorBgContainer,
-                      }}
-                    >
+                    <div key={i} className="appearance-editor-stop">
                       <ColorPicker
                         size="small"
                         value={stop.color}
@@ -646,7 +516,7 @@ icon={showGradientEditor ? undefined : <Pencil size={ICON_SIZE.MEDIUM} />}
                           newStops[i] = { ...newStops[i], position: v / 100 };
                           updateCustomGradient({ stops: newStops });
                         }}
-                        style={{ flex: 1 }}
+                        className="appearance-editor-slider"
                       />
                       {customGradient.stops.length > 2 && (
                         <Button
@@ -670,7 +540,6 @@ icon={<MinusCircle size={ICON_SIZE.MEDIUM} />}
                     size="small"
                     block
 icon={<Plus size={ICON_SIZE.MEDIUM} />}
-                    style={{ marginTop: 8 }}
                     onClick={() => {
                       const lastPos = customGradient.stops[customGradient.stops.length - 1]?.position ?? 0.5;
                       const newPos = Math.min(1, lastPos + 0.15);
@@ -683,44 +552,31 @@ icon={<Plus size={ICON_SIZE.MEDIUM} />}
                   </Button>
                 )}
 
-                <div style={{ marginTop: 14, paddingTop: 12, borderTop: `1px solid ${token.colorBorderSecondary}` }}>
-                  <div style={{ fontSize: 11, color: token.colorTextTertiary, marginBottom: 8 }}>
-                    {t('gradient.darkModeConfig')}
+                <div className="appearance-editor-dark">
+                  <div className="appearance-editor-note">{t('gradient.darkModeConfig')}</div>
+                  <div className="appearance-editor-toggle-row">
+                    <Switch
+                      size="small"
+                      checked={customGradient.darkStops != null}
+                      onChange={(checked) => {
+                        if (checked) {
+                          const darkStops = customGradient.stops.map((s) => ({
+                            color: darkenHex(s.color, 0.5),
+                            position: s.position,
+                          }));
+                          updateCustomGradient({ darkStops, darkAngle: customGradient.angle });
+                        } else {
+                          updateCustomGradient({ darkStops: undefined, darkAngle: undefined });
+                        }
+                      }}
+                    />
+                    <span className="appearance-mode-note">{t('gradient.independentDark')}</span>
                   </div>
-                  <Switch
-                    size="small"
-                    checked={customGradient.darkStops != null}
-                    onChange={(checked) => {
-                      if (checked) {
-                        const darkStops = customGradient.stops.map((s) => ({
-                          color: darkenHex(s.color, 0.5),
-                          position: s.position,
-                        }));
-                        updateCustomGradient({ darkStops, darkAngle: customGradient.angle });
-                      } else {
-                        updateCustomGradient({ darkStops: undefined, darkAngle: undefined });
-                      }
-                    }}
-                  />
-                  <span style={{ fontSize: 11, marginLeft: 8, color: token.colorTextSecondary }}>
-                    {t('gradient.independentDark')}
-                  </span>
 
                   {customGradient.darkStops && (
-                    <div style={{ marginTop: 8 }}>
+                    <div className="appearance-toggle-group">
                       {customGradient.darkStops.map((stop, i) => (
-                        <div
-                          key={i}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 8,
-                            padding: '4px 8px',
-                            borderRadius: token.borderRadiusSM,
-                            background: token.colorBgElevated,
-                            marginBottom: 4,
-                          }}
-                        >
+                        <div key={i} className="appearance-editor-stop-dark">
                           <ColorPicker
                             size="small"
                             value={stop.color}
@@ -739,7 +595,7 @@ icon={<Plus size={ICON_SIZE.MEDIUM} />}
                               newStops[i] = { ...newStops[i], position: v / 100 };
                               updateCustomGradient({ darkStops: newStops });
                             }}
-                            style={{ flex: 1 }}
+                            className="appearance-editor-slider"
                           />
                         </div>
                       ))}
@@ -754,7 +610,7 @@ icon={<Plus size={ICON_SIZE.MEDIUM} />}
 
       {/* ── 自定义背景图 ── */}
       <Field label={t('bg.imageTitle')} hint={t('bg.imageHint')}>
-        <Space direction="vertical" size={8} style={{ width: '100%' }}>
+        <Space direction="vertical" size={8} className="appearance-full-width">
           <Input
             placeholder={t('bg.imageUrlPlaceholder')}
             value={settings.backgroundImage?.url ?? ''}
@@ -769,11 +625,11 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
                   onClick={() => { void updateSettings({ backgroundImage: undefined }); }}
                 />
               ) : (
-<Image size={ICON_SIZE.MEDIUM} style={{ color: token.colorTextTertiary }} />
+                <Image size={ICON_SIZE.MEDIUM} className="appearance-muted-icon" />
               )
             }
           />
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div className="appearance-fit-row">
             <Upload
               beforeUpload={(file) => {
                 handleFileUpload(file);
@@ -782,7 +638,7 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
               showUploadList={false}
               accept="image/*"
             >
-<Button size="small" icon={<Image size={ICON_SIZE.MEDIUM} />}>
+              <Button size="small" icon={<Image size={ICON_SIZE.MEDIUM} />}>
                 {t('bg.uploadImage')}
               </Button>
             </Upload>
@@ -791,7 +647,7 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
                 size="small"
                 value={settings.backgroundImage.fit}
                 onChange={(v) => updateBgImage({ fit: v })}
-                style={{ width: 120 }}
+                className="appearance-fit-select"
                 options={[
                   { value: 'cover', label: t('bg.fitCover') },
                   { value: 'contain', label: t('bg.fitContain') },
@@ -805,20 +661,20 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
 
       {/* ── 背景遮罩层 ── */}
       <Field label={t('bg.overlayTitle')} hint={t('bg.overlayHint')}>
-        <Space direction="vertical" size={8} style={{ width: '100%' }}>
-          <Switch
-            size="small"
-            checked={settings.backgroundOverlay?.enabled ?? false}
-            onChange={(checked) => updateBgOverlay({ enabled: checked })}
-          />
-          <span style={{ fontSize: 11, marginLeft: 8, color: token.colorTextSecondary }}>
-            {t('bg.overlayEnabled')}
-          </span>
+        <Space direction="vertical" size={8} className="appearance-full-width">
+          <div className="appearance-editor-toggle-row">
+            <Switch
+              size="small"
+              checked={settings.backgroundOverlay?.enabled ?? false}
+              onChange={(checked) => updateBgOverlay({ enabled: checked })}
+            />
+            <span className="appearance-mode-note">{t('bg.overlayEnabled')}</span>
+          </div>
 
           {(settings.backgroundOverlay?.enabled) && (
             <>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 11, color: token.colorTextTertiary, flexShrink: 0 }}>
+              <div className="appearance-overlay-row">
+                <span className="appearance-color-label">
                   {t('bg.overlayColor')}
                 </span>
                 <ColorPicker
@@ -839,17 +695,15 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
                   }}
                 />
               </div>
-              <div>
-                <span style={{ fontSize: 11, color: token.colorTextTertiary }}>
-                  {t('bg.overlayBlur')}: {settings.backgroundOverlay?.blur ?? 0}px
-                </span>
-                <Slider
-                  min={0}
-                  max={12}
-                  value={Math.min(settings.backgroundOverlay?.blur ?? 0, 12)}
-                  onChange={(v) => updateBgOverlay({ blur: v })}
-                />
-              </div>
+              <SliderField
+                label={t('bg.overlayBlur')}
+                value={Math.min(settings.backgroundOverlay?.blur ?? 0, 12)}
+                min={0}
+                max={12}
+                step={1}
+                hint=""
+                onChange={(value) => updateBgOverlay({ blur: value })}
+              />
             </>
           )}
         </Space>
@@ -858,7 +712,7 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
       {/* ══════════════════════════════════════════════════
           布局定制区
           ══════════════════════════════════════════════════ */}
-      <Divider style={{ fontSize: 12, color: token.colorTextTertiary, margin: '8px 0' }}>
+      <Divider className="appearance-divider">
         {t('layout.sectionTitle')}
       </Divider>
 
@@ -867,7 +721,7 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
         <Select
           value={settings.layoutDensity ?? 'default'}
           onChange={(v) => { void updateSettings({ layoutDensity: v }); }}
-          style={{ width: '100%' }}
+          className="appearance-full-width"
           options={[
             { value: 'compact', label: t('layout.densityCompact') },
             { value: 'default', label: t('layout.densityDefault') },
@@ -878,17 +732,17 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
 
       {/* ── 内容区最大宽度 ── */}
       <Field label={t('layout.maxWidth')} hint={t('layout.maxWidthHint')}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div className="appearance-width-row">
           <InputNumber
             min={0}
             max={3000}
             step={40}
             value={settings.contentMaxWidth ?? 1360}
             onChange={(v) => { void updateSettings({ contentMaxWidth: v ?? 0 }); }}
-            style={{ width: 120 }}
+            className="appearance-width-input"
           />
-          <span style={{ fontSize: 11, color: token.colorTextTertiary }}>px</span>
-          <span style={{ fontSize: 10, color: token.colorTextQuaternary }}>
+          <span className="appearance-width-unit">px</span>
+          <span className="appearance-width-note">
             ({t('layout.maxWidthZero')})
           </span>
         </div>
@@ -897,7 +751,7 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
       {/* ══════════════════════════════════════════════════
           动效与无障碍
           ══════════════════════════════════════════════════ */}
-      <Divider style={{ fontSize: 12, color: token.colorTextTertiary, margin: '8px 0' }}>
+      <Divider className="appearance-divider">
         {t('a11y.sectionTitle')}
       </Divider>
 
@@ -906,7 +760,7 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
         <Select
           value={settings.reducedMotion ?? 'auto'}
           onChange={(v) => { void updateSettings({ reducedMotion: v }); }}
-          style={{ width: '100%' }}
+          className="appearance-full-width"
           options={[
             { value: 'auto', label: t('a11y.reducedMotionAuto') },
             { value: 'on', label: t('a11y.reducedMotionOn') },
@@ -922,7 +776,7 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
         <Select
           value={settings.clickEffect ?? 'off'}
           onChange={(v) => { void updateSettings({ clickEffect: v }); }}
-          style={{ width: '100%' }}
+          className="appearance-full-width"
           options={[
             { value: 'off', label: t('effects.clickOff') },
             { value: 'ripple', label: t('effects.clickRipple') },
@@ -956,7 +810,7 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
               });
             })();
           }}
-          style={{ width: '100%' }}
+          className="appearance-full-width"
           options={[
             { value: 'none', label: t('effects.videoBgNone') },
             { value: 'url', label: t('effects.videoBgUrl') },
@@ -1016,7 +870,7 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
               return false; // 禁止 antd 自己上传
             }}
           >
-<Button icon={<Image size={ICON_SIZE.MEDIUM} />}>
+            <Button icon={<Image size={ICON_SIZE.MEDIUM} />}>
               {settings.videoBackground.fileKey !== undefined && settings.videoBackground.fileKey !== ''
                 ? t('effects.videoBgFileChange')
                 : t('effects.videoBgFileSelect')}
@@ -1048,12 +902,12 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
       {/* ══════════════════════════════════════════════════
           UI 区域显隐
           ══════════════════════════════════════════════════ */}
-      <Divider style={{ fontSize: 12, color: token.colorTextTertiary, margin: '8px 0' }}>
+      <Divider className="appearance-divider">
         {t('uiVisibility.sectionTitle')}
       </Divider>
 
       <Field label={t('uiVisibility.sectionTitle')} hint={t('uiVisibility.hint')}>
-        <Space direction="vertical" size={10} style={{ width: '100%' }}>
+        <Space direction="vertical" size={10} className="appearance-full-width">
           {([
             ['header', t('uiVisibility.header'), t('uiVisibility.headerHint')],
             ['heroLogo', t('uiVisibility.heroLogo'), t('uiVisibility.heroLogoHint')],
@@ -1064,27 +918,13 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
             ['workspaceOverview', t('uiVisibility.workspaceOverview'), t('uiVisibility.workspaceOverviewHint')],
             ['tidySuggestion', t('uiVisibility.tidySuggestion'), t('uiVisibility.tidySuggestionHint')],
           ] as const).map(([key, label, hint]) => (
-            <div
+            <VisibilityRow
               key={key}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '6px 10px',
-                borderRadius: token.borderRadiusSM,
-                background: token.colorFillQuaternary,
-              }}
-            >
-              <div>
-                <div style={{ fontSize: 12, fontWeight: 500, color: token.colorText }}>{label}</div>
-                <div style={{ fontSize: 10, color: token.colorTextTertiary }}>{hint}</div>
-              </div>
-              <Switch
-                size="small"
-                checked={settings.uiVisibility?.[key] !== false}
-                onChange={(v) => updateUiVisibility(key, v)}
-              />
-            </div>
+              label={label}
+              hint={hint}
+              checked={settings.uiVisibility?.[key] !== false}
+              onChange={(v) => updateUiVisibility(key, v)}
+            />
           ))}
         </Space>
       </Field>

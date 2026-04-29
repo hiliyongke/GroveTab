@@ -12,7 +12,7 @@
  * 所有 UI 组件一律走 antd；不再依赖 Tailwind / 自写原子组件。
  */
 
-import { useEffect, useState, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef, lazy, Suspense, type CSSProperties, type RefObject } from 'react';
 import {
   Layout,
   Input,
@@ -35,8 +35,6 @@ import {
   Monitor,
   BarChart3,
 } from 'lucide-react';
-import { theme as antdTheme } from 'antd';
-import { iconColor } from '@/shared/utils/icon-colors';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useTabsStore, useSettingsStore, useUndoStore, useMetadataStore, useSelectionStore } from '@/store';
 import { useSwBroadcast, useResolvedTheme } from '@/shared/hooks';
@@ -146,8 +144,6 @@ function AppHeader({
   const theme = useSettingsStore((s) => s.settings.theme);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const { t } = useT();
-  const { token } = antdTheme.useToken();
-
   /** 循环切换 light → dark → system */
   const toggleTheme = useCallback(() => {
     const next = theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light';
@@ -162,74 +158,42 @@ function AppHeader({
    */
   const themeIcon =
     theme === 'system' ? (
-                    <Monitor key="sys" size={ICON_SIZE.MEDIUM} style={{ color: iconColor('theme', token) }} />
+      <Monitor key="sys" size={ICON_SIZE.MEDIUM} className="app-icon app-icon--theme" />
     ) : theme === 'dark' ? (
-                    <Moon key="dark" size={ICON_SIZE.MEDIUM} style={{ color: iconColor('theme', token) }} />
+      <Moon key="dark" size={ICON_SIZE.MEDIUM} className="app-icon app-icon--theme" />
     ) : (
-                    <Sun key="light" size={ICON_SIZE.MEDIUM} style={{ color: iconColor('theme', token) }} />
+      <Sun key="light" size={ICON_SIZE.MEDIUM} className="app-icon app-icon--theme" />
     );
 
   return (
-    <Header
-      style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 20,
-        height: 'var(--app-header-height)',
-        display: 'flex',
-        alignItems: 'center',
-        padding: '0 20px',
-        background: 'var(--app-glass-bg)',
-        borderBottom: '1px solid var(--app-hairline)',
-        backdropFilter: 'var(--app-glass-filter)',
-        WebkitBackdropFilter: 'var(--app-glass-filter)',
-      }}
-    >
+    <Header className="app-header-shell">
       {/* 左侧：小 logo + 状态摘要 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+      <div className="app-header-left">
         <img
           src="/icons/logo.png"
           alt={BRAND.name}
-          style={{
-            width: 24,
-            height: 24,
-            objectFit: 'contain',
-          }}
+          className="app-header-logo"
         />
         {/* 状态徽标 */}
         <Tag
           color={hasTidySuggestions ? 'gold' : 'green'}
-          style={{
-            margin: 0,
-            fontSize: 10.5,
-            fontWeight: 500,
-            borderRadius: 6,
-            opacity: compactSearchVisible ? 0 : 1,
-            transform: compactSearchVisible ? 'translateX(-4px)' : 'translateX(0)',
-            transition: 'opacity 220ms ease, transform 220ms ease',
-            pointerEvents: compactSearchVisible ? 'none' : 'auto',
-          }}
+          className={`app-header-status-tag${compactSearchVisible ? ' is-hidden' : ''}`}
         >
           {hasTidySuggestions ? t('dashboard.tidyReady') : t('dashboard.allClear')}
         </Tag>
         {/* 核心计数 —— 仅在吸附搜索未激活时显示 */}
         <span
-          style={{
-            fontSize: 12,
-            color: token.colorTextSecondary,
-            whiteSpace: 'nowrap',
-            opacity: compactSearchVisible ? 0 : 1,
-            transform: compactSearchVisible ? 'translateX(-4px)' : 'translateX(0)',
-            transition: 'opacity 220ms ease, transform 220ms ease',
-          }}
+          className={`app-header-metrics${compactSearchVisible ? ' is-hidden' : ''}`}
         >
-          <span style={{ color: token.colorText, fontWeight: 500 }}>{tabCount}</span> {t('dashboard.tabsStat')}
-          <span style={{ margin: '0 6px', color: token.colorBorder }}>·</span>
-          <span style={{ color: token.colorText, fontWeight: 500 }}>{domainCount}</span> {t('dashboard.domainsStat')}
+          <span className="app-header-metric-strong">{tabCount}</span> {t('dashboard.tabsStat')}
+          <span className="app-header-dot">·</span>
+          <span className="app-header-metric-strong">{domainCount}</span> {t('dashboard.domainsStat')}
           {(duplicateTabsCount > 0 || idleTabsCount > 0) && (
             <>
-              <span style={{ margin: '0 6px', color: token.colorBorder }}>·</span>
-              <span style={{ color: hasTidySuggestions ? token.colorWarning : token.colorTextSecondary, fontWeight: 500 }}>
+              <span className="app-header-dot">·</span>
+              <span
+                className={`app-header-metric-warning${hasTidySuggestions ? ' is-warning' : ''}`}
+              >
                 {duplicateTabsCount + idleTabsCount}
               </span>{' '}
               {t('header.pending')}
@@ -244,54 +208,15 @@ function AppHeader({
         · flex:1 占满中间空间
         · Hero 搜索框在视野内时隐藏，滚出后渐显
       */}
-      <div
-        style={{
-          flex: 1,
-          display: 'flex',
-          justifyContent: 'center',
-          minWidth: 0,
-          paddingInline: 12,
-        }}
-      >
+      <div className="app-header-center">
         <button
           type="button"
           onClick={onOpenSearch}
           aria-label={t('search.placeholder')}
-          className="app-compact-search"
-          style={{
-            all: 'unset',
-            boxSizing: 'border-box',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            width: '100%',
-            maxWidth: compactSearchVisible ? 420 : 0,
-            height: 32,
-            padding: compactSearchVisible ? '0 12px' : '0',
-            borderRadius: 999,
-            background: 'var(--ant-color-fill-tertiary)',
-            border: '1px solid var(--ant-color-border-secondary)',
-            color: 'var(--ant-color-text-tertiary)',
-            fontSize: 13,
-            opacity: compactSearchVisible ? 1 : 0,
-            transform: compactSearchVisible ? 'translateY(0)' : 'translateY(-6px)',
-            transition:
-              'opacity 260ms ease, transform 260ms ease, max-width 300ms ease, padding 260ms ease, background 160ms ease, border-color 160ms ease',
-            pointerEvents: compactSearchVisible ? 'auto' : 'none',
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-          }}
+          className={`app-compact-search app-header-search-trigger${compactSearchVisible ? ' is-visible' : ''}`}
         >
-          <Search size={ICON_SIZE.DEFAULT} style={{ flexShrink: 0, color: iconColor('search', token) }} />
-          <span
-            style={{
-              flex: 1,
-              textAlign: 'left',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
+          <Search size={ICON_SIZE.DEFAULT} className="app-icon app-icon--search app-header-search-icon" />
+          <span className="app-header-search-trigger-text">
             {t('search.placeholder')}
           </span>
           <span className="app-kbd" aria-hidden>
@@ -300,7 +225,7 @@ function AppHeader({
         </button>
       </div>
 
-      <Space size={8} style={{ flexShrink: 0 }}>
+      <Space size={8} className="app-header-actions">
         <Segmented<NewtabPageMode>
           size="small"
           value={pageMode}
@@ -316,7 +241,7 @@ function AppHeader({
         <Tooltip title={t('header.archiveTooltip')} placement="bottom">
           <Button
             type="text"
-            icon={<Save size={ICON_SIZE.MEDIUM} style={{ color: iconColor('archive', token) }} />}
+            icon={<Save size={ICON_SIZE.MEDIUM} className="app-icon app-icon--archive" />}
             onClick={onArchive}
             aria-label={t('header.archiveTooltip')}
           />
@@ -327,10 +252,7 @@ function AppHeader({
             icon={
               <span
                 key={theme}
-                style={{
-                  display: 'inline-flex',
-                  animation: 'app-theme-icon-spin 260ms ease-out',
-                }}
+                className="app-theme-icon"
               >
                 {themeIcon}
               </span>
@@ -342,7 +264,7 @@ function AppHeader({
         <Tooltip title={t('header.settings')}>
           <Button
             type="text"
-            icon={<Settings size={ICON_SIZE.MEDIUM} style={{ color: iconColor('settings', token) }} />}
+            icon={<Settings size={ICON_SIZE.MEDIUM} className="app-icon app-icon--settings" />}
             onClick={onSettings}
             aria-label={t('header.settings')}
           />
@@ -351,7 +273,7 @@ function AppHeader({
           <Tooltip title={t('insights.title')}>
             <Button
               type="text"
-              icon={<BarChart3 size={ICON_SIZE.MEDIUM} style={{ color: iconColor('insights', token) }} />}
+              icon={<BarChart3 size={ICON_SIZE.MEDIUM} className="app-icon app-icon--insights" />}
               onClick={onInsights}
               aria-label={t('insights.title')}
             />
@@ -386,7 +308,7 @@ function HeroBar({
   viewMode: ViewMode;
   onViewChange: (v: ViewMode) => void;
   onOpenSearch: () => void;
-  sentinelRef: React.RefObject<HTMLDivElement | null>;
+  sentinelRef: RefObject<HTMLDivElement | null>;
   showLogo: boolean;
   showTitle: boolean;
   showSlogan: boolean;
@@ -394,8 +316,6 @@ function HeroBar({
   showViewSwitcher: boolean;
 }) {
   const { t, locale } = useT();
-  const { token } = antdTheme.useToken();
-
   /** 品牌身份：名称 + slogan 均来自 BRAND 配置层，切换品牌无需改此处 */
   const brandName = getBrandDisplayName(locale);
   const brandSlogan = getBrandSlogan(locale);
@@ -414,15 +334,7 @@ function HeroBar({
       VIEW_CONFIGS.map((v) => ({
         value: v.id,
         label: (
-          <span
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 5,
-              padding: '1px 4px',
-              fontSize: 12.5,
-            }}
-          >
+          <span className="app-view-option">
             <v.Icon size={ICON_SIZE.MEDIUM} />
             {t(v.labelKey)}
           </span>
@@ -432,48 +344,24 @@ function HeroBar({
   );
 
   return (
-    <section
-      style={{
-        padding: '36px 0 24px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 16,
-      }}
-    >
+    <section className="app-hero">
       {/* 品牌 Logo —— 居中展示，参考微软新标签页
           所有内容通过 BRAND 配置层读取，切换品牌预设即可整站换装 */}
       {(shouldShowBrandRow || shouldShowSlogan) && (
         <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 6,
-          }}
+          className="app-hero-brand"
         >
           {shouldShowBrandRow && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div className="app-hero-brand-row">
               {showLogo && (
                 <img
                   src="/icons/logo.png"
                   alt={BRAND.name}
-                  style={{
-                    width: 40,
-                    height: 40,
-                    objectFit: 'contain',
-                  }}
+                  className="app-hero-logo"
                 />
               )}
               {showTitle && (
-                <span
-                  style={{
-                    fontSize: 20,
-                    fontWeight: 700,
-                    letterSpacing: '-0.02em',
-                    color: 'var(--app-text-primary)',
-                  }}
-                >
+                <span className="app-hero-title">
                   {brandName}
                 </span>
               )}
@@ -481,14 +369,7 @@ function HeroBar({
           )}
           {/* Slogan —— 低调次级展示，字号控制在 12px，避免喧宾夺主 */}
           {shouldShowSlogan && (
-            <span
-              style={{
-                fontSize: 12,
-                color: token.colorTextTertiary,
-                letterSpacing: '0.01em',
-                lineHeight: 1.4,
-              }}
-            >
+            <span className="app-hero-slogan">
               {brandSlogan}
             </span>
           )}
@@ -499,28 +380,19 @@ function HeroBar({
           hover 态、transition 全部交给 .app-hero-search（CSS），
           避免在 React 里写 onMouseEnter/Leave 副作用。 */}
       {showSearch && (
-        <div ref={sentinelRef} style={{ width: '100%', maxWidth: 680 }}>
+        <div ref={sentinelRef} className="app-hero-search-wrap">
           <Input
             className="app-hero-search"
             size="large"
             readOnly
             placeholder={t('search.placeholder')}
-            prefix={<Search size={ICON_SIZE.XXL} style={{ color: token.colorPrimary }} />}
+            prefix={<Search size={ICON_SIZE.XXL} className="app-icon app-icon--search app-hero-search-icon" />}
             suffix={<span className="app-kbd">⌘K</span>}
             onFocus={(e) => {
               e.currentTarget.blur();
               onOpenSearch();
             }}
             onClick={onOpenSearch}
-            style={{
-              borderRadius: 'var(--app-search-radius)',
-              cursor: 'pointer',
-              height: 'var(--app-search-height)',
-              fontSize: 'var(--app-search-font-size)',
-              background: token.colorBgContainer,
-              border: `1px solid ${token.colorBorderSecondary}`,
-              boxShadow: 'var(--app-shadow-brand-glow)',
-            }}
           />
         </div>
       )}
@@ -533,7 +405,7 @@ function HeroBar({
           onChange={(v: ViewMode) => onViewChange(v)}
           options={viewSegmentedOptions}
           size="middle"
-          style={{ maxWidth: '100%' }}
+          className="app-view-switcher"
         />
       )}
     </section>
@@ -852,15 +724,8 @@ function AppContent() {
 
   if (!checked) {
     return (
-      <div
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+      <div className="app-page-loading">
+        <div className="app-page-loading-inner">
           <Spin />
           <Text type="secondary">{t('tabs.loading')}</Text>
         </div>
@@ -874,7 +739,7 @@ function AppContent() {
    *   - 图片层：backgroundImage.url（如有）
    *   - 遮罩层：通过 ::after 伪元素实现（在 index.css 中）
    */
-  const layoutStyle: React.CSSProperties = {
+  const layoutStyle: CSSProperties = {
     minHeight: '100vh',
     background: layoutBackground,
     position: 'relative',
@@ -893,21 +758,26 @@ function AppContent() {
   }
 
   const overlayBlur = Math.min(Math.max(backgroundOverlay?.blur ?? 0, 0), 12);
+  const overlayStyle = backgroundOverlay?.enabled
+    ? ({
+        ['--app-background-overlay-bg' as string]: resolvedDark ? backgroundOverlay.colorDark : backgroundOverlay.color,
+        ['--app-background-overlay-filter' as string]: overlayBlur > 0 ? `blur(${overlayBlur}px)` : 'none',
+      } as CSSProperties)
+    : undefined;
+  const contentShellClassName = contentMaxWidth > 0
+    ? 'app-content-shell app-content-shell--bounded'
+    : 'app-content-shell';
+  const contentShellStyle = contentMaxWidth > 0
+    ? ({ ['--app-content-max-width' as string]: `${contentMaxWidth}px` } as CSSProperties)
+    : undefined;
 
   return (
-    <Layout style={layoutStyle}>
+    <Layout className="app-layout-shell" style={layoutStyle}>
       {/* 背景遮罩层：当 backgroundOverlay.enabled 时渲染 */}
       {backgroundOverlay?.enabled && (
         <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 0,
-            pointerEvents: 'none',
-            background: resolvedDark ? backgroundOverlay.colorDark : backgroundOverlay.color,
-            backdropFilter: overlayBlur > 0 ? `blur(${overlayBlur}px)` : undefined,
-            WebkitBackdropFilter: overlayBlur > 0 ? `blur(${overlayBlur}px)` : undefined,
-          }}
+          className="app-background-overlay"
+          style={overlayStyle}
         />
       )}
 
@@ -928,7 +798,11 @@ function AppContent() {
         />
       )}
 
-      <Content data-app-content style={{ width: '100%', maxWidth: contentMaxWidth > 0 ? contentMaxWidth : undefined, margin: '0 auto', padding: '0 32px 64px', position: 'relative', zIndex: 1 }}>
+      <Content
+        data-app-content
+        className={contentShellClassName}
+        style={contentShellStyle}
+      >
         {pageMode === 'workspace' && showHeroBar && (
           <HeroBar
             viewMode={viewMode}
@@ -960,7 +834,7 @@ function AppContent() {
                 {t('context.retry')}
               </Button>
             )}
-            style={{ marginBottom: 16 }}
+            className="app-init-alert"
           />
         )}
 
@@ -968,12 +842,12 @@ function AppContent() {
           <FishPondPage onOpenSearch={handleOpenSearch} onOpenSettings={handleOpenSettings} />
         )}
         {pageMode === 'trending' && (
-          <Suspense fallback={<div style={{ textAlign: 'center', padding: '40px 0' }}><Spin /></div>}>
+          <Suspense fallback={<div className="app-suspense-fallback"><Spin /></div>}>
             <TrendingPage />
           </Suspense>
         )}
         {pageMode === 'devtools' && (
-          <Suspense fallback={<div style={{ textAlign: 'center', padding: '40px 0' }}><Spin /></div>}>
+          <Suspense fallback={<div className="app-suspense-fallback"><Spin /></div>}>
             <DeveloperToolsPage />
           </Suspense>
         )}
@@ -1047,8 +921,8 @@ function AppContent() {
 
         <section>
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '80px 0' }}>
-              <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+            <div className="app-workspace-loading">
+              <div className="app-workspace-loading-inner">
                 <Spin />
                 <Text type="secondary">{t('tabs.loading')}</Text>
               </div>
@@ -1056,23 +930,23 @@ function AppContent() {
           ) : tabCount === 0 ? (
             <Empty
               description={
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--ant-color-text)' }}>{t('tabs.empty')}</div>
-                  <Text type="secondary" style={{ fontSize: 12.5 }}>
+                <div className="app-empty-state-body">
+                  <div className="app-empty-state-title">{t('tabs.empty')}</div>
+                  <Text type="secondary" className="app-empty-state-hint">
                     {t('tabs.emptyHint')}
                   </Text>
-                  <Text type="secondary" style={{ fontSize: 12, marginTop: 2 }}>
+                  <Text type="secondary" className="app-empty-state-recovery">
                     {t('tabs.emptyRecoveryHint')}
                   </Text>
                 </div>
               }
-              style={{ padding: '80px 0' }}
+              className="app-empty-state"
             >
-              <Space wrap style={{ marginTop: 4 }}>
-          <Button type="primary" icon={<Save size={ICON_SIZE.MEDIUM} />} onClick={handleOpenArchive}>
+              <Space wrap className="app-empty-state-actions">
+                <Button type="primary" icon={<Save size={ICON_SIZE.MEDIUM} />} onClick={handleOpenArchive}>
                   {t('dashboard.openArchives')}
                 </Button>
-          <Button icon={<Settings size={ICON_SIZE.MEDIUM} />} onClick={handleOpenSettings}>
+                <Button icon={<Settings size={ICON_SIZE.MEDIUM} />} onClick={handleOpenSettings}>
                   {t('header.settings')}
                 </Button>
               </Space>
@@ -1081,7 +955,7 @@ function AppContent() {
             const ViewComponent = getViewComponentMap()[viewMode];
             return ViewComponent !== undefined
               ? (
-                  <Suspense fallback={<div style={{ textAlign: 'center', padding: '40px 0' }}><Spin /></div>}>
+                  <Suspense fallback={<div className="app-suspense-fallback"><Spin /></div>}>
                     <ViewComponent />
                   </Suspense>
                 )

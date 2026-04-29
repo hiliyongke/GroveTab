@@ -1,4 +1,4 @@
-import { Button, theme } from 'antd';
+import { Button } from 'antd';
 import { GripVertical, Trash2 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import type { DashboardWidgetType } from '@/shared/types';
@@ -43,91 +43,33 @@ export function WidgetCard({
   children,
   dragHandleClassName,
 }: WidgetCardProps) {
-  const { token } = theme.useToken();
-  const tone = type !== undefined ? (TYPE_TONE[type] ?? token.colorPrimary) : token.colorPrimary;
+  const tone =
+    type !== undefined ? (TYPE_TONE[type] ?? 'var(--ant-color-primary)') : 'var(--ant-color-primary)';
+  const cardStyle = { '--app-widget-tone': tone } as React.CSSProperties;
+  const dragHandleClasses = [dragHandleClassName, 'app-widget-card__drag']
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div
       className={`app-card-interactive app-widget-card${editing ? ' app-widget-card--editing' : ''}`}
       role="group"
       aria-label={`${title} 小组件`}
-      style={
-        {
-          position: 'relative',
-          height: '100%',
-          borderRadius: token.borderRadiusLG + 10,
-          background: 'var(--app-glass-bg)',
-          border: `1px solid ${editing ? token.colorPrimaryBorder : token.colorBorderSecondary}`,
-          boxShadow: editing ? token.boxShadowTertiary : 'var(--app-shadow-card)',
-          backdropFilter: 'var(--app-glass-filter)',
-          WebkitBackdropFilter: 'var(--app-glass-filter)',
-          padding: 14,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 10,
-          overflow: 'hidden',
-          ['--app-hover-border' as string]: editing
-            ? token.colorPrimaryBorderHover
-            : token.colorBorder,
-        } as React.CSSProperties
-      }
+      style={cardStyle}
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 10,
-          minHeight: 28,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+      <div className="app-widget-card__head">
+        <div className="app-widget-card__title-wrap">
           {editing && (
             <button
               type="button"
-              className={dragHandleClassName}
+              className={dragHandleClasses}
               aria-label={`拖拽移动 ${title}`}
-              style={{
-                width: 28,
-                height: 28,
-                border: 0,
-                borderRadius: 10,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: token.colorFillTertiary,
-                color: token.colorTextTertiary,
-                cursor: 'grab',
-                flexShrink: 0,
-              }}
             >
               <GripVertical size={ICON_SIZE.MEDIUM} />
             </button>
           )}
-          <span
-            aria-hidden
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: 999,
-              background: tone,
-              boxShadow: `0 0 0 4px ${tone}18`,
-              flexShrink: 0,
-            }}
-          />
-          <div
-            style={{
-              fontSize: 12.5,
-              fontWeight: 700,
-              color: token.colorTextSecondary,
-              letterSpacing: '0.02em',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {title}
-          </div>
+          <span aria-hidden className="app-widget-card__tone-dot" />
+          <div className="app-widget-card__title">{title}</div>
         </div>
 
         {editing && (
@@ -138,23 +80,12 @@ export function WidgetCard({
             icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
             onClick={onRemove}
             aria-label={`删除 ${title}`}
-            className="app-dashboard__no-drag"
-            style={{ flexShrink: 0 }}
+            className="app-dashboard__no-drag app-widget-card__remove"
           />
         )}
       </div>
 
-      <div
-        className="app-widget-card__body"
-        style={{
-          flex: 1,
-          minHeight: 0,
-          overflow: 'auto',
-          scrollbarWidth: 'thin',
-        }}
-      >
-        {children}
-      </div>
+      <div className="app-widget-card__body">{children}</div>
     </div>
   );
 }

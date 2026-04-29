@@ -1,0 +1,331 @@
+.app-header-shell {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  height: var(--app-header-height);
+  padding: 0 20px;
+  background: var(--app-glass-bg);
+  border-bottom: 1px solid var(--app-hairline);
+  backdrop-filter: var(--app-glass-filter);
+  -webkit-backdrop-filter: var(--app-glass-filter);
+}
+
+.app-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.app-header-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.app-header-status-tag,
+.app-header-metrics {
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.app-header-status-tag.is-hidden,
+.app-header-metrics.is-hidden {
+  opacity: 0;
+  transform: translateX(-4px);
+}
+
+.app-header-status-tag.is-hidden {
+  pointer-events: none;
+}
+
+.app-header-metrics {
+  font-size: 12px;
+  color: var(--ant-color-text-secondary);
+  white-space: nowrap;
+}
+
+.app-header-status-tag {
+  margin: 0;
+  font-size: 10.5px;
+  font-weight: 500;
+  border-radius: 6px;
+}
+
+.app-header-metric-warning.is-warning {
+  color: var(--ant-color-warning);
+}
+
+.app-icon {
+  flex-shrink: 0;
+}
+
+.app-icon--theme {
+  color: var(--ant-color-warning);
+}
+
+.app-icon--search,
+.app-hero-search-icon {
+  color: var(--ant-color-primary);
+}
+
+.app-icon--archive,
+.app-icon--insights {
+  color: var(--ant-color-info);
+}
+
+.app-icon--settings {
+  color: var(--ant-color-text-secondary);
+}
+
+.app-header-search-icon {
+  color: var(--app-color-primary);
+}
+
+.app-header-metric-strong {
+  color: var(--ant-color-text);
+  font-weight: 500;
+}
+
+.app-header-metric-warning {
+  font-weight: 500;
+}
+
+.app-header-dot {
+  margin: 0 6px;
+  color: var(--ant-color-border);
+}
+
+.app-header-center {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+  padding-inline: 12px;
+}
+
+.app-header-search-trigger {
+  all: unset;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 0;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  font-size: 13px;
+  color: var(--ant-color-text-tertiary);
+  background: var(--ant-color-fill-tertiary);
+  border: 1px solid var(--ant-color-border-secondary);
+  border-radius: 999px;
+  transform: translateY(-6px);
+  transition:
+    opacity 260ms ease,
+    transform 260ms ease,
+    max-width 300ms ease,
+    padding 260ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.app-header-search-trigger.is-visible {
+  max-width: 420px;
+  padding: 0 12px;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.app-header-search-trigger-text {
+  flex: 1;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+}
+
+.app-header-actions {
+  flex-shrink: 0;
+}
+
+.app-theme-icon {
+  display: inline-flex;
+  animation: app-theme-icon-spin 260ms ease-out;
+}
+
+.app-view-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 4px;
+  font-size: 12.5px;
+}
+
+.app-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 36px 0 24px;
+}
+
+.app-hero-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-hero-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.app-hero-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.app-hero-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--app-text-primary);
+}
+
+.app-hero-slogan {
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  color: var(--ant-color-text-tertiary);
+}
+
+.app-hero-search-wrap {
+  width: 100%;
+  max-width: 680px;
+}
+
+.ant-input-affix-wrapper.app-hero-search {
+  height: var(--app-search-height);
+  cursor: pointer;
+  font-size: var(--app-search-font-size);
+  background: var(--ant-color-bg-container);
+  border: 1px solid var(--ant-color-border-secondary);
+  border-radius: var(--app-search-radius);
+  box-shadow: var(--app-shadow-brand-glow);
+}
+
+.ant-input-affix-wrapper.app-hero-search:hover {
+  transform: translateY(-1px);
+  border-color: var(--app-color-primary-hover);
+  box-shadow:
+    0 10px 32px color-mix(in srgb, #000 10%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--app-color-primary) 10%, transparent);
+}
+
+[data-theme='dark'] .ant-input-affix-wrapper.app-hero-search:hover {
+  box-shadow:
+    0 10px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 4px color-mix(in srgb, var(--app-color-primary) 12%, transparent);
+}
+
+.app-view-switcher {
+  max-width: 100%;
+}
+
+.app-page-loading,
+.app-suspense-fallback,
+.app-workspace-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-page-loading {
+  min-height: 100vh;
+}
+
+.app-page-loading-inner,
+.app-workspace-loading-inner,
+.app-empty-state-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.app-layout-shell {
+  min-height: 100vh;
+  position: relative;
+}
+
+.app-background-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--app-background-overlay-bg);
+  backdrop-filter: var(--app-background-overlay-filter, none);
+  -webkit-backdrop-filter: var(--app-background-overlay-filter, none);
+}
+
+.app-content-shell {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 32px 64px;
+  position: relative;
+  z-index: 1;
+}
+
+.app-content-shell--bounded {
+  max-width: var(--app-content-max-width);
+}
+
+.app-init-alert {
+  margin-bottom: 16px;
+}
+
+.app-suspense-fallback {
+  padding: 40px 0;
+  text-align: center;
+}
+
+.app-workspace-loading,
+.app-empty-state {
+  padding: 80px 0;
+  text-align: center;
+}
+
+.app-empty-state-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.app-empty-state-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ant-color-text);
+}
+
+.app-empty-state-hint {
+  font-size: 12.5px;
+}
+
+.app-empty-state-recovery {
+  margin-top: 2px;
+  font-size: 12px;
+}
+
+.app-empty-state-actions {
+  margin-top: 4px;
+}

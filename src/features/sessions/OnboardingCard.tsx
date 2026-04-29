@@ -12,7 +12,7 @@
  * 注：组件在 App.tsx 里仅在 `!onboarded` 时挂载，本组件内仅负责 UI 与写盘。
  */
 
-import { useCallback, useEffect, useMemo, useState, type ReactElement } from 'react';
+import { useCallback, useEffect, useMemo, useState, type CSSProperties, type ReactElement } from 'react';
 import { Button, Card, Modal, Progress, Space, Tag, theme, Typography } from 'antd';
 import {
   ArrowLeft,
@@ -30,6 +30,7 @@ import { markOnboardingDone } from '@/repositories';
 import { useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { BRAND } from '@/shared/config/brand';
+import './styles/onboarding.css';
 
 const { Text, Paragraph } = Typography;
 
@@ -51,9 +52,10 @@ const TOUR_STEPS: TourStep[] = [
   { icon: <Keyboard size={ICON_SIZE.XXLARGE} />, titleKey: 'onboarding.tour.shortcutsTitle', descKey: 'onboarding.tour.shortcutsDesc' },
 ];
 
-/**
- * 首次访问引导卡片（v2）
- */
+function cssVars(vars: Record<string, string>): CSSProperties {
+  return vars as CSSProperties;
+}
+
 export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
   const [phase, setPhase] = useState<Phase>('welcome');
   const [stepIndex, setStepIndex] = useState(0);
@@ -61,6 +63,21 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
   const { t } = useT();
   const { token } = theme.useToken();
   const updateSettings = useSettingsStore((s) => s.updateSettings);
+
+  const welcomeVars = useMemo(() => cssVars({
+    '--onboarding-card-radius': `${token.borderRadiusLG * 1.5}px`,
+    '--onboarding-card-shadow': token.boxShadowSecondary,
+    '--onboarding-card-primary-bg': token.colorPrimaryBg,
+    '--onboarding-card-primary': token.colorPrimary,
+    '--onboarding-card-text': token.colorText,
+    '--onboarding-card-text-tertiary': token.colorTextTertiary,
+  }), [token]);
+
+  const tourVars = useMemo(() => cssVars({
+    '--onboarding-tour-primary-bg': token.colorPrimaryBg,
+    '--onboarding-tour-primary': token.colorPrimary,
+    '--onboarding-tour-text-tertiary': token.colorTextTertiary,
+  }), [token]);
 
   const finish = useCallback(async () => {
     await markOnboardingDone();
@@ -81,7 +98,6 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
     [updateSettings, finish],
   );
 
-  // ── 键盘导航 ──
   useEffect(() => {
     if (phase !== 'tour') return;
     const onKey = (e: KeyboardEvent) => {
@@ -110,104 +126,44 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
   if (phase === 'welcome') {
     return (
       <Card
-        style={{
-          position: 'relative',
-          maxWidth: 640,
-          margin: '0 auto 20px',
-          overflow: 'hidden',
-          borderRadius: token.borderRadiusLG * 1.5,
-          boxShadow: token.boxShadowSecondary,
-        }}
-        styles={{
-          body: {
-            position: 'relative',
-            padding: '28px 28px 24px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            textAlign: 'center',
-            gap: 16,
-          },
-        }}
+        className="onboarding-card"
+        classNames={{ body: 'onboarding-card__body' }}
+        style={welcomeVars}
       >
-        {/* 背景光晕 */}
-        <div
-          aria-hidden
-          style={{
-            pointerEvents: 'none',
-            position: 'absolute',
-            top: -48,
-            right: -48,
-            width: 192,
-            height: 192,
-            borderRadius: '50%',
-            background: `radial-gradient(closest-side, ${token.colorPrimaryBg}, transparent)`,
-          }}
-        />
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 56,
-            height: 56,
-            borderRadius: token.borderRadiusLG,
-            background: token.colorPrimaryBg,
-            color: token.colorPrimary,
-          }}
-        >
+        <div aria-hidden className="onboarding-card__glow" />
+        <div className="onboarding-card__badge">
           <Network size={ICON_SIZE.XXXLARGE} />
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <h2
-            style={{
-              margin: 0,
-              fontSize: 22,
-              fontWeight: 600,
-              letterSpacing: '-0.01em',
-              color: token.colorText,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-            }}
-          >
+        <div className="onboarding-card__headline">
+          <h2 className="onboarding-card__title">
             {t('onboarding.title', { brand: BRAND.name })}
-            <Zap size={ICON_SIZE.MEDIUM} style={{ color: token.colorPrimary }} />
+            <Zap size={ICON_SIZE.MEDIUM} className="onboarding-card__title-icon" />
           </h2>
-          <Text type="secondary" style={{ fontSize: 14 }}>
+          <Text type="secondary" className="onboarding-card__subtitle">
             {t('onboarding.desc')}
           </Text>
         </div>
 
-        <Paragraph type="secondary" style={{ margin: 0, fontSize: 12.5, maxWidth: 460, lineHeight: 1.6 }}>
+        <Paragraph type="secondary" className="onboarding-card__detail">
           {t('onboarding.detail')}
         </Paragraph>
 
-        <Space wrap size={12} style={{ justifyContent: 'center' }}>
-          <Tag bordered={false} color="processing" style={{ margin: 0, fontWeight: 500 }}>
+        <Space wrap size={12} className="onboarding-card__features">
+          <Tag bordered={false} color="processing" className="onboarding-card__feature-tag">
             {t('onboarding.featureSearch')}
           </Tag>
-          <Tag bordered={false} color="gold" style={{ margin: 0, fontWeight: 500 }}>
+          <Tag bordered={false} color="gold" className="onboarding-card__feature-tag">
             {t('onboarding.featureArchive')}
           </Tag>
-          <Tag bordered={false} color="green" style={{ margin: 0, fontWeight: 500 }}>
+          <Tag bordered={false} color="green" className="onboarding-card__feature-tag">
             {t('onboarding.featureGroup')}
           </Tag>
         </Space>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: 12,
-            width: '100%',
-            marginTop: 4,
-          }}
-        >
+        <div className="onboarding-card__actions">
           <Button
-            className="app-lift"
+            className="app-lift onboarding-card__cta onboarding-card__cta--primary"
             type="primary"
             size="large"
             onClick={() => {
@@ -215,35 +171,27 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
             }}
             icon={<Globe size={ICON_SIZE.LARGE} />}
             autoFocus
-            style={{
-              background: 'var(--app-logo-gradient)',
-              border: 'none',
-              boxShadow: 'var(--app-logo-glow)',
-              fontWeight: 600,
-              height: 52,
-            }}
           >
             {t('onboarding.modeTakeover')}
           </Button>
           <Button
             size="large"
+            className="onboarding-card__cta"
             onClick={() => {
               void pickOverride(false);
             }}
             icon={<Package size={ICON_SIZE.LARGE} />}
-            style={{ height: 52 }}
           >
             {t('onboarding.modePopupOnly')}
           </Button>
         </div>
-        <Text type="secondary" style={{ fontSize: 11 }}>
+        <Text type="secondary" className="onboarding-card__hint">
           {t('onboarding.modeHint')}
         </Text>
       </Card>
     );
   }
 
-  // phase === 'tour'
   const step = TOUR_STEPS[stepIndex];
   return (
     <Modal
@@ -254,46 +202,35 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
       footer={null}
       closable={false}
       maskClosable={false}
-      styles={{ body: { padding: '28px 28px 24px' } }}
+      classNames={{ body: 'onboarding-tour-modal__body' }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 12,
-              background: token.colorPrimaryBg,
-              color: token.colorPrimary,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
+      <div className="onboarding-tour" style={tourVars}>
+        <div className="onboarding-tour__header">
+          <div className="onboarding-tour__step-badge">
             {step.icon}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Text strong style={{ fontSize: 16 }}>
+          <div className="onboarding-tour__step-copy">
+            <Text strong className="onboarding-tour__step-title">
               {t(step.titleKey)}
             </Text>
-            <Text type="secondary" style={{ fontSize: 12 }}>
+            <Text type="secondary" className="onboarding-tour__step-index">
               {t('onboarding.tour.stepIndex', { current: stepIndex + 1, total: TOUR_STEPS.length })}
             </Text>
           </div>
         </div>
 
-        <Paragraph type="secondary" style={{ margin: 0, fontSize: 13.5, lineHeight: 1.7 }}>
+        <Paragraph type="secondary" className="onboarding-tour__description">
           {t(step.descKey, { brand: BRAND.name })}
         </Paragraph>
 
         <Progress percent={progressPercent} size="small" showInfo={false} />
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="onboarding-tour__footer">
           <Button
             size="small"
             type="text"
             onClick={() => void finish()}
-            style={{ color: token.colorTextTertiary }}
+            className="onboarding-tour__skip"
           >
             {t('onboarding.tour.skip')}
           </Button>
