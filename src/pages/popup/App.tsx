@@ -52,8 +52,8 @@ async function focusTab(tab: RecentTab): Promise<void> {
     // 若目标 Tab 不存在（已关闭），兜底：新开该 URL
     try {
       await createTab({ url: tab.url, active: true });
-    } catch {
-      // ignore
+    } catch (err) {
+      console.warn('[Popup] focusTab: createTab failed', err);
     }
   }
 }

@@ -26,16 +26,6 @@ function mergeSettingsForStore(current: UserSettings, partial: Partial<UserSetti
     uiVisibility: partial.uiVisibility === undefined
       ? current.uiVisibility
       : { ...current.uiVisibility, ...partial.uiVisibility },
-    dashboardWidgets: partial.dashboardWidgets === undefined
-      ? current.dashboardWidgets
-      : {
-          ...current.dashboardWidgets,
-          ...partial.dashboardWidgets,
-          items: partial.dashboardWidgets.items ?? current.dashboardWidgets?.items,
-          availableWidgets: partial.dashboardWidgets.availableWidgets === undefined
-            ? current.dashboardWidgets?.availableWidgets
-            : { ...current.dashboardWidgets?.availableWidgets, ...partial.dashboardWidgets.availableWidgets },
-        },
     speedDial: partial.speedDial === undefined
       ? current.speedDial
       : { ...current.speedDial, ...partial.speedDial, groups: partial.speedDial.groups ?? current.speedDial?.groups },

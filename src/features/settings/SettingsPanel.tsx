@@ -9,13 +9,13 @@
  */
 
 import { Drawer, Tabs } from 'antd';
+import { useState, useEffect } from 'react';
 import {
   Palette,
   SlidersHorizontal,
   Database,
   KeyRound,
   Info,
-  LayoutGrid,
   Quote,
 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
@@ -26,7 +26,6 @@ import { BehaviorPanel } from './panels/BehaviorPanel';
 import { DataPanel } from './panels/DataPanel';
 import { ShortcutsPanel } from './panels/ShortcutsPanel';
 import { AboutPanel } from './panels/AboutPanel';
-import { WidgetsPanel } from './panels/WidgetsPanel';
 import { QuotesPanel } from './panels/QuotesPanel';
 
 interface SettingsPanelProps {
@@ -40,6 +39,12 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
   const settings = useSettingsStore((s) => s.settings);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const { t } = useT();
+  /** 受控的 Tabs activeKey */
+  const [activeTab, setActiveTab] = useState(defaultActiveTab);
+  /** 当 defaultActiveTab 变化时，更新 activeTab（支持外部控制初始 Tab） */
+  useEffect(() => {
+    setActiveTab(defaultActiveTab);
+  }, [defaultActiveTab]);
 
   return (
     <Drawer
@@ -51,7 +56,8 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
       destroyOnHidden
     >
       <Tabs
-        defaultActiveKey={defaultActiveTab}
+        activeKey={activeTab}
+        onChange={(key) => setActiveTab(key)}
         items={[
           {
             key: 'appearance',
@@ -70,15 +76,6 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
               </span>
             ),
             children: <BehaviorPanel settings={settings} updateSettings={updateSettings} />,
-          },
-          {
-            key: 'widgets',
-            label: (
-              <span>
-<LayoutGrid size={ICON_SIZE.MEDIUM} /> 小组件
-              </span>
-            ),
-            children: <WidgetsPanel />,
           },
           {
             key: 'quotes',

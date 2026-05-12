@@ -934,9 +934,27 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
 
 /**
  * 将 HEX 色值暗化指定比例
+ * 支持 3 位简写（#fff）、6 位（#ffffff）、8 位（#ffffffaa，忽略 alpha）
  */
 function darkenHex(hex: string, ratio: number): string {
-  const h = hex.replace('#', '');
+  // 移除 # 前缀
+  let h = hex.replace('#', '');
+
+  // 处理 3 位简写（如 #fff → #fffffff）
+  if (h.length === 3) {
+    h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+  }
+
+  // 处理 8 位 hex（带 alpha），忽略 alpha 部分
+  if (h.length === 8) {
+    h = h.slice(0, 6);
+  }
+
+  // 校验长度，无法解析时返回原值
+  if (h.length !== 6) {
+    return hex;
+  }
+
   const r = Math.round(parseInt(h.slice(0, 2), 16) * (1 - ratio));
   const g = Math.round(parseInt(h.slice(2, 4), 16) * (1 - ratio));
   const b = Math.round(parseInt(h.slice(4, 6), 16) * (1 - ratio));

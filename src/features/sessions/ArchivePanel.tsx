@@ -17,7 +17,9 @@ import {
   CheckSquare,
 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { Alert, Modal, Button, List, Empty, Spin, Input, theme, Space } from 'antd';
+import { Alert, Modal, Button, List, Spin, Input, theme, Space } from 'antd';
+import { FeatureEmptyState } from '@/shared/ui/FeatureEmptyState';
+import '@/shared/ui/FeatureEmptyState.css';
 import type { ArchivedSession } from '@/shared/types';
 import {
   getArchivedSessions,
@@ -382,26 +384,20 @@ export function ArchivePanel({ open, onOpenChange, onSessionsChange }: ArchivePa
             </div>
           </div>
         ) : sessions.length === 0 ? (
-          <Empty
-                image={<Inbox size={ICON_SIZE.HERO} style={{ color: token.colorTextTertiary }} />}
-            description={
-              <div>
-                <p style={{ fontSize: 13.5, fontWeight: 500, color: token.colorText, margin: 0 }}>
-                  {t('archive.empty')}
-                </p>
-                <p
-                  style={{
-                    fontSize: 12,
-                    color: token.colorTextTertiary,
-                    marginTop: 4,
-                    marginBottom: 0,
-                  }}
-                >
-                  {t('archive.emptyHint')}
-                </p>
-              </div>
-            }
-            style={{ padding: '32px 0' }}
+          <FeatureEmptyState
+            title={t('archive.empty')}
+            description={t('archive.emptyHint')}
+            icon={<Inbox size={ICON_SIZE.HERO} />}
+            hints={[
+              t('archive.emptyHint1'),
+              t('archive.emptyHint2'),
+              t('archive.emptyHint3'),
+            ]}
+            actions={[{
+              text: t('archive.archiveCurrentWindow'),
+              onClick: () => void archiveAllTabs(),
+              type: 'primary',
+            }]}
           />
         ) : (
           <List

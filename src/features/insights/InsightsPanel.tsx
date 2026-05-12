@@ -13,6 +13,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, Button, Card, Row, Col, Typography, theme, Popconfirm } from 'antd';
 import type { MetricEvent, StatsData } from '@/shared/types';
+import { BarChart3 } from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
 import {
   getMetrics,
   clearMetrics,
@@ -23,6 +25,8 @@ import {
 } from '@/repositories';
 import { useT } from '@/shared/i18n';
 import { feedback } from '@/shared/ui/feedback';
+import { FeatureEmptyState } from '@/shared/ui/FeatureEmptyState';
+import '@/shared/ui/FeatureEmptyState.css';
 
 const { Text, Title } = Typography;
 
@@ -61,8 +65,8 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
     })();
   }, [open]);
 
-  /** 近 7 天新标签页打开次数——将 now 提到 useMemo 之外避免水合不匹配 */
-  const [now] = useState(() => new Date());
+  /** 近 7 天新标签页打开次数——使用 useMemo 缓存，避免水合不匹配 */
+  const now = useMemo(() => new Date(), [open]);
   const dailyOpens = useMemo(() => {
     const map = new Map<string, number>();
     for (let i = 6; i >= 0; i--) {
@@ -163,7 +167,12 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
           <Col xs={24} md={12}>
             <Card size="small" title={t('insights.topDomains')}>
               {topDomains.length === 0 ? (
-                <Text type="secondary">{t('insights.empty')}</Text>
+                <FeatureEmptyState
+                  title={t('insights.empty')}
+                  icon={<BarChart3 size={ICON_SIZE.LARGE} />}
+                  size="small"
+                  hints={[t('insights.emptyHint1'), t('insights.emptyHint2')]}
+                />
               ) : (
                 <BarList items={topDomains.map((d) => ({ label: d.host, value: d.count }))} color={token.colorPrimary} />
               )}
@@ -178,7 +187,12 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
           <Col xs={24} md={12}>
             <Card size="small" title={t('insights.topActions')}>
               {topActions.length === 0 ? (
-                <Text type="secondary">{t('insights.empty')}</Text>
+                <FeatureEmptyState
+                  title={t('insights.empty')}
+                  icon={<BarChart3 size={ICON_SIZE.LARGE} />}
+                  size="small"
+                  hints={[t('insights.emptyHint1'), t('insights.emptyHint2')]}
+                />
               ) : (
                 <BarList items={topActions.map((a) => ({ label: a.event, value: a.count }))} color={token.colorPrimary} />
               )}

@@ -21,7 +21,6 @@ import {
   Tag,
   Button,
   Tooltip,
-  Empty,
   Spin,
   Alert,
   Segmented,
@@ -34,6 +33,7 @@ import {
   Moon,
   Monitor,
   BarChart3,
+  Globe,
 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useTabsStore, useSettingsStore, useUndoStore, useMetadataStore, useSelectionStore } from '@/store';
@@ -42,13 +42,15 @@ import { useKeybinding } from '@/shared/hooks/use-keybinding';
 import { AntdThemeProvider } from '@/shared/ui/AntdThemeProvider';
 import { ErrorBoundary } from '@/shared/ui/ErrorBoundary';
 import { UndoToast } from '@/shared/ui/UndoToast';
+import { FeatureEmptyState } from '@/shared/ui/FeatureEmptyState';
+import '@/shared/ui/FeatureEmptyState.css';
 import { I18nProvider, useT } from '@/shared/i18n';
 import { DomainGroupView } from '@/features/tabs/DomainGroupView';
 import { TidySuggestionBar } from '@/features/tabs/TidySuggestionBar';
 import { BatchActionBar } from '@/features/tabs/BatchActionBar';
 import { SelectionModeNotice } from '@/features/tabs/SelectionModeNotice';
 import { BRAND, getBrandDisplayName, getBrandSlogan } from '@/shared/config/brand';
-import { FishPondPage } from '@/features/fishpond/FishPondPage';
+
 const TrendingPage = lazy(() => import('@/features/trending/TrendingPage').then((m) => ({ default: m.TrendingPage })));
 const DeveloperToolsPage = lazy(() => import('@/features/developer-tools/DeveloperToolsPage').then((m) => ({ default: m.DeveloperToolsPage })));
 
@@ -72,7 +74,6 @@ import { VIEW_CONFIGS, VALID_VIEWS, type ViewMode } from '@/shared/config/views'
 import { registerViews, getViewComponentMap } from '@/shared/config/view-registry';
 import { findDuplicates } from '@/shared/utils/dedupe';
 import { detectIdleTabs } from '@/shared/utils/idle-detect';
-import { ActivityStrip } from '@/features/dashboard/ActivityStrip';
 import { WorkspaceSwitcher } from '@/features/workspace/WorkspaceSwitcher';
 const InsightsPanel = lazy(() => import('@/features/insights/InsightsPanel'));
 
@@ -243,7 +244,6 @@ function AppHeader({
           onChange={(value) => onPageModeChange(value)}
           options={[
             { value: 'workspace', label: t('pageMode.workspace') },
-            { value: 'fishpond', label: t('pageMode.fishpond') },
             { value: 'trending', label: t('pageMode.trending') },
             { value: 'devtools', label: t('pageMode.devtools') },
           ]}
@@ -443,21 +443,26 @@ function AppContent() {
   const [showArchive, setShowArchive] = useState(false);
   /**
    * 若 URL hash 为 #about，则初始直接打开 Settings 抽屉并切到 About Tab。
-   * 清理 hash 放在 useEffect 中，避免严格模式下 useState 初始化函数执行两次导致 replaceState 重复调用。
+   * 使用 useEffect 读取 hash，避免严格模式下 useState 初始化函数执行两次导致的问题。
    */
-  const [initialSettingsTab] = useState<'appearance' | 'about'>(() => {
-    if (typeof window === 'undefined') return 'appearance';
-    if (window.location.hash === '#about') {
-      return 'about';
-    }
-    return 'appearance';
-  });
+  const [initialSettingsTab, setInitialSettingsTab] = useState<'appearance' | 'about'>('appearance');
   useEffect(() => {
-    if (initialSettingsTab === 'about' && window.location.hash === '#about') {
+    if (typeof window === 'undefined') return;
+    if (window.location.hash === '#about') {
+      setInitialSettingsTab('about');
+    }
+  }, []);
+  useEffect(() => {
+    if (initialSettingsTab === 'about' && typeof window !== 'undefined' && window.location.hash === '#about') {
       history.replaceState(null, '', window.location.pathname);
     }
   }, [initialSettingsTab]);
-  const [showSettings, setShowSettings] = useState(initialSettingsTab === 'about');
+  const [showSettings, setShowSettings] = useState(false);
+  useEffect(() => {
+    if (initialSettingsTab === 'about') {
+      setShowSettings(true);
+    }
+  }, [initialSettingsTab]);
   const [showInsights, setShowInsights] = useState(false);
   /** tidyExpandSignal 对 TidySuggestionBar：默认为 0，点 "一键整理" 时 +1 触发展开 */
   const [tidyExpandSignal, setTidyExpandSignal] = useState(0);
@@ -524,24 +529,26 @@ function AppContent() {
   /**
    * 全局快捷键通过 URL hash 传信号：#search → 自动聚焦搜索框
    * 首次渲染时检测 hash，后续不再监听（这是 one-shot 信号）
-   *
-   * 注：不用 useEffect + setShowSearch（react-hooks/set-state-in-effect 规则禁止），
-   * 改为在初始化阶段同步读取 hash，若命中则将初始值设为 true。
    */
-  const [searchFromHash] = useState(() => {
-    if (typeof window === 'undefined') return false;
+  const [searchFromHash, setSearchFromHash] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
     const hash = window.location.hash;
     if (hash === '#search') {
-      return true;
+      setSearchFromHash(true);
     }
-    return false;
-  });
+  }, []);
   useEffect(() => {
-    if (searchFromHash && window.location.hash === '#search') {
+    if (searchFromHash && typeof window !== 'undefined' && window.location.hash === '#search') {
       history.replaceState(null, '', window.location.pathname);
     }
   }, [searchFromHash]);
-  const [showSearch, setShowSearch] = useState(searchFromHash);
+  const [showSearch, setShowSearch] = useState(false);
+  useEffect(() => {
+    if (searchFromHash) {
+      setShowSearch(true);
+    }
+  }, [searchFromHash]);
 
   useEffect(() => {
     let cancelled = false;
@@ -715,6 +722,12 @@ function AppContent() {
   const tabCount = tabs.length;
   const domainCount = new Set(tabs.map((tab) => tab.hostname)).size;
 
+  /** 使用 useMemo 缓存视图组件，替换 IIFE */
+  const ViewComponent = useMemo(() => {
+    const Comp = getViewComponentMap()[viewMode];
+    return Comp !== undefined ? Comp : null;
+  }, [viewMode]);
+
   /** Workspace 统计摘要 —— 用于 Header 状态栏展示 */
   const dedupStrictness = useSettingsStore((s) => s.settings.dedupStrictness ?? 'loose');
   const idleThresholdMinutes = useSettingsStore((s) => s.settings.idleThresholdMinutes ?? 1440);
@@ -851,9 +864,6 @@ function AppContent() {
           />
         )}
 
-        {pageMode === 'fishpond' && (
-          <FishPondPage onOpenSearch={handleOpenSearch} onOpenSettings={handleOpenSettings} />
-        )}
         {pageMode === 'trending' && (
           <Suspense fallback={<div className="app-suspense-fallback"><Spin /></div>}>
             <TrendingPage />
@@ -867,12 +877,6 @@ function AppContent() {
         {pageMode === 'workspace' && (
           <>
             {showOnboarding && <OnboardingCard onDismiss={() => setShowOnboarding(false)} />}
-
-            {/* Activity Strip —— 最近操作胶囊横条（60min 窗口内才渲染） */}
-            <ActivityStrip
-          onOpenArchive={() => setShowArchive(true)}
-          onOpenImportResult={() => setShowArchive(true)}
-        />
 
         {selectionMode && (
           <SelectionModeNotice
@@ -898,39 +902,25 @@ function AppContent() {
               </div>
             </div>
           ) : tabCount === 0 ? (
-            <Empty
-              description={
-                <div className="app-empty-state-body">
-                  <div className="app-empty-state-title">{t('tabs.empty')}</div>
-                  <Text type="secondary" className="app-empty-state-hint">
-                    {t('tabs.emptyHint')}
-                  </Text>
-                  <Text type="secondary" className="app-empty-state-recovery">
-                    {t('tabs.emptyRecoveryHint')}
-                  </Text>
-                </div>
-              }
-              className="app-empty-state"
-            >
-              <Space wrap className="app-empty-state-actions">
-                <Button type="primary" icon={<Save size={ICON_SIZE.MEDIUM} />} onClick={handleOpenArchive}>
-                  {t('dashboard.openArchives')}
-                </Button>
-                <Button icon={<Settings size={ICON_SIZE.MEDIUM} />} onClick={handleOpenSettings}>
-                  {t('header.settings')}
-                </Button>
-              </Space>
-            </Empty>
-          ) : (() => {
-            const ViewComponent = getViewComponentMap()[viewMode];
-            return ViewComponent !== undefined
-              ? (
-                  <Suspense fallback={<div className="app-suspense-fallback"><Spin /></div>}>
-                    <ViewComponent />
-                  </Suspense>
-                )
-              : <DomainGroupView />;
-          })()}
+            <FeatureEmptyState
+              title={t('tabs.empty')}
+              description={t('tabs.emptyHint')}
+              icon={<Globe size={ICON_SIZE.XXLARGE} />}
+              hints={[
+                t('tabs.emptyHint1'),
+                t('tabs.emptyHint2'),
+                t('tabs.emptyHint3'),
+              ]}
+              actions={[
+                { text: t('dashboard.openArchives'), onClick: handleOpenArchive, type: 'primary' },
+                { text: t('header.settings'), onClick: handleOpenSettings, type: 'default' },
+              ]}
+            />
+          ) : ViewComponent !== null ? (
+            <Suspense fallback={<div className="app-suspense-fallback"><Spin /></div>}>
+              <ViewComponent />
+            </Suspense>
+          ) : <DomainGroupView />}
         </section>
           </>
         )}

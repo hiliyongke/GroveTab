@@ -44,7 +44,6 @@ import { useKanbanStore, useTabsStore } from '@/store';
 import { archiveSelectedTabs } from '@/services';
 import { useT } from '@/shared/i18n';
 import { useReducedMotionPreference } from '@/shared/hooks/use-reduced-motion';
-import { activateTab, createTab } from '@/chrome';
 
 /** 拖拽数据类型：区分「源 tab」「列内卡片」「列自身」 */
 type DragData =
@@ -474,18 +473,20 @@ function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: S
     id,
     data: { kind: 'card', columnId, url: card.url } satisfies DragData,
   });
+  const jumpToTab = useTabsStore((s) => s.jumpToTab);
 
   const handleActivate = () => {
     if (offline) {
+      // 离线状态：在新标签页中打开 URL
       try {
-        void createTab({ url: card.url, active: true });
+        void window.open(card.url, '_blank');
       } catch {
         /* ignore */
       }
     } else {
       const live = tabs.find((tt) => tt.url === card.url);
       if (live) {
-        void activateTab(live.id, live.windowId);
+        void jumpToTab(live.id, live.windowId);
       }
     }
   };

@@ -149,7 +149,7 @@
 
 .devtools-workbench {
   display: grid;
-  grid-template-columns: minmax(420px, 1fr) minmax(420px, 520px);
+  grid-template-columns: minmax(460px, 1fr) 420px;
   gap: 0;
   min-height: 560px;
 }
@@ -193,7 +193,7 @@
 
 .devtools-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   align-content: start;
 }
@@ -209,6 +209,9 @@
   text-align: left;
   cursor: pointer;
   transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 .devtools-card:hover,
@@ -260,6 +263,10 @@
   color: var(--ant-color-text-secondary);
   font-size: 11.5px;
   line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .devtools-local-badge {
@@ -510,6 +517,12 @@
 
   .devtools-search {
     width: 100%;
+  }
+}
+
+@media (max-width: 1100px) {
+  .devtools-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 

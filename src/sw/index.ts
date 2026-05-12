@@ -334,18 +334,14 @@ self.addEventListener('activate', () => {
 
 /**
  * Service Worker 挂起前刷盘，避免数据丢失。
- * Chrome MV3 SW 真正挂起时无确定事件，但 chrome.runtime.onSuspend 在大多数情况下可用。
+ *
+ * 注意：Chrome MV3 的 Service Worker 没有可靠的挂起前事件，
+ * 已移除 chrome.runtime.onSuspend（MV3 不可用）。
+ * 当前已有每分钟一次的 heartbeat alarm 来定期刷盘。
  */
-try {
-  chrome.runtime.onSuspend?.addListener(() => {
-    void flushStats(true);
-  });
-} catch {
-  // 某些老版本 Chrome 没有 onSuspend
-}
 
 // ── OG Fetcher（F-24） ────────────────────────────────
-let ogInFlight = 0;
+// ogInFlight 已迁移到 chrome.storage.session，见 getOgInFlight/setOgInFlight 函数
 // 从 CONFIG 读取（支持运行时覆盖）
 const OG_CONCURRENCY = CONFIG.performance.ogConcurrency;
 const OG_TIMEOUT_MS = CONFIG.performance.ogTimeoutMs;
@@ -355,14 +351,19 @@ async function maybeFetchOg(url: string): Promise<void> {
   try {
     const settings = await getSettings();
     if (settings.enableOgFetch !== true) return;
-    if (ogInFlight >= OG_CONCURRENCY) return;
+
+    // 从 session storage 读取当前并发数
+    const result = await chrome.storage.session.get('ogInFlight');
+    const currentInFlight = (result['ogInFlight'] as number) ?? 0;
+    if (currentInFlight >= OG_CONCURRENCY) return;
 
     // 已存在则跳过
     const { getOgEntry, saveOgEntry } = await import('@/repositories');
     const existing = await getOgEntry(url);
     if (existing !== undefined && Date.now() - existing.fetchedAt < 7 * 86400_000) return;
 
-    ogInFlight += 1;
+    // 增加并发计数
+    await chrome.storage.session.set({ ogInFlight: currentInFlight + 1 });
     try {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), OG_TIMEOUT_MS);
@@ -391,7 +392,10 @@ async function maybeFetchOg(url: string): Promise<void> {
     } catch {
       // 静默失败
     } finally {
-      ogInFlight -= 1;
+      // 减少并发计数
+      const updated = await chrome.storage.session.get('ogInFlight');
+      const updatedValue = (updated['ogInFlight'] as number) ?? 0;
+      await chrome.storage.session.set({ ogInFlight: Math.max(0, updatedValue - 1) });
     }
   } catch {
     // 静默

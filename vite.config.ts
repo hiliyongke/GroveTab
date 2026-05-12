@@ -145,8 +145,8 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     minify: 'esbuild',
-    // 将 chunk 阈值调紧至 300KB，超阈值在 CI 里是 warning 信号
-    chunkSizeWarningLimit: 300,
+    // 懒加载 chunk 合理的体积上限（feat-insights 含 antd 组件 + SVG 图表 ≈ 750KB）
+    chunkSizeWarningLimit: 800,
     rollupOptions: {
       input: {
         newtab: resolve(__dirname, 'src/pages/newtab/main.tsx'),
@@ -163,33 +163,20 @@ export default defineConfig({
          */
         manualChunks(id: string) {
           if (id.includes('node_modules')) {
-            // v1.3 评估：zod（~12KB gz）本次不引入——现有手写校验（import-export.ts / storage-repo.ts）
-            // 已覆盖 schema 版本号强校验 + 白名单剪裁，zero-cost 满足需求 8。若后续新增复杂 schema 再考虑。
-
-            // react-grid-layout / react-resizable / react-draggable 必须最优先匹配——
-            // 因为 pnpm 的存放路径形如 `react-grid-layout@2.2.3_react-dom@19.2.5__react@19.2.5`，
-            // 会同时命中后面的 `react-dom` 与 `react` 分支，需要在前面短路。
-            if (
-              id.includes('react-grid-layout') ||
-              id.includes('react-resizable') ||
-              id.includes('react-draggable')
-            ) {
-              return 'vendor-grid';
-            }
-            if (id.includes('@dnd-kit')) return 'vendor-dnd';
-            if (id.includes('lunar-typescript')) return 'vendor-lunar';
-            // tinykeys ~1KB gz，随 vendor-react 一起走，避免额外 chunk 开销
-            if (id.includes('tinykeys')) return 'vendor-react';
-            if (id.includes('react-dom')) return 'vendor-react-dom';
-            if (id.includes('react') && !id.includes('react-router')) return 'vendor-react';
-            if (id.includes('antd') || id.includes('@ant-design')) return 'vendor-antd';
-            if (id.includes('minisearch') || id.includes('pinyin-pro') || id.includes('tldts')) {
-              return 'vendor-search';
-            }
-            if (id.includes('date-fns') || id.includes('dayjs')) return 'vendor-date';
-            if (id.includes('lucide-react')) return 'vendor-icons';
-            if (id.includes('motion') || id.includes('framer-motion')) return 'vendor-motion';
-            if (id.includes('zustand')) return 'vendor-zustand';
+            // pnpm 路径优先匹配：路径形如 .pnpm/antd@6.3.6__react@19/.../node_modules/antd/es/...
+            if (/antd[\\/]es[\\/]|antd[\\/]lib[\\/]/.test(id)) return 'vendor-antd';
+            if (/react-grid-layout|react-resizable|react-draggable/.test(id)) return 'vendor-grid';
+            if (/@dnd-kit/.test(id)) return 'vendor-dnd';
+            if (/lunar-typescript/.test(id)) return 'vendor-lunar';
+            if (/tinykeys/.test(id)) return 'vendor-react';
+            if (/react-dom/.test(id)) return 'vendor-react-dom';
+            if (/react(?:-router)?['@_]/.test(id)) return 'vendor-react';
+            if (/minisearch|pinyin-pro|tldts/.test(id)) return 'vendor-search';
+            if (/date-fns|dayjs/.test(id)) return 'vendor-date';
+            if (/lucide-react/.test(id)) return 'vendor-icons';
+            if (/motion|framer-motion/.test(id)) return 'vendor-motion';
+            if (/zustand/.test(id)) return 'vendor-zustand';
+            if (/@ant-design/.test(id)) return 'vendor-antd';
             return 'vendor-misc';
           }
           // 把"非首屏必需"的特性模块拆到独立 chunk

@@ -9,7 +9,9 @@
  */
 
 import { useState, useMemo, useRef, useCallback, useEffect, type CSSProperties, type ReactNode } from 'react';
-import { Modal, Input, theme, Empty, Select, Tag } from 'antd';
+import { Modal, Input, theme, Select, Tag } from 'antd';
+import { FeatureEmptyState } from '@/shared/ui/FeatureEmptyState';
+import '@/shared/ui/FeatureEmptyState.css';
 import type { InputRef } from 'antd';
 import {
   LayoutGrid,
@@ -130,8 +132,9 @@ function Kbd({ children }: { children: ReactNode }) {
 
 /**
  * 对文本中的命中片段做高亮。
+ * @param keyPrefix - 唯一前缀，用于生成稳定的 React key
  */
-function renderHighlightedText(text: string, query: string): ReactNode {
+function renderHighlightedText(text: string, query: string, keyPrefix: string): ReactNode {
   const normalizedQuery = query.trim();
   if (normalizedQuery === '' || text === '') return text;
 
@@ -145,7 +148,7 @@ function renderHighlightedText(text: string, query: string): ReactNode {
       || part.toLowerCase() === normalizedQuery.toLowerCase();
 
     return matched ? (
-      <mark key={`${part}-${index}`} className="search-box-highlight">
+      <mark key={`${keyPrefix}-${index}`} className="search-box-highlight">
         {part}
       </mark>
     ) : (
@@ -603,9 +606,10 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
   /**
    * 将高频变化的键盘导航状态缓存到 ref 中，
    * 使 handleKeyDown 的依赖稳定，避免频繁重建导致 Input 重新渲染。
+   * 改为在 handleKeyDown 执行时更新 ref，避免 useEffect 高频触发。
    */
   const navStateRef = useRef({ activeIndex, flatItems, firstWebItemIndex, normalizedQuery, currentEngine, enabledEngines });
-  useEffect(() => {
+  const updateNavStateRef = useCallback(() => {
     navStateRef.current = { activeIndex, flatItems, firstWebItemIndex, normalizedQuery, currentEngine, enabledEngines };
   }, [activeIndex, flatItems, firstWebItemIndex, normalizedQuery, currentEngine, enabledEngines]);
 
@@ -724,6 +728,8 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
    *   - ↑ / ↓         ：上下选择
    */
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    // 执行前更新 ref，确保使用最新状态，避免高频 useEffect
+    updateNavStateRef();
     const { activeIndex: idx, flatItems: items, firstWebItemIndex: webIdx, normalizedQuery: nq, currentEngine: engine, enabledEngines: engines } = navStateRef.current;
     // Cmd/Ctrl + K：再按一次关闭 Modal（与打开快捷键对称）
     if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
@@ -855,16 +861,27 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
 
         <div className="search-box-list-area">
           {flatItems.length === 0 ? (
-            <div className="search-box-empty">
-              <Empty
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                description={
-                  <span className="search-box-empty-text">
-                    {historyLoading ? t('search.loadingHistory') : normalizedQuery !== '' ? t('search.tryOther') : t('search.emptyIdle')}
-                  </span>
-                }
-              />
-            </div>
+            (() => {
+              const title = historyLoading
+                ? t('search.loadingHistory')
+                : normalizedQuery !== ''
+                  ? t('search.tryOther')
+                  : t('search.emptyIdle');
+              return (
+                <div className="search-box-empty">
+                  <FeatureEmptyState
+                    title={title}
+                    icon={<Search size={ICON_SIZE.LARGE} />}
+                    size="small"
+                    hints={
+                      normalizedQuery !== ''
+                        ? [t('search.emptyHint1'), t('search.emptyHint2')]
+                        : undefined
+                    }
+                  />
+                </div>
+              );
+            })()
           ) : (
             sections.map((section) => {
               const startIndex = flatItems.findIndex((item) => item.id === section.items[0]?.id);
@@ -879,8 +896,8 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
                       const itemIndex = startIndex + offset;
                       const active = itemIndex === activeIndex;
                       const { icon, iconRole } = getItemIconMeta(item);
-                      const titleNode = renderHighlightedText(item.title, normalizedQuery);
-                      const subtitleNode = renderHighlightedText(item.subtitle, normalizedQuery);
+                      const titleNode = renderHighlightedText(item.title, normalizedQuery, item.id + '-title');
+                      const subtitleNode = renderHighlightedText(item.subtitle, normalizedQuery, item.id + '-subtitle');
                       const itemVars = cssVars({
                         '--searchbox-item-icon-bg': iconColorAlpha(iconRole, token, active ? 0.2 : 0.1),
                         '--searchbox-item-icon-color': iconColor(iconRole, token),

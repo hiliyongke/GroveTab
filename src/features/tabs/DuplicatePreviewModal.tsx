@@ -35,10 +35,10 @@ function pickDefaultKeeper(group: DupGroup): number {
   return sorted[0]?.id ?? group.tabs[0].id;
 }
 
-function formatOpenedAt(ts: number): string {
+function formatOpenedAt(ts: number, locale: string): string {
   if (!ts) return '—';
   try {
-    return new Date(ts).toLocaleString(undefined, {
+    return new Date(ts).toLocaleString(locale, {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
@@ -50,7 +50,7 @@ function formatOpenedAt(ts: number): string {
 }
 
 export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePreviewModalProps) {
-  const { t } = useT();
+  const { t, locale: currentLocale } = useT();
   const { token } = theme.useToken();
   const { message } = App.useApp();
   const closeMultipleTabs = useTabsStore((s) => s.closeMultipleTabs);
@@ -188,6 +188,7 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
               onChange={(id) => handleKeeperChange(group.canonicalUrl, id)}
               token={token}
               t={t}
+              locale={currentLocale}
             />
           ))
         )}
@@ -202,9 +203,10 @@ interface GroupSectionProps {
   onChange: (tabId: number) => void;
   token: ReturnType<typeof theme.useToken>['token'];
   t: (key: string, params?: Record<string, string | number>) => string;
+  locale: string;
 }
 
-function GroupSection({ group, keeperId, onChange, token, t }: GroupSectionProps) {
+function GroupSection({ group, keeperId, onChange, token, t, locale }: GroupSectionProps) {
   const closeCount = keeperId === undefined ? group.tabs.length : group.tabs.length - 1;
   return (
     <div
@@ -278,7 +280,7 @@ function GroupSection({ group, keeperId, onChange, token, t }: GroupSectionProps
                 {t('dedup.windowLabel', { id: tab.windowId })}
               </Text>
               <Text type="secondary" style={{ fontSize: 10.5 }}>
-                {formatOpenedAt(tab.lastAccessed)}
+                {formatOpenedAt(tab.lastAccessed, locale)}
               </Text>
             </div>
           </label>

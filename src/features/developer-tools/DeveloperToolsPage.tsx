@@ -808,23 +808,34 @@ export function DeveloperToolsPage() {
               </div>
             )}
 
-            {/* 全部工具 */}
-            <div className="devtools-grid">
-              {filteredTools.length === 0 ? (
-                <Empty description={t('devtools.searchPlaceholder')} className="devtools-empty-state" />
-              ) : filteredTools.map((tool) => (
-                <ToolCard
-                  key={tool.id}
-                  tool={tool}
-                  title={t(tool.titleKey)}
-                  description={t(tool.descriptionKey)}
-                  selected={selectedToolId === tool.id}
-                  favorited={favorites.includes(tool.id)}
-                  onClick={() => handleSelectTool(tool.id)}
-                  onToggleFavorite={(event) => { event.stopPropagation(); handleToggleFavorite(tool.id); }}
-                />
-              ))}
-            </div>
+            {/* 全部工具（排除已在收藏/最近使用区展示的工具） */}
+            {(() => {
+              const shownInSections = new Set<string>([
+                ...favoriteTools.map((t) => t.id),
+                ...(searchQuery.trim() || category !== 'all' ? [] : recentTools.map((t) => t.id)),
+              ]);
+              const remainingTools = filteredTools.filter((tool) => !shownInSections.has(tool.id));
+              return (
+                <div className="devtools-grid">
+                  {remainingTools.length === 0 && shownInSections.size === 0 ? (
+                    <Empty description={t('devtools.searchPlaceholder')} className="devtools-empty-state" />
+                  ) : (
+                    remainingTools.map((tool) => (
+                      <ToolCard
+                        key={tool.id}
+                        tool={tool}
+                        title={t(tool.titleKey)}
+                        description={t(tool.descriptionKey)}
+                        selected={selectedToolId === tool.id}
+                        favorited={favorites.includes(tool.id)}
+                        onClick={() => handleSelectTool(tool.id)}
+                        onToggleFavorite={(event) => { event.stopPropagation(); handleToggleFavorite(tool.id); }}
+                      />
+                    ))
+                  )}
+                </div>
+              );
+            })()}
           </div>
 
           <aside className="devtools-panel-pane">

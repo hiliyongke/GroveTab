@@ -41,7 +41,6 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
           onChange={(value) => handleSetting({ newtabPageMode: value as NewtabPageMode })}
           options={[
             { value: 'workspace', label: t('pageMode.workspace') },
-            { value: 'fishpond', label: t('pageMode.fishpond') },
             { value: 'trending', label: t('pageMode.trending') },
             { value: 'devtools', label: t('pageMode.devtools') },
           ]}
@@ -74,6 +73,7 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
           }
           options={[
             { value: 'auto', label: t('settings.columnsAuto') },
+            { value: '1', label: '1' },
             { value: '2', label: '2' },
             { value: '3', label: '3' },
             { value: '4', label: '4' },

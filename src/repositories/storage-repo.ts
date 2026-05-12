@@ -63,7 +63,6 @@ const DEFAULT_SETTINGS: UserSettings = {
     viewSwitcher: true,
     workspaceOverview: true,
     tidySuggestion: true,
-    activityStrip: true,
   },
   // v1.0 封板新增默认值
   dedupStrictness: 'loose',
@@ -79,42 +78,6 @@ const DEFAULT_SETTINGS: UserSettings = {
     fontSize: 15,
     showSource: true,
     customQuotes: [],
-  },
-  dashboardWidgets: {
-    enabled: true,
-    editMode: false,
-    columns: 12,
-    rowHeight: 88,
-    gap: 12,
-    items: [
-      { id: 'clock-main', type: 'clock', x: 0, y: 0, w: 3, h: 2, title: '时钟' },
-      { id: 'weather-main', type: 'weather', x: 3, y: 0, w: 3, h: 2, title: '天气' },
-      { id: 'calendar-main', type: 'calendar', x: 6, y: 0, w: 3, h: 2, title: '日历' },
-      { id: 'work-countdown-main', type: 'workCountdown', x: 9, y: 0, w: 3, h: 2, title: '下班倒计时' },
-      { id: 'search-main', type: 'searchBox', x: 0, y: 2, w: 6, h: 2, title: '极速搜索' },
-      { id: 'speed-dial-main', type: 'speedDial', x: 6, y: 2, w: 6, h: 3, title: '常用网站' },
-      { id: 'todo-main', type: 'todo', x: 0, y: 5, w: 4, h: 3, title: '待办' },
-      { id: 'pomodoro-main', type: 'pomodoro', x: 4, y: 5, w: 4, h: 3, title: '番茄钟' },
-      { id: 'daily-quote-main', type: 'dailyQuote', x: 8, y: 5, w: 4, h: 3, title: '每日金句' },
-    ],
-    availableWidgets: {
-      clock: true,
-      weather: true,
-      calendar: true,
-      dailyQuote: true,
-      speedDial: true,
-      pomodoro: true,
-      todo: true,
-      sticky: true,
-      countdown: true,
-      workCountdown: true,
-      searchBox: true,
-      waterReminder: true,
-      habitTracker: true,
-      timestampTool: true,
-      jsonFormatter: true,
-      networkInfo: true,
-    },
   },
   speedDial: {
     enabled: true,
@@ -266,39 +229,11 @@ function withDefaults(partial: Partial<UserSettings>): UserSettings {
     ...DEFAULT_SETTINGS.uiVisibility,
     ...(partial.uiVisibility === undefined ? {} : partial.uiVisibility),
   };
-  merged.heroWidgets = {
-    ...DEFAULT_SETTINGS.heroWidgets,
-    ...(partial.heroWidgets === undefined ? {} : partial.heroWidgets),
-    clock: {
-      ...DEFAULT_SETTINGS.heroWidgets?.clock,
-      ...(partial.heroWidgets?.clock === undefined ? {} : partial.heroWidgets.clock),
-    },
-    weather: {
-      ...DEFAULT_SETTINGS.heroWidgets?.weather,
-      ...(partial.heroWidgets?.weather === undefined ? {} : partial.heroWidgets.weather),
-    },
-    calendar: {
-      ...DEFAULT_SETTINGS.heroWidgets?.calendar,
-      ...(partial.heroWidgets?.calendar === undefined ? {} : partial.heroWidgets.calendar),
-    },
-  };
   merged.dailyQuote = {
     ...DEFAULT_SETTINGS.dailyQuote,
     ...(partial.dailyQuote === undefined ? {} : partial.dailyQuote),
     categories: partial.dailyQuote?.categories ?? DEFAULT_SETTINGS.dailyQuote?.categories,
     customQuotes: partial.dailyQuote?.customQuotes ?? DEFAULT_SETTINGS.dailyQuote?.customQuotes,
-  };
-  merged.dashboardWidgets = {
-    ...DEFAULT_SETTINGS.dashboardWidgets,
-    ...(partial.dashboardWidgets === undefined ? {} : partial.dashboardWidgets),
-    items: partial.dashboardWidgets?.items ?? DEFAULT_SETTINGS.dashboardWidgets?.items,
-    availableWidgets:
-      partial.dashboardWidgets?.availableWidgets === undefined
-        ? DEFAULT_SETTINGS.dashboardWidgets?.availableWidgets
-        : {
-            ...DEFAULT_SETTINGS.dashboardWidgets?.availableWidgets,
-            ...partial.dashboardWidgets.availableWidgets,
-          },
   };
   merged.speedDial = {
     ...DEFAULT_SETTINGS.speedDial,
@@ -346,35 +281,12 @@ export async function saveSettings(settings: Partial<UserSettings>): Promise<Use
   if (settings.uiVisibility !== undefined) {
     merged.uiVisibility = { ...current.uiVisibility, ...settings.uiVisibility };
   }
-  if (settings.heroWidgets !== undefined) {
-    merged.heroWidgets = {
-      ...current.heroWidgets,
-      ...settings.heroWidgets,
-      clock: { ...current.heroWidgets?.clock, ...settings.heroWidgets.clock },
-      weather: { ...current.heroWidgets?.weather, ...settings.heroWidgets.weather },
-      calendar: { ...current.heroWidgets?.calendar, ...settings.heroWidgets.calendar },
-    };
-  }
   if (settings.dailyQuote !== undefined) {
     merged.dailyQuote = {
       ...current.dailyQuote,
       ...settings.dailyQuote,
       categories: settings.dailyQuote.categories ?? current.dailyQuote?.categories,
       customQuotes: settings.dailyQuote.customQuotes ?? current.dailyQuote?.customQuotes,
-    };
-  }
-  if (settings.dashboardWidgets !== undefined) {
-    merged.dashboardWidgets = {
-      ...current.dashboardWidgets,
-      ...settings.dashboardWidgets,
-      items: settings.dashboardWidgets.items ?? current.dashboardWidgets?.items,
-      availableWidgets:
-        settings.dashboardWidgets.availableWidgets === undefined
-          ? current.dashboardWidgets?.availableWidgets
-          : {
-              ...current.dashboardWidgets?.availableWidgets,
-              ...settings.dashboardWidgets.availableWidgets,
-            },
     };
   }
   if (settings.speedDial !== undefined) {

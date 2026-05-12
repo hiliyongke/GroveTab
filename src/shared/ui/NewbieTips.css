@@ -1,0 +1,93 @@
+.newbie-tip {
+  position: fixed;
+  z-index: 9999;
+  width: 260px;
+  background: var(--ant-color-bg-elevated, #fff);
+  border: 1px solid var(--ant-color-border-secondary, #e8e8e8);
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+  padding: 12px 14px;
+  animation: newbie-fade-in 0.35s ease-out;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@keyframes newbie-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.newbie-tip--top {
+  transform: translateY(-6px);
+}
+
+.newbie-tip--bottom {
+  transform: translateY(6px);
+}
+
+.newbie-tip__arrow {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: inherit;
+  border: inherit;
+  border-bottom: none;
+  border-right: none;
+  transform: rotate(45deg);
+  left: var(--tip-arrow, 50%);
+  margin-left: -5px;
+}
+
+.newbie-tip--top.newbie-tip__arrow {
+  top: -6px;
+}
+
+.newbie-tip--bottom.newbie-tip__arrow {
+  bottom: -6px;
+  transform: rotate(225deg);
+}
+
+.newbie-tip__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.newbie-tip__title {
+  font-weight: 600;
+  color: var(--ant-color-text, rgba(0, 0, 0, 0.88));
+}
+
+.newbie-tip__desc {
+  color: var(--ant-color-text-secondary, rgba(0, 0, 0, 0.45));
+  font-size: 12px;
+}
+
+.newbie-tip__close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--ant-color-text-tertiary, rgba(0, 0, 0, 0.35));
+  padding: 2px 4px;
+  line-height: 1;
+}
+
+.newbie-tip__close:hover {
+  color: var(--ant-color-text, rgba(0, 0, 0, 0.88));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .newbie-tip {
+    animation: none;
+  }
+}

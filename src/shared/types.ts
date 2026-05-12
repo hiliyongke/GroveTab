@@ -165,11 +165,11 @@ export interface StickyNoteEntry {
   color?: string;
 }
 
-export type NewtabPageMode = 'workspace' | 'fishpond' | 'trending' | 'devtools';
+export type NewtabPageMode = 'workspace' | 'trending' | 'devtools';
 
 export interface UserSettings {
   overrideNewTab: boolean;
-  /** 新标签页一级空间：workspace 专注标签整理；fishpond 承载个性化与小组件；trending 全网热榜；devtools 开发工具栏。 */
+  /** 新标签页一级空间：workspace 专注标签整理；trending 全网热榜；devtools 开发工具栏。 */
   newtabPageMode?: NewtabPageMode;
   defaultView: 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'bookmarks' | 'kanban';
   theme: 'light' | 'dark' | 'system';
@@ -410,45 +410,6 @@ export interface UserSettings {
     viewSwitcher?: boolean;
     workspaceOverview?: boolean;
     tidySuggestion?: boolean;
-    activityStrip?: boolean;
-    /**
-     * HeroWidgets（时钟/天气/日历）总开关。默认 true。
-     */
-    heroWidgets?: boolean;
-  };
-
-  /**
-   * HeroWidgets 精细配置：时钟 / 天气 / 日历 的每项子开关与布局模式。
-   * 仅在 `uiVisibility.heroWidgets !== false` 时生效。
-   */
-  heroWidgets?: {
-    /**
-     * 布局模式：
-     *   - 'trio'（默认）：水平三联（时钟 | 天气 | 日历）
-     *   - 'clockOnly'：仅展示时钟（极简）
-     *   - 'clockWeather'：仅时钟 + 天气
-     *   - 'hidden'：全部隐藏（等效于 uiVisibility.heroWidgets=false）
-     */
-    layout?: 'trio' | 'clockOnly' | 'clockWeather' | 'hidden';
-    /** 时钟开关 */
-    clock?: { enabled?: boolean; format24?: boolean; showSeconds?: boolean };
-    /**
-     * 天气配置：
-     *   - mode：'auto'（IP 自动定位）/ 'manual'（手动输入城市）/ 'off'
-     *   - city：mode=manual 时使用
-     *   - unit：'c'（摄氏）/'f'（华氏）
-     */
-    weather?: {
-      mode?: 'auto' | 'manual' | 'off';
-      city?: string;
-      unit?: 'c' | 'f';
-    };
-    /** 日历开关：是否显示农历/节日 */
-    calendar?: {
-      enabled?: boolean;
-      showLunar?: boolean;
-      showHolidays?: boolean;
-    };
   };
 
   /**
@@ -464,26 +425,6 @@ export interface UserSettings {
     fontSize?: number;
     showSource?: boolean;
     customQuotes?: CustomQuoteEntry[];
-  };
-
-  /**
-   * 顶部 Widget 画布（开发阶段重构版）。
-   * - enabled：总开关
-   * - editMode：是否处于自由排版编辑态
-   * - columns：桌面端网格列数，默认 12
-   * - rowHeight：行高，默认 88
-   * - gap：栅格间距，默认 12
-   * - items：各 widget 的位置信息与尺寸
-   * - availableWidgets：控制“添加组件”抽屉里各类型的启用状态
-   */
-  dashboardWidgets?: {
-    enabled?: boolean;
-    editMode?: boolean;
-    columns?: number;
-    rowHeight?: number;
-    gap?: number;
-    items?: DashboardWidgetLayoutItem[];
-    availableWidgets?: Partial<Record<DashboardWidgetType, boolean>>;
   };
 
   /** 网站快捷模块配置 */
