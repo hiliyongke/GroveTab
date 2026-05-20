@@ -14,13 +14,12 @@
  *   3. 运行时覆盖（通过 setConfigOverride）
  */
 
-import type { GlobalToken } from 'antd';
 
 // ─────────────────────────────────────────────
 // 类型定义
 // ─────────────────────────────────────────────
 
-export interface PerformanceConfig {
+interface PerformanceConfig {
   /** 统计数据刷写间隔（ms） */
   statsFlushIntervalMs: number;
   /** 统计数据保留天数 */
@@ -41,7 +40,7 @@ export interface PerformanceConfig {
   searchDebounceMs: number;
 }
 
-export interface UiConfig {
+interface UiConfig {
   /** 列表行高 */
   rowHeight: number;
   /** 虚拟列表视口预留（px） */
@@ -58,7 +57,7 @@ export interface UiConfig {
   urlMaxValueLength: number;
 }
 
-export interface BusinessConfig {
+interface BusinessConfig {
   /** 最大导入会话数 */
   maxImportSessions: number;
   /** 单次导入每会话最大标签数 */
@@ -75,12 +74,8 @@ export interface BusinessConfig {
   maxActivity: number;
   /** 活动记录 TTL（ms） */
   activityTtlMs: number;
-  /** 最大金句收藏数 */
-  maxQuoteFavorites: number;
   /** 最小聚类大小 */
   minClusterSize: number;
-  /** 待办自动折叠时间（ms） */
-  todoCollapseMs: number;
   /** 置顶条目最大数量 */
   stickyMax: number;
   /** 字符串最大长度（导入归一化） */
@@ -89,7 +84,7 @@ export interface BusinessConfig {
   maxAutoSnapshotHidden: number;
 }
 
-export interface CacheConfig {
+interface CacheConfig {
   /** 天气缓存 TTL（ms） */
   weatherCacheTtlMs: number;
   /** DB 版本号 */
@@ -100,14 +95,14 @@ export interface CacheConfig {
   storageWarningThreshold: number;
 }
 
-export interface NetworkConfig {
+interface NetworkConfig {
   /** 请求超时（ms） */
   requestTimeoutMs: number;
   /** 可见时间窗口（ms） */
   visibleWindowMs: number;
 }
 
-export interface DashboardConfig {
+interface DashboardConfig {
   /** 仪表盘网格列数 */
   gridColumns: number;
   /** 行高（px） */
@@ -124,14 +119,14 @@ export interface DashboardConfig {
   maxItemH: number;
 }
 
-export interface SearchConfig {
+interface SearchConfig {
   /** 最大热门条目数 */
   maxHotItems: number;
   /** 一天毫秒数（常量） */
   dayMs: number;
 }
 
-export interface IdleConfig {
+interface IdleConfig {
   /** 默认闲置阈值（分钟） */
   defaultIdleMinutes: number;
   /** 陈旧上限（ms） */
@@ -186,9 +181,7 @@ export const CONFIG: AppConfig = {
     maxRecentSearches: 20,
     maxActivity: 20,
     activityTtlMs: 72 * 3600 * 1000,
-    maxQuoteFavorites: 200,
     minClusterSize: 3,
-    todoCollapseMs: 24 * 60 * 60 * 1000,
     stickyMax: 10,
     maxStringLength: 2000,
     maxAutoSnapshotHidden: 20,
@@ -227,75 +220,4 @@ export const CONFIG: AppConfig = {
   },
 };
 
-// ─────────────────────────────────────────────
-// 运行时覆盖（高级用法）
-// ─────────────────────────────────────────────
 
-type NestedPartial<T> = {
-  [K in keyof T]?: T[K] extends object ? NestedPartial<T[K]> : T[K];
-};
-
-let configOverrides: NestedPartial<AppConfig> = {};
-
-/**
- * 设置运行时配置覆盖（优先级最高）。
- * 用于调试、A/B 测试或企业策略下发。
- */
-export function setConfigOverride(overrides: NestedPartial<AppConfig>): void {
-  configOverrides = deepMerge(configOverrides, overrides);
-}
-
-/**
- * 获取合并后的配置（默认值 + 覆盖）。
- */
-export function getConfig(): AppConfig {
-  return deepMerge(CONFIG, configOverrides) as AppConfig;
-}
-
-/**
- * 重置运行时覆盖。
- */
-export function resetConfigOverride(): void {
-  configOverrides = {};
-}
-
-// ─────────────────────────────────────────────
-// 工具函数
-// ─────────────────────────────────────────────
-
-function deepMerge<T extends object>(base: T, patch: NestedPartial<T>): T {
-  const result = { ...base };
-  for (const key of Object.keys(patch) as Array<keyof T>) {
-    const patchValue = patch[key];
-    const baseValue = result[key];
-    if (
-      patchValue !== null &&
-      typeof patchValue === 'object' &&
-      baseValue !== null &&
-      typeof baseValue === 'object'
-    ) {
-      result[key] = deepMerge(
-        baseValue as object,
-        patchValue as NestedPartial<T[keyof T]>,
-      ) as T[keyof T];
-    } else if (patchValue !== undefined) {
-      result[key] = patchValue as T[keyof T];
-    }
-  }
-  return result;
-}
-
-/**
- * 从 antd token 派生常用间距 scale。
- * 与 icon-size.ts 的 ICON_SIZE 类似，提供统一的间距语义。
- */
-export function getSpacingScale(token: GlobalToken) {
-  return {
-    micro: token.paddingXXS,   // 4px
-    tiny: token.paddingXS,      // 8px
-    small: token.paddingSM,      // 12px
-    default: token.paddingMD,    // 16px
-    large: token.paddingLG,      // 24px
-    xlarge: token.paddingXL,     // 32px
-  } as const;
-}

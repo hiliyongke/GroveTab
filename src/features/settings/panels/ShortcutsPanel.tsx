@@ -183,7 +183,7 @@ export function ShortcutsPanel() {
   }, [customKeybindings, updateSettings, message, t]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
       {/* Chrome 全局快捷键（只读） */}
       <Field label={t('settings.globalShortcuts')}>
         <Alert

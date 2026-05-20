@@ -70,7 +70,6 @@
   color: var(--ant-color-primary);
 }
 
-.app-icon--archive,
 .app-icon--insights {
   color: var(--ant-color-info);
 }
@@ -261,6 +260,82 @@
   max-width: 100%;
 }
 
+/* ── 主体区包裹层（侧边栏 + 内容并排） ── */
+.app-main-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── 视图侧边栏（left/right 模式） ── */
+.app-view-sidebar {
+  width: 180px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--ant-color-border-secondary);
+  padding: 12px 8px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.app-view-sidebar--right {
+  border-right: none;
+  border-left: 1px solid var(--ant-color-border-secondary);
+}
+
+.app-view-sidebar__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.app-view-sidebar__item {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 160ms ease;
+  border-radius: var(--ant-border-radius-lg);
+  color: var(--ant-color-text-secondary);
+}
+
+.app-view-sidebar__item:hover {
+  background: var(--ant-color-fill-quaternary);
+  color: var(--ant-color-text);
+}
+
+.app-view-sidebar__item.is-active {
+  font-weight: 600;
+}
+
+.app-view-sidebar__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── 响应式：小屏侧边栏收缩为仅图标 ── */
+@media (max-width: 768px) {
+  .app-view-sidebar {
+    width: 52px;
+  }
+
+  .app-view-sidebar__label {
+    display: none;
+  }
+
+  .app-view-sidebar__item {
+    justify-content: center;
+    padding: 8px;
+  }
+}
+
 /* ═══════════════════════════════════════════════════════
  * Apple 皮肤：Hero 区覆盖
  *
@@ -412,6 +487,10 @@
   padding: 0 32px 64px;
   position: relative;
   z-index: 1;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .app-content-shell--bounded {

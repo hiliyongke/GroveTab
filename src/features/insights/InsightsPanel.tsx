@@ -30,6 +30,33 @@ import '@/shared/ui/FeatureEmptyState.css';
 
 const { Text, Title } = Typography;
 
+/** 事件类型 → 可读名称映射 */
+const EVENT_LABEL_MAP: Record<string, string> = {
+  newtabOpens: '打开新标签页',
+  newtab_open: '打开新标签页',
+  tab_jump: '跳转标签页',
+  tab_close: '关闭标签页',
+  tab_close_batch: '批量关闭',
+  tab_close_domain: '按域名关闭',
+  tab_close_all: '全部关闭',
+  tab_discard: '休眠标签页',
+  tab_discard_batch: '批量休眠',
+  tab_discard_domain: '按域名休眠',
+  search_web: '网页搜索',
+  archive_create: '创建归档',
+  archive_restore: '恢复归档',
+  archive_delete: '删除归档',
+  archive_merge: '合并归档',
+  view_switch: '切换视图',
+  newtab_page_mode_switch: '切换页面模式',
+  perf_fcp: 'FCP 性能',
+  perf_fps_sample: 'FPS 采样',
+};
+
+function getEventLabel(event: string): string {
+  return EVENT_LABEL_MAP[event] ?? event;
+}
+
 interface InsightsPanelProps {
   open: boolean;
   onClose: () => void;
@@ -76,33 +103,45 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
       map.set(key, 0);
     }
     for (const ev of metrics) {
-      if (ev.event !== 'newtab_open') continue;
+      if (ev.event !== 'newtab_open' && ev.event !== 'newtabOpens') continue;
       const key = toLocalDayKey(new Date(ev.ts));
       if (map.has(key)) map.set(key, (map.get(key) ?? 0) + 1);
     }
     return Array.from(map.entries()).map(([day, count]) => ({ day, count }));
   }, [metrics]);
 
-  /** Top 10 访问域名 */
+  /** Top 10 访问域名——优先从 stats.daily 取，同时从 metrics 中的 tab 事件补充 */
   const topDomains = useMemo(() => {
-    if (stats?.daily == null) return [];
     const counts = new Map<string, number>();
-    for (const record of stats.daily) {
-      if (record?.counts == null) continue;
-      for (const [url, c] of Object.entries(record.counts)) {
-        try {
-          const host = new URL(url).hostname;
-          counts.set(host, (counts.get(host) ?? 0) + c);
-        } catch {
-          // ignore malformed
+    // 来源1：stats.daily（SW StatsCollector 按 URL × day 聚合）
+    if (stats?.daily != null) {
+      for (const record of stats.daily) {
+        if (record?.counts == null) continue;
+        for (const [url, c] of Object.entries(record.counts)) {
+          try {
+            const host = new URL(url).hostname;
+            counts.set(host, (counts.get(host) ?? 0) + c);
+          } catch {
+            // ignore malformed
+          }
         }
+      }
+    }
+    // 来源2：metrics 中的 tab 事件（补充 stats 未覆盖的操作，如关闭/跳转）
+    for (const ev of metrics) {
+      if (!ev.event.startsWith('tab_') && ev.event !== 'search_web') continue;
+      const payload = ev.payload ?? {};
+      // 尝试从 hostname 字段取域名
+      const hostname = typeof payload.hostname === 'string' ? payload.hostname : '';
+      if (hostname !== '') {
+        counts.set(hostname, (counts.get(hostname) ?? 0) + 1);
       }
     }
     return Array.from(counts.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, 10)
       .map(([host, count]) => ({ host, count }));
-  }, [stats]);
+  }, [stats, metrics]);
 
   /** Top 5 操作 */
   const topActions = useMemo(() => {
@@ -116,11 +155,11 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
       .map(([event, count]) => ({ event, count }));
   }, [metrics]);
 
-  /** 累计归档 tab 数（来自 metrics archive 事件） */
+  /** 累计归档 tab 数（来自 metrics 的 archive / archive_create 事件） */
   const archiveStats = useMemo(() => {
     let totalTabs = 0;
     for (const ev of metrics) {
-      if (ev.event === 'archive') {
+      if (ev.event === 'archive' || ev.event === 'archive_create') {
         const count = typeof ev.payload?.count === 'number' ? ev.payload.count : 0;
         totalTabs += count;
       }
@@ -194,7 +233,7 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
                   hints={[t('insights.emptyHint1'), t('insights.emptyHint2')]}
                 />
               ) : (
-                <BarList items={topActions.map((a) => ({ label: a.event, value: a.count }))} color={token.colorPrimary} />
+                <BarList items={topActions.map((a) => ({ label: getEventLabel(a.event), value: a.count }))} color={token.colorPrimary} />
               )}
             </Card>
           </Col>

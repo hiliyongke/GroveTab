@@ -81,5 +81,3 @@ closeIcon={<X size={ICON_SIZE.MICRO} />}
     </Tag>
   );
 }
-
-export default WorkspaceSwitcher;

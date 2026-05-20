@@ -158,25 +158,6 @@ export function timestampTransform(input: string, action: TimestampAction): DevT
 
 // ── SHA-256 摘要 ─────────────────────────────────────
 
-/**
- * 计算文本的 SHA-256 哈希值
- *
- * 使用 Web Crypto API（浏览器原生，无需第三方依赖）。
- */
-export async function sha256Digest(input: string): Promise<DevToolResult> {
-  if (!input) return { output: '', error: '输入为空' };
-  try {
-    const bytes = new TextEncoder().encode(input);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', bytes);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
-    return { output: hex };
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    return { output: '', error: `SHA-256 计算失败：${msg}` };
-  }
-}
-
 // ── 进制转换 ──────────────────────────────────────────
 
 /** 进制名称到基数的映射 */
@@ -186,9 +167,6 @@ const RADIX_MAP: Record<string, number> = {
   dec: 10,
   hex: 16,
 };
-
-/** 进制转换操作模式 */
-export type RadixAction = 'toDec' | 'toBin' | 'toOct' | 'toHex';
 
 /**
  * 进制转换
@@ -999,26 +977,6 @@ export function httpHeaderParse(input: string): DevToolResult {
     const msg = e instanceof Error ? e.message : String(e);
     return { output: '', error: `解析失败：${msg}` };
   }
-}
-
-// ── User-Agent 解析 ───────────────────────────────────
-
-/** 简易 User-Agent 解析 */
-export function uaParse(input: string): DevToolResult {
-  const ua = input.trim();
-  if (!ua) return { output: '', error: '输入为空' };
-  const result: Record<string, string> = { raw: ua };
-  const browserMatch = ua.match(/(Chrome|Firefox|Safari|Edge|Opera)\/(\d+\.\d+)/);
-  if (browserMatch) {
-    result.browser = `${browserMatch[1]} ${browserMatch[2]}`;
-  }
-  const osMatch = ua.match(/\(([^)]+)\)/);
-  if (osMatch) {
-    result.os = osMatch[1];
-  }
-  const mobileMatch = ua.match(/Mobile|Android|iPhone|iPad/);
-  result.device = mobileMatch ? 'Mobile' : 'Desktop';
-  return { output: JSON.stringify(result, null, 2) };
 }
 
 // ── Basic Auth 编解码 ─────────────────────────────────

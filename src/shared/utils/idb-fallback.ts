@@ -79,7 +79,7 @@ export async function shouldFallbackToIDB(): Promise<boolean> {
  *
  * @returns 迁移的会话数量
  */
-export async function migrateSessionsToIDB(): Promise<number> {
+async function migrateSessionsToIDB(): Promise<number> {
   // 1. 读取 chrome.storage.local 中的 sessions
   const result = await chrome.storage.local.get(STORAGE_KEYS.sessions);
   const rawSessions: unknown = result[STORAGE_KEYS.sessions];

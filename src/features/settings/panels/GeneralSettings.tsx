@@ -49,7 +49,7 @@ export function GeneralSettings({ settings, updateSettings }: GeneralSettingsPro
   })();
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* ── 接管新标签页 ── */}
       <Field
         label={t('settings.overrideNewTab')}

@@ -1,8 +1,11 @@
 /**
  * 表单字段包装 —— label + control + 可选 hint
+ *
+ * 抽屉模式适配：
+ *   - label 使用大写小号字体作为分组标题
+ *   - hint 使用更柔和的颜色
+ *   - 间距紧凑但不拥挤
  */
-
-import { theme } from 'antd';
 
 interface FieldProps {
   label: string;
@@ -11,32 +14,14 @@ interface FieldProps {
 }
 
 export function Field({ label, hint, children }: FieldProps) {
-  const { token } = theme.useToken();
   return (
-    <div>
-      <label
-        style={{
-          display: 'block',
-          marginBottom: 8,
-          fontSize: 12,
-          fontWeight: 500,
-          color: token.colorTextTertiary,
-          textTransform: 'uppercase',
-          letterSpacing: '0.06em',
-        }}
-      >
+    <div className="settings-field">
+      <label className="settings-field__label">
         {label}
       </label>
       {children}
       {hint && (
-        <p
-          style={{
-            margin: '6px 0 0',
-            fontSize: 11.5,
-            color: token.colorTextTertiary,
-            lineHeight: 1.5,
-          }}
-        >
+        <p className="settings-field__hint">
           {hint}
         </p>
       )}

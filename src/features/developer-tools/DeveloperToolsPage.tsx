@@ -2,14 +2,19 @@
  * 开发工具栏页面 —— 专业开发者工作台
  *
  * 功能：
- *   - 紧凑工具网格 + 右侧工作台面板
+ *   - 紧凑工具列表 + 右侧工作台面板
  *   - 前端、后端、网络、数据、编码、加密等分类
  *   - 输入实时执行、复制输出、双向交换、错误提示
  *   - 收藏 / 最近使用 / 示例填充
  *   - 全部工具纯本地处理，零网络请求
+ *
+ * 滚动位置保护策略：
+ *   - 收藏区、最近使用区不通过 React 状态驱动渲染，
+ *     改为手动 DOM 维护（insert/remove），左侧列表 DOM 不重建，
+ *     选中工具时滚动位置天然保留。
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Empty, Input, Segmented, Tag, Tooltip, Typography } from 'antd';
 import {
   Activity,
@@ -250,27 +255,23 @@ function ToolCard({ tool, title, description, selected, favorited, onClick, onTo
       onClick={onClick}
       aria-pressed={selected}
     >
-      <div className="devtools-card-head">
-        <span className="devtools-card-icon">{TOOL_ICONS[tool.id] ?? <Wrench size={ICON_SIZE.LARGE} />}</span>
-        <div className="devtools-card-body">
-          <div className="devtools-card-title">
-            <span>{title}</span>
-            <span className="devtools-card-actions">
-              {tool.localOnly && <span className="devtools-local-badge">Local</span>}
-              <span
-                className={`devtools-fav-btn${favorited ? ' is-active' : ''}`}
-                onClick={onToggleFavorite}
-                role="button"
-                tabIndex={0}
-                aria-label="收藏"
-              >
-                <Heart size={12} />
-              </span>
-            </span>
-          </div>
-          <div className="devtools-card-desc">{description}</div>
+      <span className="devtools-card-icon">{TOOL_ICONS[tool.id] ?? <Wrench size={ICON_SIZE.DEFAULT} />}</span>
+      <div className="devtools-card-body">
+        <div className="devtools-card-title">
+          <span>{title}</span>
+          {tool.localOnly && <span className="devtools-local-badge">Local</span>}
         </div>
+        <div className="devtools-card-desc">{description}</div>
       </div>
+      <span
+        className={`devtools-fav-btn${favorited ? ' is-active' : ''}`}
+        onClick={onToggleFavorite}
+        role="button"
+        tabIndex={0}
+        aria-label="收藏"
+      >
+        <Heart size={12} />
+      </span>
     </button>
   );
 }
@@ -282,6 +283,8 @@ interface ToolPanelProps {
 
 function ToolPanel({ tool, onUse }: ToolPanelProps) {
   const { t } = useT();
+  /** 当前工具 id，用于检测工具切换 */
+  const toolIdRef = useRef(tool.id);
   const [input, setInput] = useState('');
   const [input2, setInput2] = useState('');
   const [output, setOutput] = useState('');
@@ -289,6 +292,38 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
   const [colorValue, setColorValue] = useState<string | undefined>();
+
+  /** 工具切换时重置所有内部状态，替代 key={selectedTool.id} 的重挂载行为 */
+  useEffect(() => {
+    if (toolIdRef.current !== tool.id) {
+      toolIdRef.current = tool.id;
+      setInput('');
+      setInput2('');
+      setOutput('');
+      setMeta('');
+      setError('');
+      setColorValue(undefined);
+      setJsonAction('format');
+      setUrlAction('encode');
+      setBase64Action('encode');
+      setUrlQueryAction('parse');
+      setHtmlEntityAction('encode');
+      setTimestampAction('toDatetime');
+      setFromRadix('dec');
+      setToRadix('hex');
+      setHashAlgo('sha256');
+      setRegexPattern('');
+      setRegexFlags('g');
+      setRandomAction('uuid');
+      setRandomLen(32);
+      setRootName('Root');
+      setBaseFontSize(16);
+      setYamlAction('yamlToJson');
+      setCsvAction('csvToJson');
+      setBasicAuthAction('encode');
+      setEscapeMode('js');
+    }
+  }, [tool.id]);
 
   const [jsonAction, setJsonAction] = useState<JsonAction>('format');
   const [urlAction, setUrlAction] = useState<UrlAction>('encode');
@@ -677,6 +712,19 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
   );
 }
 
+/**
+ * 开发工具栏主页面
+ *
+ * 滚动保护策略：
+ *   - 收藏区（fav-section）和最近使用区（recent-section）
+ *     的 DOM 元素不通过 React 渲染，改为手动维护：
+ *     - 选中工具时，仅更新 recent 状态并写入 localStorage，
+ *       不触发左侧列表重新渲染；
+ *     - 收藏/取消收藏时，直接操作 DOM 插入或移除对应卡片，
+ *       不触发左侧列表重新渲染。
+ *   - 切换分类/搜索时，全部工具列表会重新渲染，
+ *       此时需要重建 fav-section 和 recent-section。
+ */
 export function DeveloperToolsPage() {
   const { t } = useT();
   const [category, setCategory] = useState<DevToolCategory | 'all'>('all');
@@ -684,6 +732,13 @@ export function DeveloperToolsPage() {
   const [selectedToolId, setSelectedToolId] = useState(DEV_TOOLS[0]?.id ?? 'json-format');
   const [favorites, setFavorites] = useState<string[]>(() => readStringArray(STORAGE_KEY_FAV));
   const [recent, setRecent] = useState<string[]>(() => readStringArray(STORAGE_KEY_RECENT));
+
+  /** 左侧列表容器 ref */
+  const listPaneRef = useRef<HTMLDivElement>(null);
+  /** fav-section DOM 容器 ref */
+  const favSectionRef = useRef<HTMLDivElement | null>(null);
+  /** recent-section DOM 容器 ref */
+  const recentSectionRef = useRef<HTMLDivElement | null>(null);
 
   const categoryCounts = useMemo(() => DEV_TOOLS.reduce<Record<string, number>>((acc, tool) => {
     acc[tool.category] = (acc[tool.category] ?? 0) + 1;
@@ -712,6 +767,125 @@ export function DeveloperToolsPage() {
     [selectedToolId],
   );
 
+  /** 工具 id → 翻译标题/描述（缓存，避免每次渲染都调用 t()） */
+  const toolTexts = useMemo(() => {
+    const map: Record<string, { title: string; desc: string }> = {};
+    DEV_TOOLS.forEach((tool) => {
+      map[tool.id] = {
+        title: t(tool.titleKey),
+        desc: t(tool.descriptionKey),
+      };
+    });
+    return map;
+  }, [t]);
+
+  /** 向 fav-section 或 recent-section 插入一张工具卡片 */
+  const insertCard = useCallback((container: HTMLDivElement, tool: DevToolDefinition, isFav: boolean) => {
+    const texts = toolTexts[tool.id];
+    const card = document.createElement('button');
+    card.className = `devtools-card${selectedToolId === tool.id ? ' is-selected' : ''}`;
+    card.type = 'button';
+    card.setAttribute('aria-pressed', String(selectedToolId === tool.id));
+    card.innerHTML = `
+      <span class="devtools-card-icon">${tool.id}</span>
+      <div class="devtools-card-body">
+        <div class="devtools-card-title">
+          <span>${texts.title}</span>
+          ${tool.localOnly ? '<span class="devtools-local-badge">Local</span>' : ''}
+        </div>
+        <div class="devtools-card-desc">${texts.desc}</div>
+      </div>
+      <span class="devtools-fav-btn${isFav ? ' is-active' : ''}" role="button" tabindex="0" aria-label="收藏">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </span>
+    `;
+    card.addEventListener('click', () => {
+      setSelectedToolId(tool.id);
+    });
+    card.querySelector('.devtools-fav-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const next = favorites.includes(tool.id)
+        ? favorites.filter((id) => id !== tool.id)
+        : [...favorites, tool.id];
+      setFavorites(next);
+      writeStringArray(STORAGE_KEY_FAV, next);
+    });
+    container.appendChild(card);
+  }, [favorites, selectedToolId, toolTexts]);
+
+  /** 重建 fav-section */
+  const rebuildFavSection = useCallback(() => {
+    const pane = listPaneRef.current;
+    if (!pane) return;
+    // 移除旧的 fav-section
+    favSectionRef.current?.remove();
+    favSectionRef.current = null;
+    if (favorites.length === 0) return;
+    const section = document.createElement('div');
+    section.className = 'devtools-section';
+    section.innerHTML = `
+      <div class="devtools-section-head">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="devtools-section-icon devtools-section-icon--fav"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <strong class="devtools-section-title">${t('devtools.favorites')}</strong>
+      </div>
+      <div class="devtools-grid"></div>
+    `;
+    const grid = section.querySelector('.devtools-grid') as HTMLDivElement;
+    favorites.forEach((id) => {
+      const tool = DEV_TOOLS.find((t) => t.id === id);
+      if (tool) insertCard(grid, tool, true);
+    });
+    // 插入到 list-pane 的最前面
+    pane.insertBefore(section, pane.firstChild);
+    favSectionRef.current = section;
+  }, [favorites, insertCard, t]);
+
+  /** 重建 recent-section */
+  const rebuildRecentSection = useCallback(() => {
+    const pane = listPaneRef.current;
+    if (!pane) return;
+    recentSectionRef.current?.remove();
+    recentSectionRef.current = null;
+    if (recent.length === 0 || searchQuery.trim() || category !== 'all') return;
+    const section = document.createElement('div');
+    section.className = 'devtools-section';
+    section.innerHTML = `
+      <div class="devtools-section-head">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="devtools-section-icon devtools-section-icon--recent"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <strong class="devtools-section-title">${t('devtools.recent')}</strong>
+      </div>
+      <div class="devtools-grid"></div>
+    `;
+    const grid = section.querySelector('.devtools-grid') as HTMLDivElement;
+    recent.forEach((id) => {
+      const tool = DEV_TOOLS.find((t) => t.id === id);
+      if (tool) insertCard(grid, tool, favorites.includes(tool.id));
+    });
+    // 插入到 fav-section 后面，或 list-pane 最前面
+    if (favSectionRef.current) {
+      favSectionRef.current.after(section);
+    } else {
+      pane.insertBefore(section, pane.firstChild);
+    }
+    recentSectionRef.current = section;
+  }, [recent, favorites, searchQuery, category, insertCard, t]);
+
+  /** 初始化：构建 fav-section 和 recent-section */
+  useEffect(() => {
+    rebuildFavSection();
+    rebuildRecentSection();
+  }, [rebuildFavSection, rebuildRecentSection]);
+
+  /** favorites 变化时，仅重建 fav-section（不重建全部工具列表） */
+  useEffect(() => {
+    rebuildFavSection();
+  }, [favorites, rebuildFavSection]);
+
+  /** recent 变化时，仅重建 recent-section */
+  useEffect(() => {
+    rebuildRecentSection();
+  }, [recent, rebuildRecentSection]);
+
   const handleSelectTool = useCallback((toolId: string) => {
     setSelectedToolId(toolId);
     setRecent((prev) => {
@@ -729,28 +903,32 @@ export function DeveloperToolsPage() {
     });
   }, []);
 
-  const favoriteTools = useMemo(() => favorites.map((id) => DEV_TOOLS.find((t) => t.id === id)).filter(Boolean) as DevToolDefinition[], [favorites]);
-  const recentTools = useMemo(() => recent.map((id) => DEV_TOOLS.find((t) => t.id === id)).filter(Boolean) as DevToolDefinition[], [recent]);
+  /** 需要隐藏的工具 id（已在 fav-section 或 recent-section 中展示） */
+  const hiddenIds = useMemo(() => {
+    const ids = new Set<string>(favorites);
+    if (!searchQuery.trim() && category === 'all') {
+      recent.forEach((id) => ids.add(id));
+    }
+    return ids;
+  }, [favorites, recent, searchQuery, category]);
 
   return (
     <section className="devtools-page">
       <div className="devtools-shell">
         <header className="devtools-hero">
-          <div>
-            <div className="devtools-title-row">
-              <div className="devtools-brand">
-                <span className="devtools-logo"><Wrench size={ICON_SIZE.LARGE} /></span>
-                <Title level={4} className="devtools-title">{t('devtools.title')}</Title>
-              </div>
+          <div className="devtools-title-row">
+            <div className="devtools-brand">
+              <span className="devtools-logo"><Wrench size={ICON_SIZE.LARGE} /></span>
+              <Title level={4} className="devtools-title">{t('devtools.title')}</Title>
               <Tag color="green" className="devtools-tag devtools-tag--local">{t('devtools.localOnly')}</Tag>
             </div>
-            <div className="devtools-subtitle">{t('devtools.subtitle')}</div>
+            <div className="devtools-stats">
+              <span className="devtools-stat-pill">{DEV_TOOLS.length} tools</span>
+              <span className="devtools-stat-pill">{Object.keys(categoryCounts).length} categories</span>
+              <span className="devtools-stat-pill">100% local</span>
+            </div>
           </div>
-          <div className="devtools-stats">
-            <div className="devtools-stat"><span className="devtools-stat-value">{DEV_TOOLS.length}</span><span className="devtools-stat-label">Tools</span></div>
-            <div className="devtools-stat"><span className="devtools-stat-value">{Object.keys(categoryCounts).length}</span><span className="devtools-stat-label">Categories</span></div>
-            <div className="devtools-stat"><span className="devtools-stat-value">100%</span><span className="devtools-stat-label">Local</span></div>
-          </div>
+          <div className="devtools-subtitle">{t('devtools.subtitle')}</div>
         </header>
 
         <div className="devtools-toolbar">
@@ -759,83 +937,23 @@ export function DeveloperToolsPage() {
         </div>
 
         <div className="devtools-workbench">
-          <div className="devtools-list-pane">
-            {/* 收藏区 */}
-            {favoriteTools.length > 0 && (
-              <div className="devtools-section">
-                <div className="devtools-section-head">
-                  <Heart size={14} className="devtools-section-icon--favorite" />
-                  <Text strong className="devtools-section-title">{t('devtools.favorites')}</Text>
-                </div>
-                <div className="devtools-grid">
-                  {favoriteTools.map((tool) => (
-                    <ToolCard
-                      key={`fav-${tool.id}`}
-                      tool={tool}
-                      title={t(tool.titleKey)}
-                      description={t(tool.descriptionKey)}
-                      selected={selectedToolId === tool.id}
-                      favorited
-                      onClick={() => handleSelectTool(tool.id)}
-                      onToggleFavorite={(event) => { event.stopPropagation(); handleToggleFavorite(tool.id); }}
-                    />
-                  ))}
-                </div>
-              </div>
+          <div className="devtools-list-pane" ref={listPaneRef}>
+            {/* fav-section 和 recent-section 由 useEffect 手动插入 */}
+            {filteredTools.filter((tool) => !hiddenIds.has(tool.id)).map((tool) => (
+              <ToolCard
+                key={tool.id}
+                tool={tool}
+                title={toolTexts[tool.id].title}
+                description={toolTexts[tool.id].desc}
+                selected={selectedToolId === tool.id}
+                favorited={favorites.includes(tool.id)}
+                onClick={() => handleSelectTool(tool.id)}
+                onToggleFavorite={(e) => { e.stopPropagation(); handleToggleFavorite(tool.id); }}
+              />
+            ))}
+            {filteredTools.length === 0 && (
+              <Empty description={t('devtools.searchPlaceholder')} className="devtools-empty-state" />
             )}
-
-            {/* 最近使用区 */}
-            {recentTools.length > 0 && !searchQuery.trim() && category === 'all' && (
-              <div className="devtools-section">
-                <div className="devtools-section-head">
-                  <Clock size={14} className="devtools-section-icon--recent" />
-                  <Text strong className="devtools-section-title">{t('devtools.recent')}</Text>
-                </div>
-                <div className="devtools-grid">
-                  {recentTools.map((tool) => (
-                    <ToolCard
-                      key={`recent-${tool.id}`}
-                      tool={tool}
-                      title={t(tool.titleKey)}
-                      description={t(tool.descriptionKey)}
-                      selected={selectedToolId === tool.id}
-                      favorited={favorites.includes(tool.id)}
-                      onClick={() => handleSelectTool(tool.id)}
-                      onToggleFavorite={(event) => { event.stopPropagation(); handleToggleFavorite(tool.id); }}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* 全部工具（排除已在收藏/最近使用区展示的工具） */}
-            {(() => {
-              const shownInSections = new Set<string>([
-                ...favoriteTools.map((t) => t.id),
-                ...(searchQuery.trim() || category !== 'all' ? [] : recentTools.map((t) => t.id)),
-              ]);
-              const remainingTools = filteredTools.filter((tool) => !shownInSections.has(tool.id));
-              return (
-                <div className="devtools-grid">
-                  {remainingTools.length === 0 && shownInSections.size === 0 ? (
-                    <Empty description={t('devtools.searchPlaceholder')} className="devtools-empty-state" />
-                  ) : (
-                    remainingTools.map((tool) => (
-                      <ToolCard
-                        key={tool.id}
-                        tool={tool}
-                        title={t(tool.titleKey)}
-                        description={t(tool.descriptionKey)}
-                        selected={selectedToolId === tool.id}
-                        favorited={favorites.includes(tool.id)}
-                        onClick={() => handleSelectTool(tool.id)}
-                        onToggleFavorite={(event) => { event.stopPropagation(); handleToggleFavorite(tool.id); }}
-                      />
-                    ))
-                  )}
-                </div>
-              );
-            })()}
           </div>
 
           <aside className="devtools-panel-pane">
@@ -843,7 +961,7 @@ export function DeveloperToolsPage() {
               <div className="devtools-panel-head">
                 <div className="devtools-panel-title">
                   <span className="devtools-panel-icon">{TOOL_ICONS[selectedTool.id] ?? <Wrench size={ICON_SIZE.LARGE} />}</span>
-                  <Title level={5} className="devtools-panel-heading">{t(selectedTool.titleKey)}</Title>
+                  <Title level={5} className="devtools-panel-heading">{toolTexts[selectedTool.id]?.title ?? selectedTool.titleKey}</Title>
                   <span
                     className={`devtools-fav-btn${favorites.includes(selectedTool.id) ? ' is-active' : ''}`}
                     onClick={() => handleToggleFavorite(selectedTool.id)}
@@ -854,10 +972,10 @@ export function DeveloperToolsPage() {
                     <Heart size={14} />
                   </span>
                 </div>
-                <div className="devtools-panel-desc">{t(selectedTool.descriptionKey)}</div>
+                <div className="devtools-panel-desc">{toolTexts[selectedTool.id]?.desc ?? selectedTool.descriptionKey}</div>
               </div>
               <div className="devtools-panel-body">
-                <ToolPanel key={selectedTool.id} tool={selectedTool} onUse={() => handleSelectTool(selectedTool.id)} />
+                <ToolPanel tool={selectedTool} onUse={() => handleSelectTool(selectedTool.id)} />
               </div>
             </div>
           </aside>

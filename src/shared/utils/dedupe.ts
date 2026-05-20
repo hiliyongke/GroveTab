@@ -66,11 +66,4 @@ export function findDuplicates(tabs: LiveTab[], strictness: DedupStrictness = 'l
     .map(([canonicalUrl, groupTabs]) => ({ canonicalUrl, tabs: groupTabs }));
 }
 
-/**
- * 根据严格度统计"可合并的重复数" = 所有重复组内 (tabs.length - 1) 的总和。
- * 用于 Dashboard 的"重复 N"徽标。
- */
-export function countDuplicates(tabs: LiveTab[], strictness: DedupStrictness = 'loose'): number {
-  const groups = findDuplicates(tabs, strictness);
-  return groups.reduce((sum, g) => sum + g.tabs.length - 1, 0);
-}
+

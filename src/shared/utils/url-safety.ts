@@ -23,26 +23,6 @@ export function isSafeExternalUrl(value: string): boolean {
 }
 
 /**
- * 规范化用户输入的外部 URL。
- *
- * @param value 用户输入或导入的 URL
- * @param options.assumeHttpsWhenMissingProtocol 缺少协议时是否补 `https://`
- */
-export function normalizeExternalUrl(
-  value: string,
-  options: { assumeHttpsWhenMissingProtocol?: boolean } = {},
-): string | null {
-  const trimmed = value.trim();
-  if (trimmed === '') return null;
-  const candidate =
-    options.assumeHttpsWhenMissingProtocol === true && !/^[a-z][a-z\d+.-]*:/i.test(trimmed)
-      ? `https://${trimmed}`
-      : trimmed;
-  if (!isSafeExternalUrl(candidate)) return null;
-  return candidate;
-}
-
-/**
  * 过滤出可安全打开的外部 URL 列表。
  *
  * @param values URL 列表

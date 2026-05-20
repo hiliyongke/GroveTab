@@ -41,5 +41,3 @@ export const ICON_SIZE = {
   /** 空状态大图标 */
   HERO: 48,
 } as const;
-
-export type IconSize = typeof ICON_SIZE[keyof typeof ICON_SIZE];

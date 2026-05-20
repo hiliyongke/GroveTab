@@ -13,7 +13,7 @@
 
 import { parse } from 'tldts';
 
-export interface DomainInfo {
+interface DomainInfo {
   /** 完整主机名，如 docs.google.com */
   hostname: string;
   /** 注册域，如 google.com（无法解析时回退到 hostname） */

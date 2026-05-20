@@ -13,7 +13,7 @@
 import type { LiveTab } from '@/shared/types';
 
 /** 闲置等级 */
-export type IdleLevel = 'idle' | 'stale';
+type IdleLevel = 'idle' | 'stale';
 
 /** 闲置标签信息 */
 export interface IdleTabInfo {

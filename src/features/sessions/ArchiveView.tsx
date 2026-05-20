@@ -1,0 +1,621 @@
+/**
+ * ArchiveView — 归档会话内联视图
+ *
+ * 作为视图 Tab 之一嵌入主内容区，替代原有的 Modal 浮层。
+ * 复用 ArchivePanel 的全部业务逻辑，仅移除 Modal 外壳。
+ */
+
+import { useState, useSyncExternalStore, useEffect, useMemo } from 'react';
+import {
+  Plus,
+  Save,
+  Info,
+  Inbox,
+} from 'lucide-react';
+import { ICON_SIZE } from '@/shared/utils/icon-size';
+import { Alert, Button, List, Spin, Input, Modal, theme, Space } from 'antd';
+import { FeatureEmptyState } from '@/shared/ui/FeatureEmptyState';
+import '@/shared/ui/FeatureEmptyState.css';
+import type { ArchivedSession } from '@/shared/types';
+import {
+  getArchivedSessions,
+  deleteSession,
+  renameSession,
+  archiveAllTabs,
+  mergeSessions,
+  exportSingleSession,
+} from '@/services';
+import { createTab, getCurrentWindow } from '@/chrome';
+import { useT } from '@/shared/i18n';
+import { track } from '@/shared/utils/metrics';
+import { useTabsStore, useUndoStore, useMetadataStore, useSettingsStore } from '@/store';
+import { feedback } from '@/shared/ui/feedback';
+import { SessionItem } from './components/SessionItem';
+import { BatchOperationsMenu } from './components/BatchOperationsMenu';
+import { EnhancedRestoreDialog } from './components/EnhancedRestoreDialog';
+import { EnhancedRenameDialog } from './components/EnhancedRenameDialog';
+import { APP_EVENTS } from '@/shared/config/storage-keys';
+import { iconColor } from '@/shared/utils/icon-colors';
+import { isSafeExternalUrl } from '@/shared/utils/url-safety';
+
+/* ---------- 简易外部 store 同步归档列表 ---------- */
+let sessionsCache: ArchivedSession[] = [];
+let sessionsInitialized = false;
+let sessionsListeners: (() => void)[] = [];
+
+function subscribeSessions(listener: () => void) {
+  sessionsListeners.push(listener);
+  return () => {
+    sessionsListeners = sessionsListeners.filter((l) => l !== listener);
+  };
+}
+function getSessionsSnapshot() {
+  return sessionsCache;
+}
+function getSessionsInitialized() {
+  return sessionsInitialized;
+}
+function notifySessionsListeners() {
+  sessionsListeners.forEach((l) => l());
+}
+export async function refreshSessions() {
+  sessionsCache = await getArchivedSessions();
+  sessionsInitialized = true;
+  notifySessionsListeners();
+}
+
+// 模块加载时初始化
+void refreshSessions();
+
+export function ArchiveView() {
+  const sessions = useSyncExternalStore(subscribeSessions, getSessionsSnapshot);
+  const initialized = useSyncExternalStore(subscribeSessions, getSessionsInitialized);
+  const loading = !initialized;
+  const [archivingCurrent, setArchivingCurrent] = useState(false);
+  /** 重命名相关状态 */
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renamingValue, setRenamingValue] = useState('');
+  /** 多选模式 */
+  const [selectable, setSelectable] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  /** 高亮会话（由 UndoToast 等跳转触发） */
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  const [mergeOpen, setMergeOpen] = useState(false);
+  const [mergeName, setMergeName] = useState('');
+  /** 增强恢复对话框状态 */
+  const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
+  const [restoringSession, setRestoringSession] = useState<ArchivedSession | null>(null);
+  /** 增强重命名对话框状态 */
+  const [renamingDialogOpen, setRenamingDialogOpen] = useState(false);
+  const [renamingSession, setRenamingSession] = useState<ArchivedSession | null>(null);
+  /** 折叠展开状态 */
+  const [expandedSessions, setExpandedSessions] = useState<Set<string>>(new Set());
+  /** 搜索过滤状态 */
+  const [searchQuery, setSearchQuery] = useState('');
+  const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
+  const tabCount = useTabsStore((s) => s.tabs.length);
+  const { t, locale } = useT();
+  const { token } = theme.useToken();
+
+  /** 视图首次挂载时刷新数据 */
+  useEffect(() => {
+    void refreshSessions();
+  }, []);
+
+  /**
+   * 监听 app:highlight-session 自定义事件
+   */
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ sessionId?: string }>).detail;
+      if (detail?.sessionId !== undefined) {
+        setHighlightId(detail.sessionId);
+        window.setTimeout(() => setHighlightId(null), 3000);
+      }
+    };
+    window.addEventListener(APP_EVENTS.highlightSession, handler);
+    return () => window.removeEventListener(APP_EVENTS.highlightSession, handler);
+  }, []);
+
+  /** 拼音匹配函数（懒加载） */
+  const enablePinyin = useSettingsStore((s) => s.settings.searchEnablePinyin ?? true);
+  const [pinyinMatchFn, setPinyinMatchFn] = useState<((text: string, query: string) => boolean) | null>(null);
+
+  useEffect(() => {
+    if (!enablePinyin || pinyinMatchFn !== null) return;
+    void (async () => {
+      const { pinyinMatch } = await import('@/shared/utils/pinyin');
+      setPinyinMatchFn(() => pinyinMatch);
+    })();
+  }, [enablePinyin, pinyinMatchFn]);
+
+  /** 搜索过滤逻辑：使用 useMemo 同步计算，避免 useEffect 延迟一帧 */
+  const isSearching = searchQuery.trim().length > 0;
+  const { filteredSessions, matchedTabIndexes } = useMemo(() => {
+    if (!isSearching) {
+      return { filteredSessions: sessions, matchedTabIndexes: new Map<string, Set<number>>() };
+    }
+    const query = searchQuery.toLowerCase().trim();
+    const result: ArchivedSession[] = [];
+    const matched = new Map<string, Set<number>>();
+    for (const session of sessions) {
+      const matchedIdxs = new Set<number>();
+      // 会话名匹配
+      const nameMatch = session.name.toLowerCase().includes(query) ||
+        (enablePinyin && pinyinMatchFn !== null && pinyinMatchFn(session.name, query));
+      // 标签页匹配
+      for (let i = 0; i < session.tabs.length; i++) {
+        const tab = session.tabs[i];
+        const titleMatch = tab.title?.toLowerCase().includes(query) ?? false;
+        const pinyinTitleMatch = enablePinyin && pinyinMatchFn !== null && tab.title && pinyinMatchFn(tab.title, query);
+        const urlMatch = tab.url.toLowerCase().includes(query);
+        if (titleMatch || pinyinTitleMatch || urlMatch) {
+          matchedIdxs.add(i);
+        }
+      }
+      if (nameMatch || matchedIdxs.size > 0) {
+        result.push(session);
+        matched.set(session.id, matchedIdxs);
+      }
+    }
+    return { filteredSessions: result, matchedTabIndexes: matched };
+  }, [sessions, isSearching, searchQuery, enablePinyin, pinyinMatchFn]);
+
+  /** 搜索时自动展开匹配的会话 */
+  useEffect(() => {
+    if (!isSearching) return;
+    const newExpanded = new Set<string>();
+    for (const session of filteredSessions) {
+      if (matchedTabIndexes.has(session.id)) {
+        newExpanded.add(session.id);
+      }
+    }
+    setExpandedSessions(newExpanded);
+  }, [isSearching, filteredSessions, matchedTabIndexes]);
+
+  const handleRestore = (id: string) => {
+    const session = sessions.find(s => s.id === id);
+    if (session) {
+      setRestoringSession(session);
+      setRestoreDialogOpen(true);
+    }
+  };
+
+  const handleEnhancedRestoreComplete = async (outcome: any) => {
+    await refreshSessions();
+    void track('archive_restore', { restored: outcome.restored, total: outcome.total });
+    if (outcome.cancelled) {
+      feedback.info(t('archive.restoreCancelled', { restored: outcome.restored }));
+    } else if (outcome.restored === outcome.total) {
+      feedback.success(t('archive.restoredOk'));
+    } else {
+      feedback.warning(t('archive.restorePartial', { restored: outcome.restored, total: outcome.total }));
+    }
+    setRestoreDialogOpen(false);
+    setRestoringSession(null);
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteSession(id);
+      void track('archive_delete');
+      await refreshSessions();
+    } catch (err) {
+      feedback.error(t('archive.deleteFailed'), err);
+    }
+  };
+
+  /** 分享单个会话为 JSON */
+  const handleShare = async (id: string) => {
+    const payload = await exportSingleSession(id);
+    if (payload === null) {
+      feedback.error(t('archive.shareFailed'));
+      return;
+    }
+    try {
+      const blob = new Blob([payload.content], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = payload.filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      feedback.success(t('archive.shareOk'));
+    } catch (err) {
+      feedback.error(t('archive.shareFailed'), err);
+    }
+  };
+
+  /** 合并多个会话 */
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const cancelSelect = () => {
+    setSelectable(false);
+    setSelectedIds(new Set());
+  };
+
+  const handleOpenMerge = async (ids: string[]) => {
+    if (ids.length < 2) {
+      feedback.warning(t('archive.mergeNeedTwo'));
+      return;
+    }
+    setSelectedIds(new Set(ids));
+    setMergeName(t('archive.mergedDefaultName'));
+    setMergeOpen(true);
+  };
+
+  const handleConfirmMerge = async () => {
+    try {
+      const newSession = await mergeSessions(Array.from(selectedIds), mergeName);
+      void track('archive_merge', { count: selectedIds.size });
+      await refreshSessions();
+      setMergeOpen(false);
+      cancelSelect();
+      feedback.success(t('archive.mergedOk', { count: newSession.tabCount }));
+      void useMetadataStore.getState().pushActivity({
+        id: `merge-${newSession.id}`,
+        type: 'archive',
+        ts: Date.now(),
+        summary: t('archive.mergedActivity', { count: newSession.tabCount, name: newSession.name }),
+      });
+    } catch (err) {
+      feedback.error(t('archive.mergeFailed'), err);
+    }
+  };
+
+  const handleRenameConfirm = async (id: string) => {
+    const newName = renamingValue.trim();
+    if (!newName) {
+      setRenamingId(null);
+      return;
+    }
+    try {
+      await renameSession(id, newName);
+      await refreshSessions();
+      feedback.success(t('archive.renameOk'));
+    } catch (err) {
+      feedback.error(t('archive.rename'), err);
+    }
+    setRenamingId(null);
+  };
+
+  const startRenaming = (session: ArchivedSession) => {
+    setRenamingSession(session);
+    setRenamingDialogOpen(true);
+  };
+
+  const handleOpenSingle = async (tab: { url: string }) => {
+    if (!isSafeExternalUrl(tab.url)) {
+      feedback.error(t('archive.restoreFailed'));
+      return;
+    }
+    try {
+      const currentWindow = await getCurrentWindow();
+      await createTab({ url: tab.url, windowId: currentWindow?.id, active: true });
+    } catch (err) {
+      feedback.error(t('archive.restoreFailed'), err);
+    }
+  };
+
+  const handleArchiveCurrent = async () => {
+    if (archivingCurrent || tabCount === 0) return;
+    setArchivingCurrent(true);
+    try {
+      const result = await archiveAllTabs();
+      void track('archive_create', { count: result.archivedCount });
+      const { archivedCount, closedCount, session } = result;
+      await loadAllTabs({ silent: true });
+      await refreshSessions();
+
+      const snapshots = session.tabs.map((tab) => ({
+        url: tab.url,
+        title: tab.title,
+        favIconUrl: tab.favIconUrl,
+        windowId: 0,
+        pinned: tab.pinned,
+      }));
+      const failCount = archivedCount - closedCount;
+      const subNote = failCount > 0 ? t('archive.closeIncomplete', { count: failCount }) : '';
+      void useUndoStore.getState().addRecord(
+        snapshots,
+        t('archive.archivedRichToast', { count: archivedCount, name: session.name }),
+        { archivedSessionId: session.id, subNote },
+      );
+
+      void useMetadataStore.getState().pushActivity({
+        id: `archive-${session.id}`,
+        type: 'archive',
+        ts: Date.now(),
+        summary: t('activity.archived', { count: archivedCount, name: session.name }),
+        primaryAction: {
+          id: 'view',
+          label: t('activity.viewArchive'),
+          kind: 'open_archive',
+          payload: session.id,
+        },
+      });
+    } catch (err) {
+      feedback.error(t('archive.archiveFailed'), err);
+    } finally {
+      setArchivingCurrent(false);
+    }
+  };
+
+  /** 全部展开/折叠 */
+  const expandAll = () => {
+    const allIds = new Set(sessions.map(session => session.id));
+    setExpandedSessions(allIds);
+  };
+
+  const collapseAll = () => {
+    setExpandedSessions(new Set());
+  };
+
+  return (
+    <div className="archive-view">
+      {/* 标题栏 */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        marginBottom: 16,
+        padding: '0 4px',
+      }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 32,
+            height: 32,
+            borderRadius: token.borderRadius,
+            background: token.colorPrimaryBg,
+            color: token.colorPrimary,
+          }}
+        >
+          <Save size={ICON_SIZE.LARGE} style={{ color: iconColor('archive', token) }} />
+        </div>
+        <span style={{ flex: 1, fontSize: 16, fontWeight: 600 }}>{t('archive.title')}</span>
+        <Space size={4}>
+          <BatchOperationsMenu
+            selectedIds={selectedIds}
+            totalCount={sessions.length}
+            selectable={selectable}
+            onToggleSelectMode={setSelectable}
+            onBatchRestore={async (ids) => {
+              for (const id of ids) {
+                await handleRestore(id);
+              }
+            }}
+            onBatchDelete={async (ids) => {
+              for (const id of ids) {
+                await handleDelete(id);
+              }
+            }}
+            onMergeSessions={handleOpenMerge}
+            onExportSessions={async (ids) => {
+              for (const id of ids) {
+                await handleShare(id);
+              }
+            }}
+            onClearAll={async () => {
+              for (const session of sessions) {
+                await handleDelete(session.id);
+              }
+            }}
+          />
+          <Button
+            type="primary"
+            icon={<Plus size={ICON_SIZE.MEDIUM} />}
+            loading={archivingCurrent}
+            disabled={tabCount === 0}
+            onClick={() => { void handleArchiveCurrent(); }}
+            title={t('header.tabCount', { count: tabCount })}
+          >
+            {t('header.archive')}
+          </Button>
+        </Space>
+      </div>
+
+      <Alert
+        type="info"
+        showIcon
+        icon={<Info size={ICON_SIZE.MEDIUM} />}
+        description={t('archive.description')}
+        style={{
+          marginBottom: 12,
+          borderRadius: token.borderRadius,
+          fontSize: 12.5,
+          lineHeight: 1.6,
+        }}
+      />
+
+      {/* 搜索过滤 */}
+      <div style={{ marginBottom: 12 }}>
+        <Input.Search
+          placeholder={t('archive.searchPlaceholder')}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          allowClear
+          style={{ width: '100%' }}
+        />
+      </div>
+
+      {/* 搜索结果统计 */}
+      {searchQuery.trim() && (
+        <div style={{
+          fontSize: 12,
+          color: token.colorTextTertiary,
+          marginBottom: 12,
+          textAlign: 'center'
+        }}>
+          {t('archive.searchResults', {
+            count: filteredSessions.length,
+            total: sessions.length
+          })}
+        </div>
+      )}
+
+      {/* 全部展开/折叠 */}
+      {filteredSessions.length > 0 && (
+        <div style={{ display: 'flex', gap: 8, marginBottom: 12, justifyContent: 'flex-end' }}>
+          <Button
+            size="small"
+            type="text"
+            onClick={expandAll}
+            disabled={expandedSessions.size === filteredSessions.length}
+          >
+            {t('archive.expandAll')}
+          </Button>
+          <Button
+            size="small"
+            type="text"
+            onClick={collapseAll}
+            disabled={expandedSessions.size === 0}
+          >
+            {t('archive.collapseAll')}
+          </Button>
+        </div>
+      )}
+
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '48px 0' }}>
+          <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+            <Spin />
+            <span style={{ fontSize: 12, color: token.colorTextSecondary }}>{t('archive.loading')}</span>
+          </div>
+        </div>
+      ) : filteredSessions.length === 0 ? (
+        <FeatureEmptyState
+          title={t('archive.empty')}
+          description={t('archive.emptyHint')}
+          icon={<Inbox size={ICON_SIZE.HERO} />}
+          hints={[
+            t('archive.emptyHint1'),
+            t('archive.emptyHint2'),
+            t('archive.emptyHint3'),
+          ]}
+          actions={[{
+            text: t('archive.archiveCurrentWindow'),
+            onClick: () => void archiveAllTabs(),
+            type: 'primary',
+          }]}
+        />
+      ) : (
+        <List
+          dataSource={filteredSessions}
+          renderItem={(session) => (
+            <div
+              style={{
+                outline: highlightId === session.id ? `2px solid ${token.colorPrimary}` : 'none',
+                outlineOffset: 2,
+                borderRadius: token.borderRadius,
+                transition: 'outline 200ms',
+              }}
+            >
+              <SessionItem
+                session={session}
+                isExpanded={expandedSessions.has(session.id)}
+                isRenaming={renamingId === session.id}
+                renamingValue={renamingId === session.id ? renamingValue : ''}
+                locale={locale}
+                onToggleExpand={() => {
+                  setExpandedSessions(prev => {
+                    const newSet = new Set(prev);
+                    if (newSet.has(session.id)) {
+                      newSet.delete(session.id);
+                    } else {
+                      newSet.add(session.id);
+                    }
+                    return newSet;
+                  });
+                }}
+                onRestore={(id) => { void handleRestore(id); }}
+                onDelete={(id) => { void handleDelete(id); }}
+                onStartRenaming={startRenaming}
+                onRenameConfirm={(id) => { void handleRenameConfirm(id); }}
+                onRenameChange={setRenamingValue}
+                onRenameCancel={() => setRenamingId(null)}
+                onOpenSingle={(tab) => { void handleOpenSingle(tab); }}
+                onShare={(id) => { void handleShare(id); }}
+                selectable={selectable}
+                selected={selectedIds.has(session.id)}
+                onToggleSelect={toggleSelect}
+                highlightQuery={isSearching ? searchQuery : undefined}
+                matchedTabIndexes={matchedTabIndexes.get(session.id)}
+              />
+            </div>
+          )}
+        />
+      )}
+
+      {/* 合并会话 Modal */}
+      <Modal
+        open={mergeOpen}
+        title={t('archive.mergeTitle')}
+        onCancel={() => setMergeOpen(false)}
+        onOk={() => void handleConfirmMerge()}
+        okText={t('archive.merge')}
+        cancelText={t('archive.cancel')}
+        centered
+      >
+        <p style={{ margin: '0 0 12px', fontSize: 13, color: token.colorTextSecondary }}>
+          {t('archive.mergeDesc', { count: selectedIds.size })}
+        </p>
+        <Input
+          value={mergeName}
+          onChange={(e) => setMergeName(e.target.value)}
+          placeholder={t('archive.mergeNamePlaceholder')}
+        />
+      </Modal>
+
+      {/* 增强恢复对话框 */}
+      {restoringSession && (
+        <EnhancedRestoreDialog
+          open={restoreDialogOpen}
+          sessionId={restoringSession.id}
+          sessionName={restoringSession.name}
+          tabCount={restoringSession.tabCount}
+          onClose={() => {
+            setRestoreDialogOpen(false);
+            setRestoringSession(null);
+          }}
+          onRestoreComplete={handleEnhancedRestoreComplete}
+        />
+      )}
+
+      {/* 增强重命名对话框 */}
+      {renamingSession && (
+        <EnhancedRenameDialog
+          open={renamingDialogOpen}
+          sessionId={renamingSession.id}
+          currentName={renamingSession.name}
+          tabCount={renamingSession.tabCount}
+          tabUrls={renamingSession.tabs.map(tab => tab.url)}
+          onClose={() => {
+            setRenamingDialogOpen(false);
+            setRenamingSession(null);
+          }}
+          onRenameConfirm={async (id, newName) => {
+            try {
+              await renameSession(id, newName);
+              await refreshSessions();
+              feedback.success(t('archive.renameOk'));
+            } catch (err) {
+              feedback.error(t('archive.rename'), err);
+            }
+          }}
+        />
+      )}
+    </div>
+  );
+}

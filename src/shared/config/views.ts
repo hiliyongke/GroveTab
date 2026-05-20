@@ -16,9 +16,10 @@ import {
   Monitor,
   BookOpen,
   Columns,
+  Archive,
 } from 'lucide-react';
 
-export type ViewMode = 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'bookmarks' | 'kanban';
+export type ViewMode = 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'bookmarks' | 'kanban' | 'archive';
 
 export interface ViewConfig {
   id: ViewMode;
@@ -29,14 +30,15 @@ export interface ViewConfig {
 
 export const VIEW_CONFIGS: ViewConfig[] = [
   { id: 'domain', Icon: LayoutGrid, labelKey: 'view.domain' },
+  { id: 'compact', Icon: List, labelKey: 'view.compact' },
+  { id: 'timeline', Icon: Clock, labelKey: 'view.timeline' },
   { id: 'tabgroup', Icon: Layers, labelKey: 'view.tabgroup' },
   { id: 'window', Icon: Monitor, labelKey: 'view.window' },
-  { id: 'bookmarks', Icon: BookOpen, labelKey: 'view.bookmarks' },
-  { id: 'timeline', Icon: Clock, labelKey: 'view.timeline' },
-  { id: 'compact', Icon: List, labelKey: 'view.compact' },
-  { id: 'grid', Icon: Table2, labelKey: 'view.grid' },
-  { id: 'frequency', Icon: Flame, labelKey: 'view.frequency' },
   { id: 'kanban', Icon: Columns, labelKey: 'view.kanban' },
+  { id: 'bookmarks', Icon: BookOpen, labelKey: 'view.bookmarks' },
+  { id: 'frequency', Icon: Flame, labelKey: 'view.frequency' },
+  { id: 'grid', Icon: Table2, labelKey: 'view.grid' },
+  { id: 'archive', Icon: Archive, labelKey: 'view.archive' },
 ];
 
 /** 合法的 ViewMode 值数组，用于防御旧版残留值 */

@@ -27,7 +27,7 @@ function resolvePrimaryHoverColor(base: SkinPreset, customColor?: string): strin
   return `color-mix(in srgb, ${customColor} 78%, white)`;
 }
 
-export function getDensityScale(density: LayoutDensity): number {
+function getDensityScale(density: LayoutDensity): number {
   return DENSITY_SCALE_MAP[density];
 }
 

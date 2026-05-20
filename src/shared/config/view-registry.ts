@@ -7,7 +7,7 @@
  * 视图组件支持 React.lazy 懒加载，按需拆分 chunk 减小首屏体积。
  */
 
-import { lazy, type ComponentType } from 'react';
+import type { ComponentType } from 'react';
 import type { ViewMode } from '@/shared/config/views';
 
 /** 视图注册条目 */
@@ -84,12 +84,4 @@ export function getViewComponentMap(): ViewComponentMap {
   return map;
 }
 
-/**
- * 辅助：创建懒加载视图组件
- *
- * 用法：
- *   lazyView(() => import('./MyView').then(m => ({ default: m.MyView })))
- */
-export function lazyView(load: () => Promise<{ default: ComponentType }>): ComponentType {
-  return lazy(load);
-}
+

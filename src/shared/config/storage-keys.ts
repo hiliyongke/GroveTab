@@ -36,10 +36,7 @@ export const STORAGE_KEYS = Object.freeze({
   kanban: key('kanban'),
   ogIndex: key('og_index'),
   autoSnapshotMeta: key('auto_snapshot_meta'),
-  pomodoroState: key('pomodoro_state'),
-  stickyNotes: key('sticky_notes'),
   trendingCache: key('trending_cache'),
-  quoteFavs: key('quote_favs'),
   profiles: key('profiles'),
 });
 

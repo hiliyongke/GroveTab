@@ -65,113 +65,23 @@ export interface StorageMeta {
 
 /** User settings */
 export type SearchScopeField = 'title' | 'hostname' | 'url';
-export type SearchSortMode = 'relevance' | 'recentAccess';
+type SearchSortMode = 'relevance' | 'recentAccess';
 export type SearchEngineId = 'google' | 'bing' | 'baidu' | 'duckduckgo';
 
-export type DashboardWidgetType =
-  | 'clock'
-  | 'weather'
-  | 'calendar'
-  | 'dailyQuote'
-  | 'speedDial'
-  | 'pomodoro'
-  | 'todo'
-  | 'sticky'
-  | 'countdown'
-  | 'workCountdown'
-  | 'searchBox'
-  | 'waterReminder'
-  | 'habitTracker'
-  | 'timestampTool'
-  | 'jsonFormatter'
-  | 'networkInfo';
 
-export interface HabitEntry {
-  id: string;
-  name: string;
-  emoji?: string;
-  /** YYYY-MM-DD 打卡日期集合 */
-  records: string[];
-}
-
-export interface WaterReminderState {
-  goalCups?: number;
-  currentCups?: number;
-  lastDate?: string;
-  intervalMinutes?: number;
-}
-
-export type DashboardQuoteCategory = 'aphorism' | 'renmin' | 'poetry' | 'essay' | 'custom';
-
-export interface DashboardWidgetLayoutItem {
-  id: string;
-  type: DashboardWidgetType;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  title?: string;
-}
-
-export interface SpeedDialLink {
-  id: string;
-  title: string;
-  url: string;
-  emoji?: string;
-  color?: string;
-}
-
-export interface SpeedDialGroup {
-  id: string;
-  name: string;
-  links: SpeedDialLink[];
-}
-
-export interface CustomQuoteEntry {
-  id: string;
-  text: string;
-  source: string;
-  category: 'custom';
-}
-
-export interface CountdownEntry {
-  id: string;
-  title: string;
-  targetDate: string;
-  emoji?: string;
-  description?: string;
-  color?: string;
-}
-
-export interface TodoEntry {
-  id: string;
-  text: string;
-  done: boolean;
-  /** 勾选完成时的时间戳，用于"已完成超 24h 自动折叠" */
-  completedAt?: number;
-}
-
-/** StickyNote 色板代号（配合 StickyWidget 多色升级，v1.3） */
-export type StickyNoteColor = 'yellow' | 'pink' | 'green' | 'blue' | 'purple';
-
-export interface StickyNoteEntry {
-  id: string;
-  title?: string;
-  content: string;
-  /**
-   * 兼容：旧数据可能是 #RGB 色值；v1.3 起改用 StickyNoteColor 代号。
-   * 读取时由 UI 层 `resolveStickyColor` 统一解析。
-   */
-  color?: string;
-}
 
 export type NewtabPageMode = 'workspace' | 'trending' | 'devtools';
+
+/** 视图标签栏位置 */
+export type ViewTabPosition = 'top' | 'left' | 'right';
 
 export interface UserSettings {
   overrideNewTab: boolean;
   /** 新标签页一级空间：workspace 专注标签整理；trending 全网热榜；devtools 开发工具栏。 */
   newtabPageMode?: NewtabPageMode;
-  defaultView: 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'bookmarks' | 'kanban';
+  /** 视图标签栏位置：top（搜索栏下方水平排列）/ left（左侧垂直侧栏）/ right（右侧垂直侧栏） */
+  viewTabPosition?: ViewTabPosition;
+  defaultView: 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'bookmarks' | 'kanban' | 'archive';
   theme: 'light' | 'dark' | 'system';
   /**
    * 皮肤预设：
@@ -393,9 +303,7 @@ export interface UserSettings {
    *   - header：顶栏（品牌 + 操作按钮）
    *   - heroSearch：Hero 区大搜索框
    *   - viewSwitcher：视图切换标签行
-   *   - workspaceOverview：工作区概览卡片
    *   - tidySuggestion：智能整理建议栏
-   *   - activityStrip：最近操作状态区（Activity Strip）
    * 关闭某区域后该区域不渲染，节省空间、减少视觉噪音。
    */
   uiVisibility?: {
@@ -408,76 +316,7 @@ export interface UserSettings {
     heroSlogan?: boolean;
     heroSearch?: boolean;
     viewSwitcher?: boolean;
-    workspaceOverview?: boolean;
     tidySuggestion?: boolean;
-  };
-
-  /**
-   * 每日金句 Widget 配置（v1.2）。
-   * - enabled：显隐开关（默认 true）
-   * - categories：参与抽签的分类（多选；默认四类全开）
-   * - fontSize：正文字号（12–20，默认 15）
-   * - showSource：是否显示作者/出处（默认 true）
-   */
-  dailyQuote?: {
-    enabled?: boolean;
-    categories?: DashboardQuoteCategory[];
-    fontSize?: number;
-    showSource?: boolean;
-    customQuotes?: CustomQuoteEntry[];
-  };
-
-  /** 网站快捷模块配置 */
-  speedDial?: {
-    enabled?: boolean;
-    groups?: SpeedDialGroup[];
-    activeGroupId?: string;
-    openInNewTab?: boolean;
-    showLabels?: boolean;
-  };
-
-  /** 番茄钟配置 */
-  pomodoro?: {
-    enabled?: boolean;
-    focusMinutes?: number;
-    shortBreakMinutes?: number;
-    longBreakMinutes?: number;
-    autoStartBreak?: boolean;
-  };
-
-  /** 倒计时与纪念日配置 */
-  countdowns?: {
-    enabled?: boolean;
-    items?: CountdownEntry[];
-    showPastEvents?: boolean;
-  };
-
-  /** 上班人下班倒计时配置 */
-  workCountdown?: {
-    enabled?: boolean;
-    workdayEnd?: string;
-    offLabel?: string;
-  };
-
-  /** 待办 widget 配置 */
-  todoWidget?: {
-    enabled?: boolean;
-    items?: TodoEntry[];
-  };
-
-  /** 便签 widget 配置 */
-  stickyNotes?: {
-    enabled?: boolean;
-    items?: StickyNoteEntry[];
-  };
-
-  /** 喝水提醒 widget */
-  waterReminder?: WaterReminderState & { enabled?: boolean };
-
-  /** 习惯打卡 widget */
-  habitTracker?: {
-    enabled?: boolean;
-    items?: HabitEntry[];
   };
 
   /**
@@ -610,7 +449,7 @@ export interface ArchivedSession {
 
 // ── Activity Strip / Recent Activity (F-27) ───────────
 
-export type ActivityType =
+type ActivityType =
   | 'archive'
   | 'restore'
   | 'import'
@@ -620,7 +459,7 @@ export type ActivityType =
   | 'dedup_merge'
   | 'snapshot';
 
-export interface ActivityAction {
+interface ActivityAction {
   id: string;
   label: string;
   /** 行动按钮类型：undo 调用 undoGroup；open 跳转面板；custom 由调用方处理 */
@@ -649,16 +488,6 @@ export interface SearchHistoryEntry {
   ts: number;
   /** 累计搜索次数（用于"热门关键词"排序） */
   count: number;
-}
-
-export interface TagEntry {
-  name: string;
-  /** 基于 tag 字符串 hash 稳定生成的 HSL 色（主色） */
-  color: string;
-  /** 使用次数 */
-  count: number;
-  /** 创建时间 */
-  createdAt: number;
 }
 
 // ── Workspace (F-29) ──────────────────────────────────

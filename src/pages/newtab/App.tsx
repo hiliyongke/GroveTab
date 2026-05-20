@@ -24,11 +24,11 @@ import {
   Spin,
   Alert,
   Segmented,
+  theme,
 } from 'antd';
 import {
   Search,
   Settings,
-  Save,
   Sun,
   Moon,
   Monitor,
@@ -63,14 +63,16 @@ const TabGroupView = lazy(() => import('@/features/tabs/TabGroupView').then((m) 
 const WindowView = lazy(() => import('@/features/tabs/WindowView').then((m) => ({ default: m.WindowView })));
 const BookmarkView = lazy(() => import('@/features/tabs/BookmarkView').then((m) => ({ default: m.BookmarkView })));
 const KanbanView = lazy(() => import('@/features/tabs/KanbanView').then((m) => ({ default: m.KanbanView })));
+const ArchiveView = lazy(() => import('@/features/sessions/ArchiveView').then((m) => ({ default: m.ArchiveView })));
 import { OnboardingCard } from '@/features/sessions/OnboardingCard';
 import { hasCompletedOnboarding } from '@/repositories';
-import type { ArchivedSession, NewtabPageMode } from '@/shared/types';
+import type { NewtabPageMode } from '@/shared/types';
 import { recordMetric, recordFcpOnce, recordFpsSampleOnce, track } from '@/shared/utils/metrics';
-import { getArchivedSessions, initArchiveStorage } from '@/services/archive-service';
+import { initArchiveStorage } from '@/services/archive-service';
 import { APP_EVENTS } from '@/shared/config/storage-keys';
 import { resolveGradient } from '@/shared/theme/gradient-presets';
 import { VIEW_CONFIGS, VALID_VIEWS, type ViewMode } from '@/shared/config/views';
+import type { ViewTabPosition } from '@/shared/types';
 import { registerViews, getViewComponentMap } from '@/shared/config/view-registry';
 import { findDuplicates } from '@/shared/utils/dedupe';
 import { detectIdleTabs } from '@/shared/utils/idle-detect';
@@ -79,7 +81,6 @@ const InsightsPanel = lazy(() => import('@/features/insights/InsightsPanel'));
 
 /** 懒加载抽屉/面板——非首屏必需，直接导入文件确保独立拆 chunk */
 const SearchBox = lazy(() => import('@/features/search/SearchBox').then((m) => ({ default: m.SearchBox })));
-const ArchivePanel = lazy(() => import('@/features/sessions/ArchivePanel').then((m) => ({ default: m.ArchivePanel })));
 const SettingsPanel = lazy(() => import('@/features/settings/SettingsPanel').then((m) => ({ default: m.SettingsPanel })));
 // ClickEffectLayer —— 点击动效 Canvas 图层，默认 off 时不拉取 chunk。
 const ClickEffectLayer = lazy(() => import('@/features/effects/ClickEffectLayer').then((m) => ({ default: m.ClickEffectLayer })));
@@ -89,14 +90,15 @@ const VideoBackground = lazy(() => import('@/features/effects/VideoBackground').
 /** 注册所有视图到 ViewRegistry —— 新增视图只需在此添加一条 */
 registerViews([
   { id: 'domain', component: DomainGroupView, order: 1 },
-  { id: 'tabgroup', component: TabGroupView, order: 2 },
-  { id: 'window', component: WindowView, order: 3 },
-  { id: 'bookmarks', component: BookmarkView, order: 4 },
-  { id: 'timeline', component: TimelineView, order: 5 },
-  { id: 'compact', component: CompactView, order: 6 },
-  { id: 'grid', component: GridView, order: 7 },
+  { id: 'compact', component: CompactView, order: 2 },
+  { id: 'timeline', component: TimelineView, order: 3 },
+  { id: 'tabgroup', component: TabGroupView, order: 4 },
+  { id: 'window', component: WindowView, order: 5 },
+  { id: 'kanban', component: KanbanView, order: 6 },
+  { id: 'bookmarks', component: BookmarkView, order: 7 },
   { id: 'frequency', component: FrequencyView, order: 8 },
-  { id: 'kanban', component: KanbanView, order: 9 },
+  { id: 'grid', component: GridView, order: 9 },
+  { id: 'archive', component: ArchiveView, order: 10 },
 ]);
 
 const { Header, Content } = Layout;
@@ -123,7 +125,6 @@ function AppHeader({
   compactSearchVisible,
   pageMode,
   onPageModeChange,
-  onArchive,
   onSettings,
   onOpenSearch,
   onInsights,
@@ -137,7 +138,6 @@ function AppHeader({
   compactSearchVisible: boolean;
   pageMode: NewtabPageMode;
   onPageModeChange: (mode: NewtabPageMode) => void;
-  onArchive: () => void;
   onSettings: () => void;
   onOpenSearch: () => void;
   onInsights?: () => void;
@@ -249,14 +249,6 @@ function AppHeader({
           ]}
         />
         <WorkspaceSwitcher />
-        <Tooltip title={t('header.archiveTooltip')} placement="bottom">
-          <Button
-            type="text"
-            icon={<Save size={ICON_SIZE.MEDIUM} className="app-icon app-icon--archive" />}
-            onClick={onArchive}
-            aria-label={t('header.archiveTooltip')}
-          />
-        </Tooltip>
         <Tooltip title={t(`theme.${theme}`)}>
           <Button
             type="text"
@@ -315,6 +307,7 @@ function HeroBar({
   showSlogan,
   showSearch,
   showViewSwitcher,
+  viewTabPosition,
 }: {
   viewMode: ViewMode;
   onViewChange: (v: ViewMode) => void;
@@ -325,6 +318,7 @@ function HeroBar({
   showSlogan: boolean;
   showSearch: boolean;
   showViewSwitcher: boolean;
+  viewTabPosition: ViewTabPosition;
 }) {
   const { t, locale } = useT();
   /** 品牌身份：名称 + slogan 均来自 BRAND 配置层，切换品牌无需改此处 */
@@ -408,9 +402,8 @@ function HeroBar({
         </div>
       )}
 
-      {/* 视图切换 —— 使用 antd 官方 Segmented，自动处理 hover/focus/键盘导航与选中态权重。
-          label 只渲染图标 + 文案，其余视觉（选中态/hover）由 Segmented 主题 token 接管。 */}
-      {showViewSwitcher && (
+      {/* 视图切换 —— 仅在 top 模式下渲染到 HeroBar，left/right 模式由侧边栏接管 */}
+      {showViewSwitcher && viewTabPosition === 'top' && (
         <Segmented<ViewMode>
           value={viewMode}
           onChange={(v: ViewMode) => onViewChange(v)}
@@ -420,6 +413,50 @@ function HeroBar({
         />
       )}
     </section>
+  );
+}
+
+/** 视图侧边栏（left/right 模式），垂直排列视图图标 + 标签 */
+function ViewSidebar({
+  viewMode,
+  onViewChange,
+  position,
+}: {
+  viewMode: ViewMode;
+  onViewChange: (v: ViewMode) => void;
+  position: 'left' | 'right';
+}) {
+  const { t } = useT();
+  const { token } = theme.useToken();
+
+  return (
+    <nav
+      className={`app-view-sidebar app-view-sidebar--${position}`}
+      style={{ borderColor: token.colorBorderSecondary, background: token.colorBgLayout }}
+    >
+      <div className="app-view-sidebar__list">
+        {VIEW_CONFIGS.map((v) => {
+          const isActive = viewMode === v.id;
+          return (
+            <button
+              key={v.id}
+              type="button"
+              className={`app-view-sidebar__item${isActive ? ' is-active' : ''}`}
+              onClick={() => onViewChange(v.id)}
+              title={t(v.labelKey)}
+              style={{
+                background: isActive ? token.colorPrimaryBg : undefined,
+                color: isActive ? token.colorPrimary : token.colorTextSecondary,
+                borderRadius: token.borderRadiusLG,
+              }}
+            >
+              <v.Icon size={ICON_SIZE.MEDIUM} />
+              <span className="app-view-sidebar__label">{t(v.labelKey)}</span>
+            </button>
+          );
+        })}
+      </div>
+    </nav>
   );
 }
 
@@ -440,7 +477,6 @@ function AppContent() {
   const [checked, setChecked] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
   const [initRunId, setInitRunId] = useState(0);
-  const [showArchive, setShowArchive] = useState(false);
   /**
    * 若 URL hash 为 #about，则初始直接打开 Settings 抽屉并切到 About Tab。
    * 使用 useEffect 读取 hash，避免严格模式下 useState 初始化函数执行两次导致的问题。
@@ -478,6 +514,7 @@ function AppContent() {
   const pageMode = useSettingsStore((s) => s.settings.newtabPageMode ?? 'workspace');
   const defaultView = useSettingsStore((s) => s.settings.defaultView);
   const viewMode: ViewMode = VALID_VIEWS.includes(defaultView) ? defaultView : 'domain';
+  const viewTabPosition: ViewTabPosition = useSettingsStore((s) => s.settings.viewTabPosition ?? 'top');
 
   /** 背景预设 → CSS gradient，统一走 resolveGradient 消灭硬编码 */
   const gradientPreset = useSettingsStore((s) => s.settings.gradientPreset);
@@ -490,35 +527,19 @@ function AppContent() {
   const layoutBackground = resolveGradient(gradientPreset, resolvedDark, customGradient);
   const { t } = useT();
 
-  /** 归档数据同步回调（ArchivePanel 变更后触发） */
-  const syncArchiveSummary = useCallback((_sessions: ArchivedSession[]) => {
-    // 保留回调签名供 ArchivePanel onSessionsChange 使用
-    // DashboardOverview 已移除，不再需要追踪 latestArchive
-  }, []);
-
-  const refreshArchiveSummary = useCallback(async () => {
-    try {
-      const sessions = await getArchivedSessions();
-      syncArchiveSummary(sessions);
-      return sessions;
-    } catch (err) {
-      console.warn(`${BRAND.logTag} load archive summary failed`, err);
-      return [];
-    }
-  }, [syncArchiveSummary]);
 
   useSwBroadcast();
 
   /**
    * 监听全局自定义事件 `app:open-archive`（由 UndoToast / ActivityStrip 派发），
-   * 统一打开 ArchivePanel。
+   * 切换到 archive 视图 Tab。
    */
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent<{ sessionId?: string }>).detail;
-      setShowArchive(true);
+      // 切换到 archive 视图
+      void useSettingsStore.getState().updateSettings({ defaultView: 'archive', newtabPageMode: 'workspace' });
       if (detail?.sessionId !== undefined) {
-        // 预留：将 sessionId 广播给 ArchivePanel 做高亮
         window.dispatchEvent(new CustomEvent('app:highlight-session', { detail }));
       }
     };
@@ -558,21 +579,16 @@ function AppContent() {
       try {
         await loadSettings();
 
-        const [archiveSessionsResult, tabsResult, undoResult, metadataResult, onboardingResult] = await Promise.allSettled([
-          (async () => {
-            await initArchiveStorage();
-            return getArchivedSessions();
-          })(),
+        const [archiveInitResult, tabsResult, undoResult, metadataResult, onboardingResult] = await Promise.allSettled([
+          initArchiveStorage(),
           loadAllTabs(),
           loadUndoRecords(),
           loadMetadata(),
           hasCompletedOnboarding(),
         ]);
 
-        if (archiveSessionsResult.status === 'fulfilled') {
-          syncArchiveSummary(archiveSessionsResult.value);
-        } else {
-          console.warn(`${BRAND.logTag} initArchiveStorage failed`, archiveSessionsResult.reason);
+        if (archiveInitResult.status !== 'fulfilled') {
+          console.warn(`${BRAND.logTag} initArchiveStorage failed`, archiveInitResult.reason);
         }
         if (tabsResult.status === 'rejected') {
           console.warn(`${BRAND.logTag} loadAllTabs failed`, tabsResult.reason);
@@ -614,7 +630,7 @@ function AppContent() {
       cancelled = true;
       mountedRef.current = false;
     };
-  }, [initRunId, loadAllTabs, loadMetadata, loadSettings, loadUndoRecords, syncArchiveSummary, t]);
+  }, [initRunId, loadAllTabs, loadMetadata, loadSettings, loadUndoRecords, t]);
 
   /** 页面内快捷键：通过可配置的 useKeybinding hook 注册 */
   useKeybinding('search', useCallback(() => setShowSearch((v) => !v), []));
@@ -673,7 +689,6 @@ function AppContent() {
     const prev = useSettingsStore.getState().settings.newtabPageMode ?? 'workspace';
     void useSettingsStore.getState().updateSettings({ newtabPageMode: mode });
     setShowSearch(false);
-    setShowArchive(false);
     setShowSettings(false);
     setShowInsights(false);
     void track('newtab_page_mode_switch', { from: prev, to: mode });
@@ -681,36 +696,31 @@ function AppContent() {
 
   const handleOpenSearch = useCallback(() => {
     setShowSearch(true);
-    setShowArchive(false);
     setShowSettings(false);
     setShowInsights(false);
   }, []);
 
   const handleOpenArchive = useCallback(() => {
-    setShowArchive(true);
+    // 切换到 workspace + archive 视图 Tab
+    const currentMode = useSettingsStore.getState().settings.newtabPageMode;
+    if (currentMode !== 'workspace') {
+      void useSettingsStore.getState().updateSettings({ newtabPageMode: 'workspace' });
+    }
+    void useSettingsStore.getState().updateSettings({ defaultView: 'archive' });
     setShowSearch(false);
     setShowSettings(false);
     setShowInsights(false);
   }, []);
 
-  const handleArchivePanelOpenChange = useCallback((open: boolean) => {
-    setShowArchive(open);
-    if (!open) {
-      void refreshArchiveSummary();
-    }
-  }, [refreshArchiveSummary]);
-
   const handleOpenSettings = useCallback(() => {
     setShowSettings(true);
     setShowSearch(false);
-    setShowArchive(false);
     setShowInsights(false);
   }, []);
 
   const handleOpenInsights = useCallback(() => {
     setShowInsights(true);
     setShowSearch(false);
-    setShowArchive(false);
     setShowSettings(false);
   }, []);
 
@@ -813,7 +823,6 @@ function AppContent() {
           compactSearchVisible={compactSearchVisible}
           pageMode={pageMode}
           onPageModeChange={handlePageModeChange}
-          onArchive={handleOpenArchive}
           onSettings={handleOpenSettings}
           onOpenSearch={handleOpenSearch}
           onInsights={handleOpenInsights}
@@ -823,6 +832,16 @@ function AppContent() {
           }}
         />
       )}
+
+      {/* 主体区：侧边栏 + 内容 */}
+      <div className="app-main-body">
+        {pageMode === 'workspace' && showViewSwitcher && viewTabPosition === 'left' && (
+          <ViewSidebar
+            viewMode={viewMode}
+            onViewChange={handleViewChange}
+            position="left"
+          />
+        )}
 
       <Content
         data-app-content
@@ -840,6 +859,7 @@ function AppContent() {
             showSlogan={showHeroSlogan}
             showSearch={showHeroSearch}
             showViewSwitcher={showViewSwitcher}
+            viewTabPosition={viewTabPosition}
           />
         )}
 
@@ -878,7 +898,7 @@ function AppContent() {
           <>
             {showOnboarding && <OnboardingCard onDismiss={() => setShowOnboarding(false)} />}
 
-        {selectionMode && (
+        {viewMode !== 'archive' && selectionMode && (
           <SelectionModeNotice
             selectedTabs={selectedTabs}
             onSelectAll={handleSelectAllTabs}
@@ -887,7 +907,7 @@ function AppContent() {
           />
         )}
 
-        {uiVisibility?.tidySuggestion !== false && (
+        {viewMode !== 'archive' && uiVisibility?.tidySuggestion !== false && (
           <div ref={tidySectionRef}>
             <TidySuggestionBar expandSignal={tidyExpandSignal} />
           </div>
@@ -901,7 +921,7 @@ function AppContent() {
                 <Text type="secondary">{t('tabs.loading')}</Text>
               </div>
             </div>
-          ) : tabCount === 0 ? (
+          ) : tabCount === 0 && viewMode !== 'archive' ? (
             <FeatureEmptyState
               title={t('tabs.empty')}
               description={t('tabs.emptyHint')}
@@ -926,13 +946,21 @@ function AppContent() {
         )}
       </Content>
 
+        {pageMode === 'workspace' && showViewSwitcher && viewTabPosition === 'right' && (
+          <ViewSidebar
+            viewMode={viewMode}
+            onViewChange={handleViewChange}
+            position="right"
+          />
+        )}
+      </div>
+
       <UndoToast />
 
-      <BatchActionBar />
+      {viewMode !== 'archive' && <BatchActionBar />}
 
       <Suspense fallback={null}>
         <SearchBox open={showSearch} onOpenChange={setShowSearch} />
-        <ArchivePanel open={showArchive} onOpenChange={handleArchivePanelOpenChange} onSessionsChange={syncArchiveSummary} />
           <SettingsPanel open={showSettings} onOpenChange={(open: boolean) => { if (!open) setShowSettings(false); }} defaultActiveTab={initialSettingsTab} />
         <InsightsPanel open={showInsights} onClose={() => setShowInsights(false)} />
       </Suspense>

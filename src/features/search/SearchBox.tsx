@@ -41,6 +41,7 @@ import {
   searchHistoryEntries,
   type HistorySearchEntry,
 } from '@/chrome';
+import { track } from '@/shared/utils/metrics';
 import { getRecentSearches, getSearchHistory, pushRecentSearch } from '@/repositories';
 import {
   SEARCH_ENGINE_OPTIONS,
@@ -623,6 +624,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
     if (trimmed === '') return;
     try {
       await createTab({ url: buildSearchUrl(engineId, trimmed), active: true });
+      void track('search_web', { engine: engineId, query: trimmed });
       close();
       // 打开成功后再保存搜索历史，避免存储写入阻塞或阻断核心操作
       try {
@@ -817,11 +819,11 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
       closable={false}
       destroyOnHidden
       keyboard={false}
-      width={720}
+      width={680}
       centered={false}
       rootClassName="search-box-modal"
       styles={{
-        mask: { backdropFilter: 'blur(8px)' },
+        mask: { backdropFilter: 'blur(8px)', background: 'rgba(0,0,0,0.32)' },
         body: { padding: 0 },
       }}
       style={{ top: '12vh' }}
@@ -871,7 +873,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
                 <div className="search-box-empty">
                   <FeatureEmptyState
                     title={title}
-                    icon={<Search size={ICON_SIZE.LARGE} />}
+                    icon={<Search size={20} style={{ opacity: 0.4 }} />}
                     size="small"
                     hints={
                       normalizedQuery !== ''
@@ -889,7 +891,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
                 <section key={section.key} className="search-box-section">
                   <div className="search-box-section-header">
                     <span>{section.title}</span>
-                    <span>{section.items.length}</span>
+                    <span className="search-box-section-count">{section.items.length}</span>
                   </div>
                   <ul role="listbox" className="search-box-list">
                     {section.items.map((item, offset) => {

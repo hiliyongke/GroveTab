@@ -289,5 +289,3 @@ function GroupSection({ group, keeperId, onChange, token, t, locale }: GroupSect
     </div>
   );
 }
-
-export default DuplicatePreviewModal;

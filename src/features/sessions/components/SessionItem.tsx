@@ -18,7 +18,7 @@ import {
   Share2,
 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { Button, List, Tooltip, Input, Popconfirm, theme } from 'antd';
+import { Button, List, Tooltip, Input, Popconfirm, theme, Checkbox } from 'antd';
 import { format } from 'date-fns';
 import { zhCN, enUS } from 'date-fns/locale';
 import type { ArchivedSession, ArchivedTab } from '@/shared/types';
@@ -44,6 +44,10 @@ interface SessionItemProps {
   selectable?: boolean;
   selected?: boolean;
   onToggleSelect?: (id: string) => void;
+  /** 搜索高亮关键词 */
+  highlightQuery?: string;
+  /** 匹配的标签页索引集合 */
+  matchedTabIndexes?: Set<number>;
 }
 
 export function SessionItem({
@@ -64,9 +68,51 @@ export function SessionItem({
   selectable,
   selected,
   onToggleSelect,
+  highlightQuery,
+  matchedTabIndexes,
 }: SessionItemProps) {
   const { t } = useT();
   const { token } = theme.useToken();
+
+  /** 高亮匹配关键词的文本 */
+  const highlightText = (text: string): React.ReactNode => {
+    if (!highlightQuery || !highlightQuery.trim()) return text;
+    const lowerText = text.toLowerCase();
+    const lowerQuery = highlightQuery.trim().toLowerCase();
+    const idx = lowerText.indexOf(lowerQuery);
+    if (idx === -1) return text;
+    const before = text.slice(0, idx);
+    const match = text.slice(idx, idx + highlightQuery.trim().length);
+    const after = text.slice(idx + highlightQuery.trim().length);
+    return (
+      <>
+        {before}
+        <mark style={{
+          background: token.colorPrimaryBg,
+          color: token.colorPrimary,
+          padding: '0 1px',
+          borderRadius: 2,
+          fontWeight: 600,
+        }}>{match}</mark>
+        {after}
+      </>
+    );
+  };
+
+  /** 搜索时标签页排序：匹配的排前面 */
+  const sortedTabs = (() => {
+    if (!matchedTabIndexes || matchedTabIndexes.size === 0) return session.tabs.map((tab, idx) => ({ tab, originalIdx: idx }));
+    const matched: { tab: ArchivedTab; originalIdx: number }[] = [];
+    const unmatched: { tab: ArchivedTab; originalIdx: number }[] = [];
+    session.tabs.forEach((tab, idx) => {
+      if (matchedTabIndexes.has(idx)) {
+        matched.push({ tab, originalIdx: idx });
+      } else {
+        unmatched.push({ tab, originalIdx: idx });
+      }
+    });
+    return [...matched, ...unmatched];
+  })();
 
   return (
     <List.Item
@@ -151,7 +197,7 @@ export function SessionItem({
                 whiteSpace: 'nowrap',
               }}
             >
-              {session.name}
+              {highlightText(session.name)}
             </div>
           )}
           <div style={{ fontSize: 11.5, color: token.colorTextTertiary, marginTop: 2 }}>
@@ -165,10 +211,12 @@ export function SessionItem({
 
         <div style={{ display: 'flex', gap: 4, flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
           {selectable === true && (
-            <input
-              type="checkbox"
+            <Checkbox
               checked={selected === true}
-              onChange={() => onToggleSelect?.(session.id)}
+              onChange={(e) => {
+                e.stopPropagation();
+                onToggleSelect?.(session.id);
+              }}
               style={{ marginRight: 4 }}
               aria-label={t('archive.selectToggle')}
             />
@@ -240,73 +288,76 @@ export function SessionItem({
               {t('archive.empty')}
             </div>
           ) : (
-            session.tabs.map((tab, idx) => (
-              <div
-                key={`${session.id}-${idx}`}
-                className="app-row-hover"
-                style={
-                  {
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    padding: '6px 8px',
-                    borderRadius: token.borderRadiusSM,
-                    // 与原视觉保持一致——hover 用 secondary 填色（比默认的 tertiary 更显眼）
-                    ['--app-row-hover-bg' as string]: token.colorFillSecondary,
-                  } as React.CSSProperties
-                }
-              >
-                {tab.favIconUrl ? (
-                  <img
-                    src={tab.favIconUrl}
-                    alt=""
-                    width={14}
-                    height={14}
-                    style={{ flexShrink: 0, borderRadius: 2 }}
-                    onError={(e) => {
-                      (e.currentTarget).style.visibility = 'hidden';
-                    }}
-                  />
-                ) : (
-                  <div style={{ width: 14, height: 14, flexShrink: 0 }} />
-                )}
+            sortedTabs.map(({ tab, originalIdx }) => {
+              const isMatched = matchedTabIndexes?.has(originalIdx) ?? false;
+              return (
+                <div
+                  key={`${session.id}-${originalIdx}`}
+                  className="app-row-hover"
+                  style={
+                    {
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      padding: '6px 8px',
+                      borderRadius: token.borderRadiusSM,
+                      ['--app-row-hover-bg' as string]: token.colorFillSecondary,
+                      background: isMatched ? token.colorPrimaryBg : undefined,
+                    } as React.CSSProperties
+                  }
+                >
+                  {tab.favIconUrl ? (
+                    <img
+                      src={tab.favIconUrl}
+                      alt=""
+                      width={14}
+                      height={14}
+                      style={{ flexShrink: 0, borderRadius: 2 }}
+                      onError={(e) => {
+                        (e.currentTarget).style.visibility = 'hidden';
+                      }}
+                    />
+                  ) : (
+                    <div style={{ width: 14, height: 14, flexShrink: 0 }} />
+                  )}
 
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontSize: 12.5,
-                      color: token.colorText,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                    title={tab.title || tab.url}
-                  >
-                    {tab.title || tab.url}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: 12.5,
+                        color: token.colorText,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                      title={tab.title || tab.url}
+                    >
+                      {highlightText(tab.title || tab.url)}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: token.colorTextTertiary,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {highlightText(tab.hostname || tab.url)}
+                    </div>
                   </div>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: token.colorTextTertiary,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {tab.hostname || tab.url}
-                  </div>
+
+                  <Tooltip title={t('archive.openTab')}>
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<Link size={ICON_SIZE.MEDIUM} />}
+                      onClick={() => onOpenSingle(tab)}
+                    />
+                  </Tooltip>
                 </div>
-
-                <Tooltip title={t('archive.openTab')}>
-                  <Button
-                    type="text"
-                    size="small"
-                    icon={<Link size={ICON_SIZE.MEDIUM} />}
-                    onClick={() => onOpenSingle(tab)}
-                  />
-                </Tooltip>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       )}

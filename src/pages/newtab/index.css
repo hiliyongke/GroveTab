@@ -491,7 +491,6 @@ html[data-texture-noise] body::before {
 }
 
 [data-skin='apple'] .app-header-shell .app-icon--settings,
-[data-skin='apple'] .app-header-shell .app-icon--archive,
 [data-skin='apple'] .app-header-shell .app-icon--insights {
   color: rgba(255, 255, 255, 0.7);
 }

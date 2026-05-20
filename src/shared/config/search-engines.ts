@@ -129,11 +129,4 @@ export function resolveHotKeywords(
   return PRESET_HOT_KEYWORDS[locale] ?? PRESET_HOT_KEYWORDS.en;
 }
 
-/**
- * @deprecated 请使用 `resolveHotKeywords(source, locale, history)`。
- * 保留仅为兼容旧调用点，固定返回 preset 列表。
- */
-export function getHotKeywords(locale: Locale): string[] {
-  return PRESET_HOT_KEYWORDS[locale] ?? PRESET_HOT_KEYWORDS.en;
-}
 

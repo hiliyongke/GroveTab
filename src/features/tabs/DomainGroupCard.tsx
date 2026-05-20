@@ -257,7 +257,7 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
             width: '100%',
             height: 48,
             paddingLeft: 14,
-            paddingRight: 42,
+            paddingRight: 80,
             background: 'transparent',
             borderBottom: collapsed ? 'none' : `1px solid ${token.colorBorderSecondary}`,
             cursor: 'pointer',
@@ -339,11 +339,11 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
       </button>
 
       {/* 休眠整组——释放内存但保留标签页位置 */}
-      <Tooltip title={t('tabs.discardGroup')}>
+        <Tooltip title={t('tabs.discardGroup')}>
         <Button
           type="text"
           size="small"
-icon={<Moon size={ICON_SIZE.SMALL} />}
+          icon={<Moon size={ICON_SIZE.SMALL} />}
           onClick={(e) => {
             e.stopPropagation();
             void discardDomainGroup(group.domain).catch(() => { /* store 已 toast */ });
@@ -352,8 +352,8 @@ icon={<Moon size={ICON_SIZE.SMALL} />}
           className="app-hover-reveal"
           style={{
             position: 'absolute',
-            top: 8,
-            right: 36,
+            top: 10,
+            right: 44,
             width: 28,
             height: 28,
             padding: 0,
@@ -372,15 +372,15 @@ icon={<Moon size={ICON_SIZE.SMALL} />}
           danger
           loading={closing}
           disabled={closing}
-icon={closing ? undefined : <X size={ICON_SIZE.SMALL} />}
+          icon={closing ? undefined : <X size={ICON_SIZE.SMALL} />}
           onClick={(e: React.MouseEvent) => { void handleCloseAll(e); }}
           aria-label={t('tabs.closeDomain')}
           // closing 时强制显示（is-visible），其余情况由 hover/focus 驱动
           className={`app-hover-reveal${closing ? ' is-visible' : ''}`}
           style={{
             position: 'absolute',
-            top: 8,
-            right: 6,
+            top: 10,
+            right: 8,
             width: 28,
             height: 28,
             padding: 0,

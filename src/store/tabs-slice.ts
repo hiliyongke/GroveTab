@@ -22,6 +22,7 @@ import { extractHostname, shouldDisplayUrl, isSelfNewTabPage } from '@/chrome';
 import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
 import { swBroadcast } from '@/shared/utils/sw-broadcast';
+import { track } from '@/shared/utils/metrics';
 import { useUndoStore } from './undo-slice';
 import { useSelectionStore } from './selection-slice';
 import { useSettingsStore } from './settings-slice';
@@ -330,6 +331,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
   jumpToTab: async (tabId, windowId) => {
     try {
       await activateTab(tabId, windowId);
+      void track('tab_jump', { tabId, windowId, otherWindow: windowId !== get().currentWindowId });
     } catch (err) {
       // 常见失败：目标 tab 已被用户关闭、窗口已 minimize 等——给出明确反馈
       feedback.error(translate('tabs.jumpFailed'), err);
@@ -365,6 +367,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
           console.warn(`${BRAND.logTag} addRecord failed, undo will be unavailable`, err);
         });
       await closeTab(tabId);
+      void track('tab_close', { title: tab.title, hostname: tab.hostname });
       // 关闭成功后不强制刷新——SW broadcast 的 tab-removed 会驱动 UI 移除
     } catch (err) {
       feedback.error(translate('tabs.closeFailed'), err);
@@ -396,6 +399,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
           console.warn(`${BRAND.logTag} addRecord failed, undo will be unavailable`, err);
         });
       await closeTabs(tabIds);
+      void track('tab_close_batch', { count: targets.length });
     } catch (err) {
       // 同时落入 store error 和 feedback：
       //   - feedback 让用户立即看到结果
@@ -446,6 +450,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       await closeTabs(nonPinned.map((t) => t.id));
       // 批量操作给出成功反馈，让用户明确感知"点了就有结果"
       feedback.success(translate('tabs.closedCount', { count: nonPinned.length }));
+      void track('tab_close_domain', { domain, count: nonPinned.length });
     } catch (err) {
       feedback.error(translate('tabs.closeGroupFailed'), err);
       set({ error: String(err) });
@@ -487,6 +492,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
         });
       await closeTabs(nonPinned.map((t) => t.id));
       feedback.success(translate('tabs.closedCount', { count: nonPinned.length }));
+      void track('tab_close_all', { count: nonPinned.length });
     } catch (err) {
       feedback.error(translate('tabs.closeFailed'), err);
       set({ error: String(err) });
@@ -506,6 +512,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
 
     set((state) => ({ tabs: patchTabDiscardedState(state.tabs, tabId, true) }));
     feedback.success(translate('tabs.discarded'));
+    void track('tab_discard', { tabId });
     swBroadcast('tab-discarded', { id: tabId, discarded: true });
   },
 
@@ -528,6 +535,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     }));
 
     feedback.success(translate('tabs.discardedCount', { count: succeededIds.length }));
+    void track('tab_discard_batch', { count: succeededIds.length });
     if (failedIds.length > 0) {
       feedback.warning(translate('tabs.discardPartial', { count: failedIds.length }));
     }
@@ -558,6 +566,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     }));
 
     feedback.success(translate('tabs.discardedGroup', { domain, count: succeededIds.length }));
+    void track('tab_discard_domain', { domain, count: succeededIds.length });
     if (failedIds.length > 0) {
       feedback.warning(translate('tabs.discardPartial', { count: failedIds.length }));
     }

@@ -1,138 +1,102 @@
 /**
  * 开发工具栏页面样式
  *
- * 采用紧凑型开发者工作台布局，避免大面积空白和笨重卡片。
+ * 紧凑列表式布局：左侧工具列表 + 右侧工作台面板
  */
 
 .devtools-page {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 24px 0 10px;
+  gap: 12px;
+  padding: 20px 0 10px;
+  flex: 1;
+  min-height: 0;
+  height: calc(100vh - var(--app-header-height, 56px) - 64px);
 }
 
+/* ===== Shell：整体卡片容器 ===== */
 .devtools-shell {
   border: 1px solid var(--app-hairline);
-  border-radius: 22px;
+  border-radius: 20px;
   background: var(--app-glass-bg);
   box-shadow: var(--app-shadow-card);
   overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
+/* ===== Hero：标题 + 统计行 ===== */
 .devtools-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 18px;
-  padding: 18px 20px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px 12px;
   border-bottom: 1px solid var(--app-hairline);
 }
 
-.devtools-title-row,
-.devtools-brand,
-.devtools-stats,
-.devtools-toolbar,
-.devtools-category-label,
-.devtools-card-title,
-.devtools-card-body,
-.devtools-panel-title,
-.devtools-actions,
-.devtools-privacy,
-.devtools-section-head,
-.devtools-section-shell,
-.devtools-option-arrow,
-.devtools-output-meta,
-.devtools-empty-state {
+.devtools-brand {
   display: flex;
   align-items: center;
-}
-
-.devtools-title-row {
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.devtools-brand {
-  gap: 10px;
+  gap: 9px;
   min-width: 0;
 }
 
 .devtools-logo {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: 11px;
   background: var(--ant-color-primary-bg);
   color: var(--ant-color-primary);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.28);
   flex-shrink: 0;
 }
 
-.devtools-title,
-.devtools-panel-heading {
-  margin: 0;
-}
-
 .devtools-title {
-  font-size: 17px;
-}
-
-.devtools-panel-heading {
-  min-width: 0;
-}
-
-.devtools-tag,
-.devtools-mode-badge {
   margin: 0;
+  font-size: 16px;
+  line-height: 1.2;
 }
 
-.devtools-tag--local,
-.devtools-tag--realtime {
-  line-height: 30px;
+.devtools-tag {
+  margin: 0;
+  flex-shrink: 0;
 }
 
 .devtools-subtitle {
-  margin-top: 8px;
-  max-width: 760px;
+  margin-top: 4px;
   color: var(--ant-color-text-secondary);
   font-size: 12px;
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 .devtools-stats {
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
-.devtools-stat {
-  min-width: 76px;
-  padding: 8px 10px;
+.devtools-stat-pill {
+  font-size: 11px;
+  color: var(--ant-color-text-secondary);
+  background: color-mix(in srgb, var(--ant-color-bg-container) 85%, transparent);
   border: 1px solid var(--app-hairline);
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--ant-color-bg-container) 72%, transparent);
-  text-align: right;
+  border-radius: 999px;
+  padding: 2px 9px;
+  white-space: nowrap;
 }
 
-.devtools-stat-value {
-  display: block;
-  color: var(--ant-color-text);
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.devtools-stat-label {
-  display: block;
-  margin-top: 4px;
-  color: var(--ant-color-text-tertiary);
-  font-size: 10px;
-}
-
+/* ===== Toolbar：分类 + 搜索 ===== */
 .devtools-toolbar {
+  display: flex;
+  align-items: center;
   gap: 10px;
-  padding: 12px 20px;
+  padding: 10px 18px;
   border-bottom: 1px solid var(--app-hairline);
 }
 
@@ -143,36 +107,41 @@
 }
 
 .devtools-search {
-  width: min(280px, 28vw);
+  width: min(260px, 26vw);
   flex-shrink: 0;
 }
 
+/* ===== Workbench：左右双栏（Flexbox 方案）===== */
 .devtools-workbench {
-  display: grid;
-  grid-template-columns: minmax(460px, 1fr) 420px;
-  gap: 0;
-  min-height: 560px;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
+/* ===== 左侧：列表区（固定宽度，独立滚动）===== */
 .devtools-list-pane {
-  padding: 16px;
+  width: 380px;
+  flex-shrink: 0;
+  padding: 14px;
   border-right: 1px solid var(--app-hairline);
+  overflow-y: auto;
+  min-height: 0;
+  overflow-anchor: none;
 }
 
 .devtools-section {
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .devtools-section-head {
+  display: flex;
+  align-items: center;
   gap: 6px;
   margin-bottom: 8px;
 }
 
-.devtools-section-shell {
-  min-width: 0;
-}
-
-.devtools-section-icon--favorite {
+.devtools-section-icon--fav {
   color: var(--ant-color-error);
 }
 
@@ -180,44 +149,40 @@
   color: var(--ant-color-primary);
 }
 
-.devtools-section-title,
-.devtools-output-label,
-.devtools-output-meta-text,
-.devtools-error-text {
-  font-size: 12px;
-}
-
 .devtools-section-title {
   font-weight: 600;
+  font-size: 12px;
+  color: var(--ant-color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
+/* ===== 工具卡片：紧凑横排 ===== */
 .devtools-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  align-content: start;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .devtools-card {
   width: 100%;
-  min-height: 96px;
-  padding: 13px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
   border: 1px solid var(--app-hairline);
-  border-radius: 16px;
+  border-radius: 12px;
   background: color-mix(in srgb, var(--ant-color-bg-container) 82%, transparent);
   color: inherit;
   text-align: left;
   cursor: pointer;
-  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
+  transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
 }
 
 .devtools-card:hover,
 .devtools-card:focus-visible {
-  transform: translateY(-1px);
-  border-color: color-mix(in srgb, var(--ant-color-primary) 36%, var(--app-hairline));
+  border-color: color-mix(in srgb, var(--ant-color-primary) 30%, var(--app-hairline));
+  background: color-mix(in srgb, var(--ant-color-primary-bg) 65%, var(--ant-color-bg-container));
   box-shadow: var(--app-shadow-card-hover, var(--app-shadow-card));
   outline: none;
 }
@@ -225,48 +190,50 @@
 .devtools-card.is-selected {
   border-color: var(--ant-color-primary);
   background: color-mix(in srgb, var(--ant-color-primary-bg) 72%, var(--ant-color-bg-container));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ant-color-primary) 22%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ant-color-primary) 18%, transparent);
 }
 
 .devtools-card-head {
-  display: grid;
-  grid-template-columns: 34px minmax(0, 1fr);
-  gap: 10px;
+  display: flex;
   align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
 }
 
 .devtools-card-icon {
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 11px;
+  border-radius: 10px;
   background: var(--ant-color-primary-bg);
   color: var(--ant-color-primary);
+  flex-shrink: 0;
 }
 
 .devtools-card-body {
   min-width: 0;
+  flex: 1;
 }
 
 .devtools-card-title {
+  display: flex;
+  align-items: center;
   gap: 6px;
   min-width: 0;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.25;
 }
 
-.devtools-card-desc {
-  margin-top: 5px;
-  color: var(--ant-color-text-secondary);
-  font-size: 11.5px;
-  line-height: 1.45;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+.devtools-card-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .devtools-local-badge {
@@ -276,15 +243,8 @@
   color: var(--ant-color-success);
   font-size: 9px;
   font-weight: 600;
-  line-height: 16px;
+  line-height: 15px;
   white-space: nowrap;
-}
-
-.devtools-card-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-left: auto;
 }
 
 .devtools-fav-btn {
@@ -308,73 +268,87 @@
   color: var(--ant-color-error);
 }
 
+.devtools-card-desc {
+  margin-top: 3px;
+  color: var(--ant-color-text-secondary);
+  font-size: 11px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ===== 右侧：工作台面板（flex:1 撑满，独立滚动）===== */
 .devtools-panel-pane {
-  padding: 16px;
-  background: color-mix(in srgb, var(--ant-color-bg-layout) 42%, transparent);
+  flex:1;
+  min-width:0;
+  padding: 14px;
+  background: color-mix(in srgb, var(--ant-color-bg-layout) 38%, transparent);
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .devtools-panel-card {
-  position: sticky;
-  top: 72px;
   border: 1px solid var(--app-hairline);
-  border-radius: 18px;
+  border-radius: 16px;
   background: var(--app-glass-bg);
   box-shadow: var(--app-shadow-card);
   overflow: hidden;
 }
 
 .devtools-panel-head {
-  padding: 16px 18px 12px;
+  padding: 14px 16px 10px;
   border-bottom: 1px solid var(--app-hairline);
 }
 
 .devtools-panel-title {
+  display: flex;
+  align-items: center;
   gap: 9px;
   min-width: 0;
 }
 
 .devtools-panel-icon {
   color: var(--ant-color-primary);
+  flex-shrink: 0;
+}
+
+.devtools-panel-heading {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.3;
+  min-width: 0;
 }
 
 .devtools-panel-desc {
-  margin-top: 8px;
+  margin-top: 6px;
   color: var(--ant-color-text-secondary);
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: 11.5px;
+  line-height: 1.45;
 }
 
 .devtools-panel-body {
-  padding: 16px 18px 18px;
+  padding: 14px 16px 16px;
 }
 
+/* ===== 工具表单通用 ===== */
 .devtools-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .devtools-options {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
   align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .devtools-option-arrow {
   color: var(--ant-color-text-tertiary);
-}
-
-.devtools-field-size--root {
-  width: 140px;
-}
-
-.devtools-field-size--base {
-  width: 160px;
-}
-
-.devtools-field-size--random {
-  width: 130px;
+  flex-shrink: 0;
 }
 
 .devtools-two-col {
@@ -385,7 +359,7 @@
 
 .devtools-field-label {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
   color: var(--ant-color-text-secondary);
   font-size: 11px;
 }
@@ -395,27 +369,31 @@
 }
 
 .devtools-actions {
+  display: flex;
+  align-items: center;
   gap: 8px;
   flex-wrap: wrap;
 }
 
+/* ===== 颜色预览 ===== */
 .devtools-color-preview {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .devtools-color-swatch {
-  width: 46px;
-  height: 46px;
+  width: 42px;
+  height: 42px;
   border: 1px solid var(--app-hairline);
-  border-radius: 13px;
+  border-radius: 12px;
   flex-shrink: 0;
 }
 
+/* ===== 输出区域 ===== */
 .devtools-output {
   border: 1px solid var(--app-hairline);
-  border-radius: 14px;
+  border-radius: 12px;
   background: color-mix(in srgb, var(--ant-color-bg-container) 88%, transparent);
   overflow: hidden;
 }
@@ -424,23 +402,23 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 10px;
+  padding: 7px 10px;
   border-bottom: 1px solid var(--app-hairline);
 }
 
+.devtools-output-label {
+  font-size: 12px;
+}
+
 .devtools-output-body {
-  max-height: 320px;
+  min-height: 120px;
+  max-height: 55vh;
   overflow: auto;
   padding: 10px;
 }
 
 .devtools-output-meta {
-  padding: 0 10px 10px;
-}
-
-.devtools-output-label,
-.devtools-output-meta-text {
-  font-size: 12px;
+  padding: 0 10px 8px;
 }
 
 .devtools-output-meta-text {
@@ -453,16 +431,17 @@
   word-break: break-word;
   color: var(--ant-color-text);
   font-size: 12px;
-  line-height: 1.55;
+  line-height: 1.5;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
+/* ===== Diff 输出 ===== */
 .devtools-diff-line {
   padding: 1px 5px;
   border-radius: 4px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 12px;
-  line-height: 1.55;
+  line-height: 1.5;
 }
 
 .devtools-diff-line.is-add {
@@ -475,10 +454,11 @@
   background: var(--ant-color-error-bg);
 }
 
+/* ===== 错误提示 ===== */
 .devtools-error {
-  padding: 9px 11px;
+  padding: 8px 10px;
   border: 1px solid var(--ant-color-error-border);
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--ant-color-error-bg);
 }
 
@@ -486,29 +466,40 @@
   font-size: 12px;
 }
 
+/* ===== 空状态 ===== */
 .devtools-empty-state {
+  display: flex;
   justify-content: center;
+  padding: 32px 0;
   grid-column: 1 / -1;
-  padding: 48px 0;
 }
 
+/* ===== 隐私提示 ===== */
 .devtools-privacy {
+  display: flex;
   justify-content: center;
+  align-items: center;
   gap: 6px;
-  padding: 10px 0 0;
+  padding: 10px 0 2px;
   color: var(--ant-color-text-tertiary);
   font-size: 11px;
 }
 
-@media (max-width: 980px) {
-  .devtools-hero,
+/* ===== 响应式 ===== */
+@media (max-width: 860px) {
   .devtools-workbench {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 
   .devtools-list-pane {
+    width: 100%;
     border-right: 0;
     border-bottom: 1px solid var(--app-hairline);
+    max-height: 40vh;
+  }
+
+  .devtools-panel-pane {
+    min-height: 60vh;
   }
 
   .devtools-panel-card {
@@ -518,33 +509,32 @@
   .devtools-search {
     width: 100%;
   }
-}
 
-@media (max-width: 1100px) {
-  .devtools-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .devtools-toolbar {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 
-@media (max-width: 640px) {
-  .devtools-page {
-    padding-top: 16px;
+@media (max-width: 540px) {
+  .devtools-hero {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 14px 10px;
+  }
+
+  .devtools-stats {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .devtools-toolbar,
-  .devtools-hero,
   .devtools-list-pane,
   .devtools-panel-pane {
     padding-left: 12px;
     padding-right: 12px;
   }
 
-  .devtools-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .devtools-grid,
   .devtools-two-col {
     grid-template-columns: 1fr;
   }

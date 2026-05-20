@@ -64,7 +64,4 @@ export async function deleteProfile(id: string): Promise<void> {
   await saveProfiles(filtered);
 }
 
-/** 用预设覆盖当前设置 */
-export function applyProfile(profile: SettingsProfile): Partial<UserSettings> {
-  return profile.settings;
-}
+

@@ -2,7 +2,7 @@
  * SelectionModeNotice —— 多选模式提示条。
  *
  * 功能：显示当前已选标签页的数量/域名/窗口统计，并提供「全选 / 清空 / 退出」操作。
- * 从原 WorkspaceOverview.tsx 拆分独立，消除未使用的 WorkspaceOverview 组件（死代码）。
+ * 历史来源：从早期 WorkspaceOverview 组件中拆分独立。
  */
 
 import { Button, Card, Space, theme } from 'antd';

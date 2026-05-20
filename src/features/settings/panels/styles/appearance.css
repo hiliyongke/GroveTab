@@ -1,30 +1,54 @@
+/**
+ * AppearancePanel — 外观设置面板样式
+ *
+ * 适配抽屉窄宽（~540px 可用宽度）：
+ *   - 皮肤网格 3 列
+ *   - 渐变网格 4 列
+ *   - 预设卡片圆角柔和
+ *   - 间距紧凑
+ */
+
 .appearance-panel,
 .appearance-full-width {
   width: 100%;
 }
 
+/* ── 皮肤预设网格 ── */
 .appearance-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+/* ── 渐变预设网格 ── */
+.appearance-gradient-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
 }
 
 .appearance-divider {
-  margin: 8px 0;
-  font-size: 12px;
+  margin: 6px 0;
+  font-size: 11px;
   color: var(--ant-color-text-tertiary);
 }
 
+/* ── 预设卡片 ── */
 .appearance-preset-card {
   all: unset;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   overflow: hidden;
   cursor: pointer;
-  border-radius: var(--ant-border-radius-lg);
-  border: 1px solid var(--ant-color-border-secondary);
+  border-radius: 10px;
+  border: 1.5px solid var(--ant-color-border-secondary);
   transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.appearance-preset-card:hover {
+  border-color: var(--ant-color-border);
 }
 
 .appearance-preset-card.is-selected {
@@ -32,17 +56,18 @@
   box-shadow: 0 0 0 1px var(--ant-color-primary);
 }
 
+/* ── 预览区 ── */
 .appearance-preset-preview {
   position: relative;
   background: var(--appearance-preview-bg);
 }
 
 .appearance-preset-preview--skin {
-  height: 52px;
+  height: 48px;
 }
 
 .appearance-preset-preview--gradient {
-  height: 48px;
+  height: 40px;
 }
 
 .appearance-preset-edit-icon {
@@ -53,17 +78,18 @@
   color: var(--appearance-edit-icon, rgba(0, 0, 0, 0.4));
 }
 
+/* ── 主题模式徽章 ── */
 .appearance-mode-badge {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 16px;
-  height: 16px;
+  top: 3px;
+  right: 3px;
+  width: 15px;
+  height: 15px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  font-size: 9px;
+  font-size: 8px;
 }
 
 .appearance-mode-badge.is-dark {
@@ -76,8 +102,9 @@
   background: rgba(255, 255, 255, 0.72);
 }
 
+/* ── 预设卡片底部信息 ── */
 .appearance-preset-meta {
-  padding: 4px 6px;
+  padding: 5px 6px;
   background: var(--ant-color-bg-container);
   text-align: center;
 }
@@ -109,9 +136,10 @@
   color: var(--ant-color-text-tertiary);
 }
 
+/* ── 仅标签（无描述） ── */
 .appearance-preset-label-only {
   padding: 4px 6px;
-  font-size: 11px;
+  font-size: 10.5px;
   text-align: center;
   background: var(--ant-color-bg-container);
   color: var(--ant-color-text-secondary);
@@ -122,6 +150,7 @@
   color: var(--ant-color-primary);
 }
 
+/* ── 通用堆叠布局 ── */
 .appearance-toggle-group,
 .appearance-slider-group,
 .appearance-editor-stops,
@@ -140,6 +169,7 @@
   font-size: 12px;
 }
 
+/* ── 行布局 ── */
 .appearance-toggle-row,
 .appearance-slider-header,
 .appearance-inline-row,
@@ -162,6 +192,7 @@
   justify-content: space-between;
 }
 
+/* ── 文本颜色 ── */
 .appearance-toggle-label,
 .appearance-slider-label,
 .appearance-color-label,
@@ -197,15 +228,11 @@
   font-feature-settings: 'tnum';
 }
 
+/* ── 卡片/区域容器 ── */
 .appearance-custom-box,
 .appearance-editor-shell,
 .appearance-visibility-row {
-  border-radius: var(--ant-border-radius-lg);
-}
-
-.appearance-custom-box,
-.appearance-editor-shell,
-.appearance-visibility-row {
+  border-radius: 10px;
   background: var(--ant-color-fill-quaternary);
 }
 
@@ -301,7 +328,7 @@
 }
 
 .appearance-visibility-list {
-  gap: 10px;
+  gap: 8px;
 }
 
 .appearance-visibility-row {

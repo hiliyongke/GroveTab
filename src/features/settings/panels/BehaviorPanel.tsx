@@ -6,7 +6,6 @@
  * 2. ViewLayoutSettings - 视图与布局设置
  * 3. TimelineSettings - 时间轴设置
  * 4. SearchSettings - 搜索设置
- * 5. DailyQuoteSettings - 每日金句设置
  */
 
 import type { UserSettings } from '@/shared/types';
@@ -15,7 +14,6 @@ import { GeneralSettings } from './GeneralSettings';
 import { ViewLayoutSettings } from './ViewLayoutSettings';
 import { TimelineSettings } from './TimelineSettings';
 import { SearchSettings } from './SearchSettings';
-import { DailyQuoteSettings } from './DailyQuoteSettings';
 
 interface BehaviorPanelProps {
   settings: UserSettings;
@@ -30,45 +28,45 @@ interface BehaviorPanelProps {
 export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) {
   const { t } = useT();
   return (
-    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 32 }}>
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 28 }}>
       {/* 通用行为设置 */}
       <section>
-        <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: 'inherit' }}>
+        <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 14, color: 'var(--ant-color-text)', letterSpacing: '-0.01em' }}>
           {t('settings.sectionGeneral')}
         </h3>
-        <GeneralSettings settings={settings} updateSettings={updateSettings} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <GeneralSettings settings={settings} updateSettings={updateSettings} />
+        </div>
       </section>
 
       {/* 视图与布局设置 */}
       <section>
-        <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: 'inherit' }}>
+        <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 14, color: 'var(--ant-color-text)', letterSpacing: '-0.01em' }}>
           {t('settings.sectionViewLayout')}
         </h3>
-        <ViewLayoutSettings settings={settings} updateSettings={updateSettings} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <ViewLayoutSettings settings={settings} updateSettings={updateSettings} />
+        </div>
       </section>
 
       {/* 时间轴设置 */}
       <section>
-        <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: 'inherit' }}>
+        <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 14, color: 'var(--ant-color-text)', letterSpacing: '-0.01em' }}>
           {t('settings.sectionTimeline')}
         </h3>
-        <TimelineSettings settings={settings} updateSettings={updateSettings} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <TimelineSettings settings={settings} updateSettings={updateSettings} />
+        </div>
       </section>
 
       {/* 搜索设置 */}
       <section>
-        <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: 'inherit' }}>
+        <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 14, color: 'var(--ant-color-text)', letterSpacing: '-0.01em' }}>
           {t('settings.sectionSearch')}
         </h3>
-        <SearchSettings settings={settings} updateSettings={updateSettings} />
-      </section>
-
-      {/* 每日金句设置 */}
-      <section>
-        <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: 'inherit' }}>
-          {t('settings.sectionDailyQuote')}
-        </h3>
-        <DailyQuoteSettings settings={settings} updateSettings={updateSettings} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <SearchSettings settings={settings} updateSettings={updateSettings} />
+        </div>
       </section>
     </div>
   );

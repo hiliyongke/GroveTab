@@ -33,6 +33,7 @@ const CURRENT_SCHEMA_VERSION = 3;
 const DEFAULT_SETTINGS: UserSettings = {
   overrideNewTab: true,
   newtabPageMode: 'workspace',
+  viewTabPosition: 'top',
   defaultView: 'domain',
   theme: 'system',
   gradientPreset: 'default',
@@ -61,7 +62,6 @@ const DEFAULT_SETTINGS: UserSettings = {
     heroSlogan: true,
     heroSearch: true,
     viewSwitcher: true,
-    workspaceOverview: true,
     tidySuggestion: true,
   },
   // v1.0 封板新增默认值
@@ -72,102 +72,6 @@ const DEFAULT_SETTINGS: UserSettings = {
   autoSnapshotFrequency: '12h',
   enableOgFetch: false,
   // v1.2 新增默认值
-  dailyQuote: {
-    enabled: true,
-    categories: ['aphorism', 'renmin', 'poetry', 'essay', 'custom'],
-    fontSize: 15,
-    showSource: true,
-    customQuotes: [],
-  },
-  speedDial: {
-    enabled: true,
-    activeGroupId: 'work',
-    openInNewTab: true,
-    showLabels: true,
-    groups: [
-      {
-        id: 'work',
-        name: '工作',
-        links: [
-          { id: 'work-github', title: 'GitHub', url: 'https://github.com', emoji: '🐙', color: '#24292f' },
-          { id: 'work-figma', title: 'Figma', url: 'https://www.figma.com', emoji: '🎨', color: '#f24e1e' },
-          { id: 'work-notion', title: 'Notion', url: 'https://www.notion.so', emoji: '📝', color: '#111111' },
-          { id: 'work-linear', title: 'Linear', url: 'https://linear.app', emoji: '📈', color: '#5e6ad2' },
-        ],
-      },
-      {
-        id: 'life',
-        name: '生活',
-        links: [
-          { id: 'life-bilibili', title: 'Bilibili', url: 'https://www.bilibili.com', emoji: '📺', color: '#00a1d6' },
-          { id: 'life-douban', title: '豆瓣', url: 'https://www.douban.com', emoji: '🎬', color: '#2d963d' },
-          { id: 'life-jd', title: '京东', url: 'https://www.jd.com', emoji: '🛒', color: '#d70c18' },
-        ],
-      },
-      {
-        id: 'learn',
-        name: '学习',
-        links: [
-          { id: 'learn-mdn', title: 'MDN', url: 'https://developer.mozilla.org', emoji: '📚', color: '#0f172a' },
-          { id: 'learn-stackoverflow', title: 'Stack Overflow', url: 'https://stackoverflow.com', emoji: '💡', color: '#f48024' },
-          { id: 'learn-zhihu', title: '知乎', url: 'https://www.zhihu.com', emoji: '🧠', color: '#1677ff' },
-        ],
-      },
-    ],
-  },
-  pomodoro: {
-    enabled: true,
-    focusMinutes: 25,
-    shortBreakMinutes: 5,
-    longBreakMinutes: 15,
-    autoStartBreak: false,
-  },
-  countdowns: {
-    enabled: true,
-    showPastEvents: false,
-    items: [
-      { id: 'anniversary-launch', title: '项目上线纪念', targetDate: '2026-06-01', emoji: '🚀', color: '#1677ff' },
-      { id: 'anniversary-holiday', title: '下一次旅行', targetDate: '2026-10-01', emoji: '🏕️', color: '#52c41a' },
-    ],
-  },
-  workCountdown: {
-    enabled: true,
-    workdayEnd: '18:30',
-    offLabel: '今天收工啦',
-  },
-  todoWidget: {
-    enabled: true,
-    items: [
-      { id: 'todo-1', text: '清理待关闭标签页', done: false },
-      { id: 'todo-2', text: '补一版周报', done: false },
-      { id: 'todo-3', text: '下班前同步进度', done: true },
-    ],
-  },
-  stickyNotes: {
-    enabled: true,
-    items: [
-      {
-        id: 'sticky-1',
-        title: '灵感速记',
-        content: '把真正高频使用的小工具放到顶部，主内容区保持专注。',
-        color: '#fff7e6',
-      },
-    ],
-  },
-  waterReminder: {
-    enabled: true,
-    goalCups: 8,
-    currentCups: 0,
-    intervalMinutes: 60,
-  },
-  habitTracker: {
-    enabled: true,
-    items: [
-      { id: 'habit-read', name: '阅读 30 分钟', emoji: '📖', records: [] },
-      { id: 'habit-sport', name: '运动打卡', emoji: '🏃', records: [] },
-      { id: 'habit-early', name: '早睡', emoji: '🌙', records: [] },
-    ],
-  },
   clickEffect: 'off',
   videoBackground: { type: 'none' },
 };
@@ -229,49 +133,6 @@ function withDefaults(partial: Partial<UserSettings>): UserSettings {
     ...DEFAULT_SETTINGS.uiVisibility,
     ...(partial.uiVisibility === undefined ? {} : partial.uiVisibility),
   };
-  merged.dailyQuote = {
-    ...DEFAULT_SETTINGS.dailyQuote,
-    ...(partial.dailyQuote === undefined ? {} : partial.dailyQuote),
-    categories: partial.dailyQuote?.categories ?? DEFAULT_SETTINGS.dailyQuote?.categories,
-    customQuotes: partial.dailyQuote?.customQuotes ?? DEFAULT_SETTINGS.dailyQuote?.customQuotes,
-  };
-  merged.speedDial = {
-    ...DEFAULT_SETTINGS.speedDial,
-    ...(partial.speedDial === undefined ? {} : partial.speedDial),
-    groups: partial.speedDial?.groups ?? DEFAULT_SETTINGS.speedDial?.groups,
-  };
-  merged.pomodoro = {
-    ...DEFAULT_SETTINGS.pomodoro,
-    ...(partial.pomodoro === undefined ? {} : partial.pomodoro),
-  };
-  merged.countdowns = {
-    ...DEFAULT_SETTINGS.countdowns,
-    ...(partial.countdowns === undefined ? {} : partial.countdowns),
-    items: partial.countdowns?.items ?? DEFAULT_SETTINGS.countdowns?.items,
-  };
-  merged.workCountdown = {
-    ...DEFAULT_SETTINGS.workCountdown,
-    ...(partial.workCountdown === undefined ? {} : partial.workCountdown),
-  };
-  merged.todoWidget = {
-    ...DEFAULT_SETTINGS.todoWidget,
-    ...(partial.todoWidget === undefined ? {} : partial.todoWidget),
-    items: partial.todoWidget?.items ?? DEFAULT_SETTINGS.todoWidget?.items,
-  };
-  merged.stickyNotes = {
-    ...DEFAULT_SETTINGS.stickyNotes,
-    ...(partial.stickyNotes === undefined ? {} : partial.stickyNotes),
-    items: partial.stickyNotes?.items ?? DEFAULT_SETTINGS.stickyNotes?.items,
-  };
-  merged.waterReminder = {
-    ...DEFAULT_SETTINGS.waterReminder,
-    ...(partial.waterReminder === undefined ? {} : partial.waterReminder),
-  };
-  merged.habitTracker = {
-    ...DEFAULT_SETTINGS.habitTracker,
-    ...(partial.habitTracker === undefined ? {} : partial.habitTracker),
-    items: partial.habitTracker?.items ?? DEFAULT_SETTINGS.habitTracker?.items,
-  };
   return merged;
 }
 
@@ -280,58 +141,6 @@ export async function saveSettings(settings: Partial<UserSettings>): Promise<Use
   const merged = withDefaults({ ...current, ...settings });
   if (settings.uiVisibility !== undefined) {
     merged.uiVisibility = { ...current.uiVisibility, ...settings.uiVisibility };
-  }
-  if (settings.dailyQuote !== undefined) {
-    merged.dailyQuote = {
-      ...current.dailyQuote,
-      ...settings.dailyQuote,
-      categories: settings.dailyQuote.categories ?? current.dailyQuote?.categories,
-      customQuotes: settings.dailyQuote.customQuotes ?? current.dailyQuote?.customQuotes,
-    };
-  }
-  if (settings.speedDial !== undefined) {
-    merged.speedDial = {
-      ...current.speedDial,
-      ...settings.speedDial,
-      groups: settings.speedDial.groups ?? current.speedDial?.groups,
-    };
-  }
-  if (settings.pomodoro !== undefined) {
-    merged.pomodoro = { ...current.pomodoro, ...settings.pomodoro };
-  }
-  if (settings.countdowns !== undefined) {
-    merged.countdowns = {
-      ...current.countdowns,
-      ...settings.countdowns,
-      items: settings.countdowns.items ?? current.countdowns?.items,
-    };
-  }
-  if (settings.workCountdown !== undefined) {
-    merged.workCountdown = { ...current.workCountdown, ...settings.workCountdown };
-  }
-  if (settings.todoWidget !== undefined) {
-    merged.todoWidget = {
-      ...current.todoWidget,
-      ...settings.todoWidget,
-      items: settings.todoWidget.items ?? current.todoWidget?.items,
-    };
-  }
-  if (settings.stickyNotes !== undefined) {
-    merged.stickyNotes = {
-      ...current.stickyNotes,
-      ...settings.stickyNotes,
-      items: settings.stickyNotes.items ?? current.stickyNotes?.items,
-    };
-  }
-  if (settings.waterReminder !== undefined) {
-    merged.waterReminder = { ...current.waterReminder, ...settings.waterReminder };
-  }
-  if (settings.habitTracker !== undefined) {
-    merged.habitTracker = {
-      ...current.habitTracker,
-      ...settings.habitTracker,
-      items: settings.habitTracker.items ?? current.habitTracker?.items,
-    };
   }
   await setData(STORAGE_KEYS.settings, merged);
   return merged;
@@ -447,11 +256,6 @@ export async function pushRecentSearch(query: string): Promise<string[]> {
   return next.map((e) => e.query);
 }
 
-/** 清空搜索历史。 */
-export async function clearSearchHistory(): Promise<void> {
-  await setData(STORAGE_KEYS.searchHistory, []);
-}
-
 // ── Recent Activity (F-27) ─────────────────────────────
 
 const MAX_ACTIVITY = 20;
@@ -541,17 +345,8 @@ export async function saveAutoSnapshotMeta(meta: AutoSnapshotMeta): Promise<void
 
 // ── Metrics (§17) ──────────────────────────────────────
 
-const MAX_METRICS = 2000;
-
 export async function getMetrics(): Promise<MetricEvent[]> {
   return (await getData<MetricEvent[]>(STORAGE_KEYS.metrics)) ?? [];
-}
-
-export async function pushMetric(event: MetricEvent): Promise<void> {
-  const list = await getMetrics();
-  list.push(event);
-  if (list.length > MAX_METRICS) list.splice(0, list.length - MAX_METRICS);
-  await setData(STORAGE_KEYS.metrics, list);
 }
 
 export async function clearMetrics(): Promise<void> {

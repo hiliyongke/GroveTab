@@ -11,9 +11,6 @@ import { storageGet, storageSet } from '@/chrome';
 import type { HotBoardData, TrendingCache, TrendingCategory, TrendingItem } from '@/shared/types';
 import { STORAGE_KEYS } from '@/shared/config/storage-keys';
 
-/** 缓存有效期（毫秒），30 分钟 */
-const CACHE_TTL_MS = 30 * 60 * 1000;
-
 /** 存储 key */
 const CACHE_KEY = STORAGE_KEYS.trendingCache;
 
@@ -45,7 +42,7 @@ interface PlatformMeta {
 }
 
 /** 支持的热榜平台列表（仅包含 api.xcvts.cn 实测可用的平台） */
-export const PLATFORMS: PlatformMeta[] = [
+const PLATFORMS: PlatformMeta[] = [
   // 综合
   { id: 'weibo', name: '微博', subtitle: '热搜榜', category: 'comprehensive', color: '#ff8200', order: 1 },
   { id: 'baidu', name: '百度', subtitle: '热搜榜', category: 'comprehensive', color: '#306cff', order: 2 },
@@ -181,49 +178,7 @@ async function setCache(cache: TrendingCache): Promise<void> {
   await storageSet(CACHE_KEY, cache);
 }
 
-/** 判断缓存是否过期 */
-function isCacheExpired(cache: TrendingCache | undefined): boolean {
-  if (cache === undefined) return true;
-  return Date.now() - cache.lastRefreshAt > CACHE_TTL_MS;
-}
-
 // ── 公开 API ──────────────────────────────────────────
-
-/**
- * 获取单个平台的热榜数据（带缓存）
- *
- * 策略：
- *   1. 缓存未过期 → 直接返回
- *   2. 请求小尘API → 成功则写入缓存并返回
- *   3. 失败 → 返回缓存中的旧数据（如有）或 null
- */
-export async function fetchHotBoard(platformId: string): Promise<HotBoardData | null> {
-  // 1. 检查缓存
-  const cache = await getCache();
-  const cached = cache?.boards[platformId];
-  if (cached && !isCacheExpired(cache)) {
-    return { ...cached, from: 'cache' };
-  }
-
-  // 2. 请求 API
-  const result = await fetchFromXcvts(platformId);
-
-  // 3. 写入缓存
-  if (result !== null) {
-    const newCache: TrendingCache = {
-      boards: {
-        ...(cache?.boards ?? {}),
-        [platformId]: result,
-      },
-      lastRefreshAt: Date.now(),
-    };
-    await setCache(newCache);
-    return result;
-  }
-
-  // 4. 失败，返回旧缓存
-  return cached ?? null;
-}
 
 /**
  * 批量获取多个平台的热榜数据
@@ -301,14 +256,4 @@ export async function forceRefreshBoard(platformId: string): Promise<HotBoardDat
 /**
  * 清空热榜缓存
  */
-export async function clearTrendingCache(): Promise<void> {
-  await storageSet(CACHE_KEY, { boards: {}, lastRefreshAt: 0 });
-}
 
-/**
- * 获取所有已缓存的榜单数据
- */
-export async function getCachedBoards(): Promise<Record<string, HotBoardData>> {
-  const cache = await getCache();
-  return cache?.boards ?? {};
-}

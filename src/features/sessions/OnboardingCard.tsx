@@ -269,5 +269,3 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
     </Modal>
   );
 }
-
-export default OnboardingCard;

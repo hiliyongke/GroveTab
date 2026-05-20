@@ -1,38 +1,45 @@
 /**
- * SettingsPanel — 右侧抽屉式设置面板（antd 版）
+ * SettingsPanel — 设置抽屉（Drawer 版）
  *
- * 拆分为独立面板后，此处仅负责：
- *   - Drawer 外壳（placement="right"）
- *   - Tabs 导航组装
- *   - 向各子面板传递 settings / updateSettings
- *   - 支持受控激活 Tab（defaultActiveTab），便于从外部 hash（#about）直接切到指定 Tab
+ * 布局：
+ *   - 右侧抽屉（带毛玻璃遮罩）
+ *   - 左侧图标导航栏 + 右侧内容区（可滚动）
+ *
+ * 支持受控激活 Tab（defaultActiveTab），便于从外部 hash（#about）直接切到指定 Tab。
  */
 
-import { Drawer, Tabs } from 'antd';
-import { useState, useEffect } from 'react';
+import { Drawer } from 'antd';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Palette,
   SlidersHorizontal,
   Database,
   KeyRound,
   Info,
-  Quote,
 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
+import './settings.css';
 import { AppearancePanel } from './panels/AppearancePanel';
 import { BehaviorPanel } from './panels/BehaviorPanel';
 import { DataPanel } from './panels/DataPanel';
 import { ShortcutsPanel } from './panels/ShortcutsPanel';
 import { AboutPanel } from './panels/AboutPanel';
-import { QuotesPanel } from './panels/QuotesPanel';
 
 interface SettingsPanelProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** 初始激活的 Tab（可选），支持 'appearance' | 'behavior' | 'data' | 'shortcuts' | 'about'。 */
   defaultActiveTab?: string;
+}
+
+/** Tab 配置项 */
+interface TabConfig {
+  key: string;
+  icon: React.ReactNode;
+  labelKey: string;
+  component: React.ReactNode;
 }
 
 export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearance' }: SettingsPanelProps) {
@@ -46,75 +53,90 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
     setActiveTab(defaultActiveTab);
   }, [defaultActiveTab]);
 
+  const handleClose = useCallback(() => {
+    onOpenChange(false);
+  }, [onOpenChange]);
+
+  /** Tab 配置 */
+  const tabs: TabConfig[] = [
+    {
+      key: 'appearance',
+      icon: <Palette size={ICON_SIZE.MEDIUM} />,
+      labelKey: 'settings.appearance',
+      component: <AppearancePanel settings={settings} updateSettings={updateSettings} />,
+    },
+    {
+      key: 'behavior',
+      icon: <SlidersHorizontal size={ICON_SIZE.MEDIUM} />,
+      labelKey: 'settings.behavior',
+      component: <BehaviorPanel settings={settings} updateSettings={updateSettings} />,
+    },
+    {
+      key: 'data',
+      icon: <Database size={ICON_SIZE.MEDIUM} />,
+      labelKey: 'settings.data',
+      component: <DataPanel />,
+    },
+    {
+      key: 'shortcuts',
+      icon: <KeyRound size={ICON_SIZE.MEDIUM} />,
+      labelKey: 'settings.shortcuts',
+      component: <ShortcutsPanel />,
+    },
+    {
+      key: 'about',
+      icon: <Info size={ICON_SIZE.MEDIUM} />,
+      labelKey: 'settings.about',
+      component: <AboutPanel />,
+    },
+  ];
+
+  /** 当前激活的 Tab 内容 */
+  const activeItem = tabs.find((tab) => tab.key === activeTab);
+
   return (
     <Drawer
       open={open}
-      onClose={() => onOpenChange(false)}
-      title={t('settings.title')}
-      placement="right"
-      width={420}
-      destroyOnHidden
+      onClose={handleClose}
+      destroyOnClose
+      width={640}
+      rootClassName="settings-drawer"
+      styles={{
+        mask: { backdropFilter: 'blur(8px)', background: 'rgba(0,0,0,0.32)' },
+        body: { padding: 0, overflow: 'hidden' },
+        header: { display: 'none' },
+      }}
     >
-      <Tabs
-        activeKey={activeTab}
-        onChange={(key) => setActiveTab(key)}
-        items={[
-          {
-            key: 'appearance',
-            label: (
-              <span>
-<Palette size={ICON_SIZE.MEDIUM} /> {t('settings.appearance')}
-              </span>
-            ),
-            children: <AppearancePanel settings={settings} updateSettings={updateSettings} />,
-          },
-          {
-            key: 'behavior',
-            label: (
-              <span>
-<SlidersHorizontal size={ICON_SIZE.MEDIUM} /> {t('settings.behavior')}
-              </span>
-            ),
-            children: <BehaviorPanel settings={settings} updateSettings={updateSettings} />,
-          },
-          {
-            key: 'quotes',
-            label: (
-              <span>
-<Quote size={ICON_SIZE.MEDIUM} /> {t('settings.quotes')}
-              </span>
-            ),
-            children: <QuotesPanel />,
-          },
-          {
-            key: 'data',
-            label: (
-              <span>
-<Database size={ICON_SIZE.MEDIUM} /> {t('settings.data')}
-              </span>
-            ),
-            children: <DataPanel />,
-          },
-          {
-            key: 'shortcuts',
-            label: (
-              <span>
-<KeyRound size={ICON_SIZE.MEDIUM} /> {t('settings.shortcuts')}
-              </span>
-            ),
-            children: <ShortcutsPanel />,
-          },
-          {
-            key: 'about',
-            label: (
-              <span>
-<Info size={ICON_SIZE.MEDIUM} /> {t('settings.about')}
-              </span>
-            ),
-            children: <AboutPanel />,
-          },
-        ]}
-      />
+      <div className="settings-shell">
+        {/* 左侧图标导航 */}
+        <nav className="settings-nav">
+          <div className="settings-nav__list">
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                className={`settings-nav__item${activeTab === tab.key ? ' is-active' : ''}`}
+                onClick={() => setActiveTab(tab.key)}
+                title={t(tab.labelKey)}
+              >
+                <span className="settings-nav__icon">{tab.icon}</span>
+              </button>
+            ))}
+          </div>
+        </nav>
+
+        {/* 右侧内容区 */}
+        <main className="settings-content">
+          <div className="settings-content__header">
+            <h2 className="settings-content__title">
+              {activeItem && t(activeItem.labelKey)}
+            </h2>
+          </div>
+          <div className="settings-content__body">
+            {activeItem?.component}
+          </div>
+        </main>
+      </div>
     </Drawer>
   );
 }

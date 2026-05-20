@@ -19,7 +19,7 @@ export type DevToolCategory =
   | 'network';
 
 /** 工具交互模式：transform（输入→输出双向） / action（一键执行） */
-export type DevToolMode = 'transform' | 'action';
+type DevToolMode = 'transform' | 'action';
 
 /** 工具元信息定义 */
 export interface DevToolDefinition {
@@ -344,24 +344,6 @@ export const DEV_TOOLS: DevToolDefinition[] = [
     order: 30,
   },
 ];
-
-/** 按 id 查找工具定义 */
-export function getToolById(id: string): DevToolDefinition | undefined {
-  return DEV_TOOLS.find((tool) => tool.id === id);
-}
-
-/** 获取所有分类（去重、保持注册顺序） */
-export function getAllCategories(): DevToolCategory[] {
-  const seen = new Set<DevToolCategory>();
-  const result: DevToolCategory[] = [];
-  for (const tool of DEV_TOOLS) {
-    if (!seen.has(tool.category)) {
-      seen.add(tool.category);
-      result.push(tool.category);
-    }
-  }
-  return result;
-}
 
 /** 按分类筛选工具 */
 export function getToolsByCategory(category: DevToolCategory | 'all'): DevToolDefinition[] {

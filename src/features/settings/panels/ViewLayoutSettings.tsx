@@ -11,7 +11,7 @@
  */
 
 import { Select, Segmented, Switch } from 'antd';
-import type { NewtabPageMode, UserSettings } from '@/shared/types';
+import type { NewtabPageMode, UserSettings, ViewTabPosition } from '@/shared/types';
 import { useT } from '@/shared/i18n';
 import { VIEW_CONFIGS } from '@/shared/config/views';
 import { Field } from '../components/Field';
@@ -56,6 +56,22 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
             value: view.id,
             label: t(view.labelKey),
           }))}
+        />
+      </Field>
+
+      <Field
+        label={t('settings.viewTabPosition')}
+        hint={t('settings.viewTabPositionHint')}
+      >
+        <Segmented
+          block
+          value={settings.viewTabPosition ?? 'top'}
+          onChange={(value) => handleSetting({ viewTabPosition: value as ViewTabPosition })}
+          options={[
+            { value: 'top', label: t('settings.viewTabPositionTop') },
+            { value: 'left', label: t('settings.viewTabPositionLeft') },
+            { value: 'right', label: t('settings.viewTabPositionRight') },
+          ]}
         />
       </Field>
 

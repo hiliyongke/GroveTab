@@ -26,7 +26,7 @@ export type SkinPresetId =
   | 'apple';
 
 /** 毛玻璃配置 */
-export interface GlassConfig {
+interface GlassConfig {
   /** backdrop-filter blur 值（px） */
   blur: number;
   /** backdrop-filter saturate 值（%） */
@@ -38,7 +38,7 @@ export interface GlassConfig {
 }
 
 /** 阴影配置 */
-export interface ShadowConfig {
+interface ShadowConfig {
   /** 卡片默认阴影 */
   card: { light: string; dark: string };
   /** 卡片 hover 阴影 */
@@ -50,7 +50,7 @@ export interface ShadowConfig {
 }
 
 /** 背景纹理配置 */
-export interface TextureConfig {
+interface TextureConfig {
   /** 是否启用噪点纹理叠加 */
   noise: boolean;
   /** 噪点纹理透明度 */
@@ -62,7 +62,7 @@ export interface TextureConfig {
 }
 
 /** 卡片风格配置 */
-export interface CardStyleConfig {
+interface CardStyleConfig {
   /** 默认边框宽度 */
   borderWidth: number;
   /** hover 边框宽度 */

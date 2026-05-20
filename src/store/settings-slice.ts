@@ -26,36 +26,6 @@ function mergeSettingsForStore(current: UserSettings, partial: Partial<UserSetti
     uiVisibility: partial.uiVisibility === undefined
       ? current.uiVisibility
       : { ...current.uiVisibility, ...partial.uiVisibility },
-    speedDial: partial.speedDial === undefined
-      ? current.speedDial
-      : { ...current.speedDial, ...partial.speedDial, groups: partial.speedDial.groups ?? current.speedDial?.groups },
-    dailyQuote: partial.dailyQuote === undefined
-      ? current.dailyQuote
-      : {
-          ...current.dailyQuote,
-          ...partial.dailyQuote,
-          categories: partial.dailyQuote.categories ?? current.dailyQuote?.categories,
-          customQuotes: partial.dailyQuote.customQuotes ?? current.dailyQuote?.customQuotes,
-        },
-    pomodoro: partial.pomodoro === undefined ? current.pomodoro : { ...current.pomodoro, ...partial.pomodoro },
-    countdowns: partial.countdowns === undefined
-      ? current.countdowns
-      : { ...current.countdowns, ...partial.countdowns, items: partial.countdowns.items ?? current.countdowns?.items },
-    workCountdown: partial.workCountdown === undefined
-      ? current.workCountdown
-      : { ...current.workCountdown, ...partial.workCountdown },
-    todoWidget: partial.todoWidget === undefined
-      ? current.todoWidget
-      : { ...current.todoWidget, ...partial.todoWidget, items: partial.todoWidget.items ?? current.todoWidget?.items },
-    stickyNotes: partial.stickyNotes === undefined
-      ? current.stickyNotes
-      : { ...current.stickyNotes, ...partial.stickyNotes, items: partial.stickyNotes.items ?? current.stickyNotes?.items },
-    waterReminder: partial.waterReminder === undefined
-      ? current.waterReminder
-      : { ...current.waterReminder, ...partial.waterReminder },
-    habitTracker: partial.habitTracker === undefined
-      ? current.habitTracker
-      : { ...current.habitTracker, ...partial.habitTracker, items: partial.habitTracker.items ?? current.habitTracker?.items },
   };
 }
 
@@ -63,6 +33,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   settings: {
     overrideNewTab: true,
     newtabPageMode: 'workspace',
+    viewTabPosition: 'top',
     defaultView: 'domain',
     theme: 'system',
     gradientPreset: 'default',
@@ -90,9 +61,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       heroSlogan: true,
       heroSearch: true,
       viewSwitcher: true,
-      workspaceOverview: true,
       tidySuggestion: true,
-      activityStrip: true,
     },
     // v1.0 封板新增默认值
     dedupStrictness: 'loose',

@@ -25,7 +25,6 @@ import {
   Search as SearchIcon,
   BookmarkIcon,
   Palette,
-  Quote as QuoteIcon,
   Code2,
   ExternalLink,
   Mail,
@@ -60,7 +59,6 @@ const FEATURES: FeatureCard[] = [
   { icon: SearchIcon, titleKey: 'about.feature.search.title', descKey: 'about.feature.search.desc', color: '#8B5CF6' },
   { icon: BookmarkIcon, titleKey: 'about.feature.bookmark.title', descKey: 'about.feature.bookmark.desc', color: '#10B981' },
   { icon: Palette, titleKey: 'about.feature.skin.title', descKey: 'about.feature.skin.desc', color: '#9B8EC4' },
-  { icon: QuoteIcon, titleKey: 'about.feature.quote.title', descKey: 'about.feature.quote.desc', color: '#3D8EB9' },
 ];
 
 export function AboutPanel() {
@@ -68,7 +66,7 @@ export function AboutPanel() {
   const brandName = getBrandDisplayName(locale);
   const slogan = getBrandSlogan(locale);
   const heroStyle = {
-    '--about-hero-gradient': `linear-gradient(135deg, ${BRAND.accentColor} 0%, ${BRAND.accentColorEnd} 100%)`,
+    '--about-hero-gradient': 'linear-gradient(135deg, var(--ant-color-bg-elevated) 0%, var(--ant-color-fill-quaternary) 100%)',
   } as React.CSSProperties;
 
   return (

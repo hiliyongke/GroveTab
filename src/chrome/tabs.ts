@@ -140,19 +140,6 @@ export async function discardTab(tabId: number): Promise<void> {
 }
 
 /**
- * 批量丢弃（休眠）标签页
- */
-export async function discardTabs(tabIds: number[]): Promise<void> {
-  if (tabIds.length === 0) return;
-  // chrome.tabs.discard 只支持单个 tabId，逐个调用
-  await Promise.all(tabIds.map((id) =>
-    safeCall('tabs.discard', () => chrome.tabs.discard(id)).catch(() => {
-      /* 个别失败不阻塞其余 */
-    })
-  ));
-}
-
-/**
  * 获取当前窗口 —— 恢复会话等场景需要
  */
 export async function getCurrentWindow(): Promise<chrome.windows.Window> {
@@ -178,10 +165,6 @@ export async function storageSet<T>(key: string, value: T): Promise<void> {
 
 export async function storageRemove(key: string): Promise<void> {
   await safeCall('storage.local.remove', () => chrome.storage.local.remove(key));
-}
-
-export async function storageGetBytesInUse(keys?: string | string[]): Promise<number> {
-  return safeCall('storage.local.getBytesInUse', () => chrome.storage.local.getBytesInUse(keys));
 }
 
 /**

@@ -1,14 +1,22 @@
+/**
+ * DataPanel — 数据管理面板样式
+ *
+ * 适配抽屉窄宽：
+ *   - 紧凑间距
+ *   - 统一圆角 10px
+ */
+
 .data-panel {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
   width: 100%;
 }
 
 .data-panel__profile-create {
   display: flex;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .data-panel__profile-input,
@@ -21,20 +29,20 @@
 }
 
 .data-panel__empty {
-  margin: 8px 0;
+  margin: 4px 0;
 }
 
 .data-panel__profile-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .data-panel__profile-card,
 .data-panel__quota {
-  padding: 12px 14px;
+  padding: 10px 12px;
   border: 1px solid var(--ant-color-border-secondary);
-  border-radius: var(--ant-border-radius-lg);
+  border-radius: 10px;
   background: var(--ant-color-fill-quaternary);
 }
 
@@ -55,14 +63,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .data-panel__quota-label {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12.5px;
+  gap: 6px;
+  font-size: 12px;
   font-weight: 500;
 }
 
@@ -72,7 +80,7 @@
 
 .data-panel__quota-meta {
   color: var(--ant-color-text-tertiary);
-  font-size: 11.5px;
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -81,7 +89,7 @@
 }
 
 .data-panel__quota-alert {
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .data-panel__actions {
@@ -98,13 +106,13 @@
 .data-panel__import-status {
   padding: 0 4px;
   color: var(--ant-color-text-tertiary);
-  font-size: 11.5px;
+  font-size: 11px;
 }
 
 .data-panel__divider {
-  margin: 8px 0;
+  margin: 4px 0;
   color: var(--ant-color-text-tertiary);
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .data-panel__factory-confirm {

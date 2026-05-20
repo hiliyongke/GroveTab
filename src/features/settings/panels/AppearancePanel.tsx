@@ -232,7 +232,6 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
         header: true,
         heroSearch: true,
         viewSwitcher: true,
-        workspaceOverview: true,
         tidySuggestion: true,
       };
       void updateSettings({ uiVisibility: { ...current, [key]: value } });
@@ -411,7 +410,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
 
       {/* ── 渐变背景预设 ── */}
       <Field label={t('gradient.title')} hint={t('gradient.hint')}>
-        <div className="appearance-grid">
+        <div className="appearance-gradient-grid">
           {GRADIENT_PRESETS.map((preset) => {
             const isSelected = settings.gradientPreset === preset.id;
             const previewBg =
@@ -915,7 +914,6 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
             ['heroSlogan', t('uiVisibility.heroSlogan'), t('uiVisibility.heroSloganHint')],
             ['heroSearch', t('uiVisibility.heroSearch'), t('uiVisibility.heroSearchHint')],
             ['viewSwitcher', t('uiVisibility.viewSwitcher'), t('uiVisibility.viewSwitcherHint')],
-            ['workspaceOverview', t('uiVisibility.workspaceOverview'), t('uiVisibility.workspaceOverviewHint')],
             ['tidySuggestion', t('uiVisibility.tidySuggestion'), t('uiVisibility.tidySuggestionHint')],
           ] as const).map(([key, label, hint]) => (
             <VisibilityRow
