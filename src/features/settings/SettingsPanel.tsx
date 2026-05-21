@@ -100,12 +100,15 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
       onClose={handleClose}
       destroyOnClose
       width={640}
-      rootClassName="settings-drawer"
-      styles={{
-        mask: { backdropFilter: 'blur(8px)', background: 'rgba(0,0,0,0.32)' },
-        body: { padding: 0, overflow: 'hidden' },
-        header: { display: 'none' },
+      title={t('settings.title')}
+      classNames={{
+        mask: 'settings-drawer__mask',
+        header: 'settings-drawer__header',
+        title: 'settings-drawer__title',
+        body: 'settings-drawer__body',
+        section: 'settings-drawer__section',
       }}
+      rootClassName="settings-drawer"
     >
       <div className="settings-shell">
         {/* 左侧图标导航 */}

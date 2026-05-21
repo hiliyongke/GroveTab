@@ -150,17 +150,9 @@ export function BatchOperationsMenu({
             count={selectedCount}
             showZero={false}
             size="small"
-            style={{ 
-              backgroundColor: '#1890ff',
-              fontSize: '11px',
-              lineHeight: '16px'
-            }}
+            classNames={{ indicator: 'app-archive-batch-menu__badge-indicator' }}
           >
-            <span style={{ 
-              fontSize: '12px', 
-              color: '#666',
-              padding: '0 8px'
-            }}>
+            <span className="app-archive-batch-menu__summary">
               {t('archive.selectedCount', { count: selectedCount })}
             </span>
           </Badge>

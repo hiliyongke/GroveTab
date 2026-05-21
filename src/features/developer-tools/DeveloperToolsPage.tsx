@@ -354,6 +354,10 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
   const isAutoExecute = AUTO_EXECUTE_TOOL_IDS.has(tool.id);
   const isBidirectional = ['url-codec', 'base64-codec', 'timestamp', 'radix', 'html-entity', 'url-query'].includes(tool.id);
   const isMonospace = ['json-format', 'json-to-ts', 'json-path', 'jwt-decoder', 'regex-test', 'text-diff', 'hash', 'radix', 'url-query', 'case-convert', 'text-stats', 'yaml-json', 'csv-json', 'http-header', 'ua-parse', 'sql-format', 'string-escape', 'curl-fetch'].includes(tool.id);
+  const colorSwatchStyle = useMemo(
+    () => ({ ['--devtools-color-swatch-bg' as string]: colorValue ?? 'transparent' }) as React.CSSProperties,
+    [colorValue],
+  );
 
   const runTool = useCallback(async (primary: string, secondary: string) => {
     switch (tool.id) {
@@ -683,7 +687,7 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
 
       {tool.id === 'color-preview' && colorValue && (
         <div className="devtools-color-preview">
-          <div className="devtools-color-swatch" style={{ background: colorValue }} />
+          <div className="devtools-color-swatch" style={colorSwatchStyle} />
           <Text code>{colorValue}</Text>
         </div>
       )}

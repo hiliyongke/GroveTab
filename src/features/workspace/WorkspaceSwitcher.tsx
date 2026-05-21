@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { Dropdown, Tag, Button, theme } from 'antd';
+import { Dropdown, Button, Space, Tooltip } from 'antd';
 import { FolderOpen, X } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useMetadataStore, useSettingsStore } from '@/store';
@@ -14,7 +14,6 @@ import { useT } from '@/shared/i18n';
 
 export function WorkspaceSwitcher() {
   const { t } = useT();
-  const { token } = theme.useToken();
   const workspaces = useMetadataStore((s) => s.workspaces);
   const activeId = useSettingsStore((s) => s.settings.lastActiveWorkspaceId);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
@@ -47,7 +46,12 @@ export function WorkspaceSwitcher() {
   if (active === undefined) {
     return (
       <Dropdown menu={{ items }} trigger={['click']}>
-<Button size="small" type="text" icon={<FolderOpen size={ICON_SIZE.DEFAULT} />}>
+        <Button
+          size="small"
+          type="text"
+          className="app-workspace-trigger"
+          icon={<FolderOpen size={ICON_SIZE.DEFAULT} />}
+        >
           {t('workspace.title')}
         </Button>
       </Dropdown>
@@ -55,29 +59,27 @@ export function WorkspaceSwitcher() {
   }
 
   return (
-    <Tag
-      closable
-      onClose={(e) => {
-        e.preventDefault();
-        handleSwitch(undefined);
-      }}
-closeIcon={<X size={ICON_SIZE.MICRO} />}
-      style={{
-        margin: 0,
-        borderRadius: 999,
-        background: token.colorPrimaryBg,
-        color: token.colorPrimary,
-        border: `1px solid ${token.colorPrimaryBorder}`,
-        cursor: 'pointer',
-        padding: '2px 10px',
-      }}
-    >
+    <Space.Compact className="app-workspace-switcher">
       <Dropdown menu={{ items }} trigger={['click']}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-<FolderOpen size={ICON_SIZE.TINY} />
+        <Button
+          size="small"
+          type="text"
+          className="app-workspace-trigger app-workspace-trigger--active"
+          icon={<FolderOpen size={ICON_SIZE.TINY} />}
+        >
           {active.name}
-        </span>
+        </Button>
       </Dropdown>
-    </Tag>
+      <Tooltip title={t('workspace.clear')}>
+        <Button
+          size="small"
+          type="text"
+          className="app-workspace-clear"
+          icon={<X size={ICON_SIZE.MICRO} />}
+          aria-label={t('workspace.clear')}
+          onClick={() => handleSwitch(undefined)}
+        />
+      </Tooltip>
+    </Space.Compact>
   );
 }

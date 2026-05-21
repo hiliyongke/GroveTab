@@ -10,13 +10,13 @@
  * UndoToast 通过自定义事件 `app:open-archive` 通知上层打开 ArchivePanel 并高亮 session。
  */
 
-import { Button, theme } from 'antd';
+import { Button } from 'antd';
 import { Archive, Undo2, X } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useUndoStore, useSelectionStore } from '@/store';
 import { useT } from '@/shared/i18n';
-import { Z } from '@/shared/config/z-index';
 import { APP_EVENTS } from '@/shared/config/storage-keys';
+import './status-surfaces.css';
 
 /**
  * 触发"打开 Archive 并高亮 session"的跨组件事件。
@@ -39,7 +39,6 @@ export function UndoToast() {
   const selectionMode = useSelectionStore((s) => s.selectionMode);
   const selectedIds = useSelectionStore((s) => s.selectedIds);
   const { t } = useT();
-  const { token } = theme.useToken();
 
   if (!activeToast) return null;
 
@@ -63,44 +62,14 @@ export function UndoToast() {
   // 当批量操作栏可见时，UndoToast 上移避免重叠
   // BatchActionBar 高度约 44px + bottom 24px，需额外间距 8px
   const batchBarVisible = selectionMode && selectedIds.size > 0;
-  const bottomOffset = batchBarVisible ? 84 : 24;
-
   return (
     <div
       role="alert"
       aria-live="polite"
-      style={{
-        position: 'fixed',
-        bottom: bottomOffset,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: Z.undoToast,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 4,
-        alignItems: 'center',
-        padding: '8px 8px 8px 20px',
-        borderRadius: 16,
-        background: token.colorBgElevated,
-        border: `1px solid ${token.colorBorderSecondary}`,
-        boxShadow: token.boxShadow,
-        backdropFilter: 'blur(16px)',
-        maxWidth: 520,
-      }}
+      className={`app-undo-toast${batchBarVisible ? ' is-lifted' : ''}`}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <span
-          style={{
-            fontSize: 13,
-            fontWeight: 500,
-            color: token.colorText,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            maxWidth: 320,
-          }}
-          title={mainLabel}
-        >
+      <div className="app-undo-toast__row">
+        <span className="app-undo-toast__title" title={mainLabel}>
           {mainLabel}
         </span>
 
@@ -136,13 +105,7 @@ export function UndoToast() {
         />
       </div>
       {activeToast.subNote !== undefined && activeToast.subNote !== '' && (
-        <span
-          style={{
-            fontSize: 11.5,
-            color: token.colorWarning,
-            paddingLeft: 4,
-          }}
-        >
+        <span className="app-undo-toast__note">
           {activeToast.subNote}
         </span>
       )}

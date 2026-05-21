@@ -44,6 +44,7 @@ import { useKanbanStore, useTabsStore } from '@/store';
 import { archiveSelectedTabs } from '@/services';
 import { useT } from '@/shared/i18n';
 import { useReducedMotionPreference } from '@/shared/hooks/use-reduced-motion';
+import './styles/views.css';
 
 /** 拖拽数据类型：区分「源 tab」「列内卡片」「列自身」 */
 type DragData =
@@ -88,6 +89,16 @@ export function KanbanView() {
     useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
+
+  const kanbanThemeStyle = {
+    ['--app-kanban-source-bg' as string]: token.colorFillQuaternary,
+    ['--app-kanban-surface-bg' as string]: token.colorBgContainer,
+    ['--app-kanban-border' as string]: token.colorBorderSecondary,
+    ['--app-kanban-column-bg' as string]: token.colorFillQuaternary,
+    ['--app-kanban-column-hover-bg' as string]: token.colorPrimaryBg,
+    ['--app-kanban-overlay-border' as string]: token.colorPrimary,
+    ['--app-kanban-overlay-shadow' as string]: token.boxShadowSecondary,
+  } as React.CSSProperties;
 
   const handleAddColumn = async () => {
     const name = newColumnName.trim();
@@ -197,90 +208,73 @@ export function KanbanView() {
       onDragEnd={(e) => void onDragEnd(e)}
       onDragCancel={() => setActive(null)}
     >
-      <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 12 }}>
-        {/* 左侧：实时 Tab 源栏 —— 只作为拖出源，不是排序目标 */}
-        <div
-          style={{
-            flex: '0 0 240px',
-            maxHeight: 'calc(100vh - 280px)',
-            overflowY: 'auto',
-            padding: 10,
-            background: token.colorFillQuaternary,
-            borderRadius: 12,
-            border: `1px solid ${token.colorBorderSecondary}`,
-          }}
-        >
-          <div
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              color: token.colorTextSecondary,
-              marginBottom: 8,
-            }}
-          >
-            {t('kanban.title')}
-          </div>
-          {tabs.map((tab) => (
-            <TabSourceItem
-              key={tab.id}
-              card={{
-                url: tab.url,
-                title: tab.title,
-                favIconUrl: tab.favIconUrl,
-                addedAt: Date.now(),
-              }}
-              reduced={reduced}
-            />
-          ))}
-        </div>
-
-        {/* 右侧：列排序层 —— 每列作为一个可排序单元 */}
-        <SortableContext
-          items={columns.map((c) => `col::${c.id}`)}
-          strategy={horizontalListSortingStrategy}
-        >
-          {columns.map((col) => (
-            <KanbanColumnView
-              key={col.id}
-              col={col}
-              liveUrls={liveUrls}
-              tabs={tabs}
-              t={t}
-              reduced={reduced}
-              onRename={(name) => void renameColumn(col.id, name)}
-              onRemove={() => {
-                removeColumn(col.id).catch((err) => {
-                  message.error(t('kanban.removeColumnFailed'));
-                  console.warn('[kanban] removeColumn failed', err);
-                });
-              }}
-              onSaveAsSession={() => void handleSaveAsSession(col)}
-              onRemoveCard={(url) => {
-                removeCard(col.id, url).catch((err) => {
-                  message.error(t('kanban.removeCardFailed'));
-                  console.warn('[kanban] removeCard failed', err);
-                });
-              }}
-            />
-          ))}
-        </SortableContext>
-
-        {/* 新增列 */}
-        <div style={{ flex: '0 0 220px' }}>
-          <Input
-            value={newColumnName}
-            onChange={(e) => setNewColumnName(e.target.value)}
-            onPressEnter={() => void handleAddColumn()}
-            placeholder={t('kanban.addColumn')}
-            suffix={
-              <Button
-                size="small"
-                type="text"
-                icon={<Plus size={ICON_SIZE.SMALL} />}
-                onClick={() => void handleAddColumn()}
+      <div className="app-kanban-theme" style={kanbanThemeStyle}>
+        <div className="app-kanban-view">
+          {/* 左侧：实时 Tab 源栏 —— 只作为拖出源，不是排序目标 */}
+          <div className="app-kanban-source">
+            <div className="app-kanban-source__title">{t('kanban.title')}</div>
+            {tabs.map((tab) => (
+              <TabSourceItem
+                key={tab.id}
+                card={{
+                  url: tab.url,
+                  title: tab.title,
+                  favIconUrl: tab.favIconUrl,
+                  addedAt: Date.now(),
+                }}
+                reduced={reduced}
               />
-            }
-          />
+            ))}
+          </div>
+
+          {/* 右侧：列排序层 —— 每列作为一个可排序单元 */}
+          <SortableContext
+            items={columns.map((c) => `col::${c.id}`)}
+            strategy={horizontalListSortingStrategy}
+          >
+            {columns.map((col) => (
+              <KanbanColumnView
+                key={col.id}
+                col={col}
+                liveUrls={liveUrls}
+                tabs={tabs}
+                t={t}
+                reduced={reduced}
+                onRename={(name) => void renameColumn(col.id, name)}
+                onRemove={() => {
+                  removeColumn(col.id).catch((err) => {
+                    message.error(t('kanban.removeColumnFailed'));
+                    console.warn('[kanban] removeColumn failed', err);
+                  });
+                }}
+                onSaveAsSession={() => void handleSaveAsSession(col)}
+                onRemoveCard={(url) => {
+                  removeCard(col.id, url).catch((err) => {
+                    message.error(t('kanban.removeCardFailed'));
+                    console.warn('[kanban] removeCard failed', err);
+                  });
+                }}
+              />
+            ))}
+          </SortableContext>
+
+          {/* 新增列 */}
+          <div className="app-kanban-add-column">
+            <Input
+              value={newColumnName}
+              onChange={(e) => setNewColumnName(e.target.value)}
+              onPressEnter={() => void handleAddColumn()}
+              placeholder={t('kanban.addColumn')}
+              suffix={
+                <Button
+                  size="small"
+                  type="text"
+                  icon={<Plus size={ICON_SIZE.SMALL} />}
+                  onClick={() => void handleAddColumn()}
+                />
+              }
+            />
+          </div>
         </div>
       </div>
 
@@ -294,40 +288,29 @@ export function KanbanView() {
 
 // ── 子组件：源 Tab 卡片 ──────────────────────────────────
 function TabSourceItem({ card, reduced }: { card: KanbanCard; reduced: boolean }) {
-  const { token } = theme.useToken();
   const id = `tab-source::${card.url}`;
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
     data: { kind: 'tab-source', card } satisfies DragData,
   });
+  const sourceItemStyle = {
+    opacity: isDragging ? 0.4 : 1,
+    transform: CSS.Translate.toString(transform),
+    transition: reduced ? 'none' : transition,
+  } as React.CSSProperties;
+
   return (
     <div
       ref={setNodeRef}
       {...attributes}
       {...listeners}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 6,
-        padding: '6px 8px',
-        marginBottom: 4,
-        borderRadius: 6,
-        background: token.colorBgContainer,
-        border: `1px solid ${token.colorBorderSecondary}`,
-        cursor: 'grab',
-        fontSize: 11.5,
-        opacity: isDragging ? 0.4 : 1,
-        transform: CSS.Translate.toString(transform),
-        transition: reduced ? 'none' : transition,
-      }}
+      className="app-kanban-card app-kanban-card--source"
+      style={sourceItemStyle}
     >
       {card.favIconUrl !== undefined && card.favIconUrl !== '' && (
-        <img src={card.favIconUrl} alt="" width={12} height={12} style={{ borderRadius: 2 }} />
+        <img src={card.favIconUrl} alt="" width={12} height={12} className="app-kanban-card__favicon" />
       )}
-      <span
-        style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-        title={card.title}
-      >
+      <span className="app-kanban-card__title" title={card.title}>
         {card.title}
       </span>
     </div>
@@ -358,7 +341,6 @@ function KanbanColumnView({
   onSaveAsSession,
   onRemoveCard,
 }: KanbanColumnViewProps) {
-  const { token } = theme.useToken();
   // 整列拖拽（useSortable 把列作为 SortableContext 中的一项）
   const sortable = useSortable({
     id: `col::${col.id}`,
@@ -371,44 +353,45 @@ function KanbanColumnView({
     data: { kind: 'column-body', columnId: col.id },
   });
 
+  const columnWrapStyle = {
+    transform: CSS.Translate.toString(sortable.transform),
+    transition: reduced ? 'none' : sortable.transition,
+    opacity: sortable.isDragging ? 0.5 : 1,
+  } as React.CSSProperties;
+
+  const columnCardStyle = {
+    transition: reduced ? 'none' : 'background 120ms',
+  } as React.CSSProperties;
+
   return (
     <div
       ref={sortable.setNodeRef}
-      style={{
-        flex: '0 0 260px',
-        transform: CSS.Translate.toString(sortable.transform),
-        transition: reduced ? 'none' : sortable.transition,
-        opacity: sortable.isDragging ? 0.5 : 1,
-      }}
+      className="app-kanban-column-wrap"
+      style={columnWrapStyle}
     >
       <Card
         size="small"
-        style={{
-          minHeight: 400,
-          background: body.isOver ? token.colorPrimaryBg : token.colorFillQuaternary,
-          border: `1px solid ${token.colorBorderSecondary}`,
-          borderRadius: 12,
-          transition: reduced ? 'none' : 'background 120ms',
-        }}
-        styles={{ body: { padding: 8 } }}
+        className={`app-kanban-column${body.isOver ? ' is-over' : ''}`}
+        style={columnCardStyle}
+        classNames={{ body: 'app-kanban-column__body' }}
         title={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div className="app-kanban-column__header">
             {/* 列拖拽句柄 —— 只有点住这里才能拖整列 */}
             <Button
               type="text"
               size="small"
-icon={<GripVertical size={ICON_SIZE.TINY} />}
+              icon={<GripVertical size={ICON_SIZE.TINY} />}
               {...sortable.attributes}
               {...sortable.listeners}
-              style={{ cursor: 'grab' }}
+              className="app-kanban-column__drag-handle"
               aria-label={t('kanban.renameColumn')}
             />
             <ColumnNameEditor col={col} onRename={onRename} />
-            <span style={{ fontSize: 11, opacity: 0.6 }}>{col.cards.length}</span>
+            <span className="app-kanban-column__count">{col.cards.length}</span>
             <Button
               type="text"
               size="small"
-icon={<Save size={ICON_SIZE.TINY} />}
+              icon={<Save size={ICON_SIZE.TINY} />}
               onClick={onSaveAsSession}
               title={t('kanban.saveAsSession')}
             />
@@ -418,22 +401,13 @@ icon={<Save size={ICON_SIZE.TINY} />}
           </div>
         }
       >
-        <div ref={body.setNodeRef} style={{ minHeight: 300 }}>
+        <div ref={body.setNodeRef} className="app-kanban-column__dropzone">
           <SortableContext
             items={col.cards.map((c) => `card::${col.id}::${c.url}`)}
             strategy={verticalListSortingStrategy}
           >
             {col.cards.length === 0 ? (
-              <div
-                style={{
-                  padding: '24px 8px',
-                  fontSize: 11.5,
-                  color: token.colorTextTertiary,
-                  textAlign: 'center',
-                }}
-              >
-                {t('kanban.emptyColumn')}
-              </div>
+              <div className="app-kanban-column__empty">{t('kanban.emptyColumn')}</div>
             ) : (
               col.cards.map((card) => (
                 <SortableCard
@@ -467,7 +441,6 @@ interface SortableCardProps {
 }
 
 function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: SortableCardProps) {
-  const { token } = theme.useToken();
   const id = `card::${columnId}::${card.url}`;
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
@@ -491,26 +464,19 @@ function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: S
     }
   };
 
+  const sortableCardStyle = {
+    opacity: isDragging ? 0.4 : offline ? 0.55 : 1,
+    transform: CSS.Translate.toString(transform),
+    transition: reduced ? 'none' : transition,
+  } as React.CSSProperties;
+
   return (
     <div
       ref={setNodeRef}
       {...attributes}
       {...listeners}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 6,
-        padding: '6px 8px',
-        marginBottom: 4,
-        borderRadius: 6,
-        background: token.colorBgContainer,
-        border: `1px solid ${token.colorBorderSecondary}`,
-        fontSize: 11.5,
-        opacity: isDragging ? 0.4 : offline ? 0.55 : 1,
-        cursor: 'pointer',
-        transform: CSS.Translate.toString(transform),
-        transition: reduced ? 'none' : transition,
-      }}
+      className={`app-kanban-card${offline ? ' is-offline' : ''}`}
+      style={sortableCardStyle}
       onClick={handleActivate}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -522,15 +488,10 @@ function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: S
       tabIndex={0}
     >
       {card.favIconUrl !== undefined && card.favIconUrl !== '' && (
-        <img src={card.favIconUrl} alt="" width={12} height={12} style={{ borderRadius: 2 }} />
+        <img src={card.favIconUrl} alt="" width={12} height={12} className="app-kanban-card__favicon" />
       )}
       <span
-        style={{
-          flex: 1,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-        }}
+        className="app-kanban-card__title app-kanban-card__title--grow"
         title={offline ? `${card.title} · ${t('kanban.offline')}` : card.title}
       >
         {card.title}
@@ -573,7 +534,7 @@ function ColumnNameEditor({ col, onRename }: { col: KanbanColumn; onRename: (nam
   }
   return (
     <span
-      style={{ flex: 1, fontSize: 12.5, fontWeight: 600, cursor: 'text' }}
+      className="app-kanban-column__name"
       onDoubleClick={() => setEditing(true)}
     >
       {col.name}
@@ -584,47 +545,21 @@ function ColumnNameEditor({ col, onRename }: { col: KanbanColumn; onRename: (nam
 
 // ── 子组件：DragOverlay 抬升副本 ──────────────────────────────────
 function DragPreview({ active }: { active: ActiveDrag }) {
-  const { token } = theme.useToken();
   const { t } = useT();
   if (active.data.kind === 'column') {
     return (
-      <div
-        style={{
-          width: 260,
-          minHeight: 60,
-          padding: 12,
-          background: token.colorBgContainer,
-          borderRadius: 12,
-          border: `1px solid ${token.colorBorderSecondary}`,
-          boxShadow: token.boxShadowSecondary,
-          opacity: 0.9,
-        }}
-      >
+      <div className="app-kanban-overlay app-kanban-overlay--column">
         {t('kanban.draggingColumn')}
       </div>
     );
   }
   const card = active.data.kind === 'card' ? null : active.data.kind === 'tab-source' ? active.data.card : null;
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 6,
-        padding: '6px 8px',
-        borderRadius: 6,
-        background: token.colorBgContainer,
-        border: `1px solid ${token.colorPrimary}`,
-        boxShadow: token.boxShadowSecondary,
-        fontSize: 11.5,
-        opacity: 0.9,
-        minWidth: 200,
-      }}
-    >
+    <div className="app-kanban-overlay">
       {card !== null && card.favIconUrl !== undefined && card.favIconUrl !== '' && (
-        <img src={card.favIconUrl} alt="" width={12} height={12} style={{ borderRadius: 2 }} />
+        <img src={card.favIconUrl} alt="" width={12} height={12} className="app-kanban-card__favicon" />
       )}
-      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      <span className="app-kanban-card__title">
         {card ? card.title : t('kanban.draggingCard')}
       </span>
     </div>

@@ -9,12 +9,10 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Modal, Button, Input, Space, Typography, Tag, Alert, Divider } from 'antd';
+import { Modal, Button, Input, Space, Tag, Alert, Divider } from 'antd';
 import { CheckCircle, AlertCircle, Tag as TagIcon } from 'lucide-react';
 import { useT } from '@/shared/i18n';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
-
-const { Text } = Typography;
 
 interface EnhancedRenameDialogProps {
   open: boolean;
@@ -139,6 +137,7 @@ export function EnhancedRenameDialog({
   return (
     <Modal
       open={open}
+      rootClassName="app-archive-dialog app-archive-rename-dialog"
       title={t('archive.renameTitle')}
       onCancel={onClose}
       footer={[
@@ -159,21 +158,16 @@ export function EnhancedRenameDialog({
       width={520}
       centered
     >
-      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+      <Space direction="vertical" size="middle" className="app-archive-dialog__stack">
         {/* 当前名称 */}
-        <div>
-          <Text type="secondary" style={{ fontSize: 12 }}>
-            {t('archive.currentName')}
-          </Text>
-          <br />
-          <Text strong>{currentName}</Text>
+        <div className="app-archive-dialog__section">
+          <div className="app-archive-dialog__label">{t('archive.currentName')}</div>
+          <div className="app-archive-dialog__current-name">{currentName}</div>
         </div>
 
         {/* 新名称输入 */}
-        <div>
-          <Text strong style={{ display: 'block', marginBottom: 8 }}>
-            {t('archive.newName')}
-          </Text>
+        <div className="app-archive-dialog__section">
+          <div className="app-archive-dialog__strategy-label">{t('archive.newName')}</div>
           <Input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
@@ -187,16 +181,14 @@ export function EnhancedRenameDialog({
 
         {/* 命名建议 */}
         {suggestions.length > 0 && (
-          <div>
-            <Text type="secondary" style={{ fontSize: 12, marginBottom: 8, display: 'block' }}>
-              {t('archive.nameSuggestions')}
-            </Text>
+          <div className="app-archive-dialog__section">
+            <div className="app-archive-dialog__label">{t('archive.nameSuggestions')}</div>
             <Space wrap>
               {suggestions.map((suggestion, index) => (
                 <Tag
                   key={index}
                   color="blue"
-                  style={{ cursor: 'pointer', marginBottom: 4 }}
+                  className="app-archive-dialog__tag"
                   onClick={() => handleSuggestionClick(suggestion)}
                 >
                   {suggestion}
@@ -208,17 +200,17 @@ export function EnhancedRenameDialog({
 
         {/* 标签分类 */}
         {tags.length > 0 && (
-          <div>
-            <Text type="secondary" style={{ fontSize: 12, marginBottom: 8, display: 'block' }}>
-              <TagIcon size={12} style={{ marginRight: 4 }} />
+          <div className="app-archive-dialog__section">
+            <div className="app-archive-dialog__label app-archive-dialog__tag-label">
+              <TagIcon size={12} />
               {t('archive.tags')}
-            </Text>
+            </div>
             <Space wrap>
               {tags.map((tag, index) => (
                 <Tag
                   key={index}
                   color={newName.includes(tag) ? 'green' : 'default'}
-                  style={{ cursor: 'pointer', marginBottom: 4 }}
+                  className="app-archive-dialog__tag"
                   onClick={() => handleTagClick(tag)}
                 >
                   #{tag}
@@ -235,24 +227,17 @@ export function EnhancedRenameDialog({
             type="warning"
             showIcon
             icon={<AlertCircle size={ICON_SIZE.SMALL} />}
-            style={{ fontSize: 12 }}
+            className="app-archive-dialog__validation"
           />
         )}
 
         {/* 预览 */}
-        <Divider style={{ margin: '8px 0' }} />
-        <div>
-          <Text type="secondary" style={{ fontSize: 12 }}>
-            {t('archive.preview')}
-          </Text>
-          <br />
-          <Text style={{ 
-            fontSize: 14, 
-            fontWeight: 500,
-            color: isNameValid ? '#1890ff' : '#ff4d4f'
-          }}>
+        <Divider className="app-archive-dialog__divider" />
+        <div className="app-archive-dialog__section">
+          <div className="app-archive-dialog__label">{t('archive.preview')}</div>
+          <div className={`app-archive-dialog__preview-value${isNameValid ? '' : ' is-invalid'}`}>
             {newName.trim() || t('archive.noName')}
-          </Text>
+          </div>
         </div>
       </Space>
     </Modal>

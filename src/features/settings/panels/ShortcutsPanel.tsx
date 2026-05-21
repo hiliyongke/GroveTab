@@ -7,7 +7,7 @@
  */
 
 import { useState, useCallback, useEffect } from 'react';
-import { Alert, theme, Button, App } from 'antd';
+import { Alert, Button, App } from 'antd';
 import { RotateCcw } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
@@ -37,7 +37,6 @@ function KeybindingRecorder({
   onReset: () => void;
 }) {
   const { t } = useT();
-  const { token } = theme.useToken();
   const [recording, setRecording] = useState(false);
 
   useEffect(() => {
@@ -90,7 +89,7 @@ function KeybindingRecorder({
   };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+    <div className="settings-keybinding-recorder">
       <button
         type="button"
         onClick={() => setRecording(true)}
@@ -98,22 +97,7 @@ function KeybindingRecorder({
           recording ? t('shortcuts.recording') : t('shortcuts.resetHint')
         }
         aria-pressed={recording}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minWidth: 80,
-          padding: '4px 10px',
-          fontSize: 12,
-          fontFamily: 'inherit',
-          borderRadius: token.borderRadiusSM,
-          background: recording ? token.colorPrimaryBg : token.colorBgContainer,
-          border: `1px solid ${recording ? token.colorPrimary : token.colorBorder}`,
-          color: recording ? token.colorPrimary : token.colorTextSecondary,
-          cursor: 'pointer',
-          whiteSpace: 'nowrap',
-          transition: 'all 160ms ease',
-        }}
+        className={`settings-keybinding-trigger${recording ? ' is-recording' : ''}`}
       >
         {recording ? t('shortcuts.recording') : formatDisplay(currentKeys)}
       </button>
@@ -124,7 +108,7 @@ icon={<RotateCcw size={ICON_SIZE.MEDIUM} />}
         title={t('shortcuts.resetHint')}
         aria-label={t('shortcuts.resetHint')}
         onClick={onReset}
-        style={{ color: token.colorTextTertiary }}
+        className="settings-keybinding-reset"
       />
     </div>
   );
@@ -132,7 +116,6 @@ icon={<RotateCcw size={ICON_SIZE.MEDIUM} />}
 
 export function ShortcutsPanel() {
   const { t } = useT();
-  const { token } = theme.useToken();
   const { message } = App.useApp();
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const customKeybindings = useSettingsStore((s) => s.settings.customKeybindings);
@@ -183,30 +166,19 @@ export function ShortcutsPanel() {
   }, [customKeybindings, updateSettings, message, t]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+    <div className="settings-panel-stack">
       {/* Chrome 全局快捷键（只读） */}
       <Field label={t('settings.globalShortcuts')}>
         <Alert
           type="info"
           message={t('settings.shortcutsHint')}
           showIcon
-          style={{ fontSize: 12, marginBottom: 16 }}
+          className="settings-shortcuts-alert"
         />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="settings-card-list">
           {GLOBAL_SHORTCUTS.map((item) => (
-            <div
-              key={item.labelKey}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '10px 14px',
-                borderRadius: token.borderRadiusLG,
-                background: token.colorFillQuaternary,
-                border: `1px solid ${token.colorBorderSecondary}`,
-              }}
-            >
-              <span style={{ fontSize: 13, fontWeight: 500 }}>{t(item.labelKey, { brand: BRAND.name })}</span>
+            <div key={item.labelKey} className="settings-card-row">
+              <span className="settings-card-row__title">{t(item.labelKey, { brand: BRAND.name })}</span>
               <kbd className="app-kbd">{item.keys}</kbd>
             </div>
           ))}
@@ -215,48 +187,28 @@ export function ShortcutsPanel() {
 
       {/* 页面内快捷键（可自定义） */}
       <Field label={t('settings.localShortcuts')} hint={t('settings.localShortcutsHint')}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="settings-card-list">
           {resolved.map((item) => (
-              <div
-                key={item.action}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '10px 14px',
-                  borderRadius: token.borderRadiusLG,
-                  background: token.colorFillQuaternary,
-                  border: `1px solid ${token.colorBorderSecondary}`,
-                }}
-              >
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 500 }}>{t(item.label)}</div>
+            <div key={item.action} className="settings-card-row">
+              <div className="settings-card-row__main">
+                <div className="settings-card-row__title">{t(item.label)}</div>
                   {item.hint && (
-                    <div style={{ fontSize: 11, color: token.colorTextTertiary, marginTop: 2 }}>
+                    <div className="settings-card-row__hint">
                       {t(item.hint, { brand: BRAND.name })}
                     </div>
                   )}
                   {conflictMap.has(item.action) && (
-                    <div
-                      style={{
-                        fontSize: 11,
-                        color: token.colorErrorText,
-                        marginTop: 4,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 4,
-                      }}
-                    >
+                    <div className="settings-warning-inline">
                       ⚠ {conflictMap.get(item.action)}
                     </div>
                   )}
-                </div>
-                <KeybindingRecorder
-                  currentKeys={item.keys}
-                  onRecord={(keyStr) => handleRecord(item.action, keyStr)}
-                  onReset={() => handleReset(item.action)}
-                />
               </div>
+              <KeybindingRecorder
+                currentKeys={item.keys}
+                onRecord={(keyStr) => handleRecord(item.action, keyStr)}
+                onReset={() => handleReset(item.action)}
+              />
+            </div>
             ))}
         </div>
       </Field>

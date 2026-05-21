@@ -13,6 +13,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { useTabsStore } from '@/store';
 import { TabItem } from './TabItem';
 import { CONFIG } from '@/shared/config';
+import './styles/views.css';
 
 const ROW_HEIGHT = CONFIG.ui.rowHeight;
 /** 容器最大高度（留给 Header + Hero + pb 的空间） */
@@ -46,31 +47,31 @@ export function CompactView() {
 
   /** 短列表不撑满视口；长列表按视口高度滚动 */
   const containerMaxHeight = `min(calc(100vh - ${VIEWPORT_RESERVE}px), ${sortedTabs.length * ROW_HEIGHT + 8}px)`;
+  const containerStyle = {
+    maxHeight: containerMaxHeight,
+    minHeight: Math.min(sortedTabs.length, 6) * ROW_HEIGHT,
+  } as React.CSSProperties;
+  const spacerStyle = { height: virtualizer.getTotalSize() };
 
   return (
     <div
       ref={parentRef}
-      style={{
-        overflowY: 'auto',
-        paddingRight: 4,
-        maxHeight: containerMaxHeight,
-        minHeight: Math.min(sortedTabs.length, 6) * ROW_HEIGHT,
-      }}
+      className="app-compact-view"
+      style={containerStyle}
     >
-      <div style={{ height: virtualizer.getTotalSize(), width: '100%', position: 'relative' }}>
+      <div className="app-compact-view-spacer" style={spacerStyle}>
         {virtualizer.getVirtualItems().map((virtualRow) => {
           const tab = sortedTabs[virtualRow.index];
+          const itemStyle = {
+            height: ROW_HEIGHT,
+            transform: `translateY(${virtualRow.start}px)`,
+          } as React.CSSProperties;
+
           return (
             <div
               key={tab.id}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: ROW_HEIGHT,
-                transform: `translateY(${virtualRow.start}px)`,
-              }}
+              className="app-compact-view-item"
+              style={itemStyle}
             >
               <TabItem
                 tab={tab}

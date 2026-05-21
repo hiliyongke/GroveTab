@@ -5,9 +5,10 @@
  * 历史来源：从早期 WorkspaceOverview 组件中拆分独立。
  */
 
-import { Button, Card, Space, theme } from 'antd';
+import { Button, Card, Space } from 'antd';
 import type { LiveTab } from '@/shared/types';
 import { useT } from '@/shared/i18n';
+import './styles/views.css';
 
 interface SelectionModeNoticeProps {
   selectedTabs: LiveTab[];
@@ -23,7 +24,6 @@ export function SelectionModeNotice({
   onExitSelectionMode,
 }: SelectionModeNoticeProps) {
   const { t } = useT();
-  const { token } = theme.useToken();
 
   const selectedCount = selectedTabs.length;
   const selectedDomainCount = new Set(selectedTabs.map((tab) => tab.hostname)).size;
@@ -32,37 +32,24 @@ export function SelectionModeNotice({
   return (
     <Card
       size="small"
-      style={{
-        marginBottom: 16,
-        borderRadius: token.borderRadiusLG,
-        borderColor: token.colorPrimaryBorder,
-        background: token.colorPrimaryBg,
-      }}
-      styles={{ body: { padding: '12px 14px' } }}
+      className="app-selection-notice"
+      classNames={{ body: 'app-selection-notice__body' }}
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 12,
-          flexWrap: 'wrap',
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <div style={{ fontSize: 13.5, fontWeight: 600, color: token.colorText }}>
+      <div className="app-selection-notice__body">
+        <div className="app-selection-notice__summary">
+          <div className="app-selection-notice__title">
             {t('selection.title')}
           </div>
-          <div style={{ fontSize: 12, color: token.colorTextSecondary }}>
+          <div className="app-selection-notice__meta">
             {selectedCount > 0
               ? t('selection.summary', {
                   count: selectedCount,
                   domains: selectedDomainCount,
                   windows: selectedWindowCount,
-                })
+              })
               : t('selection.empty')}
           </div>
-          <div style={{ fontSize: 11.5, color: token.colorTextTertiary }}>
+          <div className="app-selection-notice__hint">
             {t('selection.hint')}
           </div>
         </div>

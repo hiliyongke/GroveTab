@@ -14,7 +14,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Tree, Input, Button, Empty, List, Spin, theme } from 'antd';
+import { Tree, Input, Button, Empty, List, Spin } from 'antd';
 import {
   BookOpen,
   Search,
@@ -38,6 +38,7 @@ import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
 import { BookmarkToolsModal } from '@/features/bookmarks/BookmarkToolsModal';
 import { isSafeExternalUrl } from '@/shared/utils/url-safety';
+import './styles/views.css';
 
 /**
  * 将书签树转换为 antd Tree 数据
@@ -75,7 +76,6 @@ export function BookmarkView() {
   const [toolsOpen, setToolsOpen] = useState(false);
   const tabs = useTabsStore((s) => s.tabs);
   const { t } = useT();
-  const { token } = theme.useToken();
 
   /** 检查权限 */
   useEffect(() => {
@@ -145,14 +145,14 @@ export function BookmarkView() {
   const allFlatBookmarks = useMemo(() => flattenBookmarks(bookmarks), [bookmarks]);
 
   if (checking) {
-    return <Spin style={{ display: 'block', margin: '80px auto' }} />;
+    return <Spin className="app-bookmark-loading" />;
   }
 
   if (!hasPermission) {
     return (
-      <div style={{ textAlign: 'center', padding: '80px 0' }}>
-          <BookOpen size={ICON_SIZE.HERO} style={{ color: token.colorTextTertiary, marginBottom: 16 }} />
-        <div style={{ fontSize: 14, color: token.colorTextSecondary, marginBottom: 16 }}>
+      <div className="app-bookmark-empty">
+        <BookOpen size={ICON_SIZE.HERO} className="app-bookmark-empty-icon" />
+        <div className="app-bookmark-empty-copy">
           {t('bookmark.needPermission')}
         </div>
         <Button type="primary" icon={<BookOpen size={ICON_SIZE.MEDIUM} />} onClick={() => { void handleRequestPermission(); }}>
@@ -163,29 +163,16 @@ export function BookmarkView() {
   }
 
   return (
-    <div
-      style={{
-        /*
-         * 固定高度 flex 布局：
-         *   - 外层高度锁在 min(100vh - 320px, 640px)，避免搜索结果变化导致整页高度跳动。
-         *   - 搜索栏固定在顶部；结果/Tree 容器 flex:1 + overflowY:auto 独立滚动。
-         *   - Tree <-> List 视图切换时，外框尺寸恒定，页面其它区域完全不受影响。
-         */
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 12,
-        height: 'min(calc(100vh - 320px), 640px)',
-      }}
-    >
+    <div className="app-bookmark-shell">
       {/* 搜索栏 + 操作（固定，不参与滚动） */}
-      <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+      <div className="app-bookmark-toolbar">
         <Input
           prefix={<Search size={ICON_SIZE.MEDIUM} />}
           placeholder={t('bookmark.searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => { void handleSearch(e.target.value); }}
           allowClear
-          style={{ flex: 1 }}
+          className="app-bookmark-search"
         />
         <Button icon={<Plus size={ICON_SIZE.MEDIUM} />} onClick={() => { void handleBookmarkAll(); }}>
           {t('bookmark.bookmarkAll')}
@@ -197,10 +184,10 @@ export function BookmarkView() {
       </div>
 
       {/* 结果区：独立滚动容器 */}
-      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: 4 }}>
+      <div className="app-bookmark-result">
         {searchQuery ? (
           searching ? (
-            <Spin style={{ display: 'block', margin: '40px auto' }} />
+            <Spin className="app-bookmark-result-loading" />
           ) : searchResults.length === 0 ? (
             <Empty description={t('bookmark.noResults')} />
           ) : (
@@ -210,7 +197,7 @@ export function BookmarkView() {
               renderItem={(item) => (
                 <List.Item
                   key={item.id}
-                  style={{ cursor: 'pointer', padding: '6px 8px' }}
+                  className="app-bookmark-list-item"
                   onClick={() => {
                     if (item.url) {
                       void handleOpenBookmark(item.url);
@@ -219,12 +206,12 @@ export function BookmarkView() {
                 >
                   <List.Item.Meta
                     title={
-                      <span style={{ fontSize: 12.5, fontWeight: 500, color: token.colorText }}>
+                      <span className="app-bookmark-list-title">
                         {item.title}
                       </span>
                     }
                     description={
-                      <span style={{ fontSize: 11, color: token.colorTextTertiary }}>
+                      <span className="app-bookmark-list-url">
                         {item.url}
                       </span>
                     }

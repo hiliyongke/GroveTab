@@ -19,6 +19,8 @@ export function ArchivePanel({ open, onOpenChange }: ArchivePanelProps) {
   return (
     <Modal
       open={open}
+      rootClassName="app-archive-panel"
+      classNames={{ body: 'app-archive-panel__body' }}
       onCancel={() => onOpenChange(false)}
       afterOpenChange={(visible) => {
         if (visible) {
@@ -29,8 +31,6 @@ export function ArchivePanel({ open, onOpenChange }: ArchivePanelProps) {
       width={680}
       centered={false}
       destroyOnHidden
-      styles={{ body: { padding: '16px 24px 20px' } }}
-      style={{ top: '10vh' }}
     >
       <ArchiveView />
     </Modal>

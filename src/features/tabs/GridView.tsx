@@ -31,6 +31,7 @@ import { findAmbiguousTitleIds } from '@/shared/utils/url-display';
 import { TabItem } from './TabItem';
 import type { LiveTab } from '@/shared/types';
 import type { Accent } from '@/shared/utils/favicon-color';
+import './styles/views.css';
 
 /**
  * 网格视图主组件：每个域名一张大卡片
@@ -70,13 +71,7 @@ export function GridView() {
   };
 
   return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-        gap: 12,
-      }}
-    >
+    <div className="app-grid-view">
       {groups.map((group) => (
         <GridCard
           key={group.domain}
@@ -152,116 +147,51 @@ function GridCard({
     <Card
       onClick={handleCardClick}
       className="app-card-interactive app-grid-card"
-      styles={{
-        body: {
-          padding: 12,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 10,
-        },
-      }}
+      classNames={{ body: 'app-grid-card__body' }}
       style={
         {
           borderRadius: token.borderRadiusLG,
-          cursor: 'pointer',
           // 下发 hover 边框色给 app-card-interactive 消费
           ['--app-hover-border' as string]: token.colorPrimaryBorder,
+          ['--app-grid-card-accent' as string]: color,
         } as React.CSSProperties
       }
     >
       {/* 缩略图区 —— 16:10 宽高比 */}
-      <div
-        style={{
-          position: 'relative',
-          width: '100%',
-          aspectRatio: '16 / 10',
-          borderRadius: token.borderRadius,
-          overflow: 'hidden',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: `linear-gradient(135deg, ${color}18 0%, ${color}08 100%)`,
-        }}
-      >
+      <div className="app-grid-card-preview">
         {first?.favIconUrl && !faviconError ? (
           <img
             src={first.favIconUrl}
             alt=""
-            style={{ width: 36, height: 36, borderRadius: 6 }}
+            className="app-grid-card-favicon"
             onError={() => setFaviconError(true)}
           />
         ) : (
-          <span style={{ fontSize: 24, fontWeight: 700, lineHeight: 1, color }}>
+          <span className="app-grid-card-fallback">
             {domain.charAt(0).toUpperCase()}
           </span>
         )}
 
         {/* 多 tab 角标：数字，右上角 */}
         {isMulti && (
-          <span
-            style={{
-              position: 'absolute',
-              top: 6,
-              right: 6,
-              minWidth: 22,
-              height: 20,
-              padding: '0 6px',
-              borderRadius: 10,
-              background: token.colorBgElevated,
-              border: `1px solid ${token.colorBorderSecondary}`,
-              boxShadow: token.boxShadowTertiary,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 11,
-              fontWeight: 600,
-              color: token.colorText,
-              fontVariantNumeric: 'tabular-nums',
-            }}
-          >
+          <span className="app-grid-card-count">
             {tabs.length}
           </span>
         )}
       </div>
 
       {/* 域名 */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          width: '100%',
-          minWidth: 0,
-        }}
-      >
-        <span
-          style={{
-            fontSize: 13,
-            fontWeight: 500,
-            color: token.colorText,
-            flex: 1,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            lineHeight: 1.3,
-          }}
-        >
+      <div className="app-grid-card-meta">
+        <span className="app-grid-card-domain">
           {domain}
         </span>
         {hasAudible && (
-<Volume2 size={ICON_SIZE.SMALL} style={{ color: token.colorPrimary, flexShrink: 0 }} />
+          <Volume2 size={ICON_SIZE.SMALL} className="app-grid-card-audible" />
         )}
       </div>
 
       {/* 计数行 */}
-      <span
-        style={{
-          fontSize: 11.5,
-          color: token.colorTextTertiary,
-          fontVariantNumeric: 'tabular-nums',
-          lineHeight: 1.3,
-        }}
-      >
+      <span className="app-grid-card-copy">
         {countLabel}
       </span>
     </Card>
@@ -278,7 +208,8 @@ function GridCard({
       placement="bottom"
       arrow
       destroyOnHidden
-      overlayInnerStyle={{ padding: 0 }}
+      classNames={{ container: 'app-grid-popover-container' }}
+      overlayClassName="app-grid-popover-overlay"
       content={
         <DomainTabsPanel
           domain={domain}
@@ -327,7 +258,6 @@ function DomainTabsPanel({
   onCloseTab,
   onClose,
 }: DomainTabsPanelProps) {
-  const { token } = theme.useToken();
   const { t } = useT();
   const [faviconFailed, setFaviconFailed] = useState(false);
 
@@ -344,93 +274,35 @@ function DomainTabsPanel({
   };
 
   const hasFavicon = typeof faviconSrc === 'string' && faviconSrc.length > 0;
+  const popoverStyle = {
+    ['--app-grid-popover-accent' as string]: accentColor,
+  } as React.CSSProperties;
 
   return (
-    <div
-      style={{
-        width: 340,
-        maxWidth: 'calc(100vw - 32px)',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
+    <div className="app-grid-popover" style={popoverStyle}>
       {/* Header —— 色条 + favicon + 域名 + 计数 + 关闭 */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          padding: '10px 8px 10px 12px',
-          borderBottom: `1px solid ${token.colorBorderSecondary}`,
-        }}
-      >
+      <div className="app-grid-popover__header">
         {/* 左侧身份色条 */}
-        <span
-          aria-hidden
-          style={{
-            width: 3,
-            alignSelf: 'stretch',
-            borderRadius: 2,
-            background: accentColor,
-            flexShrink: 0,
-          }}
-        />
+        <span aria-hidden className="app-grid-popover__accent" />
         {/* favicon */}
         {hasFavicon && !faviconFailed ? (
           <img
             src={faviconSrc}
             alt=""
-            width={16}
-            height={16}
-            style={{ borderRadius: 3, flexShrink: 0 }}
+            className="app-grid-popover__favicon"
             onError={() => setFaviconFailed(true)}
           />
         ) : (
-          <span
-            aria-hidden
-            style={{
-              width: 16,
-              height: 16,
-              borderRadius: 3,
-              background: `${accentColor}22`,
-              color: accentColor,
-              fontSize: 10,
-              fontWeight: 700,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-            }}
-          >
+          <span aria-hidden className="app-grid-popover__fallback">
             {domain.charAt(0).toUpperCase()}
           </span>
         )}
         {/* 域名 —— 允许省略 */}
-        <span
-          title={domain}
-          style={{
-            flex: 1,
-            minWidth: 0,
-            fontSize: 13,
-            fontWeight: 600,
-            color: token.colorText,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            lineHeight: 1.3,
-          }}
-        >
+        <span title={domain} className="app-grid-popover__title">
           {domain}
         </span>
         {/* 计数 —— secondary tone，tabular */}
-        <span
-          style={{
-            fontSize: 12,
-            color: token.colorTextTertiary,
-            fontVariantNumeric: 'tabular-nums',
-            flexShrink: 0,
-          }}
-        >
+        <span className="app-grid-popover__count">
           {t('header.tabCount', { count: tabs.length })}
         </span>
         {/* 关闭按钮 —— antd Button（键盘可达 + ant 原生样式） */}
@@ -440,21 +312,12 @@ function DomainTabsPanel({
           aria-label="Close"
           onClick={onClose}
           icon={<X size={ICON_SIZE.MEDIUM} />}
-          style={{ flexShrink: 0 }}
+          className="app-grid-popover__close"
         />
       </div>
 
       {/* 列表区 */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 2,
-          padding: '4px 4px 8px',
-          maxHeight: 'min(60vh, 420px)',
-          overflowY: 'auto',
-        }}
-      >
+      <div className="app-grid-popover__list">
         {tabs.map((tab) => (
           <TabItem
             key={tab.id}

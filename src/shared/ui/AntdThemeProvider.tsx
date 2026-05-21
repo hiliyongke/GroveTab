@@ -108,7 +108,45 @@ export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
   const locale = language === 'zh-CN' ? zhCN : enUS;
 
   return (
-    <ConfigProvider theme={themeConfig} locale={locale}>
+    <ConfigProvider
+      theme={themeConfig}
+      locale={locale}
+      typography={{ className: 'app-typography' }}
+      tag={{ classNames: { root: 'app-tag' } }}
+      button={{ classNames: { root: 'app-button' } }}
+      card={{ classNames: { root: 'app-card' } }}
+      alert={{ classNames: { root: 'app-alert' } }}
+      badge={{ classNames: { indicator: 'app-badge__indicator' } }}
+      segmented={{
+        classNames: {
+          root: 'app-segmented',
+          item: 'app-segmented__item',
+        },
+      }}
+      modal={{
+        classNames: {
+          mask: 'app-modal__mask',
+          header: 'app-modal__header',
+          body: 'app-modal__body',
+          footer: 'app-modal__footer',
+          container: 'app-modal__container',
+        },
+      }}
+      drawer={{
+        classNames: {
+          mask: 'app-drawer__mask',
+          header: 'app-drawer__header',
+          body: 'app-drawer__body',
+          footer: 'app-drawer__footer',
+          section: 'app-drawer__section',
+        },
+      }}
+      popover={{
+        classNames: {
+          container: 'app-popover__container',
+        },
+      }}
+    >
       <AntdApp style={ANT_APP_STYLE}>
         <FeedbackBridge />
         {children}

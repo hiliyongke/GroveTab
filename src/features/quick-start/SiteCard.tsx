@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { Card, Dropdown, theme } from 'antd';
+import { Card, Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
 import { GripVertical, Pencil, Trash2, ExternalLink, MoreHorizontal } from 'lucide-react';
 import { useT } from '@/shared/i18n';
@@ -38,7 +38,6 @@ export function SiteCard({
   onDelete,
 }: SiteCardProps) {
   const { t } = useT();
-  const { token } = theme.useToken();
   const [faviconError, setFaviconError] = useState(false);
 
   const hostname = useMemo(() => getHostname(site.url), [site.url]);
@@ -89,31 +88,21 @@ export function SiteCard({
     },
   ];
 
+  const cardStyle = {
+    ['--speed-dial-card-accent' as string]: color,
+    ['--speed-dial-card-opacity' as string]: isDragging ? '0.4' : '1',
+  } as React.CSSProperties;
+
   return (
     <Card
       className="app-card-interactive app-speed-dial-card"
-      styles={{ body: { padding: 0, display: 'flex', flexDirection: 'column' } }}
-      style={{
-        borderRadius: token.borderRadiusLG,
-        opacity: isDragging ? 0.4 : 1,
-        transition: 'opacity 160ms ease',
-      }}
+      classNames={{ body: 'app-speed-dial-card__body' }}
+      style={cardStyle}
     >
       {/* 缩略图区 —— 16:10，favicon 主色渐变 */}
       <div
+        className="app-speed-dial-preview"
         onClick={openSite}
-        style={{
-          position: 'relative',
-          width: '100%',
-          aspectRatio: '16 / 10',
-          borderRadius: `${token.borderRadiusLG}px ${token.borderRadiusLG}px 0 0`,
-          overflow: 'hidden',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: `linear-gradient(135deg, ${color}18 0%, ${color}08 100%)`,
-          cursor: 'pointer',
-        }}
       >
         {/* 拖拽手柄 —— 只有绑定了 dragListeners 时才可拖拽 */}
         {dragListeners && (
@@ -121,21 +110,8 @@ export function SiteCard({
             {...dragListeners}
             {...dragAttributes}
             className="speed-dial-drag-handle"
-            style={{
-              position: 'absolute',
-              top: 6,
-              left: 6,
-              width: 22,
-              height: 22,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 4,
-              cursor: 'grab',
-              zIndex: 10,
-            }}
           >
-            <GripVertical size={ICON_SIZE.SMALL} style={{ color: token.colorTextSecondary }} />
+            <GripVertical size={ICON_SIZE.SMALL} className="speed-dial-drag-icon" />
           </div>
         )}
 
@@ -144,17 +120,17 @@ export function SiteCard({
           <img
             src={faviconUrl}
             alt=""
-            style={{ width: 36, height: 36, borderRadius: 6 }}
+            className="app-speed-dial-favicon"
             onError={() => setFaviconError(true)}
           />
         ) : (
-          <span style={{ fontSize: 28, fontWeight: 700, lineHeight: 1, color }}>
+          <span className="app-speed-dial-fallback">
             {getInitial(hostname)}
           </span>
         )}
 
         {/* 「更多」按钮 —— 右上角绝对定位，Dropdown portal 到 body 避免裁切 */}
-        <div style={{ position: 'absolute', top: 6, right: 6, zIndex: 10 }}>
+        <div className="speed-dial-more-container">
           <Dropdown
             menu={{ items: menuItems }}
             trigger={['hover']}
@@ -173,32 +149,17 @@ export function SiteCard({
 
       {/* 底部信息区 */}
       <div
+        className="app-speed-dial-content"
         onClick={openSite}
-        style={{ padding: '10px 10px 8px', display: 'flex', flexDirection: 'column', gap: 2, cursor: 'pointer' }}
       >
         <span
-          style={{
-            fontSize: 13,
-            fontWeight: 500,
-            color: token.colorText,
-            lineHeight: 1.3,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
+          className="app-speed-dial-title"
           title={site.title || hostname}
         >
           {site.title || hostname}
         </span>
         <span
-          style={{
-            fontSize: 11,
-            color: token.colorTextTertiary,
-            lineHeight: 1.3,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
+          className="app-speed-dial-hostname"
           title={hostname}
         >
           {hostname}

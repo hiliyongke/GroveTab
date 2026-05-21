@@ -49,7 +49,7 @@ export function GeneralSettings({ settings, updateSettings }: GeneralSettingsPro
   })();
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div className="settings-panel-stack settings-panel-stack--compact">
       {/* ── 接管新标签页 ── */}
       <Field
         label={t('settings.overrideNewTab')}
@@ -80,7 +80,7 @@ export function GeneralSettings({ settings, updateSettings }: GeneralSettingsPro
         <Select
           value={settings.idleThresholdMinutes ?? 1440}
           onChange={(value) => handleSetting({ idleThresholdMinutes: value })}
-          style={{ width: '100%' }}
+          className="settings-control-full"
           options={[
             { value: 360, label: t('settings.idle6h') },
             { value: 720, label: t('settings.idle12h') },
@@ -96,7 +96,7 @@ export function GeneralSettings({ settings, updateSettings }: GeneralSettingsPro
         <Select
           value={settings.undoWindowSeconds ?? 5}
           onChange={(value) => handleSetting({ undoWindowSeconds: value })}
-          style={{ width: '100%' }}
+          className="settings-control-full"
           options={[3, 5, 7, 10].map((n) => ({ value: n, label: t('settings.undoWindowSeconds', { n }) }))}
         />
       </Field>

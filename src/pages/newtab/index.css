@@ -60,7 +60,7 @@ h3,
 h4,
 h5,
 h6,
-.ant-typography {
+.app-typography {
   font-family: var(--app-font-family-heading, var(--ant-font-family));
 }
 
@@ -114,17 +114,6 @@ h6 {
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--ant-color-border-secondary) transparent;
-}
-
-/* ─── 域名卡片瀑布流容器（antd 无对应组件） ────────── */
-.app-domain-masonry {
-  column-gap: 16px;
-  column-fill: balance;
-}
-.app-domain-masonry-item {
-  break-inside: avoid;
-  page-break-inside: avoid;
-  margin-bottom: 14px;
 }
 
 /* ─── favicon 占位块（无图时的字母色块） ──────────── */
@@ -326,7 +315,7 @@ html[data-texture-noise] body::before {
  * 替代原先在 label JSX 里通过 `viewMode === v.id` 判断 fontWeight 的写法——
  * 视觉表现完全一致，但避免了 React 在每次切换时重新构造整个 options 数组。
  */
-.ant-segmented .ant-segmented-item-selected {
+.app-segmented .app-segmented__item.app-segmented__item-selected {
   font-weight: 600;
 }
 
@@ -469,7 +458,7 @@ html[data-texture-noise] body::before {
 }
 
 /* 导航栏文本颜色 */
-[data-skin='apple'] .app-header-shell .ant-tag {
+[data-skin='apple'] .app-header-shell .app-tag {
   color: var(--app-apple-nav-text);
   border-color: rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.08);
@@ -518,11 +507,11 @@ html[data-texture-noise] body::before {
 }
 
 /* ── Apple Segmented 视图切换器 ── */
-[data-skin='apple'] .ant-segmented {
+[data-skin='apple'] .app-segmented {
   background: rgba(0, 0, 0, 0.04);
 }
 
-[data-theme='dark'][data-skin='apple'] .ant-segmented {
+[data-theme='dark'][data-skin='apple'] .app-segmented {
   background: rgba(255, 255, 255, 0.08);
 }
 
@@ -534,27 +523,27 @@ html[data-texture-noise] body::before {
  * ═══════════════════════════════════════════════════════ */
 
 /* ── Apple 卡片：无边框 ── */
-[data-skin='apple'] .ant-card {
+[data-skin='apple'] .app-card {
   border: none;
 }
 
-[data-skin='apple'] .ant-card:hover {
+[data-skin='apple'] .app-card:hover {
   transform: none !important;
 }
 
 /* ── Apple 按钮：pill 形 CTA ── */
-[data-skin='apple'] .ant-btn-primary {
+[data-skin='apple'] .app-button.ant-btn-primary {
   border-radius: 980px;
 }
 
 /* ── Apple 链接色 ── */
 [data-skin='apple'] a,
-[data-skin='apple'] .ant-typography a {
+[data-skin='apple'] .app-typography a {
   color: var(--app-apple-link-light);
 }
 
 [data-theme='dark'][data-skin='apple'] a,
-[data-theme='dark'][data-skin='apple'] .ant-typography a {
+[data-theme='dark'][data-skin='apple'] .app-typography a {
   color: var(--app-apple-link-dark);
 }
 
@@ -634,12 +623,12 @@ html[data-texture-noise] body::before {
 }
 
 /* Apple：分组内 favicon 徽章更圆润 */
-[data-skin='apple'] .app-domain-group-header div[style*="border-radius: 7px"] {
+[data-skin='apple'] .app-domain-group-badge {
   border-radius: 8px !important;
 }
 
 /* ── Apple Tag 标签 ── */
-[data-skin='apple'] .ant-tag {
+[data-skin='apple'] .app-tag {
   border-radius: 980px;
   border: none;
   font-weight: 500;
@@ -647,11 +636,11 @@ html[data-texture-noise] body::before {
 }
 
 /* ── Apple Segmented 视图切换器 ── */
-[data-skin='apple'] .ant-segmented {
+[data-skin='apple'] .app-segmented {
   border-radius: 9px;
 }
 
-[data-skin='apple'] .ant-segmented .ant-segmented-item-selected {
+[data-skin='apple'] .app-segmented .app-segmented__item.app-segmented__item-selected {
   font-weight: 600;
 }
 
@@ -662,7 +651,7 @@ html[data-texture-noise] body::before {
   letter-spacing: -0.022em;
 }
 
-[data-skin='apple'] .app-empty-state-actions .ant-btn-primary {
+[data-skin='apple'] .app-empty-state-actions .app-button.ant-btn-primary {
   border-radius: 980px;
 }
 
@@ -678,7 +667,7 @@ html[data-texture-noise] body::before {
 }
 
 /* ── Apple 选中态通知栏 ── */
-[data-skin='apple'] .ant-alert {
+[data-skin='apple'] .app-alert {
   border-radius: 12px;
   border: none;
 }
@@ -793,23 +782,23 @@ html[data-texture-noise] body::before {
 
 /* ── Fluent 链接色 ── */
 [data-skin='glassmorphism'] a,
-[data-skin='glassmorphism'] .ant-typography a {
+[data-skin='glassmorphism'] .app-typography a {
   color: #0078D4;
 }
 
 [data-theme='dark'][data-skin='glassmorphism'] a,
-[data-theme='dark'][data-skin='glassmorphism'] .ant-typography a {
+[data-theme='dark'][data-skin='glassmorphism'] .app-typography a {
   color: #60CDFF;
 }
 
 /* ── Fluent 按钮 ── */
-[data-skin='glassmorphism'] .ant-btn-primary {
+[data-skin='glassmorphism'] .app-button.ant-btn-primary {
   background: #0078D4;
   border-color: #0078D4;
   border-radius: 6px;
 }
 
-[data-skin='glassmorphism'] .ant-btn-primary:hover {
+[data-skin='glassmorphism'] .app-button.ant-btn-primary:hover {
   background: #2B88D8;
   border-color: #2B88D8;
 }
@@ -854,7 +843,7 @@ html[data-texture-noise] body::before {
 }
 
 /* ── Fluent Drawer：Acrylic 毛玻璃抽屉 ── */
-[data-skin='glassmorphism'] .ant-drawer-content {
+[data-skin='glassmorphism'] .app-drawer__section {
   background: var(--app-glass-bg) !important;
   backdrop-filter: var(--app-glass-filter) !important;
   -webkit-backdrop-filter: var(--app-glass-filter) !important;
@@ -862,48 +851,48 @@ html[data-texture-noise] body::before {
   box-shadow: -8px 0 32px rgba(0, 0, 0, 0.12), inset 1px 0 0 rgba(255, 255, 255, 0.06);
 }
 
-[data-skin='glassmorphism'] .ant-drawer-header {
+[data-skin='glassmorphism'] .app-drawer__header {
   background: transparent !important;
   border-bottom-color: rgba(255, 255, 255, 0.06);
 }
 
-[data-skin='glassmorphism'] .ant-drawer-body {
+[data-skin='glassmorphism'] .app-drawer__body {
   background: transparent !important;
 }
 
-[data-skin='glassmorphism'] .ant-drawer-footer {
+[data-skin='glassmorphism'] .app-drawer__footer {
   background: transparent !important;
   border-top-color: rgba(255, 255, 255, 0.06);
 }
 
 /* Drawer 遮罩层：加深以突出 Acrylic 抽屉 */
-[data-skin='glassmorphism'] .ant-drawer-mask {
+[data-skin='glassmorphism'] .app-drawer__mask {
   background: rgba(0, 0, 0, 0.45) !important;
   backdrop-filter: blur(4px) !important;
   -webkit-backdrop-filter: blur(4px) !important;
 }
 
-[data-theme='dark'][data-skin='glassmorphism'] .ant-drawer-mask {
+[data-theme='dark'][data-skin='glassmorphism'] .app-drawer__mask {
   background: rgba(0, 0, 0, 0.55) !important;
 }
 
 /* ── Fluent SearchBox Modal：Acrylic 毛玻璃搜索弹窗 ── */
-[data-skin='glassmorphism'] .search-box-modal .ant-modal-content {
+[data-skin='glassmorphism'] .search-box-container {
   background: var(--app-glass-bg) !important;
   backdrop-filter: var(--app-glass-filter) !important;
   -webkit-backdrop-filter: var(--app-glass-filter) !important;
 }
 
-[data-skin='glassmorphism'] .search-box-modal .ant-modal-mask {
+[data-skin='glassmorphism'] .search-box-mask {
   background: rgba(0, 0, 0, 0.45) !important;
 }
 
-[data-theme='dark'][data-skin='glassmorphism'] .search-box-modal .ant-modal-mask {
+[data-theme='dark'][data-skin='glassmorphism'] .search-box-mask {
   background: rgba(0, 0, 0, 0.55) !important;
 }
 
 /* ── Fluent Modal：Acrylic 毛玻璃弹窗 ── */
-[data-skin='glassmorphism'] .ant-modal-content {
+[data-skin='glassmorphism'] .app-modal__container {
   background: var(--app-glass-bg) !important;
   backdrop-filter: var(--app-glass-filter) !important;
   -webkit-backdrop-filter: var(--app-glass-filter) !important;
@@ -911,27 +900,27 @@ html[data-texture-noise] body::before {
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-[data-skin='glassmorphism'] .ant-modal-header {
+[data-skin='glassmorphism'] .app-modal__header {
   background: transparent !important;
   border-bottom-color: rgba(255, 255, 255, 0.06);
 }
 
-[data-skin='glassmorphism'] .ant-modal-body {
+[data-skin='glassmorphism'] .app-modal__body {
   background: transparent !important;
 }
 
-[data-skin='glassmorphism'] .ant-modal-footer {
+[data-skin='glassmorphism'] .app-modal__footer {
   background: transparent !important;
   border-top-color: rgba(255, 255, 255, 0.06);
 }
 
 /* Modal 遮罩层：加深以突出 Acrylic 弹窗 */
-[data-skin='glassmorphism'] .ant-modal-mask {
+[data-skin='glassmorphism'] .app-modal__mask {
   background: rgba(0, 0, 0, 0.45) !important;
   backdrop-filter: blur(4px) !important;
   -webkit-backdrop-filter: blur(4px) !important;
 }
 
-[data-theme='dark'][data-skin='glassmorphism'] .ant-modal-mask {
+[data-theme='dark'][data-skin='glassmorphism'] .app-modal__mask {
   background: rgba(0, 0, 0, 0.55) !important;
 }

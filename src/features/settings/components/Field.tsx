@@ -16,9 +16,9 @@ interface FieldProps {
 export function Field({ label, hint, children }: FieldProps) {
   return (
     <div className="settings-field">
-      <label className="settings-field__label">
+      <div className="settings-field__label">
         {label}
-      </label>
+      </div>
       {children}
       {hint && (
         <p className="settings-field__hint">

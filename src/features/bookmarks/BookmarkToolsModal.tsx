@@ -10,7 +10,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { Modal, Tabs, Button, List, Tag, Progress, Alert, theme, Space } from 'antd';
+import { Modal, Tabs, Button, List, Tag, Progress, Alert, Space, Checkbox } from 'antd';
 import { Copy, HeartPulse, FolderTree, Check, RefreshCw } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import type { BookmarkNode } from '@/chrome/bookmarks';
@@ -29,6 +29,7 @@ import {
 import { useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { feedback } from '@/shared/ui/feedback';
+import './bookmark-tools.css';
 
 interface BookmarkToolsModalProps {
   open: boolean;
@@ -39,7 +40,6 @@ interface BookmarkToolsModalProps {
 
 export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsModalProps) {
   const { t } = useT();
-  const { token } = theme.useToken();
   const dedupStrictness = useSettingsStore((s) => s.settings.dedupStrictness) ?? 'loose';
 
   // ── Tab 1: 去重 ──
@@ -152,12 +152,12 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
           {
             key: 'dedupe',
             label: (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <span className="bookmark-tools-tab-label">
                 <Copy size={ICON_SIZE.MEDIUM} /> {t('bookmark.tools.dedupe')}
               </span>
             ),
             children: (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxHeight: 420 }}>
+              <div className="bookmark-tools-panel">
                 <Alert
                   type="info"
                   showIcon
@@ -174,7 +174,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
                   )}
                 </Space>
                 {dups !== null && (
-                  <div style={{ overflowY: 'auto', flex: 1 }}>
+                  <div className="bookmark-tools-result">
                     {dups.length === 0 ? (
                       <Alert type="success" message={t('bookmark.tools.dedupeClean')} />
                     ) : (
@@ -183,9 +183,9 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
                         dataSource={dups}
                         renderItem={(g) => (
                           <List.Item>
-                            <div style={{ width: '100%' }}>
-                              <div style={{ fontSize: 12, color: token.colorTextSecondary }}>{g.key}</div>
-                              <div style={{ fontSize: 11, color: token.colorTextTertiary }}>
+                            <div className="bookmark-tools-item">
+                              <div className="bookmark-tools-item__title">{g.key}</div>
+                              <div className="bookmark-tools-item__subtitle">
                                 {t('bookmark.tools.dedupeItems', { count: g.items.length })}
                               </div>
                             </div>
@@ -202,12 +202,12 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
           {
             key: 'health',
             label: (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <span className="bookmark-tools-tab-label">
                 <HeartPulse size={ICON_SIZE.MEDIUM} /> {t('bookmark.tools.health')}
               </span>
             ),
             children: (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxHeight: 420 }}>
+              <div className="bookmark-tools-panel">
                 <Alert
                   type="warning"
                   showIcon
@@ -230,7 +230,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
                   <Progress percent={healthProgress.total > 0 ? Math.round((healthProgress.done / healthProgress.total) * 100) : 0} />
                 )}
                 {healthResults !== null && (
-                  <div style={{ overflowY: 'auto', flex: 1 }}>
+                  <div className="bookmark-tools-result">
                     {deadList.length === 0 ? (
                       <Alert type="success" message={t('bookmark.tools.healthClean')} />
                     ) : (
@@ -239,14 +239,14 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
                         dataSource={deadList}
                         renderItem={(r) => (
                           <List.Item>
-                            <div style={{ width: '100%' }}>
-                              <div style={{ fontSize: 12 }}>
+                            <div className="bookmark-tools-item">
+                              <div className="bookmark-tools-health-title">
                                 {r.bookmark.title}
-                                <Tag color={r.status === 'timeout' ? 'orange' : 'red'} style={{ marginLeft: 8 }}>
+                                <Tag color={r.status === 'timeout' ? 'orange' : 'red'} className="bookmark-tools-health-tag">
                                   {r.status}
                                 </Tag>
                               </div>
-                              <div style={{ fontSize: 11, color: token.colorTextTertiary }}>{r.bookmark.url}</div>
+                              <div className="bookmark-tools-item__subtitle">{r.bookmark.url}</div>
                             </div>
                           </List.Item>
                         )}
@@ -261,12 +261,12 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
           {
             key: 'organize',
             label: (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <span className="bookmark-tools-tab-label">
                 <FolderTree size={ICON_SIZE.MEDIUM} /> {t('bookmark.tools.organize')}
               </span>
             ),
             children: (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxHeight: 420 }}>
+              <div className="bookmark-tools-panel">
                 <Alert type="info" showIcon message={t('bookmark.tools.organizeHint')} />
                 <Space>
                   <Button type="primary" loading={orgLoading} icon={<RefreshCw size={ICON_SIZE.MEDIUM} />} onClick={() => { void scanClusters(); }}>
@@ -279,7 +279,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
                   )}
                 </Space>
                 {clusters !== null && (
-                  <div style={{ overflowY: 'auto', flex: 1 }}>
+                  <div className="bookmark-tools-result">
                     {clusters.length === 0 ? (
                       <Alert type="success" message={t('bookmark.tools.organizeEmpty')} />
                     ) : (
@@ -290,7 +290,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
                           const checked = selectedClusters.has(c.domain);
                           return (
                             <List.Item
-                              style={{ cursor: 'pointer' }}
+                              className="bookmark-tools-cluster-item"
                               onClick={() => {
                                 const next = new Set(selectedClusters);
                                 if (checked) next.delete(c.domain);
@@ -298,11 +298,11 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
                                 setSelectedClusters(next);
                               }}
                             >
-                              <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <input type="checkbox" checked={checked} readOnly />
-                                <div style={{ flex: 1 }}>
-                                  <div style={{ fontSize: 12 }}>{c.domain}</div>
-                                  <div style={{ fontSize: 11, color: token.colorTextTertiary }}>
+                              <div className="bookmark-tools-cluster-row">
+                                <Checkbox checked={checked} onChange={() => undefined} />
+                                <div className="bookmark-tools-cluster-meta">
+                                  <div className="bookmark-tools-cluster-domain">{c.domain}</div>
+                                  <div className="bookmark-tools-cluster-count">
                                     {t('bookmark.tools.organizeCount', { count: c.items.length })}
                                   </div>
                                 </div>

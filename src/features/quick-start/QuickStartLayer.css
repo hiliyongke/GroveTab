@@ -46,7 +46,7 @@
   color: var(--ant-color-text-secondary);
   letter-spacing: 0.01em;
   padding: 4px 12px;
-  background: var(--ant-color-bg-container);
+  background: color-mix(in srgb, var(--speed-dial-group-accent, var(--ant-color-primary)) 6%, var(--ant-color-bg-container));
   border: 1px solid var(--ant-color-border-secondary);
   border-left: 3px solid var(--ant-color-primary);
   border-radius: 6px;
@@ -75,19 +75,42 @@
 /* ── 站点卡片（与 GridCard 同体系） ── */
 .app-speed-dial-card {
   overflow: hidden;
+  opacity: var(--speed-dial-card-opacity, 1);
+  transition: opacity 160ms ease;
 }
 
-.app-speed-dial-card .ant-card-body {
+.app-speed-dial-card__body {
+  padding: 0;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-speed-dial-form {
+  margin-top: 16px;
 }
 
 /* ── 拖拽手柄（hover 时浮现） ── */
 .speed-dial-drag-handle {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 10;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   opacity: 0;
   transition: opacity 160ms ease, background 120ms ease;
   padding: 2px;
   border-radius: 4px;
   background: rgba(0, 0, 0, 0.04);
+  color: var(--ant-color-text-secondary);
+  cursor: grab;
+}
+
+.speed-dial-drag-icon {
   color: var(--ant-color-text-secondary);
 }
 
@@ -142,6 +165,80 @@
   z-index: 10;
 }
 
+.app-speed-dial-preview,
+.app-speed-dial-add-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-speed-dial-preview {
+  overflow: hidden;
+  border-radius: var(--ant-border-radius-lg) var(--ant-border-radius-lg) 0 0;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--speed-dial-card-accent, var(--ant-color-primary)) 18%, transparent) 0%, color-mix(in srgb, var(--speed-dial-card-accent, var(--ant-color-primary)) 8%, transparent) 100%);
+  cursor: pointer;
+}
+
+.app-speed-dial-favicon {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+}
+
+.app-speed-dial-fallback {
+  color: var(--speed-dial-card-accent, var(--ant-color-primary));
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.app-speed-dial-content,
+.app-speed-dial-add-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 10px 8px;
+}
+
+.app-speed-dial-content {
+  cursor: pointer;
+}
+
+.app-speed-dial-title,
+.app-speed-dial-add-label {
+  overflow: hidden;
+  color: var(--ant-color-text);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-speed-dial-hostname,
+.app-speed-dial-add-label {
+  color: var(--ant-color-text-tertiary);
+}
+
+.app-speed-dial-hostname {
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-speed-dial-add-preview {
+  border-bottom: 1px dashed var(--ant-color-border-secondary);
+}
+
+.app-speed-dial-add-icon {
+  color: var(--ant-color-text-tertiary);
+}
+
 /* ── 操作菜单 ── */
 .speed-dial-menu {
   position: absolute;
@@ -190,11 +287,11 @@
   border-color: var(--app-color-primary, var(--ant-color-primary));
 }
 
-.app-speed-dial-card--add:hover .ant-card-body > div:first-child {
+.app-speed-dial-card--add:hover .app-speed-dial-add-preview {
   border-bottom-color: var(--app-color-primary, var(--ant-color-primary)) !important;
 }
 
-.app-speed-dial-card--add:hover .ant-card-body span {
+.app-speed-dial-card--add:hover .app-speed-dial-add-label {
   color: var(--app-color-primary, var(--ant-color-primary));
 }
 
@@ -220,23 +317,10 @@
 }
 
 .speed-dial-empty-btn {
-  all: unset;
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 20px;
   margin-top: 6px;
   border-radius: var(--ant-border-radius, 8px);
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--app-color-primary, var(--ant-color-primary));
-  background: color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 8%, transparent);
-  transition: background 160ms ease, transform 160ms ease;
 }
 
 .speed-dial-empty-btn:hover {
-  background: color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 14%, transparent);
   transform: translateY(-1px);
 }

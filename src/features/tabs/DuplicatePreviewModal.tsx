@@ -18,6 +18,7 @@ import type { DupGroup } from '@/shared/utils/dedupe';
 import { useTabsStore, useMetadataStore } from '@/store';
 import { nanoid } from 'nanoid';
 import { useT } from '@/shared/i18n';
+import './styles/views.css';
 
 const { Text } = Typography;
 
@@ -148,7 +149,7 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
       centered
       destroyOnHidden
       footer={
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="app-duplicate-footer">
           <Space>
             <Button size="small" onClick={handleKeepAllOldest}>
               {t('dedup.keepOldest')}
@@ -158,7 +159,7 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
             </Button>
           </Space>
           <Space>
-            <Text type="secondary" style={{ fontSize: 12 }}>
+            <Text type="secondary" className="app-duplicate-summary">
               {t('dedup.mergeSummary', { close: closeCount, keep: keepCount })}
             </Text>
             <Button onClick={onClose} disabled={busy}>
@@ -176,7 +177,7 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
         </div>
       }
     >
-      <div style={{ maxHeight: 480, overflowY: 'auto', padding: '4px 2px' }}>
+      <div className="app-duplicate-groups">
         {effectiveGroups.length === 0 ? (
           <Text type="secondary">{t('dedup.emptyPreview')}</Text>
         ) : (
@@ -206,80 +207,47 @@ interface GroupSectionProps {
   locale: string;
 }
 
-function GroupSection({ group, keeperId, onChange, token, t, locale }: GroupSectionProps) {
+function GroupSection({ group, keeperId, onChange, token: _token, t, locale }: GroupSectionProps) {
   const closeCount = keeperId === undefined ? group.tabs.length : group.tabs.length - 1;
   return (
-    <div
-      style={{
-        marginBottom: 12,
-        padding: 12,
-        borderRadius: 10,
-        border: `1px solid ${token.colorBorderSecondary}`,
-        background: token.colorFillQuaternary,
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <Text strong style={{ fontSize: 12.5, color: token.colorTextSecondary, wordBreak: 'break-all' }}>
+    <div className="app-duplicate-group">
+      <div className="app-duplicate-group__header">
+        <Text strong className="app-duplicate-group__title">
           {group.canonicalUrl}
         </Text>
-        <Tag color="gold" bordered={false} style={{ margin: 0 }}>
+        <Tag color="gold" bordered={false} className="app-duplicate-group__tag">
           {t('dedup.willClose', { count: closeCount })}
         </Tag>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div className="app-duplicate-group__list">
         {group.tabs.map((tab: LiveTab) => (
           <label
             key={tab.id}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '6px 8px',
-              borderRadius: 6,
-              cursor: 'pointer',
-              background: keeperId === tab.id ? token.colorPrimaryBg : 'transparent',
-              transition: 'background 120ms',
-            }}
+            className={`app-duplicate-option${keeperId === tab.id ? ' is-selected' : ''}`}
           >
             <input
               type="radio"
               name={`group-${group.canonicalUrl}`}
               checked={keeperId === tab.id}
               onChange={() => onChange(tab.id)}
-              style={{ margin: 0 }}
+              className="app-duplicate-option__radio"
             />
             {tab.favIconUrl !== '' && (
-              <img src={tab.favIconUrl} alt="" width={14} height={14} style={{ borderRadius: 3 }} />
+              <img src={tab.favIconUrl} alt="" className="app-duplicate-option__favicon" />
             )}
-            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
-              <span
-                style={{
-                  fontSize: 12.5,
-                  color: token.colorText,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
+            <div className="app-duplicate-option__content">
+              <span className="app-duplicate-option__title">
                 {tab.title}
               </span>
-              <span
-                style={{
-                  fontSize: 11,
-                  color: token.colorTextTertiary,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
+              <span className="app-duplicate-option__url">
                 {tab.url}
               </span>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, flexShrink: 0 }}>
-              <Text type="secondary" style={{ fontSize: 10.5 }}>
+            <div className="app-duplicate-option__aside">
+              <Text type="secondary" className="app-duplicate-option__meta">
                 {t('dedup.windowLabel', { id: tab.windowId })}
               </Text>
-              <Text type="secondary" style={{ fontSize: 10.5 }}>
+              <Text type="secondary" className="app-duplicate-option__meta">
                 {formatOpenedAt(tab.lastAccessed, locale)}
               </Text>
             </div>

@@ -6,7 +6,7 @@
  *
  * 使用方式：
  *   import { iconColor } from '@/shared/utils/icon-colors';
- *   <SearchOutlined style={{ color: iconColor.search(token) }} />
+ *   <SearchOutlined className="search-icon" /> // `.search-icon { color: iconColor('search', token) }`
  *
  * 原则：
  *   1. 主操作（搜索/归档）用主色或品牌色

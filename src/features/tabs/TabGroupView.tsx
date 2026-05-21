@@ -11,10 +11,11 @@
  */
 
 import { useMemo } from 'react';
-import { Tag, Collapse, Empty, theme } from 'antd';
+import { Tag, Collapse, Empty } from 'antd';
 import { useTabsStore } from '@/store';
 import { TabItem } from './TabItem';
 import { useT } from '@/shared/i18n';
+import './styles/views.css';
 
 /**
  * Chrome Tab Group 颜色映射到 antd Tag color
@@ -50,7 +51,6 @@ export function TabGroupView() {
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
   const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
   const { t } = useT();
-  const { token } = theme.useToken();
 
   /**
    * 按 Chrome 原生 Tab Group 分组
@@ -86,7 +86,7 @@ export function TabGroupView() {
     return (
       <Empty
         description={t('tabs.empty')}
-        style={{ padding: '80px 0' }}
+        className="app-tab-group-empty"
       />
     );
   }
@@ -101,20 +101,20 @@ export function TabGroupView() {
       items={groups.map((group) => ({
         key: String(group.groupId),
         label: (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className="app-tab-group-label">
             <Tag
               color={GROUP_COLOR_MAP[group.color] || 'default'}
-              style={{ margin: 0, fontSize: 11 }}
+              className="app-tab-group-tag"
             >
               {group.title}
             </Tag>
-            <span style={{ fontSize: 12, color: token.colorTextTertiary }}>
+            <span className="app-tab-group-count">
               {group.tabs.length}
             </span>
           </div>
         ),
         children: (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div className="app-tab-group-list">
             {group.tabs.map((tab) => (
               <TabItem
                 key={tab.id}

@@ -10,7 +10,7 @@
  *   - 所有交互走 antd Button + Tag + Tooltip 原生组件
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import type { LiveTab } from '@/shared/types';
 import { Button, Tag, Tooltip, Checkbox, theme } from 'antd';
 import {
@@ -28,6 +28,7 @@ import { stringToColor } from '@/shared/utils/color';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { formatUrlForDisplay } from '@/shared/utils/url-display';
 import { TabContextMenu } from './TabContextMenu';
+import './styles/items.css';
 
 interface TabItemProps {
   tab: LiveTab;
@@ -146,6 +147,22 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
 
   /** 选中态背景色 */
   const selectedBg = token.colorPrimaryBg;
+  const rowStyle = useMemo(
+    () =>
+      ({
+        ['--app-row-hover-bg' as string]: token.colorFillTertiary,
+        ['--app-tab-selected-bg' as string]: selectedBg,
+        ['--app-tab-text' as string]: token.colorText,
+        ['--app-tab-text-tertiary' as string]: token.colorTextTertiary,
+        ['--app-tab-primary' as string]: token.colorPrimary,
+        ['--app-tab-fallback-bg' as string]: token.colorFillSecondary,
+      }) as React.CSSProperties,
+    [selectedBg, token.colorFillSecondary, token.colorFillTertiary, token.colorPrimary, token.colorText, token.colorTextTertiary],
+  );
+  const tagStyles = useMemo(
+    () => new Map(tags.slice(0, 2).map((tag) => [tag, { ['--app-tab-item-tag-bg' as string]: stringToColor(tag) } as React.CSSProperties])),
+    [tags],
+  );
 
   return (
     <>
@@ -165,27 +182,15 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
           }
         }}
         onContextMenu={handleContextMenu}
-        className="app-row-hover app-hover-reveal-host"
-        style={
-          {
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            width: '100%',
-            minHeight: showUrlHint ? 52 : 40,
-            padding: showUrlHint ? '8px 12px' : '4px 12px',
-            borderRadius: token.borderRadiusSM,
-            cursor: 'pointer',
-            // 选中态用内联 background 强制覆盖 hover 规则；非选中态留空让 CSS
-            // .app-row-hover:hover 接管（空字符串/undefined 都不会产生内联规则）
-            ...(isSelected ? { backgroundColor: selectedBg } : {}),
-            outline: 'none',
-            opacity: isDiscarded ? 0.5 : 1,
-            position: 'relative',
-            // 向 .app-row-hover 下发自定义 hover 背景色（与原 colorFillTertiary 一致）
-            ['--app-row-hover-bg' as string]: token.colorFillTertiary,
-          } as React.CSSProperties
-        }
+        className={[
+          'app-row-hover',
+          'app-hover-reveal-host',
+          'app-tab-item',
+          showUrlHint ? 'has-url-hint' : '',
+          isSelected ? 'is-selected' : '',
+          isDiscarded ? 'is-discarded' : '',
+        ].filter(Boolean).join(' ')}
+        style={rowStyle}
       >
         {/* 多选 Checkbox——selectable 时始终占位，非多选模式用 visibility:hidden 隐藏，避免布局跳动 */}
         {selectable && (
@@ -195,7 +200,7 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
               e.stopPropagation();
               toggleSelect(tab.id, e.shiftKey, visibleTabIds);
             }}
-            style={{ flexShrink: 0, visibility: (selectionMode || isSelected) ? 'visible' : 'hidden' }}
+            className={`app-tab-item-checkbox${selectionMode || isSelected ? ' is-visible' : ''}`}
           />
         )}
 
@@ -207,94 +212,39 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
             <img
               src={tab.favIconUrl}
               alt=""
-              style={{ width: 16, height: 16, borderRadius: 3, flexShrink: 0 }}
+              className="app-tab-item-favicon"
               onError={() => setFaviconError(true)}
             />
           ) : (
-            <div
-              style={{
-                width: 16,
-                height: 16,
-                borderRadius: 3,
-                background: token.colorFillSecondary,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              <Globe size={ICON_SIZE.MICRO} style={{ color: token.colorTextTertiary }} />
+            <div className="app-tab-item-favicon-fallback">
+              <Globe size={ICON_SIZE.MICRO} className="app-tab-item-favicon-icon" />
             </div>
           )
         )}
 
         {/* 标题区（单行或双行，取决于是否需要 URL 消歧） */}
-        <div
-          style={{
-            flex: 1,
-            minWidth: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            gap: showUrlHint ? 2 : 0,
-          }}
-        >
+        <div className="app-tab-item-main">
           {/* 上行：标题 + 标记 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-            <span
-              style={{
-                fontSize: 12.5,
-                fontWeight: 500,
-                color: token.colorText,
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                lineHeight: 1.3,
-                flex: '0 1 auto',
-                minWidth: 0,
-              }}
-            >
+          <div className="app-tab-item-head">
+            <span className="app-tab-item-title">
               {tab.title}
             </span>
             {showHostname && (
-              <span
-                style={{
-                  fontSize: 11,
-                  color: token.colorTextTertiary,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  flexShrink: 0,
-                  maxWidth: 160,
-                }}
-              >
+              <span className="app-tab-item-hostname">
                 {tab.hostname}
               </span>
             )}
             {isPinned && (
-              <Pin size={ICON_SIZE.MICRO} style={{ color: token.colorPrimary, flexShrink: 0 }} />
+              <Pin size={ICON_SIZE.MICRO} className="app-tab-item-status-primary" />
             )}
             {note && (
-              <MessageSquare
-                size={ICON_SIZE.MICRO}
-                style={{ color: token.colorTextTertiary, flexShrink: 0 }}
-              />
+              <MessageSquare size={ICON_SIZE.MICRO} className="app-tab-item-note-icon" />
             )}
             {tags.slice(0, 2).map((tag) => (
               <Tag
                 key={tag}
-                style={{
-                  margin: 0,
-                  height: 16,
-                  lineHeight: '14px',
-                  padding: '0 5px',
-                  fontSize: 10,
-                  borderRadius: 3,
-                  color: '#fff',
-                  border: 'none',
-                  backgroundColor: stringToColor(tag),
-                  flexShrink: 0,
-                }}
+                className="app-tab-item-tag"
+                style={tagStyles.get(tag)}
               >
                 {tag}
               </Tag>
@@ -304,19 +254,7 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
           {/* 下行：URL 友好串（仅同名多 tab 时展示） */}
           {showUrlHint && urlHint && (
             <Tooltip title={tab.url} mouseEnterDelay={0.4} placement="bottomLeft">
-              <span
-                style={{
-                  display: 'block',
-                  fontSize: 11,
-                  color: token.colorTextTertiary,
-                  fontFamily:
-                    'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  lineHeight: 1.3,
-                }}
-              >
+              <span className="app-tab-item-url-hint">
                 {urlHint}
               </span>
             </Tooltip>
@@ -324,16 +262,16 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
         </div>
 
         {/* 状态图标 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+        <div className="app-tab-item-status">
           {tab.audible && (
             <Tooltip title={t('tabs.playing')}>
-              <Volume2 size={ICON_SIZE.SMALL} style={{ color: token.colorPrimary }} />
+              <Volume2 size={ICON_SIZE.SMALL} className="app-tab-item-status-primary" />
             </Tooltip>
           )}
           {!tab.isCurrentWindow && (
             <Tooltip title={t('tabs.otherWindow')}>
               {/* 使用外链箭头图标表达「跳去另一个窗口」语义，避免与 favicon 兜底的 Global 图标混淆 */}
-              <Pointer size={ICON_SIZE.SMALL} style={{ color: token.colorTextTertiary }} />
+              <Pointer size={ICON_SIZE.SMALL} className="app-tab-item-secondary-icon" />
             </Tooltip>
           )}
         </div>
@@ -346,7 +284,7 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
           <Button
             type="text"
             size="small"
-            icon={<Star size={ICON_SIZE.SMALL} fill={isInQuickStart ? token.colorWarning : 'none'} />}
+            icon={<Star size={ICON_SIZE.SMALL} fill={isInQuickStart ? 'currentColor' : 'none'} />}
             onClick={(e) => {
               e.stopPropagation();
               if (isInQuickStart) return;
@@ -360,17 +298,11 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
               });
             }}
             aria-label={t('context.addToQuickStart')}
-            className={isInQuickStart ? '' : 'app-hover-reveal'}
-            style={{
-              flexShrink: 0,
-              width: 24,
-              height: 24,
-              padding: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: isInQuickStart ? token.colorWarning : undefined,
-            }}
+            className={[
+              'app-tab-item-action',
+              'app-tab-item-action--favorite',
+              isInQuickStart ? 'is-active' : 'app-hover-reveal',
+            ].join(' ')}
           />
         </Tooltip>
 
@@ -383,16 +315,7 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
             icon={<X size={ICON_SIZE.SMALL} />}
             onClick={handleClose}
             aria-label={t('tabs.close')}
-            className="app-hover-reveal"
-            style={{
-              flexShrink: 0,
-              width: 24,
-              height: 24,
-              padding: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
+            className="app-hover-reveal app-tab-item-action"
           />
         </Tooltip>
       </div>

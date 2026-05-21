@@ -25,6 +25,7 @@ import { useT } from '@/shared/i18n';
 import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
 import { Z } from '@/shared/config/z-index';
+import './styles/views.css';
 
 /**
  * 批量操作浮动栏
@@ -88,44 +89,30 @@ export function BatchActionBar() {
   // 非多选模式或无选中时不渲染
   if (!selectionMode || count === 0) return null;
 
+  const batchBarStyle = {
+    ['--app-batch-bar-z' as string]: Z.batchBar,
+    ['--app-batch-bar-danger-icon' as string]: iconColor('close', token),
+    ['--app-batch-bar-discard-icon' as string]: iconColor('discard', token),
+  } as React.CSSProperties;
+
   return (
     <div
       className="app-batch-bar app-surface-elevated"
       role="toolbar"
       aria-label={t('selection.title')}
-      style={{
-        position: 'fixed',
-        bottom: 24,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: Z.batchBar,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 10,
-        padding: '8px 10px 8px 16px',
-      }}
+      style={batchBarStyle}
     >
       {/* 计数标签组：图标 + 选中数 */}
-      <div
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 8,
-          paddingRight: 2,
-          color: token.colorText,
-          fontSize: 13,
-          fontWeight: 500,
-        }}
-      >
+      <div className="app-batch-bar__summary">
         <Badge
           count={count}
           size="small"
           color={token.colorPrimary}
           offset={[0, 0]}
         >
-          <Pointer size={ICON_SIZE.LARGE} style={{ color: token.colorPrimary, display: 'block' }} />
+          <Pointer size={ICON_SIZE.LARGE} className="app-batch-bar__pointer" />
         </Badge>
-        <span style={{ color: token.colorTextSecondary, fontSize: 12.5 }}>
+        <span className="app-batch-bar__summary-copy">
           {t('selection.title')}
         </span>
       </div>
@@ -133,7 +120,7 @@ export function BatchActionBar() {
       <div className="app-divider-soft" aria-hidden />
 
       {/* 操作组：危险→中性→主要，视觉权重递增 */}
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+      <div className="app-batch-bar__actions">
         <Tooltip title={t('batch.close')} placement="top">
           <Popconfirm
             title={t('batch.closeConfirm', { count })}
@@ -146,7 +133,7 @@ export function BatchActionBar() {
             <Button
               size="small"
               danger
-              icon={<X size={ICON_SIZE.DEFAULT} style={{ color: iconColor('close', token) }} />}
+              icon={<X size={ICON_SIZE.DEFAULT} className="app-batch-bar__danger-icon" />}
             >
               {t('batch.close')}
             </Button>
@@ -156,7 +143,7 @@ export function BatchActionBar() {
         <Tooltip title={t('batch.discard')} placement="top">
           <Button
             size="small"
-            icon={<Moon size={ICON_SIZE.DEFAULT} style={{ color: iconColor('discard', token) }} />}
+            icon={<Moon size={ICON_SIZE.DEFAULT} className="app-batch-bar__secondary-icon" />}
             onClick={() => { void handleBatchDiscard(); }}
           >
             {t('batch.discard')}
@@ -189,7 +176,7 @@ export function BatchActionBar() {
         <Button
           size="small"
           type="text"
-          icon={<XCircle size={ICON_SIZE.DEFAULT} style={{ color: iconColor('close', token) }} />}
+          icon={<XCircle size={ICON_SIZE.DEFAULT} className="app-batch-bar__danger-icon" />}
           onClick={exitSelectionMode}
           aria-label={t('batch.cancel')}
         />

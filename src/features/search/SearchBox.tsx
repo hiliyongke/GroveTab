@@ -821,12 +821,13 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
       keyboard={false}
       width={680}
       centered={false}
-      rootClassName="search-box-modal"
-      styles={{
-        mask: { backdropFilter: 'blur(8px)', background: 'rgba(0,0,0,0.32)' },
-        body: { padding: 0 },
+      className="search-box-dialog"
+      classNames={{
+        mask: 'search-box-mask',
+        body: 'search-box-body',
+        container: 'search-box-container',
       }}
-      style={{ top: '12vh' }}
+      rootClassName="search-box-modal"
     >
       <div className="search-box-shell" style={rootVars}>
         <div className="search-box-header">
@@ -873,7 +874,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
                 <div className="search-box-empty">
                   <FeatureEmptyState
                     title={title}
-                    icon={<Search size={20} style={{ opacity: 0.4 }} />}
+                    icon={<Search size={20} className="search-box-empty-icon" />}
                     size="small"
                     hints={
                       normalizedQuery !== ''

@@ -13,6 +13,7 @@ import { useTabsStore, useMetadataStore, useSettingsStore } from '@/store';
 import { groupTabsByDomain, getGroupFavicon } from '@/shared/utils/domain';
 import { useGroupAccents } from '@/shared/hooks/useGroupAccents';
 import { DomainGroupCard } from './DomainGroupCard';
+import './styles/items.css';
 
 /**
  * 构造响应式 multi-column 布局样式
@@ -20,16 +21,12 @@ import { DomainGroupCard } from './DomainGroupCard';
  * @param forcedColumns - 若用户在设置中显式指定列数（1–6），则强制使用该列数；
  *                        否则返回纯响应式配置（按 `column-width` 自适应）
  */
-function getColumnStyle(forcedColumns: number | null): React.CSSProperties {
-  const base: React.CSSProperties = {
-    columnGap: '20px',
-    columnFill: 'balance',
-  };
+function getColumnVars(forcedColumns: number | null): React.CSSProperties {
   if (forcedColumns && forcedColumns >= 1 && forcedColumns <= 6) {
-    return { ...base, columnCount: forcedColumns };
+    return { ['--app-domain-column-count' as string]: String(forcedColumns) };
   }
-  // 纯响应式：每列最少 320px，宽屏自动增加列数
-  return { ...base, columnWidth: '320px' };
+
+  return { ['--app-domain-column-width' as string]: '320px' };
 }
 
 /**
@@ -98,16 +95,12 @@ export function DomainGroupView() {
   }
 
   return (
-    <div style={getColumnStyle(forcedColumns)}>
+    <div
+      className={`app-domain-masonry${forcedColumns !== null ? ' is-fixed-columns' : ''}`}
+      style={getColumnVars(forcedColumns)}
+    >
       {sortedGroups.map((group) => (
-        <div
-          key={group.domain}
-          style={{
-            marginBottom: 16,
-            breakInside: 'avoid',
-            pageBreakInside: 'avoid',
-          }}
-        >
+        <div key={group.domain} className="app-domain-masonry-item">
           <DomainGroupCard
             group={group}
             initialCollapsed={false}

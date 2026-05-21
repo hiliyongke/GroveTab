@@ -9,14 +9,12 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Modal, Button, Progress, Radio, Space, Typography, Alert } from 'antd';
+import { Modal, Button, Progress, Radio, Space, Alert } from 'antd';
 import { Play, X, CheckCircle, AlertCircle } from 'lucide-react';
 import type { RestoreStrategy, RestoreOutcome } from '@/services/archive-service';
 import { restoreSession } from '@/services/archive-service';
 import { useT } from '@/shared/i18n';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
-
-const { Text } = Typography;
 
 interface EnhancedRestoreDialogProps {
   open: boolean;
@@ -132,6 +130,7 @@ export function EnhancedRestoreDialog({
   return (
     <Modal
       open={open}
+      rootClassName="app-archive-dialog app-archive-restore-dialog"
       title={t('archive.restoreTitle')}
       onCancel={handleClose}
       footer={[
@@ -172,22 +171,17 @@ export function EnhancedRestoreDialog({
       width={500}
       centered
     >
-      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+      <Space direction="vertical" size="middle" className="app-archive-dialog__stack">
         {/* 会话信息 */}
-        <div>
-          <Text strong>{sessionName}</Text>
-          <br />
-          <Text type="secondary">
-            {t('archive.tabCount', { count: tabCount })}
-          </Text>
+        <div className="app-archive-dialog__session-summary">
+          <div className="app-archive-dialog__current-name">{sessionName}</div>
+          <div className="app-archive-dialog__label">{t('archive.tabCount', { count: tabCount })}</div>
         </div>
 
         {/* 恢复策略选择 */}
         {!isRestoring && !outcome && (
-          <div>
-            <Text strong style={{ display: 'block', marginBottom: 8 }}>
-              {t('archive.restoreStrategy')}
-            </Text>
+          <div className="app-archive-dialog__section">
+            <div className="app-archive-dialog__strategy-label">{t('archive.restoreStrategy')}</div>
             <Radio.Group
               value={restoreStrategy}
               onChange={(e) => setRestoreStrategy(e.target.value)}
@@ -214,10 +208,6 @@ export function EnhancedRestoreDialog({
                 outcome?.cancelled ? 'exception' : 
                 outcome?.restored === total ? 'success' : 'normal'
               }
-              strokeColor={
-                outcome?.cancelled ? '#ff4d4f' : 
-                outcome?.restored === total ? '#52c41a' : '#1890ff'
-              }
             />
           </div>
         )}
@@ -237,12 +227,12 @@ export function EnhancedRestoreDialog({
 
         {/* 策略说明 */}
         {!isRestoring && !outcome && (
-          <Text type="secondary" style={{ fontSize: 12, lineHeight: 1.5 }}>
+          <div className="app-archive-dialog__strategy-copy">
             {restoreStrategy === 'new_window' 
               ? t('archive.strategyNewWindowDesc')
               : t('archive.strategyCurrentWindowDesc')
             }
-          </Text>
+          </div>
         )}
       </Space>
     </Modal>

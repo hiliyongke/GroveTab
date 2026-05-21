@@ -9,6 +9,7 @@
  */
 import { Component, type ReactNode } from 'react';
 import { BRAND } from '@/shared/config/brand';
+import './status-surfaces.css';
 
 interface Props {
   children: ReactNode;
@@ -54,37 +55,17 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback(this.state.error, this.reset);
       }
       return (
-        <div
-          role="alert"
-          style={{
-            padding: 16,
-            color: 'var(--ant-color-error-text, #cf1322)',
-            background: 'var(--ant-color-error-bg, #fff2f0)',
-            borderRadius: 8,
-            fontSize: 12,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 8,
-            alignItems: 'flex-start',
-          }}
-        >
-          <div style={{ fontWeight: 600 }}>
+        <div role="alert" className="app-error-boundary">
+          <div className="app-error-boundary__title">
             加载失败{this.props.label ? ` · ${this.props.label}` : ''}
           </div>
-          <div style={{ opacity: 0.8, wordBreak: 'break-word' }}>
+          <div className="app-error-boundary__message">
             {this.state.error.message}
           </div>
           <button
             type="button"
             onClick={this.reset}
-            style={{
-              all: 'unset',
-              cursor: 'pointer',
-              padding: '4px 10px',
-              borderRadius: 6,
-              border: '1px solid currentColor',
-              fontSize: 11,
-            }}
+            className="app-error-boundary__retry"
           >
             点击重试
           </button>

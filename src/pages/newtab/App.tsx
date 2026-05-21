@@ -25,7 +25,6 @@ import {
   Alert,
   Segmented,
   Dropdown,
-  theme,
 } from 'antd';
 import {
   Search,
@@ -465,6 +464,7 @@ function HeroBar({
           options={viewSegmentedOptions}
           size="middle"
           className="app-view-switcher"
+          classNames={{ item: 'app-view-switcher__item' }}
         />
       )}
     </section>
@@ -482,13 +482,9 @@ function ViewSidebar({
   position: 'left' | 'right';
 }) {
   const { t } = useT();
-  const { token } = theme.useToken();
 
   return (
-    <nav
-      className={`app-view-sidebar app-view-sidebar--${position}`}
-      style={{ borderColor: token.colorBorderSecondary, background: token.colorBgLayout }}
-    >
+    <nav className={`app-view-sidebar app-view-sidebar--${position}`}>
       <div className="app-view-sidebar__list">
         {VIEW_CONFIGS.map((v) => {
           const isActive = viewMode === v.id;
@@ -497,13 +493,9 @@ function ViewSidebar({
               key={v.id}
               type="button"
               className={`app-view-sidebar__item${isActive ? ' is-active' : ''}`}
+              aria-current={isActive ? 'page' : undefined}
               onClick={() => onViewChange(v.id)}
               title={t(v.labelKey)}
-              style={{
-                background: isActive ? token.colorPrimaryBg : undefined,
-                color: isActive ? token.colorPrimary : token.colorTextSecondary,
-                borderRadius: token.borderRadiusLG,
-              }}
             >
               <v.Icon size={ICON_SIZE.MEDIUM} />
               <span className="app-view-sidebar__label">{t(v.labelKey)}</span>

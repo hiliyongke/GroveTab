@@ -27,6 +27,7 @@ import { useT } from '@/shared/i18n';
 import { findAmbiguousTitleIds } from '@/shared/utils/url-display';
 import { TabItem } from './TabItem';
 import type { LiveTab } from '@/shared/types';
+import './styles/views.css';
 
 /** 翻译函数类型（与 useT 返回的 t 对齐） */
 type TFn = (key: string, vars?: Record<string, string | number>) => string;
@@ -263,21 +264,10 @@ function SegmentHeader({
       type="button"
       onClick={onToggle}
       aria-expanded={!collapsed}
-      className="app-timeline-segment-header"
+      className="app-timeline-segment-header app-timeline-segment-trigger"
       style={
         {
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 8,
-          height: 24,
-          padding: '0 8px 0 0',
-          fontSize: 13,
-          fontWeight: 600,
           transition: `color ${token.motionDurationFast}`,
-          background: 'transparent',
-          border: 'none',
-          cursor: 'pointer',
-          outline: 'none',
           // 颜色通过 CSS 变量下发，:hover 规则里切换，避免内联 color 被覆盖
           ['--app-color' as string]: token.colorTextSecondary,
           ['--app-color-hover' as string]: token.colorText,
@@ -286,42 +276,16 @@ function SegmentHeader({
     >
       <span>{label}</span>
       {rangeText && (
-        <span
-          style={{
-            fontSize: 11.5,
-            fontWeight: 400,
-            color: token.colorTextTertiary,
-            fontVariantNumeric: 'tabular-nums',
-          }}
-        >
+        <span className="app-timeline-segment-range">
           {rangeText}
         </span>
       )}
-      <span
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minWidth: 20,
-          height: 18,
-          padding: '0 6px',
-          borderRadius: 9,
-          background: token.colorFillSecondary,
-          color: token.colorTextTertiary,
-          fontSize: 11,
-          fontWeight: 500,
-          fontVariantNumeric: 'tabular-nums',
-        }}
-      >
+      <span className="app-timeline-segment-count">
         {count}
       </span>
       <ChevronDown
         size={ICON_SIZE.MICRO}
-        style={{
-          color: token.colorTextTertiary,
-          transform: collapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
-          transition: `transform ${token.motionDurationMid}`,
-        }}
+        className={`app-timeline-segment-chevron${collapsed ? ' is-collapsed' : ''}`}
       />
     </button>
   );
@@ -340,7 +304,6 @@ function SegmentContent({
   const [collapsed, setCollapsed] = useState(false);
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
   const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
-  const { token } = theme.useToken();
   /** 段内同名 tab id 集合 */
   const ambiguousIds = useMemo(() => findAmbiguousTitleIds(segment.tabs), [segment.tabs]);
   /** 段内 tab ID 列表（供 Shift 范围选） */
@@ -350,8 +313,8 @@ function SegmentContent({
   const rangeText = showExactTime ? formatSegmentRange(segment.tabs) : undefined;
 
   return (
-    <div style={{ paddingBottom: collapsed ? 4 : 12 }}>
-      <div style={{ marginBottom: collapsed ? 0 : 6 }}>
+    <div className={`app-timeline-segment${collapsed ? ' is-collapsed' : ''}`}>
+      <div className="app-timeline-segment__header">
         <SegmentHeader
           label={segment.label}
           rangeText={rangeText}
@@ -362,7 +325,7 @@ function SegmentContent({
       </div>
 
       {!collapsed && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div className="app-timeline-segment-list">
           {segment.tabs.map((tab) => (
             <TabItem
               key={tab.id}
@@ -375,16 +338,7 @@ function SegmentContent({
               visibleTabIds={segmentTabIds}
               trailing={
                 showExactTime && tab.lastAccessed ? (
-                  <span
-                    style={{
-                      flexShrink: 0,
-                      fontSize: 11.5,
-                      color: token.colorTextTertiary,
-                      fontVariantNumeric: 'tabular-nums',
-                      minWidth: 38,
-                      textAlign: 'right',
-                    }}
-                  >
+                  <span className="app-timeline-segment-time">
                     {formatHM(tab.lastAccessed)}
                   </span>
                 ) : null
@@ -446,7 +400,7 @@ export function TimelineView() {
   }));
 
   return (
-    <div style={{ paddingTop: 4 }}>
+    <div className="app-timeline-view">
       <Timeline items={items} />
     </div>
   );

@@ -240,7 +240,7 @@
   max-width: 680px;
 }
 
-.ant-input-affix-wrapper.app-hero-search {
+.app-hero-search {
   height: var(--app-search-height);
   cursor: pointer;
   font-size: var(--app-search-font-size);
@@ -250,7 +250,7 @@
   box-shadow: var(--app-shadow-brand-glow);
 }
 
-.ant-input-affix-wrapper.app-hero-search:hover {
+.app-hero-search:hover {
   transform: translateY(-1px);
   border-color: var(--app-color-primary-hover);
   box-shadow:
@@ -258,7 +258,7 @@
     0 0 0 4px color-mix(in srgb, var(--app-color-primary) 10%, transparent);
 }
 
-[data-theme='dark'] .ant-input-affix-wrapper.app-hero-search:hover {
+[data-theme='dark'] .app-hero-search:hover {
   box-shadow:
     0 10px 32px rgba(0, 0, 0, 0.4),
     0 0 0 4px color-mix(in srgb, var(--app-color-primary) 12%, transparent);
@@ -282,6 +282,7 @@
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--ant-color-border-secondary);
+  background: color-mix(in srgb, var(--ant-color-bg-layout) 88%, transparent);
   padding: 12px 8px;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -320,6 +321,8 @@
 }
 
 .app-view-sidebar__item.is-active {
+  background: var(--ant-color-primary-bg);
+  color: var(--ant-color-primary);
   font-weight: 600;
 }
 
@@ -327,6 +330,36 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.app-workspace-switcher {
+  display: inline-flex;
+}
+
+.app-workspace-trigger,
+.app-workspace-clear {
+  border-radius: 999px;
+}
+
+.app-workspace-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-workspace-trigger--active {
+  border-color: color-mix(in srgb, var(--ant-color-primary) 22%, var(--ant-color-border-secondary));
+  background: var(--ant-color-primary-bg);
+  color: var(--ant-color-primary);
+}
+
+.app-workspace-trigger--active:hover,
+.app-workspace-clear:hover {
+  border-color: color-mix(in srgb, var(--ant-color-primary) 30%, var(--ant-color-border-secondary));
+}
+
+.app-workspace-clear {
+  color: var(--ant-color-text-tertiary);
 }
 
 /* ── 响应式：小屏侧边栏收缩为仅图标 ── */
@@ -380,7 +413,7 @@
 }
 
 /* Apple：Hero 搜索框 - 改为 Apple Filter/Search 按钮风格 */
-[data-skin='apple'] .ant-input-affix-wrapper.app-hero-search {
+[data-skin='apple'] .app-hero-search {
   height: 44px;
   border: 3px solid rgba(0, 0, 0, 0.04);
   border-radius: 11px;
@@ -390,18 +423,18 @@
   letter-spacing: -0.01em;
 }
 
-[data-skin='apple'] .ant-input-affix-wrapper.app-hero-search:hover {
+[data-skin='apple'] .app-hero-search:hover {
   border-color: rgba(0, 0, 0, 0.06);
   box-shadow: none;
   transform: none;
 }
 
-[data-theme='dark'][data-skin='apple'] .ant-input-affix-wrapper.app-hero-search {
+[data-theme='dark'][data-skin='apple'] .app-hero-search {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.06);
 }
 
-[data-theme='dark'][data-skin='apple'] .ant-input-affix-wrapper.app-hero-search:hover {
+[data-theme='dark'][data-skin='apple'] .app-hero-search:hover {
   border-color: rgba(255, 255, 255, 0.1);
   box-shadow: none;
   transform: none;
@@ -435,12 +468,12 @@
   margin-top: 4px;
 }
 
-[data-skin='apple'] .app-view-switcher .ant-segmented {
+[data-skin='apple'] .app-view-switcher {
   background: rgba(0, 0, 0, 0.04);
   border-radius: 9px;
 }
 
-[data-theme='dark'][data-skin='apple'] .app-view-switcher .ant-segmented {
+[data-theme='dark'][data-skin='apple'] .app-view-switcher {
   background: rgba(255, 255, 255, 0.08);
 }
 

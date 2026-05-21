@@ -35,6 +35,7 @@ import type { Accent } from '@/shared/utils/favicon-color';
 import { TabItem } from './TabItem';
 import { useTabsStore, useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
+import './styles/items.css';
 
 interface DomainGroupCardProps {
   group: DomainGroup;
@@ -179,24 +180,32 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
     [],
   );
 
+  const cardStyle = useMemo(
+    () =>
+      ({
+        borderRadius: cardRadius || 12,
+        overflow: 'hidden',
+        position: 'relative',
+        boxShadow: 'var(--app-shadow-card)',
+        border: `1px solid ${token.colorBorderSecondary}`,
+        ['--app-hover-border' as string]: token.colorBorder,
+        ['--app-domain-card-radius' as string]: `${cardRadius || 12}px`,
+        ['--app-domain-card-bar' as string]: barColor,
+        ['--app-domain-card-badge-bg' as string]: accent.soft,
+        ['--app-domain-card-header-border' as string]: collapsed ? 'transparent' : token.colorBorderSecondary,
+        ['--app-domain-card-chevron-color' as string]: token.colorTextTertiary,
+        ['--app-domain-card-title-color' as string]: token.colorText,
+        ['--app-row-hover-bg' as string]: token.colorFillSecondary,
+      }) as React.CSSProperties,
+    [accent.soft, barColor, cardRadius, collapsed, token.colorBorder, token.colorBorderSecondary, token.colorFillSecondary, token.colorText, token.colorTextTertiary],
+  );
+
   return (
     <Card
       size="small"
-      className="app-card-interactive app-hover-reveal-host"
-      styles={{
-        body: { padding: 0 },
-      }}
-      style={
-        {
-          borderRadius: cardRadius || 12,
-          overflow: 'hidden',
-          position: 'relative',
-          boxShadow: 'var(--app-shadow-card)',
-          border: `1px solid ${token.colorBorderSecondary}`,
-          // 下发 hover 边框色，app-card-interactive:hover 消费
-          ['--app-hover-border' as string]: token.colorBorder,
-        } as React.CSSProperties
-      }
+      className="app-card-interactive app-hover-reveal-host app-domain-group-card"
+      classNames={{ body: 'app-domain-group-card__body' }}
+      style={cardStyle}
     >
       {/*
         身份色条 —— 位置依用户偏好渲染：
@@ -207,40 +216,10 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
         无障碍：aria-hidden，不参与语义。
       */}
       {barPosition === 'left' && (
-        <div
-          aria-hidden
-          className="app-accent-bar--left"
-          style={{
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            bottom: 0,
-            width: 2,
-            background: barColor,
-            borderTopLeftRadius: cardRadius,
-            borderBottomLeftRadius: cardRadius,
-            pointerEvents: 'none',
-            zIndex: 1,
-          }}
-        />
+        <div aria-hidden className="app-accent-bar--left" />
       )}
       {barPosition === 'top' && (
-        <div
-          aria-hidden
-          className="app-accent-bar--top"
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            top: 0,
-            height: 2,
-            background: barColor,
-            borderTopLeftRadius: cardRadius,
-            borderTopRightRadius: cardRadius,
-            pointerEvents: 'none',
-            zIndex: 1,
-          }}
-        />
+        <div aria-hidden className="app-accent-bar--top" />
       )}
       {/* 分组头部 —— 可点击展开/折叠 */}
       <button
@@ -249,34 +228,10 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
         aria-expanded={!collapsed}
         aria-label={collapsed ? t('tabs.expand') : t('tabs.collapse')}
         className="app-row-hover app-domain-group-header"
-        style={
-          {
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            width: '100%',
-            height: 48,
-            paddingLeft: 14,
-            paddingRight: 80,
-            background: 'transparent',
-            borderBottom: collapsed ? 'none' : `1px solid ${token.colorBorderSecondary}`,
-            cursor: 'pointer',
-            textAlign: 'left',
-            border: 'none',
-            outline: 'none',
-            // header 内部 hover 色跳到 secondary（比默认 tertiary 更明显）
-            ['--app-row-hover-bg' as string]: token.colorFillSecondary,
-          } as React.CSSProperties
-        }
       >
         <ChevronDown
           size={ICON_SIZE.TINY}
-          style={{
-            color: token.colorTextTertiary,
-            flexShrink: 0,
-            transform: collapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
-            transition: `transform ${token.motionDurationMid}`,
-          }}
+          className={`app-domain-group-chevron${collapsed ? ' is-collapsed' : ''}`}
         />
 
         {/*
@@ -284,62 +239,30 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
           内部要么嵌 favicon，要么在占位图标。把"色彩=身份"的语义集中在这块小徽章里，
           多卡并排时视觉协同——左边条 + 徽章 是同色系，一眼就能把"这是什么网站"传达出去。
         */}
-        <div
-          style={{
-            width: 26,
-            height: 26,
-            borderRadius: 7,
-            backgroundColor: accent.soft,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-          }}
-        >
+        <div className="app-domain-group-badge">
           {favicon && !faviconError ? (
             <img
               src={favicon}
               alt=""
-              style={{ width: 16, height: 16, borderRadius: 3 }}
+              className="app-domain-group-badge-favicon"
               onError={() => setFaviconError(true)}
             />
           ) : (
-<Globe size={ICON_SIZE.SMALL} style={{ color: barColor }} />
+            <Globe size={ICON_SIZE.SMALL} className="app-domain-group-badge-icon" />
           )}
         </div>
 
-        <span
-          style={{
-            fontSize: 13,
-            fontWeight: 600,
-            color: token.colorText,
-            flex: 1,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            lineHeight: 1.3,
-            letterSpacing: '-0.01em',
-          }}
-        >
+        <span className="app-domain-group-title">
           {group.domain}
         </span>
 
-        <Tag
-          style={{
-            margin: 0,
-            flexShrink: 0,
-            fontSize: 11,
-            padding: '0 6px',
-            lineHeight: '18px',
-            height: 18,
-          }}
-        >
+        <Tag className="app-domain-group-count">
           {group.tabs.length}
         </Tag>
       </button>
 
       {/* 休眠整组——释放内存但保留标签页位置 */}
-        <Tooltip title={t('tabs.discardGroup')}>
+      <Tooltip title={t('tabs.discardGroup')}>
         <Button
           type="text"
           size="small"
@@ -349,18 +272,7 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
             void discardDomainGroup(group.domain).catch(() => { /* store 已 toast */ });
           }}
           aria-label={t('tabs.discardGroup')}
-          className="app-hover-reveal"
-          style={{
-            position: 'absolute',
-            top: 10,
-            right: 44,
-            width: 28,
-            height: 28,
-            padding: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
+          className="app-hover-reveal app-domain-group-action app-domain-group-action--discard"
         />
       </Tooltip>
 
@@ -376,35 +288,24 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
           onClick={(e: React.MouseEvent) => { void handleCloseAll(e); }}
           aria-label={t('tabs.closeDomain')}
           // closing 时强制显示（is-visible），其余情况由 hover/focus 驱动
-          className={`app-hover-reveal${closing ? ' is-visible' : ''}`}
-          style={{
-            position: 'absolute',
-            top: 10,
-            right: 8,
-            width: 28,
-            height: 28,
-            padding: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
+          className={`app-hover-reveal app-domain-group-action app-domain-group-action--close${closing ? ' is-visible' : ''}`}
         />
       </Tooltip>
 
       {/* 标签列表 — 使用 motion Reorder 实现分组内拖拽排序 */}
       {!collapsed && (
-        <div style={{ padding: '6px 6px' }}>
+        <div className="app-domain-group-list">
           <Reorder.Group
             axis="y"
             values={tabOrder}
             onReorder={handleReorder}
-            style={{ display: 'flex', flexDirection: 'column', gap: 2, listStyle: 'none', margin: 0, padding: 0 }}
+            className="app-domain-group-sortable"
           >
             {tabOrder.map((tab) => (
               <Reorder.Item
                 key={tab.id}
                 value={tab}
-                style={{ listStyle: 'none', cursor: 'grab' }}
+                className="app-domain-group-sortable-item"
                 whileDrag={{ scale: 1.02, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', zIndex: 10, position: 'relative' as const }}
               >
                 <TabItem

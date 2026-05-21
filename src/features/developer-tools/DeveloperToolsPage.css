@@ -383,6 +383,7 @@
 }
 
 .devtools-color-swatch {
+  background: var(--devtools-color-swatch-bg, transparent);
   width: 42px;
   height: 42px;
   border: 1px solid var(--app-hairline);

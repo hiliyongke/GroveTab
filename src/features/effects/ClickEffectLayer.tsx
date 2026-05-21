@@ -17,7 +17,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useSettingsStore } from '@/store';
-import { Z } from '@/shared/config/z-index';
+import './effects.css';
 
 /** 点击动效类型 */
 export type ClickEffectType = 'off' | 'ripple' | 'sparkle' | 'confetti' | 'petal';
@@ -284,15 +284,7 @@ export function ClickEffectLayer() {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      style={{
-        position: 'fixed',
-        left: 0,
-        top: 0,
-        width: '100vw',
-        height: '100vh',
-        pointerEvents: 'none',
-        zIndex: Z.clickEffect,
-      }}
+      className="app-click-effect-layer"
     />
   );
 }

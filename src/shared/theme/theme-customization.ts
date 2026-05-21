@@ -226,6 +226,7 @@ export function buildAntdThemeConfig(
         borderRadiusLG: skin.borderRadiusLG + 4,
         contentBg: isDark ? skin.colorBgElevatedDark : skin.colorBgElevatedLight,
         headerBg: isDark ? skin.colorBgElevatedDark : skin.colorBgElevatedLight,
+        footerBg: isDark ? skin.colorBgElevatedDark : skin.colorBgElevatedLight,
       },
 
     },
@@ -302,6 +303,8 @@ export function buildAppThemeVars(
     '--app-page-bg': 'var(--ant-color-bg-layout)',
     '--app-surface-elevated-bg': 'var(--ant-color-bg-elevated)',
     '--app-hairline': 'var(--ant-color-border-secondary)',
+    '--app-overlay-mask-bg': isDark ? 'rgba(5, 10, 20, 0.48)' : 'rgba(15, 23, 42, 0.24)',
+    '--app-overlay-blur': isDark ? '14px' : '12px',
 
     '--app-font-family-heading': skin.fontFamilyHeading,
     '--app-font-weight-body': `${custom?.fontWeightBody ?? 400}`,

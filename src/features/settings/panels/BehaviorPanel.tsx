@@ -27,47 +27,37 @@ interface BehaviorPanelProps {
  */
 export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) {
   const { t } = useT();
+  const sections = [
+    {
+      key: 'general',
+      title: t('settings.sectionGeneral'),
+      content: <GeneralSettings settings={settings} updateSettings={updateSettings} />,
+    },
+    {
+      key: 'view-layout',
+      title: t('settings.sectionViewLayout'),
+      content: <ViewLayoutSettings settings={settings} updateSettings={updateSettings} />,
+    },
+    {
+      key: 'timeline',
+      title: t('settings.sectionTimeline'),
+      content: <TimelineSettings settings={settings} updateSettings={updateSettings} />,
+    },
+    {
+      key: 'search',
+      title: t('settings.sectionSearch'),
+      content: <SearchSettings settings={settings} updateSettings={updateSettings} />,
+    },
+  ];
+
   return (
-    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 28 }}>
-      {/* 通用行为设置 */}
-      <section>
-        <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 14, color: 'var(--ant-color-text)', letterSpacing: '-0.01em' }}>
-          {t('settings.sectionGeneral')}
-        </h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <GeneralSettings settings={settings} updateSettings={updateSettings} />
-        </div>
-      </section>
-
-      {/* 视图与布局设置 */}
-      <section>
-        <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 14, color: 'var(--ant-color-text)', letterSpacing: '-0.01em' }}>
-          {t('settings.sectionViewLayout')}
-        </h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <ViewLayoutSettings settings={settings} updateSettings={updateSettings} />
-        </div>
-      </section>
-
-      {/* 时间轴设置 */}
-      <section>
-        <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 14, color: 'var(--ant-color-text)', letterSpacing: '-0.01em' }}>
-          {t('settings.sectionTimeline')}
-        </h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <TimelineSettings settings={settings} updateSettings={updateSettings} />
-        </div>
-      </section>
-
-      {/* 搜索设置 */}
-      <section>
-        <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 14, color: 'var(--ant-color-text)', letterSpacing: '-0.01em' }}>
-          {t('settings.sectionSearch')}
-        </h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <SearchSettings settings={settings} updateSettings={updateSettings} />
-        </div>
-      </section>
+    <div className="settings-panel-stack">
+      {sections.map((section) => (
+        <section key={section.key} className="settings-section">
+          <h3 className="settings-section__title">{section.title}</h3>
+          <div className="settings-section__body">{section.content}</div>
+        </section>
+      ))}
     </div>
   );
 }

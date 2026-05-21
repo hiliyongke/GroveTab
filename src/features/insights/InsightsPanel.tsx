@@ -27,6 +27,7 @@ import { useT } from '@/shared/i18n';
 import { feedback } from '@/shared/ui/feedback';
 import { FeatureEmptyState } from '@/shared/ui/FeatureEmptyState';
 import '@/shared/ui/FeatureEmptyState.css';
+import './insights.css';
 
 const { Text, Title } = Typography;
 
@@ -192,7 +193,7 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
       centered
       destroyOnHidden
     >
-      <div style={{ maxHeight: '65vh', overflowY: 'auto' }}>
+      <div className="insights-panel">
         <Row gutter={[12, 12]}>
           <Col xs={24} md={12}>
             <Card size="small" title={t('insights.dailyOpens')}>
@@ -219,7 +220,7 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
           </Col>
           <Col xs={24} md={12}>
             <Card size="small" title={t('insights.archiveStat')}>
-              <Title level={3} style={{ margin: 0 }}>{archiveStats.totalTabs}</Title>
+              <Title level={3} className="insights-archive-stat">{archiveStats.totalTabs}</Title>
               <Text type="secondary">{t('insights.archiveDesc', { mb: archiveStats.savedMemMB })}</Text>
             </Card>
           </Col>
@@ -239,7 +240,7 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
           </Col>
         </Row>
 
-        <div style={{ marginTop: 16, textAlign: 'right' }}>
+        <div className="insights-footer">
           <Popconfirm
             title={t('insights.clearConfirm')}
             onConfirm={() => void handleClearAll()}
@@ -272,7 +273,7 @@ function LineChart({ data, labels, color }: { data: number[]; labels: string[]; 
     .join(' ');
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height: 120 }}>
+    <svg viewBox={`0 0 ${width} ${height}`} className="insights-line-chart">
       <polyline
         fill="none"
         stroke={color}
@@ -308,18 +309,24 @@ function BarList({ items, color }: { items: Array<{ label: string; value: number
   const { token } = theme.useToken();
   const max = Math.max(1, ...items.map((i) => i.value));
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+    <div className="insights-bar-list">
       {items.map((it) => {
         const w = Math.round((it.value / max) * 100);
+        const trackStyle = {
+          ['--insights-track-bg' as string]: token.colorFillTertiary,
+          ['--insights-bar-fill' as string]: color,
+          ['--insights-bar-width' as string]: `${w}%`,
+        } as React.CSSProperties;
+
         return (
-          <div key={it.label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 11.5, flex: '0 0 40%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <div key={it.label} className="insights-bar-row">
+            <span className="insights-bar-label">
               {it.label}
             </span>
-            <div style={{ flex: 1, position: 'relative', height: 14, background: token.colorFillTertiary, borderRadius: 4 }}>
-              <div style={{ width: `${w}%`, height: '100%', background: color, borderRadius: 4 }} />
+            <div className="insights-bar-track" style={trackStyle}>
+              <div className="insights-bar-fill" />
             </div>
-            <span style={{ fontSize: 11.5, fontVariantNumeric: 'tabular-nums' }}>{it.value}</span>
+            <span className="insights-bar-value">{it.value}</span>
           </div>
         );
       })}

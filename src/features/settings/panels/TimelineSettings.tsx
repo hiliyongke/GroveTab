@@ -28,7 +28,7 @@ export function TimelineSettings({ settings, updateSettings }: TimelineSettingsP
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div className="settings-panel-stack settings-panel-stack--regular">
       <Field
         label={t('settings.timelineGranularity')}
         hint={t('settings.timelineGranularityHint')}

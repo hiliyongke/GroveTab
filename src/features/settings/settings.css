@@ -7,11 +7,28 @@
  */
 
 /* ── Drawer 全局覆盖 ── */
-.settings-drawer .ant-drawer-content {
+.settings-drawer__section {
   overflow: hidden;
 }
 
-.settings-drawer .ant-drawer-body {
+.settings-drawer__mask {
+  backdrop-filter: blur(var(--app-overlay-blur, 12px));
+  background: var(--app-overlay-mask-bg, rgba(15, 23, 42, 0.24));
+}
+
+.settings-drawer__header {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--ant-color-border-secondary);
+  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, transparent);
+}
+
+.settings-drawer__title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.settings-drawer__body {
   padding: 0;
   overflow: hidden;
 }
@@ -84,7 +101,7 @@
 .settings-content__header {
   display: flex;
   align-items: center;
-  padding: 20px 28px 0;
+  padding: 18px 28px 0;
   flex-shrink: 0;
 }
 
@@ -100,7 +117,7 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 20px 28px 32px;
+  padding: 18px 28px 32px;
   overscroll-behavior: contain;
 }
 
@@ -127,6 +144,140 @@
   line-height: 1.55;
 }
 
+.settings-panel-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  width: 100%;
+}
+
+.settings-panel-stack--compact {
+  gap: 20px;
+}
+
+.settings-panel-stack--regular {
+  gap: 24px;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.settings-section__title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ant-color-text);
+}
+
+.settings-section__body {
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-control-full {
+  width: 100%;
+}
+
+.settings-checkbox-group {
+  display: grid;
+  gap: 8px;
+}
+
+.settings-checkbox-group > label {
+  margin-inline-end: 0;
+}
+
+.settings-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settings-card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 14px;
+  border-radius: var(--ant-border-radius-lg, 10px);
+  background: var(--ant-color-fill-quaternary);
+  border: 1px solid var(--ant-color-border-secondary);
+}
+
+.settings-card-row__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.settings-card-row__title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ant-color-text);
+}
+
+.settings-card-row__hint {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--ant-color-text-tertiary);
+}
+
+.settings-shortcuts-alert {
+  margin-bottom: 16px;
+  font-size: 12px;
+}
+
+.settings-keybinding-recorder {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.settings-keybinding-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  border-radius: var(--ant-border-radius-sm, 6px);
+  border: 1px solid var(--ant-color-border);
+  background: var(--ant-color-bg-container);
+  color: var(--ant-color-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 160ms ease;
+}
+
+.settings-keybinding-trigger:hover {
+  border-color: var(--ant-color-border-secondary);
+  color: var(--ant-color-text);
+}
+
+.settings-keybinding-trigger.is-recording {
+  border-color: var(--ant-color-primary);
+  background: var(--ant-color-primary-bg);
+  color: var(--ant-color-primary);
+}
+
+.settings-keybinding-reset {
+  color: var(--ant-color-text-tertiary);
+}
+
+.settings-warning-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--ant-color-error-text);
+}
+
 /* ── 内容区宽度自适应 ── */
 .settings-content__body > * {
   max-width: 100%;
@@ -148,4 +299,24 @@
 
 .settings-content__body::-webkit-scrollbar-thumb:hover {
   background: var(--ant-color-fill-secondary);
+}
+
+@media (max-width: 640px) {
+  .settings-content__header {
+    padding: 16px 20px 0;
+  }
+
+  .settings-content__body {
+    padding: 16px 20px 28px;
+  }
+
+  .settings-card-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .settings-keybinding-recorder {
+    width: 100%;
+    justify-content: space-between;
+  }
 }

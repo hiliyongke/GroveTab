@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { Card, theme } from 'antd';
+import { Card, Button } from 'antd';
 import { Plus } from 'lucide-react';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
@@ -28,20 +28,17 @@ import { getHostname, getFaviconUrl } from './utils/siteUtils';
  * 根据分组内第一个站点的 favicon 提取主色，自适应左边框与背景色
  */
 function GroupHeader({ groupName, firstSite }: { groupName: string; firstSite: SpeedDialSite }) {
-  const { token } = theme.useToken();
   const faviconUrl = useMemo(() => getFaviconUrl(firstSite), [firstSite]);
   const hostname = useMemo(() => getHostname(firstSite.url), [firstSite.url]);
   const accent = useAccent(faviconUrl, hostname);
-  const color = accent.bar || token.colorPrimary;
+  const color = accent.bar || 'var(--ant-color-primary)';
+  const headerStyle = {
+    borderLeftColor: color,
+    ['--speed-dial-group-accent' as string]: color,
+  } as React.CSSProperties;
 
   return (
-    <div
-      className="speed-dial-group-header"
-      style={{
-        borderLeftColor: color,
-        background: `color-mix(in srgb, ${color} 6%, ${token.colorBgContainer})`,
-      }}
-    >
+    <div className="speed-dial-group-header" style={headerStyle}>
       {groupName}
     </div>
   );
@@ -53,7 +50,6 @@ interface SpeedDialGridProps {
 
 export function SpeedDialGrid({ sites }: SpeedDialGridProps) {
   const { t } = useT();
-  const { token } = theme.useToken();
   const removeSite = useSpeedDialStore((s) => s.removeSite);
   const groupEnabled = useSettingsStore((s) => s.settings.speedDialGroupEnabled ?? false);
   const showAddButton = useSettingsStore((s) => s.settings.showAddSiteButton ?? true);
@@ -112,32 +108,14 @@ export function SpeedDialGrid({ sites }: SpeedDialGridProps) {
   const AddCard = () => (
     <Card
       className="app-card-interactive app-speed-dial-card app-speed-dial-card--add"
+      classNames={{ body: 'app-speed-dial-card__body' }}
       onClick={handleAddClick}
-      styles={{ body: { padding: 0, display: 'flex', flexDirection: 'column' } }}
-      style={{ borderRadius: token.borderRadiusLG, cursor: 'pointer' }}
     >
-      <div
-        style={{
-          width: '100%',
-          aspectRatio: '16 / 10',
-          borderRadius: `${token.borderRadiusLG}px ${token.borderRadiusLG}px 0 0`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderBottom: `1px dashed ${token.colorBorderSecondary}`,
-        }}
-      >
-        <Plus size={28} style={{ color: token.colorTextTertiary }} />
+      <div className="app-speed-dial-add-preview">
+        <Plus size={28} className="app-speed-dial-add-icon" />
       </div>
-      <div style={{ padding: '10px 10px 8px' }}>
-        <span
-          style={{
-            fontSize: 13,
-            fontWeight: 500,
-            color: token.colorTextTertiary,
-            lineHeight: 1.3,
-          }}
-        >
+      <div className="app-speed-dial-add-content">
+        <span className="app-speed-dial-add-label">
           {t('quickStart.addSite')}
         </span>
       </div>
@@ -165,10 +143,9 @@ export function SpeedDialGrid({ sites }: SpeedDialGridProps) {
         <div className="speed-dial-empty">
           <p className="speed-dial-empty-title">{t('quickStart.emptyTitle')}</p>
           <p className="speed-dial-empty-desc">{t('quickStart.emptyDesc')}</p>
-          <button type="button" className="speed-dial-empty-btn" onClick={handleAddClick}>
-            <Plus size={ICON_SIZE.SMALL} />
+          <Button type="primary" className="speed-dial-empty-btn" icon={<Plus size={ICON_SIZE.SMALL} />} onClick={handleAddClick}>
             {t('quickStart.addSite')}
-          </button>
+          </Button>
         </div>
         <SpeedDialAddModal
           open={addModalOpen}

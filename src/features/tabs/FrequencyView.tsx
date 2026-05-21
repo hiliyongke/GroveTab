@@ -12,9 +12,10 @@ import { findAmbiguousTitleIds } from '@/shared/utils/url-display';
 import { TabItem } from './TabItem';
 import { Flame } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { theme, Tag } from 'antd';
+import { Tag } from 'antd';
 import { CONFIG } from '@/shared/config';
 import { STORAGE_KEYS } from '@/shared/config/storage-keys';
+import './styles/views.css';
 
 const MAX_DISPLAY = CONFIG.ui.maxDisplay;
 
@@ -27,7 +28,6 @@ export function FrequencyView() {
   const getCountRecent = useStatsStore((s) => s.getCountRecent);
   const statsLoaded = useStatsStore((s) => s.loaded);
   const { t } = useT();
-  const { token } = theme.useToken();
 
   // 首次进入视图时加载统计数据
   useEffect(() => {
@@ -65,35 +65,19 @@ export function FrequencyView() {
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          marginBottom: 12,
-          padding: '0 10px',
-        }}
-      >
-        <Flame size={ICON_SIZE.MEDIUM} style={{ color: token.colorPrimary }} />
-        <span
-          style={{
-            fontSize: 11.5,
-            fontWeight: 600,
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            color: token.colorTextTertiary,
-          }}
-        >
+      <div className="app-frequency-header">
+        <Flame size={ICON_SIZE.MEDIUM} className="app-frequency-header-icon" />
+        <span className="app-frequency-header-copy">
           {t('view.frequencyDesc', { count: sortedTabs.length })}
         </span>
         {isFallback && (
-          <Tag bordered={false} color="default" style={{ fontSize: 10.5, margin: 0 }}>
+          <Tag bordered={false} color="default" className="app-frequency-rebuild-tag">
             {t('view.frequencyRebuilding')}
           </Tag>
         )}
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <div className="app-frequency-list">
         {sortedTabs.map((entry, i) => (
           <TabItem
             key={entry.tab.id}
@@ -103,25 +87,7 @@ export function FrequencyView() {
             showHostname
             showUrlHint={ambiguousIds.has(entry.tab.id)}
             leading={
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  width: 20,
-                  height: 20,
-                  borderRadius: '50%',
-                  fontSize: 10.5,
-                  fontWeight: 600,
-                  fontVariantNumeric: 'tabular-nums',
-                  lineHeight: 1,
-                  background:
-                    i < 3 ? token.colorPrimaryBg : token.colorFillSecondary,
-                  color:
-                    i < 3 ? token.colorPrimary : token.colorTextTertiary,
-                }}
-              >
+              <span className={`app-frequency-rank${i < 3 ? ' is-top-rank' : ''}`}>
                 {i + 1}
               </span>
             }

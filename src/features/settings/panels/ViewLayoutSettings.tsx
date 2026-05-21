@@ -33,7 +33,7 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div className="settings-panel-stack settings-panel-stack--regular">
       <Field label={t('settings.defaultPageMode')} hint={t('settings.defaultPageModeHint')}>
         <Segmented
           block
@@ -51,7 +51,7 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
         <Select
           value={settings.defaultView}
           onChange={(value) => handleSetting({ defaultView: value })}
-          style={{ width: '100%' }}
+          className="settings-control-full"
           options={VIEW_CONFIGS.map((view) => ({
             value: view.id,
             label: t(view.labelKey),

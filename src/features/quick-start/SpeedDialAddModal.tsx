@@ -10,6 +10,7 @@ import { Modal, Input, Form, Select } from 'antd';
 import { useSpeedDialStore, useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import type { SpeedDialSite } from '@/shared/types';
+import './QuickStartLayer.css';
 
 interface SpeedDialAddModalProps {
   open: boolean;
@@ -140,7 +141,7 @@ export function SpeedDialAddModal({ open, onClose, editingSite, existingGroups }
       destroyOnClose
       width={440}
     >
-      <Form layout="vertical" style={{ marginTop: 16 }}>
+      <Form layout="vertical" className="app-speed-dial-form">
         <Form.Item label={t('quickStart.urlLabel')}>
           <Input
             value={url}

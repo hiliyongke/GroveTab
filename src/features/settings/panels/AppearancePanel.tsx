@@ -190,6 +190,16 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
     ],
     angle: 135,
   };
+  const customPreviewStyle = {
+    ['--appearance-preview-bg' as string]: buildGradient(
+      customGradient?.stops ?? [
+        { color: '#667eea', position: 0 },
+        { color: '#764ba2', position: 0.5 },
+        { color: '#f093fb', position: 1 },
+      ],
+      customGradient?.angle ?? 135,
+    ),
+  } as React.CSSProperties;
 
   const updateCustomGradient = useCallback(
     (patch: Partial<UserSettings['customGradient']>) => {
@@ -264,6 +274,9 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
           {SKIN_PRESETS.map((skin) => {
             const isSelected = settings.skinPreset === skin.id || (!settings.skinPreset && skin.id === 'glassmorphism');
             const gradientBg = `linear-gradient(135deg, ${skin.previewColors[0]}, ${skin.previewColors[1]}, ${skin.previewColors[2] ?? skin.previewColors[1]})`;
+            const skinPreviewStyle = {
+              ['--appearance-preview-bg' as string]: gradientBg,
+            } as React.CSSProperties;
             return (
               <PresetCard
                 key={skin.id}
@@ -274,7 +287,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                 preview={(
                   <div
                     className="appearance-preset-preview appearance-preset-preview--skin"
-                    style={{ ['--appearance-preview-bg' as string]: gradientBg } as React.CSSProperties}
+                    style={skinPreviewStyle}
                   >
                     {skin.compatibleMode !== 'both' && <ModeBadge mode={skin.compatibleMode} />}
                   </div>
@@ -425,6 +438,10 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                 : isDark
                   ? preset.dark
                   : preset.light;
+            const gradientPreviewStyle = {
+              ['--appearance-preview-bg' as string]: previewBg,
+              ['--appearance-edit-icon' as string]: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.4)',
+            } as React.CSSProperties;
             return (
               <button
                 key={preset.id}
@@ -436,11 +453,8 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                 className={`appearance-preset-card${isSelected ? ' is-selected' : ''}`}
               >
                 <div
-                  className="appearance-preset-preview appearance-preset-preview--gradient"
-                  style={{
-                    ['--appearance-preview-bg' as string]: previewBg,
-                    ['--appearance-edit-icon' as string]: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.4)',
-                  } as React.CSSProperties}
+                  className="appearance-preset-preview appearance-preset-preview--gradient appearance-preview-editable"
+                  style={gradientPreviewStyle}
                 >
                   {preset.compatibleMode !== 'both' && <ModeBadge mode={preset.compatibleMode} />}
                   {preset.id === 'custom' && <Pencil size={ICON_SIZE.LARGE} className="appearance-preset-edit-icon" />}
@@ -473,16 +487,7 @@ icon={showGradientEditor ? undefined : <Pencil size={ICON_SIZE.MEDIUM} />}
 
             <div
               className={`appearance-editor-preview${showGradientEditor ? '' : ' is-collapsed'}`}
-              style={{
-                ['--appearance-preview-bg' as string]: buildGradient(
-                  customGradient?.stops ?? [
-                    { color: '#667eea', position: 0 },
-                    { color: '#764ba2', position: 0.5 },
-                    { color: '#f093fb', position: 1 },
-                  ],
-                  customGradient?.angle ?? 135,
-                ),
-              } as React.CSSProperties}
+              style={customPreviewStyle}
             />
 
             {showGradientEditor && (

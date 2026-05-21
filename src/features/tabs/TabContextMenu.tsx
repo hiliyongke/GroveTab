@@ -27,6 +27,7 @@ import { stringToColor } from '@/shared/utils/color';
 import { splitTabToSide } from '@/chrome';
 import { Z } from '@/shared/config/z-index';
 import { CONFIG } from '@/shared/config';
+import './styles/views.css';
 
 interface TabContextMenuProps {
   x: number;
@@ -128,27 +129,27 @@ export function TabContextMenu({ x, y, url, title, favIconUrl, tabId, onClose }:
   };
 
   const pinned = isPinned(url);
+  const menuStyle = {
+    left: position.left,
+    top: position.top,
+    ['--app-tab-context-width' as string]: `${MENU_WIDTH}px`,
+    ['--app-tab-context-z' as string]: Z.contextMenu,
+    ['--app-tab-context-radius' as string]: `${token.borderRadiusLG}px`,
+    ['--app-tab-context-shadow' as string]: token.boxShadow,
+  } as React.CSSProperties;
 
   return (
     <div
       ref={menuRef}
       role="menu"
       onClick={(e) => e.stopPropagation()}
-      style={{
-        position: 'fixed',
-        left: position.left,
-        top: position.top,
-        width: MENU_WIDTH,
-        zIndex: Z.contextMenu,
-      }}
+      className="app-tab-context-menu"
+      style={menuStyle}
     >
       <Card
         size="small"
-        styles={{ body: { padding: 4 } }}
-        style={{
-          borderRadius: token.borderRadiusLG,
-          boxShadow: token.boxShadow,
-        }}
+        classNames={{ body: 'app-tab-context-menu__body' }}
+        className="app-tab-context-menu__card"
       >
         {/* Pin / Unpin */}
         <Button
@@ -159,7 +160,7 @@ export function TabContextMenu({ x, y, url, title, favIconUrl, tabId, onClose }:
             void togglePin(url);
             onClose();
           }}
-          style={{ textAlign: 'left', justifyContent: 'flex-start', height: 32 }}
+          className="app-tab-context-menu__button"
         >
           {pinned ? t('context.unpin') : t('context.pin')}
         </Button>
@@ -180,7 +181,7 @@ export function TabContextMenu({ x, y, url, title, favIconUrl, tabId, onClose }:
                 }
               })();
             }}
-            style={{ textAlign: 'left', justifyContent: 'flex-start', height: 32 }}
+            className="app-tab-context-menu__button"
           >
             {t('tabs.discard')}
           </Button>
@@ -202,7 +203,7 @@ export function TabContextMenu({ x, y, url, title, favIconUrl, tabId, onClose }:
                 }
               })();
             }}
-            style={{ textAlign: 'left', justifyContent: 'flex-start', height: 32 }}
+            className="app-tab-context-menu__button"
           >
             {t('context.splitScreen')}
           </Button>
@@ -227,13 +228,13 @@ export function TabContextMenu({ x, y, url, title, favIconUrl, tabId, onClose }:
                 onClose();
               })();
             }}
-            style={{ textAlign: 'left', justifyContent: 'flex-start', height: 32 }}
+            className="app-tab-context-menu__button"
           >
             {t('context.addToQuickStart')}
           </Button>
         )}
 
-        <Divider style={{ margin: '4px 0' }} />
+        <Divider className="app-tab-context-menu__divider" />
 
         {/* Add Tag */}
         <Button
@@ -241,49 +242,40 @@ export function TabContextMenu({ x, y, url, title, favIconUrl, tabId, onClose }:
           block
           icon={<TagIcon size={ICON_SIZE.MEDIUM} />}
           onClick={() => setShowTagInput(true)}
-          style={{ textAlign: 'left', justifyContent: 'flex-start', height: 32 }}
+          className="app-tab-context-menu__button"
         >
           {t('context.addTag')}
         </Button>
 
         {/* 已有 tags */}
         {tags.length > 0 && (
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 4,
-              padding: '4px 8px 8px',
-            }}
-          >
-            {tags.map((tag) => (
-              <Tag
-                key={tag}
-                closable
-                onClose={(e) => {
-                  e.preventDefault();
-                  void removeTag(url, tag);
-                }}
-                style={{
-                  margin: 0,
-                  fontSize: 11,
-                  padding: '0 6px',
-                  height: 20,
-                  lineHeight: '18px',
-                  color: '#fff',
-                  border: 'none',
-                  backgroundColor: stringToColor(tag),
-                }}
-              >
-                {tag}
-              </Tag>
-            ))}
+          <div className="app-tab-context-menu__tag-list">
+            {tags.map((tag) => {
+              const tagStyle = {
+                ['--app-tab-context-tag-bg' as string]: stringToColor(tag),
+              } as React.CSSProperties;
+
+              return (
+                <Tag
+                  key={tag}
+                  closable
+                  onClose={(e) => {
+                    e.preventDefault();
+                    void removeTag(url, tag);
+                  }}
+                  className="app-tab-context-menu__tag"
+                  style={tagStyle}
+                >
+                  {tag}
+                </Tag>
+              );
+            })}
           </div>
         )}
 
         {/* Tag 输入 */}
         {showTagInput && (
-          <div style={{ padding: '4px 6px 6px', display: 'flex', gap: 4 }}>
+          <div className="app-tab-context-menu__tag-input">
             <Input
               size="small"
               autoFocus
@@ -304,7 +296,7 @@ export function TabContextMenu({ x, y, url, title, favIconUrl, tabId, onClose }:
           </div>
         )}
 
-        <Divider style={{ margin: '4px 0' }} />
+        <Divider className="app-tab-context-menu__divider" />
 
         {/* Note */}
         <Button
@@ -315,29 +307,22 @@ export function TabContextMenu({ x, y, url, title, favIconUrl, tabId, onClose }:
             setShowNoteInput(true);
             setNoteValue(note);
           }}
-          style={{ textAlign: 'left', justifyContent: 'flex-start', height: 32 }}
+          className="app-tab-context-menu__button"
         >
           {note ? t('context.editNote') : t('context.addNote')}
         </Button>
 
         {showNoteInput && (
-          <div style={{ padding: '4px 6px 6px' }}>
+          <div className="app-tab-context-menu__note">
             <Input.TextArea
               autoFocus
               value={noteValue}
               onChange={(e) => setNoteValue(e.target.value)}
               placeholder={t('context.notePlaceholder')}
               rows={3}
-              style={{ fontSize: 12 }}
+              className="app-tab-context-menu__note-field"
             />
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: 4,
-                marginTop: 6,
-              }}
-            >
+            <div className="app-tab-context-menu__note-actions">
               <Button size="small" onClick={() => setShowNoteInput(false)}>
                 {t('context.cancel')}
               </Button>

@@ -14,7 +14,7 @@
  */
 
 import { useMemo, useCallback, useState } from 'react';
-import { Tag, Button, Collapse, Empty, theme } from 'antd';
+import { Tag, Button, Collapse, Empty } from 'antd';
 import {
   Merge,
 } from 'lucide-react';
@@ -25,6 +25,7 @@ import { useT } from '@/shared/i18n';
 import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
 import { moveTabs } from '@/chrome';
+import './styles/views.css';
 
 /**
  * 多窗口管理视图
@@ -36,7 +37,6 @@ export function WindowView() {
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
   const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
   const { t } = useT();
-  const { token } = theme.useToken();
   const [busy, setBusy] = useState(false);
 
   /** 按窗口分组 */
@@ -94,17 +94,17 @@ export function WindowView() {
   const allTabIds = tabs.map((t) => t.id);
 
   if (tabs.length === 0) {
-    return <Empty description={t('tabs.empty')} style={{ padding: '80px 0' }} />;
+    return <Empty description={t('tabs.empty')} className="app-window-empty" />;
   }
 
   return (
     <div>
       {/* 多窗口操作栏 */}
       {sortedWindowIds.length > 1 && (
-        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
+        <div className="app-window-toolbar">
           <Button
             type="primary"
-icon={<Merge size={ICON_SIZE.MEDIUM} />}
+            icon={<Merge size={ICON_SIZE.MEDIUM} />}
             loading={busy}
             onClick={() => { void handleMergeAll(); }}
           >
@@ -125,22 +125,22 @@ icon={<Merge size={ICON_SIZE.MEDIUM} />}
           return {
             key: String(windowId),
             label: (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: token.colorText }}>
+              <div className="app-window-panel-label">
+                <span className="app-window-panel-title">
                   {isCurrent ? t('window.current') : t('window.other')}
                 </span>
                 {isFocused && (
-                  <Tag color="green" style={{ margin: 0, fontSize: 10 }}>
+                  <Tag color="green" className="app-window-panel-tag app-window-panel-tag--focused">
                     {t('window.focused')}
                   </Tag>
                 )}
-                <Tag style={{ margin: 0, fontSize: 11 }}>
+                <Tag className="app-window-panel-tag">
                   {windowTabs.length}
                 </Tag>
               </div>
             ),
             children: (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <div className="app-window-panel-body">
                 {windowTabs.map((tab) => (
                   <TabItem
                     key={tab.id}

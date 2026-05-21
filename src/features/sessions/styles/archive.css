@@ -1,0 +1,339 @@
+.archive-view {
+  display: block;
+}
+
+.app-archive-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+.app-archive-header__badge {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: var(--ant-border-radius);
+  background: var(--ant-color-primary-bg);
+  color: var(--ant-color-primary);
+}
+
+.app-archive-header__icon {
+  color: var(--ant-color-info);
+}
+
+.app-archive-header__title {
+  flex: 1;
+  min-width: 0;
+  color: var(--ant-color-text);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.app-archive-alert {
+  margin-bottom: 12px;
+  border-radius: var(--ant-border-radius);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.app-archive-search {
+  margin-bottom: 12px;
+}
+
+.app-archive-search__input {
+  width: 100%;
+}
+
+.app-archive-search-result {
+  margin-bottom: 12px;
+  color: var(--ant-color-text-tertiary);
+  font-size: 12px;
+  text-align: center;
+}
+
+.app-archive-expand-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.app-archive-loading {
+  padding: 48px 0;
+  text-align: center;
+}
+
+.app-archive-loading__content {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.app-archive-loading__copy {
+  color: var(--ant-color-text-secondary);
+  font-size: 12px;
+}
+
+.app-archive-session-shell {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-radius: var(--ant-border-radius);
+  transition: outline-color 200ms ease;
+}
+
+.app-archive-session-shell.is-highlighted {
+  outline-color: var(--ant-color-primary);
+}
+
+.app-archive-item {
+  align-items: stretch;
+  flex-direction: column;
+  padding: 12px 0;
+}
+
+.app-archive-item__main {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.app-archive-item__toggle-icon {
+  transition: transform 0.2s ease;
+}
+
+.app-archive-item__toggle-icon.is-expanded {
+  transform: rotate(90deg);
+}
+
+.app-archive-item__icon {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: var(--ant-border-radius);
+  background: var(--ant-color-fill-secondary);
+  color: var(--ant-color-text-tertiary);
+}
+
+.app-archive-item__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.app-archive-item__name {
+  overflow: hidden;
+  color: var(--ant-color-text);
+  font-size: 13.5px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-archive-item__meta {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-top: 2px;
+  color: var(--ant-color-text-tertiary);
+  font-size: 11.5px;
+  flex-wrap: wrap;
+}
+
+.app-archive-item__meta-divider {
+  margin: 0 6px;
+  color: var(--ant-color-border);
+}
+
+.app-archive-item__actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.app-archive-item__checkbox {
+  margin-right: 4px;
+}
+
+.app-archive-item__details {
+  margin-top: 8px;
+  margin-left: 40px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 8px;
+  border-radius: var(--ant-border-radius);
+  background: var(--ant-color-fill-quaternary);
+}
+
+.app-archive-item__empty {
+  padding: 16px;
+  color: var(--ant-color-text-tertiary);
+  font-size: 12px;
+  text-align: center;
+}
+
+.app-archive-item__tab-row {
+  --app-row-hover-bg: var(--ant-color-fill-secondary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: var(--ant-border-radius-sm);
+}
+
+.app-archive-item__tab-row.is-matched {
+  background: var(--ant-color-primary-bg);
+}
+
+.app-archive-item__tab-favicon,
+.app-archive-item__tab-favicon-placeholder {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.app-archive-item__tab-favicon {
+  border-radius: 2px;
+}
+
+.app-archive-item__tab-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.app-archive-item__tab-title,
+.app-archive-item__tab-subtitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-archive-item__tab-title {
+  color: var(--ant-color-text);
+  font-size: 12.5px;
+}
+
+.app-archive-item__tab-subtitle {
+  color: var(--ant-color-text-tertiary);
+  font-size: 11px;
+}
+
+.app-archive-highlight {
+  padding: 0 1px;
+  border-radius: 2px;
+  background: var(--ant-color-primary-bg);
+  color: var(--ant-color-primary);
+  font-weight: 600;
+}
+
+.app-archive-batch-menu__badge-indicator {
+  background: var(--ant-color-primary);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.app-archive-batch-menu__summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  color: var(--ant-color-text-secondary);
+  font-size: 12px;
+}
+
+.app-archive-merge-copy {
+  margin: 0 0 12px;
+  color: var(--ant-color-text-secondary);
+  font-size: 13px;
+}
+
+.app-archive-panel {
+  top: 10vh;
+  padding-bottom: 0;
+}
+
+.app-archive-panel__body {
+  padding: 16px 24px 20px;
+}
+
+.app-archive-dialog__stack {
+  width: 100%;
+}
+
+.app-archive-dialog__section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.app-archive-dialog__label {
+  color: var(--ant-color-text-tertiary);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.app-archive-dialog__current-name {
+  color: var(--ant-color-text);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.app-archive-dialog__tag-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.app-archive-dialog__tag {
+  cursor: pointer;
+  margin-bottom: 4px;
+}
+
+.app-archive-dialog__validation {
+  font-size: 12px;
+}
+
+.app-archive-dialog__divider {
+  margin: 8px 0;
+}
+
+.app-archive-dialog__preview-value {
+  color: var(--ant-color-primary);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.app-archive-dialog__preview-value.is-invalid {
+  color: var(--ant-color-error);
+}
+
+.app-archive-dialog__session-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.app-archive-dialog__strategy-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--ant-color-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.app-archive-dialog__strategy-copy {
+  color: var(--ant-color-text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}

@@ -13,7 +13,7 @@ import {
   Inbox,
 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { Alert, Button, List, Spin, Input, Modal, theme, Space } from 'antd';
+import { Alert, Button, List, Spin, Input, Modal, Space } from 'antd';
 import { FeatureEmptyState } from '@/shared/ui/FeatureEmptyState';
 import '@/shared/ui/FeatureEmptyState.css';
 import type { ArchivedSession } from '@/shared/types';
@@ -35,8 +35,8 @@ import { BatchOperationsMenu } from './components/BatchOperationsMenu';
 import { EnhancedRestoreDialog } from './components/EnhancedRestoreDialog';
 import { EnhancedRenameDialog } from './components/EnhancedRenameDialog';
 import { APP_EVENTS } from '@/shared/config/storage-keys';
-import { iconColor } from '@/shared/utils/icon-colors';
 import { isSafeExternalUrl } from '@/shared/utils/url-safety';
+import './styles/archive.css';
 
 /* ---------- 简易外部 store 同步归档列表 ---------- */
 let sessionsCache: ArchivedSession[] = [];
@@ -72,9 +72,6 @@ export function ArchiveView() {
   const initialized = useSyncExternalStore(subscribeSessions, getSessionsInitialized);
   const loading = !initialized;
   const [archivingCurrent, setArchivingCurrent] = useState(false);
-  /** 重命名相关状态 */
-  const [renamingId, setRenamingId] = useState<string | null>(null);
-  const [renamingValue, setRenamingValue] = useState('');
   /** 多选模式 */
   const [selectable, setSelectable] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -95,7 +92,6 @@ export function ArchiveView() {
   const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
   const tabCount = useTabsStore((s) => s.tabs.length);
   const { t, locale } = useT();
-  const { token } = theme.useToken();
 
   /** 视图首次挂载时刷新数据 */
   useEffect(() => {
@@ -243,6 +239,14 @@ export function ArchiveView() {
     setSelectedIds(new Set());
   };
 
+  const handleSelectModeChange = (enabled: boolean) => {
+    if (enabled) {
+      setSelectable(true);
+      return;
+    }
+    cancelSelect();
+  };
+
   const handleOpenMerge = async (ids: string[]) => {
     if (ids.length < 2) {
       feedback.warning(t('archive.mergeNeedTwo'));
@@ -270,22 +274,6 @@ export function ArchiveView() {
     } catch (err) {
       feedback.error(t('archive.mergeFailed'), err);
     }
-  };
-
-  const handleRenameConfirm = async (id: string) => {
-    const newName = renamingValue.trim();
-    if (!newName) {
-      setRenamingId(null);
-      return;
-    }
-    try {
-      await renameSession(id, newName);
-      await refreshSessions();
-      feedback.success(t('archive.renameOk'));
-    } catch (err) {
-      feedback.error(t('archive.rename'), err);
-    }
-    setRenamingId(null);
   };
 
   const startRenaming = (session: ArchivedSession) => {
@@ -363,34 +351,17 @@ export function ArchiveView() {
   return (
     <div className="archive-view">
       {/* 标题栏 */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12,
-        marginBottom: 16,
-        padding: '0 4px',
-      }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 32,
-            height: 32,
-            borderRadius: token.borderRadius,
-            background: token.colorPrimaryBg,
-            color: token.colorPrimary,
-          }}
-        >
-          <Save size={ICON_SIZE.LARGE} style={{ color: iconColor('archive', token) }} />
+      <div className="app-archive-header">
+        <div className="app-archive-header__badge">
+          <Save size={ICON_SIZE.LARGE} className="app-archive-header__icon" />
         </div>
-        <span style={{ flex: 1, fontSize: 16, fontWeight: 600 }}>{t('archive.title')}</span>
+        <span className="app-archive-header__title">{t('archive.title')}</span>
         <Space size={4}>
           <BatchOperationsMenu
             selectedIds={selectedIds}
             totalCount={sessions.length}
             selectable={selectable}
-            onToggleSelectMode={setSelectable}
+            onToggleSelectMode={handleSelectModeChange}
             onBatchRestore={async (ids) => {
               for (const id of ids) {
                 await handleRestore(id);
@@ -431,33 +402,23 @@ export function ArchiveView() {
         showIcon
         icon={<Info size={ICON_SIZE.MEDIUM} />}
         description={t('archive.description')}
-        style={{
-          marginBottom: 12,
-          borderRadius: token.borderRadius,
-          fontSize: 12.5,
-          lineHeight: 1.6,
-        }}
+        className="app-archive-alert"
       />
 
       {/* 搜索过滤 */}
-      <div style={{ marginBottom: 12 }}>
+      <div className="app-archive-search">
         <Input.Search
+          className="app-archive-search__input"
           placeholder={t('archive.searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           allowClear
-          style={{ width: '100%' }}
         />
       </div>
 
       {/* 搜索结果统计 */}
       {searchQuery.trim() && (
-        <div style={{
-          fontSize: 12,
-          color: token.colorTextTertiary,
-          marginBottom: 12,
-          textAlign: 'center'
-        }}>
+        <div className="app-archive-search-result">
           {t('archive.searchResults', {
             count: filteredSessions.length,
             total: sessions.length
@@ -467,7 +428,7 @@ export function ArchiveView() {
 
       {/* 全部展开/折叠 */}
       {filteredSessions.length > 0 && (
-        <div style={{ display: 'flex', gap: 8, marginBottom: 12, justifyContent: 'flex-end' }}>
+        <div className="app-archive-expand-actions">
           <Button
             size="small"
             type="text"
@@ -488,10 +449,10 @@ export function ArchiveView() {
       )}
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '48px 0' }}>
-          <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+        <div className="app-archive-loading">
+          <div className="app-archive-loading__content">
             <Spin />
-            <span style={{ fontSize: 12, color: token.colorTextSecondary }}>{t('archive.loading')}</span>
+            <span className="app-archive-loading__copy">{t('archive.loading')}</span>
           </div>
         </div>
       ) : filteredSessions.length === 0 ? (
@@ -515,18 +476,11 @@ export function ArchiveView() {
           dataSource={filteredSessions}
           renderItem={(session) => (
             <div
-              style={{
-                outline: highlightId === session.id ? `2px solid ${token.colorPrimary}` : 'none',
-                outlineOffset: 2,
-                borderRadius: token.borderRadius,
-                transition: 'outline 200ms',
-              }}
+              className={`app-archive-session-shell${highlightId === session.id ? ' is-highlighted' : ''}`}
             >
               <SessionItem
                 session={session}
                 isExpanded={expandedSessions.has(session.id)}
-                isRenaming={renamingId === session.id}
-                renamingValue={renamingId === session.id ? renamingValue : ''}
                 locale={locale}
                 onToggleExpand={() => {
                   setExpandedSessions(prev => {
@@ -542,9 +496,6 @@ export function ArchiveView() {
                 onRestore={(id) => { void handleRestore(id); }}
                 onDelete={(id) => { void handleDelete(id); }}
                 onStartRenaming={startRenaming}
-                onRenameConfirm={(id) => { void handleRenameConfirm(id); }}
-                onRenameChange={setRenamingValue}
-                onRenameCancel={() => setRenamingId(null)}
                 onOpenSingle={(tab) => { void handleOpenSingle(tab); }}
                 onShare={(id) => { void handleShare(id); }}
                 selectable={selectable}
@@ -561,6 +512,7 @@ export function ArchiveView() {
       {/* 合并会话 Modal */}
       <Modal
         open={mergeOpen}
+        rootClassName="app-archive-merge-modal"
         title={t('archive.mergeTitle')}
         onCancel={() => setMergeOpen(false)}
         onOk={() => void handleConfirmMerge()}
@@ -568,7 +520,7 @@ export function ArchiveView() {
         cancelText={t('archive.cancel')}
         centered
       >
-        <p style={{ margin: '0 0 12px', fontSize: 13, color: token.colorTextSecondary }}>
+        <p className="app-archive-merge-copy">
           {t('archive.mergeDesc', { count: selectedIds.size })}
         </p>
         <Input

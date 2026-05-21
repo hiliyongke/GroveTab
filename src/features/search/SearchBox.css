@@ -1,9 +1,19 @@
 /* ─── 搜索弹窗 Modal 容器 ─── */
-.search-box-modal .ant-modal {
+.search-box-dialog {
+  top: 12vh;
   padding-bottom: 0;
 }
 
-.search-box-modal .ant-modal-content {
+.search-box-mask {
+  backdrop-filter: blur(var(--app-overlay-blur, 12px));
+  background: var(--app-overlay-mask-bg, rgba(15, 23, 42, 0.24));
+}
+
+.search-box-body {
+  padding: 0;
+}
+
+.search-box-container {
   overflow: hidden;
   border: 1px solid var(--app-hairline, var(--ant-color-border-secondary));
   box-shadow: var(--app-shadow-floating, var(--app-shadow-card));
@@ -77,6 +87,10 @@
   justify-content: center;
   min-height: 180px;
   padding: 24px;
+}
+
+.search-box-empty-icon {
+  opacity: 0.4;
 }
 
 .search-box-empty-text {
@@ -245,12 +259,12 @@
   border-radius: 4px;
   color: var(--searchbox-text-secondary);
   background: var(--searchbox-fill-tertiary);
-  font-family: var(--font-family-mono, monospace);
+  font-family: var(--ant-font-family-code, ui-monospace, monospace);
 }
 
 /* ─── 响应式适配 ─── */
 @media (max-width: 768px) {
-  .search-box-modal .ant-modal {
+  .search-box-dialog {
     max-width: calc(100vw - 24px);
     margin-inline: 12px;
   }

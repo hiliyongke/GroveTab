@@ -44,12 +44,13 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div className="settings-panel-stack settings-panel-stack--regular">
       <Field
         label={t('settings.searchScope')}
         hint={t('settings.searchScopeHint')}
       >
         <Checkbox.Group
+          className="settings-checkbox-group"
           value={settings.searchScope ?? ['title', 'hostname', 'url']}
           onChange={(values) => {
             if (values.length === 0) return;
@@ -99,7 +100,7 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
         <Select<SearchEngineId>
           value={defaultSearchEngine}
           onChange={(value) => handleSetting({ searchDefaultEngine: value })}
-          style={{ width: '100%' }}
+          className="settings-control-full"
           options={enabledEngines.map((engineId) => {
             const option = SEARCH_ENGINE_OPTIONS.find((item) => item.id === engineId);
             return {
@@ -115,6 +116,7 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
         hint={t('settings.searchEnabledEnginesHint')}
       >
         <Checkbox.Group
+          className="settings-checkbox-group"
           value={enabledEngines}
           onChange={(values) => {
             if (values.length === 0) return;
@@ -175,7 +177,7 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
           value={settings.hotSuggestionSource ?? 'local'}
           disabled={settings.searchUseHotSuggestions === false}
           onChange={(v) => handleSetting({ hotSuggestionSource: v })}
-          style={{ width: '100%' }}
+          className="settings-control-full"
           options={[
             { value: 'local', label: t('settings.hotSourceLocal') },
             { value: 'preset', label: t('settings.hotSourcePreset') },

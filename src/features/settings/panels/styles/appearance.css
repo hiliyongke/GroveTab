@@ -62,6 +62,11 @@
   background: var(--appearance-preview-bg);
 }
 
+.appearance-preview-editable {
+  --appearance-edit-icon: rgba(0, 0, 0, 0.4);
+  color: var(--appearance-edit-icon);
+}
+
 .appearance-preset-preview--skin {
   height: 48px;
 }
