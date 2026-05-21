@@ -99,6 +99,7 @@
 /* 一键整理链接（整合自 DashboardOverview） */
 .app-header-tidy-link {
   all: unset;
+  box-sizing: border-box;
   margin-left: 6px;
   cursor: pointer;
   font-size: 12px;
@@ -171,6 +172,13 @@
 
 .app-header-actions {
   flex-shrink: 0;
+}
+
+/* ── 空间切换下拉菜单项 ── */
+.app-space-menu-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .app-theme-icon {
@@ -246,7 +254,7 @@
   transform: translateY(-1px);
   border-color: var(--app-color-primary-hover);
   box-shadow:
-    0 10px 32px color-mix(in srgb, #000 10%, transparent),
+    0 10px 32px color-mix(in srgb, var(--ant-color-text) 10%, transparent),
     0 0 0 4px color-mix(in srgb, var(--app-color-primary) 10%, transparent);
 }
 
@@ -292,6 +300,7 @@
 
 .app-view-sidebar__item {
   all: unset;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 10px;

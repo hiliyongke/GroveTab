@@ -43,7 +43,7 @@ export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
   const language = useSettingsStore((s) => s.settings.language);
   const loaded = useSettingsStore((s) => s.loaded);
   const mode = useResolvedTheme();
-  const skinPreset = useSettingsStore((s) => s.settings.skinPreset ?? 'minimal');
+  const skinPreset = useSettingsStore((s) => s.settings.skinPreset ?? 'glassmorphism');
   const layoutDensity = useSettingsStore((s) => s.settings.layoutDensity ?? 'default');
   const reducedMotionSetting = useSettingsStore((s) => s.settings.reducedMotion ?? 'auto');
   const skinCustom = useSettingsStore((s) => s.settings.skinCustom);
@@ -56,7 +56,9 @@ export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
     if (!loaded) return;
     document.documentElement.setAttribute('data-theme', mode);
     document.documentElement.setAttribute('data-skin', skinPreset);
-    document.documentElement.style.backgroundColor = mode === 'dark' ? '#141414' : '#F5F5F7';
+    document.documentElement.style.backgroundColor = mode === 'dark'
+      ? (skinPreset === 'glassmorphism' ? '#202020' : '#141414')
+      : (skinPreset === 'glassmorphism' ? '#F3F3F3' : '#F5F5F7');
     document.documentElement.style.colorScheme = mode;
 
     try {

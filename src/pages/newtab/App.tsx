@@ -24,6 +24,7 @@ import {
   Spin,
   Alert,
   Segmented,
+  Dropdown,
   theme,
 } from 'antd';
 import {
@@ -34,6 +35,9 @@ import {
   Monitor,
   BarChart3,
   Globe,
+  TrendingUp,
+  Wrench,
+  MoreHorizontal,
 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useTabsStore, useSettingsStore, useUndoStore, useMetadataStore, useSelectionStore } from '@/store';
@@ -49,6 +53,8 @@ import { DomainGroupView } from '@/features/tabs/DomainGroupView';
 import { TidySuggestionBar } from '@/features/tabs/TidySuggestionBar';
 import { BatchActionBar } from '@/features/tabs/BatchActionBar';
 import { SelectionModeNotice } from '@/features/tabs/SelectionModeNotice';
+import { QuickStartLayer } from '@/features/quick-start/QuickStartLayer';
+import '@/features/quick-start/QuickStartLayer.css';
 import { BRAND, getBrandDisplayName, getBrandSlogan } from '@/shared/config/brand';
 
 const TrendingPage = lazy(() => import('@/features/trending/TrendingPage').then((m) => ({ default: m.TrendingPage })));
@@ -105,6 +111,51 @@ const { Header, Content } = Layout;
 const { Text } = Typography;
 
 
+
+/**
+ * 空间切换下拉菜单——将 trending / devtools 降为二级入口。
+ */
+function DropdownMenu({
+  currentPageMode,
+  onPageModeChange,
+}: {
+  currentPageMode: NewtabPageMode;
+  onPageModeChange: (mode: NewtabPageMode) => void;
+}) {
+  const { t } = useT();
+  const items = [
+    {
+      key: 'trending',
+      label: (
+        <span className="app-space-menu-item">
+          <TrendingUp size={ICON_SIZE.SMALL} />
+          {t('pageMode.trending')}
+        </span>
+      ),
+      onClick: () => onPageModeChange('trending'),
+    },
+    {
+      key: 'devtools',
+      label: (
+        <span className="app-space-menu-item">
+          <Wrench size={ICON_SIZE.SMALL} />
+          {t('pageMode.devtools')}
+        </span>
+      ),
+      onClick: () => onPageModeChange('devtools'),
+    },
+  ];
+
+  return (
+    <Dropdown menu={{ items }} trigger={['click']}>
+      <Button
+        size="small"
+        type={currentPageMode !== 'workspace' ? 'primary' : 'text'}
+        icon={<MoreHorizontal size={ICON_SIZE.SMALL} />}
+      />
+    </Dropdown>
+  );
+}
 
 /**
  * 顶栏：轻量工具条（标签计数 + 吸附搜索 + 操作按钮）
@@ -238,15 +289,19 @@ function AppHeader({
       </div>
 
       <Space size={8} className="app-header-actions">
-        <Segmented<NewtabPageMode>
-          size="small"
-          value={pageMode}
-          onChange={(value) => onPageModeChange(value)}
-          options={[
-            { value: 'workspace', label: t('pageMode.workspace') },
-            { value: 'trending', label: t('pageMode.trending') },
-            { value: 'devtools', label: t('pageMode.devtools') },
-          ]}
+        {pageMode !== 'workspace' && (
+          <Button
+            size="small"
+            type="text"
+            icon={<Globe size={ICON_SIZE.SMALL} />}
+            onClick={() => onPageModeChange('workspace')}
+          >
+            {t('pageMode.workspace')}
+          </Button>
+        )}
+        <DropdownMenu
+          currentPageMode={pageMode}
+          onPageModeChange={onPageModeChange}
         />
         <WorkspaceSwitcher />
         <Tooltip title={t(`theme.${theme}`)}>
@@ -862,6 +917,8 @@ function AppContent() {
             viewTabPosition={viewTabPosition}
           />
         )}
+
+        {pageMode === 'workspace' && <QuickStartLayer />}
 
         {initError !== null && (
           <Alert

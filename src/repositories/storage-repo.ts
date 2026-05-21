@@ -15,6 +15,7 @@ import type {
   MetricEvent,
   OgEntry,
   SearchHistoryEntry,
+  SpeedDialSite,
   StatsData,
   StorageKey,
   StorageMeta,
@@ -37,7 +38,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   defaultView: 'domain',
   theme: 'system',
   gradientPreset: 'default',
-  skinPreset: 'minimal',
+  skinPreset: 'glassmorphism',
   showIncognito: false,
   language: 'zh-CN',
   domainGroupColumns: 'auto',
@@ -63,7 +64,9 @@ const DEFAULT_SETTINGS: UserSettings = {
     heroSearch: true,
     viewSwitcher: true,
     tidySuggestion: true,
+    quickStart: true,
   },
+  speedDialGroupEnabled: false,
   // v1.0 封板新增默认值
   dedupStrictness: 'loose',
   idleThresholdMinutes: 1440,
@@ -351,6 +354,67 @@ export async function getMetrics(): Promise<MetricEvent[]> {
 
 export async function clearMetrics(): Promise<void> {
   await setData(STORAGE_KEYS.metrics, []);
+}
+
+// ── Speed Dial / 常用站点 ──────────────────────────────
+
+/** 获取所有常用站点，按 order 升序排列 */
+export async function getSpeedDialSites(): Promise<SpeedDialSite[]> {
+  const sites = (await getData<SpeedDialSite[]>(STORAGE_KEYS.speedDial)) ?? [];
+  return sites.sort((a, b) => a.order - b.order);
+}
+
+/** 保存全部常用站点列表（不限制数量） */
+export async function saveSpeedDialSites(sites: SpeedDialSite[]): Promise<void> {
+  const sorted = [...sites].sort((a, b) => a.order - b.order);
+  await setData(STORAGE_KEYS.speedDial, sorted);
+}
+
+/** 新增一个常用站点（不可变操作） */
+export async function addSpeedDialSite(site: SpeedDialSite): Promise<SpeedDialSite[]> {
+  const sites = await getSpeedDialSites();
+  const newSites = [...sites, site];
+  await saveSpeedDialSites(newSites);
+  return newSites;
+}
+
+/** 更新一个常用站点（不可变操作） */
+export async function updateSpeedDialSite(updated: Partial<SpeedDialSite> & { id: string }): Promise<SpeedDialSite[]> {
+  const sites = await getSpeedDialSites();
+  const idx = sites.findIndex((s) => s.id === updated.id);
+  if (idx !== -1) {
+    const newSites = [
+      ...sites.slice(0, idx),
+      { ...sites[idx], ...updated },
+      ...sites.slice(idx + 1),
+    ];
+    await saveSpeedDialSites(newSites);
+    return newSites;
+  }
+  return sites;
+}
+
+/** 删除一个常用站点 */
+export async function removeSpeedDialSite(id: string): Promise<SpeedDialSite[]> {
+  const sites = await getSpeedDialSites();
+  const filtered = sites.filter((s) => s.id !== id);
+  await saveSpeedDialSites(filtered);
+  return filtered;
+}
+
+/** 重排常用站点（不可变操作） */
+export async function reorderSpeedDialSites(reorderedIds: string[]): Promise<SpeedDialSite[]> {
+  const sites = await getSpeedDialSites();
+  const siteMap = new Map(sites.map((s) => [s.id, s]));
+  const reordered = reorderedIds
+    .map((id, idx) => {
+      const site = siteMap.get(id);
+      if (site) return { ...site, order: idx };
+      return undefined;
+    })
+    .filter((s): s is SpeedDialSite => s !== undefined);
+  await saveSpeedDialSites(reordered);
+  return reordered;
 }
 
 // Initialize meta on module load

@@ -132,7 +132,7 @@ h6 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--ant-color-text-inverse, #fff);
   font-size: 9px;
   font-weight: 700;
   border-radius: 4px;
@@ -851,4 +851,87 @@ html[data-texture-noise] body::before {
  */
 [data-skin='glassmorphism'] body::before {
   mix-blend-mode: overlay;
+}
+
+/* ── Fluent Drawer：Acrylic 毛玻璃抽屉 ── */
+[data-skin='glassmorphism'] .ant-drawer-content {
+  background: var(--app-glass-bg) !important;
+  backdrop-filter: var(--app-glass-filter) !important;
+  -webkit-backdrop-filter: var(--app-glass-filter) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.12), inset 1px 0 0 rgba(255, 255, 255, 0.06);
+}
+
+[data-skin='glassmorphism'] .ant-drawer-header {
+  background: transparent !important;
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-skin='glassmorphism'] .ant-drawer-body {
+  background: transparent !important;
+}
+
+[data-skin='glassmorphism'] .ant-drawer-footer {
+  background: transparent !important;
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Drawer 遮罩层：加深以突出 Acrylic 抽屉 */
+[data-skin='glassmorphism'] .ant-drawer-mask {
+  background: rgba(0, 0, 0, 0.45) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+}
+
+[data-theme='dark'][data-skin='glassmorphism'] .ant-drawer-mask {
+  background: rgba(0, 0, 0, 0.55) !important;
+}
+
+/* ── Fluent SearchBox Modal：Acrylic 毛玻璃搜索弹窗 ── */
+[data-skin='glassmorphism'] .search-box-modal .ant-modal-content {
+  background: var(--app-glass-bg) !important;
+  backdrop-filter: var(--app-glass-filter) !important;
+  -webkit-backdrop-filter: var(--app-glass-filter) !important;
+}
+
+[data-skin='glassmorphism'] .search-box-modal .ant-modal-mask {
+  background: rgba(0, 0, 0, 0.45) !important;
+}
+
+[data-theme='dark'][data-skin='glassmorphism'] .search-box-modal .ant-modal-mask {
+  background: rgba(0, 0, 0, 0.55) !important;
+}
+
+/* ── Fluent Modal：Acrylic 毛玻璃弹窗 ── */
+[data-skin='glassmorphism'] .ant-modal-content {
+  background: var(--app-glass-bg) !important;
+  backdrop-filter: var(--app-glass-filter) !important;
+  -webkit-backdrop-filter: var(--app-glass-filter) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+[data-skin='glassmorphism'] .ant-modal-header {
+  background: transparent !important;
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-skin='glassmorphism'] .ant-modal-body {
+  background: transparent !important;
+}
+
+[data-skin='glassmorphism'] .ant-modal-footer {
+  background: transparent !important;
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Modal 遮罩层：加深以突出 Acrylic 弹窗 */
+[data-skin='glassmorphism'] .ant-modal-mask {
+  background: rgba(0, 0, 0, 0.45) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+}
+
+[data-theme='dark'][data-skin='glassmorphism'] .ant-modal-mask {
+  background: rgba(0, 0, 0, 0.55) !important;
 }

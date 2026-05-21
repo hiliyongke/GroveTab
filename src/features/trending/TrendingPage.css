@@ -279,7 +279,7 @@
   border-radius: 6px;
   font-size: 11px;
   font-weight: 700;
-  color: #fff;
+  color: var(--ant-color-text-inverse, #fff);
 }
 
 .trending-rank-badge.is-rank-1 {
@@ -287,11 +287,11 @@
 }
 
 .trending-rank-badge.is-rank-2 {
-  background: #faad14;
+  background: var(--ant-color-gold, #faad14);
 }
 
 .trending-rank-badge.is-rank-3 {
-  background: #d48806;
+  background: var(--ant-color-gold-active, #d48806);
 }
 
 .trending-rank-badge.is-plain {

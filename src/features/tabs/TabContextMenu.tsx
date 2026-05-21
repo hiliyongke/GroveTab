@@ -17,10 +17,11 @@ import {
   MessageSquare,
   Moon,
   MoveHorizontal,
+  Star,
 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { Button, Input, Tag, Divider, Card, theme } from 'antd';
-import { useMetadataStore, useTabsStore } from '@/store';
+import { useMetadataStore, useTabsStore, useSpeedDialStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { stringToColor } from '@/shared/utils/color';
 import { splitTabToSide } from '@/chrome';
@@ -31,6 +32,10 @@ interface TabContextMenuProps {
   x: number;
   y: number;
   url: string;
+  /** 标签页标题，用于添加到常用站点 */
+  title?: string;
+  /** 标签页 favicon，用于添加到常用站点 */
+  favIconUrl?: string;
   /** 标签页 ID，用于休眠等需要 tabId 的操作 */
   tabId?: number;
   onClose: () => void;
@@ -38,10 +43,25 @@ interface TabContextMenuProps {
 
 const MENU_WIDTH = CONFIG.ui.menuWidth;
 
+/** 标准化 URL：去掉协议前缀和常见跟踪参数，用于去重比较 */
+function normalizeUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    // 去掉常见跟踪参数
+    const dropParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'fbclid', 'gclid'];
+    dropParams.forEach((p) => u.searchParams.delete(p));
+    // 去掉 hash
+    u.hash = '';
+    return u.host + u.pathname.replace(/\/+$/, '') + u.search;
+  } catch {
+    return url;
+  }
+}
+
 /**
  * 标签右键上下文菜单
  */
-export function TabContextMenu({ x, y, url, tabId, onClose }: TabContextMenuProps) {
+export function TabContextMenu({ x, y, url, title, favIconUrl, tabId, onClose }: TabContextMenuProps) {
   const { t } = useT();
   const { token } = theme.useToken();
   const addTag = useMetadataStore((s) => s.addTag);
@@ -52,6 +72,8 @@ export function TabContextMenu({ x, y, url, tabId, onClose }: TabContextMenuProp
   const tags = useMetadataStore((s) => s.getTags(url));
   const note = useMetadataStore((s) => s.getNote(url));
   const discardTab = useTabsStore((s) => s.discardTab);
+  const addSite = useSpeedDialStore((s) => s.addSite);
+  const speedDialSites = useSpeedDialStore((s) => s.sites);
 
   const [showTagInput, setShowTagInput] = useState(false);
   const [showNoteInput, setShowNoteInput] = useState(false);
@@ -183,6 +205,31 @@ export function TabContextMenu({ x, y, url, tabId, onClose }: TabContextMenuProp
             style={{ textAlign: 'left', justifyContent: 'flex-start', height: 32 }}
           >
             {t('context.splitScreen')}
+          </Button>
+        )}
+
+        {/* 添加到常用站点 —— 标准化 URL 后再比较，避免 http/https 差异导致重复添加 */}
+        {!speedDialSites.some((s) => normalizeUrl(s.url) === normalizeUrl(url)) && (
+          <Button
+            type="text"
+            block
+            icon={<Star size={ICON_SIZE.MEDIUM} />}
+            onClick={() => {
+              void (async () => {
+                await addSite({
+                  id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+                  url,
+                  title: title || url,
+                  favIconUrl,
+                  order: speedDialSites.length,
+                  createdAt: Date.now(),
+                });
+                onClose();
+              })();
+            }}
+            style={{ textAlign: 'left', justifyContent: 'flex-start', height: 32 }}
+          >
+            {t('context.addToQuickStart')}
           </Button>
         )}
 

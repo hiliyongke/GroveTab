@@ -1,0 +1,242 @@
+/**
+ * QuickStartLayer — 首页常用站点样式
+ *
+ * 布局方案：
+ *   - .speed-dial-grid-wrapper 为顶层 CSS Grid（auto-fill）
+ *   - .speed-dial-grid 使用 display:contents，让站点卡片成为 wrapper 的直接网格项
+ *   - 分组模式下 .speed-dial-group 跨满整行，内部 .speed-dial-group-grid 为独立网格
+ *   - 添加按钮始终与卡片共享同一网格，保证左右边距对称
+ */
+
+/* ── 整体容器：CSS Grid，让所有卡片共享同一列轨 ── */
+.speed-dial-grid-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(152px, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .speed-dial-grid-wrapper {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+}
+
+/* ── 网格布局：display:contents 让站点卡片成为 wrapper 的直接子网格项 ── */
+.speed-dial-grid {
+  display: contents;
+}
+
+/* ── 分组容器：在 wrapper 网格中占满整行 ── */
+.speed-dial-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+/* ── 分组头部：支持 inline border-left-color 覆盖（由 GroupHeader 组件设置） ── */
+.speed-dial-group-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ant-color-text-secondary);
+  letter-spacing: 0.01em;
+  padding: 4px 12px;
+  background: var(--ant-color-bg-container);
+  border: 1px solid var(--ant-color-border-secondary);
+  border-left: 3px solid var(--ant-color-primary);
+  border-radius: 6px;
+  width: fit-content;
+  transition: background 120ms ease, border-left-color 120ms ease;
+}
+
+/* ── 分组内网格 ── */
+.speed-dial-group-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(152px, 1fr));
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .speed-dial-group-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+}
+
+/* ── 添加按钮网格单元格 ── */
+.speed-dial-add-cell {
+  min-width: 0;
+}
+
+/* ── 站点卡片（与 GridCard 同体系） ── */
+.app-speed-dial-card {
+  overflow: hidden;
+}
+
+.app-speed-dial-card .ant-card-body {
+  height: 100%;
+}
+
+/* ── 拖拽手柄（hover 时浮现） ── */
+.speed-dial-drag-handle {
+  opacity: 0;
+  transition: opacity 160ms ease, background 120ms ease;
+  padding: 2px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--ant-color-text-secondary);
+}
+
+.app-speed-dial-card:hover .speed-dial-drag-handle {
+  opacity: 1;
+}
+
+.speed-dial-drag-handle:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: var(--ant-color-text);
+}
+
+.speed-dial-drag-handle:active {
+  cursor: grabbing !important;
+  opacity: 1 !important;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* ── 更多按钮（hover 时浮现，定位由父层 div 控制） ── */
+.speed-dial-more-btn {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  background: var(--ant-color-bg-elevated);
+  border: 1px solid var(--ant-color-border-secondary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  color: var(--ant-color-text-tertiary);
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 160ms ease, transform 160ms ease, color 120ms ease, background 120ms ease;
+  cursor: pointer;
+}
+
+.app-speed-dial-card:hover .speed-dial-more-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.speed-dial-more-btn:hover {
+  color: var(--ant-color-text);
+  background: var(--ant-color-bg-container);
+}
+
+/* ── 更多按钮容器（含菜单） ── */
+.speed-dial-more-container {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 10;
+}
+
+/* ── 操作菜单 ── */
+.speed-dial-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  min-width: 140px;
+  background: var(--ant-color-bg-elevated);
+  border: 1px solid var(--ant-color-border-secondary);
+  border-radius: var(--ant-border-radius, 8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  padding: 4px;
+  z-index: 1000;
+}
+
+.speed-dial-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  color: var(--ant-color-text);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.speed-dial-menu-item:hover {
+  background: var(--ant-color-bg-text-hover);
+}
+
+.speed-dial-menu-item--danger {
+  color: var(--ant-color-error);
+}
+
+.speed-dial-menu-item--danger:hover {
+  background: var(--ant-color-error-bg);
+}
+
+/* ── 新增卡片 ── */
+.app-speed-dial-card--add {
+  border-style: dashed;
+}
+
+.app-speed-dial-card--add:hover {
+  border-color: var(--app-color-primary, var(--ant-color-primary));
+}
+
+.app-speed-dial-card--add:hover .ant-card-body > div:first-child {
+  border-bottom-color: var(--app-color-primary, var(--ant-color-primary)) !important;
+}
+
+.app-speed-dial-card--add:hover .ant-card-body span {
+  color: var(--app-color-primary, var(--ant-color-primary));
+}
+
+/* ── 空状态 ── */
+.speed-dial-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 0;
+}
+
+.speed-dial-empty-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ant-color-text);
+}
+
+.speed-dial-empty-desc {
+  font-size: 13px;
+  color: var(--ant-color-text-tertiary);
+}
+
+.speed-dial-empty-btn {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  margin-top: 6px;
+  border-radius: var(--ant-border-radius, 8px);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--app-color-primary, var(--ant-color-primary));
+  background: color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 8%, transparent);
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.speed-dial-empty-btn:hover {
+  background: color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 14%, transparent);
+  transform: translateY(-1px);
+}

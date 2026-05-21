@@ -93,12 +93,12 @@
 }
 
 .appearance-mode-badge.is-dark {
-  color: #fff;
+  color: var(--ant-color-text-inverse, #fff);
   background: rgba(0, 0, 0, 0.5);
 }
 
 .appearance-mode-badge.is-light {
-  color: #333;
+  color: var(--ant-color-text, #333);
   background: rgba(255, 255, 255, 0.72);
 }
 

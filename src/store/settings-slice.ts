@@ -37,7 +37,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     defaultView: 'domain',
     theme: 'system',
     gradientPreset: 'default',
-    skinPreset: 'minimal',
+    skinPreset: 'glassmorphism',
     showIncognito: false,
     language: 'zh-CN',
     domainGroupColumns: 'auto',
@@ -62,6 +62,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       heroSearch: true,
       viewSwitcher: true,
       tidySuggestion: true,
+      quickStart: true,
     },
     // v1.0 封板新增默认值
     dedupStrictness: 'loose',
@@ -70,6 +71,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     closeConfirmThreshold: 20,
     autoSnapshotFrequency: '12h',
     enableOgFetch: false,
+    speedDialGroupEnabled: false,
   },
   loaded: false,
 

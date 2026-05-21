@@ -38,6 +38,7 @@ export const STORAGE_KEYS = Object.freeze({
   autoSnapshotMeta: key('auto_snapshot_meta'),
   trendingCache: key('trending_cache'),
   profiles: key('profiles'),
+  speedDial: key('speed_dial'),
 });
 
 /** 判断是否属于当前应用命名空间的存储键。 */

@@ -225,14 +225,18 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
     [settings.backgroundOverlay, updateSettings],
   );
 
-  /** 安全更新 uiVisibility */
+  /** 安全更新 uiVisibility（内联 fallback 确保所有属性有默认值） */
   const updateUiVisibility = useCallback(
     (key: keyof NonNullable<UserSettings['uiVisibility']>, value: boolean) => {
       const current = settings.uiVisibility ?? {
         header: true,
+        heroLogo: true,
+        heroTitle: true,
+        heroSlogan: true,
         heroSearch: true,
         viewSwitcher: true,
         tidySuggestion: true,
+        quickStart: true,
       };
       void updateSettings({ uiVisibility: { ...current, [key]: value } });
     },
@@ -258,7 +262,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
       <Field label={t('skin.title')} hint={t('skin.hint')}>
         <div className="appearance-grid">
           {SKIN_PRESETS.map((skin) => {
-            const isSelected = settings.skinPreset === skin.id || (!settings.skinPreset && skin.id === 'minimal');
+            const isSelected = settings.skinPreset === skin.id || (!settings.skinPreset && skin.id === 'glassmorphism');
             const gradientBg = `linear-gradient(135deg, ${skin.previewColors[0]}, ${skin.previewColors[1]}, ${skin.previewColors[2] ?? skin.previewColors[1]})`;
             return (
               <PresetCard
@@ -914,6 +918,7 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
             ['heroSlogan', t('uiVisibility.heroSlogan'), t('uiVisibility.heroSloganHint')],
             ['heroSearch', t('uiVisibility.heroSearch'), t('uiVisibility.heroSearchHint')],
             ['viewSwitcher', t('uiVisibility.viewSwitcher'), t('uiVisibility.viewSwitcherHint')],
+            ['quickStart', t('uiVisibility.quickStart'), t('uiVisibility.quickStartHint')],
             ['tidySuggestion', t('uiVisibility.tidySuggestion'), t('uiVisibility.tidySuggestionHint')],
           ] as const).map(([key, label, hint]) => (
             <VisibilityRow
@@ -924,6 +929,23 @@ icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
               onChange={(v) => updateUiVisibility(key, v)}
             />
           ))}
+          {/* 常用站点分组开关 — 仅在 quickStart 可见时展示 */}
+          {settings.uiVisibility?.quickStart !== false && (
+            <>
+              <VisibilityRow
+                label={t('speedDialGroupEnabled')}
+                hint={t('speedDialGroupEnabledHint')}
+                checked={settings.speedDialGroupEnabled ?? false}
+                onChange={(v) => void updateSettings({ speedDialGroupEnabled: v })}
+              />
+              <VisibilityRow
+                label={t('quickStart.showAddButton')}
+                hint={t('quickStart.showAddButtonHint')}
+                checked={settings.showAddSiteButton ?? true}
+                onChange={(v) => void updateSettings({ showAddSiteButton: v })}
+              />
+            </>
+          )}
         </Space>
       </Field>
     </Space>

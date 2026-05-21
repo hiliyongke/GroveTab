@@ -28,7 +28,7 @@
   border-radius: calc(var(--ant-border-radius) + 2px);
   background: var(--app-logo-gradient);
   box-shadow: var(--app-logo-glow);
-  color: #fff;
+  color: var(--ant-color-text-inverse, #fff);
   font-size: 12px;
   font-weight: 800;
 }
@@ -112,6 +112,7 @@
 
 .popup-about-link {
   all: unset;
+  box-sizing: border-box;
   cursor: pointer;
   padding: 4px 8px;
   font-size: 11px;
@@ -143,6 +144,7 @@
 
 .popup-row-main {
   all: unset;
+  box-sizing: border-box;
   cursor: pointer;
   flex: 1;
   min-width: 0;
@@ -182,6 +184,7 @@
 
 .popup-row-close {
   all: unset;
+  box-sizing: border-box;
   width: 18px;
   height: 18px;
   display: inline-flex;

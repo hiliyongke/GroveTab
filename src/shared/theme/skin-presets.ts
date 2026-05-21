@@ -1100,6 +1100,6 @@ export const SKIN_PRESETS: SkinPreset[] = [
  */
 export function getSkinPreset(id: SkinPresetId): SkinPreset {
   const preset = SKIN_PRESETS.find((p) => p.id === id);
-  if (!preset) return SKIN_PRESETS[0]; // 默认回退到 minimal
+  if (!preset) return SKIN_PRESETS.find((p) => p.id === 'glassmorphism') ?? SKIN_PRESETS[0]; // 默认回退到 glassmorphism
   return preset;
 }

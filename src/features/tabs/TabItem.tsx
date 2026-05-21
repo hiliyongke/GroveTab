@@ -20,9 +20,10 @@ import {
   MessageSquare,
   X,
   Pointer,
+  Star,
 } from 'lucide-react';
 import { useT } from '@/shared/i18n';
-import { useMetadataStore, useSelectionStore } from '@/store';
+import { useMetadataStore, useSelectionStore, useSpeedDialStore } from '@/store';
 import { stringToColor } from '@/shared/utils/color';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { formatUrlForDisplay } from '@/shared/utils/url-display';
@@ -84,6 +85,22 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
   const enterSelectionMode = useSelectionStore((s) => s.enterSelectionMode);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [faviconError, setFaviconError] = useState(false);
+  const speedDialSites = useSpeedDialStore((s) => s.sites);
+  const addSite = useSpeedDialStore((s) => s.addSite);
+  /** 标准化 URL：去掉协议前缀和常见跟踪参数，用于去重比较 */
+  const normalizeUrl = (url: string): string => {
+    try {
+      const u = new URL(url);
+      const dropParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'fbclid', 'gclid'];
+      dropParams.forEach((p) => u.searchParams.delete(p));
+      u.hash = '';
+      return u.host + u.pathname.replace(/\/+$/, '') + u.search;
+    } catch {
+      return url;
+    }
+  };
+  /** 当前标签是否已在常用站点中 */
+  const isInQuickStart = speedDialSites.some((s) => normalizeUrl(s.url) === normalizeUrl(tab.url));
   /** 休眠态——标签已被浏览器丢弃，显示灰色样式 */
   const isDiscarded = tab.discarded ?? false;
 
@@ -324,6 +341,39 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
         {/* 行尾附加信息（如时间戳），放在状态图标和关闭按钮之间 */}
         {trailing}
 
+        {/* 添加到常用站点——hover 时显示星标按钮，已添加则高亮常驻 */}
+        <Tooltip title={isInQuickStart ? t('context.alreadyInQuickStart') : t('context.addToQuickStart')}>
+          <Button
+            type="text"
+            size="small"
+            icon={<Star size={ICON_SIZE.SMALL} fill={isInQuickStart ? token.colorWarning : 'none'} />}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (isInQuickStart) return;
+              void addSite({
+                id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+                url: tab.url,
+                title: tab.title,
+                favIconUrl: tab.favIconUrl || undefined,
+                order: speedDialSites.length,
+                createdAt: Date.now(),
+              });
+            }}
+            aria-label={t('context.addToQuickStart')}
+            className={isInQuickStart ? '' : 'app-hover-reveal'}
+            style={{
+              flexShrink: 0,
+              width: 24,
+              height: 24,
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: isInQuickStart ? token.colorWarning : undefined,
+            }}
+          />
+        </Tooltip>
+
         {/* 关闭按钮（hover/focus 时显示，由父节点 .app-hover-reveal-host 驱动） */}
         <Tooltip title={t('tabs.close')}>
           <Button
@@ -353,6 +403,8 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
           x={contextMenu.x}
           y={contextMenu.y}
           url={tab.url}
+          title={tab.title}
+          favIconUrl={tab.favIconUrl}
           tabId={tab.id}
           onClose={() => setContextMenu(null)}
         />

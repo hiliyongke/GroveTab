@@ -317,7 +317,15 @@ export interface UserSettings {
     heroSearch?: boolean;
     viewSwitcher?: boolean;
     tidySuggestion?: boolean;
+    /** 常用站点区域 */
+    quickStart?: boolean;
   };
+
+  /** 常用站点是否启用分组显示，默认 false（平铺模式） */
+  speedDialGroupEnabled?: boolean;
+
+  /** 常用站点是否显示「添加站点」按钮，默认 true */
+  showAddSiteButton?: boolean;
 
   /**
    * 全局点击动效（v1.2）。
@@ -562,6 +570,26 @@ export interface MetricEvent {
   event: string;
   ts: number;
   payload?: Record<string, unknown>;
+}
+
+// ── Speed Dial / 常用站点 (v1.4) ────────────────────
+
+/** 常用站点条目 */
+export interface SpeedDialSite {
+  /** 唯一标识 */
+  id: string;
+  /** 站点 URL */
+  url: string;
+  /** 站点标题 */
+  title: string;
+  /** favicon URL */
+  favIconUrl?: string;
+  /** 排序权重（越小越靠前） */
+  order: number;
+  /** 创建时间 */
+  createdAt: number;
+  /** 所属分组名称，不设则为「未分组」 */
+  group?: string;
 }
 
 // ── Trending / 热榜聚合 (v1.4) ──────────────────────
