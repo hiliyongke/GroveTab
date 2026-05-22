@@ -18,7 +18,7 @@ export async function getQuotaStatus(): Promise<QuotaStatus> {
   try {
     usedBytes = await chrome.storage.local.getBytesInUse(null);
   } catch {
-    // Fallback: estimate from data sizes
+  // 兜底：从数据大小估算
     usedBytes = 0;
   }
   const percentage = Math.round((usedBytes / totalBytes) * 100);

@@ -65,7 +65,7 @@ export function SessionItem({
 
   /** 高亮匹配关键词的文本 */
   const highlightText = (text: string): React.ReactNode => {
-    if (!highlightQuery || !highlightQuery.trim()) return text;
+    if (!highlightQuery?.trim()) return text;
     const lowerText = text.toLowerCase();
     const lowerQuery = highlightQuery.trim().toLowerCase();
     const idx = lowerText.indexOf(lowerQuery);
@@ -85,8 +85,8 @@ export function SessionItem({
   /** 搜索时标签页排序：匹配的排前面 */
   const sortedTabs = (() => {
     if (!matchedTabIndexes || matchedTabIndexes.size === 0) return session.tabs.map((tab, idx) => ({ tab, originalIdx: idx }));
-    const matched: { tab: ArchivedTab; originalIdx: number }[] = [];
-    const unmatched: { tab: ArchivedTab; originalIdx: number }[] = [];
+    const matched: Array<{ tab: ArchivedTab; originalIdx: number }> = [];
+    const unmatched: Array<{ tab: ArchivedTab; originalIdx: number }> = [];
     session.tabs.forEach((tab, idx) => {
       if (matchedTabIndexes.has(idx)) {
         matched.push({ tab, originalIdx: idx });

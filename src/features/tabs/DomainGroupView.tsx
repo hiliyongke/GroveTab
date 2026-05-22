@@ -10,8 +10,8 @@
 
 import { useMemo } from 'react';
 import { useTabsStore, useMetadataStore, useSettingsStore } from '@/store';
-import { groupTabsByDomain, getGroupFavicon } from '@/shared/utils/domain';
-import { useGroupAccents } from '@/shared/hooks/useGroupAccents';
+import { groupTabsByDomain } from '@/shared/utils/domain';
+import { cssVars } from '@/shared/utils/css-vars';
 import { DomainGroupCard } from './DomainGroupCard';
 import './styles/items.css';
 
@@ -23,10 +23,10 @@ import './styles/items.css';
  */
 function getColumnVars(forcedColumns: number | null): React.CSSProperties {
   if (forcedColumns && forcedColumns >= 1 && forcedColumns <= 6) {
-    return { ['--app-domain-column-count' as string]: String(forcedColumns) };
+    return cssVars({ '--app-domain-column-count': String(forcedColumns) });
   }
 
-  return { ['--app-domain-column-width' as string]: '320px' };
+  return cssVars({ '--app-domain-column-width': '320px' });
 }
 
 /**
@@ -74,22 +74,6 @@ export function DomainGroupView() {
     });
   }, [groups, pinnedUrls, sortBy]);
 
-  /**
-   * 批次内去重分配 Accent——解决"相邻卡颜色太近几乎没法区分"的问题。
-   * inputs 顺序 = 渲染顺序，越靠前的分组越倾向于保住自己的 favicon 主色，
-   * 冲突时后面的分组会被推到色相圆上的最远空位。
-   * 注意：hooks 必须在 early return 前调用，保持调用顺序稳定。
-   */
-  const accentInputs = useMemo(
-    () =>
-      sortedGroups.map((g) => ({
-        colorKey: g.colorKey,
-        favicon: getGroupFavicon(g.tabs),
-      })),
-    [sortedGroups],
-  );
-  const accentMap = useGroupAccents(accentInputs);
-
   if (sortedGroups.length === 0) {
     return null;
   }
@@ -104,7 +88,6 @@ export function DomainGroupView() {
           <DomainGroupCard
             group={group}
             initialCollapsed={false}
-            accentOverride={accentMap[group.colorKey]}
           />
         </div>
       ))}

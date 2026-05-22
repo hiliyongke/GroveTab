@@ -1,6 +1,11 @@
 /**
  * Zustand Store — Stats Slice (F-11 使用频率视图)
  *
+ * Slice 依赖关系：
+ *   - 依赖 settings-slice：无直接依赖（stats 数据来源是 SW StatsCollector，不依赖设置）
+ *   - 独立 slice，不依赖其他 slice
+ *   - 被 FrequencyView 组件消费（读取 data, loaded, isFallback）
+ *
  * 在新标签页侧消费 SW `StatsCollector` 写入的激活计数数据，
  * 按"最近 7 天合计激活次数"为 `FrequencyView` 排序。
  *

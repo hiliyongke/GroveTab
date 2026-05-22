@@ -190,7 +190,7 @@ export async function storageGetAllKeys(): Promise<string[]> {
  * 非扩展上下文（如 `pnpm dev` 直接在浏览器里预览）返回空串，让调用方用
  * `tab.favIconUrl` 本身兜底。
  */
-export function getFaviconUrl(url: string, size: number = 32): string {
+export function getFaviconUrl(url: string, size = 32): string {
   try {
     // 校验 URL 合法性
     new URL(url);
@@ -292,7 +292,7 @@ export async function splitTabToSide(tabId: number): Promise<number> {
 /**
  * 批量移动标签页到指定窗口
  */
-export async function moveTabs(tabIds: number[], windowId: number, index: number = -1): Promise<chrome.tabs.Tab[]> {
+export async function moveTabs(tabIds: number[], windowId: number, index = -1): Promise<chrome.tabs.Tab[]> {
   if (tabIds.length === 0) return [];
   return safeCall('tabs.move', () => chrome.tabs.move(tabIds, { windowId, index }));
 }

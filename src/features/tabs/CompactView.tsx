@@ -47,10 +47,10 @@ export function CompactView() {
 
   /** 短列表不撑满视口；长列表按视口高度滚动 */
   const containerMaxHeight = `min(calc(100vh - ${VIEWPORT_RESERVE}px), ${sortedTabs.length * ROW_HEIGHT + 8}px)`;
-  const containerStyle = {
+  const containerStyle: React.CSSProperties = {
     maxHeight: containerMaxHeight,
     minHeight: Math.min(sortedTabs.length, 6) * ROW_HEIGHT,
-  } as React.CSSProperties;
+  };
   const spacerStyle = { height: virtualizer.getTotalSize() };
 
   return (
@@ -62,10 +62,10 @@ export function CompactView() {
       <div className="app-compact-view-spacer" style={spacerStyle}>
         {virtualizer.getVirtualItems().map((virtualRow) => {
           const tab = sortedTabs[virtualRow.index];
-          const itemStyle = {
+          const itemStyle: React.CSSProperties = {
             height: ROW_HEIGHT,
             transform: `translateY(${virtualRow.start}px)`,
-          } as React.CSSProperties;
+          };
 
           return (
             <div

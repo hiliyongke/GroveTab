@@ -9,6 +9,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Card, Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
 import { GripVertical, Pencil, Trash2, ExternalLink, MoreHorizontal } from 'lucide-react';
+import { cssVars } from '@/shared/utils/css-vars';
 import { useT } from '@/shared/i18n';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useAccent } from '@/shared/hooks/useAccent';
@@ -88,10 +89,10 @@ export function SiteCard({
     },
   ];
 
-  const cardStyle = {
-    ['--speed-dial-card-accent' as string]: color,
-    ['--speed-dial-card-opacity' as string]: isDragging ? '0.4' : '1',
-  } as React.CSSProperties;
+  const cardStyle: React.CSSProperties = cssVars({
+    '--speed-dial-card-accent': color,
+    '--speed-dial-card-opacity': isDragging ? '0.4' : '1',
+  });
 
   return (
     <Card

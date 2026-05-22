@@ -18,6 +18,7 @@
  */
 
 import { Button, Divider } from 'antd';
+import { cssVars } from '@/shared/utils/css-vars';
 import {
   Package,
   Sparkles,
@@ -29,6 +30,7 @@ import {
   ExternalLink,
   Mail,
 } from 'lucide-react';
+
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
 import { BRAND, getBrandDisplayName, getBrandSlogan } from '@/shared/config/brand';
@@ -65,25 +67,30 @@ export function AboutPanel() {
   const { t, locale } = useT();
   const brandName = getBrandDisplayName(locale);
   const slogan = getBrandSlogan(locale);
-  const heroStyle = {
+  const heroStyle: React.CSSProperties = cssVars({
     '--about-hero-gradient': 'linear-gradient(135deg, var(--ant-color-bg-elevated) 0%, var(--ant-color-fill-quaternary) 100%)',
-  } as React.CSSProperties;
+  });
 
   return (
-    <div className="about-panel">
-      <div className="about-panel__hero" style={heroStyle}>
+    <div className="about-panel settings-panel-stack">
+      <section className="settings-section">
+        <div className="about-panel__hero" style={heroStyle}>
         <div className="about-panel__logo">{BRAND.shortName}</div>
         <div className="about-panel__brand">{brandName}</div>
         <div className="about-panel__slogan">「{slogan}」</div>
         <div className="about-panel__version">v{PKG_VERSION}</div>
       </div>
+      </section>
 
-      <div>
+      <section className="settings-section">
+        <div>
         <div className="about-panel__section-title">{t('about.featuresTitle')}</div>
         <div className="about-panel__feature-grid">
           {FEATURES.map((feature) => {
             const Icon = feature.icon;
-            const featureStyle = { '--about-feature-color': feature.color } as React.CSSProperties;
+            const featureStyle: React.CSSProperties = cssVars({
+              '--about-feature-color': feature.color,
+            });
             return (
               <div key={feature.titleKey} className="about-panel__feature-card">
                 <div className="about-panel__feature-icon" style={featureStyle}>
@@ -98,8 +105,10 @@ export function AboutPanel() {
           })}
         </div>
       </div>
+      </section>
 
-      <div>
+      <section className="settings-section">
+        <div>
         <div className="about-panel__tips-title">
           <Sparkles size={ICON_SIZE.MEDIUM} />
           {t('about.tipsTitle')}
@@ -111,10 +120,12 @@ export function AboutPanel() {
           <li>{t('about.tip4')}</li>
         </ul>
       </div>
+      </section>
 
       <Divider className="about-panel__divider" />
 
-      <div className="about-panel__support">
+      <section className="settings-section">
+        <div className="about-panel__support">
         <div className="about-panel__support-title">{t('about.supportTitle')}</div>
         <div className="about-panel__support-actions">
           <Button
@@ -158,6 +169,7 @@ export function AboutPanel() {
         </div>
         <div className="about-panel__support-copy">{t('about.madeWith')} ❤️ · {t('about.privacyLocal')}</div>
       </div>
+      </section>
     </div>
   );
 }

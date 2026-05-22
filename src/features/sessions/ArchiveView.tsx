@@ -41,7 +41,7 @@ import './styles/archive.css';
 /* ---------- 简易外部 store 同步归档列表 ---------- */
 let sessionsCache: ArchivedSession[] = [];
 let sessionsInitialized = false;
-let sessionsListeners: (() => void)[] = [];
+let sessionsListeners: Array<() => void> = [];
 
 function subscribeSessions(listener: () => void) {
   sessionsListeners.push(listener);

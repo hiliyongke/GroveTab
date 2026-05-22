@@ -120,8 +120,8 @@ export async function getSettings(): Promise<UserSettings> {
    * 旧值迁移：aurora → slate，sunrise → warm
    * 2026-04-23 预设体系重命名后，存量用户磁盘里可能还存着旧 ID。
    */
-  if ((settings.gradientPreset as string) === 'aurora') settings.gradientPreset = 'slate';
-  if ((settings.gradientPreset as string) === 'sunrise') settings.gradientPreset = 'warm';
+  if (settings.gradientPreset === 'aurora') settings.gradientPreset = 'slate';
+  if (settings.gradientPreset === 'sunrise') settings.gradientPreset = 'warm';
   /**
    * v1.0 封板：为缺失的新字段注入默认值（向前兼容，绝不抛错）。
    * 不使用展开合并整个 DEFAULT_SETTINGS，避免意外覆盖用户显式关闭的老字段。
@@ -224,7 +224,7 @@ export async function getSearchHistory(): Promise<SearchHistoryEntry[]> {
   // 旧数据兼容：string[] → SearchHistoryEntry[]
   if (typeof raw[0] === 'string') {
     const now = Date.now();
-    return (raw as string[]).map((query) => ({ query, ts: now, count: 1 }));
+    return (raw as readonly string[]).map((query) => ({ query, ts: now, count: 1 }));
   }
   return raw as SearchHistoryEntry[];
 }
@@ -364,8 +364,8 @@ export async function getSpeedDialSites(): Promise<SpeedDialSite[]> {
   return sites.sort((a, b) => a.order - b.order);
 }
 
-/** 保存全部常用站点列表（不限制数量） */
-export async function saveSpeedDialSites(sites: SpeedDialSite[]): Promise<void> {
+/** 保存全部常用站点列表（不限制数量，内部函数） */
+async function saveSpeedDialSites(sites: SpeedDialSite[]): Promise<void> {
   const sorted = [...sites].sort((a, b) => a.order - b.order);
   await setData(STORAGE_KEYS.speedDial, sorted);
 }
@@ -417,5 +417,5 @@ export async function reorderSpeedDialSites(reorderedIds: string[]): Promise<Spe
   return reordered;
 }
 
-// Initialize meta on module load
+  // 模块加载时初始化元数据
 void ensureMeta();

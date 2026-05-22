@@ -23,22 +23,18 @@ import {
   AlertTriangle,
   Sparkles,
 } from 'lucide-react';
+
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
 import { useSettingsStore } from '@/store';
 import { exportSessionsJSON, downloadFile, parseImportJSON } from '@/shared/utils/import-export';
 import { getArchivedSessions, saveSessions } from '@/services';
 import { getQuotaStatus, formatBytes } from '@/shared/utils/quota';
-import {
-  getProfiles,
-  createProfile,
-  renameProfile,
-  deleteProfile,
-  type SettingsProfile,
-} from '@/shared/utils/profiles';
-import { Field } from '../components/Field';
+import { Field } from '@/features/settings/components/Field';
 import { getAllDataKeys, removeData } from '@/repositories/storage-repo';
 import { APP_RESOURCE_NAMES, STORAGE_KEYS, isAppStorageKey } from '@/shared/config/storage-keys';
+import type { SettingsProfile } from '@/shared/utils/profiles';
+import { getProfiles, createProfile, renameProfile, deleteProfile } from '@/shared/utils/profiles';
 import './styles/data.css';
 
 interface QuotaInfo {
@@ -175,8 +171,9 @@ export function DataPanel() {
   };
 
   return (
-    <div className="data-panel">
-      <Field label={t('settings.profiles')} hint={t('settings.profilesHint')}>
+    <div className="data-panel settings-panel-stack">
+      <section className="settings-section">
+        <Field label={t('settings.profiles')} hint={t('settings.profilesHint')}>
         <div className="data-panel__profile-create">
           <Input
             size="small"
@@ -255,9 +252,11 @@ export function DataPanel() {
           </div>
         )}
       </Field>
+      </section>
 
       {quotaInfo !== null && (
-        <div className="data-panel__quota">
+        <section className="settings-section">
+          <div className="data-panel__quota">
           <div className="data-panel__quota-header">
             <span className="data-panel__quota-label">
               <HardDrive size={ICON_SIZE.MEDIUM} className="data-panel__quota-icon" />
@@ -282,9 +281,11 @@ export function DataPanel() {
             />
           )}
         </div>
+        </section>
       )}
 
-      <div className="data-panel__actions">
+      <section className="settings-section">
+        <div className="data-panel__actions">
         <Button block icon={<Download size={ICON_SIZE.MEDIUM} />} onClick={() => { void handleExport(); }}>
           {t('settings.export')}
         </Button>
@@ -302,8 +303,10 @@ export function DataPanel() {
           <div className="data-panel__import-status">{importStatus}</div>
         )}
       </div>
+      </section>
 
-      <Button block danger icon={<Trash2 size={ICON_SIZE.MEDIUM} />} onClick={handleClearAll}>
+      <section className="settings-section">
+        <Button block danger icon={<Trash2 size={ICON_SIZE.MEDIUM} />} onClick={handleClearAll}>
         {t('settings.clearAll')}
       </Button>
 
@@ -397,6 +400,7 @@ export function DataPanel() {
       >
         {t('settings.factoryReset')}
       </Button>
+      </section>
     </div>
   );
 }

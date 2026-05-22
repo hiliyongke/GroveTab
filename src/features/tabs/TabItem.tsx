@@ -13,8 +13,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import type { LiveTab } from '@/shared/types';
 import { Button, Tag, Tooltip, Checkbox, theme } from 'antd';
-import {
-  Globe,
+import { Globe,
   Volume2,
   Pin,
   MessageSquare,
@@ -22,7 +21,7 @@ import {
   Pointer,
   Star,
 } from 'lucide-react';
-import { useT } from '@/shared/i18n';
+import { cssVars } from '@/shared/utils/css-vars';import { useT } from '@/shared/i18n';
 import { useMetadataStore, useSelectionStore, useSpeedDialStore } from '@/store';
 import { stringToColor } from '@/shared/utils/color';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
@@ -147,20 +146,19 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
 
   /** 选中态背景色 */
   const selectedBg = token.colorPrimaryBg;
-  const rowStyle = useMemo(
-    () =>
-      ({
-        ['--app-row-hover-bg' as string]: token.colorFillTertiary,
-        ['--app-tab-selected-bg' as string]: selectedBg,
-        ['--app-tab-text' as string]: token.colorText,
-        ['--app-tab-text-tertiary' as string]: token.colorTextTertiary,
-        ['--app-tab-primary' as string]: token.colorPrimary,
-        ['--app-tab-fallback-bg' as string]: token.colorFillSecondary,
-      }) as React.CSSProperties,
+  const rowStyle = useMemo<React.CSSProperties>(
+    () => cssVars({
+      '--app-row-hover-bg': token.colorFillTertiary,
+      '--app-tab-selected-bg': selectedBg,
+      '--app-tab-text': token.colorText,
+      '--app-tab-text-tertiary': token.colorTextTertiary,
+      '--app-tab-primary': token.colorPrimary,
+      '--app-tab-fallback-bg': token.colorFillSecondary,
+    }),
     [selectedBg, token.colorFillSecondary, token.colorFillTertiary, token.colorPrimary, token.colorText, token.colorTextTertiary],
   );
   const tagStyles = useMemo(
-    () => new Map(tags.slice(0, 2).map((tag) => [tag, { ['--app-tab-item-tag-bg' as string]: stringToColor(tag) } as React.CSSProperties])),
+    () => new Map(tags.slice(0, 2).map((tag) => [tag, cssVars({ '--app-tab-item-tag-bg': stringToColor(tag) })])),
     [tags],
   );
 

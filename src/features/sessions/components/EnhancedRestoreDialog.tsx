@@ -11,8 +11,8 @@
 import { useState, useEffect } from 'react';
 import { Modal, Button, Progress, Radio, Space, Alert } from 'antd';
 import { Play, X, CheckCircle, AlertCircle } from 'lucide-react';
-import type { RestoreStrategy, RestoreOutcome } from '@/services/archive-service';
-import { restoreSession } from '@/services/archive-service';
+import type { RestoreStrategy, RestoreOutcome } from '@/services/archive';
+import { restoreSession } from '@/services/archive';
 import { useT } from '@/shared/i18n';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 

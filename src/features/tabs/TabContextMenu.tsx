@@ -19,6 +19,7 @@ import {
   MoveHorizontal,
   Star,
 } from 'lucide-react';
+import { cssVars } from '@/shared/utils/css-vars';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { Button, Input, Tag, Divider, Card, theme } from 'antd';
 import { useMetadataStore, useTabsStore, useSpeedDialStore } from '@/store';
@@ -129,14 +130,16 @@ export function TabContextMenu({ x, y, url, title, favIconUrl, tabId, onClose }:
   };
 
   const pinned = isPinned(url);
-  const menuStyle = {
+  const menuStyle: React.CSSProperties = {
     left: position.left,
     top: position.top,
-    ['--app-tab-context-width' as string]: `${MENU_WIDTH}px`,
-    ['--app-tab-context-z' as string]: Z.contextMenu,
-    ['--app-tab-context-radius' as string]: `${token.borderRadiusLG}px`,
-    ['--app-tab-context-shadow' as string]: token.boxShadow,
-  } as React.CSSProperties;
+    ...cssVars({
+      '--app-tab-context-width': `${MENU_WIDTH}px`,
+      '--app-tab-context-z': String(Z.contextMenu),
+      '--app-tab-context-radius': `${token.borderRadiusLG}px`,
+      '--app-tab-context-shadow': token.boxShadow,
+    }),
+  };
 
   return (
     <div
@@ -251,9 +254,9 @@ export function TabContextMenu({ x, y, url, title, favIconUrl, tabId, onClose }:
         {tags.length > 0 && (
           <div className="app-tab-context-menu__tag-list">
             {tags.map((tag) => {
-              const tagStyle = {
-                ['--app-tab-context-tag-bg' as string]: stringToColor(tag),
-              } as React.CSSProperties;
+              const tagStyle: React.CSSProperties = cssVars({
+                '--app-tab-context-tag-bg': stringToColor(tag),
+              });
 
               return (
                 <Tag

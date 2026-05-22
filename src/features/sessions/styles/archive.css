@@ -94,7 +94,7 @@
 .app-archive-item {
   align-items: stretch;
   flex-direction: column;
-  padding: 12px 0;
+  padding: var(--app-space-3) 0;
 }
 
 .app-archive-item__main {
@@ -169,13 +169,13 @@
   margin-left: 40px;
   max-height: 260px;
   overflow-y: auto;
-  padding: 8px;
+  padding: var(--app-space-2);
   border-radius: var(--ant-border-radius);
   background: var(--ant-color-fill-quaternary);
 }
 
 .app-archive-item__empty {
-  padding: 16px;
+  padding: var(--app-space-4);
   color: var(--ant-color-text-tertiary);
   font-size: 12px;
   text-align: center;
@@ -202,7 +202,7 @@
 }
 
 .app-archive-item__tab-favicon {
-  border-radius: 2px;
+  border-radius: var(--app-radius-xs);
 }
 
 .app-archive-item__tab-content {
@@ -228,8 +228,8 @@
 }
 
 .app-archive-highlight {
-  padding: 0 1px;
-  border-radius: 2px;
+  padding: 0 var(--app-space-1);
+  border-radius: var(--app-radius-xs);
   background: var(--ant-color-primary-bg);
   color: var(--ant-color-primary);
   font-weight: 600;

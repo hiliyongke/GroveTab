@@ -9,12 +9,13 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Alert, Button, App } from 'antd';
 import { RotateCcw } from 'lucide-react';
+
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
 import { useSettingsStore } from '@/store';
 import { useResolvedKeybindings } from '@/shared/hooks/use-keybinding';
 import type { KeybindingAction } from '@/shared/config/keybindings';
-import { Field } from '../components/Field';
+import { Field } from '@/features/settings/components/Field';
 import { BRAND } from '@/shared/config/brand';
 
 /** Chrome 全局快捷键（只读） */
@@ -168,7 +169,8 @@ export function ShortcutsPanel() {
   return (
     <div className="settings-panel-stack">
       {/* Chrome 全局快捷键（只读） */}
-      <Field label={t('settings.globalShortcuts')}>
+      <section className="settings-section">
+        <Field label={t('settings.globalShortcuts')}>
         <Alert
           type="info"
           message={t('settings.shortcutsHint')}
@@ -184,8 +186,10 @@ export function ShortcutsPanel() {
           ))}
         </div>
       </Field>
+      </section>
 
       {/* 页面内快捷键（可自定义） */}
+      <section className="settings-section">
       <Field label={t('settings.localShortcuts')} hint={t('settings.localShortcutsHint')}>
         <div className="settings-card-list">
           {resolved.map((item) => (
@@ -212,6 +216,7 @@ export function ShortcutsPanel() {
             ))}
         </div>
       </Field>
+      </section>
     </div>
   );
 }

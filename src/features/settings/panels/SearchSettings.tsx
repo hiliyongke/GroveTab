@@ -15,10 +15,11 @@
  */
 
 import { Select, Segmented, Switch, Checkbox, Button, Popconfirm } from 'antd';
+
 import type { SearchEngineId, SearchScopeField, UserSettings } from '@/shared/types';
 import { useT } from '@/shared/i18n';
 import { SEARCH_ENGINE_OPTIONS } from '@/shared/config/search-engines';
-import { Field } from '../components/Field';
+import { Field } from '@/features/settings/components/Field';
 import { setData } from '@/repositories/storage-repo';
 import { feedback } from '@/shared/ui/feedback';
 import { STORAGE_KEYS } from '@/shared/config/storage-keys';

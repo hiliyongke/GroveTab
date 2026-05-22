@@ -1,1 +1,1 @@
-export * from './archive-service';
+export * from './archive';

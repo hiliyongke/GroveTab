@@ -3,6 +3,14 @@
  *
  * Manages undo records for closed tabs.
  * Records are persisted to chrome.storage.local and synced across new tab pages.
+ *
+ * Slice 依赖关系：
+ *   - 依赖 settings-slice：读取 settings.undoWindowSeconds 决定 TTL
+ *   - 被 tabs-slice 依赖：tabs-slice 的关闭操作（closeSingleTab, closeMultipleTabs 等）调用 addRecord
+ *
+ * 上游被以下模块依赖：
+ *   - AppContent：消费 activeToast 进行撤销 toast 展示
+ *   - UndoToast 组件：消费 undoRecord, dismissToast
  */
 
 import { create } from 'zustand';

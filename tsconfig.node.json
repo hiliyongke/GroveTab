@@ -6,6 +6,8 @@
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "forceConsistentCasingInFileNames": true,
     "types": ["node"]
   },
   "include": ["vite.config.ts", "vitest.config.ts", "eslint.config.js"]

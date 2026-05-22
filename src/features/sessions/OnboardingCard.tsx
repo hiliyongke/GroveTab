@@ -53,7 +53,7 @@ const TOUR_STEPS: TourStep[] = [
 ];
 
 function cssVars(vars: Record<string, string>): CSSProperties {
-  return vars as CSSProperties;
+  return vars;
 }
 
 export function OnboardingCard({ onDismiss }: OnboardingCardProps) {

@@ -38,7 +38,7 @@ async function getCounters(): Promise<Metrics> {
  */
 export async function recordMetric(
   key: keyof Metrics,
-  increment: number = 1,
+  increment = 1,
 ): Promise<void> {
   try {
     const metrics = await getCounters();
@@ -46,14 +46,14 @@ export async function recordMetric(
     if (metrics.firstUsedAt === 0) metrics.firstUsedAt = now;
     metrics.lastUsedAt = now;
     if (typeof metrics[key] === 'number') {
-      (metrics[key] as number) += increment;
+      (metrics[key]) += increment;
     }
     await setData(STORAGE_KEYS.metricCounters, metrics);
   } catch {
     // metrics 永远不应阻塞主流程
   }
   // 同时写入事件流，便于 InsightsPanel 展示
-  void track(key as string, { increment });
+  void track(String(key), { increment });
 }
 
 const MAX_EVENTS = 2000;

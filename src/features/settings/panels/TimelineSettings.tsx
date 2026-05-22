@@ -7,9 +7,10 @@
  */
 
 import { Segmented, Switch } from 'antd';
+
 import type { UserSettings } from '@/shared/types';
 import { useT } from '@/shared/i18n';
-import { Field } from '../components/Field';
+import { Field } from '@/features/settings/components/Field';
 
 interface TimelineSettingsProps {
   settings: UserSettings;

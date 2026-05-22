@@ -53,7 +53,7 @@ export interface DomainGroup {
   /** 色键（注册域，同家族子域共享同色系） */
   colorKey: string;
   /** 该分组下的标签页 */
-  tabs: import('@/shared/types').LiveTab[];
+  tabs: Array<import('@/shared/types').LiveTab>;
   /** 是否折叠 */
   collapsed: boolean;
 }
@@ -103,11 +103,4 @@ export function groupTabsByDomain(tabs: LiveTab[]): DomainGroup[] {
   });
 
   return groups;
-}
-
-/**
- * 取分组封面 favicon：用第一个 tab 的
- */
-export function getGroupFavicon(tabs: LiveTab[]): string {
-  return tabs[0]?.favIconUrl || '';
 }

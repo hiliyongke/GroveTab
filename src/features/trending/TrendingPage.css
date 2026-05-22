@@ -88,7 +88,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border-radius: 10px;
+  border-radius: var(--app-radius-md);
   color: var(--ant-color-primary);
   background: var(--ant-color-primary-bg);
 }
@@ -115,7 +115,7 @@
 }
 
 .trending-alert {
-  border-radius: 12px;
+  border-radius: var(--app-card-radius, 12px);
 }
 
 .trending-loading-state {
@@ -193,7 +193,7 @@
   margin: 0;
   font-size: 10px;
   line-height: 16px;
-  border-radius: 4px;
+  border-radius: var(--app-radius-sm);
 }
 
 .trending-board-card__list {
@@ -228,9 +228,9 @@
 }
 
 .trending-list-item {
-  gap: 8px;
-  padding: 6px 8px;
-  border-radius: 8px;
+  gap: var(--app-space-2);
+  padding: var(--app-space-2) var(--app-space-2);
+  border-radius: var(--app-radius-md);
   color: inherit;
   text-decoration: none;
   transition: background-color var(--app-motion-duration-fast, 0.15s) ease;
@@ -276,7 +276,7 @@
 .trending-rank-badge.is-top {
   width: 20px;
   height: 20px;
-  border-radius: 6px;
+  border-radius: var(--app-radius-sm);
   font-size: 11px;
   font-weight: 700;
   color: var(--ant-color-text-inverse, #fff);

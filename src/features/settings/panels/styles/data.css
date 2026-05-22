@@ -7,9 +7,6 @@
  */
 
 .data-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
   width: 100%;
 }
 
@@ -29,7 +26,7 @@
 }
 
 .data-panel__empty {
-  margin: 4px 0;
+  margin: var(--app-space-1) 0;
 }
 
 .data-panel__profile-list {
@@ -40,9 +37,9 @@
 
 .data-panel__profile-card,
 .data-panel__quota {
-  padding: 10px 12px;
+  padding: var(--app-space-3) var(--app-space-3);
   border: 1px solid var(--ant-color-border-secondary);
-  border-radius: 10px;
+  border-radius: var(--app-radius-md);
   background: var(--ant-color-fill-quaternary);
 }
 

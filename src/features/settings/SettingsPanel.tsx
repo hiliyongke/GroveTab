@@ -8,7 +8,7 @@
  * 支持受控激活 Tab（defaultActiveTab），便于从外部 hash（#about）直接切到指定 Tab。
  */
 
-import { Drawer } from 'antd';
+import { Drawer, Tooltip } from 'antd';
 import { useState, useEffect, useCallback } from 'react';
 import {
   Palette,
@@ -115,15 +115,15 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
         <nav className="settings-nav">
           <div className="settings-nav__list">
             {tabs.map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                className={`settings-nav__item${activeTab === tab.key ? ' is-active' : ''}`}
-                onClick={() => setActiveTab(tab.key)}
-                title={t(tab.labelKey)}
-              >
-                <span className="settings-nav__icon">{tab.icon}</span>
-              </button>
+              <Tooltip key={tab.key} title={t(tab.labelKey)} placement="right">
+                <button
+                  type="button"
+                  className={`settings-nav__item${activeTab === tab.key ? ' is-active' : ''}`}
+                  onClick={() => setActiveTab(tab.key)}
+                >
+                  <span className="settings-nav__icon">{tab.icon}</span>
+                </button>
+              </Tooltip>
             ))}
           </div>
         </nav>

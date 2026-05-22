@@ -20,7 +20,7 @@
 }
 
 .feature-empty--small {
-  padding: 24px 16px;
+  padding: var(--app-space-5) var(--app-space-4);
 }
 
 .feature-empty__empty {

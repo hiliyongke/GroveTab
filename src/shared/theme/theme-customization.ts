@@ -280,6 +280,22 @@ export function buildAppThemeVars(
 
     '--app-floating-radius': `${floatingRadius}px`,
 
+    /* ── 统一圆角规范（所有组件必须使用这些变量）── */
+    '--app-radius-xs': `${skin.borderRadiusXS}px`,
+    '--app-radius-sm': `${skin.borderRadiusSM}px`,
+    '--app-radius-md': `${skin.borderRadius}px`,
+    '--app-radius-lg': `${skin.borderRadiusLG}px`,
+    '--app-radius-pill': '980px',
+    '--app-radius-circle': '50%',
+
+    /* ── 统一间距规范（4px 基础单位，支持密度缩放）── */
+    '--app-space-1': `calc(4px * ${densityScale})`,
+    '--app-space-2': `calc(8px * ${densityScale})`,
+    '--app-space-3': `calc(12px * ${densityScale})`,
+    '--app-space-4': `calc(16px * ${densityScale})`,
+    '--app-space-5': `calc(24px * ${densityScale})`,
+    '--app-space-6': `calc(32px * ${densityScale})`,
+
     '--app-card-radius': `${skin.borderRadiusLG}px`,
     '--app-card-lift': skin.cardStyle.hoverLift && !reducedMotion ? `${skin.cardStyle.liftDistance}px` : '0px',
 

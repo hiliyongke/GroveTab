@@ -251,7 +251,7 @@ export function parseImportHTML(text: string): { sessions: ArchivedSession[]; er
     for (const h3 of h3s) {
       const name = h3.textContent?.trim() ?? '未命名';
       const dl = h3.nextElementSibling;
-      if (!dl || dl.tagName !== 'DL') continue;
+      if (dl?.tagName !== 'DL') continue;
       const anchors = Array.from(dl.querySelectorAll('a'));
       const tabs: ArchivedTab[] = [];
       for (const a of anchors) {

@@ -46,7 +46,7 @@
 .onboarding-card__badge {
   width: 56px;
   height: 56px;
-  border-radius: 12px;
+  border-radius: var(--app-card-radius, 12px);
 }
 
 .onboarding-card__headline {
@@ -133,7 +133,7 @@
 .onboarding-tour__step-badge {
   width: 44px;
   height: 44px;
-  border-radius: 12px;
+  border-radius: var(--app-card-radius, 12px);
   flex-shrink: 0;
 }
 

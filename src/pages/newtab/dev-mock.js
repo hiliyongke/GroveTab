@@ -52,6 +52,32 @@
     ['woa.com', 'LLM Chat', 'https://llm.woa.com/'],
   ];
 
+  function shouldAvoidExternalFaviconProxy(hostname) {
+    const lower = String(hostname || '').toLowerCase();
+    if (
+      lower === 'localhost' ||
+      lower === 'woa.com' ||
+      lower === 'oa.com' ||
+      lower.endsWith('.local') ||
+      lower.endsWith('.woa.com') ||
+      lower.endsWith('.oa.com') ||
+      !lower.includes('.')
+    ) {
+      return true;
+    }
+
+    if (/^(10|127)\./.test(lower)) return true;
+    if (/^192\.168\./.test(lower)) return true;
+    if (/^172\.(1[6-9]|2\d|3[0-1])\./.test(lower)) return true;
+
+    return false;
+  }
+
+  function getMockFaviconUrl(hostname) {
+    if (shouldAvoidExternalFaviconProxy(hostname)) return '';
+    return `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`;
+  }
+
   const now = Date.now();
   /** 可变的 tabs 数据源（mock 内部 state） */
   let mockTabs = initialMockTabs.map((t, i) => ({
@@ -60,7 +86,7 @@
     index: i,
     url: t[2],
     title: t[1],
-    favIconUrl: `https://www.google.com/s2/favicons?domain=${t[0]}&sz=32`,
+    favIconUrl: getMockFaviconUrl(t[0]),
     active: i === 0,
     pinned: false,
     audible: false,

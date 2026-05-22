@@ -12,7 +12,7 @@
 
 import { swBroadcast } from '@/shared/utils/sw-broadcast';
 import { archiveCurrentWindowTabs } from './archive-handler';
-import { createAutoSnapshot } from '@/services/archive-service';
+import { createAutoSnapshot } from '@/services/archive';
 import {
   getSettings,
   getStats,
@@ -126,7 +126,7 @@ chrome.tabs.onCreated.addListener((tab) => {
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  // Only broadcast meaningful changes
+  // 仅广播有意义的变更
   if (changeInfo.url || changeInfo.title || changeInfo.favIconUrl || changeInfo.status === 'complete') {
     swBroadcast('tab-updated', {
       id: tabId,
@@ -248,9 +248,9 @@ chrome.commands.onCommand.addListener((command) => {
 });
 // ── Alarms ────────────────────────────────────────────
 
-void chrome.alarms.create('app-stats-heartbeat', { periodInMinutes: 1 });
-void chrome.alarms.create('app-auto-snapshot', { periodInMinutes: 60 });
-void chrome.alarms.create('app-trending-refresh', { periodInMinutes: 30 });
+void chrome.alarms.create(APP_INTERNAL_IDS.statsHeartbeatAlarm, { periodInMinutes: 1 });
+void chrome.alarms.create(APP_INTERNAL_IDS.autoSnapshotAlarm, { periodInMinutes: 60 });
+void chrome.alarms.create(APP_INTERNAL_IDS.trendingRefreshAlarm, { periodInMinutes: 30 });
 
 async function autoSnapshotIfNeeded(): Promise<void> {
   try {
@@ -354,7 +354,7 @@ async function maybeFetchOg(url: string): Promise<void> {
 
     // 从 session storage 读取当前并发数
     const result = await chrome.storage.session.get('ogInFlight');
-    const currentInFlight = (result['ogInFlight'] as number) ?? 0;
+    const currentInFlight = (typeof result.ogInFlight === 'number' ? result.ogInFlight : 0) ?? 0;
     if (currentInFlight >= OG_CONCURRENCY) return;
 
     // 已存在则跳过
@@ -394,7 +394,7 @@ async function maybeFetchOg(url: string): Promise<void> {
     } finally {
       // 减少并发计数
       const updated = await chrome.storage.session.get('ogInFlight');
-      const updatedValue = (updated['ogInFlight'] as number) ?? 0;
+      const updatedValue = (typeof updated.ogInFlight === 'number' ? updated.ogInFlight : 0) ?? 0;
       await chrome.storage.session.set({ ogInFlight: Math.max(0, updatedValue - 1) });
     }
   } catch {
@@ -415,7 +415,7 @@ async function refreshTrendingCache(): Promise<void> {
     const { storageGet, storageSet } = await import('@/chrome');
     const cache = await storageGet<Record<string, unknown>>(STORAGE_KEYS.trendingCache);
     // 无缓存 → 用户从未用过热榜，跳过
-    if (!cache || !cache.boards || typeof cache.boards !== 'object') return;
+    if (!cache?.boards || typeof cache.boards !== 'object') return;
 
     const boards = cache.boards as Record<string, Record<string, unknown>>;
     const boardIds = Object.keys(boards);
@@ -438,7 +438,7 @@ async function refreshTrendingCache(): Promise<void> {
         if (!resp.ok) continue;
         const json = await resp.json() as {
           success?: boolean;
-          data?: Record<string, unknown>[];
+          data?: Array<Record<string, unknown>>;
           title?: string;
           subtitle?: string;
           update_time?: string;
@@ -469,7 +469,7 @@ async function refreshTrendingCache(): Promise<void> {
       }
     }
 
-    (cache as Record<string, unknown>).lastRefreshAt = Date.now();
+    (cache).lastRefreshAt = Date.now();
     await storageSet(STORAGE_KEYS.trendingCache, cache);
   } catch (err) {
     console.warn(`${SW_LOG_TAG} trending cache refresh failed`, err);

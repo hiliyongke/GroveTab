@@ -1,5 +1,13 @@
 /**
- * Zustand Store — View Mode Slice
+ * Zustand Store — Settings Slice
+ *
+ * Slice 依赖关系（下游依赖本 slice 的有）：
+ *   - tabs-slice：读取 settings（defaultView, uiVisibility, closeConfirmThreshold 等）
+ *   - undo-slice：读取 settings（undoWindowSeconds）
+ *   - metadata-slice：间接依赖（通过 tabs-slice 关闭后的 undo 逻辑）
+ *   - stats-slice：无直接依赖
+ *   - useAppInitialization：读取 settings（初始化加载）
+ *   - AppWorkspace：读取 settings（pageMode, contentMaxWidth 等 UI 配置）
  */
 
 import { create } from 'zustand';

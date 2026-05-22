@@ -11,13 +11,21 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+
+    /* 严格模式配置 */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
-    "ignoreDeprecations": "6.0",
+    "forceConsistentCasingInFileNames": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedSideEffectImports": true,
+    "exactOptionalPropertyTypes": false,
+
+    /* 路径别名 */
     "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "paths": {
       "@/*": ["src/*"],
       "@pages/*": ["src/pages/*"],
@@ -28,6 +36,8 @@
       "@repos/*": ["src/repositories/*"],
       "@chrome/*": ["src/chrome/*"]
     },
+
+    /* 类型定义 */
     "types": ["chrome", "vite/client"]
   },
   "include": ["src"],

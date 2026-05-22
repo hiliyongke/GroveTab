@@ -17,6 +17,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button, Card, Input, Popconfirm, theme, App as AntApp } from 'antd';
 import { Plus, Trash2, Save, PenLine, X, GripVertical } from 'lucide-react';
+import { cssVars } from '@/shared/utils/css-vars';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import {
   DndContext,
@@ -52,10 +53,10 @@ type DragData =
   | { kind: 'card'; columnId: string; url: string }
   | { kind: 'column'; columnId: string };
 
-type ActiveDrag = {
+interface ActiveDrag {
   id: string;
   data: DragData;
-};
+}
 
 export function KanbanView() {
   const { token } = theme.useToken();
@@ -90,15 +91,15 @@ export function KanbanView() {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
-  const kanbanThemeStyle = {
-    ['--app-kanban-source-bg' as string]: token.colorFillQuaternary,
-    ['--app-kanban-surface-bg' as string]: token.colorBgContainer,
-    ['--app-kanban-border' as string]: token.colorBorderSecondary,
-    ['--app-kanban-column-bg' as string]: token.colorFillQuaternary,
-    ['--app-kanban-column-hover-bg' as string]: token.colorPrimaryBg,
-    ['--app-kanban-overlay-border' as string]: token.colorPrimary,
-    ['--app-kanban-overlay-shadow' as string]: token.boxShadowSecondary,
-  } as React.CSSProperties;
+  const kanbanThemeStyle: React.CSSProperties = cssVars({
+    '--app-kanban-source-bg': token.colorFillQuaternary,
+    '--app-kanban-surface-bg': token.colorBgContainer,
+    '--app-kanban-border': token.colorBorderSecondary,
+    '--app-kanban-column-bg': token.colorFillQuaternary,
+    '--app-kanban-column-hover-bg': token.colorPrimaryBg,
+    '--app-kanban-overlay-border': token.colorPrimary,
+    '--app-kanban-overlay-shadow': token.boxShadowSecondary,
+  });
 
   const handleAddColumn = async () => {
     const name = newColumnName.trim();
@@ -293,11 +294,11 @@ function TabSourceItem({ card, reduced }: { card: KanbanCard; reduced: boolean }
     id,
     data: { kind: 'tab-source', card } satisfies DragData,
   });
-  const sourceItemStyle = {
+  const sourceItemStyle: React.CSSProperties = {
     opacity: isDragging ? 0.4 : 1,
     transform: CSS.Translate.toString(transform),
     transition: reduced ? 'none' : transition,
-  } as React.CSSProperties;
+  };
 
   return (
     <div
@@ -321,7 +322,7 @@ function TabSourceItem({ card, reduced }: { card: KanbanCard; reduced: boolean }
 interface KanbanColumnViewProps {
   col: KanbanColumn;
   liveUrls: Set<string>;
-  tabs: { id: number; url: string; windowId: number }[];
+  tabs: Array<{ id: number; url: string; windowId: number }>;
   t: (key: string, params?: Record<string, string | number>) => string;
   reduced: boolean;
   onRename: (name: string) => void;
@@ -353,15 +354,15 @@ function KanbanColumnView({
     data: { kind: 'column-body', columnId: col.id },
   });
 
-  const columnWrapStyle = {
+  const columnWrapStyle: React.CSSProperties = {
     transform: CSS.Translate.toString(sortable.transform),
     transition: reduced ? 'none' : sortable.transition,
     opacity: sortable.isDragging ? 0.5 : 1,
-  } as React.CSSProperties;
+  };
 
-  const columnCardStyle = {
+  const columnCardStyle: React.CSSProperties = {
     transition: reduced ? 'none' : 'background 120ms',
-  } as React.CSSProperties;
+  };
 
   return (
     <div
@@ -434,7 +435,7 @@ interface SortableCardProps {
   card: KanbanCard;
   columnId: string;
   offline: boolean;
-  tabs: { id: number; url: string; windowId: number }[];
+  tabs: Array<{ id: number; url: string; windowId: number }>;
   t: (key: string, params?: Record<string, string | number>) => string;
   reduced: boolean;
   onRemove: () => void;
@@ -464,11 +465,11 @@ function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: S
     }
   };
 
-  const sortableCardStyle = {
+  const sortableCardStyle: React.CSSProperties = {
     opacity: isDragging ? 0.4 : offline ? 0.55 : 1,
     transform: CSS.Translate.toString(transform),
     transition: reduced ? 'none' : transition,
-  } as React.CSSProperties;
+  };
 
   return (
     <div
@@ -556,7 +557,7 @@ function DragPreview({ active }: { active: ActiveDrag }) {
   const card = active.data.kind === 'card' ? null : active.data.kind === 'tab-source' ? active.data.card : null;
   return (
     <div className="app-kanban-overlay">
-      {card !== null && card.favIconUrl !== undefined && card.favIconUrl !== '' && (
+      {card?.favIconUrl !== undefined && card.favIconUrl !== '' && (
         <img src={card.favIconUrl} alt="" width={12} height={12} className="app-kanban-card__favicon" />
       )}
       <span className="app-kanban-card__title">

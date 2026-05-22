@@ -72,7 +72,7 @@
   overflow-y: auto;
   scrollbar-gutter: stable;
   margin-bottom: var(--ant-margin-sm);
-  padding: 6px;
+  padding: var(--app-space-1);
   border: 1px solid color-mix(in srgb, var(--app-hairline) 88%, white);
   border-radius: calc(var(--ant-border-radius-lg) + 4px);
   background: var(--app-glass-bg);
@@ -82,7 +82,7 @@
 }
 
 .popup-list-empty {
-  padding: 20px 12px;
+  padding: var(--app-space-5) var(--app-space-2);
   text-align: center;
 }
 
@@ -91,6 +91,16 @@
 }
 
 .popup-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.popup-actions__primary {
+  width: 100%;
+}
+
+.popup-actions__secondary {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
@@ -114,7 +124,7 @@
   all: unset;
   box-sizing: border-box;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: var(--app-space-1) var(--app-space-2);
   font-size: 11px;
   color: var(--ant-color-text-tertiary);
 }
@@ -129,7 +139,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 9px;
+  padding: var(--app-space-2) var(--app-space-2);
   border-radius: calc(var(--ant-border-radius) + 1px);
   transition:
     background-color var(--app-motion-duration-fast, 0.12s) ease,
@@ -155,7 +165,7 @@
 
 .popup-row-favicon {
   flex-shrink: 0;
-  border-radius: 3px;
+  border-radius: var(--app-radius-xs);
 }
 
 .popup-row-content {
@@ -203,7 +213,7 @@
 }
 
 [data-skin='apple'] .popup-brand-mark {
-  border-radius: 8px;
+  border-radius: var(--app-radius-md);
   background: linear-gradient(135deg, #0071e3, #2997ff);
   box-shadow: none;
 }
@@ -211,7 +221,7 @@
 [data-skin='apple'] .popup-search {
   background: #fafafc;
   border: 3px solid rgba(0, 0, 0, 0.04);
-  border-radius: 11px;
+  border-radius: var(--app-radius-md);
   box-shadow: none;
 }
 
@@ -229,7 +239,7 @@
 }
 
 [data-skin='apple'] .popup-actions .ant-btn-primary {
-  border-radius: 980px;
+  border-radius: var(--app-radius-pill);
 }
 
 [data-skin='apple'] .popup-row:hover,

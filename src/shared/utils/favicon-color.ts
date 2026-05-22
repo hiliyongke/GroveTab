@@ -220,17 +220,6 @@ export function buildAccentFromHue(h: number, lShift = 0): Accent {
 }
 
 /**
- * 把任意 hex 颜色转成 hue 角（用于从 antd 预设色板反推色相）
- */
-export function hexToHue(hex: string): number {
-  const clean = hex.replace('#', '');
-  const r = parseInt(clean.slice(0, 2), 16);
-  const g = parseInt(clean.slice(2, 4), 16);
-  const b = parseInt(clean.slice(4, 6), 16);
-  return rgbToHsl(r, g, b)[0];
-}
-
-/**
  * 把 favicon URL 变成 Accent
  *
  * **同源策略**：

@@ -1,6 +1,15 @@
 /**
  * Zustand Store — Selection Slice（多选与批量操作）
  *
+ * Slice 依赖关系：
+ *   - 被 tabs-slice 依赖：tabs-slice 的关闭/丢弃操作完成后，调用 removeIds 清除已删除 tab 的选中态
+ *   - 不依赖其他 slice（纯 UI 状态，不持久化）
+ *
+ * 上游被以下模块依赖：
+ *   - BatchActionBar：消费 selectedIds, selectionMode, isSelected 等
+ *   - DomainGroupView：消费 selectionMode, isSelected 等
+ *   - AppWorkspace：消费 selectedIds, selectionMode
+ *
  * 职责：
  *   1. 维护全局多选状态：哪些 tabId 被选中、是否处于多选模式
  *   2. 提供切换/全选/清空/范围选等操作

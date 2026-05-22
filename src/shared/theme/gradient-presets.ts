@@ -21,6 +21,8 @@ export type GradientPresetId =
   | 'deepspace'
   | 'midnight'
   | 'pastel'
+  | 'aurora'
+  | 'sunrise'
   | 'custom';
 
 export interface GradientPreset {
@@ -145,7 +147,10 @@ export function resolveGradient(id: GradientPresetId, isDark: boolean, customGra
     const angle = (isDark && customGradient.darkAngle != null) ? customGradient.darkAngle : customGradient.angle;
     return buildGradient(stops, angle);
   }
-  const preset = GRADIENT_PRESETS.find((p) => p.id === id);
+  // 旧预设迁移：aurora → slate，sunrise → warm
+  const migratedId: Exclude<GradientPresetId, 'aurora' | 'sunrise'> =
+    id === 'aurora' ? 'slate' : id === 'sunrise' ? 'warm' : id;
+  const preset = GRADIENT_PRESETS.find((p) => p.id === migratedId);
   if (!preset) return 'var(--ant-color-bg-layout)';
   return isDark ? preset.dark : preset.light;
 }

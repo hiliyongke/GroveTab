@@ -25,6 +25,7 @@ import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useTabsStore, useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { findAmbiguousTitleIds } from '@/shared/utils/url-display';
+import { cssVars } from '@/shared/utils/css-vars';
 import { TabItem } from './TabItem';
 import type { LiveTab } from '@/shared/types';
 import './styles/views.css';
@@ -268,10 +269,11 @@ function SegmentHeader({
       style={
         {
           transition: `color ${token.motionDurationFast}`,
-          // 颜色通过 CSS 变量下发，:hover 规则里切换，避免内联 color 被覆盖
-          ['--app-color' as string]: token.colorTextSecondary,
-          ['--app-color-hover' as string]: token.colorText,
-        } as React.CSSProperties
+          ...cssVars({
+            '--app-color': token.colorTextSecondary,
+            '--app-color-hover': token.colorText,
+          }),
+        }
       }
     >
       <span>{label}</span>

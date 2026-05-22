@@ -5,7 +5,7 @@
  * `archive-service`，避免 Popup / SW / UI 三处逻辑继续分叉。
  */
 
-import { archiveCurrentWindowTabs as archiveCurrentWindowTabsFromService } from '@/services/archive-service';
+import { archiveCurrentWindowTabs as archiveCurrentWindowTabsFromService } from '@/services/archive';
 
 /** 归档当前窗口所有可归档标签页。 */
 export async function archiveCurrentWindowTabs(): Promise<void> {

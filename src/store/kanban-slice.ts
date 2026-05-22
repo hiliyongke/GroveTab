@@ -3,6 +3,10 @@
  *
  * 看板数据结构：多列，每列含 KanbanCard 数组。拖拽不关闭原 Tab，
  * 仅在看板中聚合 URL 视图。
+ *
+ * Slice 依赖关系：
+ *   - 独立 slice，不依赖其他 slice（数据自给自足，持久化到 chrome.storage.local）
+ *   - 被 AppWorkspace 间接消费（KanbanView 组件读取 columns, loaded）
  */
 
 import { create } from 'zustand';

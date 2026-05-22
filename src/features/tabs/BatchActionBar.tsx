@@ -14,9 +14,10 @@ import {
   X,
   Moon,
   Save,
-  XCircle,
   Pointer,
+  XCircle,
 } from 'lucide-react';
+import { cssVars } from '@/shared/utils/css-vars';
 import { useSelectionStore, useTabsStore } from '@/store';
 import { iconColor } from '@/shared/utils/icon-colors';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
@@ -89,11 +90,11 @@ export function BatchActionBar() {
   // 非多选模式或无选中时不渲染
   if (!selectionMode || count === 0) return null;
 
-  const batchBarStyle = {
-    ['--app-batch-bar-z' as string]: Z.batchBar,
-    ['--app-batch-bar-danger-icon' as string]: iconColor('close', token),
-    ['--app-batch-bar-discard-icon' as string]: iconColor('discard', token),
-  } as React.CSSProperties;
+  const batchBarStyle: React.CSSProperties = cssVars({
+    '--app-batch-bar-z': String(Z.batchBar),
+    '--app-batch-bar-danger-icon': iconColor('close', token),
+    '--app-batch-bar-discard-icon': iconColor('discard', token),
+  });
 
   return (
     <div

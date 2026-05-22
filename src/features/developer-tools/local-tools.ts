@@ -242,7 +242,7 @@ export function colorParse(input: string): DevToolResult {
   if (!trimmed) return { output: '', error: '输入为空' };
 
   // 尝试解析 HEX
-  const hexMatch = trimmed.match(/^#?([0-9a-fA-F]{3,8})$/);
+  const hexMatch = /^#?([0-9a-fA-F]{3,8})$/.exec(trimmed);
   if (hexMatch) {
     const hex = hexMatch[1];
     // 校验有效长度
@@ -256,7 +256,7 @@ export function colorParse(input: string): DevToolResult {
   }
 
   // 尝试解析 rgb/rgba
-  const rgbMatch = trimmed.match(/^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*([\d.]+))?\s*\)$/i);
+  const rgbMatch = /^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*([\d.]+))?\s*\)$/i.exec(trimmed);
   if (rgbMatch) {
     const [, r, g, b, a] = rgbMatch;
     const ri = Number(r), gi = Number(g), bi = Number(b);
@@ -271,7 +271,7 @@ export function colorParse(input: string): DevToolResult {
   }
 
   // 尝试解析 hsl/hsla
-  const hslMatch = trimmed.match(/^hsla?\(\s*(\d{1,3})\s*,\s*(\d{1,3})%?\s*,\s*(\d{1,3})%?\s*(?:,\s*([\d.]+))?\s*\)$/i);
+  const hslMatch = /^hsla?\(\s*(\d{1,3})\s*,\s*(\d{1,3})%?\s*,\s*(\d{1,3})%?\s*(?:,\s*([\d.]+))?\s*\)$/i.exec(trimmed);
   if (hslMatch) {
     const [, h, s, l, a] = hslMatch;
     const hi = Number(h), si = Number(s), li = Number(l);
@@ -422,7 +422,7 @@ export function textDiff(left: string, right: string): DevToolResult {
 export type HtmlEntityAction = 'encode' | 'decode';
 
 /** 需要编码的 HTML 特殊字符映射 */
-const HTML_ENTITIES: [RegExp, string][] = [
+const HTML_ENTITIES: Array<[RegExp, string]> = [
   [/&/g, '&amp;'],
   [/</g, '&lt;'],
   [/>/g, '&gt;'],
@@ -682,7 +682,7 @@ export function mimeLookup(input: string): DevToolResult {
 
 /** CSS 单位转换 */
 export function cssUnitConvert(input: string, baseFontSize = 16): DevToolResult {
-  const match = input.trim().match(/^(-?\d+(?:\.\d+)?)(px|rem|em)$/i);
+  const match = /^(-?\d+(?:\.\d+)?)(px|rem|em)$/i.exec(input.trim());
   if (!match) return { output: '', error: '请输入形如 16px、1rem、1.5em 的值' };
   const value = Number(match[1]);
   const unit = match[2].toLowerCase();
@@ -769,16 +769,16 @@ export function curlToFetch(input: string): DevToolResult {
   if (!trimmed) return { output: '', error: '输入为空' };
   if (!trimmed.toLowerCase().startsWith('curl')) return { output: '', error: '输入应以 curl 开头' };
   try {
-    const urlMatch = trimmed.match(/curl\s+['"]?([^'"\s]+)['"]?/);
+    const urlMatch = /curl\s+['"]?([^'"\s]+)['"]?/.exec(trimmed);
     const url = urlMatch ? urlMatch[1] : '';
-    const methodMatch = trimmed.match(/-X\s+(\w+)/i);
+    const methodMatch = /-X\s+(\w+)/i.exec(trimmed);
     const method = methodMatch ? methodMatch[1].toUpperCase() : 'GET';
     const headers: Record<string, string> = {};
     const headerMatches = trimmed.matchAll(/-H\s+['"]([^:]+):\s*([^'"]+)['"]/g);
     for (const [, key, value] of headerMatches) {
       headers[key] = value;
     }
-    const bodyMatch = trimmed.match(/-d\s+['"]([^'"]*)['"]/);
+    const bodyMatch = /-d\s+['"]([^'"]*)['"]/.exec(trimmed);
     const body = bodyMatch ? bodyMatch[1] : undefined;
     const options: Record<string, unknown> = { method, headers };
     if (body) options.body = body;
@@ -820,7 +820,7 @@ function parseYaml(text: string): unknown {
   const lines = text.split('\n');
   const root: Record<string, unknown> = {};
   let current = root;
-  const stack: { obj: Record<string, unknown>; indent: number }[] = [];
+  const stack: Array<{ obj: Record<string, unknown>; indent: number }> = [];
 
   for (const raw of lines) {
     const trimmed = raw.trimEnd();
@@ -830,9 +830,9 @@ function parseYaml(text: string): unknown {
 
     if (line.startsWith('- ')) {
       const val = line.slice(2).trim();
-      const arr = current['__array'] as unknown[] ?? [];
+      const arr = current.__array as unknown[] ?? [];
       arr.push(parseYamlValue(val));
-      current['__array'] = arr;
+      current.__array = arr;
       continue;
     }
 
@@ -860,7 +860,7 @@ function parseYaml(text: string): unknown {
     }
   }
 
-  if (root['__array']) return root['__array'];
+  if (root.__array) return root.__array;
   return root;
 }
 
@@ -945,7 +945,7 @@ export function csvToJson(input: string): DevToolResult {
 export function jsonToCsv(input: string): DevToolResult {
   if (!input.trim()) return { output: '', error: '输入为空' };
   try {
-    const data = JSON.parse(input) as Record<string, unknown>[];
+    const data = JSON.parse(input) as Array<Record<string, unknown>>;
     if (!Array.isArray(data) || data.length === 0) return { output: '', error: 'JSON 应为对象数组' };
     const headers = Object.keys(data[0]);
     const rows = data.map((row) => headers.map((h) => String(row[h] ?? '')).join(','));

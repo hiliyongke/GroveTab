@@ -21,9 +21,9 @@ export function normalizeUrl(url: string, strictness: DedupStrictness): string {
   }
   try {
     const parsed = new URL(url);
-    // Remove hash
+    // 移除哈希
     parsed.hash = '';
-    // Remove tracking params
+    // 移除跟踪参数
     const params = new URLSearchParams();
     for (const [key, value] of parsed.searchParams.entries()) {
       if (!TRACKING_PARAMS.test(key)) {
@@ -31,9 +31,9 @@ export function normalizeUrl(url: string, strictness: DedupStrictness): string {
       }
     }
     parsed.search = params.toString();
-    // Sort params for consistent comparison
+    // 排序参数以保持一致性
     parsed.searchParams.sort();
-    return parsed.toString().replace(/\/+$/, ''); // Remove trailing slashes
+    return parsed.toString().replace(/\/+$/, ''); // 移除末尾斜杠
   } catch {
     return url;
   }

@@ -21,7 +21,7 @@ function classifyUrl(url: string): SpecialUrlType {
  * Check if a URL should be displayed in the tab list
  * chrome:// and about:blank/newtab are hidden by default
  */
-export function shouldDisplayUrl(url: string, showSpecial: boolean = false): boolean {
+export function shouldDisplayUrl(url: string, showSpecial = false): boolean {
   const type = classifyUrl(url);
   if (type === 'normal') return true;
   // about:blank is the new tab page itself — always hide

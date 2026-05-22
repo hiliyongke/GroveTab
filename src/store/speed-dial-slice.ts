@@ -3,6 +3,11 @@
  *
  * 管理用户自定义的常用站点列表：增删改查、拖拽排序。
  * 数据持久化至 chrome.storage.local，通过 storage-repo CRUD。
+ *
+ * Slice 依赖关系：
+ *   - 依赖 settings-slice：读取 settings.speedDialGroupEnabled 决定是否分组显示
+ *   - 独立 slice，不依赖 undo/selection/tabs/kanban/stats slice
+ *   - 被 QuickStartLayer 和 AppWorkspace 消费
  */
 
 import { create } from 'zustand';

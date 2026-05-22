@@ -241,7 +241,7 @@ export function ClickEffectLayer() {
         if (effect === 'confetti') p.vy += 0.12;
         if (effect === 'petal') p.vy += 0.02;
         if (p.vrot !== undefined && p.rot !== undefined) p.rot += p.vrot;
-        drawParticle(ctx, p, effect as Exclude<ClickEffectType, 'off'>);
+        drawParticle(ctx, p, effect);
       }
 
       if (arr.length > 0) {
@@ -252,7 +252,7 @@ export function ClickEffectLayer() {
     };
 
     const onClick = (e: MouseEvent) => {
-      const t = effect as Exclude<ClickEffectType, 'off'>;
+      const t = effect;
       const newOnes = spawn(t, e.clientX, e.clientY, brandColorRef.current);
       // 粒子上限截断
       const arr = particlesRef.current;
@@ -269,7 +269,7 @@ export function ClickEffectLayer() {
 
     return () => {
       window.removeEventListener('resize', resize);
-      window.removeEventListener('click', onClick, { capture: true } as EventListenerOptions);
+      window.removeEventListener('click', onClick, { capture: true });
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
       particlesRef.current = [];

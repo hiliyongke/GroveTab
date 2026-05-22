@@ -1,6 +1,16 @@
 /**
  * Zustand Store — Tabs Slice
  *
+ * Slice 依赖关系：
+ *   - 依赖 settings-slice：读取 settings（defaultView, uiVisibility, closeConfirmThreshold 等）
+ *   - 依赖 undo-slice：关闭 tab 时创建 undo record（closeSingleTab, closeMultipleTabs, closeDomainGroup, closeAllNonPinned）
+ *   - 依赖 selection-slice：关闭/丢弃操作后清除已删除 tab 的选中态
+ *   - 被 metadata-slice 间接依赖：metadata 的 pin/unpin 操作可能触发 tabs 刷新
+ *
+ * 上游被以下模块依赖：
+ *   - AppWorkspace：消费 tabs, loading, error 等状态
+ *   - AppContent/App.tsx：消费 loadAllTabs, handleBroadcast 等
+ *
  * 统一的 tab 状态与操作入口，职责：
  *   1. 通过 SW broadcast 增量维护 live tabs 列表
  *   2. 所有「动」tab 的操作（关闭 / 跳转）在此集中容错：

@@ -27,11 +27,12 @@ import {
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { Reorder } from 'motion/react';
 import type { DomainGroup } from '@/shared/utils/domain';
-import { getGroupFavicon } from '@/shared/utils/domain';
 import { useAccent } from '@/shared/hooks/useAccent';
+import { getFaviconUrl } from '@/features/quick-start/utils/siteUtils';
+import type { SpeedDialSite } from '@/shared/types';
 import { useResolvedTheme } from '@/shared/hooks/use-resolved-theme';
 import { findAmbiguousTitleIds } from '@/shared/utils/url-display';
-import type { Accent } from '@/shared/utils/favicon-color';
+import { cssVars } from '@/shared/utils/css-vars';
 import { TabItem } from './TabItem';
 import { useTabsStore, useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
@@ -40,17 +41,12 @@ import './styles/items.css';
 interface DomainGroupCardProps {
   group: DomainGroup;
   initialCollapsed?: boolean;
-  /**
-   * 外部注入的强调色——由父层的 `useGroupAccents` 做批次内去重后下发。
-   * 未提供时退回到 `useAccent` 单独取色（向后兼容）。
-   */
-  accentOverride?: Accent;
 }
 
 /**
  * 域名分组卡片：头部（可折叠）+ 标签列表
  */
-export function DomainGroupCard({ group, initialCollapsed = false, accentOverride }: DomainGroupCardProps) {
+export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroupCardProps) {
   const [collapsed, setCollapsed] = useState(initialCollapsed);
   const [faviconError, setFaviconError] = useState(false);
   /** 关闭整个分组的 in-flight 标记，防止重复点击 + 驱动 Button loading */
@@ -125,14 +121,27 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
         setClosing(false);
       }
     },
-    [closeDomainGroup, closing, group.domain],
+        [closeDomainGroup, closing, group.domain],
   );
 
-  const favicon = getGroupFavicon(group.tabs);
-  /** 优先从 favicon 提主色，失败回退到 colorKey 哈希色；同家族子域自动共享（因 favicon 通常相同） */
-  const localAccent = useAccent(favicon, group.colorKey);
-  /** 外部传入的 accentOverride 优先——父层已做批次去重，保证相邻卡不会撞色 */
-  const accent = accentOverride ?? localAccent;
+  /**
+   * 构造与 SiteCard 完全一致的 favicon URL
+   * 复用 getFaviconUrl() 逻辑：优先用 tab 自带的 favIconUrl，否则公网域名走 Google favicon 代理
+   */
+  const faviconUrl = useMemo(() => {
+    const firstTab = group.tabs[0];
+    if (!firstTab) return undefined;
+    // 构造与 SiteCard 完全一致的 mock SiteCard
+    const mockSite: Partial<SpeedDialSite> = {
+      url: firstTab.url?.startsWith('http') ? firstTab.url : `https://${group.domain}`,
+      favIconUrl: firstTab.favIconUrl,
+    };
+    return getFaviconUrl(mockSite as SpeedDialSite);
+  }, [group.tabs, group.domain]);
+
+  const localAccent = useAccent(faviconUrl, group.colorKey);
+  /** 与常用站点算法一致：从 favicon 提主色，失败回退到 colorKey 哈希色 */
+  const accent = localAccent;
   /**
    * 依主题选择身份色变体（2026-04-22 多巴胺版）：
    *   - 浅色主题 → barLight（高饱和 ~0.85、中偏高亮 ~0.58），白底细条上鲜明
@@ -180,23 +189,24 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
     [],
   );
 
-  const cardStyle = useMemo(
-    () =>
-      ({
-        borderRadius: cardRadius || 12,
-        overflow: 'hidden',
-        position: 'relative',
-        boxShadow: 'var(--app-shadow-card)',
-        border: `1px solid ${token.colorBorderSecondary}`,
-        ['--app-hover-border' as string]: token.colorBorder,
-        ['--app-domain-card-radius' as string]: `${cardRadius || 12}px`,
-        ['--app-domain-card-bar' as string]: barColor,
-        ['--app-domain-card-badge-bg' as string]: accent.soft,
-        ['--app-domain-card-header-border' as string]: collapsed ? 'transparent' : token.colorBorderSecondary,
-        ['--app-domain-card-chevron-color' as string]: token.colorTextTertiary,
-        ['--app-domain-card-title-color' as string]: token.colorText,
-        ['--app-row-hover-bg' as string]: token.colorFillSecondary,
-      }) as React.CSSProperties,
+  const cardStyle = useMemo<React.CSSProperties>(
+    () => ({
+      borderRadius: cardRadius || 12,
+      overflow: 'hidden',
+      position: 'relative',
+      boxShadow: 'var(--app-shadow-card)',
+      border: `1px solid ${token.colorBorderSecondary}`,
+      ...cssVars({
+        '--app-hover-border': token.colorBorder,
+        '--app-domain-card-radius': `${cardRadius || 12}px`,
+        '--app-domain-card-bar': barColor,
+        '--app-domain-card-badge-bg': accent.soft,
+        '--app-domain-card-header-border': collapsed ? 'transparent' : token.colorBorderSecondary,
+        '--app-domain-card-chevron-color': token.colorTextTertiary,
+        '--app-domain-card-title-color': token.colorText,
+        '--app-row-hover-bg': token.colorFillSecondary,
+      }),
+    }),
     [accent.soft, barColor, cardRadius, collapsed, token.colorBorder, token.colorBorderSecondary, token.colorFillSecondary, token.colorText, token.colorTextTertiary],
   );
 
@@ -240,9 +250,9 @@ export function DomainGroupCard({ group, initialCollapsed = false, accentOverrid
           多卡并排时视觉协同——左边条 + 徽章 是同色系，一眼就能把"这是什么网站"传达出去。
         */}
         <div className="app-domain-group-badge">
-          {favicon && !faviconError ? (
+          {faviconUrl && !faviconError ? (
             <img
-              src={favicon}
+              src={faviconUrl}
               alt=""
               className="app-domain-group-badge-favicon"
               onError={() => setFaviconError(true)}

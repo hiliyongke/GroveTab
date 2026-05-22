@@ -6,6 +6,5 @@
     "src/sw/index.ts",
     "tests/**/*.{test,spec}.{ts,tsx}"
   ],
-  "project": ["src/**/*.{ts,tsx}"],
-  "ignore": ["src/pages/newtab/dev-mock.js", "src/pages/newtab/theme-init.js"]
+  "project": ["src/**/*.{ts,tsx}"]
 }

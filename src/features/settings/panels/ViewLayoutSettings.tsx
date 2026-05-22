@@ -10,11 +10,13 @@
  * 6. 域名分组排序方式
  */
 
+import { useMemo } from 'react';
 import { Select, Segmented, Switch } from 'antd';
+
 import type { NewtabPageMode, UserSettings, ViewTabPosition } from '@/shared/types';
 import { useT } from '@/shared/i18n';
 import { VIEW_CONFIGS } from '@/shared/config/views';
-import { Field } from '../components/Field';
+import { Field } from '@/features/settings/components/Field';
 
 interface ViewLayoutSettingsProps {
   settings: UserSettings;
@@ -31,6 +33,16 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
   const handleSetting = (patch: Partial<UserSettings>) => {
     void updateSettings(patch);
   };
+
+  /** 默认视图下拉选项，缓存以避免每次渲染重建数组 */
+  const defaultViewOptions = useMemo(
+    () =>
+      VIEW_CONFIGS.map((view) => ({
+        value: view.id,
+        label: t(view.labelKey),
+      })),
+    [t],
+  );
 
   return (
     <div className="settings-panel-stack settings-panel-stack--regular">
@@ -52,10 +64,7 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
           value={settings.defaultView}
           onChange={(value) => handleSetting({ defaultView: value })}
           className="settings-control-full"
-          options={VIEW_CONFIGS.map((view) => ({
-            value: view.id,
-            label: t(view.labelKey),
-          }))}
+          options={defaultViewOptions}
         />
       </Field>
 

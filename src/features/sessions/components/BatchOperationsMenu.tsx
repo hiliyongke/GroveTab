@@ -13,7 +13,8 @@ import {
   X,
 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { Button, Dropdown, MenuProps, Space, Popconfirm, Tooltip, Badge } from 'antd';
+import type { MenuProps} from 'antd';
+import { Button, Dropdown, Space, Popconfirm, Tooltip, Badge } from 'antd';
 import { useT } from '@/shared/i18n';
 import { feedback } from '@/shared/ui/feedback';
 
@@ -60,16 +61,18 @@ export function BatchOperationsMenu({
       label: t('archive.batchRestore'),
       icon: <Undo2 size={ICON_SIZE.SMALL} />,
       disabled: selectedCount === 0 || operating,
-      onClick: async () => {
-        setOperating(true);
-        try {
-          await onBatchRestore(Array.from(selectedIds));
-          feedback.success(t('archive.batchRestoreSuccess', { count: selectedCount }));
-        } catch (error) {
-          feedback.error(t('archive.batchRestoreFailed'));
-        } finally {
-          setOperating(false);
-        }
+      onClick: () => {
+        void (async () => {
+          setOperating(true);
+          try {
+            await onBatchRestore(Array.from(selectedIds));
+            feedback.success(t('archive.batchRestoreSuccess', { count: selectedCount }));
+          } catch (_error) {
+            feedback.error(t('archive.batchRestoreFailed'));
+          } finally {
+            setOperating(false);
+          }
+        })();
       },
     },
     {
@@ -78,16 +81,18 @@ export function BatchOperationsMenu({
       icon: <Trash2 size={ICON_SIZE.SMALL} />,
       danger: true,
       disabled: selectedCount === 0 || operating,
-      onClick: async () => {
-        setOperating(true);
-        try {
-          await onBatchDelete(Array.from(selectedIds));
-          feedback.success(t('archive.batchDeleteSuccess', { count: selectedCount }));
-        } catch (error) {
-          feedback.error(t('archive.batchDeleteFailed'));
-        } finally {
-          setOperating(false);
-        }
+      onClick: () => {
+        void (async () => {
+          setOperating(true);
+          try {
+            await onBatchDelete(Array.from(selectedIds));
+            feedback.success(t('archive.batchDeleteSuccess', { count: selectedCount }));
+          } catch (_error) {
+            feedback.error(t('archive.batchDeleteFailed'));
+          } finally {
+            setOperating(false);
+          }
+        })();
       },
     },
     {
@@ -98,15 +103,17 @@ export function BatchOperationsMenu({
       label: t('archive.merge'),
       icon: <GitMerge size={ICON_SIZE.SMALL} />,
       disabled: selectedCount < 2 || operating,
-      onClick: async () => {
-        setOperating(true);
-        try {
-          await onMergeSessions(Array.from(selectedIds));
-        } catch (error) {
-          feedback.error(t('archive.mergeFailed'));
-        } finally {
-          setOperating(false);
-        }
+      onClick: () => {
+        void (async () => {
+          setOperating(true);
+          try {
+            await onMergeSessions(Array.from(selectedIds));
+          } catch (_error) {
+            feedback.error(t('archive.mergeFailed'));
+          } finally {
+            setOperating(false);
+          }
+        })();
       },
     },
     {
@@ -114,16 +121,18 @@ export function BatchOperationsMenu({
       label: t('archive.batchExport'),
       icon: <Download size={ICON_SIZE.SMALL} />,
       disabled: selectedCount === 0 || operating,
-      onClick: async () => {
-        setOperating(true);
-        try {
-          await onExportSessions(Array.from(selectedIds));
-          feedback.success(t('archive.batchExportSuccess', { count: selectedCount }));
-        } catch (error) {
-          feedback.error(t('archive.batchExportFailed'));
-        } finally {
-          setOperating(false);
-        }
+      onClick: () => {
+        void (async () => {
+          setOperating(true);
+          try {
+            await onExportSessions(Array.from(selectedIds));
+            feedback.success(t('archive.batchExportSuccess', { count: selectedCount }));
+          } catch (_error) {
+            feedback.error(t('archive.batchExportFailed'));
+          } finally {
+            setOperating(false);
+          }
+        })();
       },
     },
   ];
@@ -190,7 +199,7 @@ export function BatchOperationsMenu({
         <Popconfirm
           title={t('archive.clearAllConfirmTitle')}
           description={t('archive.clearAllConfirmDesc', { count: totalCount })}
-          onConfirm={() => onClearAll()}
+          onConfirm={() => { void onClearAll(); }}
           okText={t('archive.clearAllConfirmOk')}
           cancelText={t('archive.clearAllConfirmCancel')}
           okButtonProps={{ danger: true }}

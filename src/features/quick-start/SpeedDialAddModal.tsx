@@ -48,17 +48,19 @@ export function SpeedDialAddModal({ open, onClose, editingSite, existingGroups }
   const [confirmLoading, setConfirmLoading] = useState(false);
   /** 标记用户是否手动修改过 URL 或标题，避免异步回调覆盖 */
   const userModifiedRef = useRef(false);
+  /** 当前活动 tab 的 favicon URL（新增时自动带入） */
+  const faviconUrlRef = useRef<string | undefined>(undefined);
 
   /** 包装 setUrl，标记用户已手动修改 */
   const setUrlWithFlag = useCallback((value: string | ((prev: string) => string)) => {
     userModifiedRef.current = true;
-    setUrl(value as string);
+    setUrl(value);
   }, []);
 
   /** 包装 setTitle，标记用户已手动修改 */
   const setTitleWithFlag = useCallback((value: string | ((prev: string) => string)) => {
     userModifiedRef.current = true;
-    setTitle(value as string);
+    setTitle(value);
   }, []);
 
   const isEdit = editingSite !== null;
@@ -72,10 +74,12 @@ export function SpeedDialAddModal({ open, onClose, editingSite, existingGroups }
       setUrl(editingSite.url);
       setTitle(editingSite.title);
       setGroup(editingSite.group || '__none__');
+      faviconUrlRef.current = editingSite.favIconUrl;
     } else {
       setUrl('');
       setTitle('');
       setGroup(groupEnabled ? '__none__' : undefined);
+      faviconUrlRef.current = undefined;
       if (typeof chrome !== 'undefined' && chrome.tabs) {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabsList) => {
           const active = tabsList[0];
@@ -83,6 +87,9 @@ export function SpeedDialAddModal({ open, onClose, editingSite, existingGroups }
           if (active?.url && active.url.startsWith('http') && !userModifiedRef.current) {
             setUrl(active.url);
             setTitle(active.title || '');
+          }
+          if (active?.favIconUrl) {
+            faviconUrlRef.current = active.favIconUrl;
           }
         });
       }
@@ -109,14 +116,14 @@ export function SpeedDialAddModal({ open, onClose, editingSite, existingGroups }
           url: finalUrl,
           title: title.trim() || safeGetHostname(finalUrl),
           group: resolvedGroup,
+          favIconUrl: faviconUrlRef.current,
         });
       } else {
         const site: SpeedDialSite = {
           id: uid(),
           url: finalUrl,
           title: title.trim() || safeGetHostname(finalUrl),
-          /** favIconUrl 留空，由 SpeedDialGrid 的 getFaviconUrl() 运行时解析 */
-          favIconUrl: undefined,
+          favIconUrl: faviconUrlRef.current,
           order: sites.length,
           createdAt: Date.now(),
           group: resolvedGroup,

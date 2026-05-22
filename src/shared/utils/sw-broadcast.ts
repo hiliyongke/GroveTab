@@ -34,7 +34,7 @@ export function swBroadcast(type: SwBroadcastType, payload: Record<string, unkno
     };
     getChannel().postMessage(message);
   } catch (err) {
-    // BroadcastChannel 在某些上下文（如非 extension 页面）可能报错，静默忽略
+  // BroadcastChannel 在某些上下文（如非扩展页面）可能报错，静默忽略
     console.warn(`${BRAND.logTag} swBroadcast failed:`, err);
   }
 }

@@ -26,11 +26,11 @@ export function SortableSiteCard({ site, onEdit, onDelete }: SortableSiteCardPro
     isDragging,
   } = useSortable({ id: site.id });
 
-  const style = {
+  const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 999 : 'auto',
-  } as React.CSSProperties;
+  };
 
   return (
     <div ref={setNodeRef} style={style} {...attributes}>

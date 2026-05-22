@@ -10,6 +10,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Card, Button } from 'antd';
 import { Plus } from 'lucide-react';
+import { cssVars } from '@/shared/utils/css-vars';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import { useSpeedDialStore, useSettingsStore } from '@/store';
@@ -32,10 +33,12 @@ function GroupHeader({ groupName, firstSite }: { groupName: string; firstSite: S
   const hostname = useMemo(() => getHostname(firstSite.url), [firstSite.url]);
   const accent = useAccent(faviconUrl, hostname);
   const color = accent.bar || 'var(--ant-color-primary)';
-  const headerStyle = {
+  const headerStyle: React.CSSProperties = {
     borderLeftColor: color,
-    ['--speed-dial-group-accent' as string]: color,
-  } as React.CSSProperties;
+    ...cssVars({
+      '--speed-dial-group-accent': color,
+    }),
+  };
 
   return (
     <div className="speed-dial-group-header" style={headerStyle}>
@@ -117,6 +120,9 @@ export function SpeedDialGrid({ sites }: SpeedDialGridProps) {
       <div className="app-speed-dial-add-content">
         <span className="app-speed-dial-add-label">
           {t('quickStart.addSite')}
+        </span>
+        <span className="app-speed-dial-add-hint" aria-hidden="true">
+          placeholder
         </span>
       </div>
     </Card>

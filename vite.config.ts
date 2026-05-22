@@ -166,17 +166,17 @@ export default defineConfig({
             // pnpm 路径优先匹配：路径形如 .pnpm/antd@6.3.6__react@19/.../node_modules/antd/es/...
             if (/antd[\\/]es[\\/]|antd[\\/]lib[\\/]/.test(id)) return 'vendor-antd';
             if (/react-grid-layout|react-resizable|react-draggable/.test(id)) return 'vendor-grid';
-            if (/@dnd-kit/.test(id)) return 'vendor-dnd';
-            if (/lunar-typescript/.test(id)) return 'vendor-lunar';
-            if (/tinykeys/.test(id)) return 'vendor-react';
-            if (/react-dom/.test(id)) return 'vendor-react-dom';
+            if (id.includes('@dnd-kit')) return 'vendor-dnd';
+            if (id.includes('lunar-typescript')) return 'vendor-lunar';
+            if (id.includes('tinykeys')) return 'vendor-react';
+            if (id.includes('react-dom')) return 'vendor-react-dom';
             if (/react(?:-router)?['@_]/.test(id)) return 'vendor-react';
             if (/minisearch|pinyin-pro|tldts/.test(id)) return 'vendor-search';
             if (/date-fns|dayjs/.test(id)) return 'vendor-date';
-            if (/lucide-react/.test(id)) return 'vendor-icons';
+            if (id.includes('lucide-react')) return 'vendor-icons';
             if (/motion|framer-motion/.test(id)) return 'vendor-motion';
-            if (/zustand/.test(id)) return 'vendor-zustand';
-            if (/@ant-design/.test(id)) return 'vendor-antd';
+            if (id.includes('zustand')) return 'vendor-zustand';
+            if (id.includes('@ant-design')) return 'vendor-antd';
             return 'vendor-misc';
           }
           // 把"非首屏必需"的特性模块拆到独立 chunk

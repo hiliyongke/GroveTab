@@ -58,9 +58,9 @@ const DEFAULT_ENABLED_ENGINES: SearchEngineId[] = SEARCH_ENGINE_OPTIONS.map((ite
 const SEARCH_DEBOUNCE_MS = 180;
 
 type PinyinMatchFn = (text: string, query: string) => boolean;
-type SearchIndexLike = {
+interface SearchIndexLike {
   search: (query: string) => Array<{ id: number }>;
-};
+}
 
 interface SearchBoxProps {
   /** 受控：是否打开 */
@@ -121,7 +121,7 @@ function cx(...classNames: Array<string | false | undefined>) {
 }
 
 function cssVars(vars: Record<string, string>): CSSProperties {
-  return vars as CSSProperties;
+  return vars;
 }
 
 /**

@@ -24,13 +24,12 @@ import { Volume2, X } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useTabsStore } from '@/store';
 import { useT } from '@/shared/i18n';
-import { groupTabsByDomain, getGroupFavicon } from '@/shared/utils/domain';
+import { groupTabsByDomain } from '@/shared/utils/domain';
 import { useAccent } from '@/shared/hooks/useAccent';
-import { useGroupAccents } from '@/shared/hooks/useGroupAccents';
 import { findAmbiguousTitleIds } from '@/shared/utils/url-display';
+import { cssVars } from '@/shared/utils/css-vars';
 import { TabItem } from './TabItem';
 import type { LiveTab } from '@/shared/types';
-import type { Accent } from '@/shared/utils/favicon-color';
 import './styles/views.css';
 
 /**
@@ -46,21 +45,6 @@ export function GridView() {
 
   /** 当前打开 Popover 的域名（null 代表全部关闭）——同时至多一个浮层 */
   const [activeDomain, setActiveDomain] = useState<string | null>(null);
-
-  /**
-   * 批次内去重分配 Accent——与 DomainGroupView 同策略，
-   * 避免大量 GridCard 并排时哈希撞色。
-   * 注意：hooks 必须在 early return 前调用。
-   */
-  const accentInputs = useMemo(
-    () =>
-      groups.map((g) => ({
-        colorKey: g.colorKey,
-        favicon: getGroupFavicon(g.tabs),
-      })),
-    [groups],
-  );
-  const accentMap = useGroupAccents(accentInputs);
 
   if (groups.length === 0) return null;
 
@@ -86,7 +70,6 @@ export function GridView() {
           onJumpFromPopover={handleJumpFromPopover}
           onCloseTab={(id) => { void closeSingleTab(id); }}
           countLabel={t('header.tabCount', { count: group.tabs.length })}
-          accentOverride={accentMap[group.colorKey]}
         />
       ))}
     </div>
@@ -104,8 +87,6 @@ interface GridCardProps {
   onJumpFromPopover: (tabId: number, windowId: number) => void;
   onCloseTab: (tabId: number) => void;
   countLabel: string;
-  /** 父层批次去重后的 Accent；未提供则退回单独 `useAccent` */
-  accentOverride?: Accent;
 }
 
 /**
@@ -121,17 +102,14 @@ function GridCard({
   onJumpFromPopover,
   onCloseTab,
   countLabel,
-  accentOverride,
 }: GridCardProps) {
   const [faviconError, setFaviconError] = useState(false);
   const { token } = theme.useToken();
   const hasAudible = tabs.some((tab) => tab.audible);
   const first = tabs[0];
   const isMulti = tabs.length > 1;
-  /** 从 favicon 提取主色（失败自动回退到 colorKey 哈希色） */
-  const localAccent = useAccent(first?.favIconUrl, colorKey);
-  /** 父层注入优先，保证同一批 GridCard 内不撞色 */
-  const accent = accentOverride ?? localAccent;
+  /** 从 favicon 提取主色（失败自动回退到 colorKey 哈希色）——与常用站点算法一致 */
+  const accent = useAccent(first?.favIconUrl, colorKey);
   const color = accent.bar;
 
   /** 点击卡片：单 tab 直接跳，多 tab 切换 Popover */
@@ -148,14 +126,13 @@ function GridCard({
       onClick={handleCardClick}
       className="app-card-interactive app-grid-card"
       classNames={{ body: 'app-grid-card__body' }}
-      style={
-        {
-          borderRadius: token.borderRadiusLG,
-          // 下发 hover 边框色给 app-card-interactive 消费
-          ['--app-hover-border' as string]: token.colorPrimaryBorder,
-          ['--app-grid-card-accent' as string]: color,
-        } as React.CSSProperties
-      }
+      style={{
+        borderRadius: token.borderRadiusLG,
+        ...cssVars({
+          '--app-hover-border': token.colorPrimaryBorder,
+          '--app-grid-card-accent': color,
+        }),
+      }}
     >
       {/* 缩略图区 —— 16:10 宽高比 */}
       <div className="app-grid-card-preview">
@@ -180,20 +157,20 @@ function GridCard({
         )}
       </div>
 
-      {/* 域名 */}
-      <div className="app-grid-card-meta">
-        <span className="app-grid-card-domain">
-          {domain}
+      {/* 底部信息区 */}
+      <div className="app-grid-card-content">
+        <div className="app-grid-card-meta">
+          <span className="app-grid-card-domain">
+            {domain}
+          </span>
+          {hasAudible && (
+            <Volume2 size={ICON_SIZE.SMALL} className="app-grid-card-audible" />
+          )}
+        </div>
+        <span className="app-grid-card-copy">
+          {countLabel}
         </span>
-        {hasAudible && (
-          <Volume2 size={ICON_SIZE.SMALL} className="app-grid-card-audible" />
-        )}
       </div>
-
-      {/* 计数行 */}
-      <span className="app-grid-card-copy">
-        {countLabel}
-      </span>
     </Card>
   );
 
@@ -274,9 +251,9 @@ function DomainTabsPanel({
   };
 
   const hasFavicon = typeof faviconSrc === 'string' && faviconSrc.length > 0;
-  const popoverStyle = {
-    ['--app-grid-popover-accent' as string]: accentColor,
-  } as React.CSSProperties;
+  const popoverStyle: React.CSSProperties = cssVars({
+    '--app-grid-popover-accent': accentColor,
+  });
 
   return (
     <div className="app-grid-popover" style={popoverStyle}>

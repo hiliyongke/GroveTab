@@ -6,12 +6,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: var(--app-space-1);
   max-width: 520px;
-  padding: 8px 8px 8px 20px;
+  padding: var(--app-space-2) var(--app-space-2) var(--app-space-2) var(--app-space-4);
   transform: translateX(-50%);
   border: 1px solid var(--ant-color-border-secondary);
-  border-radius: 16px;
+  border-radius: var(--app-radius-lg);
   background: var(--ant-color-bg-elevated);
   box-shadow: var(--ant-box-shadow);
   backdrop-filter: blur(16px);
@@ -47,9 +47,9 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 8px;
-  padding: 16px;
-  border-radius: 8px;
+  gap: var(--app-space-2);
+  padding: var(--app-space-4);
+  border-radius: var(--app-radius-md);
   background: var(--ant-color-error-bg, #fff2f0);
   color: var(--ant-color-error-text, #cf1322);
   font-size: 12px;
@@ -66,9 +66,9 @@
 
 .app-error-boundary__retry {
   all: unset;
-  padding: 4px 10px;
+  padding: var(--app-space-1) var(--app-space-3);
   border: 1px solid currentColor;
-  border-radius: 6px;
+  border-radius: var(--app-radius-sm);
   cursor: pointer;
   font-size: 11px;
 }

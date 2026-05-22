@@ -31,3 +31,6 @@ coverage/
 vite.config.js
 vitest.config.js
 vitest.config.d.ts
+
+# Husky
+.husky/

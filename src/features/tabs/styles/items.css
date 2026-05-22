@@ -78,14 +78,14 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border-radius: 7px;
+  border-radius: var(--app-radius-sm);
   background: var(--app-domain-card-badge-bg);
 }
 
 .app-domain-group-badge-favicon {
   width: 16px;
   height: 16px;
-  border-radius: 3px;
+  border-radius: var(--app-radius-xs);
 }
 
 .app-domain-group-badge-icon {
@@ -158,7 +158,7 @@
   gap: 10px;
   width: 100%;
   min-height: 40px;
-  padding: 4px 12px;
+  padding: var(--app-space-1) var(--app-space-3);
   border-radius: var(--ant-border-radius-sm);
   cursor: pointer;
   outline: none;
@@ -189,7 +189,7 @@
 .app-tab-item-favicon {
   width: 16px;
   height: 16px;
-  border-radius: 3px;
+  border-radius: var(--app-radius-xs);
   flex-shrink: 0;
 }
 
@@ -200,7 +200,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border-radius: 3px;
+  border-radius: var(--app-radius-xs);
   background: var(--app-tab-fallback-bg);
 }
 
@@ -261,9 +261,9 @@
   margin: 0;
   flex-shrink: 0;
   height: 16px;
-  padding: 0 5px;
+  padding: 0 var(--app-space-1);
   border: none;
-  border-radius: 3px;
+  border-radius: var(--app-radius-xs);
   color: #fff;
   font-size: 10px;
   line-height: 14px;

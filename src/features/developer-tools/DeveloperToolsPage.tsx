@@ -46,6 +46,7 @@ import {
   Wrench,
 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
+import { cssVars } from '@/shared/utils/css-vars';
 import { useT } from '@/shared/i18n';
 import { BRAND } from '@/shared/config/brand';
 import type { DevToolCategory, DevToolDefinition } from './tool-registry';
@@ -128,8 +129,8 @@ function readStringArray(key: string): string[] {
   try {
     const raw = localStorage.getItem(key);
     if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((item) => typeof item === 'string') : [];
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : [];
   } catch {
     return [];
   }
@@ -294,6 +295,27 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
   const [colorValue, setColorValue] = useState<string | undefined>();
 
   /** 工具切换时重置所有内部状态，替代 key={selectedTool.id} 的重挂载行为 */
+  const [jsonAction, setJsonAction] = useState<JsonAction>('format');
+  const [urlAction, setUrlAction] = useState<UrlAction>('encode');
+  const [base64Action, setBase64Action] = useState<Base64Action>('encode');
+  const [urlQueryAction, setUrlQueryAction] = useState<UrlQueryAction>('parse');
+  const [htmlEntityAction, setHtmlEntityAction] = useState<HtmlEntityAction>('encode');
+  const [timestampAction, setTimestampAction] = useState<TimestampAction>('toDatetime');
+  const [fromRadix, setFromRadix] = useState('dec');
+  const [toRadix, setToRadix] = useState('hex');
+  const [hashAlgo, setHashAlgo] = useState<HashAlgorithm>('sha256');
+  const [regexPattern, setRegexPattern] = useState('');
+  const [regexFlags, setRegexFlags] = useState('g');
+  const [randomAction, setRandomAction] = useState<RandomAction>('uuid');
+  const [randomLen, setRandomLen] = useState(32);
+  const [rootName, setRootName] = useState('Root');
+  const [baseFontSize, setBaseFontSize] = useState(16);
+  const [yamlAction, setYamlAction] = useState<'yamlToJson' | 'jsonToYaml'>('yamlToJson');
+  const [csvAction, setCsvAction] = useState<'csvToJson' | 'jsonToCsv'>('csvToJson');
+  const [basicAuthAction, setBasicAuthAction] = useState<'encode' | 'decode'>('encode');
+  const [escapeMode, setEscapeMode] = useState<'js' | 'json' | 'regex' | 'shell'>('js');
+  const [computing, setComputing] = useState(false);
+
   useEffect(() => {
     if (toolIdRef.current !== tool.id) {
       toolIdRef.current = tool.id;
@@ -325,27 +347,6 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
     }
   }, [tool.id]);
 
-  const [jsonAction, setJsonAction] = useState<JsonAction>('format');
-  const [urlAction, setUrlAction] = useState<UrlAction>('encode');
-  const [base64Action, setBase64Action] = useState<Base64Action>('encode');
-  const [urlQueryAction, setUrlQueryAction] = useState<UrlQueryAction>('parse');
-  const [htmlEntityAction, setHtmlEntityAction] = useState<HtmlEntityAction>('encode');
-  const [timestampAction, setTimestampAction] = useState<TimestampAction>('toDatetime');
-  const [fromRadix, setFromRadix] = useState('dec');
-  const [toRadix, setToRadix] = useState('hex');
-  const [hashAlgo, setHashAlgo] = useState<HashAlgorithm>('sha256');
-  const [regexPattern, setRegexPattern] = useState('');
-  const [regexFlags, setRegexFlags] = useState('g');
-  const [randomAction, setRandomAction] = useState<RandomAction>('uuid');
-  const [randomLen, setRandomLen] = useState(32);
-  const [rootName, setRootName] = useState('Root');
-  const [baseFontSize, setBaseFontSize] = useState(16);
-  const [yamlAction, setYamlAction] = useState<'yamlToJson' | 'jsonToYaml'>('yamlToJson');
-  const [csvAction, setCsvAction] = useState<'csvToJson' | 'jsonToCsv'>('csvToJson');
-  const [basicAuthAction, setBasicAuthAction] = useState<'encode' | 'decode'>('encode');
-  const [escapeMode, setEscapeMode] = useState<'js' | 'json' | 'regex' | 'shell'>('js');
-  const [computing, setComputing] = useState(false);
-
   const debouncedInput = useDebounce(input, 260);
   const debouncedInput2 = useDebounce(input2, 260);
   const debouncedPattern = useDebounce(regexPattern, 260);
@@ -354,8 +355,8 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
   const isAutoExecute = AUTO_EXECUTE_TOOL_IDS.has(tool.id);
   const isBidirectional = ['url-codec', 'base64-codec', 'timestamp', 'radix', 'html-entity', 'url-query'].includes(tool.id);
   const isMonospace = ['json-format', 'json-to-ts', 'json-path', 'jwt-decoder', 'regex-test', 'text-diff', 'hash', 'radix', 'url-query', 'case-convert', 'text-stats', 'yaml-json', 'csv-json', 'http-header', 'ua-parse', 'sql-format', 'string-escape', 'curl-fetch'].includes(tool.id);
-  const colorSwatchStyle = useMemo(
-    () => ({ ['--devtools-color-swatch-bg' as string]: colorValue ?? 'transparent' }) as React.CSSProperties,
+  const colorSwatchStyle: React.CSSProperties = useMemo(
+    () => cssVars({ '--devtools-color-swatch-bg': colorValue ?? 'transparent' }),
     [colorValue],
   );
 
@@ -448,22 +449,22 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
   useEffect(() => {
     if (!isAutoExecute) return;
     if (tool.id === 'regex-test' && !debouncedPattern.trim()) {
-      setOutput(''); setMeta(''); setError(''); setColorValue(undefined);
+      applyResult({ output: '', meta: '', error: '', colorValue: undefined });
       return;
     }
     if (tool.id !== 'text-stats' && !debouncedInput.trim() && !isDualInput) {
-      setOutput(''); setMeta(''); setError(''); setColorValue(undefined);
+      applyResult({ output: '', meta: '', error: '', colorValue: undefined });
       return;
     }
     if (isDualInput && !debouncedInput && !debouncedInput2) {
-      setOutput(''); setMeta(''); setError(''); setColorValue(undefined);
+      applyResult({ output: '', meta: '', error: '', colorValue: undefined });
       return;
     }
     let cancelled = false;
-    (async () => {
+    void (async () => {
       const result = await runTool(debouncedInput, debouncedInput2);
       if (!cancelled) applyResult(result);
-    })().catch(() => undefined);
+    })();
     return () => { cancelled = true; };
   }, [applyResult, debouncedInput, debouncedInput2, debouncedPattern, isAutoExecute, isDualInput, runTool, tool.id]);
 
@@ -676,13 +677,13 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
 
       <div className="devtools-actions">
         {!isAutoExecute && (
-          <Button type="primary" onClick={handleExecute} loading={computing}>{t('devtools.execute')}</Button>
+          <Button type="primary" onClick={() => { void handleExecute(); }} loading={computing}>{t('devtools.execute')}</Button>
         )}
         {isAutoExecute && <Tag color="blue" className="devtools-tag devtools-tag--realtime">{t('devtools.realtime')}</Tag>}
         {isBidirectional && <Button onClick={handleSwap} icon={<ArrowRightLeft size={14} />}>{t('devtools.swap')}</Button>}
         <Button onClick={handleClear} icon={<Trash2 size={14} />}>{t('devtools.clear')}</Button>
         {TOOL_EXAMPLES[tool.id] && <Button onClick={handleFillExample} icon={<Terminal size={14} />}>{t('devtools.example')}</Button>}
-        {tool.id === 'random-gen' && <Button type="primary" onClick={handleExecute} loading={computing}>{t('devtools.generate')}</Button>}
+        {tool.id === 'random-gen' && <Button type="primary" onClick={() => { void handleExecute(); }} loading={computing}>{t('devtools.generate')}</Button>}
       </div>
 
       {tool.id === 'color-preview' && colorValue && (
@@ -726,9 +727,9 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
  *       不触发左侧列表重新渲染；
  *     - 收藏/取消收藏时，直接操作 DOM 插入或移除对应卡片，
  *       不触发左侧列表重新渲染。
- *   - 切换分类/搜索时，全部工具列表会重新渲染，
- *       此时需要重建 fav-section 和 recent-section。
- */
+   *   - 切换分类/搜索时，全部工具列表会重新渲染，
+   *       此时需要重建 fav-section 和 recent-section。
+   */
 export function DeveloperToolsPage() {
   const { t } = useT();
   const [category, setCategory] = useState<DevToolCategory | 'all'>('all');
@@ -784,7 +785,7 @@ export function DeveloperToolsPage() {
   }, [t]);
 
   /** 向 fav-section 或 recent-section 插入一张工具卡片 */
-  const insertCard = useCallback((container: HTMLDivElement, tool: DevToolDefinition, isFav: boolean) => {
+  const insertCard = useCallback((container: Element, tool: DevToolDefinition, isFav: boolean) => {
     const texts = toolTexts[tool.id];
     const card = document.createElement('button');
     card.className = `devtools-card${selectedToolId === tool.id ? ' is-selected' : ''}`;
@@ -834,7 +835,7 @@ export function DeveloperToolsPage() {
       </div>
       <div class="devtools-grid"></div>
     `;
-    const grid = section.querySelector('.devtools-grid') as HTMLDivElement;
+    const grid = section.querySelector('.devtools-grid')!;
     favorites.forEach((id) => {
       const tool = DEV_TOOLS.find((t) => t.id === id);
       if (tool) insertCard(grid, tool, true);
@@ -860,7 +861,7 @@ export function DeveloperToolsPage() {
       </div>
       <div class="devtools-grid"></div>
     `;
-    const grid = section.querySelector('.devtools-grid') as HTMLDivElement;
+    const grid = section.querySelector('.devtools-grid')!;
     recent.forEach((id) => {
       const tool = DEV_TOOLS.find((t) => t.id === id);
       if (tool) insertCard(grid, tool, favorites.includes(tool.id));
@@ -936,7 +937,7 @@ export function DeveloperToolsPage() {
         </header>
 
         <div className="devtools-toolbar">
-          <Segmented value={category} onChange={(value) => setCategory(value as DevToolCategory | 'all')} options={categoryOptions} size="small" className="devtools-segmented" />
+          <Segmented value={category} onChange={(value) => setCategory(value)} options={categoryOptions} size="small" className="devtools-segmented" />
           <Input prefix={<Search size={14} />} placeholder={t('devtools.searchPlaceholder')} value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} allowClear size="small" className="devtools-search" />
         </div>
 

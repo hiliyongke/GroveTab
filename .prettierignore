@@ -1,19 +1,33 @@
-node_modules/
+# 构建产物
 dist/
-*.local
-.env
-.env.*
-!.env.example
+build/
+out/
+*.crx
+*.zip
 
-# IDE
-.vscode/
-.idea/
+# 依赖
+node_modules/
 
-# OS
+# 缓存
+.vite/
+*.tsbuildinfo
+
+# 日志
+*.log
+npm-debug.log*
+
+# 系统文件
 .DS_Store
 Thumbs.db
 
-# Build
-*.crx
-*.pem
-*.zip
+# 编辑器
+.vscode/
+.idea/
+
+# 测试覆盖率
+coverage/
+
+# 自动生成文件
+vite.config.js
+vitest.config.js
+vitest.config.d.ts

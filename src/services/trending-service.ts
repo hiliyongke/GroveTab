@@ -137,7 +137,7 @@ async function fetchFromXcvts(platformId: string): Promise<HotBoardData | null> 
     const json = await resp.json() as {
       success?: boolean;
       msg?: string;
-      data?: Record<string, unknown>[];
+      data?: Array<Record<string, unknown>>;
       title?: string;
       subtitle?: string;
       update_time?: string;

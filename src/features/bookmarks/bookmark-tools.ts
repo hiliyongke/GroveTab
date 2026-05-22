@@ -130,7 +130,7 @@ export async function checkBookmarkHealth(
   let done = 0;
   // 手写并发池，最多 HEALTH_CONCURRENCY 路并发
   const queue = [...bookmarks];
-  const workers: Promise<void>[] = [];
+  const workers: Array<Promise<void>> = [];
   for (let i = 0; i < Math.min(HEALTH_CONCURRENCY, total); i++) {
     workers.push(
       (async () => {

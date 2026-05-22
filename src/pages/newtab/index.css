@@ -104,7 +104,7 @@ h6 {
 }
 ::-webkit-scrollbar-thumb {
   background: var(--ant-color-border-secondary);
-  border-radius: 3px;
+  border-radius: var(--app-radius-xs);
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--ant-color-border);
@@ -124,7 +124,7 @@ h6 {
   color: var(--ant-color-text-inverse, #fff);
   font-size: 9px;
   font-weight: 700;
-  border-radius: 4px;
+  border-radius: var(--app-radius-xs);
   flex-shrink: 0;
 }
 
@@ -258,7 +258,7 @@ html[data-texture-noise] body::before {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 1px 6px;
+  padding: var(--app-space-1) var(--app-space-2);
   min-width: 20px;
   height: 20px;
   font-family: var(--ant-font-family-code, ui-monospace, monospace);
@@ -267,7 +267,7 @@ html[data-texture-noise] body::before {
   color: var(--ant-color-text-tertiary);
   background: var(--ant-color-fill-quaternary);
   border: 1px solid var(--ant-color-border-secondary);
-  border-radius: 6px;
+  border-radius: var(--app-radius-sm);
   white-space: nowrap;
 }
 
@@ -501,8 +501,8 @@ html[data-texture-noise] body::before {
 
 [data-skin='apple'] .app-header-search-trigger .app-kbd {
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  padding: 1px 5px;
+  border-radius: var(--app-radius-xs);
+  padding: var(--app-space-1) var(--app-space-1);
   font-size: 11px;
 }
 
@@ -533,7 +533,7 @@ html[data-texture-noise] body::before {
 
 /* ── Apple 按钮：pill 形 CTA ── */
 [data-skin='apple'] .app-button.ant-btn-primary {
-  border-radius: 980px;
+  border-radius: var(--app-radius-pill);
 }
 
 /* ── Apple 链接色 ── */
@@ -556,7 +556,7 @@ html[data-texture-noise] body::before {
 /* ── Apple DomainGroupCard：无边框、柔和阴影 ── */
 [data-skin='apple'] .app-card-interactive {
   border: none !important;
-  border-radius: 12px;
+  border-radius: var(--app-card-radius, 12px);
   box-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px 0px;
 }
 
@@ -591,7 +591,7 @@ html[data-texture-noise] body::before {
 /* ── Apple ActivityStrip：pill 胶囊风格 ── */
 [data-skin='apple'] .activity-strip__item {
   border: none;
-  border-radius: 980px;
+  border-radius: var(--app-radius-pill);
   background: rgba(0, 0, 0, 0.04);
   font-size: 13px;
   letter-spacing: -0.01em;
@@ -624,12 +624,12 @@ html[data-texture-noise] body::before {
 
 /* Apple：分组内 favicon 徽章更圆润 */
 [data-skin='apple'] .app-domain-group-badge {
-  border-radius: 8px !important;
+  border-radius: var(--app-radius-sm) !important;
 }
 
 /* ── Apple Tag 标签 ── */
 [data-skin='apple'] .app-tag {
-  border-radius: 980px;
+  border-radius: var(--app-radius-pill);
   border: none;
   font-weight: 500;
   letter-spacing: -0.01em;
@@ -637,7 +637,7 @@ html[data-texture-noise] body::before {
 
 /* ── Apple Segmented 视图切换器 ── */
 [data-skin='apple'] .app-segmented {
-  border-radius: 9px;
+  border-radius: var(--app-radius-sm);
 }
 
 [data-skin='apple'] .app-segmented .app-segmented__item.app-segmented__item-selected {
@@ -652,13 +652,13 @@ html[data-texture-noise] body::before {
 }
 
 [data-skin='apple'] .app-empty-state-actions .app-button.ant-btn-primary {
-  border-radius: 980px;
+  border-radius: var(--app-radius-pill);
 }
 
 /* ── Apple TidySuggestionBar ── */
 [data-skin='apple'] .app-accordion-panel {
   border: none;
-  border-radius: 12px;
+  border-radius: var(--app-card-radius, 12px);
   box-shadow: rgba(0, 0, 0, 0.12) 2px 4px 20px 0px;
 }
 
@@ -668,14 +668,14 @@ html[data-texture-noise] body::before {
 
 /* ── Apple 选中态通知栏 ── */
 [data-skin='apple'] .app-alert {
-  border-radius: 12px;
+  border-radius: var(--app-card-radius, 12px);
   border: none;
 }
 
 /* ── Apple WidgetCard 覆盖 ── */
 [data-skin='apple'] .app-widget-card {
   border: none;
-  border-radius: 12px;
+  border-radius: var(--app-card-radius, 12px);
   box-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px 0px;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -692,7 +692,7 @@ html[data-texture-noise] body::before {
 /* ── Apple 滚动条 ── */
 [data-skin='apple'] ::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.15);
-  border-radius: 999px;
+  border-radius: var(--app-radius-circle);
 }
 
 [data-theme='dark'][data-skin='apple'] ::-webkit-scrollbar-thumb {
@@ -760,7 +760,7 @@ html[data-texture-noise] body::before {
 
 /* ── Fluent ActivityStrip ── */
 [data-skin='glassmorphism'] .activity-strip__item {
-  border-radius: 6px;
+  border-radius: var(--app-radius-sm);
   border-color: rgba(255, 255, 255, 0.06);
 }
 
@@ -795,7 +795,7 @@ html[data-texture-noise] body::before {
 [data-skin='glassmorphism'] .app-button.ant-btn-primary {
   background: #0078D4;
   border-color: #0078D4;
-  border-radius: 6px;
+  border-radius: var(--app-radius-sm);
 }
 
 [data-skin='glassmorphism'] .app-button.ant-btn-primary:hover {
@@ -817,7 +817,7 @@ html[data-texture-noise] body::before {
 /* ── Fluent 滚动条 ── */
 [data-skin='glassmorphism'] ::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
+  border-radius: var(--app-radius-xs);
 }
 
 [data-theme='dark'][data-skin='glassmorphism'] ::-webkit-scrollbar-thumb {

@@ -55,7 +55,7 @@ const CATEGORIES: CategoryOption[] = [
   { value: 'news', labelKey: 'trending.catNews', icon: <Newspaper size={ICON_SIZE.DEFAULT} /> },
 ];
 
-const STEALTH_OPTIONS: { value: StealthModeConfig['disguise']; labelKey: string; icon: ReactNode }[] = [
+const STEALTH_OPTIONS: Array<{ value: StealthModeConfig['disguise']; labelKey: string; icon: ReactNode }> = [
   { value: 'email', labelKey: 'trending.stealthEmail', icon: <Mail size={ICON_SIZE.DEFAULT} /> },
   { value: 'doc', labelKey: 'trending.stealthDoc', icon: <FileText size={ICON_SIZE.DEFAULT} /> },
   { value: 'spreadsheet', labelKey: 'trending.stealthSpreadsheet', icon: <Table2 size={ICON_SIZE.DEFAULT} /> },
@@ -67,7 +67,7 @@ function cx(...classNames: Array<string | false | undefined>) {
 }
 
 function cssVars(vars: Record<string, string | undefined>): CSSProperties {
-  return vars as CSSProperties;
+  return vars;
 }
 
 function StealthDisguise({ disguise }: { disguise: StealthModeConfig['disguise'] }) {
@@ -370,10 +370,11 @@ export function TrendingPage() {
   );
 
   const groupModeOptions = useMemo(
-    () => [
-      { value: 'default' as TrendingGroupMode, label: t('trending.groupDefault') },
-      { value: 'compact' as TrendingGroupMode, label: t('trending.groupCompact') },
-    ],
+    () =>
+      [
+        { value: 'default' as const, label: t('trending.groupDefault') },
+        { value: 'compact' as const, label: t('trending.groupCompact') },
+      ] as any,
     [t],
   );
 

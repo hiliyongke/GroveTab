@@ -1,5 +1,16 @@
 /**
  * Zustand Store — Metadata Slice (tags, notes, pins, recent activity, workspaces)
+ *
+ * Slice 依赖关系：
+ *   - 依赖 settings-slice：无直接依赖（设置变更不影响 metadata）
+ *   - 被 tabs-slice 间接关联：pin/unpin 操作影响 tabs 列表的显示（如排序固定标签）
+ *   - 不依赖 undo-slice、selection-slice、kanban-slice、stats-slice、speed-dial-slice
+ *
+ * 上游被以下模块依赖：
+ *   - AppWorkspace：消费 pinnedUrls, tags, notes 等
+ *   - HeroBar：消费 isPinned
+ *   - ActivityStrip：消费 recentActivity
+ *   - WorkspaceSwitcher：消费 workspaces
  */
 
 import { create } from 'zustand';
@@ -133,7 +144,7 @@ export const useMetadataStore = create<MetadataState>((set, get) => ({
   },
 
   isPinned: (url) => get().pinnedUrls.has(normalizeKey(url)),
-  getTags: (url) => get().tags[normalizeKey(url)] ?? (EMPTY_TAGS as string[]),
+  getTags: (url) => get().tags[normalizeKey(url)] ?? EMPTY_TAGS,
   getNote: (url) => get().notes[normalizeKey(url)] ?? '',
 
   // ── v1.0 封板新增：Activity Strip / Workspace ──

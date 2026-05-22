@@ -36,7 +36,7 @@ function toTinyKeysPattern(key: string): string {
       // 单字母 → KeyX；其他（Escape / Enter / ArrowLeft…）保持大写首字母形式
       if (/^[a-z]$/.test(lower)) return `Key${lower.toUpperCase()}`;
       if (/^[0-9]$/.test(lower)) return `Digit${lower}`;
-      // Escape / Enter / Tab / ArrowLeft…
+  // Escape / Enter / Tab / 左箭头…
       return p.charAt(0).toUpperCase() + p.slice(1);
     })
     .join('+');

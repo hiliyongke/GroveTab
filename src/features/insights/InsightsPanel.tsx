@@ -15,6 +15,7 @@ import { Modal, Button, Card, Row, Col, Typography, theme, Popconfirm } from 'an
 import type { MetricEvent, StatsData } from '@/shared/types';
 import { BarChart3 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
+import { cssVars } from '@/shared/utils/css-vars';
 import {
   getMetrics,
   clearMetrics,
@@ -312,11 +313,11 @@ function BarList({ items, color }: { items: Array<{ label: string; value: number
     <div className="insights-bar-list">
       {items.map((it) => {
         const w = Math.round((it.value / max) * 100);
-        const trackStyle = {
-          ['--insights-track-bg' as string]: token.colorFillTertiary,
-          ['--insights-bar-fill' as string]: color,
-          ['--insights-bar-width' as string]: `${w}%`,
-        } as React.CSSProperties;
+        const trackStyle: React.CSSProperties = cssVars({
+          '--insights-track-bg': token.colorFillTertiary,
+          '--insights-bar-fill': color,
+          '--insights-bar-width': `${w}%`,
+        });
 
         return (
           <div key={it.label} className="insights-bar-row">

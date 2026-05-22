@@ -81,7 +81,7 @@ function normalizeColorKey(raw: string): string {
   key = key.replace(/:\d+$/, '').toLowerCase();
   // IPv4 归一到 /24
   const ipv4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
-  const m = key.match(ipv4);
+  const m = ipv4.exec(key);
   if (m) {
     return `${m[1]}.${m[2]}.${m[3]}.*`;
   }

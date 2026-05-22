@@ -14,7 +14,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Input, Tooltip, Typography, Empty } from 'antd';
 import { AntdThemeProvider } from '@/shared/ui/AntdThemeProvider';
-import { LayoutGrid, Save, Search, ExternalLink, X } from 'lucide-react';
+import { LayoutGrid, Save, Search, ExternalLink, X, Settings } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { archiveCurrentWindowTabs } from '@/services';
 import { BRAND } from '@/shared/config/brand';
@@ -227,8 +227,9 @@ function PopupContent() {
         )}
       </div>
 
-      {/* 底部：两个操作按钮 */}
+      {/* 底部：操作按钮区 */}
       <div className="popup-actions">
+        {/* 主操作：归档 —— 独占整行 */}
         <Tooltip title={!hasAnyTab ? t('popup.noTabsToArchive') : ''} mouseEnterDelay={0.3}>
           <Button
             type="primary"
@@ -237,18 +238,34 @@ function PopupContent() {
             loading={archiving}
             disabled={!hasAnyTab || archiving}
             onClick={() => { void archiveAll(); }}
+            className="popup-actions__primary"
           >
             {t('popup.archiveWindow')}
           </Button>
         </Tooltip>
-        <Button
-          icon={<LayoutGrid size={ICON_SIZE.MEDIUM} />}
-          block
-          onClick={openNewTab}
-        >
-          {t('popup.openWorkspace')}
-          <ExternalLink size={ICON_SIZE.MICRO} className="popup-external-icon" />
-        </Button>
+        {/* 次要操作：打开工作台 + 设置 —— 并排 */}
+        <div className="popup-actions__secondary">
+          <Button
+            icon={<LayoutGrid size={ICON_SIZE.MEDIUM} />}
+            block
+            onClick={openNewTab}
+          >
+            {t('popup.openWorkspace')}
+            <ExternalLink size={ICON_SIZE.MICRO} className="popup-external-icon" />
+          </Button>
+          <Button
+            icon={<Settings size={ICON_SIZE.MEDIUM} />}
+            block
+            onClick={() => {
+              void createTab({
+                url: chrome.runtime.getURL('src/pages/newtab/index.html') + '#settings',
+              });
+              window.close();
+            }}
+          >
+            {t('header.settings')}
+          </Button>
+        </div>
       </div>
 
       {/* 底部"关于"链接：跳转 newtab 并自动切到 About Tab */}
