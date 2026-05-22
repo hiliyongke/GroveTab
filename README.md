@@ -37,15 +37,30 @@ See `docs/PRD.md` for full product requirements and technical architecture.
 
 ```
 src/
-├── pages/          # Entry points (newtab, popup, options)
+├── pages/          # Entry points (newtab, popup)
 ├── features/       # Feature modules (tabs, sessions, search, etc.)
-├── shared/         # Shared UI, hooks, utils, i18n
+├── shared/         # Shared UI, hooks, utils, i18n, types
 ├── store/          # Zustand state management
 ├── services/       # Business logic services
 ├── repositories/   # Storage abstraction layer
 ├── chrome/         # Chrome API wrappers
 └── sw/             # Service Worker
 ```
+
+## Technology Stack
+
+- **Framework**: React 19 + React DOM
+- **Language**: TypeScript 6
+- **Build Tool**: Vite 8
+- **UI Library**: Ant Design 6
+- **State Management**: Zustand 5
+- **Animation**: Motion 12 (formerly Framer Motion)
+- **Drag & Drop**: @dnd-kit/core + @dnd-kit/sortable
+- **Virtual Scroll**: @tanstack/react-virtual
+- **Utilities**: dayjs, date-fns, nanoid, pinyin-pro, tldts, tinykeys, MiniSearch
+- **Code Quality**: ESLint 10 + TypeScript ESLint + Prettier 3
+- **Testing**: Vitest 4 + jsdom
+- **Git Hooks**: Husky + lint-staged
 
 ## License
 

@@ -39,6 +39,15 @@ export const STORAGE_KEYS = Object.freeze({
   trendingCache: key('trending_cache'),
   profiles: key('profiles'),
   speedDial: key('speed_dial'),
+  // ── 插件原生历史记录（v1.4） ──────────────────────
+  /** 细粒度操作时间线（HistoryEvent[]） */
+  historyEvents: key('history_events'),
+  /** 最近关闭的标签快照（ClosedTabRecord[]） */
+  closedTabs: key('closed_tabs'),
+  /** 整窗关闭的快照（ClosedWindowRecord[]），用于一键恢复整个窗口 */
+  closedWindows: key('closed_windows'),
+  /** 每日标签页快照（DailySnapshot[]），用于「昨天 → 今天」对比 */
+  dailySnapshots: key('daily_snapshots'),
 });
 
 /** 判断是否属于当前应用命名空间的存储键。 */

@@ -33,7 +33,7 @@ function pickDefaultKeeper(group: DupGroup): number {
   const sorted = [...group.tabs].sort(
     (a, b) => (a.lastAccessed || 0) - (b.lastAccessed || 0) || a.id - b.id,
   );
-  return sorted[0]?.id ?? group.tabs[0].id;
+  return sorted[0]?.id ?? group.tabs[0]?.id ?? -1;
 }
 
 function formatOpenedAt(ts: number, locale: string): string {

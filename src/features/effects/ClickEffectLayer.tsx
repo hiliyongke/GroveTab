@@ -45,7 +45,7 @@ const MAX_PARTICLES = 150;
 /** 从色环取一个鲜亮颜色（彩纸用） */
 function pickConfettiColor(): string {
   const palette = ['#ff6b6b', '#ffd93d', '#6bcB77', '#4d96ff', '#c74dff', '#ff8fab'];
-  return palette[Math.floor(Math.random() * palette.length)];
+  return palette[Math.floor(Math.random() * palette.length)] ?? '#ff6b6b';
 }
 
 /** 根据动效类型在 (x,y) 生成一批粒子 */
@@ -230,6 +230,7 @@ export function ClickEffectLayer() {
       const arr = particlesRef.current;
       for (let i = arr.length - 1; i >= 0; i--) {
         const p = arr[i];
+        if (!p) continue;
         p.life -= dt;
         if (p.life <= 0) {
           arr.splice(i, 1);

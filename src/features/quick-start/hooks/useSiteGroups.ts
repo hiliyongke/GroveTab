@@ -58,8 +58,8 @@ export function useSiteGroups({
     }));
 
     /** 全部未分组时隐藏噪音标题 */
-    if (result.length === 1 && result[0].groupName === ungroupedLabel) {
-      return [{ groupName: '', sites: result[0].sites }];
+    if (result.length === 1 && result[0]?.groupName === ungroupedLabel) {
+      return [{ groupName: '', sites: result[0]!.sites }];
     }
 
     return result;

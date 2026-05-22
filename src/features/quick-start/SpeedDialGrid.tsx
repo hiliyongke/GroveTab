@@ -56,8 +56,26 @@ export function SpeedDialGrid({ sites }: SpeedDialGridProps) {
   const removeSite = useSpeedDialStore((s) => s.removeSite);
   const groupEnabled = useSettingsStore((s) => s.settings.speedDialGroupEnabled ?? false);
   const showAddButton = useSettingsStore((s) => s.settings.showAddSiteButton ?? true);
+  const cardSize = useSettingsStore((s) => s.settings.quickStartCardSize ?? 'md');
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editingSite, setEditingSite] = useState<SpeedDialSite | null>(null);
+
+  /**
+   * 根据卡片尺寸档位计算实际的卡片最小宽度。
+   *   - sm / md / lg：固定档位（卡片不超过这个宽度太多，行内塞更多）
+   *   - auto：使用较小的下限，让 CSS Grid 的 auto-fill + 1fr 自动铺满容器宽度，
+   *           卡片会随窗口宽度自适应伸缩，无需按站点数量分档。
+   */
+  const cardMinWidth = useMemo(() => {
+    const SIZE_MAP = { sm: '120px', md: '160px', lg: '208px', auto: '140px' } as const;
+    return SIZE_MAP[cardSize] ?? SIZE_MAP.md;
+  }, [cardSize]);
+
+  /** 顶层 wrapper 上注入 --speed-dial-card-min-width CSS 变量 */
+  const wrapperStyle = useMemo(
+    () => cssVars({ '--speed-dial-card-min-width': cardMinWidth }),
+    [cardMinWidth],
+  );
 
   /** 删除站点 */
   const handleDelete = useCallback((id: string) => {
@@ -166,12 +184,12 @@ export function SpeedDialGrid({ sites }: SpeedDialGridProps) {
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={sites.map((s) => s.id)} strategy={rectSortingStrategy}>
-        <div className="speed-dial-grid-wrapper">
+        <div className="speed-dial-grid-wrapper" style={wrapperStyle}>
           {/* 分组模式 */}
           {groupEnabled ? (
             grouped.map(({ groupName, sites: groupSites }) => (
               <div key={groupName || 'ungrouped'} className="speed-dial-group">
-                {groupName && <GroupHeader groupName={groupName} firstSite={groupSites[0]} />}
+                {groupName && groupSites[0] && <GroupHeader groupName={groupName} firstSite={groupSites[0]} />}
                 <div className="speed-dial-group-grid">
                   {renderCards(groupSites)}
                 </div>

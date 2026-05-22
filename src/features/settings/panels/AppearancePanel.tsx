@@ -520,7 +520,9 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                           value={stop.color}
                           onChangeComplete={(color) => {
                             const newStops = [...customGradient.stops];
-                            newStops[i] = { ...newStops[i], color: color.toHexString() };
+                            const target = newStops[i];
+                            if (!target) return;
+                            newStops[i] = { ...target, color: color.toHexString() };
                             updateCustomGradient({ stops: newStops });
                           }}
                         />
@@ -530,7 +532,9 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                           value={Math.round(stop.position * 100)}
                           onChange={(v) => {
                             const newStops = [...customGradient.stops];
-                            newStops[i] = { ...newStops[i], position: v / 100 };
+                            const target = newStops[i];
+                            if (!target) return;
+                            newStops[i] = { ...target, position: v / 100 };
                             updateCustomGradient({ stops: newStops });
                           }}
                           className="appearance-editor-slider"
@@ -599,7 +603,9 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                               value={stop.color}
                               onChangeComplete={(color) => {
                                 const newStops = [...(customGradient.darkStops ?? [])];
-                                newStops[i] = { ...newStops[i], color: color.toHexString() };
+                                const target = newStops[i];
+                                if (!target) return;
+                                newStops[i] = { ...target, color: color.toHexString() };
                                 updateCustomGradient({ darkStops: newStops });
                               }}
                             />
@@ -609,7 +615,9 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                               value={Math.round(stop.position * 100)}
                               onChange={(v) => {
                                 const newStops = [...(customGradient.darkStops ?? [])];
-                                newStops[i] = { ...newStops[i], position: v / 100 };
+                                const target = newStops[i];
+                                if (!target) return;
+                                newStops[i] = { ...target, position: v / 100 };
                                 updateCustomGradient({ darkStops: newStops });
                               }}
                               className="appearance-editor-slider"
@@ -762,7 +770,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
               min={0}
               max={3000}
               step={40}
-              value={settings.contentMaxWidth ?? 1360}
+              value={settings.contentMaxWidth ?? 0}
               onChange={(v) => { void updateSettings({ contentMaxWidth: v ?? 0 }); }}
               className="appearance-width-input"
             />
@@ -980,6 +988,25 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                   checked={settings.showAddSiteButton ?? true}
                   onChange={(v) => void updateSettings({ showAddSiteButton: v })}
                 />
+                {/* 卡片尺寸：sm / md / lg / auto，便于适应不同站点数量与屏幕宽度 */}
+                <div className="appearance-visibility-row">
+                  <div>
+                    <div className="appearance-visibility-title">{t('quickStart.cardSize')}</div>
+                    <div className="appearance-visibility-hint">{t('quickStart.cardSizeHint')}</div>
+                  </div>
+                  <Select
+                    size="small"
+                    style={{ width: 120 }}
+                    value={settings.quickStartCardSize ?? 'md'}
+                    onChange={(v) => void updateSettings({ quickStartCardSize: v })}
+                    options={[
+                      { value: 'sm', label: t('quickStart.cardSizeSm') },
+                      { value: 'md', label: t('quickStart.cardSizeMd') },
+                      { value: 'lg', label: t('quickStart.cardSizeLg') },
+                      { value: 'auto', label: t('quickStart.cardSizeAuto') },
+                    ]}
+                  />
+                </div>
               </>
             )}
           </Space>
@@ -997,9 +1024,9 @@ function darkenHex(hex: string, ratio: number): string {
   // 移除 # 前缀
   let h = hex.replace('#', '');
 
-  // 处理 3 位简写（如 #fff → #fffffff）
+  // 处理 3 位简写（如 #fff → #ffffff）
   if (h.length === 3) {
-    h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    h = h[0]! + h[0]! + h[1]! + h[1]! + h[2]! + h[2]!;
   }
 
   // 处理 8 位 hex（带 alpha），忽略 alpha 部分

@@ -517,5 +517,3 @@ export function TrendingPage() {
     </section>
   );
 }
-
-export default TrendingPage;

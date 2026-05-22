@@ -11,7 +11,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { Modal, Button, Card, Row, Col, Typography, theme, Popconfirm } from 'antd';
+import { Modal, Button, Card, Row, Col, Typography, theme, Popconfirm, Skeleton } from 'antd';
 import type { MetricEvent, StatsData } from '@/shared/types';
 import { BarChart3 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
@@ -20,8 +20,6 @@ import {
   getMetrics,
   clearMetrics,
   getStats,
-  clearOgIndex,
-  clearActivity,
   saveStats,
 } from '@/repositories';
 import { useT } from '@/shared/i18n';
@@ -32,31 +30,25 @@ import './insights.css';
 
 const { Text, Title } = Typography;
 
-/** 事件类型 → 可读名称映射 */
-const EVENT_LABEL_MAP: Record<string, string> = {
-  newtabOpens: '打开新标签页',
-  newtab_open: '打开新标签页',
-  tab_jump: '跳转标签页',
-  tab_close: '关闭标签页',
-  tab_close_batch: '批量关闭',
-  tab_close_domain: '按域名关闭',
-  tab_close_all: '全部关闭',
-  tab_discard: '休眠标签页',
-  tab_discard_batch: '批量休眠',
-  tab_discard_domain: '按域名休眠',
-  search_web: '网页搜索',
-  archive_create: '创建归档',
-  archive_restore: '恢复归档',
-  archive_delete: '删除归档',
-  archive_merge: '合并归档',
-  view_switch: '切换视图',
-  newtab_page_mode_switch: '切换页面模式',
-  perf_fcp: 'FCP 性能',
-  perf_fps_sample: 'FPS 采样',
-};
+/**
+ * 事件名归一化：旧 `newtabOpens` 合并到 `newtab_open`，
+ * 避免 Top 5 中出现两条 label 相同但 event 不同的重复项。
+ */
+function normalizeEvent(event: string): string {
+  if (event === 'newtabOpens') return 'newtab_open';
+  return event;
+}
 
-function getEventLabel(event: string): string {
-  return EVENT_LABEL_MAP[event] ?? event;
+/** 事件类型 → 可读名称映射（走 i18n） */
+function getEventLabel(
+  event: string,
+  t: (key: string, params?: Record<string, string | number>) => string,
+): string {
+  const norm = normalizeEvent(event);
+  const i18nKey = `insights.event.${norm}`;
+  const label = t(i18nKey);
+  // 未命中的 i18n key 会原样返回，此时退化为原始事件名
+  return label === i18nKey ? norm : label;
 }
 
 interface InsightsPanelProps {
@@ -84,19 +76,33 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
   const { t } = useT();
   const [metrics, setMetrics] = useState<MetricEvent[]>([]);
   const [stats, setStats] = useState<StatsData | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!open) return;
+    let cancelled = false;
+    setLoading(true);
     void (async () => {
-      const [m, s] = await Promise.all([getMetrics(), getStats()]);
-      setMetrics(Array.isArray(m) ? m : []);
-      setStats(isValidStatsData(s) ? s : null);
+      try {
+        const [m, s] = await Promise.all([getMetrics(), getStats()]);
+        if (cancelled) return;
+        setMetrics(Array.isArray(m) ? m : []);
+        setStats(isValidStatsData(s) ? s : null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     })();
+    return () => {
+      cancelled = true;
+    };
   }, [open]);
 
-  /** 近 7 天新标签页打开次数——使用 useMemo 缓存，避免水合不匹配 */
-  const now = useMemo(() => new Date(), [open]);
+  /**
+   * 近 7 天新标签页打开次数。
+   * 只在面板打开时计算 "now"，避免面板一直打开跨天后“今天”错位。
+   */
   const dailyOpens = useMemo(() => {
+    const now = new Date();
     const map = new Map<string, number>();
     for (let i = 6; i >= 0; i--) {
       const d = new Date(now);
@@ -105,12 +111,15 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
       map.set(key, 0);
     }
     for (const ev of metrics) {
-      if (ev.event !== 'newtab_open' && ev.event !== 'newtabOpens') continue;
+      const norm = normalizeEvent(ev.event);
+      if (norm !== 'newtab_open') continue;
       const key = toLocalDayKey(new Date(ev.ts));
       if (map.has(key)) map.set(key, (map.get(key) ?? 0) + 1);
     }
     return Array.from(map.entries()).map(([day, count]) => ({ day, count }));
-  }, [metrics]);
+    // open 作为依赖仅用于面板重新打开时刷新 "今天" 基准
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [metrics, open]);
 
   /** Top 10 访问域名——优先从 stats.daily 取，同时从 metrics 中的 tab 事件补充 */
   const topDomains = useMemo(() => {
@@ -145,11 +154,12 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
       .map(([host, count]) => ({ host, count }));
   }, [stats, metrics]);
 
-  /** Top 5 操作 */
+  /** Top 5 操作：在统计前先归一化事件名 */
   const topActions = useMemo(() => {
     const counts = new Map<string, number>();
     for (const ev of metrics) {
-      counts.set(ev.event, (counts.get(ev.event) ?? 0) + 1);
+      const key = normalizeEvent(ev.event);
+      counts.set(key, (counts.get(key) ?? 0) + 1);
     }
     return Array.from(counts.entries())
       .sort((a, b) => b[1] - a[1])
@@ -169,12 +179,22 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
     return { totalTabs, savedMemMB: totalTabs * 80 };
   }, [metrics]);
 
+  /** 是否所有数据源都为空：冷启动用户统一展示 empty state */
+  const isAllEmpty = !loading
+    && metrics.length === 0
+    && (stats?.daily?.length ?? 0) === 0;
+
+  /** 近 7 天是否全部为 0 */
+  const dailyAllZero = dailyOpens.every((d) => d.count === 0);
+
+  /**
+   * 清除：仅清除统计相关数据（metrics + stats）。
+   * 不再清理 OG 索引与 Recent Activity，避免超出用户预期。
+   */
   const handleClearAll = async () => {
     try {
       await clearMetrics();
       await saveStats({ daily: [], lastFlushAt: Date.now() });
-      await clearOgIndex();
-      await clearActivity();
       setMetrics([]);
       setStats(null);
       feedback.success(t('insights.cleared'));
@@ -195,51 +215,83 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
       destroyOnHidden
     >
       <div className="insights-panel">
-        <Row gutter={[12, 12]}>
-          <Col xs={24} md={12}>
-            <Card size="small" title={t('insights.dailyOpens')}>
-              <LineChart
-                data={dailyOpens.map((d) => d.count)}
-                labels={dailyOpens.map((d) => d.day.slice(5))}
-                color={token.colorPrimary}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} md={12}>
-            <Card size="small" title={t('insights.topDomains')}>
-              {topDomains.length === 0 ? (
-                <FeatureEmptyState
-                  title={t('insights.empty')}
-                  icon={<BarChart3 size={ICON_SIZE.LARGE} />}
-                  size="small"
-                  hints={[t('insights.emptyHint1'), t('insights.emptyHint2')]}
-                />
-              ) : (
-                <BarList items={topDomains.map((d) => ({ label: d.host, value: d.count }))} color={token.colorPrimary} />
-              )}
-            </Card>
-          </Col>
-          <Col xs={24} md={12}>
-            <Card size="small" title={t('insights.archiveStat')}>
-              <Title level={3} className="insights-archive-stat">{archiveStats.totalTabs}</Title>
-              <Text type="secondary">{t('insights.archiveDesc', { mb: archiveStats.savedMemMB })}</Text>
-            </Card>
-          </Col>
-          <Col xs={24} md={12}>
-            <Card size="small" title={t('insights.topActions')}>
-              {topActions.length === 0 ? (
-                <FeatureEmptyState
-                  title={t('insights.empty')}
-                  icon={<BarChart3 size={ICON_SIZE.LARGE} />}
-                  size="small"
-                  hints={[t('insights.emptyHint1'), t('insights.emptyHint2')]}
-                />
-              ) : (
-                <BarList items={topActions.map((a) => ({ label: getEventLabel(a.event), value: a.count }))} color={token.colorPrimary} />
-              )}
-            </Card>
-          </Col>
-        </Row>
+        {loading ? (
+          <div className="insights-loading">
+            <Skeleton active paragraph={{ rows: 6 }} />
+          </div>
+        ) : isAllEmpty ? (
+          <FeatureEmptyState
+            title={t('insights.empty')}
+            icon={<BarChart3 size={ICON_SIZE.LARGE} />}
+            hints={[t('insights.emptyHint1'), t('insights.emptyHint2')]}
+          />
+        ) : (
+          <Row gutter={[12, 12]}>
+            <Col xs={24} md={12}>
+              <Card size="small" title={t('insights.dailyOpens')}>
+                {dailyAllZero ? (
+                  <FeatureEmptyState
+                    title={t('insights.dailyEmpty')}
+                    icon={<BarChart3 size={ICON_SIZE.LARGE} />}
+                    size="small"
+                    hints={[t('insights.emptyHint1')]}
+                  />
+                ) : (
+                  <LineChart
+                    data={dailyOpens.map((d) => d.count)}
+                    labels={dailyOpens.map((d) => d.day.slice(5))}
+                    color={token.colorPrimary}
+                  />
+                )}
+              </Card>
+            </Col>
+            <Col xs={24} md={12}>
+              <Card size="small" title={t('insights.topDomains')}>
+                {topDomains.length === 0 ? (
+                  <FeatureEmptyState
+                    title={t('insights.empty')}
+                    icon={<BarChart3 size={ICON_SIZE.LARGE} />}
+                    size="small"
+                    hints={[t('insights.emptyHint1'), t('insights.emptyHint2')]}
+                  />
+                ) : (
+                  <BarList items={topDomains.map((d) => ({ label: d.host, value: d.count }))} color={token.colorPrimary} />
+                )}
+              </Card>
+            </Col>
+            <Col xs={24} md={12}>
+              <Card size="small" title={t('insights.archiveStat')}>
+                {archiveStats.totalTabs === 0 ? (
+                  <FeatureEmptyState
+                    title={t('insights.archiveEmpty')}
+                    icon={<BarChart3 size={ICON_SIZE.LARGE} />}
+                    size="small"
+                    hints={[t('insights.emptyHint1')]}
+                  />
+                ) : (
+                  <>
+                    <Title level={3} className="insights-archive-stat">{archiveStats.totalTabs}</Title>
+                    <Text type="secondary">{t('insights.archiveDesc', { mb: archiveStats.savedMemMB })}</Text>
+                  </>
+                )}
+              </Card>
+            </Col>
+            <Col xs={24} md={12}>
+              <Card size="small" title={t('insights.topActions')}>
+                {topActions.length === 0 ? (
+                  <FeatureEmptyState
+                    title={t('insights.empty')}
+                    icon={<BarChart3 size={ICON_SIZE.LARGE} />}
+                    size="small"
+                    hints={[t('insights.emptyHint1'), t('insights.emptyHint2')]}
+                  />
+                ) : (
+                  <BarList items={topActions.map((a) => ({ label: getEventLabel(a.event, t), value: a.count }))} color={token.colorPrimary} />
+                )}
+              </Card>
+            </Col>
+          </Row>
+        )}
 
         <div className="insights-footer">
           <Popconfirm
@@ -247,8 +299,9 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
             onConfirm={() => void handleClearAll()}
             okText={t('archive.delete')}
             cancelText={t('archive.cancel')}
+            disabled={loading || isAllEmpty}
           >
-            <Button danger size="small">
+            <Button danger size="small" disabled={loading || isAllEmpty}>
               {t('insights.clearAll')}
             </Button>
           </Popconfirm>

@@ -4,29 +4,61 @@
  * 热词来源由 `settings.hotSuggestionSource` 控制：
  *   - 'off'       ：不显示热词
  *   - 'local'     ：基于用户本地搜索历史聚合（默认，零请求）
- *   - 'preset'    ：静态预设列表（旧行为保留，作为 local 为空时的兜底）
+ *   - 'preset'    ：静态预设列表（显式选择 preset 时展示）
  *   - 'trending'  ：可选公开热榜（目前未启用，占位）
  *
  * 所有数据源都不强制联网，国内环境默认 off / local 即可。
  */
 
-import type { SearchEngineId, SearchHistoryEntry } from '@/shared/types';
+import type { SearchEngineId, SearchHistoryEntry, TrendingCache } from '@/shared/types';
+import type { CustomSearchEngine } from '@/shared/types/settings';
 import type { Locale } from '@/shared/i18n';
 
 export interface SearchEngineOption {
   id: SearchEngineId;
   label: string;
   searchUrl: string;
+  iconUrl?: string;
+  color: string;
+  builtIn?: boolean;
 }
 
 /**
  * 内置搜索引擎：覆盖中英文主流引擎；国内用户默认选 Bing（国内可访问且体验最接近 Google）。
  */
 export const SEARCH_ENGINE_OPTIONS: SearchEngineOption[] = [
-  { id: 'bing', label: 'Bing', searchUrl: 'https://www.bing.com/search?q={query}' },
-  { id: 'baidu', label: '百度', searchUrl: 'https://www.baidu.com/s?wd={query}' },
-  { id: 'google', label: 'Google', searchUrl: 'https://www.google.com/search?q={query}' },
-  { id: 'duckduckgo', label: 'DuckDuckGo', searchUrl: 'https://duckduckgo.com/?q={query}' },
+  {
+    id: 'bing',
+    label: 'Bing',
+    searchUrl: 'https://www.bing.com/search?q={query}',
+    iconUrl: 'https://www.bing.com/favicon.ico',
+    color: '#008373',
+    builtIn: true,
+  },
+  {
+    id: 'baidu',
+    label: '百度',
+    searchUrl: 'https://www.baidu.com/s?wd={query}',
+    iconUrl: 'https://www.baidu.com/favicon.ico',
+    color: '#315efb',
+    builtIn: true,
+  },
+  {
+    id: 'google',
+    label: 'Google',
+    searchUrl: 'https://www.google.com/search?q={query}',
+    iconUrl: 'https://www.google.com/favicon.ico',
+    color: '#4285f4',
+    builtIn: true,
+  },
+  {
+    id: 'duckduckgo',
+    label: 'DuckDuckGo',
+    searchUrl: 'https://duckduckgo.com/?q={query}',
+    iconUrl: 'https://duckduckgo.com/favicon.ico',
+    color: '#de5833',
+    builtIn: true,
+  },
 ];
 
 /**
@@ -35,8 +67,8 @@ export const SEARCH_ENGINE_OPTIONS: SearchEngineOption[] = [
 export type HotKeywordSource = 'off' | 'local' | 'preset' | 'trending';
 
 /**
- * 预设热词表（兜底）——无本地历史/未开启时才展示。
- * 这些是"静态兜底"，不代表当下热榜；避免给用户"这是固定写死"的错觉。
+ * 预设热词表（显式选择 preset 时展示）。
+ * 这些是"静态兜底"，不代表当下热榜；默认 local 不再自动退回预设，避免给用户"这是固定写死"的错觉。
  */
 const PRESET_HOT_KEYWORDS: Record<Locale, string[]> = {
   'zh-CN': [
@@ -67,6 +99,56 @@ const PRESET_HOT_KEYWORDS: Record<Locale, string[]> = {
 
 /** 最多返回热词个数 */
 const MAX_HOT_ITEMS = 8;
+const TRENDING_BOARD_PRIORITY = ['weibo', 'baidu', 'toutiao', 'zhihu', 'bilihot'];
+
+export function normalizeSearchUrl(url: string): string {
+  const trimmed = url.trim();
+  if (trimmed === '') return '';
+  const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  return withProtocol.includes('{query}') ? withProtocol : `${withProtocol}${withProtocol.includes('?') ? '&' : '?'}q={query}`;
+}
+
+export function createCustomSearchEngine(label: string, searchUrl: string, iconUrl?: string): CustomSearchEngine {
+  const normalizedLabel = label.trim();
+  const normalizedUrl = normalizeSearchUrl(searchUrl);
+  const normalizedSlug = normalizedLabel
+    .toLowerCase()
+    .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  const slug = normalizedSlug === '' ? 'engine' : normalizedSlug;
+  const normalizedIconUrl = iconUrl?.trim();
+  return {
+    id: `custom:${slug}-${Date.now()}`,
+    label: normalizedLabel,
+    searchUrl: normalizedUrl,
+    iconUrl: normalizedIconUrl === '' ? undefined : normalizedIconUrl,
+    color: '#64748b',
+  };
+}
+
+export function getAllSearchEngineOptions(customEngines: CustomSearchEngine[] = []): SearchEngineOption[] {
+  const customOptions = customEngines
+    .filter((item) => item.label.trim() !== '' && item.searchUrl.trim() !== '')
+    .map<SearchEngineOption>((item) => ({
+      id: item.id,
+      label: item.label,
+      searchUrl: normalizeSearchUrl(item.searchUrl),
+      iconUrl: item.iconUrl,
+      color: item.color ?? '#64748b',
+      builtIn: false,
+    }));
+  return [...SEARCH_ENGINE_OPTIONS, ...customOptions];
+}
+
+export function normalizeEnabledSearchEngines(
+  engineIds: SearchEngineId[] | undefined,
+  customEngines: CustomSearchEngine[] = [],
+): SearchEngineId[] {
+  const allOptions = getAllSearchEngineOptions(customEngines);
+  const validIds = new Set<SearchEngineId>(allOptions.map((item) => item.id));
+  const normalized = (engineIds ?? []).filter((item) => validIds.has(item));
+  return normalized.length > 0 ? normalized : SEARCH_ENGINE_OPTIONS.map((item) => item.id);
+}
 
 /**
  * 按 count 降序 + 最近使用时间加权，从历史记录聚合出 Top N 热词。
@@ -97,30 +179,57 @@ function rankHistoryAsHot(entries: SearchHistoryEntry[]): string[] {
 /**
  * 获取指定引擎的配置。
  */
-export function getSearchEngineOption(engineId: SearchEngineId): SearchEngineOption {
-  return SEARCH_ENGINE_OPTIONS.find((item) => item.id === engineId) ?? SEARCH_ENGINE_OPTIONS[0];
+export function getSearchEngineOption(
+  engineId: SearchEngineId,
+  customEngines: CustomSearchEngine[] = [],
+): SearchEngineOption {
+  return getAllSearchEngineOptions(customEngines).find((item) => item.id === engineId) ?? SEARCH_ENGINE_OPTIONS[0]!;
 }
 
 /**
  * 构造网页搜索 URL。
  */
-export function buildSearchUrl(engineId: SearchEngineId, query: string): string {
-  return getSearchEngineOption(engineId).searchUrl.replace('{query}', encodeURIComponent(query.trim()));
+export function buildSearchUrl(engineId: SearchEngineId, query: string, customEngines: CustomSearchEngine[] = []): string {
+  return getSearchEngineOption(engineId, customEngines).searchUrl.replace('{query}', encodeURIComponent(query.trim()));
+}
+
+export function resolveTrendingKeywords(cache: TrendingCache | undefined): string[] {
+  if (!cache) return [];
+  const boards = Object.values(cache.boards);
+  const orderedBoards = boards.sort((a, b) => {
+    const ai = TRENDING_BOARD_PRIORITY.indexOf(a.id);
+    const bi = TRENDING_BOARD_PRIORITY.indexOf(b.id);
+    return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+  });
+  const seen = new Set<string>();
+  const keywords: string[] = [];
+  orderedBoards.forEach((board) => {
+    board.items.forEach((item) => {
+      const title = item.title.trim();
+      const key = title.toLowerCase();
+      if (title === '' || seen.has(key)) return;
+      seen.add(key);
+      keywords.push(title);
+    });
+  });
+  return keywords.slice(0, MAX_HOT_ITEMS);
 }
 
 /**
  * 新版：按 source 获取热词。
  *   - preset：直接返回预设列表
- *   - local：调用者需传入 history，本函数按频次+时效聚合
- *   - off / trending：返回空数组（trending 占位，未来接入公开热榜时扩展）
+ *   - local：基于 history 聚合；本地历史为空时返回空数组，不展示写死热词
+ *   - trending：使用全网热榜缓存
+ *   - off：返回空数组
  */
 export function resolveHotKeywords(
   source: HotKeywordSource,
   locale: Locale,
   history: SearchHistoryEntry[] = [],
+  trendingCache?: TrendingCache,
 ): string[] {
   if (source === 'off') return [];
-  if (source === 'trending') return [];
+  if (source === 'trending') return resolveTrendingKeywords(trendingCache);
   if (source === 'local') {
     if (history.length === 0) return [];
     return rankHistoryAsHot(history);
@@ -128,5 +237,3 @@ export function resolveHotKeywords(
   // 'preset' 或兜底
   return PRESET_HOT_KEYWORDS[locale] ?? PRESET_HOT_KEYWORDS.en;
 }
-
-

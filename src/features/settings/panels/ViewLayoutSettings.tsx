@@ -8,6 +8,7 @@
  * 4. 域名分组强调条位置
  * 5. 域名分组卡片圆角
  * 6. 域名分组排序方式
+ * 7. 网格视图展开触发方式（点击 / 悬停）
  */
 
 import { useMemo } from 'react';
@@ -78,6 +79,7 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
           onChange={(value) => handleSetting({ viewTabPosition: value as ViewTabPosition })}
           options={[
             { value: 'top', label: t('settings.viewTabPositionTop') },
+            { value: 'bottom', label: t('settings.viewTabPositionBottom') },
             { value: 'left', label: t('settings.viewTabPositionLeft') },
             { value: 'right', label: t('settings.viewTabPositionRight') },
           ]}
@@ -175,6 +177,25 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
             { value: 'tabCount', label: t('settings.sortByTabCount') },
             { value: 'alphabetical', label: t('settings.sortByAlphabetical') },
             { value: 'recentAccess', label: t('settings.sortByRecentAccess') },
+          ]}
+        />
+      </Field>
+
+      <Field
+        label={t('settings.gridExpandTrigger')}
+        hint={t('settings.gridExpandTriggerHint')}
+      >
+        <Segmented
+          block
+          value={settings.gridExpandTrigger ?? 'click'}
+          onChange={(value) =>
+            handleSetting({
+              gridExpandTrigger: value as 'click' | 'hover',
+            })
+          }
+          options={[
+            { value: 'click', label: t('settings.gridExpandTriggerClick') },
+            { value: 'hover', label: t('settings.gridExpandTriggerHover') },
           ]}
         />
       </Field>

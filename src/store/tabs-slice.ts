@@ -164,10 +164,12 @@ async function discardTabsBatch(tabIds: number[]): Promise<{ succeededIds: numbe
   const failedIds: number[] = [];
 
   results.forEach((result, index) => {
+    const tabId = tabIds[index];
+    if (tabId === undefined) return;
     if (result.status === 'fulfilled') {
-      succeededIds.push(tabIds[index]);
+      succeededIds.push(tabId);
     } else {
-      failedIds.push(tabIds[index]);
+      failedIds.push(tabId);
     }
   });
 

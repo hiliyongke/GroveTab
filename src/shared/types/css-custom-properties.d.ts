@@ -62,6 +62,8 @@ declare module 'react' {
     '--speed-dial-group-accent'?: string;
     '--speed-dial-card-accent'?: string;
     '--speed-dial-card-opacity'?: string;
+    /** 常用站点卡片最小宽度（用于尺寸档位与 auto 自适配） */
+    '--speed-dial-card-min-width'?: string;
 
     /** 外观设置面板 CSS 自定义属性 */
     '--appearance-preview-bg'?: string;

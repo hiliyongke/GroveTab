@@ -19,8 +19,10 @@ import { getHostname, getInitial, getFaviconUrl } from './utils/siteUtils';
 interface SiteCardProps {
   site: SpeedDialSite;
   /** 拖拽手柄的 listeners（由 SortableSiteCard 传入） */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dragListeners?: any;
   /** 拖拽手柄的 attributes（由 SortableSiteCard 传入） */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dragAttributes?: any;
   /** 是否正在拖拽中（用于降低透明度） */
   isDragging?: boolean;

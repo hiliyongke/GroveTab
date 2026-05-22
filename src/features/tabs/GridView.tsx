@@ -22,7 +22,7 @@ import { useMemo, useState } from 'react';
 import { Button, Card, Popover, theme } from 'antd';
 import { Volume2, X } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { useTabsStore } from '@/store';
+import { useTabsStore, useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { groupTabsByDomain } from '@/shared/utils/domain';
 import { useAccent } from '@/shared/hooks/useAccent';
@@ -39,6 +39,14 @@ export function GridView() {
   const tabs = useTabsStore((s) => s.tabs);
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
   const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
+  /**
+   * 展开触发方式（点击 / 悬停）。默认 click——保持「需要确认动作」的稳重交互；
+   * 切到 hover 后，鼠标移到多 tab 卡片上立即看到列表，移开自动收起，更适合
+   * 喜欢「快速预览」的用户。
+   */
+  const expandTrigger = useSettingsStore(
+    (s) => s.settings.gridExpandTrigger ?? 'click',
+  );
   const { t } = useT();
 
   const groups = useMemo(() => groupTabsByDomain(tabs), [tabs]);
@@ -70,6 +78,7 @@ export function GridView() {
           onJumpFromPopover={handleJumpFromPopover}
           onCloseTab={(id) => { void closeSingleTab(id); }}
           countLabel={t('header.tabCount', { count: group.tabs.length })}
+          expandTrigger={expandTrigger}
         />
       ))}
     </div>
@@ -87,6 +96,8 @@ interface GridCardProps {
   onJumpFromPopover: (tabId: number, windowId: number) => void;
   onCloseTab: (tabId: number) => void;
   countLabel: string;
+  /** 展开触发方式：'click' 点击 / 'hover' 悬停 */
+  expandTrigger: 'click' | 'hover';
 }
 
 /**
@@ -102,6 +113,7 @@ function GridCard({
   onJumpFromPopover,
   onCloseTab,
   countLabel,
+  expandTrigger,
 }: GridCardProps) {
   const [faviconError, setFaviconError] = useState(false);
   const { token } = theme.useToken();
@@ -112,10 +124,20 @@ function GridCard({
   const accent = useAccent(first?.favIconUrl, colorKey);
   const color = accent.bar;
 
-  /** 点击卡片：单 tab 直接跳，多 tab 切换 Popover */
+  /**
+   * 点击卡片：
+   *   - 单 tab：直接跳转
+   *   - 多 tab + click 模式：切换 Popover
+   *   - 多 tab + hover 模式：保留点击=跳转到首个 tab 的快捷路径
+   *     （hover 已能展开浮层，再让点击切换会语义打架）
+   */
   const handleCardClick = () => {
     if (isMulti) {
-      onOpenChange(!open);
+      if (expandTrigger === 'click') {
+        onOpenChange(!open);
+      } else if (first) {
+        onJump(first.id, first.windowId);
+      }
       return;
     }
     if (first) onJump(first.id, first.windowId);
@@ -177,11 +199,19 @@ function GridCard({
   // 单 tab 卡片：不需要 Popover 包裹，少一层节点
   if (!isMulti) return cardNode;
 
+  /**
+   * hover 模式下加 100ms 进入延迟，避免鼠标穿过卡片瞬间触发；
+   * 离开延迟 150ms，让用户能从卡片移到浮层而不会先关掉。
+   */
+  const popoverMouseDelay =
+    expandTrigger === 'hover' ? { mouseEnterDelay: 0.1, mouseLeaveDelay: 0.15 } : {};
+
   return (
     <Popover
       open={open}
       onOpenChange={onOpenChange}
-      trigger="click"
+      trigger={expandTrigger}
+      {...popoverMouseDelay}
       placement="bottom"
       arrow
       destroyOnHidden

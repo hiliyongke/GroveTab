@@ -1,17 +1,3 @@
-/**
- * 新标签页应用主入口（antd v6 版）
- *
- * 布局结构：
- *   ┌─ Layout.Header（sticky，毛玻璃，品牌 + 次级操作）
- *   └─ Layout.Content（最大 1280，居中）
- *        · Hero：大搜索框 + Segmented 视图切换
- *        · OnboardingCard（首次）
- *        · DedupInfoBar（有重复时）
- *        · 主视图：Domain / Timeline / Compact / Grid / Frequency
- *
- * 所有 UI 组件一律走 antd；不再依赖 Tailwind / 自写原子组件。
- */
-
 import { useEffect, useState, useCallback, useMemo, useRef, lazy, Suspense, type CSSProperties } from 'react';
 import {
   Layout,
@@ -27,13 +13,17 @@ import { AntdThemeProvider } from '@/shared/ui/AntdThemeProvider';
 import { ErrorBoundary } from '@/shared/ui/ErrorBoundary';
 import { UndoToast } from '@/shared/ui/UndoToast';
 import { I18nProvider } from '@/shared/i18n';
-import { DomainGroupView } from '@/features/tabs/DomainGroupView';
 import { BatchActionBar } from '@/features/tabs/BatchActionBar';
 import { AppWorkspace } from '@/features/workspace/AppWorkspace';
 import InsightsPanel from '@/features/insights/InsightsPanel';
 import { QuickStartLayer } from '@/features/quick-start/QuickStartLayer';
 import '@/features/quick-start/QuickStartLayer.css';
 import { TidySuggestionBar } from '@/features/tabs/TidySuggestionBar';
+import { AppHeader } from '@/features/workspace/AppHeader';
+import { HeroBar } from '@/features/workspace/HeroBar';
+import { ViewSidebar } from '@/features/workspace/ViewSidebar';
+import { ViewBottomBar } from '@/features/workspace/ViewBottomBar';
+import { DomainGroupView } from '@/features/tabs/DomainGroupView';
 import { track } from '@/shared/utils/metrics';
 import { resolveGradient } from '@/shared/theme/gradient-presets';
 import { cssVars } from '@/shared/utils/css-vars';
@@ -57,12 +47,12 @@ const BookmarkView = lazy(() => import('@/features/tabs/BookmarkView').then((m) 
 const KanbanView = lazy(() => import('@/features/tabs/KanbanView').then((m) => ({ default: m.KanbanView })));
 const ArchiveView = lazy(() => import('@/features/sessions/ArchiveView').then((m) => ({ default: m.ArchiveView })));
 
-
 const SearchBox = lazy(() => import('@/features/search/SearchBox').then((m) => ({ default: m.SearchBox })));
 const SettingsPanel = lazy(() => import('@/features/settings/SettingsPanel').then((m) => ({ default: m.SettingsPanel })));
-// ClickEffectLayer —— 点击动效 Canvas 图层，默认 off 时不拉取 chunk。
+const HistoryPanel = lazy(() => import('@/features/history/HistoryPanel').then((m) => ({ default: m.HistoryPanel })));
+/** 点击动效 Canvas 图层，默认 off 时不拉取 chunk */
 const ClickEffectLayer = lazy(() => import('@/features/effects/ClickEffectLayer').then((m) => ({ default: m.ClickEffectLayer })));
-// VideoBackground —— 视频背景层，zIndex:-1；默认 none 时不拉取 chunk。
+/** 视频背景层，zIndex:-1；默认 none 时不拉取 chunk */
 const VideoBackground = lazy(() => import('@/features/effects/VideoBackground').then((m) => ({ default: m.VideoBackground })));
 
 /** 注册所有视图到 ViewRegistry —— 新增视图只需在此添加一条 */
@@ -81,16 +71,6 @@ registerViews([
 
 const { Content } = Layout;
 const { Text } = Typography;
-
-
-
-
-import { AppHeader } from '@/features/workspace/AppHeader';
-import { HeroBar } from '@/features/workspace/HeroBar';
-import { ViewSidebar } from '@/features/workspace/ViewSidebar';
-
-
-
 
 
 function AppContent() {
@@ -121,13 +101,13 @@ function AppContent() {
     }
   }, [initialSettingsTab, openSettingsFromHash]);
   const [showInsights, setShowInsights] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   /** tidyExpandSignal 对 TidySuggestionBar：默认为 0，点 "一键整理" 时 +1 触发展开 */
   const [tidyExpandSignal, setTidyExpandSignal] = useState(0);
   const tidySectionRef = useRef<HTMLDivElement>(null);
   /** initRunId —— 初始化失败时递增此值，触发 useEffect 重新执行 */
   const [initRunId, setInitRunId] = useState(0);
 
-  /** 使用 useAppInitialization 封装初始化逻辑 */
   const {
     checked,
     initError,
@@ -172,7 +152,7 @@ function AppContent() {
     customGradient: s.settings.customGradient,
     backgroundImage: s.settings.backgroundImage,
     backgroundOverlay: s.settings.backgroundOverlay,
-    contentMaxWidth: s.settings.contentMaxWidth ?? 1360,
+    contentMaxWidth: s.settings.contentMaxWidth ?? 0,
     defaultView: s.settings.defaultView,
     newtabPageMode: s.settings.newtabPageMode ?? 'workspace',
     viewTabPosition: s.settings.viewTabPosition ?? 'top',
@@ -203,7 +183,6 @@ function AppContent() {
     }
   }, [searchFromHash]);
 
-  /** 页面内快捷键
   /** 页面内快捷键：通过可配置的 useKeybinding hook 注册 */
   const handleViewChange = useCallback((view: ViewMode) => {
     const prev = useSettingsStore.getState().settings.defaultView;
@@ -213,6 +192,35 @@ function AppContent() {
   }, []);
 
   useKeybinding('search', useCallback(() => setShowSearch((v) => !v), []));
+
+  /**
+   * 打开「历史记录」面板的全局快捷键。
+   * 默认 ChromeCommands 注册为 `Alt+H`（sw 供作业系统级快捷），页内额外增加 Cmd/Ctrl+⌫ H
+   * 以该快捷与现有 useKeybinding 机制一致。这里临时需要代码中手动增加 listener：
+   */
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const meta = e.metaKey || e.ctrlKey;
+      if (meta && e.shiftKey && (e.key === 'H' || e.key === 'h')) {
+        e.preventDefault();
+        setShowHistory((v) => !v);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    /** 同时响应来自 sw 的「operation:open-history」广播（可选接入），
+     *  如果以后要进一步接管 chrome.commands。
+     */
+    const onMessage = (msg: { type?: string }) => {
+      if (msg.type === 'open-history') {
+        setShowHistory(true);
+      }
+    };
+    chrome.runtime?.onMessage?.addListener?.(onMessage);
+    return () => {
+      window.removeEventListener('keydown', handler);
+      chrome.runtime?.onMessage?.removeListener?.(onMessage);
+    };
+  }, []);
 
   /**
    * 多选快捷键
@@ -271,6 +279,13 @@ function AppContent() {
     setShowInsights(true);
     setShowSearch(false);
     setShowSettings(false);
+  }, []);
+
+  const handleOpenHistory = useCallback(() => {
+    setShowHistory(true);
+    setShowSearch(false);
+    setShowSettings(false);
+    setShowInsights(false);
   }, []);
 
   const handleTidy = useCallback(() => {
@@ -356,7 +371,10 @@ function AppContent() {
   }
 
   return (
-    <Layout className="app-layout-shell" style={layoutStyle}>
+    <Layout
+      className={`app-layout-shell${pageMode === 'workspace' && showViewSwitcher && viewTabPosition === 'bottom' ? ' app-layout-shell--view-bottom' : ''}`}
+      style={layoutStyle}
+    >
       {/* 背景遮罩层：当 backgroundOverlay.enabled 时渲染 */}
       {backgroundOverlay?.enabled && (
         <div
@@ -378,6 +396,7 @@ function AppContent() {
           onSettings={handleOpenSettings}
           onOpenSearch={handleOpenSearch}
           onInsights={handleOpenInsights}
+          onOpenHistory={handleOpenHistory}
           onTidy={handleTidy}
         />
       )}
@@ -454,14 +473,22 @@ function AppContent() {
         )}
       </div>
 
+      {pageMode === 'workspace' && showViewSwitcher && viewTabPosition === 'bottom' && (
+        <ViewBottomBar
+          viewMode={viewMode}
+          onViewChange={handleViewChange}
+        />
+      )}
+
       <UndoToast />
 
       {viewMode !== 'archive' && <BatchActionBar />}
 
       <Suspense fallback={null}>
-        <SearchBox open={showSearch} onOpenChange={setShowSearch} />
+        <SearchBox open={showSearch} onOpenChange={setShowSearch} onOpenHistory={handleOpenHistory} />
         <SettingsPanel open={showSettings} onOpenChange={(open: boolean) => { if (!open) setShowSettings(false); }} defaultActiveTab={initialSettingsTab} />
         <InsightsPanel open={showInsights} onClose={() => setShowInsights(false)} />
+        <HistoryPanel open={showHistory} onClose={() => setShowHistory(false)} />
       </Suspense>
     </Layout>
   );

@@ -218,10 +218,10 @@ export const SKIN_PRESETS: SkinPreset[] = [
     colorBorderSecondaryDark: 'rgba(173, 194, 227, 0.14)',
 
     glass: {
-      blur: 18,
-      saturate: 132,
-      bgLight: 'rgba(250, 250, 251, 0.78)',
-      bgDark: 'rgba(13, 22, 36, 0.76)',
+      blur: 28,
+      saturate: 140,
+      bgLight: 'rgba(250, 250, 251, 0.88)',
+      bgDark: 'rgba(13, 22, 36, 0.86)',
     },
 
     shadow: {
@@ -1100,6 +1100,6 @@ export const SKIN_PRESETS: SkinPreset[] = [
  */
 export function getSkinPreset(id: SkinPresetId): SkinPreset {
   const preset = SKIN_PRESETS.find((p) => p.id === id);
-  if (!preset) return SKIN_PRESETS.find((p) => p.id === 'glassmorphism') ?? SKIN_PRESETS[0]; // 默认回退到 glassmorphism
+  if (!preset) return SKIN_PRESETS.find((p) => p.id === 'glassmorphism') ?? SKIN_PRESETS[0]!; // 默认回退到 glassmorphism
   return preset;
 }

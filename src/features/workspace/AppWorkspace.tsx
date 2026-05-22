@@ -10,7 +10,7 @@
  * 设计原则：纯渲染组件，所有状态由父组件 AppContent 通过 props 传入。
  */
 
-import { useMemo, Suspense } from 'react';
+import { useMemo, useCallback, Suspense } from 'react';
 import { Spin, Alert, Button, Typography } from 'antd';
 import { Globe } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
@@ -74,7 +74,7 @@ export function AppWorkspace({
   }, [viewMode]);
 
   /* ---------- 事件处理 ---------- */
-  const handleSelectAllTabs = useMemo(() => () => {
+  const handleSelectAllTabs = useCallback(() => {
     selectAll(tabs.map((tab) => tab.id));
   }, [selectAll, tabs]);
 
@@ -118,7 +118,7 @@ export function AppWorkspace({
         />
       )}
 
-      <section>
+      <section className="app-workspace-section">
         {loading ? (
           <div className="app-workspace-loading">
             <div className="app-workspace-loading-inner">

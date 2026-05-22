@@ -566,5 +566,3 @@ function DragPreview({ active }: { active: ActiveDrag }) {
     </div>
   );
 }
-
-export default KanbanView;

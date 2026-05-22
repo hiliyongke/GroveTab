@@ -8,7 +8,7 @@
  * 支持受控激活 Tab（defaultActiveTab），便于从外部 hash（#about）直接切到指定 Tab。
  */
 
-import { Drawer, Tooltip } from 'antd';
+import { Drawer } from 'antd';
 import { useState, useEffect, useCallback } from 'react';
 import {
   Palette,
@@ -16,6 +16,7 @@ import {
   Database,
   KeyRound,
   Info,
+  Shield,
 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useSettingsStore } from '@/store';
@@ -26,6 +27,7 @@ import { BehaviorPanel } from './panels/BehaviorPanel';
 import { DataPanel } from './panels/DataPanel';
 import { ShortcutsPanel } from './panels/ShortcutsPanel';
 import { AboutPanel } from './panels/AboutPanel';
+import { PrivacyPanel } from './panels/PrivacyPanel';
 
 interface SettingsPanelProps {
   open: boolean;
@@ -78,6 +80,12 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
       component: <DataPanel />,
     },
     {
+      key: 'privacy',
+      icon: <Shield size={ICON_SIZE.MEDIUM} />,
+      labelKey: 'settings.privacy',
+      component: <PrivacyPanel settings={settings} updateSettings={updateSettings} />,
+    },
+    {
       key: 'shortcuts',
       icon: <KeyRound size={ICON_SIZE.MEDIUM} />,
       labelKey: 'settings.shortcuts',
@@ -99,7 +107,7 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
       open={open}
       onClose={handleClose}
       destroyOnClose
-      width={640}
+      width={704}
       title={t('settings.title')}
       classNames={{
         mask: 'settings-drawer__mask',
@@ -115,15 +123,15 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
         <nav className="settings-nav">
           <div className="settings-nav__list">
             {tabs.map((tab) => (
-              <Tooltip key={tab.key} title={t(tab.labelKey)} placement="right">
-                <button
-                  type="button"
-                  className={`settings-nav__item${activeTab === tab.key ? ' is-active' : ''}`}
-                  onClick={() => setActiveTab(tab.key)}
-                >
-                  <span className="settings-nav__icon">{tab.icon}</span>
-                </button>
-              </Tooltip>
+              <button
+                key={tab.key}
+                type="button"
+                className={`settings-nav__item${activeTab === tab.key ? ' is-active' : ''}`}
+                onClick={() => setActiveTab(tab.key)}
+              >
+                <span className="settings-nav__icon">{tab.icon}</span>
+                <span className="settings-nav__label">{t(tab.labelKey)}</span>
+              </button>
             ))}
           </div>
         </nav>

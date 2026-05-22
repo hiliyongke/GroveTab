@@ -42,7 +42,7 @@
 
 /* ── 左侧图标导航栏 ── */
 .settings-nav {
-  width: 56px;
+  width: 120px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -62,13 +62,15 @@
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
-  aspect-ratio: 1;
+  height: 40px;
+  padding: 0 14px;
   border-radius: var(--ant-border-radius-lg, 10px);
   color: var(--ant-color-text-tertiary);
   cursor: pointer;
   transition: all 180ms ease;
+  gap: 10px;
 }
 
 .settings-nav__item:hover {
@@ -87,6 +89,14 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.settings-nav__label {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ── 右侧内容区 ── */
@@ -305,7 +315,21 @@
   background: var(--ant-color-fill-secondary);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 704px) {
+  .settings-nav {
+    width: 56px;
+  }
+
+  .settings-nav__item {
+    justify-content: center;
+    padding: 0;
+    height: 40px;
+  }
+
+  .settings-nav__label {
+    display: none;
+  }
+
   .settings-content__header {
     padding: 16px 20px 0;
   }

@@ -8,6 +8,7 @@ import {
   Monitor,
   Globe,
   BarChart3,
+  History,
 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useSettingsStore } from '@/store';
@@ -42,6 +43,7 @@ export function AppHeader({
   onOpenSearch,
   onInsights,
   onTidy,
+  onOpenHistory,
 }: {
   tabCount: number;
   domainCount: number;
@@ -56,6 +58,8 @@ export function AppHeader({
   onInsights?: () => void;
   /** 一键整理回调 */
   onTidy?: () => void;
+  /** 打开「插件历史记录」面板 */
+  onOpenHistory?: () => void;
 }) {
   const theme = useSettingsStore((s) => s.settings.theme);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
@@ -150,7 +154,7 @@ export function AppHeader({
         </button>
       </div>
 
-      <Space size={8} className="app-header-actions">
+      <Space size={6} className="app-header-actions">
         {pageMode !== 'workspace' && (
           <Button
             size="small"
@@ -168,6 +172,7 @@ export function AppHeader({
         <WorkspaceSwitcher />
         <Tooltip title={t(`theme.${theme}`)}>
           <Button
+            size="small"
             type="text"
             icon={
               <span
@@ -176,15 +181,15 @@ export function AppHeader({
               >
                 {themeIcon}
               </span>
-            }
-            onClick={toggleTheme}
+            }            onClick={toggleTheme}
             aria-label={t(`theme.${theme}`)}
           />
         </Tooltip>
         <Tooltip title={t('header.settings')}>
           <Button
+            size="small"
             type="text"
-            icon={<Settings size={ICON_SIZE.MEDIUM} className="app-icon app-icon--settings" />}
+            icon={<Settings size={ICON_SIZE.SMALL} className="app-icon app-icon--settings" />}
             onClick={onSettings}
             aria-label={t('header.settings')}
           />
@@ -192,10 +197,22 @@ export function AppHeader({
         {onInsights && (
           <Tooltip title={t('insights.title')}>
             <Button
+              size="small"
               type="text"
-              icon={<BarChart3 size={ICON_SIZE.MEDIUM} className="app-icon app-icon--insights" />}
+              icon={<BarChart3 size={ICON_SIZE.SMALL} className="app-icon app-icon--insights" />}
               onClick={onInsights}
               aria-label={t('insights.title')}
+            />
+          </Tooltip>
+        )}
+        {onOpenHistory && (
+          <Tooltip title={t('header.history')}>
+            <Button
+              size="small"
+              type="text"
+              icon={<History size={ICON_SIZE.SMALL} className="app-icon" />}
+              onClick={onOpenHistory}
+              aria-label={t('header.history')}
             />
           </Tooltip>
         )}

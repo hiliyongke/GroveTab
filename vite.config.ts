@@ -149,48 +149,19 @@ export default defineConfig({
     chunkSizeWarningLimit: 800,
     rollupOptions: {
       input: {
+        // 注：SW 不在 vite 入口中。vite 8 (rolldown) 多入口会把 SW 与
+        // newtab 共享的代码拆到 feat-* chunk，连带 antd/react/DOM 依赖一起
+        // 加载 → SW 启动报 "document is not defined" → listener 不注册 →
+        // 插件历史记录永远为空。
+        // 改用 scripts/build-sw.mjs 在 vite build 后独立用 esbuild bundle SW，
+        // 产出一个完全自包含、无任何 import 的 dist/sw.js。
         newtab: resolve(__dirname, 'src/pages/newtab/main.tsx'),
         popup: resolve(__dirname, 'src/pages/popup/main.tsx'),
-        sw: resolve(__dirname, 'src/sw/index.ts'),
       },
       output: {
         entryFileNames: '[name].js',
         chunkFileNames: 'chunks/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash][extname]',
-        /**
-         * 手动分片策略（v1.0 封板）：把重依赖拆到独立 chunk，
-         * 让主入口 newtab.js 保持精简（目标 ≤ 280 KB / 90 KB gz）。
-         */
-        manualChunks(id: string) {
-          if (id.includes('node_modules')) {
-            // pnpm 路径优先匹配：路径形如 .pnpm/antd@6.3.6__react@19/.../node_modules/antd/es/...
-            if (/antd[\\/]es[\\/]|antd[\\/]lib[\\/]/.test(id)) return 'vendor-antd';
-            if (/react-grid-layout|react-resizable|react-draggable/.test(id)) return 'vendor-grid';
-            if (id.includes('@dnd-kit')) return 'vendor-dnd';
-            if (id.includes('lunar-typescript')) return 'vendor-lunar';
-            if (id.includes('tinykeys')) return 'vendor-react';
-            if (id.includes('react-dom')) return 'vendor-react-dom';
-            if (/react(?:-router)?['@_]/.test(id)) return 'vendor-react';
-            if (/minisearch|pinyin-pro|tldts/.test(id)) return 'vendor-search';
-            if (/date-fns|dayjs/.test(id)) return 'vendor-date';
-            if (id.includes('lucide-react')) return 'vendor-icons';
-            if (/motion|framer-motion/.test(id)) return 'vendor-motion';
-            if (id.includes('zustand')) return 'vendor-zustand';
-            if (id.includes('@ant-design')) return 'vendor-antd';
-            return 'vendor-misc';
-          }
-          // 把"非首屏必需"的特性模块拆到独立 chunk
-          if (id.includes('/features/settings/')) return 'feat-settings';
-          if (id.includes('/features/sessions/')) return 'feat-sessions';
-          if (id.includes('/features/search/')) return 'feat-search';
-          if (id.includes('/features/insights/')) return 'feat-insights';
-          if (id.includes('/features/workspace/')) return 'feat-workspace';
-          if (id.includes('/features/tabs/KanbanView')) return 'feat-kanban';
-          if (id.includes('/shared/theme/')) return 'shared-theme';
-          if (id.includes('/shared/utils/import-export')) return 'shared-import-export';
-          return undefined;
-        },
       },
-    },
-  },
+    },  },
 });

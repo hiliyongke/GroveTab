@@ -490,13 +490,17 @@ html[data-texture-noise] body::before {
 
 /* 导航栏搜索触发器 */
 [data-skin='apple'] .app-header-search-trigger {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.6);
+  height: 36px;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.72);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 8px 24px rgba(0, 0, 0, 0.18);
 }
 
 [data-skin='apple'] .app-header-search-trigger.is-visible {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 [data-skin='apple'] .app-header-search-trigger .app-kbd {
@@ -842,13 +846,30 @@ html[data-texture-noise] body::before {
   mix-blend-mode: overlay;
 }
 
-/* ── Fluent Drawer：Acrylic 毛玻璃抽屉 ── */
+/* ── Fluent Drawer：Acrylic 毛玻璃抽屉 ──
+   设计要点：偏"磨砂"而非"透明玻璃"——表面不透度走高 (≥ 85%)，
+   依靠强 backdrop blur 把背后内容柔化为色调，而不是让背后内容清晰透入。
+   用 linear-gradient 叠一层极淡的高光作为"内填光"，强化金属/玻璃质感。 */
 [data-skin='glassmorphism'] .app-drawer__section {
-  background: var(--app-glass-bg) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 40%),
+    var(--app-glass-bg) !important;
   backdrop-filter: var(--app-glass-filter) !important;
   -webkit-backdrop-filter: var(--app-glass-filter) !important;
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.12), inset 1px 0 0 rgba(255, 255, 255, 0.06);
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow:
+    -8px 0 32px rgba(0, 0, 0, 0.18),
+    inset 1px 0 0 rgba(255, 255, 255, 0.12);
+}
+
+[data-theme='dark'][data-skin='glassmorphism'] .app-drawer__section {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 40%),
+    var(--app-glass-bg) !important;
+  border-left-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    -8px 0 32px rgba(0, 0, 0, 0.4),
+    inset 1px 0 0 rgba(255, 255, 255, 0.06);
 }
 
 [data-skin='glassmorphism'] .app-drawer__header {
@@ -878,9 +899,17 @@ html[data-texture-noise] body::before {
 
 /* ── Fluent SearchBox Modal：Acrylic 毛玻璃搜索弹窗 ── */
 [data-skin='glassmorphism'] .search-box-container {
-  background: var(--app-glass-bg) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 45%),
+    var(--app-glass-bg) !important;
   backdrop-filter: var(--app-glass-filter) !important;
   -webkit-backdrop-filter: var(--app-glass-filter) !important;
+}
+
+[data-theme='dark'][data-skin='glassmorphism'] .search-box-container {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 45%),
+    var(--app-glass-bg) !important;
 }
 
 [data-skin='glassmorphism'] .search-box-mask {
@@ -893,11 +922,27 @@ html[data-texture-noise] body::before {
 
 /* ── Fluent Modal：Acrylic 毛玻璃弹窗 ── */
 [data-skin='glassmorphism'] .app-modal__container {
-  background: var(--app-glass-bg) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 45%),
+    var(--app-glass-bg) !important;
   backdrop-filter: var(--app-glass-filter) !important;
   -webkit-backdrop-filter: var(--app-glass-filter) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.22),
+    0 2px 8px rgba(0, 0, 0, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+[data-theme='dark'][data-skin='glassmorphism'] .app-modal__container {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 45%),
+    var(--app-glass-bg) !important;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.45),
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 [data-skin='glassmorphism'] .app-modal__header {

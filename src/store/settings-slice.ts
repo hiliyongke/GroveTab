@@ -56,11 +56,13 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     searchSortBy: 'relevance',
     searchDefaultEngine: 'google',
     searchEnabledEngines: ['google', 'bing', 'baidu', 'duckduckgo'],
+    searchCustomEngines: [],
     searchAutoFallbackToWeb: true,
     searchUseHistorySuggestions: true,
     searchUseHotSuggestions: true,
+    hotSuggestionSource: 'trending',
     layoutDensity: 'default',
-    contentMaxWidth: 1360,
+    contentMaxWidth: 0,
     reducedMotion: 'auto',
     uiVisibility: {
       header: true,
@@ -80,6 +82,13 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     autoSnapshotFrequency: '12h',
     enableOgFetch: false,
     speedDialGroupEnabled: false,
+    // v1.4 插件原生历史记录默认值
+    historyEnabled: true,
+    historyRecordEvents: true,
+    historyMaxClosedTabs: 50,
+    historyMaxEvents: 500,
+    historyClosedTabsTtlHours: 168,
+    historyUrlBlocklist: [],
   },
   loaded: false,
 

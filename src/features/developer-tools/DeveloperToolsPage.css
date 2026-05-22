@@ -142,11 +142,7 @@
 }
 
 .devtools-section-icon--fav {
-  color: var(--ant-color-error);
-}
-
-.devtools-section-icon--recent {
-  color: var(--ant-color-primary);
+  color: var(--ant-color-warning);
 }
 
 .devtools-section-title {

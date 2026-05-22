@@ -9,8 +9,15 @@
   background: var(--app-overlay-mask-bg, rgba(15, 23, 42, 0.24));
 }
 
+.search-box-modal .ant-modal-content,
+.search-box-modal .ant-modal-body,
 .search-box-body {
   padding: 0;
+}
+
+.search-box-modal .ant-modal-content {
+  overflow: hidden;
+  background: transparent;
 }
 
 .search-box-container {
@@ -23,6 +30,7 @@
 
 /* ─── 搜索弹窗外壳 ─── */
 .search-box-shell {
+  overflow: hidden;
   color: var(--searchbox-text);
 }
 
@@ -48,8 +56,10 @@
 
 /* ─── 搜索输入头部 ─── */
 .search-box-header {
-  gap: 12px;
-  padding: 12px 18px;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 10px 14px 10px 12px;
   border-bottom: 1px solid var(--searchbox-border);
 }
 
@@ -63,6 +73,131 @@
   color: var(--searchbox-search-icon);
 }
 
+/* ─── 引擎切换触发器（输入框左侧） ─── */
+.search-box-engine-trigger {
+  all: unset;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 36px;
+  padding: 0 6px 0 8px;
+  border-radius: var(--app-radius-md, 8px);
+  cursor: pointer;
+  color: var(--searchbox-text-secondary);
+  background: transparent;
+  transition:
+    background var(--searchbox-transition),
+    color var(--searchbox-transition);
+}
+
+.search-box-engine-trigger:hover,
+.search-box-engine-trigger.is-open {
+  color: var(--searchbox-text);
+  background: var(--searchbox-fill-tertiary);
+}
+
+.search-box-engine-trigger:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--searchbox-engine-color, var(--searchbox-accent)) 60%, transparent);
+  outline-offset: 1px;
+}
+
+.search-box-engine-trigger-caret {
+  flex-shrink: 0;
+  opacity: 0.6;
+  transition: transform var(--searchbox-transition);
+}
+
+.search-box-engine-trigger.is-open .search-box-engine-trigger-caret {
+  transform: rotate(180deg);
+}
+
+.search-box-engine-logo {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--searchbox-engine-color, var(--searchbox-accent));
+}
+
+.search-box-engine-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #fff;
+}
+
+/* ─── 引擎切换 Popover 菜单 ─── */
+.search-box-engine-popover .ant-popover-inner {
+  padding: 6px;
+  border-radius: var(--app-radius-md, 10px);
+}
+
+.search-box-engine-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  min-width: 200px;
+  list-style: none;
+}
+
+.search-box-engine-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px 6px 8px;
+  border-radius: var(--app-radius-sm, 6px);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--searchbox-text);
+  transition: background var(--searchbox-transition);
+}
+
+.search-box-engine-menu-item:hover {
+  background: var(--searchbox-fill-tertiary);
+}
+
+.search-box-engine-menu-item.is-active {
+  background: color-mix(in srgb, var(--searchbox-engine-color, var(--searchbox-accent)) 12%, transparent);
+  color: var(--searchbox-text);
+  font-weight: 600;
+}
+
+.search-box-engine-menu-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-box-engine-menu-shortcut {
+  flex-shrink: 0;
+  font-family: var(--ant-font-family-code, ui-monospace, monospace);
+  font-size: 11px;
+  color: var(--searchbox-text-tertiary);
+  padding: 1px 5px;
+  border: 1px solid var(--searchbox-border);
+  border-radius: var(--app-radius-sm, 4px);
+  background: var(--searchbox-fill-quaternary);
+  line-height: 1.2;
+}
+
+.search-box-engine-menu-check {
+  flex-shrink: 0;
+  color: var(--searchbox-engine-color, var(--searchbox-accent));
+}
+
+/* 兼容旧 DOM，防止增量构建缓存期间样式断层 */
 .search-box-engine {
   min-width: 132px;
 }
@@ -73,19 +208,17 @@
 
 /* ─── 搜索结果列表区域 ─── */
 .search-box-list-area {
-  min-height: 180px;
-  max-height: 52vh;
+  height: min(420px, 52vh);
+  min-height: 260px;
   overflow-y: auto;
   padding: 4px 0;
-  /* 平滑高度过渡，防止内容加载时闪烁 */
-  transition: min-height 0s;
 }
 
 .search-box-empty {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 180px;
+  min-height: 100%;
   padding: 24px;
 }
 
@@ -206,6 +339,21 @@
   line-height: 1;
 }
 
+.search-box-tag-list {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: min(220px, 40%);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.search-box-tag-list .search-box-tag {
+  max-width: 72px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .search-box-highlight {
   padding: 0;
   font-weight: 700;
@@ -270,20 +418,21 @@
   }
 
   .search-box-header {
-    align-items: stretch;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
   }
 
-  .search-box-engine {
-    width: 100%;
+  .search-box-engine-trigger {
+    height: 32px;
   }
 
   .search-box-list-area {
-    min-height: 140px;
+    height: min(360px, 52vh);
+    min-height: 220px;
   }
 
   .search-box-empty {
-    min-height: 140px;
+    min-height: 100%;
   }
 
   .search-box-footer {

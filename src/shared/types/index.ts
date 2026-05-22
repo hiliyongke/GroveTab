@@ -15,25 +15,35 @@ export type { SwBroadcastType, SwBroadcastMessage } from './broadcast';
 // ── 存储 ──────────────────────────────────────────
 export type { StorageKey, StorageMeta } from './storage';
 
-// ── 用户设置 ──────────────────────────────────────
+// ── 用户设置 ──────────────────────────────
 export type {
   SearchScopeField,
-  SearchSortMode,
   SearchEngineId,
+  BuiltInSearchEngineId,
+  CustomSearchEngineId,
+  CustomSearchEngine,
   NewtabPageMode,
   ViewTabPosition,
   UserSettings,
 } from './settings';
-
 // ── 撤销系统 ──────────────────────────────────────
 export type { ClosedTabSnapshot, UndoRecord } from './undo';
 
 // ── 归档 / 会话 ──────────────────────────────────
 export type { ArchivedTab, ArchivedSession, AutoSnapshotMeta } from './archive';
 
-// ── 活动记录 ──────────────────────────────────────
-export type { ActivityType, ActivityAction, ActivityRecord } from './activity';
+// ── 活动记录 ────────────────────────────
+export type { ActivityRecord } from './activity';
 
+// ── 插件原生历史记录（v1.4） ─────────────────
+export type {
+  HistoryEvent,
+  HistoryEventType,
+  ClosedTabRecord,
+  ClosedWindowRecord,
+  DailySnapshot,
+  SnapshotDiff,
+} from './history';
 // ── 搜索历史 ──────────────────────────────────────
 export type { SearchHistoryEntry } from './search';
 

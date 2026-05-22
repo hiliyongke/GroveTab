@@ -49,6 +49,10 @@
     "toggle-search": {
       "suggested_key": { "default": "Alt+K" },
       "description": "Open search in __MSG_appName__"
+    },
+    "open-history": {
+      "suggested_key": { "default": "Alt+H" },
+      "description": "Open history timeline in __MSG_appName__"
     }
   },
   "incognito": "split"

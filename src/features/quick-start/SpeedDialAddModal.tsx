@@ -73,7 +73,7 @@ export function SpeedDialAddModal({ open, onClose, editingSite, existingGroups }
     if (editingSite) {
       setUrl(editingSite.url);
       setTitle(editingSite.title);
-      setGroup(editingSite.group || '__none__');
+      setGroup(editingSite.group ?? '__none__');
       faviconUrlRef.current = editingSite.favIconUrl;
     } else {
       setUrl('');
@@ -86,7 +86,7 @@ export function SpeedDialAddModal({ open, onClose, editingSite, existingGroups }
           // 只有当用户没有手动修改过时才自动填充
           if (active?.url && active.url.startsWith('http') && !userModifiedRef.current) {
             setUrl(active.url);
-            setTitle(active.title || '');
+            setTitle(active.title ?? '');
           }
           if (active?.favIconUrl) {
             faviconUrlRef.current = active.favIconUrl;
@@ -142,7 +142,7 @@ export function SpeedDialAddModal({ open, onClose, editingSite, existingGroups }
       title={isEdit ? t('quickStart.editTitle') : t('quickStart.addTitle')}
       okText={isEdit ? t('quickStart.save') : t('quickStart.add')}
       cancelText={t('quickStart.cancel')}
-      onOk={handleOk}
+      onOk={() => void handleOk()}
       onCancel={onClose}
       confirmLoading={confirmLoading}
       destroyOnClose

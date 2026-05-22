@@ -34,7 +34,6 @@ export default tseslint.config(
       'react-hooks/set-state-in-effect': 'off',
       'react-hooks/exhaustive-deps': 'warn',
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-      '@typescript-eslint/prefer-nullish-coalescing': 'off',
 
       /* TypeScript ESLint 规则 */
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
@@ -42,7 +41,7 @@ export default tseslint.config(
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/prefer-nullish-coalescing': 'warn',
       '@typescript-eslint/prefer-optional-chain': 'warn',
-      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
+      '@typescript-eslint/consistent-type-imports': 'off',
       '@typescript-eslint/no-misused-promises': 'error',
 
       /* 禁用太严格的规则 */
@@ -51,7 +50,6 @@ export default tseslint.config(
       '@typescript-eslint/prefer-includes': 'off',
       '@typescript-eslint/non-nullable-type-assertion-style': 'off',
       '@typescript-eslint/no-unnecessary-type-assertion': 'off',
-      '@typescript-eslint/consistent-type-imports': 'off',
       'no-useless-assignment': 'off',
 
       /* 代码风格 */

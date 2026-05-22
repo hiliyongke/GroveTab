@@ -19,6 +19,13 @@ import {
   saveStats,
   getAutoSnapshotMeta,
   saveAutoSnapshotMeta,
+  appendHistoryEvent,
+  pushClosedTab,
+  pushClosedWindow,
+  isUrlIgnored,
+  upsertDailySnapshot,
+  getTodaySnapshot,
+  snapshotDateKey,
 } from '@/repositories';
 import type { StatsData, StatsRecord } from '@/shared/types';
 import { BRAND } from '@/shared/config/brand';
@@ -30,6 +37,132 @@ const SW_LOG_TAG = `${BRAND.logTag} SW`;
 
 /** 上一次轮询时的 tab discarded 状态缓存，用于检测 discard 变化 */
 const cachedTabDiscardedState = new Map<number, boolean>();
+
+// ── 历史记录快照缓存 ────────────────────────────────
+/**
+ * tabs.onRemoved 触发时，tab 已被删除、拿不到 url/title。
+ * 因此需要在每次 onCreated/onUpdated 中维护一份内存快照，
+ * onRemoved 时从快照读取写入「最近关闭」列表。
+ *
+ * 【注意】MV3 SW 会被挂起。获其他请求唤醒后，这份内存快照会丢失；
+ * 另外补上「启动时全量拉一次」的兑底（见下面 hydrateTabSnapshots）。
+ */
+interface TabSnapshot {
+  id: number;
+  url: string;
+  title: string;
+  favIconUrl: string;
+  windowId: number;
+  pinned: boolean;
+  incognito: boolean;
+}
+const tabSnapshots = new Map<number, TabSnapshot>();
+
+/** 记录「本次被成套关闭」的窗口： windowId -> closedTab 记录 id 集 */
+const windowCloseBuffer = new Map<number, string[]>();
+
+function snapshotTab(tab: chrome.tabs.Tab): void {
+  if (tab.id === undefined) return;
+  tabSnapshots.set(tab.id, {
+    id: tab.id,
+    url: tab.url ?? tab.pendingUrl ?? '',
+    title: tab.title ?? '',
+    favIconUrl: tab.favIconUrl ?? '',
+    windowId: tab.windowId,
+    pinned: tab.pinned ?? false,
+    incognito: tab.incognito ?? false,
+  });
+}
+
+/** SW 启动时全量补一次，避免被挂起后快照丢失 */
+async function hydrateTabSnapshots(): Promise<void> {
+  try {
+    const allTabs = await chrome.tabs.query({});
+    for (const tab of allTabs) snapshotTab(tab);
+  } catch {
+    /* SW 初始化期间调用可能失败 */
+  }
+}
+void hydrateTabSnapshots();
+
+/**
+ * 「每日标签页快照」：
+ *   - 在 SW 启动 / 安装 / onStartup 时调用
+ *   - 同一天只拍一次（按本地时区 YYYY-MM-DD 判重）
+ *   - 拍照内容：当前所有标签页按 hostname 聚合的 [host, count] 列表
+ *
+ * 用作 HistoryPanel 顶部「昨天 → 今天」对比的源数据。
+ */
+async function maybeCaptureDailySnapshot(): Promise<void> {
+  try {
+    const today = await getTodaySnapshot();
+    if (today !== undefined) return; // 今天已拍过
+
+    const tabs = await chrome.tabs.query({});
+    const counter = new Map<string, number>();
+    for (const t of tabs) {
+      // 与 historyEvents 同步策略：忽略 chrome:// 等内置页和隐身窗口
+      if (t.incognito) continue;
+      const url = t.url ?? t.pendingUrl ?? '';
+      if (isUrlIgnored(url)) continue;
+      let host = '';
+      try {
+        host = new URL(url).hostname;
+      } catch {
+        continue;
+      }
+      if (host === '') continue;
+      counter.set(host, (counter.get(host) ?? 0) + 1);
+    }
+    const hosts = [...counter.entries()].sort((a, b) => b[1] - a[1]);
+    await upsertDailySnapshot({
+      dateKey: snapshotDateKey(),
+      ts: Date.now(),
+      totalTabs: tabs.filter((t) => !t.incognito).length,
+      hosts,
+    });
+  } catch (err) {
+    console.warn(`${SW_LOG_TAG} maybeCaptureDailySnapshot failed:`, err);
+  }
+}
+// 启动即尝试一次（同一天有则跳过）
+void maybeCaptureDailySnapshot();
+chrome.runtime.onStartup.addListener(() => { void maybeCaptureDailySnapshot(); });
+
+/**
+ * 在指定窗口被整体关闭后的一个宏任务周期里，把该窗口下累积的 closedTab
+ * 起一个 ClosedWindowRecord 快照。动机：Chrome 关闭窗口时会贯穿着发 N 个 tab onRemoved
+ * 事件（isWindowClosing=true），收集完后起一个“整窗快照”便于一键恢复。
+ */
+const windowCloseFlushTimers = new Map<number, ReturnType<typeof setTimeout>>();
+function scheduleWindowCloseFlush(windowId: number): void {
+  const existing = windowCloseFlushTimers.get(windowId);
+  if (existing !== undefined) clearTimeout(existing);
+  const timer = setTimeout(() => {
+    void (async () => {
+      windowCloseFlushTimers.delete(windowId);
+      const ids = windowCloseBuffer.get(windowId) ?? [];
+      windowCloseBuffer.delete(windowId);
+      if (ids.length < 2) return; // 单 tab 没必要当作整窗快照
+      try {
+        await pushClosedWindow({
+          windowId,
+          tabIds: ids,
+          tabCount: ids.length,
+          preview: '',
+        });
+        await appendHistoryEvent({
+          type: 'window_closed',
+          windowId,
+          extra: { tabCount: ids.length },
+        });
+      } catch (err) {
+        console.warn(`${SW_LOG_TAG} flush window close failed`, err);
+      }
+    })();
+  }, 800);
+  windowCloseFlushTimers.set(windowId, timer);
+}
 
 // ── StatsCollector（F-11） ────────────────────────────
 /**
@@ -115,6 +248,20 @@ async function flushStats(force = false): Promise<void> {
 // ── Tab Event Listeners ───────────────────────────────
 
 chrome.tabs.onCreated.addListener((tab) => {
+  // 维护快照
+  snapshotTab(tab);
+  // 记录“打开新标签页”事件（仅当 url 有意义时）
+  const url = tab.url ?? tab.pendingUrl ?? '';
+  if (url !== '' && !isUrlIgnored(url)) {
+    void appendHistoryEvent({
+      type: 'tab_opened',
+      url,
+      title: tab.title ?? '',
+      favIconUrl: tab.favIconUrl ?? '',
+      windowId: tab.windowId,
+      incognito: tab.incognito,
+    });
+  }
   swBroadcast('tab-created', {
     id: tab.id,
     url: tab.url ?? tab.pendingUrl ?? '',
@@ -126,6 +273,9 @@ chrome.tabs.onCreated.addListener((tab) => {
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  // 同步更新快照（拿到最新 url/title/favicon，供 onRemoved 读取）
+  snapshotTab(tab);
+
   // 仅广播有意义的变更
   if (changeInfo.url || changeInfo.title || changeInfo.favIconUrl || changeInfo.status === 'complete') {
     swBroadcast('tab-updated', {
@@ -153,6 +303,46 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 });
 
 chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
+  // 从快照中拿出被关闭 tab 的信息，写入「最近关闭」与「历史事件」
+  const snap = tabSnapshots.get(tabId);
+  tabSnapshots.delete(tabId);
+  if (snap !== undefined && !snap.incognito && !isUrlIgnored(snap.url)) {
+    void (async () => {
+      try {
+        const tabs = await pushClosedTab({
+          url: snap.url,
+          title: snap.title === '' ? snap.url : snap.title,
+          favIconUrl: snap.favIconUrl,
+          windowId: snap.windowId,
+          fromWindowClose: removeInfo.isWindowClosing,
+          pinned: snap.pinned,
+          incognito: snap.incognito,
+        });
+        await appendHistoryEvent({
+          type: 'tab_closed',
+          url: snap.url,
+          title: snap.title,
+          favIconUrl: snap.favIconUrl,
+          windowId: snap.windowId,
+          incognito: snap.incognito,
+          extra: { fromWindowClose: removeInfo.isWindowClosing },
+        });
+        // 收集到 windowCloseBuffer、稍后起一个「整窗快照」
+        if (removeInfo.isWindowClosing) {
+          const newId = tabs[0]?.id ?? '';
+          if (newId !== '') {
+            const arr = windowCloseBuffer.get(snap.windowId) ?? [];
+            arr.push(newId);
+            windowCloseBuffer.set(snap.windowId, arr);
+            scheduleWindowCloseFlush(snap.windowId);
+          }
+        }
+      } catch (err) {
+        console.warn(`${SW_LOG_TAG} record closed tab failed`, err);
+      }
+    })();
+  }
+
   swBroadcast('tab-removed', {
     id: tabId,
     windowId: removeInfo.windowId,
@@ -242,6 +432,15 @@ chrome.commands.onCommand.addListener((command) => {
         await chrome.tabs.create({ url });
       } catch (err) {
         console.error(`${SW_LOG_TAG} Toggle search failed:`, err);
+      }
+    }
+
+    if (command === 'open-history') {
+      try {
+        const url = chrome.runtime.getURL('src/pages/newtab/index.html#history');
+        await chrome.tabs.create({ url });
+      } catch (err) {
+        console.error(`${SW_LOG_TAG} Open history failed:`, err);
       }
     }
   })();

@@ -23,6 +23,7 @@ import {
   clearActivity as repoClearActivity,
   getWorkspaces,
   saveWorkspaces,
+  appendHistoryEvent,
 } from '@/repositories';
 import { STORAGE_KEYS } from '@/shared/config/storage-keys';
 
@@ -56,7 +57,7 @@ interface MetadataState {
   removeNote: (url: string) => Promise<void>;
   togglePin: (url: string) => Promise<void>;
   isPinned: (url: string) => boolean;
-  getTags: (url: string) => string[];
+  getTags: (url: string) => readonly string[];
   getNote: (url: string) => string;
 
   // ── v1.0 封板新增 ──
@@ -99,6 +100,16 @@ export const useMetadataStore = create<MetadataState>((set, get) => ({
       tags[key] = [...existing, tag];
       set({ tags });
       await setData(TAGS_KEY, tags);
+      // 同步写一条 undoable 的「tab_tagged」事件，让「插件历史」有入口可反悔
+      void appendHistoryEvent({
+        type: 'tab_tagged',
+        url,
+        title: tag,
+        extra: { tag },
+        undoable: true,
+        // url+tag 是必需上下文，undo handler 调用 removeTag(url, tag)
+        undoContext: { url, tag },
+      });
     }
   },
 

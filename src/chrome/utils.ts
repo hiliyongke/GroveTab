@@ -51,6 +51,6 @@ function isExtensionNewTab(url: string): boolean {
  * Check if the extension's own new tab URL matches
  */
 export function isSelfNewTabPage(tab: { url?: string; pendingUrl?: string }): boolean {
-  const url = tab.url || tab.pendingUrl || '';
+  const url = tab.url ?? tab.pendingUrl ?? '';
   return isExtensionNewTab(url);
 }

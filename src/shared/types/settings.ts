@@ -6,18 +6,28 @@
 /** User settings */
 export type SearchScopeField = 'title' | 'hostname' | 'url';
 export type SearchSortMode = 'relevance' | 'recentAccess';
-export type SearchEngineId = 'google' | 'bing' | 'baidu' | 'duckduckgo';
+export type BuiltInSearchEngineId = 'google' | 'bing' | 'baidu' | 'duckduckgo';
+export type CustomSearchEngineId = `custom:${string}`;
+export type SearchEngineId = BuiltInSearchEngineId | CustomSearchEngineId;
+
+export interface CustomSearchEngine {
+  id: CustomSearchEngineId;
+  label: string;
+  searchUrl: string;
+  iconUrl?: string;
+  color?: string;
+}
 
 export type NewtabPageMode = 'workspace' | 'trending' | 'devtools';
 
 /** 视图标签栏位置 */
-export type ViewTabPosition = 'top' | 'left' | 'right';
+export type ViewTabPosition = 'top' | 'left' | 'right' | 'bottom';
 
 export interface UserSettings {
   overrideNewTab: boolean;
   /** 新标签页一级空间：workspace 专注标签整理；trending 全网热榜；devtools 开发工具栏。 */
   newtabPageMode?: NewtabPageMode;
-  /** 视图标签栏位置：top（搜索栏下方水平排列）/ left（左侧垂直侧栏）/ right（右侧垂直侧栏） */
+  /** 视图标签栏位置：top（搜索栏下方水平）/ left / right（垂直侧栏）/ bottom（固定底部水平） */
   viewTabPosition?: ViewTabPosition;
   defaultView: 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'bookmarks' | 'kanban' | 'archive';
   theme: 'light' | 'dark' | 'system';
@@ -149,6 +159,13 @@ export interface UserSettings {
    */
   domainGroupSortBy?: 'tabCount' | 'alphabetical' | 'recentAccess';
   /**
+   * 网格视图卡片的展开触发方式：
+   *   - 'click'（默认）：点击多 tab 卡片时弹出 Popover
+   *   - 'hover'：鼠标悬停在多 tab 卡片上即展开 Popover，移开自动收起
+   * 仅影响多 tab 卡片；单 tab 卡片始终为「点击直跳」。
+   */
+  gridExpandTrigger?: 'click' | 'hover';
+  /**
    * 搜索配置：
    *   - scope：搜索范围，选择哪些字段参与搜索匹配
    *   - enablePinyin：是否启用拼音搜索（关闭后跳过 pinyin-pro 计算，略省性能）
@@ -164,6 +181,7 @@ export interface UserSettings {
   searchSortBy?: SearchSortMode;
   searchDefaultEngine?: SearchEngineId;
   searchEnabledEngines?: SearchEngineId[];
+  searchCustomEngines?: CustomSearchEngine[];
   searchAutoFallbackToWeb?: boolean;
   searchUseHistorySuggestions?: boolean;
   searchUseHotSuggestions?: boolean;
@@ -268,6 +286,15 @@ export interface UserSettings {
   showAddSiteButton?: boolean;
 
   /**
+   * 常用站点卡片尺寸（v1.4）。
+   *   - 'sm'   ：紧凑（站点多时使用，单卡 ~120px）
+   *   - 'md'   ：默认（单卡 ~160px，与 v1.3 行为一致）
+   *   - 'lg'   ：宽松（站点少时使用，单卡 ~200px）
+   *   - 'auto' ：根据站点数量自动适配（≤6 用 lg，7-14 用 md，>14 用 sm）
+   */
+  quickStartCardSize?: 'sm' | 'md' | 'lg' | 'auto';
+
+  /**
    * 全局点击动效（v1.2）。
    *   - 'off'（默认）：无动效
    *   - 'ripple'   ：品牌色涟漪环
@@ -336,4 +363,45 @@ export interface UserSettings {
    * 最后激活的 Workspace id（F-29），页面刷新时用于恢复选中状态。
    */
   lastActiveWorkspaceId?: string;
+
+  // ── 插件原生历史记录（v1.4 新增） ────────────────
+
+  /**
+   * 历史记录主开关（默认 true）。关闭后：
+   *   - sw 不再向 closedTabs / historyEvents 写入新记录
+   *   - SearchBox 的「最近关闭」section 自动隐藏
+   *   - HistoryPanel 仍可打开查看历史数据，但不会增加新条目
+   */
+  historyEnabled?: boolean;
+
+  /**
+   * 是否记录细粒度的操作时间线（默认 true）。
+   * 关闭后只保留「最近关闭」标签快照，不再记录搜索/归档/打标签等事件。
+   */
+  historyRecordEvents?: boolean;
+
+  /**
+   * 「最近关闭」最大条数（默认 50，范围 10–500）。
+   * 超出时按时间顺序 FIFO 淘汰。
+   */
+  historyMaxClosedTabs?: number;
+
+  /**
+   * 操作时间线最大条数（默认 500，范围 50–5000）。
+   * 超出时按时间顺序 FIFO 淘汰。
+   */
+  historyMaxEvents?: number;
+
+  /**
+   * 「最近关闭」自动过期时间（小时，默认 168 = 7 天）。
+   * 0 表示从不过期。
+   */
+  historyClosedTabsTtlHours?: number;
+
+  /**
+   * URL 黑名单（hostname 数组，默认空）。
+   * 命中黑名单的 URL 不会被记录到任何历史。
+   * 例如：`['mail.google.com', 'localhost']`。
+   */
+  historyUrlBlocklist?: string[];
 }

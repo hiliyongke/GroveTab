@@ -193,6 +193,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
   }
 
   const step = TOUR_STEPS[stepIndex];
+  if (!step) return null;
   return (
     <Modal
       open

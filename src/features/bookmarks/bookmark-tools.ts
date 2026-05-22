@@ -222,3 +222,118 @@ export async function organizeClusterIntoFolder(
   }
   return folder.id;
 }
+
+// ═══════════════════════════════════════════════════════════
+// 4. 空文件夹清理
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * 找出所有"递归为空"的文件夹（不含任何书签或非空子文件夹）。
+ *
+ * 设计要点：
+ *   - 顶层 Chrome 根（书签栏 / 其他书签 / 移动设备）即使为空也不会返回，避免误删根节点
+ *   - 递归判定：只要某子树没有任何 url 节点，整棵子树都算"空"，但只返回**最顶层**的空文件夹，
+ *     这样删一个就清掉一片，避免操作链冗长
+ */
+export interface EmptyFolder {
+  folder: BookmarkNode;
+  /** 该子树内被一并清掉的空文件夹数（含自身），用于在 UI 上展示"将连带删除 N 项" */
+  size: number;
+}
+
+export function findEmptyFolders(roots: BookmarkNode[]): EmptyFolder[] {
+  const result: EmptyFolder[] = [];
+
+  /** 递归判断：当前子树是否完全没有 url；同时统计含的文件夹数 */
+  function walk(node: BookmarkNode, isTopLevel: boolean): { empty: boolean; folderCount: number } {
+    if (node.url !== undefined) {
+      // 叶子书签：非空
+      return { empty: false, folderCount: 0 };
+    }
+    const children = node.children ?? [];
+    let allEmpty = true;
+    let folderCount = 1; // 算上自己
+    for (const c of children) {
+      const r = walk(c, false);
+      if (!r.empty) allEmpty = false;
+      folderCount += r.folderCount;
+    }
+    // 顶层根节点不算"空文件夹候选"，但仍要继续向下搜索
+    if (allEmpty && !isTopLevel) {
+      // 仅当父节点不是空（或自己是根的直接子节点）时才作为候选；
+      // 由调用者判断"最顶层"语义即可——这里只标记可清理，并把 size 作为子树总文件夹数返回
+      return { empty: true, folderCount };
+    }
+    return { empty: allEmpty, folderCount };
+  }
+
+  /** 第二轮：只采集"最顶层"的空文件夹（父节点不空） */
+  function collect(node: BookmarkNode, isTopLevel: boolean) {
+    if (node.url !== undefined) return;
+    const r = walk(node, isTopLevel);
+    if (r.empty && !isTopLevel) {
+      result.push({ folder: node, size: r.folderCount });
+      return; // 不再继续向下挖（避免重复）
+    }
+    for (const c of node.children ?? []) collect(c, false);
+  }
+
+  for (const root of roots) collect(root, true);
+  return result;
+}
+
+/**
+ * 批量删除空文件夹。注意 chrome.bookmarks.remove 只允许删空节点，
+ * 这里的 EmptyFolder 子树本就全是空文件夹，所以会按"自下而上"的顺序删。
+ */
+export async function removeEmptyFolders(targets: EmptyFolder[]): Promise<number> {
+  let removed = 0;
+  // 先深度递归删每个子树，保证从叶到根
+  async function rmTree(node: BookmarkNode): Promise<void> {
+    for (const c of node.children ?? []) {
+      await rmTree(c);
+    }
+    const ok = await removeBookmark(node.id);
+    if (ok) removed += 1;
+  }
+  for (const t of targets) {
+    await rmTree(t.folder);
+  }
+  return removed;
+}
+
+// ═══════════════════════════════════════════════════════════
+// 总览统计
+// ═══════════════════════════════════════════════════════════
+
+export interface BookmarkOverview {
+  /** 总书签数（叶子） */
+  total: number;
+  /** 文件夹数（含根） */
+  folders: number;
+  /** 不同域名数 */
+  domains: number;
+  /** 最大深度（根 = 0） */
+  maxDepth: number;
+}
+
+export function collectBookmarkOverview(roots: BookmarkNode[]): BookmarkOverview {
+  let total = 0;
+  let folders = 0;
+  let maxDepth = 0;
+  const domains = new Set<string>();
+
+  function walk(node: BookmarkNode, depth: number) {
+    if (depth > maxDepth) maxDepth = depth;
+    if (node.url !== undefined) {
+      total += 1;
+      const host = extractHostname(node.url);
+      if (host !== '') domains.add(host);
+      return;
+    }
+    folders += 1;
+    for (const c of node.children ?? []) walk(c, depth + 1);
+  }
+  for (const r of roots) walk(r, 0);
+  return { total, folders, domains: domains.size, maxDepth };
+}

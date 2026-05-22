@@ -5,13 +5,8 @@
  *   - 紧凑工具列表 + 右侧工作台面板
  *   - 前端、后端、网络、数据、编码、加密等分类
  *   - 输入实时执行、复制输出、双向交换、错误提示
- *   - 收藏 / 最近使用 / 示例填充
+ *   - 收藏置顶 / 示例填充
  *   - 全部工具纯本地处理，零网络请求
- *
- * 滚动位置保护策略：
- *   - 收藏区、最近使用区不通过 React 状态驱动渲染，
- *     改为手动 DOM 维护（insert/remove），左侧列表 DOM 不重建，
- *     选中工具时滚动位置天然保留。
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -40,6 +35,7 @@ import {
   Search,
   Server,
   Shield,
+  Star,
   Terminal,
   Trash2,
   Type,
@@ -99,8 +95,6 @@ import './DeveloperToolsPage.css';
 const { Text, Title } = Typography;
 
 const STORAGE_KEY_FAV = 'devtools:favorites';
-const STORAGE_KEY_RECENT = 'devtools:recent';
-const MAX_RECENT = 6;
 
 /** 支持自动实时执行的工具 */
 const AUTO_EXECUTE_TOOL_IDS = new Set([
@@ -509,7 +503,7 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
   const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
     if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
       event.preventDefault();
-      handleExecute();
+      void handleExecute();
     }
   }, [handleExecute]);
 
@@ -698,7 +692,7 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
           <div className="devtools-output-head">
             <Text type="secondary" className="devtools-output-label">{t('devtools.output')}</Text>
             <Tooltip title={copied ? t('devtools.copied') : t('devtools.copy')}>
-              <Button size="small" type="text" onClick={handleCopy} icon={copied ? <Check size={14} /> : <Copy size={14} />} />
+              <Button size="small" type="text" onClick={() => void handleCopy()} icon={copied ? <Check size={14} /> : <Copy size={14} />} />
             </Tooltip>
           </div>
           <div className="devtools-output-body">
@@ -720,30 +714,17 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
 /**
  * 开发工具栏主页面
  *
- * 滚动保护策略：
- *   - 收藏区（fav-section）和最近使用区（recent-section）
- *     的 DOM 元素不通过 React 渲染，改为手动维护：
- *     - 选中工具时，仅更新 recent 状态并写入 localStorage，
- *       不触发左侧列表重新渲染；
- *     - 收藏/取消收藏时，直接操作 DOM 插入或移除对应卡片，
- *       不触发左侧列表重新渲染。
-   *   - 切换分类/搜索时，全部工具列表会重新渲染，
-   *       此时需要重建 fav-section 和 recent-section。
-   */
+ * 列表组织：
+ *   - 顶部：收藏区（仅当无搜索 / category=all 时展示）
+ *   - 主体：根据分类与搜索过滤后的工具列表
+ *   - 收藏区与主列表共用同一份 React 渲染逻辑，避免手动 DOM 操作引发的状态错位
+ */
 export function DeveloperToolsPage() {
   const { t } = useT();
   const [category, setCategory] = useState<DevToolCategory | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedToolId, setSelectedToolId] = useState(DEV_TOOLS[0]?.id ?? 'json-format');
   const [favorites, setFavorites] = useState<string[]>(() => readStringArray(STORAGE_KEY_FAV));
-  const [recent, setRecent] = useState<string[]>(() => readStringArray(STORAGE_KEY_RECENT));
-
-  /** 左侧列表容器 ref */
-  const listPaneRef = useRef<HTMLDivElement>(null);
-  /** fav-section DOM 容器 ref */
-  const favSectionRef = useRef<HTMLDivElement | null>(null);
-  /** recent-section DOM 容器 ref */
-  const recentSectionRef = useRef<HTMLDivElement | null>(null);
 
   const categoryCounts = useMemo(() => DEV_TOOLS.reduce<Record<string, number>>((acc, tool) => {
     acc[tool.category] = (acc[tool.category] ?? 0) + 1;
@@ -768,7 +749,7 @@ export function DeveloperToolsPage() {
   }, [category, searchQuery]);
 
   const selectedTool = useMemo(
-    () => DEV_TOOLS.find((tool) => tool.id === selectedToolId) ?? DEV_TOOLS[0],
+    () => DEV_TOOLS.find((tool) => tool.id === selectedToolId) ?? DEV_TOOLS[0]!,
     [selectedToolId],
   );
 
@@ -784,120 +765,8 @@ export function DeveloperToolsPage() {
     return map;
   }, [t]);
 
-  /** 向 fav-section 或 recent-section 插入一张工具卡片 */
-  const insertCard = useCallback((container: Element, tool: DevToolDefinition, isFav: boolean) => {
-    const texts = toolTexts[tool.id];
-    const card = document.createElement('button');
-    card.className = `devtools-card${selectedToolId === tool.id ? ' is-selected' : ''}`;
-    card.type = 'button';
-    card.setAttribute('aria-pressed', String(selectedToolId === tool.id));
-    card.innerHTML = `
-      <span class="devtools-card-icon">${tool.id}</span>
-      <div class="devtools-card-body">
-        <div class="devtools-card-title">
-          <span>${texts.title}</span>
-          ${tool.localOnly ? '<span class="devtools-local-badge">Local</span>' : ''}
-        </div>
-        <div class="devtools-card-desc">${texts.desc}</div>
-      </div>
-      <span class="devtools-fav-btn${isFav ? ' is-active' : ''}" role="button" tabindex="0" aria-label="收藏">
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
-      </span>
-    `;
-    card.addEventListener('click', () => {
-      setSelectedToolId(tool.id);
-    });
-    card.querySelector('.devtools-fav-btn')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const next = favorites.includes(tool.id)
-        ? favorites.filter((id) => id !== tool.id)
-        : [...favorites, tool.id];
-      setFavorites(next);
-      writeStringArray(STORAGE_KEY_FAV, next);
-    });
-    container.appendChild(card);
-  }, [favorites, selectedToolId, toolTexts]);
-
-  /** 重建 fav-section */
-  const rebuildFavSection = useCallback(() => {
-    const pane = listPaneRef.current;
-    if (!pane) return;
-    // 移除旧的 fav-section
-    favSectionRef.current?.remove();
-    favSectionRef.current = null;
-    if (favorites.length === 0) return;
-    const section = document.createElement('div');
-    section.className = 'devtools-section';
-    section.innerHTML = `
-      <div class="devtools-section-head">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="devtools-section-icon devtools-section-icon--fav"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        <strong class="devtools-section-title">${t('devtools.favorites')}</strong>
-      </div>
-      <div class="devtools-grid"></div>
-    `;
-    const grid = section.querySelector('.devtools-grid')!;
-    favorites.forEach((id) => {
-      const tool = DEV_TOOLS.find((t) => t.id === id);
-      if (tool) insertCard(grid, tool, true);
-    });
-    // 插入到 list-pane 的最前面
-    pane.insertBefore(section, pane.firstChild);
-    favSectionRef.current = section;
-  }, [favorites, insertCard, t]);
-
-  /** 重建 recent-section */
-  const rebuildRecentSection = useCallback(() => {
-    const pane = listPaneRef.current;
-    if (!pane) return;
-    recentSectionRef.current?.remove();
-    recentSectionRef.current = null;
-    if (recent.length === 0 || searchQuery.trim() || category !== 'all') return;
-    const section = document.createElement('div');
-    section.className = 'devtools-section';
-    section.innerHTML = `
-      <div class="devtools-section-head">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="devtools-section-icon devtools-section-icon--recent"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        <strong class="devtools-section-title">${t('devtools.recent')}</strong>
-      </div>
-      <div class="devtools-grid"></div>
-    `;
-    const grid = section.querySelector('.devtools-grid')!;
-    recent.forEach((id) => {
-      const tool = DEV_TOOLS.find((t) => t.id === id);
-      if (tool) insertCard(grid, tool, favorites.includes(tool.id));
-    });
-    // 插入到 fav-section 后面，或 list-pane 最前面
-    if (favSectionRef.current) {
-      favSectionRef.current.after(section);
-    } else {
-      pane.insertBefore(section, pane.firstChild);
-    }
-    recentSectionRef.current = section;
-  }, [recent, favorites, searchQuery, category, insertCard, t]);
-
-  /** 初始化：构建 fav-section 和 recent-section */
-  useEffect(() => {
-    rebuildFavSection();
-    rebuildRecentSection();
-  }, [rebuildFavSection, rebuildRecentSection]);
-
-  /** favorites 变化时，仅重建 fav-section（不重建全部工具列表） */
-  useEffect(() => {
-    rebuildFavSection();
-  }, [favorites, rebuildFavSection]);
-
-  /** recent 变化时，仅重建 recent-section */
-  useEffect(() => {
-    rebuildRecentSection();
-  }, [recent, rebuildRecentSection]);
-
   const handleSelectTool = useCallback((toolId: string) => {
     setSelectedToolId(toolId);
-    setRecent((prev) => {
-      const next = [toolId, ...prev.filter((id) => id !== toolId)].slice(0, MAX_RECENT);
-      writeStringArray(STORAGE_KEY_RECENT, next);
-      return next;
-    });
   }, []);
 
   const handleToggleFavorite = useCallback((toolId: string) => {
@@ -908,14 +777,28 @@ export function DeveloperToolsPage() {
     });
   }, []);
 
-  /** 需要隐藏的工具 id（已在 fav-section 或 recent-section 中展示） */
-  const hiddenIds = useMemo(() => {
-    const ids = new Set<string>(favorites);
-    if (!searchQuery.trim() && category === 'all') {
-      recent.forEach((id) => ids.add(id));
-    }
-    return ids;
-  }, [favorites, recent, searchQuery, category]);
+  /** 收藏区是否展示：无搜索时即可展示，分类筛选时也允许展示（仅显示该分类下的收藏） */
+  const favoriteTools = useMemo(() => {
+    if (favorites.length === 0) return [];
+    const lookup = new Map(DEV_TOOLS.map((tool) => [tool.id, tool]));
+    return favorites
+      .map((id) => lookup.get(id))
+      .filter((tool): tool is DevToolDefinition => Boolean(tool))
+      .filter((tool) => category === 'all' || tool.category === category)
+      .filter((tool) => {
+        if (!searchQuery.trim()) return true;
+        const q = searchQuery.trim().toLowerCase();
+        const texts = toolTexts[tool.id];
+        return (
+          tool.id.toLowerCase().includes(q)
+          || (texts?.title.toLowerCase().includes(q) ?? false)
+          || (texts?.desc.toLowerCase().includes(q) ?? false)
+        );
+      });
+  }, [favorites, category, searchQuery, toolTexts]);
+
+  /** 主列表中需要隐藏（已在收藏区展示）的工具 id */
+  const hiddenIds = useMemo(() => new Set(favoriteTools.map((tool) => tool.id)), [favoriteTools]);
 
   return (
     <section className="devtools-page">
@@ -942,14 +825,34 @@ export function DeveloperToolsPage() {
         </div>
 
         <div className="devtools-workbench">
-          <div className="devtools-list-pane" ref={listPaneRef}>
-            {/* fav-section 和 recent-section 由 useEffect 手动插入 */}
-            {filteredTools.filter((tool) => !hiddenIds.has(tool.id)).map((tool) => (
-              <ToolCard
+          <div className="devtools-list-pane">
+            {favoriteTools.length > 0 && (
+              <div className="devtools-section">
+                <div className="devtools-section-head">
+                  <Star size={14} className="devtools-section-icon devtools-section-icon--fav" />
+                  <strong className="devtools-section-title">{t('devtools.favorites')}</strong>
+                </div>
+                <div className="devtools-grid">
+                  {favoriteTools.map((tool) => (
+                    <ToolCard
+                      key={`fav-${tool.id}`}
+                      tool={tool}
+                      title={toolTexts[tool.id]?.title ?? tool.titleKey}
+                      description={toolTexts[tool.id]?.desc ?? tool.descriptionKey}
+                      selected={selectedToolId === tool.id}
+                      favorited
+                      onClick={() => handleSelectTool(tool.id)}
+                      onToggleFavorite={(e) => { e.stopPropagation(); handleToggleFavorite(tool.id); }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+            {filteredTools.filter((tool) => !hiddenIds.has(tool.id)).map((tool) => (              <ToolCard
                 key={tool.id}
                 tool={tool}
-                title={toolTexts[tool.id].title}
-                description={toolTexts[tool.id].desc}
+                title={toolTexts[tool.id]?.title ?? tool.titleKey}
+                description={toolTexts[tool.id]?.desc ?? tool.descriptionKey}
                 selected={selectedToolId === tool.id}
                 favorited={favorites.includes(tool.id)}
                 onClick={() => handleSelectTool(tool.id)}
@@ -994,5 +897,3 @@ export function DeveloperToolsPage() {
     </section>
   );
 }
-
-export default DeveloperToolsPage;

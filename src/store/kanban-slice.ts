@@ -114,6 +114,7 @@ export const useKanbanStore = create<KanbanState>((set, get) => ({
       if (c.id !== columnId) return c;
       const cards = [...c.cards];
       const [item] = cards.splice(fromIndex, 1);
+      if (!item) return c;
       cards.splice(toIndex, 0, item);
       return { ...c, cards };
     });
@@ -126,6 +127,7 @@ export const useKanbanStore = create<KanbanState>((set, get) => ({
     if (fromIndex < 0 || fromIndex >= columns.length) return;
     if (toIndex < 0 || toIndex >= columns.length) return;
     const [moved] = columns.splice(fromIndex, 1);
+    if (!moved) return;
     columns.splice(toIndex, 0, moved);
     await persist(columns);
     set({ columns });

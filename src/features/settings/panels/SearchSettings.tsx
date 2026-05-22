@@ -14,11 +14,15 @@
  * 10. 清空最近搜索
  */
 
-import { Select, Segmented, Switch, Checkbox, Button, Popconfirm } from 'antd';
+import { useState } from 'react';
+import { Select, Segmented, Switch, Checkbox, Button, Popconfirm, Input, Space, Tag } from 'antd';
 
 import type { SearchEngineId, SearchScopeField, UserSettings } from '@/shared/types';
 import { useT } from '@/shared/i18n';
-import { SEARCH_ENGINE_OPTIONS } from '@/shared/config/search-engines';
+import {
+  getAllSearchEngineOptions,
+  normalizeEnabledSearchEngines,
+} from '@/shared/config/search-engines';
 import { Field } from '@/features/settings/components/Field';
 import { setData } from '@/repositories/storage-repo';
 import { feedback } from '@/shared/ui/feedback';
@@ -29,19 +33,84 @@ interface SearchSettingsProps {
   updateSettings: (patch: Partial<UserSettings>) => void | Promise<void>;
 }
 
+interface SearchSettingsSnapshot {
+  searchCustomEngines?: LocalCustomSearchEngine[];
+}
+
+interface LocalCustomSearchEngine {
+  id: `custom:${string}`;
+  label: string;
+  searchUrl: string;
+  iconUrl?: string;
+  color?: string;
+}
+
+function createCustomEngineId(label: string, existing: LocalCustomSearchEngine[]): `custom:${string}` {
+  const slug = label
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  const base = slug === '' ? 'engine' : slug;
+  let index = existing.length + 1;
+  let id: `custom:${string}` = `custom:${base}-${index}`;
+  const existingIds = new Set(existing.map((item) => item.id));
+  while (existingIds.has(id)) {
+    index += 1;
+    id = `custom:${base}-${index}`;
+  }
+  return id;
+}
+
 /**
  * 搜索设置组件
  */
 export function SearchSettings({ settings, updateSettings }: SearchSettingsProps) {
   const { t } = useT();
-  const enabledEngines = settings.searchEnabledEngines ?? SEARCH_ENGINE_OPTIONS.map((item) => item.id);
-  const defaultSearchEngine = enabledEngines.includes(settings.searchDefaultEngine ?? 'google')
-    ? (settings.searchDefaultEngine ?? 'google')
-    : enabledEngines[0];
+  const [customEngineName, setCustomEngineName] = useState('');
+  const [customEngineUrl, setCustomEngineUrl] = useState('');
+  const [customEngineIcon, setCustomEngineIcon] = useState('');
+  const settingsSnapshot = settings as SearchSettingsSnapshot;
+  const customEngines: LocalCustomSearchEngine[] = settingsSnapshot.searchCustomEngines ?? [];
+  const allEngines = getAllSearchEngineOptions(customEngines);
+  const enabledEngines = normalizeEnabledSearchEngines(settings.searchEnabledEngines, customEngines);
+  const defaultSearchEngine: SearchEngineId =
+    enabledEngines.includes(settings.searchDefaultEngine ?? 'google')
+      ? (settings.searchDefaultEngine ?? 'google')
+      : (enabledEngines[0] ?? 'google');
+  const canAddCustomEngine = customEngineName.trim() !== '' && customEngineUrl.trim() !== '';
 
   /** 防 ESLint `no-misused-promises`：`updateSettings` 异步但表单回调需要 `void`。 */
   const handleSetting = (patch: Partial<UserSettings>) => {
     void updateSettings(patch);
+  };
+
+  const handleAddCustomEngine = () => {
+    if (!canAddCustomEngine) return;
+    const rawUrl = customEngineUrl.trim();
+    const withProtocol = /^https?:\/\//i.test(rawUrl) ? rawUrl : `https://${rawUrl}`;
+    const searchUrl = withProtocol.includes('{query}')
+      ? withProtocol
+      : `${withProtocol}${withProtocol.includes('?') ? '&' : '?'}q={query}`;
+    const iconUrl = customEngineIcon.trim();
+    const engine: LocalCustomSearchEngine = {
+      id: createCustomEngineId(customEngineName, customEngines),
+      label: customEngineName.trim(),
+      searchUrl,
+      iconUrl: iconUrl === '' ? undefined : iconUrl,
+      color: '#64748b',
+    };
+    const nextCustomEngines: LocalCustomSearchEngine[] = [...customEngines, engine];
+    const nextEnabledEngines: SearchEngineId[] = [...enabledEngines, engine.id];
+    handleSetting({
+      searchCustomEngines: nextCustomEngines,
+      searchEnabledEngines: nextEnabledEngines,
+      searchDefaultEngine: defaultSearchEngine,
+    });
+    setCustomEngineName('');
+    setCustomEngineUrl('');
+    setCustomEngineIcon('');
+    feedback.success(t('settings.customSearchEngineAdded'));
   };
 
   return (
@@ -103,7 +172,7 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
           onChange={(value) => handleSetting({ searchDefaultEngine: value })}
           className="settings-control-full"
           options={enabledEngines.map((engineId) => {
-            const option = SEARCH_ENGINE_OPTIONS.find((item) => item.id === engineId);
+            const option = allEngines.find((item) => item.id === engineId);
             return {
               value: engineId,
               label: option?.label ?? engineId,
@@ -126,14 +195,40 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
               searchEnabledEngines: nextEngines,
               searchDefaultEngine: nextEngines.includes(defaultSearchEngine)
                 ? defaultSearchEngine
-                : nextEngines[0],
+                : nextEngines[0]!,
             });
           }}
-          options={SEARCH_ENGINE_OPTIONS.map((item) => ({
-            label: item.label,
+          options={allEngines.map((item) => ({
+            label: item.builtIn ? item.label : <span>{item.label} <Tag>{t('settings.customSearchEngineTag')}</Tag></span>,
             value: item.id,
           }))}
         />
+      </Field>
+
+      <Field
+        label={t('settings.customSearchEngine')}
+        hint={t('settings.customSearchEngineHint')}
+      >
+        <Space.Compact className="settings-control-full">
+          <Input
+            value={customEngineName}
+            onChange={(e) => setCustomEngineName(e.target.value)}
+            placeholder={t('settings.customSearchEngineName')}
+          />
+          <Input
+            value={customEngineUrl}
+            onChange={(e) => setCustomEngineUrl(e.target.value)}
+            placeholder={t('settings.customSearchEngineUrl')}
+          />
+          <Input
+            value={customEngineIcon}
+            onChange={(e) => setCustomEngineIcon(e.target.value)}
+            placeholder={t('settings.customSearchEngineIcon')}
+          />
+          <Button type="primary" disabled={!canAddCustomEngine} onClick={handleAddCustomEngine}>
+            {t('settings.customSearchEngineAdd')}
+          </Button>
+        </Space.Compact>
       </Field>
 
       <Field
@@ -182,7 +277,7 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
           options={[
             { value: 'local', label: t('settings.hotSourceLocal') },
             { value: 'preset', label: t('settings.hotSourcePreset') },
-            { value: 'trending', label: t('settings.hotSourceTrending'), disabled: true },
+            { value: 'trending', label: t('settings.hotSourceTrending') },
             { value: 'off', label: t('settings.hotSourceOff') },
           ]}
         />
@@ -195,13 +290,15 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
       >
         <Popconfirm
           title={t('settings.clearRecentSearchesConfirm')}
-          onConfirm={async () => {
-            try {
-              await setData(STORAGE_KEYS.searchHistory, []);
-              feedback.success(t('settings.clearRecentSearchesDone'));
-            } catch (err) {
-              console.error('[SearchSettings] clearSearchHistory failed:', err);
-            }
+          onConfirm={() => {
+            void (async () => {
+              try {
+                await setData(STORAGE_KEYS.searchHistory, []);
+                feedback.success(t('settings.clearRecentSearchesDone'));
+              } catch (err) {
+                console.error('[SearchSettings] clearSearchHistory failed:', err);
+              }
+            })();
           }}
         >
           <Button size="small" danger>

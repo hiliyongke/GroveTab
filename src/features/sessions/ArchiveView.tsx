@@ -25,11 +25,14 @@ import {
   mergeSessions,
   exportSingleSession,
 } from '@/services';
+import type { RestoreOutcome } from '@/services/archive';
 import { createTab, getCurrentWindow } from '@/chrome';
 import { useT } from '@/shared/i18n';
 import { track } from '@/shared/utils/metrics';
 import { useTabsStore, useUndoStore, useMetadataStore, useSettingsStore } from '@/store';
 import { feedback } from '@/shared/ui/feedback';
+import { appendHistoryEvent } from '@/repositories';
+import { registerHistoryUndoHandler } from '@/services/history/undo-bus';
 import { SessionItem } from './components/SessionItem';
 import { BatchOperationsMenu } from './components/BatchOperationsMenu';
 import { EnhancedRestoreDialog } from './components/EnhancedRestoreDialog';
@@ -66,6 +69,21 @@ export async function refreshSessions() {
 
 // 模块加载时初始化
 void refreshSessions();
+
+/**
+ * 模块加载时一次性注册「archive_create」与「archive_restore」事件的「撤销处理器」。
+ * - archive_create.撤销 = 删除该归档会话（仅此，请勿尝试復原原 tab，避免与已存在的 useUndoStore 冲突）
+ * - archive_restore 未提供：恢复后再「反恢复」语义不明，暂不接
+ *
+ * 这里在模块作用域调用一次即可：ArchiveView 是 lazy chunk，在面板首次打开时一定会被加载。
+ */
+registerHistoryUndoHandler('archive_create', async (event) => {
+  const sessionId = (event.undoContext as { sessionId?: string } | undefined)?.sessionId;
+  if (sessionId === undefined || sessionId === '') return false;
+  await deleteSession(sessionId);
+  await refreshSessions();
+  return true;
+});
 
 export function ArchiveView() {
   const sessions = useSyncExternalStore(subscribeSessions, getSessionsSnapshot);
@@ -142,6 +160,7 @@ export function ArchiveView() {
       // 标签页匹配
       for (let i = 0; i < session.tabs.length; i++) {
         const tab = session.tabs[i];
+        if (!tab) continue;
         const titleMatch = tab.title?.toLowerCase().includes(query) ?? false;
         const pinyinTitleMatch = enablePinyin && pinyinMatchFn !== null && tab.title && pinyinMatchFn(tab.title, query);
         const urlMatch = tab.url.toLowerCase().includes(query);
@@ -177,15 +196,16 @@ export function ArchiveView() {
     }
   };
 
-  const handleEnhancedRestoreComplete = async (outcome: any) => {
+  const handleEnhancedRestoreComplete = async (outcome: RestoreOutcome) => {
     await refreshSessions();
-    void track('archive_restore', { restored: outcome.restored, total: outcome.total });
+    const total = restoringSession?.tabCount ?? outcome.restored;
+    void track('archive_restore', { restored: outcome.restored, total });
     if (outcome.cancelled) {
       feedback.info(t('archive.restoreCancelled', { restored: outcome.restored }));
-    } else if (outcome.restored === outcome.total) {
+    } else if (outcome.restored === total) {
       feedback.success(t('archive.restoredOk'));
     } else {
-      feedback.warning(t('archive.restorePartial', { restored: outcome.restored, total: outcome.total }));
+      feedback.warning(t('archive.restorePartial', { restored: outcome.restored, total }));
     }
     setRestoreDialogOpen(false);
     setRestoringSession(null);
@@ -301,6 +321,14 @@ export function ArchiveView() {
       const result = await archiveAllTabs();
       void track('archive_create', { count: result.archivedCount });
       const { archivedCount, closedCount, session } = result;
+      // 同步记录到「插件历史」时间线，带上足够的 undo 上下文
+      void appendHistoryEvent({
+        type: 'archive_create',
+        title: session.name,
+        extra: { count: archivedCount, sessionId: session.id },
+        undoable: true,
+        undoContext: { sessionId: session.id },
+      });
       await loadAllTabs({ silent: true });
       await refreshSessions();
 

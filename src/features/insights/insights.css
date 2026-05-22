@@ -1,6 +1,9 @@
 .insights-panel {
-  max-height: 65vh;
-  overflow-y: auto;
+  /* Modal 自身已处理高度溢出，外层不再设置 max-height/overflow，避免双滚动条 */
+}
+
+.insights-loading {
+  padding: 8px 4px;
 }
 
 .insights-archive-stat {

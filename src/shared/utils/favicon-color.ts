@@ -90,6 +90,8 @@ function extractDominantColor(imageData: ImageData): [number, number, number] | 
     const g = data[i + 1];
     const b = data[i + 2];
     const a = data[i + 3];
+    // noUncheckedIndexedAccess：守卫四元组完整性
+    if (r === undefined || g === undefined || b === undefined || a === undefined) continue;
     // 过滤：透明、近白、近黑、灰
     if (a < 128) continue;
     if (r > 240 && g > 240 && b > 240) continue;

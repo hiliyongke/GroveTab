@@ -16,14 +16,15 @@
 /* ── 整体容器：CSS Grid，让所有卡片共享同一列轨 ── */
 .speed-dial-grid-wrapper {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(152px, 1fr));
+  /* 卡片最小宽度由 --speed-dial-card-min-width 控制（默认 152px，对应 'md' 档） */
+  grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 152px), 1fr));
   gap: 12px;
   align-items: start;
 }
 
 @media (min-width: 768px) {
   .speed-dial-grid-wrapper {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 160px), 1fr));
   }
 }
 
@@ -62,13 +63,13 @@
 /* ── 分组内网格 ── */
 .speed-dial-group-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(152px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 152px), 1fr));
   gap: 12px;
 }
 
 @media (min-width: 768px) {
   .speed-dial-group-grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 160px), 1fr));
   }
 }
 
@@ -190,14 +191,14 @@
 }
 
 .app-speed-dial-favicon {
-  width: 36px;
-  height: 36px;
+  width: clamp(28px, calc(var(--speed-dial-card-min-width, 152px) * 0.22), 48px);
+  height: clamp(28px, calc(var(--speed-dial-card-min-width, 152px) * 0.22), 48px);
   border-radius: var(--app-radius-sm);
 }
 
 .app-speed-dial-fallback {
   color: var(--speed-dial-card-accent, var(--ant-color-primary));
-  font-size: 28px;
+  font-size: clamp(20px, calc(var(--speed-dial-card-min-width, 152px) * 0.18), 36px);
   font-weight: 700;
   line-height: 1;
 }
@@ -217,38 +218,65 @@
 }
 
 .app-speed-dial-title,
-.app-speed-dial-add-label {
+.app-speed-dial-title {
   overflow: hidden;
   color: var(--ant-color-text);
   font-size: 11px;
   font-weight: 500;
   line-height: 1.3;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  word-break: break-all;
 }
-
 .app-speed-dial-hostname,
 .app-speed-dial-add-label,
 .app-speed-dial-add-hint {
   color: var(--ant-color-text-tertiary);
 }
 
-.app-speed-dial-hostname,
-.app-speed-dial-add-hint {
+.app-speed-dial-add-label {
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  word-break: break-all;
+}
+
+.app-speed-dial-hostname {
   overflow: hidden;
   font-size: 9px;
   line-height: 1.3;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  word-break: break-all;
 }
 
 .app-speed-dial-add-hint {
   visibility: hidden;
+  overflow: hidden;
+  font-size: 9px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  word-break: break-all;
 }
 
 .app-speed-dial-add-preview {
   background: linear-gradient(135deg, color-mix(in srgb, var(--ant-color-primary) 10%, transparent) 0%, color-mix(in srgb, var(--ant-color-primary) 4%, transparent) 100%);
-  border-bottom: 1px dashed var(--ant-color-border-secondary);
+  border-bottom: 1px solid var(--ant-color-border-secondary);
 }
 
 .app-speed-dial-add-icon {
@@ -296,15 +324,10 @@
 
 /* ── 新增卡片 ── */
 .app-speed-dial-card--add {
-  border-style: dashed;
 }
 
 .app-speed-dial-card--add:hover {
   border-color: var(--app-color-primary, var(--ant-color-primary));
-}
-
-.app-speed-dial-card--add:hover .app-speed-dial-add-preview {
-  border-bottom-color: var(--app-color-primary, var(--ant-color-primary)) !important;
 }
 
 .app-speed-dial-card--add:hover .app-speed-dial-add-label {

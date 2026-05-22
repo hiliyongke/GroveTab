@@ -9,7 +9,7 @@
  */
 
 import { useState, useMemo, useRef, useCallback, useEffect, type CSSProperties, type ReactNode } from 'react';
-import { Modal, Input, theme, Select, Tag } from 'antd';
+import { Modal, Input, theme, Tag, Popover } from 'antd';
 import { FeatureEmptyState } from '@/shared/ui/FeatureEmptyState';
 import '@/shared/ui/FeatureEmptyState.css';
 import type { InputRef } from 'antd';
@@ -22,16 +22,23 @@ import {
   Link,
   Search,
   Unlock,
+  Check,
+  ChevronDown,
+  History,
+  RotateCcw,
 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import type {
   LiveTab,
   SearchEngineId,
   SearchScopeField,
+  TrendingCache,
 } from '@/shared/types';
+import type { CustomSearchEngine } from '@/shared/types/settings';
 import {
   useTabsStore,
   useSettingsStore,
+  useMetadataStore,
 } from '@/store';
 import { useT } from '@/shared/i18n';
 import {
@@ -39,23 +46,34 @@ import {
   hasHistoryPermission,
   requestHistoryPermission,
   searchHistoryEntries,
+  storageGet,
   type HistorySearchEntry,
 } from '@/chrome';
 import { track } from '@/shared/utils/metrics';
-import { getRecentSearches, getSearchHistory, pushRecentSearch } from '@/repositories';
 import {
-  SEARCH_ENGINE_OPTIONS,
+  getRecentSearches,
+  getSearchHistory,
+  pushRecentSearch,
+  getClosedTabs,
+  deleteClosedTab,
+} from '@/repositories';
+import type { ClosedTabRecord } from '@/shared/types';
+import { STORAGE_KEYS } from '@/shared/config/storage-keys';
+import { fetchMultipleBoards } from '@/services/trending-service';
+import {
   buildSearchUrl,
   resolveHotKeywords,
   getSearchEngineOption,
+  normalizeEnabledSearchEngines,
+  type SearchEngineOption,
   type HotKeywordSource,
 } from '@/shared/config/search-engines';
 import { iconColor, iconColorAlpha, type IconRole } from '@/shared/utils/icon-colors';
 import './SearchBox.css';
 
 const DEFAULT_SEARCH_SCOPE: SearchScopeField[] = ['title', 'hostname', 'url'];
-const DEFAULT_ENABLED_ENGINES: SearchEngineId[] = SEARCH_ENGINE_OPTIONS.map((item) => item.id);
 const SEARCH_DEBOUNCE_MS = 180;
+const SEARCH_TRENDING_PLATFORMS = ['weibo', 'baidu', 'toutiao'];
 
 type PinyinMatchFn = (text: string, query: string) => boolean;
 interface SearchIndexLike {
@@ -67,6 +85,12 @@ interface SearchBoxProps {
   open: boolean;
   /** 受控：开关切换回调 */
   onOpenChange: (open: boolean) => void;
+  /** 点击「查看全部历史」时的回调；未传时不展示该入口 */
+  onOpenHistory?: () => void;
+}
+
+interface SearchSettingsSnapshot {
+  searchCustomEngines?: CustomSearchEngine[];
 }
 
 type SuggestionSource = 'recent' | 'hot';
@@ -79,6 +103,7 @@ type UniversalSearchItem =
       subtitle: string;
       tab: LiveTab;
       badge?: string;
+      matchedTags?: string[];
     }
   | {
       id: string;
@@ -86,6 +111,13 @@ type UniversalSearchItem =
       title: string;
       subtitle: string;
       entry: HistorySearchEntry;
+    }
+  | {
+      id: string;
+      type: 'closed';
+      title: string;
+      subtitle: string;
+      record: ClosedTabRecord;
     }
   | {
       id: string;
@@ -108,6 +140,14 @@ type UniversalSearchItem =
       type: 'permission';
       title: string;
       subtitle: string;
+    }
+  | {
+      /** 快捷动作，如「打开历史面板」，取代于临时仅有一个 commandId 但保留可扩展能力 */
+      id: string;
+      type: 'command';
+      title: string;
+      subtitle: string;
+      commandId: 'open-history';
     };
 
 interface SearchSection {
@@ -122,6 +162,21 @@ function cx(...classNames: Array<string | false | undefined>) {
 
 function cssVars(vars: Record<string, string>): CSSProperties {
   return vars;
+}
+
+/** Normalize URL exactly like metadata-slice so search can resolve tab tags reliably. */
+function normalizeMetadataKey(url: string): string {
+  try {
+    const parsed = new URL(url);
+    parsed.hash = '';
+    return parsed.toString().replace(/\/+$/, '');
+  } catch {
+    return url;
+  }
+}
+
+function normalizeSearchText(text: string): string {
+  return text.trim().toLowerCase();
 }
 
 /**
@@ -164,6 +219,10 @@ function getItemIconMeta(item: UniversalSearchItem): { icon: ReactNode; iconRole
       return { icon: <LayoutGrid size={ICON_SIZE.TINY} />, iconRole: 'tab' };
     case 'history':
       return { icon: <Link size={ICON_SIZE.TINY} />, iconRole: 'history' };
+    case 'closed':
+      return { icon: <RotateCcw size={ICON_SIZE.TINY} />, iconRole: 'history' };
+    case 'command':
+      return { icon: <History size={ICON_SIZE.TINY} />, iconRole: 'history' };
     case 'web':
       return { icon: <Globe size={ICON_SIZE.TINY} />, iconRole: 'web' };
     case 'permission':
@@ -178,18 +237,9 @@ function getItemIconMeta(item: UniversalSearchItem): { icon: ReactNode; iconRole
 }
 
 /**
- * 规范化搜索引擎列表，确保至少保留一个有效引擎。
- */
-function normalizeEnabledEngines(engineIds: SearchEngineId[] | undefined): SearchEngineId[] {
-  const validIds = new Set<SearchEngineId>(SEARCH_ENGINE_OPTIONS.map((item) => item.id));
-  const normalized = (engineIds ?? []).filter((item) => validIds.has(item));
-  return normalized.length > 0 ? normalized : DEFAULT_ENABLED_ENGINES;
-}
-
-/**
  * 全能搜索浮层。
  */
-export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
+export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps) {
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
@@ -197,11 +247,16 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   /** 本地热词聚合需要完整的 SearchHistoryEntry（带 count + ts），不能复用 recentSearches */
   const [historyForHot, setHistoryForHot] = useState<Array<{ query: string; ts: number; count: number }>>([]);
+  const [trendingCache, setTrendingCache] = useState<TrendingCache | undefined>(undefined);
   const [historyPermission, setHistoryPermission] = useState<boolean | null>(null);
   const [historyEntries, setHistoryEntries] = useState<HistorySearchEntry[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [enginePopoverOpen, setEnginePopoverOpen] = useState(false);
+  /** 「最近关闭」：输入为空时作为 section 展示；有输入时也作为补充候选 */
+  const [closedTabRecords, setClosedTabRecords] = useState<ClosedTabRecord[]>([]);
   const inputRef = useRef<InputRef>(null);
   const tabs = useTabsStore((s) => s.tabs);
+  const tagsByUrl = useMetadataStore((s) => s.tags);
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
   const { t, locale } = useT();
   const { token } = theme.useToken();
@@ -212,10 +267,16 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
   const searchSortBy = useSettingsStore((s) => s.settings.searchSortBy ?? 'relevance');
   const defaultEngine = useSettingsStore((s) => s.settings.searchDefaultEngine ?? 'google');
   const enabledEngineIds = useSettingsStore((s) => s.settings.searchEnabledEngines);
+  const customEngines = useSettingsStore((s): CustomSearchEngine[] => {
+    const settings = s.settings as SearchSettingsSnapshot;
+    return settings.searchCustomEngines ?? [];
+  });
   const autoFallbackToWeb = useSettingsStore((s) => s.settings.searchAutoFallbackToWeb ?? true);
   const useHistorySuggestions = useSettingsStore((s) => s.settings.searchUseHistorySuggestions ?? true);
   const useHotSuggestions = useSettingsStore((s) => s.settings.searchUseHotSuggestions ?? true);
   const hotSuggestionSource = useSettingsStore((s) => s.settings.hotSuggestionSource);
+  /** 历史记录主开关：关闭时不再展示「最近关闭」section */
+  const historyEnabled = useSettingsStore((s) => s.settings.historyEnabled !== false);
 
   /**
    * 归一化热词来源：老开关（布尔）+ 新字段（3 档）的兼容规则——
@@ -226,11 +287,23 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
     ? 'off'
     : (hotSuggestionSource ?? 'local');
 
-  const enabledEngines = useMemo(() => normalizeEnabledEngines(enabledEngineIds), [enabledEngineIds]);
-  const resolvedDefaultEngine = enabledEngines.includes(defaultEngine) ? defaultEngine : enabledEngines[0];
-  const currentEngineOption = getSearchEngineOption(currentEngine);
+  const enabledEngines = useMemo(
+    () => normalizeEnabledSearchEngines(enabledEngineIds, customEngines),
+    [customEngines, enabledEngineIds],
+  );
+  const engineOptions = useMemo<SearchEngineOption[]>(
+    () => enabledEngines.map((engineId) => getSearchEngineOption(engineId, customEngines)),
+    [customEngines, enabledEngines],
+  );
+  const resolvedDefaultEngine: SearchEngineId = enabledEngines.includes(defaultEngine) ? defaultEngine : (enabledEngines[0] ?? 'google');
+  const currentEngineOption = getSearchEngineOption(currentEngine, customEngines);
   const normalizedQuery = query.trim();
   const lowerQuery = normalizedQuery.toLowerCase();
+  const tagScopedMatch = /^tag[:：]\s*(.*)$/i.exec(normalizedQuery);
+  const isTagScopedQuery = tagScopedMatch !== null;
+  const tagScopedQuery = isTagScopedQuery ? (tagScopedMatch[1] ?? '').trim() : '';
+  const searchText = isTagScopedQuery ? tagScopedQuery : normalizedQuery;
+  const lowerSearchText = normalizeSearchText(searchText);
 
   const rootVars = useMemo(
     () => cssVars({
@@ -251,7 +324,16 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
 
   /**
    * MiniSearch 索引（异步构建）。
+   *
+   * 性能注意：tabs 数组在 store 中每次变更都会创建新引用（即使内容没变），
+   * 直接把 tabs 放到依赖里会导致索引被频繁重建（用户每切一次 Tab 都重建一次）。
+   * 这里改为基于「能影响命中结果的内容指纹」做依赖：tabs 数量 + id/title/url/hostname 拼接。
+   * 这样标签状态字段（如 lastAccessed、audible）变化不会触发无谓重建。
    */
+  const tabsIndexSignature = useMemo(
+    () => `${tabs.length}|${tabs.map((t) => `${t.id}:${t.title}:${t.hostname}:${t.url}`).join('\u0001')}`,
+    [tabs],
+  );
   const [searchIndex, setSearchIndex] = useState<SearchIndexLike | null>(null);
   useEffect(() => {
     if (!open) return;
@@ -282,7 +364,9 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
     return () => {
       cancelled = true;
     };
-  }, [open, searchScope, tabs]);
+    // 依赖项 tabs 通过 tabsIndexSignature 间接表达；ESLint 在该 hook 上忽略 tabs 是有意为之
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, searchScope, tabsIndexSignature]);
 
   /**
    * 拼音匹配函数（异步预加载）。
@@ -314,10 +398,38 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
         setHistoryForHot(entries);
       }
     });
+    // 加载「最近关闭」
+    void getClosedTabs().then((tabs) => {
+      if (!cancelled) {
+        setClosedTabRecords(tabs);
+      }
+    });
     return () => {
       cancelled = true;
     };
   }, [open]);
+
+  /**
+   * 全网热门话题：优先读后台定时刷新的热榜缓存；没有缓存时主动拉取一组综合热榜。
+   */
+  useEffect(() => {
+    if (!open || effectiveHotSource !== 'trending') return;
+    let cancelled = false;
+    void (async () => {
+      const cached = await storageGet<TrendingCache>(STORAGE_KEYS.trendingCache);
+      if (!cancelled && cached !== undefined) {
+        setTrendingCache(cached);
+      }
+      if (cached !== undefined && Object.keys(cached.boards).length > 0) return;
+      const boards = await fetchMultipleBoards(SEARCH_TRENDING_PLATFORMS, 3);
+      if (!cancelled && Object.keys(boards).length > 0) {
+        setTrendingCache({ boards, lastRefreshAt: Date.now() });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [effectiveHotSource, open]);
 
   /**
    * 打开搜索框时检查历史记录权限。
@@ -350,32 +462,31 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
 
   /**
    * 拉取历史建议。
+   * - debouncedQuery 改变时立即清空旧结果，避免「上一个 query 的历史」短暂错位显示。
+   * - 防抖已在上一个 effect 中通过 setDebouncedQuery 完成，这里直接发起请求，无需再嵌套 setTimeout。
    */
   useEffect(() => {
     if (!open || !useHistorySuggestions || historyPermission !== true) return;
     let cancelled = false;
-    const timer = window.setTimeout(() => {
-      setHistoryLoading(true);
-      void searchHistoryEntries(debouncedQuery, debouncedQuery === '' ? 5 : 6)
-        .then((entries) => {
-          if (!cancelled) {
-            setHistoryEntries(entries);
-          }
-        })
-        .catch(() => {
-          if (!cancelled) {
-            setHistoryEntries([]);
-          }
-        })
-        .finally(() => {
-          if (!cancelled) {
-            setHistoryLoading(false);
-          }
-        });
-    }, 0);
+    setHistoryLoading(true);
+    void searchHistoryEntries(debouncedQuery, debouncedQuery === '' ? 5 : 6)
+      .then((entries) => {
+        if (!cancelled) {
+          setHistoryEntries(entries);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setHistoryEntries([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setHistoryLoading(false);
+        }
+      });
     return () => {
       cancelled = true;
-      window.clearTimeout(timer);
     };
   }, [debouncedQuery, historyPermission, open, useHistorySuggestions]);
 
@@ -389,6 +500,35 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
     const matchTitle = scopeSet.has('title');
     const matchHostname = scopeSet.has('hostname');
     const matchUrl = scopeSet.has('url');
+    const getTabTags = (tab: LiveTab) => tagsByUrl[normalizeMetadataKey(tab.url)] ?? [];
+    const getMatchedTags = (tab: LiveTab) => {
+      if (lowerSearchText === '') return [];
+      return getTabTags(tab).filter((tag) => normalizeSearchText(tag).includes(lowerSearchText));
+    };
+    const hasTagMatch = (tab: LiveTab) => getMatchedTags(tab).length > 0;
+    const sortTabs = (items: LiveTab[]) => {
+      if (searchSortBy === 'recentAccess') {
+        items.sort((a, b) => (b.lastAccessed || 0) - (a.lastAccessed || 0));
+      }
+      return items;
+    };
+    const toItem = (tab: LiveTab): UniversalSearchItem => {
+      const matchedTags = getMatchedTags(tab);
+      return {
+        id: `tab-${tab.id}`,
+        type: 'tab',
+        title: tab.title,
+        subtitle: tab.hostname,
+        tab,
+        badge: tab.isCurrentWindow ? undefined : t('tabs.otherWindow'),
+        matchedTags,
+      };
+    };
+
+    if (isTagScopedQuery) {
+      if (lowerSearchText === '') return [];
+      return sortTabs(tabs.filter(hasTagMatch)).map(toItem);
+    }
 
     try {
       const miniResults: Array<{ id: number }> = searchIndex?.search(normalizedQuery) ?? [];
@@ -398,108 +538,115 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
           .map((item) => byId.get(item.id))
           .filter((item): item is LiveTab => item !== undefined);
 
+        const existingIds = new Set(matchedTabs.map((item) => item.id));
+
         if (enablePinyin && pinyinMatchFn !== null) {
-          const existingIds = new Set(matchedTabs.map((item) => item.id));
           const extras = tabs.filter((tab) => {
             if (existingIds.has(tab.id)) return false;
             const matchesTitle = matchTitle && pinyinMatchFn(tab.title, normalizedQuery);
             const matchesHostname = matchHostname && pinyinMatchFn(tab.hostname, normalizedQuery);
             return matchesTitle || matchesHostname;
           });
+          extras.forEach((item) => existingIds.add(item.id));
           matchedTabs = [...matchedTabs, ...extras];
         }
 
-        if (searchSortBy === 'recentAccess') {
-          matchedTabs.sort((a, b) => (b.lastAccessed || 0) - (a.lastAccessed || 0));
-        }
+        const tagMatchedTabs = tabs.filter((tab) => !existingIds.has(tab.id) && hasTagMatch(tab));
+        matchedTabs = [...matchedTabs, ...tagMatchedTabs];
 
-        return matchedTabs.map((tab) => ({
-          id: `tab-${tab.id}`,
-          type: 'tab',
-          title: tab.title,
-          subtitle: tab.hostname,
-          tab,
-          badge: tab.isCurrentWindow ? undefined : t('tabs.otherWindow'),
-        }));
+        return sortTabs(matchedTabs).map(toItem);
       }
     } catch {
       /* MiniSearch 异常时走兜底匹配 */
     }
 
     const fallbackTabs = tabs.filter((tab) => {
+      if (hasTagMatch(tab)) return true;
       if (matchTitle) {
         const titleMatched = tab.title.toLowerCase().includes(lowerQuery);
         if (titleMatched) return true;
-        if (enablePinyin && pinyinMatchFn !== null && pinyinMatchFn(tab.title, normalizedQuery)) return true;
+        if (enablePinyin && pinyinMatchFn?.(tab.title, normalizedQuery)) return true;
       }
       if (matchHostname) {
         const hostnameMatched = tab.hostname.toLowerCase().includes(lowerQuery);
         if (hostnameMatched) return true;
-        if (enablePinyin && pinyinMatchFn !== null && pinyinMatchFn(tab.hostname, normalizedQuery)) return true;
+        if (enablePinyin && pinyinMatchFn?.(tab.hostname, normalizedQuery)) return true;
       }
       if (matchUrl && tab.url.toLowerCase().includes(lowerQuery)) return true;
       return false;
     });
 
-    if (searchSortBy === 'recentAccess') {
-      fallbackTabs.sort((a, b) => (b.lastAccessed || 0) - (a.lastAccessed || 0));
-    }
-
-    return fallbackTabs.map((tab) => ({
-      id: `tab-${tab.id}`,
-      type: 'tab',
-      title: tab.title,
-      subtitle: tab.hostname,
-      tab,
-      badge: tab.isCurrentWindow ? undefined : t('tabs.otherWindow'),
-    }));
-  }, [enablePinyin, lowerQuery, normalizedQuery, pinyinMatchFn, searchIndex, searchScope, searchSortBy, t, tabs]);
+    return sortTabs(fallbackTabs).map(toItem);
+  }, [enablePinyin, isTagScopedQuery, lowerQuery, lowerSearchText, normalizedQuery, pinyinMatchFn, searchIndex, searchScope, searchSortBy, t, tabs, tagsByUrl]);
 
   /**
-   * 计算联想建议。
+   * 计算"最近搜索"列表（独立 section）。
+   * - 空 query：展示用户的最近搜索词（按存储顺序）
+   * - 有 query：把最近搜索作为联想（包含子串过滤）
    */
-  const suggestionItems = useMemo<UniversalSearchItem[]>(() => {
-    const items: UniversalSearchItem[] = [];
+  const recentItems = useMemo<UniversalSearchItem[]>(() => {
+    if (isTagScopedQuery) return [];
     const seen = new Set<string>();
-    const pushSuggestion = (keyword: string, source: SuggestionSource, subtitle: string) => {
+    const items: UniversalSearchItem[] = [];
+    const filtered = recentSearches.filter((item) =>
+      normalizedQuery === '' ? true : item.toLowerCase().includes(lowerQuery),
+    );
+    filtered.slice(0, normalizedQuery === '' ? 6 : 4).forEach((keyword) => {
       const normalized = keyword.trim();
       const key = normalized.toLowerCase();
       if (normalized === '' || seen.has(key)) return;
       seen.add(key);
       items.push({
-        id: `${source}-${key}`,
+        id: `recent-${key}`,
         type: 'suggestion',
         title: normalized,
-        subtitle,
+        subtitle: t('search.sourceRecent'),
         keyword: normalized,
-        source,
+        source: 'recent',
       });
-    };
+    });
+    return items;
+  }, [isTagScopedQuery, lowerQuery, normalizedQuery, recentSearches, t]);
 
-    const filteredRecent = recentSearches.filter((item) =>
+  /**
+   * 计算"热门话题"列表（独立 section）。
+   * - source=local 时基于本地历史聚合；本地为空时由 resolveHotKeywords 退化为 preset
+   * - source=preset/trending 时按各自规则
+   * - source=off 时返回空
+   */
+  const hotItems = useMemo<UniversalSearchItem[]>(() => {
+    if (isTagScopedQuery || effectiveHotSource === 'off') return [];
+    const seen = new Set<string>();
+    // 同名词去重：避免某个 keyword 同时出现在 recent 与 hot 中导致两条
+    recentItems.forEach((item) => {
+      if (item.type === 'suggestion') seen.add(item.keyword.toLowerCase());
+    });
+    const items: UniversalSearchItem[] = [];
+    const hotKeywords = resolveHotKeywords(effectiveHotSource, locale, historyForHot, trendingCache).filter((item) =>
       normalizedQuery === '' ? true : item.toLowerCase().includes(lowerQuery),
     );
-    filteredRecent.slice(0, 4).forEach((item) => {
-      pushSuggestion(item, 'recent', t('search.sourceRecent'));
-    });
-
-    if (effectiveHotSource !== 'off') {
-      const hotKeywords = resolveHotKeywords(effectiveHotSource, locale, historyForHot).filter((item) =>
-        normalizedQuery === '' ? true : item.toLowerCase().includes(lowerQuery),
-      );
-      hotKeywords.slice(0, normalizedQuery === '' ? 5 : 4).forEach((item) => {
-        pushSuggestion(item, 'hot', t('search.sourceHot'));
+    hotKeywords.slice(0, normalizedQuery === '' ? 6 : 4).forEach((keyword) => {
+      const normalized = keyword.trim();
+      const key = normalized.toLowerCase();
+      if (normalized === '' || seen.has(key)) return;
+      seen.add(key);
+      items.push({
+        id: `hot-${key}`,
+        type: 'suggestion',
+        title: normalized,
+        subtitle: t('search.sourceHot'),
+        keyword: normalized,
+        source: 'hot',
       });
-    }
-
+    });
     return items;
-  }, [locale, lowerQuery, normalizedQuery, recentSearches, t, effectiveHotSource, historyForHot]);
+  }, [effectiveHotSource, historyForHot, isTagScopedQuery, locale, lowerQuery, normalizedQuery, recentItems, t, trendingCache]);
 
   /**
    * 计算历史结果。
    */
   const historyItems = useMemo<UniversalSearchItem[]>(() => {
-    if (!useHistorySuggestions || historyPermission !== true) return [];
+    if (isTagScopedQuery || !useHistorySuggestions || historyPermission !== true) return [];
     return historyEntries
       .filter((entry) => entry.url !== '')
       .map((entry) => ({
@@ -509,10 +656,33 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
         subtitle: entry.url,
         entry,
       }));
-  }, [historyEntries, historyPermission, useHistorySuggestions]);
+  }, [historyEntries, historyPermission, isTagScopedQuery, useHistorySuggestions]);
+
+  /**
+   * 「最近关闭」section
+   * - 空 query：展示最多 5 条最近关闭
+   * - 有 query：作为子串过滤后的补充候选（最多 4 条）
+   * - 主开关关闭时不展示
+   */
+  const closedItems = useMemo<UniversalSearchItem[]>(() => {
+    if (isTagScopedQuery) return [];
+    if (!historyEnabled) return [];
+    const filtered = closedTabRecords.filter((r) => {
+      if (normalizedQuery === '') return true;
+      const hay = `${r.title} ${r.url} ${r.hostname}`.toLowerCase();
+      return hay.includes(lowerQuery);
+    });
+    return filtered.slice(0, normalizedQuery === '' ? 5 : 4).map((r) => ({
+      id: `closed-${r.id}`,
+      type: 'closed' as const,
+      title: r.title === '' ? r.url : r.title,
+      subtitle: r.hostname === '' ? r.url : r.hostname,
+      record: r,
+    }));
+  }, [closedTabRecords, historyEnabled, isTagScopedQuery, lowerQuery, normalizedQuery]);
 
   const webItems = useMemo<UniversalSearchItem[]>(() => {
-    if (normalizedQuery === '') return [];
+    if (isTagScopedQuery || normalizedQuery === '') return [];
     const primary: UniversalSearchItem[] = [
       {
         id: `web-${currentEngine}-${normalizedQuery}`,
@@ -529,7 +699,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
 
     const secondaryEngines = enabledEngines.filter((engineId) => engineId !== currentEngine).slice(0, 2);
     secondaryEngines.forEach((engineId) => {
-      const option = getSearchEngineOption(engineId);
+      const option = getSearchEngineOption(engineId, customEngines);
       primary.push({
         id: `web-${engineId}-${normalizedQuery}`,
         type: 'web',
@@ -544,10 +714,10 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
     });
 
     return primary;
-  }, [currentEngine, currentEngineOption.label, enabledEngines, normalizedQuery, t]);
+  }, [currentEngine, currentEngineOption.label, customEngines, enabledEngines, isTagScopedQuery, normalizedQuery, t]);
 
   const permissionItems = useMemo<UniversalSearchItem[]>(() => {
-    if (!useHistorySuggestions || historyPermission !== false) return [];
+    if (isTagScopedQuery || !useHistorySuggestions || historyPermission !== false) return [];
     return [
       {
         id: 'permission-history',
@@ -556,7 +726,28 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
         subtitle: t('search.enableHistoryHint'),
       },
     ];
-  }, [historyPermission, t, useHistorySuggestions]);
+  }, [historyPermission, isTagScopedQuery, t, useHistorySuggestions]);
+
+  /**
+   * 「快捷动作」候选项：输入「history / 历史 / recent / 最近 / closed / 关闭 / /h / /history」
+   * 等关键词时，为用户提供一条「打开历史面板」的路由入口。未提供 onOpenHistory 时不出现。
+   */
+  const commandItems = useMemo<UniversalSearchItem[]>(() => {
+    if (isTagScopedQuery || onOpenHistory === undefined) return [];
+    if (normalizedQuery === '') return [];
+    const triggers = ['history', 'recent', 'closed', '/h', '/history', '历史', '最近', '关闭'];
+    const hit = triggers.some((kw) => lowerQuery.includes(kw));
+    if (!hit) return [];
+    return [
+      {
+        id: 'command-open-history',
+        type: 'command',
+        title: t('search.commandOpenHistory'),
+        subtitle: t('search.commandOpenHistoryHint'),
+        commandId: 'open-history',
+      },
+    ];
+  }, [isTagScopedQuery, lowerQuery, normalizedQuery, onOpenHistory, t]);
 
   /**
    * 按优先级组装搜索区块。
@@ -568,11 +759,21 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
     if (normalizedQuery !== '' && autoFallbackToWeb && !hasTabMatches && webItems.length > 0) {
       nextSections.push({ key: 'web-primary', title: t('search.sectionWeb'), items: webItems });
     }
+    if (commandItems.length > 0) {
+      // 「快捷动作」总是置顶，避免被页内 tab 结果淹没
+      nextSections.push({ key: 'commands', title: t('search.sectionCommands'), items: commandItems });
+    }
     if (tabItems.length > 0) {
       nextSections.push({ key: 'tabs', title: t('search.sectionTabs'), items: tabItems });
     }
-    if (suggestionItems.length > 0) {
-      nextSections.push({ key: 'suggestions', title: t('search.sectionSuggestions'), items: suggestionItems });
+    if (recentItems.length > 0) {
+      nextSections.push({ key: 'recent', title: t('search.sectionRecent'), items: recentItems });
+    }
+    if (closedItems.length > 0) {
+      nextSections.push({ key: 'closed', title: t('search.sectionRecentlyClosed'), items: closedItems });
+    }
+    if (hotItems.length > 0) {
+      nextSections.push({ key: 'hot', title: t('search.sectionHot'), items: hotItems });
     }
     if (historyItems.length > 0 || permissionItems.length > 0) {
       nextSections.push({
@@ -586,13 +787,37 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
     }
 
     return nextSections;
-  }, [autoFallbackToWeb, historyItems, normalizedQuery, permissionItems, suggestionItems, t, tabItems, webItems]);
+  }, [autoFallbackToWeb, closedItems, commandItems, historyItems, hotItems, normalizedQuery, permissionItems, recentItems, t, tabItems, webItems]);
 
   const flatItems = useMemo(() => sections.flatMap((section) => section.items), [sections]);
   const firstWebItemIndex = useMemo(
     () => flatItems.findIndex((item) => item.type === 'web'),
     [flatItems],
   );
+
+  /**
+   * 当结果集合变化导致 activeIndex 越界时，把它 clamp 回合法范围。
+   * 避免「输入新关键词后，旧的 activeIndex 大于当前列表长度，高亮丢失」的问题。
+   */
+  useEffect(() => {
+    if (flatItems.length === 0) {
+      if (activeIndex !== 0) setActiveIndex(0);
+      return;
+    }
+    if (activeIndex >= flatItems.length) {
+      setActiveIndex(flatItems.length - 1);
+    }
+  }, [activeIndex, flatItems.length]);
+
+  /**
+   * 当 enabledEngines 变化导致 currentEngine 不在启用列表中时，
+   * 自动切到一个合法引擎，避免 Select 显示空白或 Cmd+Enter 用错引擎。
+   */
+  useEffect(() => {
+    if (!enabledEngines.includes(currentEngine)) {
+      setCurrentEngine(enabledEngines[0] ?? 'google');
+    }
+  }, [currentEngine, enabledEngines]);
   const shortcutHints = useMemo(
     () => [
       { id: 'navigate', keys: ['↑', '↓'], label: t('search.navigate') },
@@ -618,32 +843,38 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
 
   /**
    * 执行网页搜索。
+   * @param active - 是否切换到新打开的 Tab；Alt+Enter 等场景需要后台打开（false）
    */
-  const runWebSearch = useCallback(async (searchText: string, engineId: SearchEngineId) => {
-    const trimmed = searchText.trim();
+  const runWebSearch = useCallback(async (
+    searchQuery: string,
+    engineId: SearchEngineId = currentEngine,
+    active = true,
+  ) => {
+    const trimmed = searchQuery.trim();
     if (trimmed === '') return;
+    const url = buildSearchUrl(engineId, trimmed, customEngines);
+    // 先记录搜索历史，再关闭浮层；避免组件被 destroyOnHidden 卸载后 setState 警告
     try {
-      await createTab({ url: buildSearchUrl(engineId, trimmed), active: true });
+      const updatedRecent = await pushRecentSearch(trimmed);
+      setRecentSearches(updatedRecent);
+    } catch {
+      /* 搜索历史保存失败不影响用户操作 */
+    }
+    try {
+      await createTab({ url, active });
       void track('search_web', { engine: engineId, query: trimmed });
       close();
-      // 打开成功后再保存搜索历史，避免存储写入阻塞或阻断核心操作
-      try {
-        const updatedRecent = await pushRecentSearch(trimmed);
-        setRecentSearches(updatedRecent);
-      } catch {
-        /* 搜索历史保存失败不影响用户操作 */
-      }
     } catch (err) {
       // createTab 失败（如非扩展上下文），回退到 window.open
       try {
-        window.open(buildSearchUrl(engineId, trimmed), '_blank');
+        window.open(url, '_blank');
         close();
       } catch {
         /* 彻底失败时静默处理 */
       }
       console.error('[SearchBox] runWebSearch failed:', err);
     }
-  }, [close]);
+  }, [close, currentEngine, customEngines]);
 
   /**
    * 打开历史结果。
@@ -685,6 +916,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
     setActiveIndex(0);
     setCurrentEngine(resolvedDefaultEngine);
     setHistoryEntries([]);
+    setEnginePopoverOpen(false);
     inputRef.current?.focus();
   }, [resolvedDefaultEngine]);
 
@@ -692,6 +924,27 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
     void jumpToTab(tab.id, tab.windowId);
     close();
   }, [close, jumpToTab]);
+
+  /**
+   * 恢复一条「最近关闭」记录。
+   */
+  const restoreClosedTab = useCallback(async (record: ClosedTabRecord) => {
+    try {
+      await createTab({ url: record.url, active: true, pinned: record.pinned });
+      await deleteClosedTab(record.id);
+      // 同步本地状态，让 UI 立即反馈该项消失
+      setClosedTabRecords((prev) => prev.filter((r) => r.id !== record.id));
+      close();
+    } catch (err) {
+      try {
+        window.open(record.url, '_blank');
+        close();
+      } catch {
+        /* 彻底失败静默处理 */
+      }
+      console.error('[SearchBox] restoreClosedTab failed:', err);
+    }
+  }, [close]);
 
   /**
    * 执行当前高亮项。
@@ -705,6 +958,10 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
       void openHistoryEntry(item.entry);
       return;
     }
+    if (item.type === 'closed') {
+      void restoreClosedTab(item.record);
+      return;
+    }
     if (item.type === 'suggestion') {
       void runWebSearch(item.keyword, currentEngine);
       return;
@@ -715,8 +972,16 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
     }
     if (item.type === 'permission') {
       void enableHistorySuggestions();
+      return;
     }
-  }, [currentEngine, enableHistorySuggestions, handleJump, openHistoryEntry, runWebSearch]);
+    if (item.type === 'command') {
+      // 目前只接入 open-history，后续如有更多命令式 item，按 commandId 分支扩展
+      if (item.commandId === 'open-history' && onOpenHistory !== undefined) {
+        close();
+        onOpenHistory();
+      }
+    }
+  }, [close, currentEngine, enableHistorySuggestions, handleJump, onOpenHistory, openHistoryEntry, restoreClosedTab, runWebSearch]);
 
   /**
    * 键盘导航（v1.1 完善）：
@@ -775,7 +1040,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
     if (e.altKey && e.key === 'Enter' && nq !== '') {
       // Alt+Enter：后台打开（不切换到新 Tab）
       e.preventDefault();
-      void runWebSearch(nq, engine);
+      void runWebSearch(nq, engine, false);
       return;
     }
 
@@ -808,7 +1073,7 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
         void runWebSearch(nq, engine);
       }
     }
-  }, [close, handleActivate, runWebSearch]);
+  }, [close, handleActivate, runWebSearch, updateNavStateRef]);
 
   return (
     <Modal
@@ -831,6 +1096,64 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
     >
       <div className="search-box-shell" style={rootVars}>
         <div className="search-box-header">
+          <Popover
+            open={enginePopoverOpen}
+            onOpenChange={setEnginePopoverOpen}
+            trigger="click"
+            placement="bottomLeft"
+            arrow={false}
+            overlayClassName="search-box-engine-popover"
+            content={(
+              <ul className="search-box-engine-menu" role="listbox" aria-label={t('search.engineSwitcher')}>
+                {engineOptions.map((option, idx) => {
+                  const active = option.id === currentEngine;
+                  const shortcut = idx < 9 ? `\u2318${idx + 1}` : undefined;
+                  return (
+                    <li
+                      key={option.id}
+                      role="option"
+                      aria-selected={active}
+                      className={cx('search-box-engine-menu-item', active && 'is-active')}
+                      style={cssVars({ '--searchbox-engine-color': option.color })}
+                      onClick={() => {
+                        setCurrentEngine(option.id);
+                        setEnginePopoverOpen(false);
+                        inputRef.current?.focus();
+                      }}
+                    >
+                      <span className="search-box-engine-logo" aria-hidden="true">
+                        {option.iconUrl ? <img src={option.iconUrl} alt="" /> : option.label.slice(0, 1)}
+                      </span>
+                      <span className="search-box-engine-menu-label">{option.label}</span>
+                      {shortcut !== undefined && (
+                        <span className="search-box-engine-menu-shortcut" aria-hidden="true">{shortcut}</span>
+                      )}
+                      {active && (
+                        <Check size={ICON_SIZE.TINY} className="search-box-engine-menu-check" aria-hidden="true" />
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          >
+            <button
+              type="button"
+              className={cx('search-box-engine-trigger', enginePopoverOpen && 'is-open')}
+              style={cssVars({ '--searchbox-engine-color': currentEngineOption.color })}
+              aria-haspopup="listbox"
+              aria-expanded={enginePopoverOpen}
+              aria-label={t('search.engineSwitcher')}
+              title={currentEngineOption.label}
+            >
+              <span className="search-box-engine-logo" aria-hidden="true">
+                {currentEngineOption.iconUrl
+                  ? <img src={currentEngineOption.iconUrl} alt="" />
+                  : currentEngineOption.label.slice(0, 1)}
+              </span>
+              <ChevronDown size={ICON_SIZE.TINY} className="search-box-engine-trigger-caret" aria-hidden="true" />
+            </button>
+          </Popover>
           <Input
             ref={inputRef}
             size="large"
@@ -849,17 +1172,20 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
             aria-label={t('search.universalPlaceholder')}
             className="search-box-input"
           />
-          <Select<SearchEngineId>
-            size="small"
-            value={currentEngine}
-            onChange={setCurrentEngine}
-            className="search-box-engine"
-            suffixIcon={<Globe size={ICON_SIZE.MEDIUM} className="search-box-engine-icon" />}
-            options={enabledEngines.map((engineId) => {
-              const option = getSearchEngineOption(engineId);
-              return { value: option.id, label: option.label };
-            })}
-          />
+          {onOpenHistory !== undefined && (
+            <button
+              type="button"
+              className="search-box-history-trigger"
+              onClick={() => {
+                close();
+                onOpenHistory();
+              }}
+              aria-label={t('search.openHistoryPanel')}
+              title={t('search.openHistoryPanel')}
+            >
+              <History size={ICON_SIZE.SMALL} aria-hidden="true" />
+            </button>
+          )}
         </div>
 
         <div className="search-box-list-area">
@@ -933,6 +1259,15 @@ export function SearchBox({ open, onOpenChange }: SearchBoxProps) {
                               <div className="search-box-item-title">{titleNode}</div>
                               {item.type === 'tab' && item.badge !== undefined && (
                                 <Tag className="search-box-tag">{item.badge}</Tag>
+                              )}
+                              {item.type === 'tab' && item.matchedTags !== undefined && item.matchedTags.length > 0 && (
+                                <span className="search-box-tag-list" aria-label={t('search.matchedTags')}>
+                                  {item.matchedTags.slice(0, 3).map((tag) => (
+                                    <Tag key={tag} className="search-box-tag" color="blue">
+                                      {tag}
+                                    </Tag>
+                                  ))}
+                                </span>
                               )}
                               {item.type === 'suggestion' && (
                                 <Tag className="search-box-tag" color={item.source === 'hot' ? 'gold' : 'default'}>

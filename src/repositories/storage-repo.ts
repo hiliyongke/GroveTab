@@ -50,11 +50,13 @@ const DEFAULT_SETTINGS: UserSettings = {
   searchSortBy: 'relevance',
   searchDefaultEngine: 'bing',
   searchEnabledEngines: ['bing', 'baidu', 'google', 'duckduckgo'],
+  searchCustomEngines: [],
   searchAutoFallbackToWeb: true,
   searchUseHistorySuggestions: true,
   searchUseHotSuggestions: true,
+  hotSuggestionSource: 'trending',
   layoutDensity: 'default',
-  contentMaxWidth: 1360,
+  contentMaxWidth: 0,
   reducedMotion: 'auto',
   uiVisibility: {
     header: true,
@@ -77,6 +79,13 @@ const DEFAULT_SETTINGS: UserSettings = {
   // v1.2 新增默认值
   clickEffect: 'off',
   videoBackground: { type: 'none' },
+  // v1.4 插件原生历史记录默认值
+  historyEnabled: true,
+  historyRecordEvents: true,
+  historyMaxClosedTabs: 50,
+  historyMaxEvents: 500,
+  historyClosedTabsTtlHours: 168,
+  historyUrlBlocklist: [],
 };
 
 // ── Generic CRUD ──────────────────────────────────────
@@ -326,7 +335,7 @@ export async function saveOgEntry(entry: OgEntry): Promise<void> {
   // LRU：超过 10000 条时淘汰最老 1000 条
   const keys = Object.keys(index);
   if (keys.length > 10000) {
-    const sorted = keys.sort((a, b) => (index[a].fetchedAt ?? 0) - (index[b].fetchedAt ?? 0));
+    const sorted = keys.sort((a, b) => (index[a]?.fetchedAt ?? 0) - (index[b]?.fetchedAt ?? 0));
     for (const k of sorted.slice(0, 1000)) delete index[k];
   }
   await setData(STORAGE_KEYS.ogIndex, index);
@@ -382,10 +391,11 @@ export async function addSpeedDialSite(site: SpeedDialSite): Promise<SpeedDialSi
 export async function updateSpeedDialSite(updated: Partial<SpeedDialSite> & { id: string }): Promise<SpeedDialSite[]> {
   const sites = await getSpeedDialSites();
   const idx = sites.findIndex((s) => s.id === updated.id);
-  if (idx !== -1) {
-    const newSites = [
+  const target = idx !== -1 ? sites[idx] : undefined;
+  if (idx !== -1 && target) {
+    const newSites: SpeedDialSite[] = [
       ...sites.slice(0, idx),
-      { ...sites[idx], ...updated },
+      { ...target, ...updated },
       ...sites.slice(idx + 1),
     ];
     await saveSpeedDialSites(newSites);
@@ -417,5 +427,5 @@ export async function reorderSpeedDialSites(reorderedIds: string[]): Promise<Spe
   return reordered;
 }
 
-  // 模块加载时初始化元数据
+// 模块加载时初始化元数据
 void ensureMeta();

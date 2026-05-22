@@ -84,4 +84,3 @@ export function getViewComponentMap(): ViewComponentMap {
   return map;
 }
 
-

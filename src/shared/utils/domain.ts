@@ -104,3 +104,16 @@ export function groupTabsByDomain(tabs: LiveTab[]): DomainGroup[] {
 
   return groups;
 }
+
+/**
+ * 获取分组的第一张 favicon
+ * 遍历分组中的 tab，返回第一个有 favIconUrl 的 tab 的 favIconUrl
+ * @param tabs - 分组中的标签页列表
+ * @returns 第一个 favicon URL 或空字符串
+ */
+export function getGroupFavicon(tabs: LiveTab[]): string {
+  for (const tab of tabs) {
+    if (tab.favIconUrl) return tab.favIconUrl;
+  }
+  return '';
+}

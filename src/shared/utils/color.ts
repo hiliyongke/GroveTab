@@ -93,7 +93,7 @@ function normalizeColorKey(raw: string): string {
  */
 function stringToDopamineHue(str: string): number {
   const idx = hashString(normalizeColorKey(str)) % PALETTE_HUES.length;
-  return PALETTE_HUES[idx];
+  return PALETTE_HUES[idx] ?? 0;
 }
 
 /**

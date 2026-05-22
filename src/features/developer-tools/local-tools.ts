@@ -32,7 +32,7 @@ export type JsonAction = 'format' | 'minify' | 'validate';
 export function jsonTransform(input: string, action: JsonAction): DevToolResult {
   if (!input.trim()) return { output: '', error: '输入为空' };
   try {
-    const parsed = JSON.parse(input);
+    const parsed: unknown = JSON.parse(input);
     switch (action) {
       case 'format':
         return { output: JSON.stringify(parsed, null, 2) };
@@ -217,7 +217,7 @@ export function randomGenerate(action: RandomAction, length?: number): DevToolRe
         crypto.getRandomValues(values);
         const min = Math.pow(10, len - 1);
         const max = Math.pow(10, len) - 1;
-        const result = min + (values[0] % (max - min + 1));
+        const result = min + ((values[0] ?? 0) % (max - min + 1));
         return { output: String(result) };
       }
       case 'randomHex': {
@@ -244,13 +244,13 @@ export function colorParse(input: string): DevToolResult {
   // 尝试解析 HEX
   const hexMatch = /^#?([0-9a-fA-F]{3,8})$/.exec(trimmed);
   if (hexMatch) {
-    const hex = hexMatch[1];
+    const hex = hexMatch[1] ?? '';
     // 校验有效长度
     if (![3, 4, 6, 8].includes(hex.length)) {
       return { output: '', error: 'HEX 颜色值应为 3/4/6/8 位' };
     }
     const fullHex = hex.length === 3
-      ? `#${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`
+      ? `#${hex[0]!}${hex[0]!}${hex[1]!}${hex[1]!}${hex[2]!}${hex[2]!}`
       : `#${hex}`;
     return { output: fullHex.toUpperCase(), colorValue: fullHex };
   }
@@ -378,12 +378,12 @@ export function textDiff(left: string, right: string): DevToolResult {
   // 构建 LCS 表
   const m = linesA.length;
   const n = linesB.length;
-  const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array<number>(n + 1).fill(0));
   for (let i = 1; i <= m; i++) {
     for (let j = 1; j <= n; j++) {
-      dp[i][j] = linesA[i - 1] === linesB[j - 1]
-        ? dp[i - 1][j - 1] + 1
-        : Math.max(dp[i - 1][j], dp[i][j - 1]);
+      dp[i]![j] = linesA[i - 1] === linesB[j - 1]
+        ? dp[i - 1]![j - 1]! + 1
+        : Math.max(dp[i - 1]![j]!, dp[i]![j - 1]!);
     }
   }
 
@@ -392,13 +392,13 @@ export function textDiff(left: string, right: string): DevToolResult {
   let i = m, j = n;
   while (i > 0 || j > 0) {
     if (i > 0 && j > 0 && linesA[i - 1] === linesB[j - 1]) {
-      diff.unshift({ type: 'equal', content: linesA[i - 1] });
+      diff.unshift({ type: 'equal', content: linesA[i - 1]! });
       i--; j--;
-    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
-      diff.unshift({ type: 'add', content: linesB[j - 1] });
+    } else if (j > 0 && (i === 0 || dp[i]![j - 1]! >= dp[i - 1]![j]!)) {
+      diff.unshift({ type: 'add', content: linesB[j - 1]! });
       j--;
     } else {
-      diff.unshift({ type: 'remove', content: linesA[i - 1] });
+      diff.unshift({ type: 'remove', content: linesA[i - 1]! });
       i--;
     }
   }
@@ -483,8 +483,8 @@ export function jwtDecode(input: string): DevToolResult {
   const parts = token.split('.');
   if (parts.length < 2) return { output: '', error: 'JWT 至少应包含 header 和 payload 两段' };
   try {
-    const header = JSON.parse(decodeBase64Url(parts[0]));
-    const payload = JSON.parse(decodeBase64Url(parts[1]));
+    const header = JSON.parse(decodeBase64Url(parts[0] ?? '')) as Record<string, unknown>;
+    const payload = JSON.parse(decodeBase64Url(parts[1] ?? '')) as Record<string, unknown>;
     const exp = typeof payload.exp === 'number' ? new Date(payload.exp * 1000) : null;
     const meta = exp
       ? `过期时间：${exp.toLocaleString('zh-CN', { hour12: false })}`
@@ -685,7 +685,7 @@ export function cssUnitConvert(input: string, baseFontSize = 16): DevToolResult 
   const match = /^(-?\d+(?:\.\d+)?)(px|rem|em)$/i.exec(input.trim());
   if (!match) return { output: '', error: '请输入形如 16px、1rem、1.5em 的值' };
   const value = Number(match[1]);
-  const unit = match[2].toLowerCase();
+  const unit = (match[2] ?? '').toLowerCase();
   const px = unit === 'px' ? value : value * baseFontSize;
   const rem = px / baseFontSize;
   const result = {
@@ -726,6 +726,9 @@ export function cronDescribe(input: string): DevToolResult {
   const parts = input.trim().split(/\s+/);
   if (parts.length !== 5) return { output: '', error: '请输入 5 段 Cron 表达式：分 时 日 月 周' };
   const [minute, hour, day, month, week] = parts;
+  if (minute === undefined || hour === undefined || day === undefined || month === undefined || week === undefined) {
+    return { output: '', error: 'Cron 字段解析失败' };
+  }
   const lines = [
     describeCronField(minute, '分钟'),
     describeCronField(hour, '小时'),
@@ -770,16 +773,17 @@ export function curlToFetch(input: string): DevToolResult {
   if (!trimmed.toLowerCase().startsWith('curl')) return { output: '', error: '输入应以 curl 开头' };
   try {
     const urlMatch = /curl\s+['"]?([^'"\s]+)['"]?/.exec(trimmed);
-    const url = urlMatch ? urlMatch[1] : '';
+    const url = urlMatch ? (urlMatch[1] ?? '') : '';
     const methodMatch = /-X\s+(\w+)/i.exec(trimmed);
-    const method = methodMatch ? methodMatch[1].toUpperCase() : 'GET';
+    const method = methodMatch ? (methodMatch[1] ?? 'GET').toUpperCase() : 'GET';
     const headers: Record<string, string> = {};
     const headerMatches = trimmed.matchAll(/-H\s+['"]([^:]+):\s*([^'"]+)['"]/g);
     for (const [, key, value] of headerMatches) {
+      if (key === undefined || value === undefined) continue;
       headers[key] = value;
     }
     const bodyMatch = /-d\s+['"]([^'"]*)['"]/.exec(trimmed);
-    const body = bodyMatch ? bodyMatch[1] : undefined;
+    const body = bodyMatch ? (bodyMatch[1] ?? '') : undefined;
     const options: Record<string, unknown> = { method, headers };
     if (body) options.body = body;
     const code = `fetch('${url}', ${JSON.stringify(options, null, 2)})\n  .then(res => res.json())\n  .then(data => console.log(data))\n  .catch(err => console.error(err));`;
@@ -841,11 +845,11 @@ function parseYaml(text: string): unknown {
     const key = line.slice(0, colonIndex).trim();
     const value = line.slice(colonIndex + 1).trim();
 
-    while (stack.length > 0 && stack[stack.length - 1].indent >= indent) {
+    while (stack.length > 0 && (stack[stack.length - 1]?.indent ?? -1) >= indent) {
       stack.pop();
     }
     if (stack.length > 0) {
-      current = stack[stack.length - 1].obj;
+      current = stack[stack.length - 1]!.obj;
     } else {
       current = root;
     }
@@ -929,7 +933,7 @@ export function csvToJson(input: string): DevToolResult {
   try {
     const lines = input.trim().split('\n');
     if (lines.length < 2) return { output: '', error: 'CSV 至少需要表头和一行数据' };
-    const headers = lines[0].split(',').map((h) => h.trim());
+    const headers = (lines[0] ?? '').split(',').map((h) => h.trim());
     const rows = lines.slice(1).map((line) => {
       const values = line.split(',').map((v) => v.trim());
       return Object.fromEntries(headers.map((h, i) => [h, values[i] ?? '']));
@@ -947,7 +951,7 @@ export function jsonToCsv(input: string): DevToolResult {
   try {
     const data = JSON.parse(input) as Array<Record<string, unknown>>;
     if (!Array.isArray(data) || data.length === 0) return { output: '', error: 'JSON 应为对象数组' };
-    const headers = Object.keys(data[0]);
+    const headers = Object.keys(data[0]!);
     const rows = data.map((row) => headers.map((h) => String(row[h] ?? '')).join(','));
     return { output: [headers.join(','), ...rows].join('\n'), meta: `${data.length} 行数据` };
   } catch (e) {

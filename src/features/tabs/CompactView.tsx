@@ -62,6 +62,7 @@ export function CompactView() {
       <div className="app-compact-view-spacer" style={spacerStyle}>
         {virtualizer.getVirtualItems().map((virtualRow) => {
           const tab = sortedTabs[virtualRow.index];
+          if (!tab) return null;
           const itemStyle: React.CSSProperties = {
             height: ROW_HEIGHT,
             transform: `translateY(${virtualRow.start}px)`,

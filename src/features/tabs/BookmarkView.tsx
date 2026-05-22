@@ -1,25 +1,28 @@
 /**
- * BookmarkView — 书签视图
+ * BookmarkView — 书签视图（v3 视觉打磨）
  *
- * 展示 Chrome 书签，支持：
- *   - 按文件夹分组浏览
- *   - 搜索书签
- *   - 从标签页一键收藏
- *   - 点击书签在新标签页打开
- *
- * 设计：
- *   - 使用 antd Tree 组件展示书签文件夹结构
- *   - 搜索走 chrome.bookmarks.search API
- *   - 首次使用需动态申请 bookmarks optional permission
+ * 设计要点：
+ *   - 扁平化层级：顶层文件夹（书签栏 / 其他书签 / 移动设备）作为「分区标题」展开，不嵌套卡片
+ *   - 子文件夹作为「次级分组」带缩进展示，避免「卡中卡」视觉嵌套
+ *   - 书签行项：左侧身份色条 + favicon + 标题/hostname + 末端外链图标
+ *   - Chrome 默认文件夹做 i18n 映射，不再出现「未命名文件夹」
+ *   - 搜索结果走独立通道
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Tree, Input, Button, Empty, List, Spin } from 'antd';
+import { Input, Button, Tag, Spin, Tooltip, Segmented } from 'antd';
 import {
   BookOpen,
   Search,
   Plus,
   Wrench,
+  ChevronDown,
+  Folder,
+  ExternalLink,
+  Bookmark as BookmarkIcon,
+  List as ListIcon,
+  Network,
+  GitBranch,
 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import {
@@ -28,44 +31,260 @@ import {
   createBookmark,
   requestBookmarksPermission,
   hasBookmarksPermission,
-  flattenBookmarks,
   type BookmarkNode,
 } from '@/chrome/bookmarks';
-import { createTab } from '@/chrome';
+import { createTab, getFaviconUrl } from '@/chrome';
 import { useTabsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
 import { BookmarkToolsModal } from '@/features/bookmarks/BookmarkToolsModal';
 import { isSafeExternalUrl } from '@/shared/utils/url-safety';
+import { useAccent } from '@/shared/hooks/useAccent';
+import { FeatureEmptyState } from '@/shared/ui/FeatureEmptyState';
+import '@/shared/ui/FeatureEmptyState.css';
+import { BookmarkTreeView } from './BookmarkTreeView';
 import './styles/views.css';
 
-/**
- * 将书签树转换为 antd Tree 数据
- */
-function toTreeData(nodes: BookmarkNode[]): Array<Record<string, unknown>> {
-  return nodes
-    .filter((node) => (node.children?.length ?? 0) > 0 || (node.url ?? '') !== '')
-    .map((node) => {
-      const bookmarkUrl = node.url ?? '';
-      const hasBookmarkUrl = bookmarkUrl !== '';
-      const fallbackTitle = hasBookmarkUrl
-        ? (() => { try { return new URL(bookmarkUrl).hostname; } catch { return bookmarkUrl; } })()
-        : '未命名';
+/** 视图模式：列表 / 脈图（横向）/ 架构图（垂直） */
+type BookmarkLayout = 'list' | 'mindmap' | 'orgchart';
 
-      return {
-        key: node.id,
-        title: (node.title ?? '') !== '' ? node.title : fallbackTitle,
-        icon: hasBookmarkUrl ? <BookOpen size={ICON_SIZE.SMALL} /> : undefined,
-        children: node.children !== undefined ? toTreeData(node.children) : undefined,
-        isLeaf: hasBookmarkUrl,
-      };
-    });
+/** 从 URL 提取 hostname 做展示和取色键 */
+function getHostname(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
+}
+
+/** 从标题/URL 提取首字母作为 favicon 回退 */
+function getFallbackLetter(title: string, url: string): string {
+  if (title) return title.charAt(0).toUpperCase();
+  try {
+    return new URL(url).hostname.charAt(0).toUpperCase();
+  } catch {
+    return '?';
+  }
 }
 
 /**
- * 书签视图
+ * Chrome 默认根级文件夹的 ID 与友好名映射
+ * 0: 根  1: 书签栏  2: 其他书签  3: 移动设备书签
  */
+function resolveFolderTitle(node: BookmarkNode, t: (key: string) => string): string {
+  if (node.title?.trim()) return node.title;
+  switch (node.id) {
+    case '1': return t('bookmark.folder.bar');
+    case '2': return t('bookmark.folder.others');
+    case '3': return t('bookmark.folder.mobile');
+    default: return t('bookmark.folder.unnamed');
+  }
+}
+
+/** 递归统计书签总数 */
+function countBookmarks(nodes: BookmarkNode[] | undefined): number {
+  if (!nodes) return 0;
+  return nodes.reduce((sum, n) => {
+    if (n.url) return sum + 1;
+    return sum + countBookmarks(n.children);
+  }, 0);
+}
+
+// ── 子组件 ──
+
+/** 单个书签行项 */
+function BookmarkRow({
+  node,
+  onOpen,
+  highlight,
+}: {
+  node: BookmarkNode;
+  onOpen: (url: string) => void;
+  highlight?: (text: string) => React.ReactNode;
+}) {
+  const url = node.url ?? '';
+  const hostname = getHostname(url);
+  const faviconUrl = getFaviconUrl(url);
+  const accent = useAccent(faviconUrl || undefined, hostname);
+  const [faviconError, setFaviconError] = useState(false);
+
+  const handleClick = useCallback(() => {
+    if (url) onOpen(url);
+  }, [url, onOpen]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && url) onOpen(url);
+  }, [url, onOpen]);
+
+  const titleText = node.title || hostname;
+
+  return (
+    <div
+      className="app-bookmark-row"
+      style={{ '--app-bm-accent': accent.bar } as React.CSSProperties}
+      onClick={handleClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      title={`${titleText}\n${url}`}
+    >
+      <span className="app-bookmark-row__bar" />
+      {faviconUrl && !faviconError ? (
+        <img
+          src={faviconUrl}
+          alt=""
+          className="app-bookmark-row__favicon"
+          onError={() => setFaviconError(true)}
+        />
+      ) : (
+        <span
+          className="app-bookmark-row__favicon-fallback"
+          style={{ background: accent.soft, color: accent.text }}
+        >
+          {getFallbackLetter(node.title ?? '', url)}
+        </span>
+      )}
+      <div className="app-bookmark-row__main">
+        <div className="app-bookmark-row__title">
+          {highlight ? highlight(titleText) : titleText}
+        </div>
+        <div className="app-bookmark-row__hostname">
+          {highlight ? highlight(hostname) : hostname}
+        </div>
+      </div>
+      <ExternalLink size={ICON_SIZE.SMALL} className="app-bookmark-row__action" />
+    </div>
+  );
+}
+
+/**
+ * 子文件夹分组（次级标题样式，无卡片包裹，用左侧缩进 + 折叠头表达层级）
+ */
+function SubFolderGroup({
+  folder,
+  onOpenBookmark,
+  depth,
+  resolveTitle,
+}: {
+  folder: BookmarkNode;
+  onOpenBookmark: (url: string) => void;
+  depth: number;
+  resolveTitle: (n: BookmarkNode) => string;
+}) {
+  const [collapsed, setCollapsed] = useState(false);
+  const children = useMemo(() => folder.children ?? [], [folder.children]);
+  const bookmarks = useMemo(() => children.filter((c) => !!c.url), [children]);
+  const subFolders = useMemo(() => children.filter((c) => !c.url), [children]);
+  const total = useMemo(() => countBookmarks(children), [children]);
+
+  if (bookmarks.length === 0 && subFolders.length === 0) return null;
+  const title = resolveTitle(folder);
+
+  return (
+    <div className="app-bookmark-subgroup" style={{ '--app-bm-depth': depth } as React.CSSProperties}>
+      <button
+        type="button"
+        className="app-bookmark-subgroup__head"
+        onClick={() => setCollapsed((c) => !c)}
+        aria-expanded={!collapsed}
+      >
+        <ChevronDown
+          size={ICON_SIZE.SMALL}
+          className={`app-bookmark-subgroup__chevron${collapsed ? ' is-collapsed' : ''}`}
+        />
+        <Folder size={ICON_SIZE.SMALL} className="app-bookmark-subgroup__icon" />
+        <span className="app-bookmark-subgroup__title">{title}</span>
+        <span className="app-bookmark-subgroup__count">{total}</span>
+      </button>
+      {!collapsed && (
+        <div className="app-bookmark-subgroup__body">
+          {bookmarks.map((bm) => (
+            <BookmarkRow key={bm.id} node={bm} onOpen={onOpenBookmark} />
+          ))}
+          {subFolders.map((sf) => (
+            <SubFolderGroup
+              key={sf.id}
+              folder={sf}
+              onOpenBookmark={onOpenBookmark}
+              depth={depth + 1}
+              resolveTitle={resolveTitle}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * 顶层文件夹分区（书签栏 / 其他书签 / 移动设备）
+ * 设计上不再做卡片包裹，而是用「分区头 + 内容列表」的扁平结构
+ */
+function TopFolderSection({
+  folder,
+  onOpenBookmark,
+  defaultOpen,
+  resolveTitle,
+}: {
+  folder: BookmarkNode;
+  onOpenBookmark: (url: string) => void;
+  defaultOpen: boolean;
+  resolveTitle: (n: BookmarkNode) => string;
+}) {
+  const [collapsed, setCollapsed] = useState(!defaultOpen);
+  const children = useMemo(() => folder.children ?? [], [folder.children]);
+  const bookmarks = useMemo(() => children.filter((c) => !!c.url), [children]);
+  const subFolders = useMemo(() => children.filter((c) => !c.url), [children]);
+  const total = useMemo(() => countBookmarks(children), [children]);
+
+  if (bookmarks.length === 0 && subFolders.length === 0) return null;
+  const title = resolveTitle(folder);
+
+  return (
+    <section className="app-bookmark-section">
+      <button
+        type="button"
+        className="app-bookmark-section__head"
+        onClick={() => setCollapsed((c) => !c)}
+        aria-expanded={!collapsed}
+      >
+        <ChevronDown
+          size={ICON_SIZE.MEDIUM}
+          className={`app-bookmark-section__chevron${collapsed ? ' is-collapsed' : ''}`}
+        />
+        <span className="app-bookmark-section__badge">
+          <BookmarkIcon size={14} />
+        </span>
+        <h3 className="app-bookmark-section__title">{title}</h3>
+        <Tag className="app-bookmark-section__count" bordered={false}>{total}</Tag>
+      </button>
+      {!collapsed && (
+        <div className="app-bookmark-section__body">
+          {bookmarks.length > 0 && (
+            <div className="app-bookmark-section__rows">
+              {bookmarks.map((bm) => (
+                <BookmarkRow key={bm.id} node={bm} onOpen={onOpenBookmark} />
+              ))}
+            </div>
+          )}
+          {subFolders.map((sf) => (
+            <SubFolderGroup
+              key={sf.id}
+              folder={sf}
+              onOpenBookmark={onOpenBookmark}
+              depth={1}
+              resolveTitle={resolveTitle}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+// ── 主组件 ──
+
 export function BookmarkView() {
   const [hasPermission, setHasPermission] = useState(false);
   const [checking, setChecking] = useState(true);
@@ -74,8 +293,15 @@ export function BookmarkView() {
   const [searchResults, setSearchResults] = useState<BookmarkNode[]>([]);
   const [searching, setSearching] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
+  const [layout, setLayout] = useState<BookmarkLayout>('list');
   const tabs = useTabsStore((s) => s.tabs);
   const { t } = useT();
+
+  /** 解析文件夹标题（支持 Chrome 默认文件夹） */
+  const resolveTitle = useCallback(
+    (n: BookmarkNode) => resolveFolderTitle(n, t),
+    [t],
+  );
 
   /** 检查权限 */
   useEffect(() => {
@@ -88,7 +314,6 @@ export function BookmarkView() {
     });
   }, []);
 
-  /** 请求权限 */
   const handleRequestPermission = useCallback(async () => {
     const granted = await requestBookmarksPermission();
     if (granted) {
@@ -100,7 +325,6 @@ export function BookmarkView() {
     }
   }, []);
 
-  /** 搜索书签 */
   const handleSearch = useCallback(async (query: string) => {
     setSearchQuery(query);
     if (!query.trim()) {
@@ -113,7 +337,6 @@ export function BookmarkView() {
     setSearching(false);
   }, []);
 
-  /** 打开书签。 */
   const handleOpenBookmark = useCallback(async (url: string) => {
     if (!isSafeExternalUrl(url)) {
       feedback.error(translate('bookmark.openFailed'));
@@ -126,7 +349,11 @@ export function BookmarkView() {
     }
   }, []);
 
-  /** 收藏当前所有标签页 */
+  const openBookmarkSync = useCallback(
+    (url: string) => { void handleOpenBookmark(url); },
+    [handleOpenBookmark],
+  );
+
   const handleBookmarkAll = useCallback(async () => {
     let count = 0;
     for (const tab of tabs) {
@@ -136,115 +363,223 @@ export function BookmarkView() {
       }
     }
     feedback.success(translate('bookmark.bookmarkedAll', { count }));
-    // 刷新书签
     const tree = await getBookmarkTree();
     setBookmarks(tree);
   }, [tabs]);
 
-  /** 扁平化的全部书签（用于搜索展示） */
-  const allFlatBookmarks = useMemo(() => flattenBookmarks(bookmarks), [bookmarks]);
+  /**
+   * 顶层分区。Chrome bookmark tree 的根（id=0）只有一个，其 children 才是
+   * 「书签栏(1)/其他书签(2)/移动设备书签(3)」。我们把所有第一/二层文件夹拍平作为分区。
+   */
+  const topSections = useMemo(() => {
+    const result: BookmarkNode[] = [];
+    const visit = (nodes: BookmarkNode[]) => {
+      for (const n of nodes) {
+        if (n.url) continue;
+        if (n.id === '0') {
+          if (n.children) visit(n.children);
+          continue;
+        }
+        result.push(n);
+      }
+    };
+    visit(bookmarks);
+    return result.filter((s) => countBookmarks(s.children) > 0);
+  }, [bookmarks]);
+
+  /** 高亮搜索关键词 */
+  const buildHighlight = useCallback((query: string) => {
+    return (text: string): React.ReactNode => {
+      const q = query.trim();
+      if (!q || !text) return text;
+      const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const parts = text.split(new RegExp(`(${escaped})`, 'ig'));
+      return parts.map((part, i) =>
+        part.toLowerCase() === q.toLowerCase()
+          ? <mark key={i} className="app-bookmark-highlight">{part}</mark>
+          : <span key={i}>{part}</span>,
+      );
+    };
+  }, []);
+
+  /** 总书签数（必须在 early return 之前调用，遵守 hooks 规则） */
+  const totalBookmarks = useMemo(
+    () => topSections.reduce((sum, s) => sum + countBookmarks(s.children), 0),
+    [topSections],
+  );
 
   if (checking) {
-    return <Spin className="app-bookmark-loading" />;
+    return (
+      <div className="app-bookmark-loading-wrap">
+        <Spin />
+      </div>
+    );
   }
 
   if (!hasPermission) {
     return (
       <div className="app-bookmark-empty">
-        <BookOpen size={ICON_SIZE.HERO} className="app-bookmark-empty-icon" />
-        <div className="app-bookmark-empty-copy">
-          {t('bookmark.needPermission')}
-        </div>
-        <Button type="primary" icon={<BookOpen size={ICON_SIZE.MEDIUM} />} onClick={() => { void handleRequestPermission(); }}>
-          {t('bookmark.grantPermission')}
-        </Button>
+        <FeatureEmptyState
+          title={t('bookmark.needPermission')}
+          icon={<BookOpen size={24} className="app-bookmark-empty-icon" />}
+          actions={[
+            {
+              text: t('bookmark.grantPermission'),
+              onClick: () => { void handleRequestPermission(); },
+            },
+          ]}
+          hints={[t('bookmark.hint1'), t('bookmark.hint2')]}
+        />
       </div>
     );
   }
 
   return (
     <div className="app-bookmark-shell">
-      {/* 搜索栏 + 操作（固定，不参与滚动） */}
-      <div className="app-bookmark-toolbar">
+      {/* 顶部头：标题 + 统计 + 工具按钮 */}
+      <header className="app-bookmark-header">
+        <div className="app-bookmark-header__title">
+          <BookOpen size={ICON_SIZE.MEDIUM} className="app-bookmark-header__icon" />
+          <span>{t('bookmark.title')}</span>
+          {totalBookmarks > 0 && (
+            <Tag bordered={false} className="app-bookmark-header__count">{totalBookmarks}</Tag>
+          )}
+        </div>
+        <div className="app-bookmark-header__actions">
+          <Segmented
+            size="small"
+            value={layout}
+            onChange={(v) => setLayout(v as BookmarkLayout)}
+            options={[
+              {
+                value: 'list',
+                icon: (
+                  <Tooltip title={t('bookmark.layout.list')}>
+                    <ListIcon size={ICON_SIZE.SMALL} />
+                  </Tooltip>
+                ),
+              },
+              {
+                value: 'mindmap',
+                icon: (
+                  <Tooltip title={t('bookmark.layout.mindmap')}>
+                    <Network size={ICON_SIZE.SMALL} />
+                  </Tooltip>
+                ),
+              },
+              {
+                value: 'orgchart',
+                icon: (
+                  <Tooltip title={t('bookmark.layout.orgchart')}>
+                    <GitBranch size={ICON_SIZE.SMALL} />
+                  </Tooltip>
+                ),
+              },
+            ]}
+          />
+          <Tooltip title={t('bookmark.bookmarkAll')}>
+            <Button
+              size="small"
+              icon={<Plus size={ICON_SIZE.SMALL} />}
+              onClick={() => { void handleBookmarkAll(); }}
+            >
+              {t('bookmark.bookmarkAll')}
+            </Button>
+          </Tooltip>
+          <Tooltip title={t('bookmark.tools.entry')}>
+            <Button
+              size="small"
+              icon={<Wrench size={ICON_SIZE.SMALL} />}
+              onClick={() => setToolsOpen(true)}
+            >
+              {t('bookmark.tools.entry')}
+            </Button>
+          </Tooltip>
+        </div>
+      </header>
+
+      {/* 搜索栏 */}
+      <div className="app-bookmark-search-wrap">
         <Input
-          prefix={<Search size={ICON_SIZE.MEDIUM} />}
+          prefix={<Search size={ICON_SIZE.MEDIUM} className="app-bookmark-search-icon" />}
           placeholder={t('bookmark.searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => { void handleSearch(e.target.value); }}
           allowClear
+          size="large"
           className="app-bookmark-search"
         />
-        <Button icon={<Plus size={ICON_SIZE.MEDIUM} />} onClick={() => { void handleBookmarkAll(); }}>
-          {t('bookmark.bookmarkAll')}
-        </Button>
-        {/* 工具箱入口：打开 Modal 进行去重 / 失效检测 / 智能整理 */}
-        <Button icon={<Wrench size={ICON_SIZE.MEDIUM} />} onClick={() => setToolsOpen(true)}>
-          {t('bookmark.tools.entry')}
-        </Button>
       </div>
 
-      {/* 结果区：独立滚动容器 */}
+      {/* 结果区 */}
       <div className="app-bookmark-result">
         {searchQuery ? (
           searching ? (
-            <Spin className="app-bookmark-result-loading" />
+            <div className="app-bookmark-loading-wrap"><Spin /></div>
           ) : searchResults.length === 0 ? (
-            <Empty description={t('bookmark.noResults')} />
+            <div className="app-bookmark-result-empty">
+              <FeatureEmptyState
+                title={t('bookmark.noResults')}
+                size="small"
+                icon={<Search size={20} />}
+                hints={[t('bookmark.searchHint1'), t('bookmark.searchHint2')]}
+              />
+            </div>
           ) : (
-            <List
-              size="small"
-              dataSource={searchResults}
-              renderItem={(item) => (
-                <List.Item
-                  key={item.id}
-                  className="app-bookmark-list-item"
-                  onClick={() => {
-                    if (item.url) {
-                      void handleOpenBookmark(item.url);
-                    }
-                  }}
-                >
-                  <List.Item.Meta
-                    title={
-                      <span className="app-bookmark-list-title">
-                        {item.title}
-                      </span>
-                    }
-                    description={
-                      <span className="app-bookmark-list-url">
-                        {item.url}
-                      </span>
-                    }
+            <div className="app-bookmark-search-results">
+              <div className="app-bookmark-search-meta">
+                {t('bookmark.searchCount', { count: searchResults.length })}
+              </div>
+              <div className="app-bookmark-search-list">
+                {searchResults.map((item) => (
+                  <BookmarkRow
+                    key={item.id}
+                    node={item}
+                    onOpen={openBookmarkSync}
+                    highlight={buildHighlight(searchQuery)}
                   />
-                </List.Item>
-              )}
-            />
+                ))}
+              </div>
+            </div>
           )
-        ) : (
-          /* 书签树 */
-          <Tree
-            showIcon
-            defaultExpandAll={false}
-            treeData={toTreeData(bookmarks)}
-            onSelect={(keys, info) => {
-              // 如果选中的是叶子节点（书签），打开 URL
-              const node = info.node as unknown as { isLeaf?: boolean };
-              if (node?.isLeaf) {
-                // 通过 key 找到书签 URL
-                const flat = allFlatBookmarks.find((b) => b.id === keys[0]);
-                if (flat?.url) {
-                  void handleOpenBookmark(flat.url);
-                }
-              }
-            }}
+        ) : topSections.length === 0 ? (
+          <div className="app-bookmark-result-empty">
+            <FeatureEmptyState
+              title={t('bookmark.emptyTitle')}
+              icon={<BookOpen size={20} />}
+              size="small"
+              hints={[t('bookmark.hint1'), t('bookmark.hint2')]}
+            />
+          </div>
+        ) : layout === 'mindmap' ? (
+          <BookmarkTreeView
+            topSections={topSections}
+            onOpenBookmark={openBookmarkSync}
+            resolveTitle={resolveTitle}
+            orientation="horizontal"
           />
+        ) : layout === 'orgchart' ? (
+          <BookmarkTreeView
+            topSections={topSections}
+            onOpenBookmark={openBookmarkSync}
+            resolveTitle={resolveTitle}
+            orientation="vertical"
+          />
+        ) : (
+          <div className="app-bookmark-sections">
+            {topSections.map((section, idx) => (
+              <TopFolderSection
+                key={section.id}
+                folder={section}
+                onOpenBookmark={openBookmarkSync}
+                defaultOpen={idx === 0 || topSections.length <= 2}
+                resolveTitle={resolveTitle}
+              />
+            ))}
+          </div>
         )}
       </div>
 
-      {/*
-        书签工具箱 Modal —— 去重 / 失效检测 / 智能整理
-        mutation 完成后重新拉取书签树，避免 UI 与实际数据不一致
-      */}
       <BookmarkToolsModal
         open={toolsOpen}
         onClose={() => setToolsOpen(false)}

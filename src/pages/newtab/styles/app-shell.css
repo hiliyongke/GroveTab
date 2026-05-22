@@ -118,60 +118,104 @@
 }
 
 .app-header-center {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 520px;
+  min-width: 280px;
   display: flex;
   justify-content: center;
-  padding-inline: 12px;
+  padding-inline: 18px;
 }
 
 .app-header-search-trigger {
   all: unset;
   box-sizing: border-box;
-  width: 100%;
-  max-width: 0;
-  height: 32px;
+  width: min(560px, 100%);
+  max-width: 560px;
+  height: 36px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0;
+  gap: 9px;
+  padding: 0 14px;
   overflow: hidden;
   white-space: nowrap;
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
   font-size: 13px;
-  color: var(--ant-color-text-tertiary);
-  background: var(--ant-color-fill-tertiary);
-  border: 1px solid var(--ant-color-border-secondary);
-  border-radius: var(--app-radius-circle);
-  transform: translateY(-6px);
+  color: var(--ant-color-text-secondary);
+  background: color-mix(in srgb, var(--ant-color-bg-container) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 82%, transparent);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 16%, transparent),
+    0 8px 24px color-mix(in srgb, var(--ant-color-text) 7%, transparent);
+  transform: translateY(-6px) scale(0.98);
+  visibility: hidden;
   transition:
-    opacity 260ms ease,
-    transform 260ms ease,
-    max-width 300ms ease,
-    padding 260ms ease,
+    opacity 220ms ease,
+    transform 220ms ease,
+    visibility 0s linear 220ms,
     background 160ms ease,
     border-color 160ms ease;
 }
 
 .app-header-search-trigger.is-visible {
-  max-width: 420px;
-  padding: 0 var(--app-space-3);
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
+  visibility: visible;
   pointer-events: auto;
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease,
+    visibility 0s,
+    background 160ms ease,
+    border-color 160ms ease;
 }
 
 .app-header-search-trigger-text {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
   text-align: left;
   text-overflow: ellipsis;
 }
 
+/* trigger 内的快捷键徽章：保证在窄宽度下也能完整展示，不被压扁 */
+.app-header-search-trigger .app-kbd {
+  flex-shrink: 0;
+  min-width: 32px;
+  padding: 2px 6px;
+}
+
 .app-header-actions {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* 顶栏右侧操作区：统一所有按钮尺寸与图标对齐，避免大小/高低不齐 */
+.app-header-actions .ant-btn {
+  height: 24px;
+  min-width: 24px;
+  padding-inline: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.app-header-actions .ant-btn-icon-only {
+  width: 24px;
+  padding: 0;
+}
+
+.app-header-actions .ant-btn .anticon,
+.app-header-actions .ant-btn > span,
+.app-header-actions .app-theme-icon,
+.app-header-actions svg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
 }
 
 /* ── 空间切换下拉菜单项 ── */
@@ -275,17 +319,21 @@
   min-height: 0;
 }
 
-/* ── 视图侧边栏（left/right 模式） ── */
+/* ── 视图侧边栏（left/right 模式） ──
+ * 标签数量有限（≤ 6 项），不滚动；
+ * 由于 .app-content-shell 是滚动容器，侧栏作为 .app-main-body 的 flex item
+ * 自然填满 main-body 高度，内部 justify-content: center 即可实现上下居中。
+ */
 .app-view-sidebar {
   width: 180px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   border-right: 1px solid var(--ant-color-border-secondary);
   background: color-mix(in srgb, var(--ant-color-bg-layout) 88%, transparent);
   padding: var(--app-space-3) var(--app-space-2);
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  overflow: hidden;
 }
 
 .app-view-sidebar--right {
@@ -297,6 +345,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  width: 100%;
 }
 
 .app-view-sidebar__item {
@@ -375,6 +424,88 @@
   .app-view-sidebar__item {
     justify-content: center;
     padding: 8px;
+  }
+}
+
+/* ── 视图底部固定栏（bottom 模式） ──
+ * 使用 position: fixed 钉在视口底部，水平居中、玻璃质感；
+ * 标签数量极少（≤ 6 项）无需滚动；点击区域舒适，与顶部 header 风格呼应。
+ */
+.app-view-bottom {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: var(--app-glass-bg);
+  border-top: 1px solid var(--app-hairline);
+  backdrop-filter: var(--app-glass-filter);
+  -webkit-backdrop-filter: var(--app-glass-filter);
+  pointer-events: auto;
+}
+
+.app-view-bottom__list {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.app-view-bottom__item {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 160ms ease;
+  border-radius: var(--ant-border-radius-lg);
+  color: var(--ant-color-text-secondary);
+  white-space: nowrap;
+}
+
+.app-view-bottom__item:hover {
+  background: var(--ant-color-fill-quaternary);
+  color: var(--ant-color-text);
+}
+
+.app-view-bottom__item.is-active {
+  background: var(--ant-color-primary-bg);
+  color: var(--ant-color-primary);
+  font-weight: 600;
+}
+
+.app-view-bottom__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* bottom 模式下，主体内容预留底栏高度，避免最后一行被遮挡 */
+.app-layout-shell--view-bottom {
+  padding-bottom: 64px;
+}
+
+/* 小屏：底栏隐藏文字、缩窄按钮 */
+@media (max-width: 768px) {
+  .app-view-bottom {
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .app-view-bottom__label {
+    display: none;
+  }
+
+  .app-view-bottom__item {
+    padding: 8px 10px;
+    gap: 0;
   }
 }
 
@@ -509,8 +640,14 @@
 }
 
 .app-layout-shell {
-  min-height: 100vh;
+  /* 让整个 shell 自身限定为视口高度，内部内容区独立滚动；
+     这样滚动条出现在 .app-content-shell 内（视图侧栏左侧），
+     视图侧栏不会被遮挡也不再需要 sticky 吸附。 */
+  height: 100vh;
+  overflow: hidden;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .app-background-overlay {
@@ -533,10 +670,45 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
+  /* 滚动容器：滚动条出现在内容区右侧（视图侧栏左侧） */
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .app-content-shell--bounded {
   max-width: var(--app-content-max-width);
+}
+
+/* ── 书签「树状视图」（脑图 / 架构图）画布模式 ──
+ * 树状视图自身有平移缩放画布，不需要外层再出滚动条；
+ * 同时取消底部 64px padding，避免画布与底部留出空白带。
+ *
+ * 高度链路（已存在的正确链路，无需额外干预）：
+ *   .app-shell(100vh) → .app-main-body(flex:1, min-height:0)
+ *   → .app-content-shell(flex:1, min-height:0)  ← 已默认填满 main-body 剩余高度
+ *
+ * 因此这里只关闭外层滚动 + 去除底部 padding 即可，
+ * 不要再加 min/max-height（会与父级 flex 约束冲突，导致溢出被裁切而画布消失）。 */
+.app-content-shell:has(.app-bookmark-shell .app-bookmark-result > .app-bm-tree) {
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+/* ── Workspace 区域容器 ──
+ * 非树状视图：不需要 flex:1，内容自然撑开，由 .app-content-shell 整体滚动。
+ * 树状视图（下方 :has 规则）：需要 flex:1+min-height:0+overflow:hidden，
+ *   让画布严格填满剩余空间且不出现双滚动条。 */
+.app-workspace-section {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 树状视图（脑图/架构图）：section 必须撑满 .app-content-shell 剩余高度，
+   画布才能拿到正确的高度值；同时关闭滚动，由画布自身的 PanZoom 接管。 */
+.app-workspace-section:has(.app-bookmark-result > .app-bm-tree) {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .app-init-alert {
@@ -578,4 +750,62 @@
 
 .app-empty-state-actions {
   margin-top: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════
+ * 全局悬浮容器（弹窗 / 抽屉 / Popover / Dropdown）磨砂效果
+ *
+ * 设计目标：
+ *   antd v6 的 Modal/Drawer/Popover 默认使用 colorBgElevated 作为底色，
+ *   而部分皮肤下该色为半透明（如 rgba(...,0.72)）。仅靠透明色显得很"飘"，
+ *   缺乏材质感。这里在所有皮肤下统一加 backdrop-filter，让背后内容产生
+ *   毛玻璃模糊；同时把底色用 color-mix 与 elevated 混入更高比例的不透明
+ *   纯色，避免"看穿"感。
+ *
+ * 通过 ConfigProvider 注入的 className（见 AntdThemeProvider.tsx）：
+ *   · Modal    → .app-modal__container
+ *   · Drawer   → .app-drawer__section
+ *   · Popover  → .app-popover__container
+ * 还顺带覆盖未注入业务 class 的 antd 通用悬浮容器：
+ *   · Dropdown 菜单 / Select 下拉 / Tooltip
+ * ═══════════════════════════════════════════════════════ */
+
+/* Modal 容器 */
+.app-modal__container {
+  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container)) !important;
+  backdrop-filter: var(--app-glass-filter, blur(20px) saturate(180%));
+  -webkit-backdrop-filter: var(--app-glass-filter, blur(20px) saturate(180%));
+}
+
+/* Drawer 容器 */
+.app-drawer__section {
+  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container)) !important;
+  backdrop-filter: var(--app-glass-filter, blur(20px) saturate(180%));
+  -webkit-backdrop-filter: var(--app-glass-filter, blur(20px) saturate(180%));
+}
+
+/* Popover 容器（hover 弹窗） */
+.app-popover__container .ant-popover-inner,
+.ant-popover-inner {
+  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container)) !important;
+  backdrop-filter: var(--app-glass-filter, blur(16px) saturate(180%));
+  -webkit-backdrop-filter: var(--app-glass-filter, blur(16px) saturate(180%));
+}
+
+/* Dropdown 菜单（包括 Select / Cascader / TreeSelect / DatePicker 等通用下拉） */
+.ant-dropdown-menu,
+.ant-select-dropdown,
+.ant-cascader-dropdown,
+.ant-tree-select-dropdown,
+.ant-picker-dropdown .ant-picker-panel-container,
+.ant-color-picker .ant-popover-inner {
+  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container)) !important;
+  backdrop-filter: var(--app-glass-filter, blur(16px) saturate(180%));
+  -webkit-backdrop-filter: var(--app-glass-filter, blur(16px) saturate(180%));
+}
+
+/* Tooltip：默认黑色不透明，无需磨砂；这里仅在 colorBgSpotlight 为半透明时兜底 */
+.ant-tooltip-inner {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
