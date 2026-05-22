@@ -16,7 +16,7 @@ import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useUndoStore, useSelectionStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { APP_EVENTS } from '@/shared/config/storage-keys';
-import './status-surfaces.css';
+import styles from './status-surfaces.module.less';
 
 /**
  * 触发"打开 Archive 并高亮 session"的跨组件事件。
@@ -66,10 +66,10 @@ export function UndoToast() {
     <div
       role="alert"
       aria-live="polite"
-      className={`app-undo-toast${batchBarVisible ? ' is-lifted' : ''}`}
+      className={`${styles['app-undo-toast']}${batchBarVisible ? ` ${styles['is-lifted']}` : ''}`}
     >
-      <div className="app-undo-toast__row">
-        <span className="app-undo-toast__title" title={mainLabel}>
+      <div className={styles['app-undo-toast__row']}>
+        <span className={styles['app-undo-toast__title']} title={mainLabel}>
           {mainLabel}
         </span>
 
@@ -105,7 +105,7 @@ export function UndoToast() {
         />
       </div>
       {activeToast.subNote !== undefined && activeToast.subNote !== '' && (
-        <span className="app-undo-toast__note">
+        <span className={styles['app-undo-toast__note']}>
           {activeToast.subNote}
         </span>
       )}

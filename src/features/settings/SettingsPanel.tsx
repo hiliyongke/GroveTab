@@ -21,7 +21,7 @@ import {
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
-import './settings.css';
+import styles from './settings.module.less';
 import { AppearancePanel } from './panels/AppearancePanel';
 import { BehaviorPanel } from './panels/BehaviorPanel';
 import { DataPanel } from './panels/DataPanel';
@@ -110,40 +110,40 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
       width={704}
       title={t('settings.title')}
       classNames={{
-        mask: 'settings-drawer__mask',
-        header: 'settings-drawer__header',
-        title: 'settings-drawer__title',
-        body: 'settings-drawer__body',
-        section: 'settings-drawer__section',
+        mask: styles['settings-drawer__mask'],
+        header: styles['settings-drawer__header'],
+        title: styles['settings-drawer__title'],
+        body: styles['settings-drawer__body'],
+        section: styles['settings-drawer__section'],
       }}
-      rootClassName="settings-drawer"
+      rootClassName={styles['settings-drawer']}
     >
-      <div className="settings-shell">
+      <div className={styles['settings-shell']}>
         {/* 左侧图标导航 */}
-        <nav className="settings-nav">
-          <div className="settings-nav__list">
+        <nav className={styles['settings-nav']}>
+          <div className={styles['settings-nav__list']}>
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 type="button"
-                className={`settings-nav__item${activeTab === tab.key ? ' is-active' : ''}`}
+                className={`${styles['settings-nav__item']}${activeTab === tab.key ? ` ${styles['is-active']}` : ''}`}
                 onClick={() => setActiveTab(tab.key)}
               >
-                <span className="settings-nav__icon">{tab.icon}</span>
-                <span className="settings-nav__label">{t(tab.labelKey)}</span>
+                <span className={styles['settings-nav__icon']}>{tab.icon}</span>
+                <span className={styles['settings-nav__label']}>{t(tab.labelKey)}</span>
               </button>
             ))}
           </div>
         </nav>
 
         {/* 右侧内容区 */}
-        <main className="settings-content">
-          <div className="settings-content__header">
-            <h2 className="settings-content__title">
+        <main className={styles['settings-content']}>
+          <div className={styles['settings-content__header']}>
+            <h2 className={styles['settings-content__title']}>
               {activeItem && t(activeItem.labelKey)}
             </h2>
           </div>
-          <div className="settings-content__body">
+          <div className={styles['settings-content__body']}>
             {activeItem?.component}
           </div>
         </main>

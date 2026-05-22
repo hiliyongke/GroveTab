@@ -90,7 +90,7 @@ import {
   urlTransform,
   yamlToJson,
 } from './local-tools';
-import './DeveloperToolsPage.css';
+import styles from './DeveloperToolsPage.module.less';
 
 const { Text, Title } = Typography;
 
@@ -250,13 +250,13 @@ function ToolCard({ tool, title, description, selected, favorited, onClick, onTo
       onClick={onClick}
       aria-pressed={selected}
     >
-      <span className="devtools-card-icon">{TOOL_ICONS[tool.id] ?? <Wrench size={ICON_SIZE.DEFAULT} />}</span>
-      <div className="devtools-card-body">
-        <div className="devtools-card-title">
+      <span className={styles['devtools-card-icon']}>{TOOL_ICONS[tool.id] ?? <Wrench size={ICON_SIZE.DEFAULT} />}</span>
+      <div className={styles['devtools-card-body']}>
+        <div className={styles['devtools-card-title']}>
           <span>{title}</span>
-          {tool.localOnly && <span className="devtools-local-badge">Local</span>}
+          {tool.localOnly && <span className={styles['devtools-local-badge']}>Local</span>}
         </div>
-        <div className="devtools-card-desc">{description}</div>
+        <div className={styles['devtools-card-desc']}>{description}</div>
       </div>
       <span
         className={`devtools-fav-btn${favorited ? ' is-active' : ''}`}
@@ -583,13 +583,13 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
   }, [tool.id, urlQueryAction, yamlAction, csvAction, basicAuthAction]);
 
   return (
-    <div className="devtools-form" onKeyDown={handleKeyDown}>
-      <div className="devtools-options">
+    <div className={styles['devtools-form']} onKeyDown={handleKeyDown}>
+      <div className={styles['devtools-options']}>
         {tool.id === 'json-format' && (
           <Segmented size="small" value={jsonAction} onChange={(value) => setJsonAction(value as JsonAction)} options={[{ value: 'format', label: '格式化' }, { value: 'minify', label: '压缩' }, { value: 'validate', label: '校验' }]} />
         )}
         {tool.id === 'json-to-ts' && (
-          <Input size="small" value={rootName} onChange={(event) => setRootName(event.target.value)} placeholder="Root" className="devtools-field-size--root" />
+          <Input size="small" value={rootName} onChange={(event) => setRootName(event.target.value)} placeholder="Root" className={styles['devtools-field-size--root']} />
         )}
         {tool.id === 'yaml-json' && (
           <Segmented size="small" value={yamlAction} onChange={(value) => setYamlAction(value as 'yamlToJson' | 'jsonToYaml')} options={[{ value: 'yamlToJson', label: 'YAML → JSON' }, { value: 'jsonToYaml', label: 'JSON → YAML' }]} />
@@ -621,18 +621,18 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
         {tool.id === 'radix' && (
           <>
             <Segmented size="small" value={fromRadix} onChange={setFromRadix} options={[{ value: 'bin', label: '2' }, { value: 'oct', label: '8' }, { value: 'dec', label: '10' }, { value: 'hex', label: '16' }]} />
-            <ArrowRightLeft size={14} className="devtools-option-arrow" />
+            <ArrowRightLeft size={14} className={styles['devtools-option-arrow']} />
             <Segmented size="small" value={toRadix} onChange={setToRadix} options={[{ value: 'bin', label: '2' }, { value: 'oct', label: '8' }, { value: 'dec', label: '10' }, { value: 'hex', label: '16' }]} />
           </>
         )}
         {tool.id === 'css-unit' && (
-          <Input size="small" type="number" value={baseFontSize} onChange={(event) => setBaseFontSize(Number(event.target.value) || 16)} addonBefore="Base" addonAfter="px" className="devtools-field-size--base" />
+          <Input size="small" type="number" value={baseFontSize} onChange={(event) => setBaseFontSize(Number(event.target.value) || 16)} addonBefore="Base" addonAfter="px" className={styles['devtools-field-size--base']} />
         )}
         {tool.id === 'random-gen' && (
           <Segmented size="small" value={randomAction} onChange={(value) => setRandomAction(value as RandomAction)} options={[{ value: 'uuid', label: 'UUID' }, { value: 'randomInt', label: '随机整数' }, { value: 'randomHex', label: '随机 HEX' }]} />
         )}
         {tool.id === 'random-gen' && randomAction !== 'uuid' && (
-          <Input size="small" type="number" value={randomLen} onChange={(event) => setRandomLen(Number(event.target.value) || 1)} min={1} max={128} addonBefore="长度" className="devtools-field-size--random" />
+          <Input size="small" type="number" value={randomLen} onChange={(event) => setRandomLen(Number(event.target.value) || 1)} min={1} max={128} addonBefore="长度" className={styles['devtools-field-size--random']} />
         )}
         {tool.id === 'basic-auth' && (
           <Segmented size="small" value={basicAuthAction} onChange={(value) => setBasicAuthAction(value as 'encode' | 'decode')} options={[{ value: 'encode', label: 'Encode' }, { value: 'decode', label: 'Decode' }]} />
@@ -640,40 +640,40 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
       </div>
 
       {tool.id === 'regex-test' && (
-        <div className="devtools-two-col">
+        <div className={styles['devtools-two-col']}>
           <Input size="small" prefix={<Regex size={14} />} placeholder={t('devtools.pattern')} value={regexPattern} onChange={(event) => setRegexPattern(event.target.value)} />
           <Input size="small" placeholder={t('devtools.flags')} value={regexFlags} onChange={(event) => setRegexFlags(event.target.value.replace(/[^gimsuy]/g, ''))} maxLength={7} />
         </div>
       )}
       {tool.id === 'json-path' && (
-        <div className="devtools-two-col">
+        <div className={styles['devtools-two-col']}>
           <Input size="small" prefix={<Braces size={14} />} placeholder="JSON Path，如 $.user.name" value={regexPattern} onChange={(event) => setRegexPattern(event.target.value)} />
         </div>
       )}
 
       {isDualInput ? (
-        <div className="devtools-two-col">
+        <div className={styles['devtools-two-col']}>
           <label>
-            <span className="devtools-field-label">{t('devtools.leftText')}</span>
+            <span className={styles['devtools-field-label']}>{t('devtools.leftText')}</span>
             <Input.TextArea value={input} onChange={(event) => setInput(event.target.value)} rows={7} placeholder="第一段文本" />
           </label>
           <label>
-            <span className="devtools-field-label">{t('devtools.rightText')}</span>
+            <span className={styles['devtools-field-label']}>{t('devtools.rightText')}</span>
             <Input.TextArea value={input2} onChange={(event) => setInput2(event.target.value)} rows={7} placeholder="第二段文本" />
           </label>
         </div>
       ) : tool.id !== 'random-gen' && (
         <label>
-          <span className="devtools-field-label">{t('devtools.input')}</span>
+          <span className={styles['devtools-field-label']}>{t('devtools.input')}</span>
           <Input.TextArea value={input} onChange={(event) => setInput(event.target.value)} rows={6} placeholder={placeholder} className={isMonospace ? 'devtools-input-mono' : undefined} />
         </label>
       )}
 
-      <div className="devtools-actions">
+      <div className={styles['devtools-actions']}>
         {!isAutoExecute && (
           <Button type="primary" onClick={() => { void handleExecute(); }} loading={computing}>{t('devtools.execute')}</Button>
         )}
-        {isAutoExecute && <Tag color="blue" className="devtools-tag devtools-tag--realtime">{t('devtools.realtime')}</Tag>}
+        {isAutoExecute && <Tag color="blue" className={`${styles['devtools-tag']} ${styles['devtools-tag--realtime']}`}>{t('devtools.realtime')}</Tag>}
         {isBidirectional && <Button onClick={handleSwap} icon={<ArrowRightLeft size={14} />}>{t('devtools.swap')}</Button>}
         <Button onClick={handleClear} icon={<Trash2 size={14} />}>{t('devtools.clear')}</Button>
         {TOOL_EXAMPLES[tool.id] && <Button onClick={handleFillExample} icon={<Terminal size={14} />}>{t('devtools.example')}</Button>}
@@ -681,30 +681,30 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
       </div>
 
       {tool.id === 'color-preview' && colorValue && (
-        <div className="devtools-color-preview">
-          <div className="devtools-color-swatch" style={colorSwatchStyle} />
+        <div className={styles['devtools-color-preview']}>
+          <div className={styles['devtools-color-swatch']} style={colorSwatchStyle} />
           <Text code>{colorValue}</Text>
         </div>
       )}
 
       {output && (
-        <div className="devtools-output">
-          <div className="devtools-output-head">
-            <Text type="secondary" className="devtools-output-label">{t('devtools.output')}</Text>
+        <div className={styles['devtools-output']}>
+          <div className={styles['devtools-output-head']}>
+            <Text type="secondary" className={styles['devtools-output-label']}>{t('devtools.output')}</Text>
             <Tooltip title={copied ? t('devtools.copied') : t('devtools.copy')}>
               <Button size="small" type="text" onClick={() => void handleCopy()} icon={copied ? <Check size={14} /> : <Copy size={14} />} />
             </Tooltip>
           </div>
-          <div className="devtools-output-body">
-            {tool.id === 'text-diff' ? renderDiffOutput(output) : <pre className="devtools-pre">{output}</pre>}
+          <div className={styles['devtools-output-body']}>
+            {tool.id === 'text-diff' ? renderDiffOutput(output) : <pre className={styles['devtools-pre']}>{output}</pre>}
           </div>
-          {meta && <div className="devtools-output-meta"><Text type="secondary" className="devtools-output-meta-text">{meta}</Text></div>}
+          {meta && <div className={styles['devtools-output-meta']}><Text type="secondary" className={styles['devtools-output-meta-text']}>{meta}</Text></div>}
         </div>
       )}
 
       {error && (
-        <div className="devtools-error">
-          <Text type="danger" className="devtools-error-text">{error}</Text>
+        <div className={styles['devtools-error']}>
+          <Text type="danger" className={styles['devtools-error-text']}>{error}</Text>
         </div>
       )}
     </div>
@@ -734,11 +734,11 @@ export function DeveloperToolsPage() {
   const categoryOptions = useMemo(() => [
     {
       value: 'all' as const,
-      label: <span className="devtools-category-label"><Wrench size={ICON_SIZE.DEFAULT} />{t('devtools.catAll')} · {DEV_TOOLS.length}</span>,
+      label: <span className={styles['devtools-category-label']}><Wrench size={ICON_SIZE.DEFAULT} />{t('devtools.catAll')} · {DEV_TOOLS.length}</span>,
     },
     ...Object.entries(CATEGORY_LABEL_KEYS).map(([cat, key]) => ({
       value: cat as DevToolCategory,
-      label: <span className="devtools-category-label">{CATEGORY_ICONS[cat as DevToolCategory]}{t(key)} · {categoryCounts[cat] ?? 0}</span>,
+      label: <span className={styles['devtools-category-label']}>{CATEGORY_ICONS[cat as DevToolCategory]}{t(key)} · {categoryCounts[cat] ?? 0}</span>,
     })),
   ], [categoryCounts, t]);
 
@@ -801,38 +801,38 @@ export function DeveloperToolsPage() {
   const hiddenIds = useMemo(() => new Set(favoriteTools.map((tool) => tool.id)), [favoriteTools]);
 
   return (
-    <section className="devtools-page">
-      <div className="devtools-shell">
-        <header className="devtools-hero">
-          <div className="devtools-title-row">
-            <div className="devtools-brand">
-              <span className="devtools-logo"><Wrench size={ICON_SIZE.LARGE} /></span>
-              <Title level={4} className="devtools-title">{t('devtools.title')}</Title>
-              <Tag color="green" className="devtools-tag devtools-tag--local">{t('devtools.localOnly')}</Tag>
+    <section className={styles['devtools-page']}>
+      <div className={styles['devtools-shell']}>
+        <header className={styles['devtools-hero']}>
+          <div className={styles['devtools-title-row']}>
+            <div className={styles['devtools-brand']}>
+              <span className={styles['devtools-logo']}><Wrench size={ICON_SIZE.LARGE} /></span>
+              <Title level={4} className={styles['devtools-title']}>{t('devtools.title')}</Title>
+      <Tag color="green" className={`${styles['devtools-tag']} ${styles['devtools-tag--local']}`}>{t('devtools.localOnly')}</Tag>
             </div>
-            <div className="devtools-stats">
-              <span className="devtools-stat-pill">{DEV_TOOLS.length} tools</span>
-              <span className="devtools-stat-pill">{Object.keys(categoryCounts).length} categories</span>
-              <span className="devtools-stat-pill">100% local</span>
+            <div className={styles['devtools-stats']}>
+              <span className={styles['devtools-stat-pill']}>{DEV_TOOLS.length} tools</span>
+              <span className={styles['devtools-stat-pill']}>{Object.keys(categoryCounts).length} categories</span>
+              <span className={styles['devtools-stat-pill']}>100% local</span>
             </div>
           </div>
-          <div className="devtools-subtitle">{t('devtools.subtitle')}</div>
+          <div className={styles['devtools-subtitle']}>{t('devtools.subtitle')}</div>
         </header>
 
-        <div className="devtools-toolbar">
-          <Segmented value={category} onChange={(value) => setCategory(value)} options={categoryOptions} size="small" className="devtools-segmented" />
-          <Input prefix={<Search size={14} />} placeholder={t('devtools.searchPlaceholder')} value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} allowClear size="small" className="devtools-search" />
+        <div className={styles['devtools-toolbar']}>
+          <Segmented value={category} onChange={(value) => setCategory(value)} options={categoryOptions} size="small" className={styles['devtools-segmented']} />
+          <Input prefix={<Search size={14} />} placeholder={t('devtools.searchPlaceholder')} value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} allowClear size="small" className={styles['devtools-search']} />
         </div>
 
-        <div className="devtools-workbench">
-          <div className="devtools-list-pane">
+        <div className={styles['devtools-workbench']}>
+          <div className={styles['devtools-list-pane']}>
             {favoriteTools.length > 0 && (
-              <div className="devtools-section">
-                <div className="devtools-section-head">
-                  <Star size={14} className="devtools-section-icon devtools-section-icon--fav" />
-                  <strong className="devtools-section-title">{t('devtools.favorites')}</strong>
+              <div className={styles['devtools-section']}>
+                <div className={styles['devtools-section-head']}>
+      <Star size={14} className={`${styles['devtools-section-icon']} ${styles['devtools-section-icon--fav']}`} />
+                  <strong className={styles['devtools-section-title']}>{t('devtools.favorites')}</strong>
                 </div>
-                <div className="devtools-grid">
+                <div className={styles['devtools-grid']}>
                   {favoriteTools.map((tool) => (
                     <ToolCard
                       key={`fav-${tool.id}`}
@@ -860,16 +860,16 @@ export function DeveloperToolsPage() {
               />
             ))}
             {filteredTools.length === 0 && (
-              <Empty description={t('devtools.searchPlaceholder')} className="devtools-empty-state" />
+              <Empty description={t('devtools.searchPlaceholder')} className={styles['devtools-empty-state']} />
             )}
           </div>
 
-          <aside className="devtools-panel-pane">
-            <div className="devtools-panel-card">
-              <div className="devtools-panel-head">
-                <div className="devtools-panel-title">
-                  <span className="devtools-panel-icon">{TOOL_ICONS[selectedTool.id] ?? <Wrench size={ICON_SIZE.LARGE} />}</span>
-                  <Title level={5} className="devtools-panel-heading">{toolTexts[selectedTool.id]?.title ?? selectedTool.titleKey}</Title>
+          <aside className={styles['devtools-panel-pane']}>
+            <div className={styles['devtools-panel-card']}>
+              <div className={styles['devtools-panel-head']}>
+                <div className={styles['devtools-panel-title']}>
+                  <span className={styles['devtools-panel-icon']}>{TOOL_ICONS[selectedTool.id] ?? <Wrench size={ICON_SIZE.LARGE} />}</span>
+                  <Title level={5} className={styles['devtools-panel-heading']}>{toolTexts[selectedTool.id]?.title ?? selectedTool.titleKey}</Title>
                   <span
                     className={`devtools-fav-btn${favorites.includes(selectedTool.id) ? ' is-active' : ''}`}
                     onClick={() => handleToggleFavorite(selectedTool.id)}
@@ -880,9 +880,9 @@ export function DeveloperToolsPage() {
                     <Heart size={14} />
                   </span>
                 </div>
-                <div className="devtools-panel-desc">{toolTexts[selectedTool.id]?.desc ?? selectedTool.descriptionKey}</div>
+                <div className={styles['devtools-panel-desc']}>{toolTexts[selectedTool.id]?.desc ?? selectedTool.descriptionKey}</div>
               </div>
-              <div className="devtools-panel-body">
+              <div className={styles['devtools-panel-body']}>
                 <ToolPanel tool={selectedTool} onUse={() => handleSelectTool(selectedTool.id)} />
               </div>
             </div>
@@ -890,7 +890,7 @@ export function DeveloperToolsPage() {
         </div>
       </div>
 
-      <div className="devtools-privacy">
+      <div className={styles['devtools-privacy']}>
         <Shield size={12} />
         <span>{t('devtools.privacyNote')}</span>
       </div>

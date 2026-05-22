@@ -35,7 +35,7 @@ import { getAllDataKeys, removeData } from '@/repositories/storage-repo';
 import { APP_RESOURCE_NAMES, STORAGE_KEYS, isAppStorageKey } from '@/shared/config/storage-keys';
 import type { SettingsProfile } from '@/shared/utils/profiles';
 import { getProfiles, createProfile, renameProfile, deleteProfile } from '@/shared/utils/profiles';
-import './styles/data.css';
+import styles from './styles/data.module.less';
 
 interface QuotaInfo {
   usedBytes: number;
@@ -171,17 +171,17 @@ export function DataPanel() {
   };
 
   return (
-    <div className="data-panel settings-panel-stack">
+    <div className={styles['data-panel settings-panel-stack']}>
       <section className="settings-section">
         <Field label={t('settings.profiles')} hint={t('settings.profilesHint')}>
-        <div className="data-panel__profile-create">
+        <div className={styles['data-panel__profile-create']}>
           <Input
             size="small"
             placeholder={t('settings.profileNamePlaceholder')}
             value={profileName}
             onChange={(e) => setProfileName(e.target.value)}
             onPressEnter={() => { void handleCreateProfile(); }}
-            className="data-panel__profile-input"
+            className={styles['data-panel__profile-input']}
           />
           <Button
             size="small"
@@ -197,12 +197,12 @@ export function DataPanel() {
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}
             description={t('settings.noProfiles')}
-            className="data-panel__empty"
+            className={styles['data-panel__empty']}
           />
         ) : (
-          <div className="data-panel__profile-list">
+          <div className={styles['data-panel__profile-list']}>
             {profiles.map((profile) => (
-              <div key={profile.id} className="data-panel__profile-card">
+              <div key={profile.id} className={styles['data-panel__profile-card']}>
                 {editingId === profile.id ? (
                   <Input
                     size="small"
@@ -210,11 +210,11 @@ export function DataPanel() {
                     onChange={(e) => setEditingName(e.target.value)}
                     onPressEnter={() => { void handleRenameProfile(profile.id); }}
                     onBlur={() => { void handleRenameProfile(profile.id); }}
-                    className="data-panel__profile-edit-input"
+                    className={styles['data-panel__profile-edit-input']}
                     autoFocus
                   />
                 ) : (
-                  <span className="data-panel__profile-name">{profile.name}</span>
+                  <span className={styles['data-panel__profile-name']}>{profile.name}</span>
                 )}
                 <Space size={4}>
                   <Button
@@ -256,10 +256,10 @@ export function DataPanel() {
 
       {quotaInfo !== null && (
         <section className="settings-section">
-          <div className="data-panel__quota">
-          <div className="data-panel__quota-header">
-            <span className="data-panel__quota-label">
-              <HardDrive size={ICON_SIZE.MEDIUM} className="data-panel__quota-icon" />
+          <div className={styles['data-panel__quota']}>
+          <div className={styles['data-panel__quota-header']}>
+            <span className={styles['data-panel__quota-label']}>
+              <HardDrive size={ICON_SIZE.MEDIUM} className={styles['data-panel__quota-icon']} />
               {t('settings.storage')}
             </span>
             <span className={`data-panel__quota-meta${quotaInfo.isWarning ? ' is-warning' : ''}`}>
@@ -277,7 +277,7 @@ export function DataPanel() {
               type="error"
               showIcon
               description={t('settings.quotaWarning')}
-              className="data-panel__quota-alert"
+              className={styles['data-panel__quota-alert']}
             />
           )}
         </div>
@@ -285,7 +285,7 @@ export function DataPanel() {
       )}
 
       <section className="settings-section">
-        <div className="data-panel__actions">
+        <div className={styles['data-panel__actions']}>
         <Button block icon={<Download size={ICON_SIZE.MEDIUM} />} onClick={() => { void handleExport(); }}>
           {t('settings.export')}
         </Button>
@@ -296,11 +296,11 @@ export function DataPanel() {
           ref={fileInputRef}
           type="file"
           accept=".json"
-          className="data-panel__file-input"
+          className={styles['data-panel__file-input']}
           onChange={(e) => { void handleImport(e); }}
         />
         {importStatus !== null && (
-          <div className="data-panel__import-status">{importStatus}</div>
+          <div className={styles['data-panel__import-status']}>{importStatus}</div>
         )}
       </div>
       </section>
@@ -310,7 +310,7 @@ export function DataPanel() {
         {t('settings.clearAll')}
       </Button>
 
-      <Divider className="data-panel__divider">{t('settings.dangerZone')}</Divider>
+      <Divider className={styles['data-panel__divider']}>{t('settings.dangerZone')}</Divider>
 
       <Popconfirm
         title={t('settings.resetSettingsConfirm')}
@@ -355,13 +355,13 @@ export function DataPanel() {
           modal.confirm({
             title: t('settings.factoryResetTitle'),
             content: (
-              <div className="data-panel__factory-confirm">
+              <div className={styles['data-panel__factory-confirm']}>
                 <Alert
                   type="error"
                   showIcon
                   message={t('settings.factoryResetWarning')}
                 />
-                <div className="data-panel__factory-copy">{t('settings.factoryResetTypeHint')}</div>
+                <div className={styles['data-panel__factory-copy']}>{t('settings.factoryResetTypeHint')}</div>
                 <Input
                   placeholder="RESET"
                   onChange={(e) => {

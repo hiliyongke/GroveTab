@@ -8,7 +8,7 @@
 import { Button, Card, Space } from 'antd';
 import type { LiveTab } from '@/shared/types';
 import { useT } from '@/shared/i18n';
-import './styles/views.css';
+import styles from './styles/views.module.less';
 
 interface SelectionModeNoticeProps {
   selectedTabs: LiveTab[];
@@ -32,15 +32,15 @@ export function SelectionModeNotice({
   return (
     <Card
       size="small"
-      className="app-selection-notice"
-      classNames={{ body: 'app-selection-notice__body' }}
+      className={styles['app-selection-notice']}
+      classNames={{ body: styles['app-selection-notice__body'] }}
     >
-      <div className="app-selection-notice__body">
-        <div className="app-selection-notice__summary">
-          <div className="app-selection-notice__title">
+      <div className={styles['app-selection-notice__body']}>
+        <div className={styles['app-selection-notice__summary']}>
+<div className={styles['app-selection-notice__title']}>
             {t('selection.title')}
           </div>
-          <div className="app-selection-notice__meta">
+          <div className={styles['app-selection-notice__meta']}>
             {selectedCount > 0
               ? t('selection.summary', {
                   count: selectedCount,
@@ -49,7 +49,7 @@ export function SelectionModeNotice({
               })
               : t('selection.empty')}
           </div>
-          <div className="app-selection-notice__hint">
+<div className={styles['app-selection-notice__hint']}>
             {t('selection.hint')}
           </div>
         </div>

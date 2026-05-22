@@ -27,7 +27,7 @@ import { detectIdleTabs, formatIdleTime, type IdleTabInfo } from '@/shared/utils
 import { DuplicatePreviewModal } from './DuplicatePreviewModal';
 import { useT } from '@/shared/i18n';
 import { LOCAL_CACHE_KEYS } from '@/shared/config/storage-keys';
-import './styles/tidy-suggestion.css';
+import styles from './styles/tidy-suggestion.module.less';
 
 const DISMISSED_KEY = LOCAL_CACHE_KEYS.tidyDismissed;
 
@@ -161,25 +161,25 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
   }
 
   return (
-    <div className={`tidy-suggestion${expanded ? ' is-expanded' : ''}`}>
+    <div className={`${styles['tidy-suggestion']}${expanded ? ` ${styles['is-expanded']}` : ''}`}>
       <Alert
         type="info"
         showIcon
-        icon={<Zap size={ICON_SIZE.MEDIUM} className="tidy-suggestion__alert-icon" />}
+        icon={<Zap size={ICON_SIZE.MEDIUM} className={styles['tidy-suggestion__alert-icon']} />}
         message={(
-          <div className="tidy-suggestion__summary">
-            <span className="tidy-suggestion__summary-text">
+          <div className={styles['tidy-suggestion__summary']}>
+            <span className={styles['tidy-suggestion__summary-text']}>
               {summaryParts.join('；')}
             </span>
-            <Space size={4} className="tidy-suggestion__summary-actions">
-              <Button size="small" loading={busy} onClick={() => { void handleTidyAll(); }} className="tidy-suggestion__solid-action">
+            <Space size={4} className={styles['tidy-suggestion__summary-actions']}>
+              <Button size="small" loading={busy} onClick={() => { void handleTidyAll(); }} className={styles['tidy-suggestion__solid-action']}>
                 {t('tidy.tidyAll')}
               </Button>
               <Tooltip title={expanded ? t('tabs.collapse') : t('tabs.expand')}>
                 <Button
                   type="text"
                   size="small"
-                  icon={<ChevronDown size={ICON_SIZE.SMALL} className="tidy-suggestion__chevron" />}
+                  icon={<ChevronDown size={ICON_SIZE.SMALL} className={styles['tidy-suggestion__chevron']} />}
                   onClick={() => setExpanded(!expanded)}
                 />
               </Tooltip>
@@ -187,7 +187,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                 <Button
                   type="text"
                   size="small"
-                  icon={<X size={ICON_SIZE.SMALL} className="tidy-suggestion__dismiss-icon" />}
+                  icon={<X size={ICON_SIZE.SMALL} className={styles['tidy-suggestion__dismiss-icon']} />}
                   onClick={() => {
                     sessionStorage.setItem(DISMISSED_KEY, '1');
                     setDismissed(true);
@@ -197,27 +197,27 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
             </Space>
           </div>
         )}
-        className="tidy-suggestion__alert"
+        className={styles['tidy-suggestion__alert']}
       />
 
       {expanded && (
         <Card
-          className="tidy-suggestion__panel app-accordion-panel"
+          className={`${styles['tidy-suggestion__panel']} app-accordion-panel`}
           size="small"
-          classNames={{ body: 'tidy-suggestion__panel-body' }}
+          classNames={{ body: styles['tidy-suggestion__panel-body'] }}
         >
           {dupGroups.length > 0 && (
             <>
-              <div className="tidy-suggestion__section-header">
-                <Merge size={ICON_SIZE.DEFAULT} className="tidy-suggestion__section-icon tidy-suggestion__section-icon--dup" />
-                <span className="tidy-suggestion__section-title">
+              <div className={styles['tidy-suggestion__section-header']}>
+                <Merge size={ICON_SIZE.DEFAULT} className={`${styles['tidy-suggestion__section-icon']} ${styles['tidy-suggestion__section-icon--dup']}`} />
+                <span className={styles['tidy-suggestion__section-title']}>
                   {t('tidy.dupSection')}
                 </span>
                 <Button
                   size="small"
                   type="link"
                   onClick={() => setPreviewOpen(true)}
-                  className="tidy-suggestion__link-action"
+                  className={styles['tidy-suggestion__link-action']}
                 >
                   {t('dedup.preview')}
                 </Button>
@@ -226,7 +226,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                   type="link"
                   loading={busy}
                   onClick={handleMergeAll}
-                  className="tidy-suggestion__link-action"
+                  className={styles['tidy-suggestion__link-action']}
                 >
                   {t('dedup.mergeAll')}
                 </Button>
@@ -234,11 +234,11 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
               <List
                 size="small"
                 dataSource={dupGroups}
-                className="tidy-suggestion__list"
+                className={styles['tidy-suggestion__list']}
                 renderItem={(group) => (
                   <List.Item
                     key={group.canonicalUrl}
-                    className="tidy-suggestion__list-item"
+                    className={styles['tidy-suggestion__list-item']}
                     actions={[
                       <Button
                         key="merge"
@@ -251,8 +251,8 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                     ]}
                   >
                     <List.Item.Meta
-                      title={<span className="tidy-suggestion__item-title">{group.tabs[0]?.title || group.canonicalUrl}</span>}
-                      description={<span className="tidy-suggestion__item-desc">{group.tabs.length}x</span>}
+                      title={<span className={styles['tidy-suggestion__item-title']}>{group.tabs[0]?.title ?? group.canonicalUrl}</span>}
+                      description={<span className={styles['tidy-suggestion__item-desc']}>{group.tabs.length}x</span>}
                     />
                   </List.Item>
                 )}
@@ -262,9 +262,9 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
 
           {idleTabs.length > 0 && (
             <>
-              <div className={`tidy-suggestion__section-header${dupGroups.length > 0 ? ' has-offset' : ''}`}>
-                <Moon size={ICON_SIZE.DEFAULT} className="tidy-suggestion__section-icon tidy-suggestion__section-icon--idle" />
-                <span className="tidy-suggestion__section-title">
+              <div className={`${styles['tidy-suggestion__section-header']}${dupGroups.length > 0 ? ` ${styles['has-offset']}` : ''}`}>
+                <Moon size={ICON_SIZE.DEFAULT} className={`${styles['tidy-suggestion__section-icon']} ${styles['tidy-suggestion__section-icon--idle']}`} />
+                <span className={styles['tidy-suggestion__section-title']}>
                   {t('tidy.idleSection')}
                 </span>
                 <Button
@@ -272,7 +272,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                   type="link"
                   loading={busy}
                   onClick={() => { void handleDiscardIdle(idleTabs); }}
-                  className="tidy-suggestion__link-action"
+                  className={styles['tidy-suggestion__link-action']}
                 >
                   {t('tidy.discardAllIdle')}
                 </Button>
@@ -280,25 +280,24 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
               <List
                 size="small"
                 dataSource={idleTabs}
-                className="tidy-suggestion__list"
+                className={styles['tidy-suggestion__list']}
                 renderItem={(item) => (
                   <List.Item
                     key={item.tab.id}
-                    className="tidy-suggestion__list-item"
+                    className={styles['tidy-suggestion__list-item']}
                     actions={[
-                      <Tag key="level" color={item.level === 'stale' ? 'volcano' : 'default'} className="tidy-suggestion__level-tag">
+                      <Tag key="level" color={item.level === 'stale' ? 'volcano' : 'default'} className={styles['tidy-suggestion__level-tag']}>
                         {item.level === 'stale' ? t('tidy.stale') : t('tidy.idle')}
                       </Tag>,
                     ]}
                   >
                     <List.Item.Meta
-                      title={<span className="tidy-suggestion__item-title">{item.tab.title}</span>}
-                      description={<span className="tidy-suggestion__item-desc">{t('tidy.lastAccessed', { time: formatIdleTime(item.hoursSinceAccess) })}</span>}
+                      title={<span className={styles['tidy-suggestion__item-title']}>{item.tab.title}</span>}
+                      description={<span className={styles['tidy-suggestion__item-desc']}>{t('tidy.lastAccessed', { time: formatIdleTime(item.hoursSinceAccess) })}</span>}
                     />
                   </List.Item>
                 )}
-              />
-            </>
+              />            </>
           )}
         </Card>
       )}

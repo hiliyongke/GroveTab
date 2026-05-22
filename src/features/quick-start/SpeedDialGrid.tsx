@@ -17,6 +17,7 @@ import { useSpeedDialStore, useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import type { SpeedDialSite } from '@/shared/types';
+import styles from './QuickStartLayer.module.less';
 import { SpeedDialAddModal } from './SpeedDialAddModal';
 import { SortableSiteCard } from './SortableSiteCard';
 import { useSpeedDialSortable } from './hooks/useSpeedDialSortable';
@@ -41,7 +42,7 @@ function GroupHeader({ groupName, firstSite }: { groupName: string; firstSite: S
   };
 
   return (
-    <div className="speed-dial-group-header" style={headerStyle}>
+    <div className={styles['speed-dial-group-header']} style={headerStyle}>
       {groupName}
     </div>
   );
@@ -128,18 +129,18 @@ export function SpeedDialGrid({ sites }: SpeedDialGridProps) {
   /** 新增按钮卡片 */
   const AddCard = () => (
     <Card
-      className="app-card-interactive app-speed-dial-card app-speed-dial-card--add"
-      classNames={{ body: 'app-speed-dial-card__body' }}
+      className={`${styles['app-card-interactive']} ${styles['app-speed-dial-card']} ${styles['app-speed-dial-card--add']}`}
+      classNames={{ body: styles['app-speed-dial-card__body'] }}
       onClick={handleAddClick}
     >
-      <div className="app-speed-dial-add-preview">
-        <Plus size={28} className="app-speed-dial-add-icon" />
+      <div className={styles['app-speed-dial-add-preview']}>
+        <Plus size={28} className={styles['app-speed-dial-add-icon']} />
       </div>
-      <div className="app-speed-dial-add-content">
-        <span className="app-speed-dial-add-label">
+      <div className={styles['app-speed-dial-add-content']}>
+        <span className={styles['app-speed-dial-add-label']}>
           {t('quickStart.addSite')}
         </span>
-        <span className="app-speed-dial-add-hint" aria-hidden="true">
+        <span className={styles['app-speed-dial-add-hint']} aria-hidden="true">
           placeholder
         </span>
       </div>
@@ -163,11 +164,11 @@ export function SpeedDialGrid({ sites }: SpeedDialGridProps) {
   /** 空状态 */
   if (isEmpty) {
     return (
-      <div className="speed-dial-grid">
-        <div className="speed-dial-empty">
-          <p className="speed-dial-empty-title">{t('quickStart.emptyTitle')}</p>
-          <p className="speed-dial-empty-desc">{t('quickStart.emptyDesc')}</p>
-          <Button type="primary" className="speed-dial-empty-btn" icon={<Plus size={ICON_SIZE.SMALL} />} onClick={handleAddClick}>
+      <div className={styles['speed-dial-grid']}>
+        <div className={styles['speed-dial-empty']}>
+          <p className={styles['speed-dial-empty-title']}>{t('quickStart.emptyTitle')}</p>
+          <p className={styles['speed-dial-empty-desc']}>{t('quickStart.emptyDesc')}</p>
+          <Button type="primary" className={styles['speed-dial-empty-btn']} icon={<Plus size={ICON_SIZE.SMALL} />} onClick={handleAddClick}>
             {t('quickStart.addSite')}
           </Button>
         </div>
@@ -184,26 +185,26 @@ export function SpeedDialGrid({ sites }: SpeedDialGridProps) {
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={sites.map((s) => s.id)} strategy={rectSortingStrategy}>
-        <div className="speed-dial-grid-wrapper" style={wrapperStyle}>
+        <div className={styles['speed-dial-grid-wrapper']} style={wrapperStyle}>
           {/* 分组模式 */}
           {groupEnabled ? (
             grouped.map(({ groupName, sites: groupSites }) => (
-              <div key={groupName || 'ungrouped'} className="speed-dial-group">
+              <div key={groupName || 'ungrouped'} className={styles['speed-dial-group']}>
                 {groupName && groupSites[0] && <GroupHeader groupName={groupName} firstSite={groupSites[0]} />}
-                <div className="speed-dial-group-grid">
+                <div className={styles['speed-dial-group-grid']}>
                   {renderCards(groupSites)}
                 </div>
               </div>
             ))
           ) : (
-            <div className="speed-dial-grid">
+            <div className={styles['speed-dial-grid']}>
               {renderCards(sites)}
             </div>
           )}
 
           {/* 添加按钮：与网格同级，使用 display:contents 让所有卡片共享同一网格 */}
           {showAddButton && (
-            <div className="speed-dial-add-cell">
+            <div className={styles['speed-dial-add-cell']}>
               <AddCard />
             </div>
           )}

@@ -155,30 +155,32 @@
   }
 }
 
-/* ═══════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════
  * glassmorphism 皮肤：Acrylic 材质整理栏
- * ═══════════════════════════════════════════════════════ */
-[data-skin='glassmorphism'] .tidy-suggestion__alert {
-  background: color-mix(in srgb, var(--app-glass-bg) 88%, var(--app-color-primary) 4%);
-  backdrop-filter: var(--app-glass-filter);
-  -webkit-backdrop-filter: var(--app-glass-filter);
-  border-color: rgba(255, 255, 255, 0.08);
-}
+ * ═════════════════════════════════════════════════════════ */
+[data-skin='glassmorphism'] {
+  .tidy-suggestion__alert {
+    background: color-mix(in srgb, var(--app-glass-bg) 88%, var(--app-color-primary) 4%);
+    backdrop-filter: var(--app-glass-filter);
+    -webkit-backdrop-filter: var(--app-glass-filter);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
 
-[data-skin='glassmorphism'] .tidy-suggestion__panel {
-  background: color-mix(in srgb, var(--app-glass-bg) 92%, transparent);
-  backdrop-filter: var(--app-glass-filter);
-  -webkit-backdrop-filter: var(--app-glass-filter);
-  border-color: rgba(255, 255, 255, 0.08);
-}
+  .tidy-suggestion__panel {
+    background: color-mix(in srgb, var(--app-glass-bg) 92%, transparent);
+    backdrop-filter: var(--app-glass-filter);
+    -webkit-backdrop-filter: var(--app-glass-filter);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
 
-[data-skin='glassmorphism'] .tidy-suggestion__solid-action {
-  background: color-mix(in srgb, #0078D4 8%, transparent);
-  border-color: color-mix(in srgb, #0078D4 18%, rgba(255, 255, 255, 0.08));
-}
+  .tidy-suggestion__solid-action {
+    background: color-mix(in srgb, #0078D4 8%, transparent);
+    border-color: color-mix(in srgb, #0078D4 18%, rgba(255, 255, 255, 0.08));
+  }
 
-[data-skin='glassmorphism'] .tidy-suggestion__solid-action:hover,
-[data-skin='glassmorphism'] .tidy-suggestion__solid-action:focus-visible {
-  background: color-mix(in srgb, #0078D4 14%, transparent);
-  border-color: color-mix(in srgb, #0078D4 26%, rgba(255, 255, 255, 0.12));
+  .tidy-suggestion__solid-action:hover,
+  .tidy-suggestion__solid-action:focus-visible {
+    background: color-mix(in srgb, #0078D4 14%, transparent);
+    border-color: color-mix(in srgb, #0078D4 26%, rgba(255, 255, 255, 0.12));
+  }
 }

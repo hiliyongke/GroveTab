@@ -11,7 +11,6 @@
 import { useState, useMemo, useRef, useCallback, useEffect, type CSSProperties, type ReactNode } from 'react';
 import { Modal, Input, theme, Tag, Popover } from 'antd';
 import { FeatureEmptyState } from '@/shared/ui/FeatureEmptyState';
-import '@/shared/ui/FeatureEmptyState.css';
 import type { InputRef } from 'antd';
 import {
   LayoutGrid,
@@ -69,7 +68,7 @@ import {
   type HotKeywordSource,
 } from '@/shared/config/search-engines';
 import { iconColor, iconColorAlpha, type IconRole } from '@/shared/utils/icon-colors';
-import './SearchBox.css';
+import styles from './SearchBox.module.less';
 
 const DEFAULT_SEARCH_SCOPE: SearchScopeField[] = ['title', 'hostname', 'url'];
 const SEARCH_DEBOUNCE_MS = 180;
@@ -183,7 +182,7 @@ function normalizeSearchText(text: string): string {
  * 小键盘提示胶囊。
  */
 function Kbd({ children }: { children: ReactNode }) {
-  return <span className="search-box-kbd">{children}</span>;
+  return <span className={styles["search-box-kbd"]}>{children}</span>;
 }
 
 /**
@@ -204,7 +203,7 @@ function renderHighlightedText(text: string, query: string, keyPrefix: string): 
       || part.toLowerCase() === normalizedQuery.toLowerCase();
 
     return matched ? (
-      <mark key={`${keyPrefix}-${index}`} className="search-box-highlight">
+      <mark key={`${keyPrefix}-${index}`} className={styles["search-box-highlight"]}>
         {part}
       </mark>
     ) : (
@@ -1086,25 +1085,25 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
       keyboard={false}
       width={680}
       centered={false}
-      className="search-box-dialog"
+      className={styles["search-box-dialog"]}
       classNames={{
         mask: 'search-box-mask',
         body: 'search-box-body',
         container: 'search-box-container',
       }}
-      rootClassName="search-box-modal"
+        rootClassName={styles['search-box-modal']}
     >
-      <div className="search-box-shell" style={rootVars}>
-        <div className="search-box-header">
+      <div className={styles["search-box-shell"]} style={rootVars}>
+        <div className={styles["search-box-header"]}>
           <Popover
             open={enginePopoverOpen}
             onOpenChange={setEnginePopoverOpen}
             trigger="click"
             placement="bottomLeft"
             arrow={false}
-            overlayClassName="search-box-engine-popover"
+        overlayClassName={styles['search-box-engine-popover']}
             content={(
-              <ul className="search-box-engine-menu" role="listbox" aria-label={t('search.engineSwitcher')}>
+              <ul className={styles["search-box-engine-menu"]} role="listbox" aria-label={t('search.engineSwitcher')}>
                 {engineOptions.map((option, idx) => {
                   const active = option.id === currentEngine;
                   const shortcut = idx < 9 ? `\u2318${idx + 1}` : undefined;
@@ -1113,7 +1112,7 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
                       key={option.id}
                       role="option"
                       aria-selected={active}
-                      className={cx('search-box-engine-menu-item', active && 'is-active')}
+                      className={cx(styles['search-box-engine-menu-item'], active && styles['is-active'])}
                       style={cssVars({ '--searchbox-engine-color': option.color })}
                       onClick={() => {
                         setCurrentEngine(option.id);
@@ -1121,15 +1120,15 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
                         inputRef.current?.focus();
                       }}
                     >
-                      <span className="search-box-engine-logo" aria-hidden="true">
+                      <span className={styles["search-box-engine-logo"]} aria-hidden="true">
                         {option.iconUrl ? <img src={option.iconUrl} alt="" /> : option.label.slice(0, 1)}
                       </span>
-                      <span className="search-box-engine-menu-label">{option.label}</span>
+                      <span className={styles["search-box-engine-menu-label"]}>{option.label}</span>
                       {shortcut !== undefined && (
-                        <span className="search-box-engine-menu-shortcut" aria-hidden="true">{shortcut}</span>
+                        <span className={styles["search-box-engine-menu-shortcut"]} aria-hidden="true">{shortcut}</span>
                       )}
                       {active && (
-                        <Check size={ICON_SIZE.TINY} className="search-box-engine-menu-check" aria-hidden="true" />
+                        <Check size={ICON_SIZE.TINY} className={styles['search-box-engine-menu-check']} aria-hidden="true" />
                       )}
                     </li>
                   );
@@ -1139,19 +1138,19 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
           >
             <button
               type="button"
-              className={cx('search-box-engine-trigger', enginePopoverOpen && 'is-open')}
+              className={cx(styles['search-box-engine-trigger'], enginePopoverOpen && styles['is-open'])}
               style={cssVars({ '--searchbox-engine-color': currentEngineOption.color })}
               aria-haspopup="listbox"
               aria-expanded={enginePopoverOpen}
               aria-label={t('search.engineSwitcher')}
               title={currentEngineOption.label}
             >
-              <span className="search-box-engine-logo" aria-hidden="true">
+              <span className={styles["search-box-engine-logo"]} aria-hidden="true">
                 {currentEngineOption.iconUrl
                   ? <img src={currentEngineOption.iconUrl} alt="" />
                   : currentEngineOption.label.slice(0, 1)}
               </span>
-              <ChevronDown size={ICON_SIZE.TINY} className="search-box-engine-trigger-caret" aria-hidden="true" />
+              <ChevronDown size={ICON_SIZE.TINY} className={styles["search-box-engine-trigger-caret"]} aria-hidden="true" />
             </button>
           </Popover>
           <Input
@@ -1164,18 +1163,18 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
             }}
             onKeyDown={handleKeyDown}
             placeholder={t('search.universalPlaceholder')}
-            prefix={<Search size={ICON_SIZE.MEDIUM} className="search-box-input-prefix" />}
+            prefix={<Search size={ICON_SIZE.MEDIUM} className={styles["search-box-input-prefix"]} />}
             allowClear
             variant="borderless"
             autoComplete="off"
             spellCheck={false}
             aria-label={t('search.universalPlaceholder')}
-            className="search-box-input"
+            className={styles["search-box-input"]}
           />
           {onOpenHistory !== undefined && (
             <button
               type="button"
-              className="search-box-history-trigger"
+              className={styles["search-box-history-trigger"]}
               onClick={() => {
                 close();
                 onOpenHistory();
@@ -1188,7 +1187,7 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
           )}
         </div>
 
-        <div className="search-box-list-area">
+        <div className={styles["search-box-list-area"]}>
           {flatItems.length === 0 ? (
             (() => {
               const title = historyLoading
@@ -1197,10 +1196,10 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
                   ? t('search.tryOther')
                   : t('search.emptyIdle');
               return (
-                <div className="search-box-empty">
+                <div className={styles["search-box-empty"]}>
                   <FeatureEmptyState
                     title={title}
-                    icon={<Search size={20} className="search-box-empty-icon" />}
+                    icon={<Search size={20} className={styles["search-box-empty-icon"]} />}
                     size="small"
                     hints={
                       normalizedQuery !== ''
@@ -1215,12 +1214,12 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
             sections.map((section) => {
               const startIndex = flatItems.findIndex((item) => item.id === section.items[0]?.id);
               return (
-                <section key={section.key} className="search-box-section">
-                  <div className="search-box-section-header">
+                <section key={section.key} className={styles["search-box-section"]}>
+                  <div className={styles["search-box-section-header"]}>
                     <span>{section.title}</span>
-                    <span className="search-box-section-count">{section.items.length}</span>
+                    <span className={styles["search-box-section-count"]}>{section.items.length}</span>
                   </div>
-                  <ul role="listbox" className="search-box-list">
+                  <ul role="listbox" className={styles["search-box-list"]}>
                     {section.items.map((item, offset) => {
                       const itemIndex = startIndex + offset;
                       const active = itemIndex === activeIndex;
@@ -1239,45 +1238,45 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
                           aria-selected={active}
                           onMouseEnter={() => setActiveIndex(itemIndex)}
                           onClick={() => handleActivate(item)}
-                          className={cx('search-box-item', active && 'is-active')}
+                          className={cx(styles['search-box-item'], active && styles['is-active'])}
                           style={itemVars}
                         >
                           {item.type === 'tab' && item.tab.favIconUrl !== '' ? (
                             <img
                               src={item.tab.favIconUrl}
                               alt=""
-                              className="search-box-item-favicon"
+                              className={styles["search-box-item-favicon"]}
                               onError={(e) => {
                                 (e.target as HTMLImageElement).style.display = 'none';
                               }}
                             />
                           ) : (
-                            <span className="search-box-item-icon">{icon}</span>
+                            <span className={styles["search-box-item-icon"]}>{icon}</span>
                           )}
-                          <div className="search-box-item-main">
-                            <div className="search-box-item-head">
-                              <div className="search-box-item-title">{titleNode}</div>
+                          <div className={styles["search-box-item-main"]}>
+                            <div className={styles["search-box-item-head"]}>
+                              <div className={styles["search-box-item-title"]}>{titleNode}</div>
                               {item.type === 'tab' && item.badge !== undefined && (
-                                <Tag className="search-box-tag">{item.badge}</Tag>
+                                <Tag className={styles['search-box-tag']}>{item.badge}</Tag>
                               )}
                               {item.type === 'tab' && item.matchedTags !== undefined && item.matchedTags.length > 0 && (
-                                <span className="search-box-tag-list" aria-label={t('search.matchedTags')}>
+                              <span className={styles['search-box-tag-list']} aria-label={t('search.matchedTags')}>
                                   {item.matchedTags.slice(0, 3).map((tag) => (
-                                    <Tag key={tag} className="search-box-tag" color="blue">
+                                    <Tag key={tag} className={styles['search-box-tag']} color="blue">
                                       {tag}
                                     </Tag>
                                   ))}
                                 </span>
                               )}
                               {item.type === 'suggestion' && (
-                                <Tag className="search-box-tag" color={item.source === 'hot' ? 'gold' : 'default'}>
+                                <Tag className={styles['search-box-tag']} color={item.source === 'hot' ? 'gold' : 'default'}>
                                   {item.source === 'hot' ? t('search.sourceHot') : t('search.sourceRecent')}
                                 </Tag>
                               )}
                             </div>
-                            <div className="search-box-item-subtitle">{subtitleNode}</div>
+                            <div className={styles["search-box-item-subtitle"]}>{subtitleNode}</div>
                           </div>
-                          {active && <CornerDownLeft size={ICON_SIZE.SMALL} className="search-box-enter-icon" />}
+                          {active && <CornerDownLeft size={ICON_SIZE.SMALL} className={styles["search-box-enter-icon"]} />}
                         </li>
                       );
                     })}
@@ -1288,14 +1287,14 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
           )}
         </div>
 
-        <div className="search-box-footer">
-          <span className="search-box-status-text">
+        <div className={styles["search-box-footer"]}>
+          <span className={styles["search-box-status-text"]}>
             {flatItems.length > 0 ? t('search.results', { count: flatItems.length }) : t('search.statusIdle')}
           </span>
-          <div className="search-box-shortcuts">
+          <div className={styles["search-box-shortcuts"]}>
             {shortcutHints.map((shortcut) => (
-              <span key={shortcut.id} className="search-box-shortcut">
-                <span className="search-box-shortcut-keys">
+              <span key={shortcut.id} className={styles["search-box-shortcut"]}>
+                <span className={styles["search-box-shortcut-keys"]}>
                   {shortcut.keys.map((key) => (
                     <Kbd key={`${shortcut.id}-${key}`}>{key}</Kbd>
                   ))}

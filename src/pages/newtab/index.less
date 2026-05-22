@@ -1,0 +1,888 @@
+/**
+ * 全局样式
+ *
+ * 策略：视觉全部交给 antd v6 主题 + 皮肤预设；这里只保留 antd 无法覆盖的内容：
+ *   1. color-scheme / 盒模型等浏览器级基础重置
+ *   2. body 背景色跟随 antd 的 --ant-color-bg-layout
+ *   3. 滚动条微调（更素雅，不抢视觉）
+ *   4. 基于 CSS columns 的瀑布流布局 utility（antd 没有内建）
+ *   5. favicon 占位块（由代码生成颜色，纯结构样式）
+ *   6. 高级感增强：字体渲染、选中态、聚焦态
+ *   7. 皮肤级 CSS 变量驱动：噪点纹理、网格背景
+ *   8. 跨组件复用的通用语义类：.app-surface / .app-kbd / .app-divider-soft
+ */
+
+:root {
+  color-scheme: light;
+}
+[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+ * ─── 抗抖动：预留滚动条槽位 ─────────────────────────────────
+ *
+ * Chrome 94+/Firefox 97+ 支持 `scrollbar-gutter: stable`，即使内容还没溢出
+ * 也为滚动条预留空间；从而在动态增删内容（如搜索结果展开、BookmarkView
+ * 在 Tree/List 之间切换）导致滚动条出现/消失时，**整页宽度保持恒定**，
+ * 用户视角下不会再出现"内容向左挤一下"的抖动。
+ *
+ * 不用 `overflow-y: scroll`（会强制显示空滚动条），也不用 JS 测量
+ * 滚动条宽度再设 padding-right（会拉长首屏）。这是最现代、零成本的方案。
+ */
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  background-color: var(--app-page-bg, var(--ant-color-bg-layout, #f5f5f5));
+  background-image: var(--app-page-gradient, none);
+  color: var(--ant-color-text, #1f1f1f);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+  font-family: var(--ant-font-family);
+  font-weight: var(--app-font-weight-body, 400);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.app-typography {
+  font-family: var(--app-font-family-heading, var(--ant-font-family));
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: var(--app-font-weight-heading, 600);
+}
+
+[data-theme='dark'] body {
+  background-color: var(--app-page-bg, var(--ant-color-bg-layout, #141414));
+  background-image: var(--app-page-gradient, none);
+  color: var(--ant-color-text, #f5f5f5);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/** 选中态：用品牌色低透明度，避免默认蓝的廉价感 */
+::selection {
+  background-color: color-mix(in srgb, var(--app-color-primary) 18%, transparent);
+  color: inherit;
+}
+[data-theme='dark'] ::selection {
+  background-color: color-mix(in srgb, var(--app-color-primary) 25%, transparent);
+}
+
+/* ─── 自定义滚动条（webkit）──────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ant-color-border-secondary);
+  border-radius: var(--app-radius-xs);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ant-color-border);
+}
+
+/* ─── Firefox 滚动条 ─────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ant-color-border-secondary) transparent;
+}
+
+/* ─── favicon 占位块（无图时的字母色块） ──────────── */
+.app-favicon-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ant-color-text-inverse, #fff);
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: var(--app-radius-xs);
+  flex-shrink: 0;
+}
+
+/* ─── 全局聚焦态优化 ──────────────────────────────
+ * 移除默认 outline，改用柔和的 brand shadow ring；
+ * 仅在键盘导航时显示（:focus-visible），鼠标点击不出现。
+ */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-color-primary) 35%, transparent);
+  border-radius: inherit;
+}
+
+/* ─── 主题切换图标动画 ─────────────────────────────
+ * 头部明暗切换按钮在 theme 变化时，icon 元素通过 key 被重建；
+ * 这里给它一个轻量的「旋转 + 渐入」效果，让切换可感知。
+ */
+@keyframes app-theme-icon-spin {
+  0% {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.6);
+  }
+  60% {
+    opacity: 1;
+    transform: rotate(10deg) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+}
+
+/** 热榜刷新按钮旋转动画 */
+@keyframes app-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ─── 页面入场动画 ─────────────────────────────────
+ * 首屏加载完成后，主内容区做一个柔和的上滑渐入。
+ */
+@keyframes app-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 主内容入场：由 [data-app-content] 元素触发 */
+[data-app-content] {
+  animation: app-fade-in-up 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ─── 底部浮动操作栏入场 ───────────────────────────
+ * 上滑 + 渐入，配合 scale 让点击感更有物理性。
+ */
+@keyframes app-float-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+.app-batch-bar {
+  animation: app-float-in 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ─── Tidy 建议栏展开动画 ─────────────────────────── */
+@keyframes app-accordion-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.app-accordion-panel {
+  animation: app-accordion-in 0.22s ease-out;
+  transform-origin: top center;
+}
+
+/* ─── 皮肤纹理：噪点叠加 ──────────────────────────
+ * 当 <html> 上有 data-texture-noise 属性时，
+ * 通过 SVG filter 在 body 上叠加一层微弱噪点，增加纸张/实体质感。
+ * 由 AntdThemeProvider 动态控制此属性。
+ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  filter: url(#app-noise);
+  transition: opacity 0.3s ease;
+}
+
+html[data-texture-noise] body::before {
+  opacity: var(--app-texture-noise-opacity, 0.03);
+}
+
+/* ─── 通用语义类（跨组件复用的视觉原语） ─────────────
+ *
+ * 原则：每个类只做一件事，可自由组合；凡是多处重复的"毛玻璃面板 / 键帽 / 软分隔线"
+ * 一律走这里，避免各组件各自写内联样式造成风格漂移。
+ */
+
+/** Elevated Surface —— 浮层容器（批量栏、命令面板、菜单等共用） */
+.app-surface-elevated {
+  background: var(--app-surface-elevated-bg);
+  backdrop-filter: var(--app-glass-filter);
+  -webkit-backdrop-filter: var(--app-glass-filter);
+  border: 1px solid var(--ant-color-border-secondary);
+  box-shadow: var(--app-shadow-floating);
+  border-radius: var(--app-floating-radius);
+}
+
+/** 键帽（显示快捷键） */
+.app-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--app-space-1) var(--app-space-2);
+  min-width: 20px;
+  height: 20px;
+  font-family: var(--ant-font-family-code, ui-monospace, monospace);
+  font-size: 11px;
+  line-height: 1;
+  color: var(--ant-color-text-tertiary);
+  background: var(--ant-color-fill-quaternary);
+  border: 1px solid var(--ant-color-border-secondary);
+  border-radius: var(--app-radius-sm);
+  white-space: nowrap;
+}
+
+/** 软分隔线（与 antd divider 相比更细、更柔，适合浮层内部） */
+.app-divider-soft {
+  width: 1px;
+  height: 20px;
+  background: var(--ant-color-border-secondary);
+  flex-shrink: 0;
+}
+.app-divider-soft--horizontal {
+  width: 100%;
+  height: 1px;
+}
+
+/** 吸附/悬浮状态：让元素在 hover/focus 时轻微上浮 + 柔和 ring
+ *  用法：给任意交互元素加 .app-lift，hover 时自动抬起。
+ *  与 prefers-reduced-motion 兼容。
+ */
+.app-lift {
+  transition:
+    transform var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow var(--app-motion-duration, 0.2s) ease,
+    border-color var(--app-motion-duration, 0.2s) ease;
+}
+.app-lift:hover {
+  transform: translateY(-1px);
+}
+
+/**
+ * Header 吸附搜索按钮 hover。
+ *
+ * 元素本身是原生 <button all: unset>，不存在被 antd 覆盖的问题，
+ * 因此无需 !important。
+ */
+.app-compact-search:hover {
+  background: var(--ant-color-fill-secondary);
+  border-color: var(--ant-color-border);
+}
+
+/**
+ * Segmented 选中态字重强化。
+ *
+ * 用纯 CSS 响应 antd 官方选中类 `.ant-segmented-item-selected`，
+ * 替代原先在 label JSX 里通过 `viewMode === v.id` 判断 fontWeight 的写法——
+ * 视觉表现完全一致，但避免了 React 在每次切换时重新构造整个 options 数组。
+ */
+.app-segmented .app-segmented__item.app-segmented__item-selected {
+  font-weight: 600;
+}
+
+/* ─── 纯 CSS Hover Primitives（消除 React onMouseEnter/Leave） ───
+ *
+ * 背景：之前多处组件（TabItem / TimelineView / GridView / DomainGroupCard /
+ * SessionItem）用 React state 驱动 hover 样式——每次鼠标进/出都触发一次
+ * 组件 re-render，对长列表非常吃 CPU。
+ *
+ * 设计：
+ *   - 所有「仅改样式」的 hover 都通过 :hover / :focus-within 纯 CSS 完成。
+ *   - 组件内联把 antd token 灌成局部 CSS 变量（如 --hover-bg），
+ *     CSS 规则再消费这些变量——既保留了主题跟随，又完全脱离 React state。
+ *   - 键盘 a11y：同步挂 :focus-within，避免只有鼠标能触发悬浮显隐的按钮。
+ */
+
+/** 行级 hover：标签页行、会话子项等。变量由组件内联注入。 */
+.app-row-hover {
+  transition: background-color var(--app-motion-duration, 0.15s) ease;
+}
+.app-row-hover:hover,
+.app-row-hover:focus-within {
+  background-color: var(--app-row-hover-bg, var(--ant-color-fill-tertiary));
+}
+
+/** 卡片级 hover：上浮 + 阴影提升 + 边框加深。 */
+.app-card-interactive {
+  transition:
+    transform var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow var(--app-motion-duration, 0.2s) ease,
+    border-color var(--app-motion-duration, 0.2s) ease;
+}
+.app-card-interactive:hover,
+.app-card-interactive:focus-within {
+  transform: translateY(calc(-1 * var(--app-card-lift, 2px)));
+  box-shadow: var(--app-shadow-card-hover);
+  border-color: var(--app-hover-border, var(--ant-color-border));
+}
+
+/**
+ * Hover 显隐：容器加 .app-hover-reveal-host，
+ * 被显隐的子元素加 .app-hover-reveal。
+ *
+ * 容器 hover 或 focus-within 时子元素淡入——支持键盘 Tab 聚焦。
+ */
+.app-hover-reveal {
+  opacity: 0;
+  transition: opacity var(--app-motion-duration, 0.15s) ease;
+}
+.app-hover-reveal-host:hover .app-hover-reveal,
+.app-hover-reveal-host:focus-within .app-hover-reveal,
+.app-hover-reveal.is-visible {
+  opacity: 1;
+}
+
+/** 卡片身份色条 hover 加粗（2 → 3px）。由 DomainGroupCard 使用。 */
+.app-card-interactive .app-accent-bar--left {
+  transition: width var(--app-motion-duration, 0.15s) ease;
+}
+.app-card-interactive:hover .app-accent-bar--left,
+.app-card-interactive:focus-within .app-accent-bar--left {
+  width: 3px;
+}
+.app-card-interactive .app-accent-bar--top {
+  transition: height var(--app-motion-duration, 0.15s) ease;
+}
+.app-card-interactive:hover .app-accent-bar--top,
+.app-card-interactive:focus-within .app-accent-bar--top {
+  height: 3px;
+}
+
+/** 时间线分段标题 hover 文本提亮。颜色通过局部 CSS 变量桥接 antd token。 */
+.app-timeline-segment-header {
+  color: var(--app-color, var(--ant-color-text-secondary));
+}
+.app-timeline-segment-header:hover,
+.app-timeline-segment-header:focus-visible {
+  color: var(--app-color-hover, var(--ant-color-text));
+}
+
+/** ── 动效降级：尊重系统 reduced-motion 设置 ─── */
+@media (prefers-reduced-motion: reduce) {
+  [data-app-content],
+  .app-batch-bar,
+  .app-accordion-panel {
+    animation: none !important;
+  }
+  .app-lift:hover,
+  .app-hero-search:hover,
+  .app-card-interactive:hover,
+  .app-card-interactive:focus-within {
+    transform: none !important;
+  }
+}
+
+/* ═════════════════════════════════════════════════════════
+ * Apple 皮肤覆盖样式（data-skin="apple"）
+ *
+ * 核心设计语言：
+ *   - 导航栏：深色半透明毛玻璃（rgba(0,0,0,0.8) + blur 20px）
+ *   - 按钮：pill 形（980px radius）、Apple Blue (#0071e3) 强调
+ *   - 卡片：无边框、无 hover 上浮、柔和阴影
+ *   - 排版：SF Pro Display/Text、紧凑行高、负字间距
+ *   - 背景：纯色无渐变，#f5f5f7 (light) / #000000 (dark)
+ * ═════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════
+ * Apple 皮肤扩展覆盖
+ *
+ * 注：导航栏、Hero 搜索框等核心覆盖在 app-shell.css 中
+ * 这里补充全局组件级覆盖
+ * ═══════════════════════════════════════════════════════════ */
+
+[data-skin='apple'] {  /* ── Apple 卡片：无边框 ── */
+  & .app-card {
+    border: none;
+  }
+
+  & .app-card:hover {
+    transform: none !important;
+  }
+
+  /* ── Apple 按钮：pill 形 CTA ── */
+  & .app-button.ant-btn-primary {
+    border-radius: var(--app-radius-pill);
+  }
+
+  /* ── Apple 链接色 ── */
+  & a,
+  & .app-typography a {
+    color: var(--app-apple-link-light);
+  }
+
+  /* ── Apple 聚焦态 ── */
+  & :focus-visible {
+    outline: 2px solid #0071e3;
+    outline-offset: 2px;
+  }
+
+  /* ── Apple DomainGroupCard：无边框、柔和阴影 ── */
+  & .app-card-interactive {
+    border: none !important;
+    border-radius: var(--app-card-radius, 12px);
+    box-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px 0px;
+  }
+
+  /* Apple：卡片 hover 不上浮，仅微调阴影 */
+  & .app-card-interactive:hover,
+  & .app-card-interactive:focus-within {
+    transform: none !important;
+    box-shadow: rgba(0, 0, 0, 0.26) 5px 8px 36px 0px;
+    border-color: transparent !important;
+  }
+
+  [data-theme='dark'] {
+    & .app-card-interactive:hover,
+    & .app-card-interactive:focus-within {
+      box-shadow: rgba(0, 0, 0, 0.52) 5px 8px 36px 0px;
+    }
+  }
+
+  /* Apple：行级 hover 更柔 */
+  & .app-row-hover:hover,
+  & .app-row-hover:focus-within {
+    background-color: rgba(0, 0, 0, 0.03);
+  }
+
+  /* ── Apple ActivityStrip：pill 胶囊风格 ── */
+  & .activity-strip__item {
+    border: none;
+    border-radius: var(--app-radius-pill);
+    background: rgba(0, 0, 0, 0.04);
+    font-size: 13px;
+    letter-spacing: -0.01em;
+  }
+
+  & .activity-strip__icon {
+    color: #0071e3;
+  }
+
+  & .activity-strip__action-btn {
+    color: #0071e3 !important;
+  }
+
+  /* ── Apple 域名分组头 ── */
+  & .app-domain-group-header {
+    letter-spacing: -0.01em;
+  }
+
+  /* Apple：分组内 favicon 徽章更圆润 */
+  & .app-domain-group-badge {
+    border-radius: var(--app-radius-sm) !important;
+  }
+
+  /* ── Apple Tag 标签 ── */
+  & .app-tag {
+    border-radius: var(--app-radius-pill);
+    border: none;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  /* ── Apple Segmented 视图切换器 ── */
+  & .app-segmented {
+    border-radius: var(--app-radius-sm);
+  }
+
+  & .app-segmented .app-segmented__item.app-segmented__item-selected {
+    font-weight: 600;
+  }
+
+  /* ── Apple 空状态 ── */
+  & .app-empty-state-title {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.022em;
+  }
+
+  & .app-empty-state-actions .app-button.ant-btn-primary {
+    border-radius: var(--app-radius-pill);
+  }
+
+  /* ── Apple TidySuggestionBar ── */
+  & .app-accordion-panel {
+    border: none;
+    border-radius: var(--app-card-radius, 12px);
+    box-shadow: rgba(0, 0, 0, 0.12) 2px 4px 20px 0px;
+  }
+
+  /* ── Apple 选中态通知栏 ── */
+  & .app-alert {
+    border-radius: var(--app-card-radius, 12px);
+    border: none;
+  }
+
+  /* ── Apple WidgetCard 覆盖 ── */
+  & .app-widget-card {
+    border: none;
+    border-radius: var(--app-card-radius, 12px);
+    box-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px 0px;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  & .app-widget-card:hover {
+    transform: none !important;
+  }
+
+  /* ── Apple 滚动条 ── */
+  & ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: var(--app-radius-circle);
+  }
+
+  /* ── Apple 选中态文字 ── */
+  & ::selection {
+    background-color: rgba(0, 113, 227, 0.18);
+    color: inherit;
+  }
+
+  [data-theme='dark'] {
+    & a,
+    & .app-typography a {
+      color: var(--app-apple-link-dark);
+    }
+
+    & .app-card-interactive {
+      box-shadow: rgba(0, 0, 0, 0.44) 3px 5px 30px 0px;
+    }
+
+    & .app-card-interactive:hover,
+    & .app-card-interactive:focus-within {
+      box-shadow: rgba(0, 0, 0, 0.52) 5px 8px 36px 0px;
+    }
+
+    & .app-row-hover:hover,
+    & .app-row-hover:focus-within {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    & .activity-strip__item {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    & .activity-strip__icon {
+      color: #2997ff;
+    }
+
+    & .activity-strip__action-btn {
+      color: #2997ff !important;
+    }
+
+    & .app-accordion-panel {
+      box-shadow: rgba(0, 0, 0, 0.32) 2px 4px 20px 0px;
+    }
+
+    & .app-widget-card {
+      box-shadow: rgba(0, 0, 0, 0.44) 3px 5px 30px 0px;
+    }
+
+    & ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    & ::selection {
+      background-color: rgba(0, 113, 227, 0.32);
+    }
+  }
+}
+/* ═══════════════════════════════════════════════════════════ * Fluent Acrylic * Microsoft Fluent Design System —— Acrylic Material
+ * 核心视觉：
+ *   · 多层半透明叠加（tint → blur → noise → highlight）
+ *   · 显性噪点纹理（Fluent 标志性特征）
+ *   · 柔和的 inset 顶部高光线（模拟光线折射）
+ *   · Fluent Blue (#0078D4) 强调
+ *   · 圆角回归 Fluent 标准（8px）
+ * ═══════════════════════════════════════════════════════════ */
+
+[data-skin='glassmorphism'] {
+  /* ── Fluent Header：Acrylic 半透明底栏 ── */
+  & .app-header-shell {
+    background: var(--app-glass-bg);
+    backdrop-filter: var(--app-glass-filter);
+    -webkit-backdrop-filter: var(--app-glass-filter);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* ── Fluent 卡片：多层 Acrylic 效果 ── */
+  & .app-card-interactive {
+    border-color: rgba(255, 255, 255, 0.08);
+    transition: transform 0.367s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.367s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.25s ease;
+  }
+
+  & .app-card-interactive:hover,
+  & .app-card-interactive:focus-within {
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  /* ── Fluent 行级 hover ── */
+  & .app-row-hover:hover,
+  & .app-row-hover:focus-within {
+    background-color: rgba(0, 120, 212, 0.04);
+  }
+
+  /* ── Fluent ActivityStrip ── */
+  & .activity-strip__item {
+    border-radius: var(--app-radius-sm);
+    border-color: rgba(255, 255, 255, 0.06);
+  }
+
+  & .activity-strip__icon {
+    color: #0078D4;
+  }
+
+  & .activity-strip__action-btn {
+    color: #0078D4 !important;
+  }
+
+  /* ── Fluent 链接色 ── */
+  & a,
+  & .app-typography a {
+    color: #0078D4;
+  }
+
+  /* ── Fluent 按钮 ── */
+  & .app-button.ant-btn-primary {
+    background: #0078D4;
+    border-color: #0078D4;
+    border-radius: var(--app-radius-sm);
+  }
+
+  & .app-button.ant-btn-primary:hover {
+    background: #2B88D8;
+    border-color: #2B88D8;
+  }
+
+  /* ── Fluent 聚焦态 ── */
+  & :focus-visible {
+    outline: 2px solid #0078D4;
+    outline-offset: 1px;
+  }
+
+  /* ── Fluent WidgetCard ── */
+  & .app-widget-card {
+    border-color: rgba(255, 255, 255, 0.06);
+  }
+
+  /* ── Fluent 滚动条 ── */
+  & ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--app-radius-xs);
+  }
+
+  /* ── Fluent 选中态 ── */
+  & ::selection {
+    background-color: rgba(0, 120, 212, 0.2);
+    color: inherit;
+  }
+
+  /* ── Fluent 噪点纹理：Acrylic 标志性特征 ──
+   * 增强噪点可见度（基础 skin 配置已设 noiseOpacity: 0.05，
+   * 这里通过 CSS 进一步增强 Acrylic 的液态质感）
+   */
+  & body::before {
+    mix-blend-mode: overlay;
+  }
+
+  /* ── Fluent Drawer：Acrylic 毛玻璃抽屉 ──
+     设计要点：偏"磨砂"而非"透明玻璃"——表面不透度走高 (≥ 85%)，
+     依靠强 backdrop blur 把背后内容柔化为色调，而不是让背后内容清晰透入。
+     用 linear-gradient 叠一层极淡的高光作为"内填光"，强化金属/玻璃质感。 */
+  & .app-drawer__section {
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 40%),
+      var(--app-glass-bg) !important;
+    backdrop-filter: var(--app-glass-filter) !important;
+    -webkit-backdrop-filter: var(--app-glass-filter) !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow:
+      -8px 0 32px rgba(0, 0, 0, 0.18),
+      inset 1px 0 0 rgba(255, 255, 255, 0.12);
+  }
+
+  & .app-drawer__header {
+    background: transparent !important;
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+  }
+
+  & .app-drawer__body {
+    background: transparent !important;
+  }
+
+  & .app-drawer__footer {
+    background: transparent !important;
+    border-top-color: rgba(255, 255, 255, 0.06);
+  }
+
+  /* Drawer 遮罩层：加深以突出 Acrylic 抽屉 */
+  & .app-drawer__mask {
+    background: rgba(0, 0, 0, 0.45) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+  }
+
+  /* ── Fluent SearchBox Modal：Acrylic 毛玻璃搜索弹窗 ── */
+  & .search-box-container {
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 45%),
+      var(--app-glass-bg) !important;
+    backdrop-filter: var(--app-glass-filter) !important;
+    -webkit-backdrop-filter: var(--app-glass-filter) !important;
+  }
+
+  & .search-box-mask {
+    background: rgba(0, 0, 0, 0.45) !important;
+  }
+
+  /* ── Fluent Modal：Acrylic 毛玻璃弹窗 ── */
+  & .app-modal__container {
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 45%),
+      var(--app-glass-bg) !important;
+    backdrop-filter: var(--app-glass-filter) !important;
+    -webkit-backdrop-filter: var(--app-glass-filter) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow:
+      0 16px 48px rgba(0, 0, 0, 0.22),
+      0 2px 8px rgba(0, 0, 0, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+
+  & .app-modal__header {
+    background: transparent !important;
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+  }
+
+  & .app-modal__body {
+    background: transparent !important;
+  }
+
+  & .app-modal__footer {
+    background: transparent !important;
+    border-top-color: rgba(255, 255, 255, 0.06);
+  }
+
+  /* Modal 遮罩层：加深以突出 Acrylic 弹窗 */
+  & .app-modal__mask {
+    background: rgba(0, 0, 0, 0.45) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+  }
+
+  [data-theme='dark'] {
+    & .app-card-interactive:hover,
+    & .app-card-interactive:focus-within {
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    & .app-row-hover:hover,
+    & .app-row-hover:focus-within {
+      background-color: rgba(0, 120, 212, 0.08);
+    }
+
+    & .activity-strip__icon {
+      color: #60CDFF;
+    }
+
+    & .activity-strip__action-btn {
+      color: #60CDFF !important;
+    }
+
+    & a,
+    & .app-typography a {
+      color: #60CDFF;
+    }
+
+    & .app-widget-card {
+      border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    & ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    & ::selection {
+      background-color: rgba(0, 120, 212, 0.36);
+    }
+
+    & .app-drawer__section {
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 40%),
+        var(--app-glass-bg) !important;
+      border-left-color: rgba(255, 255, 255, 0.08);
+      box-shadow:
+        -8px 0 32px rgba(0, 0, 0, 0.4),
+        inset 1px 0 0 rgba(255, 255, 255, 0.06);
+    }
+
+    & .app-drawer__mask {
+      background: rgba(0, 0, 0, 0.55) !important;
+    }
+
+    & .search-box-container {
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 45%),
+        var(--app-glass-bg) !important;
+    }
+
+    & .search-box-mask {
+      background: rgba(0, 0, 0, 0.55) !important;
+    }
+
+    & .app-modal__container {
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 45%),
+        var(--app-glass-bg) !important;
+      border-color: rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 16px 48px rgba(0, 0, 0, 0.45),
+        0 2px 8px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    & .app-modal__mask {
+      background: rgba(0, 0, 0, 0.55) !important;
+    }
+  }
+}

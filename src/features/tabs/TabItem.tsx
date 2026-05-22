@@ -27,7 +27,7 @@ import { stringToColor } from '@/shared/utils/color';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { formatUrlForDisplay } from '@/shared/utils/url-display';
 import { TabContextMenu } from './TabContextMenu';
-import './styles/items.css';
+import styles from './styles/items.module.less';
 
 interface TabItemProps {
   tab: LiveTab;
@@ -183,10 +183,10 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
         className={[
           'app-row-hover',
           'app-hover-reveal-host',
-          'app-tab-item',
-          showUrlHint ? 'has-url-hint' : '',
-          isSelected ? 'is-selected' : '',
-          isDiscarded ? 'is-discarded' : '',
+          styles['app-tab-item'],
+          showUrlHint ? styles['has-url-hint'] : '',
+          isSelected ? styles['is-selected'] : '',
+          isDiscarded ? styles['is-discarded'] : '',
         ].filter(Boolean).join(' ')}
         style={rowStyle}
       >
@@ -198,7 +198,7 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
               e.stopPropagation();
               toggleSelect(tab.id, e.shiftKey, visibleTabIds);
             }}
-            className={`app-tab-item-checkbox${selectionMode || isSelected ? ' is-visible' : ''}`}
+            className={`${styles['app-tab-item-checkbox']}${selectionMode || isSelected ? ` ${styles['is-visible']}` : ''}`}
           />
         )}
 
@@ -210,38 +210,38 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
             <img
               src={tab.favIconUrl}
               alt=""
-              className="app-tab-item-favicon"
+              className={styles['app-tab-item-favicon']}
               onError={() => setFaviconError(true)}
             />
           ) : (
-            <div className="app-tab-item-favicon-fallback">
-              <Globe size={ICON_SIZE.MICRO} className="app-tab-item-favicon-icon" />
+            <div className={styles['app-tab-item-favicon-fallback']}>
+              <Globe size={ICON_SIZE.MICRO} className={styles['app-tab-item-favicon-icon']} />
             </div>
           )
         )}
 
         {/* 标题区（单行或双行，取决于是否需要 URL 消歧） */}
-        <div className="app-tab-item-main">
+        <div className={styles['app-tab-item-main']}>
           {/* 上行：标题 + 标记 */}
-          <div className="app-tab-item-head">
-            <span className="app-tab-item-title">
+          <div className={styles['app-tab-item-head']}>
+            <span className={styles['app-tab-item-title']}>
               {tab.title}
             </span>
             {showHostname && (
-              <span className="app-tab-item-hostname">
+              <span className={styles['app-tab-item-hostname']}>
                 {tab.hostname}
               </span>
             )}
             {isPinned && (
-              <Pin size={ICON_SIZE.MICRO} className="app-tab-item-status-primary" />
+            <Pin size={ICON_SIZE.MICRO} className={styles['app-tab-item-status-primary']} />
             )}
             {note && (
-              <MessageSquare size={ICON_SIZE.MICRO} className="app-tab-item-note-icon" />
+            <MessageSquare size={ICON_SIZE.MICRO} className={styles['app-tab-item-note-icon']} />
             )}
             {tags.slice(0, 2).map((tag) => (
               <Tag
                 key={tag}
-                className="app-tab-item-tag"
+                className={styles['app-tab-item-tag']}
                 style={tagStyles.get(tag)}
               >
                 {tag}
@@ -252,7 +252,7 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
           {/* 下行：URL 友好串（仅同名多 tab 时展示） */}
           {showUrlHint && urlHint && (
             <Tooltip title={tab.url} mouseEnterDelay={0.4} placement="bottomLeft">
-              <span className="app-tab-item-url-hint">
+              <span className={styles['app-tab-item-url-hint']}>
                 {urlHint}
               </span>
             </Tooltip>
@@ -260,16 +260,16 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
         </div>
 
         {/* 状态图标 */}
-        <div className="app-tab-item-status">
+        <div className={styles['app-tab-item-status']}>
           {tab.audible && (
             <Tooltip title={t('tabs.playing')}>
-              <Volume2 size={ICON_SIZE.SMALL} className="app-tab-item-status-primary" />
+              <Volume2 size={ICON_SIZE.SMALL} className={styles['app-tab-item-status-primary']} />
             </Tooltip>
           )}
           {!tab.isCurrentWindow && (
             <Tooltip title={t('tabs.otherWindow')}>
               {/* 使用外链箭头图标表达「跳去另一个窗口」语义，避免与 favicon 兜底的 Global 图标混淆 */}
-              <Pointer size={ICON_SIZE.SMALL} className="app-tab-item-secondary-icon" />
+              <Pointer size={ICON_SIZE.SMALL} className={styles['app-tab-item-secondary-icon']} />
             </Tooltip>
           )}
         </div>
@@ -297,9 +297,9 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
             }}
             aria-label={t('context.addToQuickStart')}
             className={[
-              'app-tab-item-action',
-              'app-tab-item-action--favorite',
-              isInQuickStart ? 'is-active' : 'app-hover-reveal',
+              styles['app-tab-item-action'],
+              styles['app-tab-item-action--favorite'],
+              isInQuickStart ? styles['is-active'] : 'app-hover-reveal',
             ].join(' ')}
           />
         </Tooltip>
@@ -313,7 +313,7 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
             icon={<X size={ICON_SIZE.SMALL} />}
             onClick={handleClose}
             aria-label={t('tabs.close')}
-            className="app-hover-reveal app-tab-item-action"
+            className={`app-hover-reveal ${styles['app-tab-item-action']}`}
           />
         </Tooltip>
       </div>

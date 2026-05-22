@@ -18,7 +18,7 @@ import type { DupGroup } from '@/shared/utils/dedupe';
 import { useTabsStore, useMetadataStore } from '@/store';
 import { nanoid } from 'nanoid';
 import { useT } from '@/shared/i18n';
-import './styles/views.css';
+import styles from './styles/views.module.less';
 
 const { Text } = Typography;
 
@@ -149,7 +149,7 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
       centered
       destroyOnHidden
       footer={
-        <div className="app-duplicate-footer">
+        <div className={styles['app-duplicate-footer']}>
           <Space>
             <Button size="small" onClick={handleKeepAllOldest}>
               {t('dedup.keepOldest')}
@@ -159,7 +159,7 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
             </Button>
           </Space>
           <Space>
-            <Text type="secondary" className="app-duplicate-summary">
+            <Text type="secondary" className={styles['app-duplicate-summary']}>
               {t('dedup.mergeSummary', { close: closeCount, keep: keepCount })}
             </Text>
             <Button onClick={onClose} disabled={busy}>
@@ -177,7 +177,7 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
         </div>
       }
     >
-      <div className="app-duplicate-groups">
+      <div className={styles['app-duplicate-groups']}>
         {effectiveGroups.length === 0 ? (
           <Text type="secondary">{t('dedup.emptyPreview')}</Text>
         ) : (
@@ -210,44 +210,44 @@ interface GroupSectionProps {
 function GroupSection({ group, keeperId, onChange, token: _token, t, locale }: GroupSectionProps) {
   const closeCount = keeperId === undefined ? group.tabs.length : group.tabs.length - 1;
   return (
-    <div className="app-duplicate-group">
-      <div className="app-duplicate-group__header">
-        <Text strong className="app-duplicate-group__title">
+    <div className={styles['app-duplicate-group']}>
+      <div className={styles['app-duplicate-group__header']}>
+        <Text strong className={styles['app-duplicate-group__title']}>
           {group.canonicalUrl}
         </Text>
-        <Tag color="gold" bordered={false} className="app-duplicate-group__tag">
+        <Tag color="gold" bordered={false} className={styles['app-duplicate-group__tag']}>
           {t('dedup.willClose', { count: closeCount })}
         </Tag>
       </div>
-      <div className="app-duplicate-group__list">
+      <div className={styles['app-duplicate-group__list']}>
         {group.tabs.map((tab: LiveTab) => (
           <label
             key={tab.id}
-            className={`app-duplicate-option${keeperId === tab.id ? ' is-selected' : ''}`}
+            className={`${styles['app-duplicate-option']}${keeperId === tab.id ? ' is-selected' : ''}`}
           >
             <input
               type="radio"
               name={`group-${group.canonicalUrl}`}
               checked={keeperId === tab.id}
               onChange={() => onChange(tab.id)}
-              className="app-duplicate-option__radio"
+              className={styles['app-duplicate-option__radio']}
             />
             {tab.favIconUrl !== '' && (
-              <img src={tab.favIconUrl} alt="" className="app-duplicate-option__favicon" />
+              <img src={tab.favIconUrl} alt="" className={styles['app-duplicate-option__favicon']} />
             )}
-            <div className="app-duplicate-option__content">
-              <span className="app-duplicate-option__title">
+            <div className={styles['app-duplicate-option__content']}>
+              <span className={styles['app-duplicate-option__title']}>
                 {tab.title}
               </span>
-              <span className="app-duplicate-option__url">
+              <span className={styles['app-duplicate-option__url']}>
                 {tab.url}
               </span>
             </div>
-            <div className="app-duplicate-option__aside">
-              <Text type="secondary" className="app-duplicate-option__meta">
+            <div className={styles['app-duplicate-option__aside']}>
+              <Text type="secondary" className={styles['app-duplicate-option__meta']}>
                 {t('dedup.windowLabel', { id: tab.windowId })}
               </Text>
-              <Text type="secondary" className="app-duplicate-option__meta">
+              <Text type="secondary" className={styles['app-duplicate-option__meta']}>
                 {formatOpenedAt(tab.lastAccessed, locale)}
               </Text>
             </div>

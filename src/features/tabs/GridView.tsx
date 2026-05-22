@@ -30,7 +30,7 @@ import { findAmbiguousTitleIds } from '@/shared/utils/url-display';
 import { cssVars } from '@/shared/utils/css-vars';
 import { TabItem } from './TabItem';
 import type { LiveTab } from '@/shared/types';
-import './styles/views.css';
+import styles from './styles/views.module.less';
 
 /**
  * 网格视图主组件：每个域名一张大卡片
@@ -63,7 +63,7 @@ export function GridView() {
   };
 
   return (
-    <div className="app-grid-view">
+    <div className={styles['app-grid-view']}>
       {groups.map((group) => (
         <GridCard
           key={group.domain}
@@ -146,8 +146,8 @@ function GridCard({
   const cardNode = (
     <Card
       onClick={handleCardClick}
-      className="app-card-interactive app-grid-card"
-      classNames={{ body: 'app-grid-card__body' }}
+      className={`${styles['app-card-interactive']} ${styles['app-grid-card']}`}
+      classNames={{ body: styles['app-grid-card__body'] }}
       style={{
         borderRadius: token.borderRadiusLG,
         ...cssVars({
@@ -157,39 +157,39 @@ function GridCard({
       }}
     >
       {/* 缩略图区 —— 16:10 宽高比 */}
-      <div className="app-grid-card-preview">
+      <div className={styles["app-grid-card-preview"]}>
         {first?.favIconUrl && !faviconError ? (
           <img
             src={first.favIconUrl}
             alt=""
-            className="app-grid-card-favicon"
+            className={styles["app-grid-card-favicon"]}
             onError={() => setFaviconError(true)}
           />
         ) : (
-          <span className="app-grid-card-fallback">
+          <span className={styles["app-grid-card-fallback"]}>
             {domain.charAt(0).toUpperCase()}
           </span>
         )}
 
         {/* 多 tab 角标：数字，右上角 */}
         {isMulti && (
-          <span className="app-grid-card-count">
+          <span className={styles["app-grid-card-count"]}>
             {tabs.length}
           </span>
         )}
       </div>
 
       {/* 底部信息区 */}
-      <div className="app-grid-card-content">
-        <div className="app-grid-card-meta">
-          <span className="app-grid-card-domain">
+      <div className={styles["app-grid-card-content"]}>
+        <div className={styles["app-grid-card-meta"]}>
+          <span className={styles["app-grid-card-domain"]}>
             {domain}
           </span>
           {hasAudible && (
-            <Volume2 size={ICON_SIZE.SMALL} className="app-grid-card-audible" />
+            <Volume2 size={ICON_SIZE.SMALL} className={styles["app-grid-card-audible"]} />
           )}
         </div>
-        <span className="app-grid-card-copy">
+        <span className={styles["app-grid-card-copy"]}>
           {countLabel}
         </span>
       </div>
@@ -216,7 +216,7 @@ function GridCard({
       arrow
       destroyOnHidden
       classNames={{ container: 'app-grid-popover-container' }}
-      overlayClassName="app-grid-popover-overlay"
+      overlayClassName={styles["app-grid-popover-overlay"]}
       content={
         <DomainTabsPanel
           domain={domain}
@@ -286,30 +286,30 @@ function DomainTabsPanel({
   });
 
   return (
-    <div className="app-grid-popover" style={popoverStyle}>
+    <div className={styles["app-grid-popover"]} style={popoverStyle}>
       {/* Header —— 色条 + favicon + 域名 + 计数 + 关闭 */}
-      <div className="app-grid-popover__header">
+      <div className={styles["app-grid-popover__header"]}>
         {/* 左侧身份色条 */}
-        <span aria-hidden className="app-grid-popover__accent" />
+        <span aria-hidden className={styles["app-grid-popover__accent"]} />
         {/* favicon */}
         {hasFavicon && !faviconFailed ? (
           <img
             src={faviconSrc}
             alt=""
-            className="app-grid-popover__favicon"
+            className={styles["app-grid-popover__favicon"]}
             onError={() => setFaviconFailed(true)}
           />
         ) : (
-          <span aria-hidden className="app-grid-popover__fallback">
+          <span aria-hidden className={styles["app-grid-popover__fallback"]}>
             {domain.charAt(0).toUpperCase()}
           </span>
         )}
         {/* 域名 —— 允许省略 */}
-        <span title={domain} className="app-grid-popover__title">
+        <span title={domain} className={styles["app-grid-popover__title"]}>
           {domain}
         </span>
         {/* 计数 —— secondary tone，tabular */}
-        <span className="app-grid-popover__count">
+        <span className={styles["app-grid-popover__count"]}>
           {t('header.tabCount', { count: tabs.length })}
         </span>
         {/* 关闭按钮 —— antd Button（键盘可达 + ant 原生样式） */}
@@ -319,12 +319,12 @@ function DomainTabsPanel({
           aria-label="Close"
           onClick={onClose}
           icon={<X size={ICON_SIZE.MEDIUM} />}
-          className="app-grid-popover__close"
+          className={styles["app-grid-popover__close"]}
         />
       </div>
 
       {/* 列表区 */}
-      <div className="app-grid-popover__list">
+      <div className={styles["app-grid-popover__list"]}>
         {tabs.map((tab) => (
           <TabItem
             key={tab.id}

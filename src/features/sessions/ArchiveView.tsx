@@ -15,7 +15,6 @@ import {
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { Alert, Button, List, Spin, Input, Modal, Space } from 'antd';
 import { FeatureEmptyState } from '@/shared/ui/FeatureEmptyState';
-import '@/shared/ui/FeatureEmptyState.css';
 import type { ArchivedSession } from '@/shared/types';
 import {
   getArchivedSessions,
@@ -39,7 +38,7 @@ import { EnhancedRestoreDialog } from './components/EnhancedRestoreDialog';
 import { EnhancedRenameDialog } from './components/EnhancedRenameDialog';
 import { APP_EVENTS } from '@/shared/config/storage-keys';
 import { isSafeExternalUrl } from '@/shared/utils/url-safety';
-import './styles/archive.css';
+import styles from './styles/archive.module.less';
 
 /* ---------- 简易外部 store 同步归档列表 ---------- */
 let sessionsCache: ArchivedSession[] = [];
@@ -377,13 +376,13 @@ export function ArchiveView() {
   };
 
   return (
-    <div className="archive-view">
+    <div className={styles["archive-view"]}>
       {/* 标题栏 */}
-      <div className="app-archive-header">
-        <div className="app-archive-header__badge">
-          <Save size={ICON_SIZE.LARGE} className="app-archive-header__icon" />
+      <div className={styles["app-archive-header"]}>
+        <div className={styles["app-archive-header__badge"]}>
+          <Save size={ICON_SIZE.LARGE} className={styles["app-archive-header__icon"]} />
         </div>
-        <span className="app-archive-header__title">{t('archive.title')}</span>
+        <span className={styles["app-archive-header__title"]}>{t('archive.title')}</span>
         <Space size={4}>
           <BatchOperationsMenu
             selectedIds={selectedIds}
@@ -430,13 +429,13 @@ export function ArchiveView() {
         showIcon
         icon={<Info size={ICON_SIZE.MEDIUM} />}
         description={t('archive.description')}
-        className="app-archive-alert"
+        className={styles["app-archive-alert"]}
       />
 
       {/* 搜索过滤 */}
-      <div className="app-archive-search">
+      <div className={styles["app-archive-search"]}>
         <Input.Search
-          className="app-archive-search__input"
+          className={styles["app-archive-search__input"]}
           placeholder={t('archive.searchPlaceholder')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -446,7 +445,7 @@ export function ArchiveView() {
 
       {/* 搜索结果统计 */}
       {searchQuery.trim() && (
-        <div className="app-archive-search-result">
+        <div className={styles["app-archive-search-result"]}>
           {t('archive.searchResults', {
             count: filteredSessions.length,
             total: sessions.length
@@ -456,7 +455,7 @@ export function ArchiveView() {
 
       {/* 全部展开/折叠 */}
       {filteredSessions.length > 0 && (
-        <div className="app-archive-expand-actions">
+        <div className={styles["app-archive-expand-actions"]}>
           <Button
             size="small"
             type="text"
@@ -477,10 +476,10 @@ export function ArchiveView() {
       )}
 
       {loading ? (
-        <div className="app-archive-loading">
-          <div className="app-archive-loading__content">
+        <div className={styles["app-archive-loading"]}>
+          <div className={styles["app-archive-loading__content"]}>
             <Spin />
-            <span className="app-archive-loading__copy">{t('archive.loading')}</span>
+            <span className={styles["app-archive-loading__copy"]}>{t('archive.loading')}</span>
           </div>
         </div>
       ) : filteredSessions.length === 0 ? (
@@ -504,7 +503,7 @@ export function ArchiveView() {
           dataSource={filteredSessions}
           renderItem={(session) => (
             <div
-              className={`app-archive-session-shell${highlightId === session.id ? ' is-highlighted' : ''}`}
+              className={`${styles['app-archive-session-shell']}${highlightId === session.id ? ' ' + styles['is-highlighted'] : ''}`}
             >
               <SessionItem
                 session={session}
@@ -540,7 +539,7 @@ export function ArchiveView() {
       {/* 合并会话 Modal */}
       <Modal
         open={mergeOpen}
-        rootClassName="app-archive-merge-modal"
+        rootClassName={styles['app-archive-merge-modal']}
         title={t('archive.mergeTitle')}
         onCancel={() => setMergeOpen(false)}
         onOk={() => void handleConfirmMerge()}
@@ -548,7 +547,7 @@ export function ArchiveView() {
         cancelText={t('archive.cancel')}
         centered
       >
-        <p className="app-archive-merge-copy">
+        <p className={styles["app-archive-merge-copy"]}>
           {t('archive.mergeDesc', { count: selectedIds.size })}
         </p>
         <Input

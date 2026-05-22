@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import '../newtab/index.css';
-import './styles/index.css';
+import '../newtab/index.less';
+import './styles/index.less';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

@@ -15,7 +15,7 @@ import { Tag, Collapse, Empty } from 'antd';
 import { useTabsStore } from '@/store';
 import { TabItem } from './TabItem';
 import { useT } from '@/shared/i18n';
-import './styles/views.css';
+import styles from './styles/views.module.less';
 
 /**
  * Chrome Tab Group 颜色映射到 antd Tag color
@@ -86,7 +86,7 @@ export function TabGroupView() {
     return (
       <Empty
         description={t('tabs.empty')}
-        className="app-tab-group-empty"
+        className={styles['app-tab-group-empty']}
       />
     );
   }
@@ -101,20 +101,20 @@ export function TabGroupView() {
       items={groups.map((group) => ({
         key: String(group.groupId),
         label: (
-          <div className="app-tab-group-label">
+          <div className={styles['app-tab-group-label']}>
             <Tag
               color={GROUP_COLOR_MAP[group.color] || 'default'}
-              className="app-tab-group-tag"
+              className={styles['app-tab-group-tag']}
             >
               {group.title}
             </Tag>
-            <span className="app-tab-group-count">
+            <span className={styles['app-tab-group-count']}>
               {group.tabs.length}
             </span>
           </div>
         ),
         children: (
-          <div className="app-tab-group-list">
+          <div className={styles['app-tab-group-list']}>
             {group.tabs.map((tab) => (
               <TabItem
                 key={tab.id}

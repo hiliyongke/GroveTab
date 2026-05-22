@@ -28,7 +28,7 @@ import { findAmbiguousTitleIds } from '@/shared/utils/url-display';
 import { cssVars } from '@/shared/utils/css-vars';
 import { TabItem } from './TabItem';
 import type { LiveTab } from '@/shared/types';
-import './styles/views.css';
+import styles from './styles/views.module.less';
 
 /** 翻译函数类型（与 useT 返回的 t 对齐） */
 type TFn = (key: string, vars?: Record<string, string | number>) => string;
@@ -265,7 +265,7 @@ function SegmentHeader({
       type="button"
       onClick={onToggle}
       aria-expanded={!collapsed}
-      className="app-timeline-segment-header app-timeline-segment-trigger"
+      className={`${styles['app-timeline-segment-header']} ${styles['app-timeline-segment-trigger']}`}
       style={
         {
           transition: `color ${token.motionDurationFast}`,
@@ -278,16 +278,16 @@ function SegmentHeader({
     >
       <span>{label}</span>
       {rangeText && (
-        <span className="app-timeline-segment-range">
+        <span className={styles['app-timeline-segment-range']}>
           {rangeText}
         </span>
       )}
-      <span className="app-timeline-segment-count">
+        <span className={styles['app-timeline-segment-count']}>
         {count}
       </span>
       <ChevronDown
         size={ICON_SIZE.MICRO}
-        className={`app-timeline-segment-chevron${collapsed ? ' is-collapsed' : ''}`}
+        className={`${styles['app-timeline-segment-chevron']}${collapsed ? ` ${styles['is-collapsed']}` : ''}`}
       />
     </button>
   );
@@ -315,8 +315,8 @@ function SegmentContent({
   const rangeText = showExactTime ? formatSegmentRange(segment.tabs) : undefined;
 
   return (
-    <div className={`app-timeline-segment${collapsed ? ' is-collapsed' : ''}`}>
-      <div className="app-timeline-segment__header">
+      <div className={`${styles['app-timeline-segment']}${collapsed ? ` ${styles['is-collapsed']}` : ''}`}>
+      <div className={styles['app-timeline-segment__header']}>
         <SegmentHeader
           label={segment.label}
           rangeText={rangeText}
@@ -327,7 +327,7 @@ function SegmentContent({
       </div>
 
       {!collapsed && (
-        <div className="app-timeline-segment-list">
+      <div className={styles['app-timeline-segment-list']}>
           {segment.tabs.map((tab) => (
             <TabItem
               key={tab.id}
@@ -340,7 +340,7 @@ function SegmentContent({
               visibleTabIds={segmentTabIds}
               trailing={
                 showExactTime && tab.lastAccessed ? (
-                  <span className="app-timeline-segment-time">
+        <span className={styles['app-timeline-segment-time']}>
                     {formatHM(tab.lastAccessed)}
                   </span>
                 ) : null
@@ -402,7 +402,7 @@ export function TimelineView() {
   }));
 
   return (
-    <div className="app-timeline-view">
+    <div className={styles['app-timeline-view']}>
       <Timeline items={items} />
     </div>
   );

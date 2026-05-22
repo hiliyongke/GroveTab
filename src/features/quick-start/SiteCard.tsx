@@ -5,6 +5,7 @@
  * 拖拽由父组件 SortableSiteCard 通过 useSortable 注入。
  */
 
+import styles from './QuickStartLayer.module.less';
 import { useCallback, useMemo, useState } from 'react';
 import { Card, Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
@@ -98,13 +99,13 @@ export function SiteCard({
 
   return (
     <Card
-      className="app-card-interactive app-speed-dial-card"
+      className={`${styles['app-card-interactive']} ${styles['app-speed-dial-card']}`}
       classNames={{ body: 'app-speed-dial-card__body' }}
       style={cardStyle}
     >
       {/* 缩略图区 —— 16:10，favicon 主色渐变 */}
       <div
-        className="app-speed-dial-preview"
+        className={styles['app-speed-dial-preview']}
         onClick={openSite}
       >
         {/* 拖拽手柄 —— 只有绑定了 dragListeners 时才可拖拽 */}
@@ -112,9 +113,9 @@ export function SiteCard({
           <div
             {...dragListeners}
             {...dragAttributes}
-            className="speed-dial-drag-handle"
+            className={styles['speed-dial-drag-handle']}
           >
-            <GripVertical size={ICON_SIZE.SMALL} className="speed-dial-drag-icon" />
+            <GripVertical size={ICON_SIZE.SMALL} className={styles['speed-dial-drag-icon']} />
           </div>
         )}
 
@@ -123,17 +124,17 @@ export function SiteCard({
           <img
             src={faviconUrl}
             alt=""
-            className="app-speed-dial-favicon"
+            className={styles['app-speed-dial-favicon']}
             onError={() => setFaviconError(true)}
           />
         ) : (
-          <span className="app-speed-dial-fallback">
+          <span className={styles['app-speed-dial-fallback']}>
             {getInitial(hostname)}
           </span>
         )}
 
         {/* 「更多」按钮 —— 右上角绝对定位，Dropdown portal 到 body 避免裁切 */}
-        <div className="speed-dial-more-container">
+        <div className={styles['speed-dial-more-container']}>
           <Dropdown
             menu={{ items: menuItems }}
             trigger={['hover']}
@@ -141,7 +142,7 @@ export function SiteCard({
             getPopupContainer={() => document.body}
           >
             <span
-              className="speed-dial-more-btn"
+              className={styles['speed-dial-more-btn']}
               onClick={(e) => e.stopPropagation()}
             >
               <MoreHorizontal size={ICON_SIZE.SMALL} />
@@ -152,17 +153,17 @@ export function SiteCard({
 
       {/* 底部信息区 */}
       <div
-        className="app-speed-dial-content"
+        className={styles['app-speed-dial-content']}
         onClick={openSite}
       >
         <span
-          className="app-speed-dial-title"
+          className={styles['app-speed-dial-title']}
           title={site.title || hostname}
         >
           {site.title || hostname}
         </span>
         <span
-          className="app-speed-dial-hostname"
+          className={styles['app-speed-dial-hostname']}
           title={hostname}
         >
           {hostname}

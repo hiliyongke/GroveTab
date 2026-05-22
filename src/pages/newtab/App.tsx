@@ -17,7 +17,6 @@ import { BatchActionBar } from '@/features/tabs/BatchActionBar';
 import { AppWorkspace } from '@/features/workspace/AppWorkspace';
 import InsightsPanel from '@/features/insights/InsightsPanel';
 import { QuickStartLayer } from '@/features/quick-start/QuickStartLayer';
-import '@/features/quick-start/QuickStartLayer.css';
 import { TidySuggestionBar } from '@/features/tabs/TidySuggestionBar';
 import { AppHeader } from '@/features/workspace/AppHeader';
 import { HeroBar } from '@/features/workspace/HeroBar';

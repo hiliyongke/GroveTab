@@ -163,5 +163,12 @@ export default defineConfig({
         chunkFileNames: 'chunks/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash][extname]',
       },
-    },  },
-});
+    },
+  },
+  css: {
+    modules: {
+      // .module.less 文件自动启用 CSS Modules
+      // 生成格式：[name]_[local]_[hash:6]，与项目现有 CSS Modules 命名一致
+      generateScopedName: '[name]_[local]_[hash:6]',
+    },
+  },});

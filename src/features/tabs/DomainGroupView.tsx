@@ -13,7 +13,7 @@ import { useTabsStore, useMetadataStore, useSettingsStore } from '@/store';
 import { groupTabsByDomain } from '@/shared/utils/domain';
 import { cssVars } from '@/shared/utils/css-vars';
 import { DomainGroupCard } from './DomainGroupCard';
-import './styles/items.css';
+import styles from './styles/items.module.less';
 
 /**
  * 构造响应式 multi-column 布局样式
@@ -80,11 +80,11 @@ export function DomainGroupView() {
 
   return (
     <div
-      className={`app-domain-masonry${forcedColumns !== null ? ' is-fixed-columns' : ''}`}
+      className={`${styles['app-domain-masonry']}${forcedColumns !== null ? ` ${styles['is-fixed-columns']}` : ''}`}
       style={getColumnVars(forcedColumns)}
     >
       {sortedGroups.map((group) => (
-        <div key={group.domain} className="app-domain-masonry-item">
+        <div key={group.domain} className={styles['app-domain-masonry-item']}>
           <DomainGroupCard
             group={group}
             initialCollapsed={false}

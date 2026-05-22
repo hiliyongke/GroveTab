@@ -36,7 +36,7 @@ import { cssVars } from '@/shared/utils/css-vars';
 import { TabItem } from './TabItem';
 import { useTabsStore, useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
-import './styles/items.css';
+import styles from './styles/items.module.less';
 
 interface DomainGroupCardProps {
   group: DomainGroup;
@@ -213,8 +213,8 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
   return (
     <Card
       size="small"
-      className="app-card-interactive app-hover-reveal-host app-domain-group-card"
-      classNames={{ body: 'app-domain-group-card__body' }}
+      className={`app-card-interactive app-hover-reveal-host ${styles['app-domain-group-card']}`}
+      classNames={{ body: styles['app-domain-group-card__body'] }}
       style={cardStyle}
     >
       {/*
@@ -226,10 +226,10 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
         无障碍：aria-hidden，不参与语义。
       */}
       {barPosition === 'left' && (
-        <div aria-hidden className="app-accent-bar--left" />
+        <div aria-hidden className={styles['app-accent-bar--left']} />
       )}
       {barPosition === 'top' && (
-        <div aria-hidden className="app-accent-bar--top" />
+        <div aria-hidden className={styles['app-accent-bar--top']} />
       )}
       {/* 分组头部 —— 可点击展开/折叠 */}
       <button
@@ -237,11 +237,11 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
         onClick={toggleCollapse}
         aria-expanded={!collapsed}
         aria-label={collapsed ? t('tabs.expand') : t('tabs.collapse')}
-        className="app-row-hover app-domain-group-header"
+        className={`app-row-hover ${styles['app-domain-group-header']}`}
       >
         <ChevronDown
           size={ICON_SIZE.TINY}
-          className={`app-domain-group-chevron${collapsed ? ' is-collapsed' : ''}`}
+          className={`${styles['app-domain-group-chevron']}${collapsed ? ` ${styles['is-collapsed']}` : ''}`}
         />
 
         {/*
@@ -249,24 +249,24 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
           内部要么嵌 favicon，要么在占位图标。把"色彩=身份"的语义集中在这块小徽章里，
           多卡并排时视觉协同——左边条 + 徽章 是同色系，一眼就能把"这是什么网站"传达出去。
         */}
-        <div className="app-domain-group-badge">
+        <div className={styles['app-domain-group-badge']}>
           {faviconUrl && !faviconError ? (
             <img
               src={faviconUrl}
               alt=""
-              className="app-domain-group-badge-favicon"
+              className={styles['app-domain-group-badge-favicon']}
               onError={() => setFaviconError(true)}
             />
           ) : (
-            <Globe size={ICON_SIZE.SMALL} className="app-domain-group-badge-icon" />
+            <Globe size={ICON_SIZE.SMALL} className={styles['app-domain-group-badge-icon']} />
           )}
         </div>
 
-        <span className="app-domain-group-title">
+        <span className={styles['app-domain-group-title']}>
           {group.domain}
         </span>
 
-        <Tag className="app-domain-group-count">
+        <Tag className={styles['app-domain-group-count']}>
           {group.tabs.length}
         </Tag>
       </button>
@@ -282,7 +282,7 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
             void discardDomainGroup(group.domain).catch(() => { /* store 已 toast */ });
           }}
           aria-label={t('tabs.discardGroup')}
-          className="app-hover-reveal app-domain-group-action app-domain-group-action--discard"
+          className={`app-hover-reveal ${styles['app-domain-group-action']} ${styles['app-domain-group-action--discard']}`}
         />
       </Tooltip>
 
@@ -298,24 +298,24 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
           onClick={(e: React.MouseEvent) => { void handleCloseAll(e); }}
           aria-label={t('tabs.closeDomain')}
           // closing 时强制显示（is-visible），其余情况由 hover/focus 驱动
-          className={`app-hover-reveal app-domain-group-action app-domain-group-action--close${closing ? ' is-visible' : ''}`}
+          className={`app-hover-reveal ${styles['app-domain-group-action']} ${styles['app-domain-group-action--close']}${closing ? ` ${styles['is-visible']}` : ''}`}
         />
       </Tooltip>
 
       {/* 标签列表 — 使用 motion Reorder 实现分组内拖拽排序 */}
       {!collapsed && (
-        <div className="app-domain-group-list">
+        <div className={styles['app-domain-group-list']}>
           <Reorder.Group
             axis="y"
             values={tabOrder}
             onReorder={handleReorder}
-            className="app-domain-group-sortable"
+            className={styles['app-domain-group-sortable']}
           >
             {tabOrder.map((tab) => (
               <Reorder.Item
                 key={tab.id}
                 value={tab}
-                className="app-domain-group-sortable-item"
+                className={styles['app-domain-group-sortable-item']}
                 whileDrag={{ scale: 1.02, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', zIndex: 10, position: 'relative' as const }}
               >
                 <TabItem

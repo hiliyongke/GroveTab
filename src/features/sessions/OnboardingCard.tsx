@@ -30,7 +30,7 @@ import { markOnboardingDone } from '@/repositories';
 import { useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { BRAND } from '@/shared/config/brand';
-import './styles/onboarding.css';
+import styles from './styles/onboarding.module.less';
 
 const { Text, Paragraph } = Typography;
 
@@ -126,44 +126,44 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
   if (phase === 'welcome') {
     return (
       <Card
-        className="onboarding-card"
-        classNames={{ body: 'onboarding-card__body' }}
+        className={styles['onboarding-card']}
+        classNames={{ body: styles['onboarding-card__body'] }}
         style={welcomeVars}
       >
-        <div aria-hidden className="onboarding-card__glow" />
-        <div className="onboarding-card__badge">
+        <div aria-hidden className={styles['onboarding-card__glow']} />
+        <div className={styles['onboarding-card__badge']}>
           <Network size={ICON_SIZE.XXXLARGE} />
         </div>
 
-        <div className="onboarding-card__headline">
-          <h2 className="onboarding-card__title">
+        <div className={styles['onboarding-card__headline']}>
+          <h2 className={styles['onboarding-card__title']}>
             {t('onboarding.title', { brand: BRAND.name })}
-            <Zap size={ICON_SIZE.MEDIUM} className="onboarding-card__title-icon" />
+            <Zap size={ICON_SIZE.MEDIUM} className={styles['onboarding-card__title-icon']} />
           </h2>
-          <Text type="secondary" className="onboarding-card__subtitle">
+          <Text type="secondary" className={styles['onboarding-card__subtitle']}>
             {t('onboarding.desc')}
           </Text>
         </div>
 
-        <Paragraph type="secondary" className="onboarding-card__detail">
+        <Paragraph type="secondary" className={styles['onboarding-card__detail']}>
           {t('onboarding.detail')}
         </Paragraph>
 
-        <Space wrap size={12} className="onboarding-card__features">
-          <Tag bordered={false} color="processing" className="onboarding-card__feature-tag">
+        <Space wrap size={12} className={styles['onboarding-card__features']}>
+          <Tag bordered={false} color="processing" className={styles['onboarding-card__feature-tag']}>
             {t('onboarding.featureSearch')}
           </Tag>
-          <Tag bordered={false} color="gold" className="onboarding-card__feature-tag">
+          <Tag bordered={false} color="gold" className={styles['onboarding-card__feature-tag']}>
             {t('onboarding.featureArchive')}
           </Tag>
-          <Tag bordered={false} color="green" className="onboarding-card__feature-tag">
+          <Tag bordered={false} color="green" className={styles['onboarding-card__feature-tag']}>
             {t('onboarding.featureGroup')}
           </Tag>
         </Space>
 
-        <div className="onboarding-card__actions">
+        <div className={styles['onboarding-card__actions']}>
           <Button
-            className="app-lift onboarding-card__cta onboarding-card__cta--primary"
+className={`${styles['app-lift']} ${styles['onboarding-card__cta']} ${styles['onboarding-card__cta--primary']}`}
             type="primary"
             size="large"
             onClick={() => {
@@ -176,7 +176,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
           </Button>
           <Button
             size="large"
-            className="onboarding-card__cta"
+            className={styles['onboarding-card__cta']}
             onClick={() => {
               void pickOverride(false);
             }}
@@ -185,7 +185,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
             {t('onboarding.modePopupOnly')}
           </Button>
         </div>
-        <Text type="secondary" className="onboarding-card__hint">
+        <Text type="secondary" className={styles['onboarding-card__hint']}>
           {t('onboarding.modeHint')}
         </Text>
       </Card>
@@ -203,35 +203,35 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
       footer={null}
       closable={false}
       maskClosable={false}
-      classNames={{ body: 'onboarding-tour-modal__body' }}
+      classNames={{ body: styles['onboarding-tour-modal__body'] }}
     >
-      <div className="onboarding-tour" style={tourVars}>
-        <div className="onboarding-tour__header">
-          <div className="onboarding-tour__step-badge">
+      <div className={styles['onboarding-tour']} style={tourVars}>
+        <div className={styles['onboarding-tour__header']}>
+          <div className={styles['onboarding-tour__step-badge']}>
             {step.icon}
           </div>
-          <div className="onboarding-tour__step-copy">
-            <Text strong className="onboarding-tour__step-title">
+          <div className={styles['onboarding-tour__step-copy']}>
+            <Text strong className={styles['onboarding-tour__step-title']}>
               {t(step.titleKey)}
             </Text>
-            <Text type="secondary" className="onboarding-tour__step-index">
+            <Text type="secondary" className={styles['onboarding-tour__step-index']}>
               {t('onboarding.tour.stepIndex', { current: stepIndex + 1, total: TOUR_STEPS.length })}
             </Text>
           </div>
         </div>
 
-        <Paragraph type="secondary" className="onboarding-tour__description">
+        <Paragraph type="secondary" className={styles['onboarding-tour__description']}>
           {t(step.descKey, { brand: BRAND.name })}
         </Paragraph>
 
         <Progress percent={progressPercent} size="small" showInfo={false} />
 
-        <div className="onboarding-tour__footer">
+        <div className={styles['onboarding-tour__footer']}>
           <Button
             size="small"
             type="text"
             onClick={() => void finish()}
-            className="onboarding-tour__skip"
+            className={styles['onboarding-tour__skip']}
           >
             {t('onboarding.tour.skip')}
           </Button>

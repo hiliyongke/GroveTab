@@ -36,7 +36,7 @@ import {
   getPlatformsByCategory,
   getPlatformColor,
 } from '@/services/trending-service';
-import './TrendingPage.css';
+import styles from './TrendingPage.module.less';
 
 const { Text, Title } = Typography;
 
@@ -125,21 +125,21 @@ function StealthDisguise({ disguise }: { disguise: StealthModeConfig['disguise']
   }, [disguise]);
 
   return (
-    <div className="trending-stealth-content">
+    <div className={styles['trending-stealth-content']}>
       <Card
-        className={cx('trending-surface-card', 'trending-disguise-card', `trending-disguise-card--${disguise}`)}
-        classNames={{ body: 'trending-disguise-card__body' }}
+className={cx(styles['trending-surface-card'], styles['trending-disguise-card'], styles[`trending-disguise-card--${disguise}`])}
+classNames={{ body: styles['trending-disguise-card__body'] }}
       >
-        <Title level={4} className="trending-disguise-title">{content.title}</Title>
-        <div className="trending-disguise-list">
+        <Title level={4} className={styles['trending-disguise-title']}>{content.title}</Title>
+        <div className={styles['trending-disguise-list']}>
           {content.items.map((item, index) => (
             <div
               key={`${disguise}-${index}`}
-              className={cx('trending-disguise-row', index < content.items.length - 1 && 'has-divider')}
+className={cx(styles['trending-disguise-row'], index < content.items.length - 1 && 'has-divider')}
             >
-              {item.from && <span className="trending-disguise-from">{item.from}</span>}
-              <span className="trending-disguise-subject">{item.subject}</span>
-              {item.time && <span className="trending-disguise-time">{item.time}</span>}
+              {item.from && <span className={styles['trending-disguise-from']}>{item.from}</span>}
+              <span className={styles['trending-disguise-subject']}>{item.subject}</span>
+              {item.time && <span className={styles['trending-disguise-time']}>{item.time}</span>}
             </div>
           ))}
         </div>
@@ -150,10 +150,10 @@ function StealthDisguise({ disguise }: { disguise: StealthModeConfig['disguise']
 
 function RankBadge({ rank }: { rank: number }) {
   if (rank <= 3) {
-    return <span className={cx('trending-rank-badge', 'is-top', `is-rank-${rank}`)}>{rank}</span>;
+return <span className={cx(styles['trending-rank-badge'], 'is-top', styles[`is-rank-${rank}`])}>{rank}</span>;
   }
 
-  return <span className="trending-rank-badge is-plain">{rank}</span>;
+return <span className={`${styles['trending-rank-badge']} is-plain`}>{rank}</span>;
 }
 
 function TrendingListItem({ item, rank }: { item: HotBoardData['items'][0]; rank: number }) {
@@ -163,16 +163,16 @@ function TrendingListItem({ item, rank }: { item: HotBoardData['items'][0]; rank
         href={item.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="trending-list-item"
+        className={styles['trending-list-item']}
       >
         <RankBadge rank={rank} />
-        <span className="trending-list-item__title">{item.title}</span>
+        <span className={styles['trending-list-item__title']}>{item.title}</span>
         {item.hotLabel ? (
-          <span className="trending-list-item__hot">{item.hotLabel}</span>
+          <span className={styles['trending-list-item__hot']}>{item.hotLabel}</span>
         ) : (
-          <span className="trending-list-item__hot trending-list-item__hot--empty" aria-hidden="true" />
+<span className={`${styles['trending-list-item__hot']} ${styles['trending-list-item__hot--empty']}`} aria-hidden="true" />
         )}
-        <ExternalLink size={12} className="trending-list-item__icon" />
+        <ExternalLink size={12} className={styles['trending-list-item__icon']} />
       </a>
     </Tooltip>
   );
@@ -203,41 +203,41 @@ function HotBoardSkeletonCard({
   }, [platformId, onRefresh]);
 
   return (
-    <Card className="trending-surface-card trending-board-card" classNames={{ body: 'trending-board-card__body' }}>
-      <div className="trending-board-card__header">
-        <div className="trending-board-card__meta" style={platformStyle}>
-          <span className="trending-board-card__dot" />
-          <span className="trending-board-card__name">{platformName}</span>
-          {platformSubtitle && <Tag className="trending-board-card__tag">{platformSubtitle}</Tag>}
+    <Card className={`${styles['trending-surface-card']} ${styles['trending-board-card']}`} classNames={{ body: styles['trending-board-card__body'] }}>
+      <div className={styles['trending-board-card__header']}>
+        <div className={styles['trending-board-card__meta']} style={platformStyle}>
+          <span className={styles['trending-board-card__dot']} />
+          <span className={styles['trending-board-card__name']}>{platformName}</span>
+          {platformSubtitle && <Tag className={styles['trending-board-card__tag']}>{platformSubtitle}</Tag>}
         </div>
         <Tooltip title={t('trending.refresh')}>
           <Button
             type="text"
             size="small"
-            icon={<RefreshCw size={ICON_SIZE.SMALL} className={cx('trending-refresh-icon', refreshing && 'is-spinning')} />}
+icon={<RefreshCw size={ICON_SIZE.SMALL} className={cx(styles['trending-refresh-icon'], refreshing && 'is-spinning')} />}
             onClick={handleRefresh}
             disabled={refreshing}
           />
         </Tooltip>
       </div>
 
-      <div className="trending-board-card__placeholder">
+      <div className={styles['trending-board-card__placeholder']}>
         {refreshing ? (
           <>
             <Spin size="small" />
-            <Text type="secondary" className="trending-board-card__placeholder-text">{t('trending.loading')}</Text>
+            <Text type="secondary" className={styles['trending-board-card__placeholder-text']}>{t('trending.loading')}</Text>
           </>
         ) : errored ? (
           <>
-            <Text type="danger" className="trending-board-card__placeholder-text">{t('trending.noData')}</Text>
-            <Button type="link" size="small" onClick={handleRefresh} className="trending-board-card__retry-btn">
+            <Text type="danger" className={styles['trending-board-card__placeholder-text']}>{t('trending.noData')}</Text>
+            <Button type="link" size="small" onClick={handleRefresh} className={styles['trending-board-card__retry-btn']}>
               {t('trending.refresh')}
             </Button>
           </>
         ) : (
           <>
             <Spin size="small" />
-            <Text type="secondary" className="trending-board-card__placeholder-text">{t('trending.loading')}</Text>
+            <Text type="secondary" className={styles['trending-board-card__placeholder-text']}>{t('trending.loading')}</Text>
           </>
         )}
       </div>
@@ -263,28 +263,28 @@ function HotBoardCard({
   }, [board.id, onRefresh]);
 
   return (
-    <Card className="trending-surface-card trending-board-card" classNames={{ body: 'trending-board-card__body' }}>
-      <div className="trending-board-card__header">
-        <div className="trending-board-card__meta" style={platformStyle}>
-          <span className="trending-board-card__dot" />
-          <span className="trending-board-card__name">{board.name}</span>
-          {board.subtitle && <Tag className="trending-board-card__tag">{board.subtitle}</Tag>}
+    <Card className={`${styles['trending-surface-card']} ${styles['trending-board-card']}`} classNames={{ body: styles['trending-board-card__body'] }}>
+      <div className={styles['trending-board-card__header']}>
+        <div className={styles['trending-board-card__meta']} style={platformStyle}>
+          <span className={styles['trending-board-card__dot']} />
+          <span className={styles['trending-board-card__name']}>{board.name}</span>
+          {board.subtitle && <Tag className={styles['trending-board-card__tag']}>{board.subtitle}</Tag>}
         </div>
         <Tooltip title={t('trending.refresh')}>
           <Button
             type="text"
             size="small"
-            icon={<RefreshCw size={ICON_SIZE.SMALL} className={cx('trending-refresh-icon', refreshing && 'is-spinning')} />}
+icon={<RefreshCw size={ICON_SIZE.SMALL} className={cx(styles['trending-refresh-icon'], refreshing && 'is-spinning')} />}
             onClick={handleRefresh}
             disabled={refreshing}
           />
         </Tooltip>
       </div>
 
-      <div className="trending-board-card__list">
+      <div className={styles['trending-board-card__list']}>
         {board.items.length === 0 ? (
-          <div className="trending-board-card__empty">
-            <Text type="secondary" className="trending-board-card__placeholder-text">{t('trending.noData')}</Text>
+          <div className={styles['trending-board-card__empty']}>
+            <Text type="secondary" className={styles['trending-board-card__placeholder-text']}>{t('trending.noData')}</Text>
           </div>
         ) : (
           board.items.map((item, index) => (
@@ -294,8 +294,8 @@ function HotBoardCard({
       </div>
 
       {board.updateTime && (
-        <div className="trending-board-card__footer">
-          <Text type="secondary" className="trending-board-card__time">
+        <div className={styles['trending-board-card__footer']}>
+          <Text type="secondary" className={styles['trending-board-card__time']}>
             {new Date(board.updateTime).toLocaleTimeString()}
           </Text>
         </div>
@@ -360,7 +360,7 @@ export function TrendingPage() {
       CATEGORIES.map((item) => ({
         value: item.value,
         label: (
-          <span className="trending-category-option">
+          <span className={styles['trending-category-option']}>
             {item.icon}
             <span>{t(item.labelKey)}</span>
           </span>
@@ -380,8 +380,8 @@ export function TrendingPage() {
 
   if (stealthMode.enabled) {
     return (
-      <section className="trending-page trending-page--stealth">
-        <div className="trending-stealth-toolbar">
+      <section className={`${styles['trending-page']} ${styles['trending-page--stealth']}`}>
+        <div className={styles['trending-stealth-toolbar']}>
           <Space size={4}>
             {STEALTH_OPTIONS.map((option) => (
               <Button
@@ -391,7 +391,7 @@ export function TrendingPage() {
                 icon={option.icon}
                 aria-pressed={stealthMode.disguise === option.value}
                 onClick={() => setStealthMode((prev) => ({ ...prev, disguise: option.value }))}
-                className={cx('trending-stealth-toolbar__button', stealthMode.disguise === option.value && 'is-active')}
+className={cx(styles['trending-stealth-toolbar__button'], stealthMode.disguise === option.value && 'is-active')}
               />
             ))}
             <Button
@@ -399,7 +399,7 @@ export function TrendingPage() {
               size="small"
               icon={<EyeOff size={ICON_SIZE.SMALL} />}
               onClick={toggleStealthMode}
-              className="trending-stealth-toolbar__button"
+              className={styles['trending-stealth-toolbar__button']}
             />
           </Space>
         </div>
@@ -409,22 +409,22 @@ export function TrendingPage() {
   }
 
   return (
-    <section className="trending-page">
-      <Card className="trending-surface-card trending-toolbar-card" classNames={{ body: 'trending-toolbar-card__body' }}>
-        <div className="trending-toolbar-card__stack">
-          <div className="trending-toolbar-card__topline">
-            <div className="trending-toolbar-card__title-group">
-              <span className="trending-toolbar-card__icon">
+    <section className={styles['trending-page']}>
+    <Card className={`${styles['trending-surface-card']} ${styles['trending-toolbar-card']}`} classNames={{ body: styles['trending-toolbar-card__body'] }}>
+        <div className={styles['trending-toolbar-card__stack']}>
+          <div className={styles['trending-toolbar-card__topline']}>
+            <div className={styles['trending-toolbar-card__title-group']}>
+              <span className={styles['trending-toolbar-card__icon']}>
                 <Flame size={ICON_SIZE.LARGE} />
               </span>
-              <Title level={4} className="trending-toolbar-card__title">{t('trending.title')}</Title>
+              <Title level={4} className={styles['trending-toolbar-card__title']}>{t('trending.title')}</Title>
             </div>
-            <Space size={4} className="trending-toolbar-card__actions">
+            <Space size={4} className={styles['trending-toolbar-card__actions']}>
               <Tooltip title={t('trending.refreshAll')}>
                 <Button
                   type="text"
                   size="small"
-                  icon={<RefreshCw size={ICON_SIZE.SMALL} className={cx('trending-refresh-icon', loading && 'is-spinning')} />}
+icon={<RefreshCw size={ICON_SIZE.SMALL} className={cx(styles['trending-refresh-icon'], loading && 'is-spinning')} />}
                   onClick={handleRefreshAll}
                   loading={loading}
                 />
@@ -440,20 +440,20 @@ export function TrendingPage() {
             </Space>
           </div>
 
-          <div className="trending-toolbar-card__controls">
+          <div className={styles['trending-toolbar-card__controls']}>
             <Segmented<TrendingCategory>
               value={category}
               onChange={setCategory}
               options={categoryOptions}
               size="small"
-              className="trending-toolbar-card__segment trending-toolbar-card__segment--categories"
+className={`${styles['trending-toolbar-card__segment']} ${styles['trending-toolbar-card__segment--categories']}`}
             />
             <Segmented<TrendingGroupMode>
               size="small"
               value={groupMode}
               onChange={setGroupMode}
               options={groupModeOptions}
-              className="trending-toolbar-card__segment trending-toolbar-card__segment--group"
+className={`${styles['trending-toolbar-card__segment']} ${styles['trending-toolbar-card__segment--group']}`}
             />
           </div>
         </div>
@@ -469,21 +469,21 @@ export function TrendingPage() {
               {t('trending.refreshAll')}
             </Button>
           )}
-          className="trending-alert"
+          className={styles['trending-alert']}
         />
       )}
 
       {loading && !hasBoardData ? (
-        <div className="trending-loading-state">
-          <div className="trending-loading-state__inner">
+        <div className={styles['trending-loading-state']}>
+          <div className={styles['trending-loading-state__inner']}>
             <Spin />
             <Text type="secondary">{t('trending.loading')}</Text>
           </div>
         </div>
       ) : activePlatforms.length === 0 ? (
-        <Empty description={t('trending.noPlatforms')} className="trending-empty-state" />
+        <Empty description={t('trending.noPlatforms')} className={styles['trending-empty-state']} />
       ) : (
-        <div className={cx('trending-grid', groupMode === 'compact' && 'is-compact')}>
+<div className={cx(styles['trending-grid'], groupMode === 'compact' && 'is-compact')}>
           {activePlatforms.map((platform) => {
             const board = boards[platform.id];
             if (!board) {
@@ -510,7 +510,7 @@ export function TrendingPage() {
       )}
 
       {loading && hasBoardData && (
-        <div className="trending-loading-more">
+        <div className={styles['trending-loading-more']}>
           <Spin size="small" />
         </div>
       )}

@@ -19,6 +19,7 @@ import { getFaviconUrl } from '@/chrome';
 import { useAccent } from '@/shared/hooks/useAccent';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
+import './styles/bookmark-tree.less';
 
 /** 从 URL 提取 hostname */
 function getHostname(url: string): string {

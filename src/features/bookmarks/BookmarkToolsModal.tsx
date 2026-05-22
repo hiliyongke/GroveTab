@@ -45,7 +45,7 @@ import {
 import { useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { feedback } from '@/shared/ui/feedback';
-import './bookmark-tools.css';
+import styles from './bookmark-tools.module.less';
 
 interface BookmarkToolsModalProps {
   open: boolean;
@@ -67,7 +67,7 @@ function SiteIcon({ url, size = 18 }: { url: string; size?: number }) {
       <img
         src={fav}
         alt=""
-        className="bm-tools__favicon"
+        className={styles['bm-tools__favicon']}
         style={{ width: size, height: size }}
         onError={() => setErr(true)}
       />
@@ -75,7 +75,7 @@ function SiteIcon({ url, size = 18 }: { url: string; size?: number }) {
   }
   const letter = (host.charAt(0) || '?').toUpperCase();
   return (
-    <span className="bm-tools__favicon bm-tools__favicon--fallback" style={{ width: size, height: size }}>
+    <span className={`${styles['bm-tools__favicon']} ${styles['bm-tools__favicon--fallback']}`} style={{ width: size, height: size }}>
       {letter}
     </span>
   );
@@ -86,11 +86,11 @@ function StatCard({ icon, label, value, accent }: {
   icon: React.ReactNode; label: string; value: number | string; accent?: 'primary' | 'success' | 'warning' | 'info';
 }) {
   return (
-    <div className={`bm-tools__stat-card${accent ? ` is-${accent}` : ''}`}>
-      <div className="bm-tools__stat-icon">{icon}</div>
-      <div className="bm-tools__stat-body">
-        <div className="bm-tools__stat-value">{value}</div>
-        <div className="bm-tools__stat-label">{label}</div>
+    <div className={`${styles['bm-tools__stat-card']}${accent ? ` is-${accent}` : ''}`}>
+      <div className={styles['bm-tools__stat-icon']}>{icon}</div>
+      <div className={styles['bm-tools__stat-body']}>
+        <div className={styles['bm-tools__stat-value']}>{value}</div>
+        <div className={styles['bm-tools__stat-label']}>{label}</div>
       </div>
     </div>
   );
@@ -267,11 +267,11 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
 
   // ── 总览面板 ──
   const renderOverview = () => (
-    <div className="bm-tools__panel">
-      <div className="bm-tools__panel-header">
+    <div className={styles['bm-tools__panel']}>
+      <div className={styles['bm-tools__panel-header']}>
         <div>
-          <div className="bm-tools__panel-title">{t('bookmark.tools.overview')}</div>
-          <div className="bm-tools__panel-subtitle">{t('bookmark.tools.overviewHint')}</div>
+          <div className={styles['bm-tools__panel-title']}>{t('bookmark.tools.overview')}</div>
+          <div className={styles['bm-tools__panel-subtitle']}>{t('bookmark.tools.overviewHint')}</div>
         </div>
         <Button
           size="small"
@@ -283,7 +283,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
         </Button>
       </div>
 
-      <div className="bm-tools__stat-grid">
+      <div className={styles['bm-tools__stat-grid']}>
         <StatCard
           icon={<BookmarkIcon size={ICON_SIZE.MEDIUM} />}
           label={t('bookmark.tools.statTotal')}
@@ -310,33 +310,33 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
         />
       </div>
 
-      <div className="bm-tools__quick-grid">
-        <button type="button" className="bm-tools__quick" onClick={() => setActiveTool('dedupe')}>
+      <div className={styles['bm-tools__quick-grid']}>
+        <button type="button" className={styles['bm-tools__quick']} onClick={() => setActiveTool('dedupe')}>
           <Copy size={ICON_SIZE.MEDIUM} />
-          <div className="bm-tools__quick-text">
-            <span className="bm-tools__quick-title">{t('bookmark.tools.dedupe')}</span>
-            <span className="bm-tools__quick-desc">{t('bookmark.tools.dedupeShort')}</span>
+          <div className={styles['bm-tools__quick-text']}>
+            <span className={styles['bm-tools__quick-title']}>{t('bookmark.tools.dedupe')}</span>
+            <span className={styles['bm-tools__quick-desc']}>{t('bookmark.tools.dedupeShort')}</span>
           </div>
         </button>
-        <button type="button" className="bm-tools__quick" onClick={() => setActiveTool('health')}>
+        <button type="button" className={styles['bm-tools__quick']} onClick={() => setActiveTool('health')}>
           <HeartPulse size={ICON_SIZE.MEDIUM} />
-          <div className="bm-tools__quick-text">
-            <span className="bm-tools__quick-title">{t('bookmark.tools.health')}</span>
-            <span className="bm-tools__quick-desc">{t('bookmark.tools.healthShort')}</span>
+          <div className={styles['bm-tools__quick-text']}>
+            <span className={styles['bm-tools__quick-title']}>{t('bookmark.tools.health')}</span>
+            <span className={styles['bm-tools__quick-desc']}>{t('bookmark.tools.healthShort')}</span>
           </div>
         </button>
-        <button type="button" className="bm-tools__quick" onClick={() => setActiveTool('organize')}>
+        <button type="button" className={styles['bm-tools__quick']} onClick={() => setActiveTool('organize')}>
           <FolderTree size={ICON_SIZE.MEDIUM} />
-          <div className="bm-tools__quick-text">
-            <span className="bm-tools__quick-title">{t('bookmark.tools.organize')}</span>
-            <span className="bm-tools__quick-desc">{t('bookmark.tools.organizeShort')}</span>
+          <div className={styles['bm-tools__quick-text']}>
+            <span className={styles['bm-tools__quick-title']}>{t('bookmark.tools.organize')}</span>
+            <span className={styles['bm-tools__quick-desc']}>{t('bookmark.tools.organizeShort')}</span>
           </div>
         </button>
-        <button type="button" className="bm-tools__quick" onClick={() => setActiveTool('empty')}>
+        <button type="button" className={styles['bm-tools__quick']} onClick={() => setActiveTool('empty')}>
           <FolderX size={ICON_SIZE.MEDIUM} />
-          <div className="bm-tools__quick-text">
-            <span className="bm-tools__quick-title">{t('bookmark.tools.empty')}</span>
-            <span className="bm-tools__quick-desc">{t('bookmark.tools.emptyShort')}</span>
+          <div className={styles['bm-tools__quick-text']}>
+            <span className={styles['bm-tools__quick-title']}>{t('bookmark.tools.empty')}</span>
+            <span className={styles['bm-tools__quick-desc']}>{t('bookmark.tools.emptyShort')}</span>
           </div>
         </button>
       </div>
@@ -345,15 +345,15 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
 
   // ── 去重 ──
   const renderDedupe = () => (
-    <div className="bm-tools__panel">
-      <div className="bm-tools__panel-header">
+    <div className={styles['bm-tools__panel']}>
+      <div className={styles['bm-tools__panel-header']}>
         <div>
-          <div className="bm-tools__panel-title">{t('bookmark.tools.dedupe')}</div>
-          <div className="bm-tools__panel-subtitle">
+          <div className={styles['bm-tools__panel-title']}>{t('bookmark.tools.dedupe')}</div>
+          <div className={styles['bm-tools__panel-subtitle']}>
             {t('bookmark.tools.dedupeHint', { mode: dedupStrictness })}
           </div>
         </div>
-        <div className="bm-tools__panel-actions">
+        <div className={styles['bm-tools__panel-actions']}>
           <Button
             type="primary"
             loading={dupLoading}
@@ -378,7 +378,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
           description={t('bookmark.tools.idle')}
-          className="bm-tools__empty"
+          className={styles['bm-tools__empty']}
         />
       )}
 
@@ -387,22 +387,22 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
       )}
 
       {dups !== null && dups.length > 0 && (
-        <div className="bm-tools__list">
+        <div className={styles['bm-tools__list']}>
           {dups.map((g) => (
-            <div key={g.key} className="bm-tools__group">
-              <div className="bm-tools__group-header">
+            <div key={g.key} className={styles['bm-tools__group']}>
+              <div className={styles['bm-tools__group-header']}>
                 <SiteIcon url={g.items[0]?.url ?? g.key} />
-                <div className="bm-tools__group-title" title={g.key}>{g.key}</div>
+                <div className={styles['bm-tools__group-title']} title={g.key}>{g.key}</div>
                 <Tag color="orange" bordered={false}>
                   {t('bookmark.tools.dedupeItems', { count: g.items.length })}
                 </Tag>
               </div>
-              <div className="bm-tools__group-body">
+              <div className={styles['bm-tools__group-body']}>
                 {g.items.map((item, idx) => (
-                  <div key={item.id} className={`bm-tools__row${idx === 0 ? ' is-keep' : ''}`}>
-                    <div className="bm-tools__row-main">
-                      <div className="bm-tools__row-title">{item.title || item.url}</div>
-                      <div className="bm-tools__row-sub">{item.url}</div>
+                  <div key={item.id} className={`${styles['bm-tools__row']}${idx === 0 ? ' is-keep' : ''}`}>
+                    <div className={styles['bm-tools__row-main']}>
+                      <div className={styles['bm-tools__row-title']}>{item.title || item.url}</div>
+                      <div className={styles['bm-tools__row-sub']}>{item.url}</div>
                     </div>
                     {idx === 0
                       ? <Tag color="green" bordered={false}>{t('bookmark.tools.keep')}</Tag>
@@ -419,13 +419,13 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
 
   // ── 失效检测 ──
   const renderHealth = () => (
-    <div className="bm-tools__panel">
-      <div className="bm-tools__panel-header">
+    <div className={styles['bm-tools__panel']}>
+      <div className={styles['bm-tools__panel-header']}>
         <div>
-          <div className="bm-tools__panel-title">{t('bookmark.tools.health')}</div>
-          <div className="bm-tools__panel-subtitle">{t('bookmark.tools.healthHint')}</div>
+          <div className={styles['bm-tools__panel-title']}>{t('bookmark.tools.health')}</div>
+          <div className={styles['bm-tools__panel-subtitle']}>{t('bookmark.tools.healthHint')}</div>
         </div>
-        <div className="bm-tools__panel-actions">
+        <div className={styles['bm-tools__panel-actions']}>
           <Button
             type="primary"
             loading={healthLoading}
@@ -451,32 +451,32 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
       )}
 
       {healthLoading && healthProgress !== null && (
-        <div className="bm-tools__progress">
+        <div className={styles['bm-tools__progress']}>
           <Progress
             percent={healthProgress.total > 0
               ? Math.round((healthProgress.done / healthProgress.total) * 100)
               : 0}
             status="active"
           />
-          <div className="bm-tools__progress-text">
+          <div className={styles['bm-tools__progress-text']}>
             {t('bookmark.tools.healthProgress', { done: healthProgress.done, total: healthProgress.total })}
           </div>
         </div>
       )}
 
       {healthStats !== null && (
-        <div className="bm-tools__health-summary">
+        <div className={styles['bm-tools__health-summary']}>
           <span className="bm-tools__chip is-success">
-            <span className="bm-tools__chip-dot" /> {t('bookmark.tools.statusOk')} {healthStats.ok}
+            <span className={styles['bm-tools__chip-dot']} /> {t('bookmark.tools.statusOk')} {healthStats.ok}
           </span>
           <span className="bm-tools__chip is-danger">
-            <span className="bm-tools__chip-dot" /> {t('bookmark.tools.statusDead')} {healthStats.dead}
+            <span className={styles['bm-tools__chip-dot']} /> {t('bookmark.tools.statusDead')} {healthStats.dead}
           </span>
           <span className="bm-tools__chip is-warning">
-            <span className="bm-tools__chip-dot" /> {t('bookmark.tools.statusTimeout')} {healthStats.timeout}
+            <span className={styles['bm-tools__chip-dot']} /> {t('bookmark.tools.statusTimeout')} {healthStats.timeout}
           </span>
           <span className="bm-tools__chip is-muted">
-            <span className="bm-tools__chip-dot" /> {t('bookmark.tools.statusSkipped')} {healthStats.skipped}
+            <span className={styles['bm-tools__chip-dot']} /> {t('bookmark.tools.statusSkipped')} {healthStats.skipped}
           </span>
         </div>
       )}
@@ -499,7 +499,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
           description={t('bookmark.tools.idle')}
-          className="bm-tools__empty"
+          className={styles['bm-tools__empty']}
         />
       )}
 
@@ -508,13 +508,13 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
       )}
 
       {healthResults !== null && filteredHealth.length > 0 && (
-        <div className="bm-tools__list">
+        <div className={styles['bm-tools__list']}>
           {filteredHealth.map((r) => (
             <div key={r.bookmark.id} className={`bm-tools__row is-status-${r.status}`}>
               <SiteIcon url={r.bookmark.url ?? ''} />
-              <div className="bm-tools__row-main">
-                <div className="bm-tools__row-title">{r.bookmark.title || r.bookmark.url}</div>
-                <div className="bm-tools__row-sub">{r.bookmark.url}</div>
+              <div className={styles['bm-tools__row-main']}>
+                <div className={styles['bm-tools__row-title']}>{r.bookmark.title || r.bookmark.url}</div>
+                <div className={styles['bm-tools__row-sub']}>{r.bookmark.url}</div>
               </div>
               <Tag
                 bordered={false}
@@ -541,13 +541,13 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
 
   // ── 智能整理 ──
   const renderOrganize = () => (
-    <div className="bm-tools__panel">
-      <div className="bm-tools__panel-header">
+    <div className={styles['bm-tools__panel']}>
+      <div className={styles['bm-tools__panel-header']}>
         <div>
-          <div className="bm-tools__panel-title">{t('bookmark.tools.organize')}</div>
-          <div className="bm-tools__panel-subtitle">{t('bookmark.tools.organizeHint')}</div>
+          <div className={styles['bm-tools__panel-title']}>{t('bookmark.tools.organize')}</div>
+          <div className={styles['bm-tools__panel-subtitle']}>{t('bookmark.tools.organizeHint')}</div>
         </div>
-        <div className="bm-tools__panel-actions">
+        <div className={styles['bm-tools__panel-actions']}>
           <Button
             type="primary"
             loading={orgLoading}
@@ -573,7 +573,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
           description={t('bookmark.tools.idle')}
-          className="bm-tools__empty"
+          className={styles['bm-tools__empty']}
         />
       )}
 
@@ -582,7 +582,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
       )}
 
       {clusters !== null && clusters.length > 0 && (
-        <div className="bm-tools__list">
+        <div className={styles['bm-tools__list']}>
           {clusters.map((c) => {
             const checked = selectedClusters.has(c.domain);
             const expanded = expandedCluster === c.domain;
@@ -598,7 +598,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
                 >
                   <Checkbox checked={checked} onChange={() => undefined} />
                   <SiteIcon url={`https://${c.domain}`} />
-                  <div className="bm-tools__group-title">{c.domain}</div>
+                  <div className={styles['bm-tools__group-title']}>{c.domain}</div>
                   <Tag bordered={false} color="blue">
                     {t('bookmark.tools.organizeCount', { count: c.items.length })}
                   </Tag>
@@ -614,12 +614,12 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
                   </Button>
                 </div>
                 {expanded && (
-                  <div className="bm-tools__group-body">
+                  <div className={styles['bm-tools__group-body']}>
                     {c.items.map((item) => (
                       <div key={item.id} className="bm-tools__row is-mini">
-                        <div className="bm-tools__row-main">
-                          <div className="bm-tools__row-title">{item.title || item.url}</div>
-                          <div className="bm-tools__row-sub">{item.url}</div>
+                        <div className={styles['bm-tools__row-main']}>
+                          <div className={styles['bm-tools__row-title']}>{item.title || item.url}</div>
+                          <div className={styles['bm-tools__row-sub']}>{item.url}</div>
                         </div>
                       </div>
                     ))}
@@ -635,13 +635,13 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
 
   // ── 空文件夹 ──
   const renderEmpty = () => (
-    <div className="bm-tools__panel">
-      <div className="bm-tools__panel-header">
+    <div className={styles['bm-tools__panel']}>
+      <div className={styles['bm-tools__panel-header']}>
         <div>
-          <div className="bm-tools__panel-title">{t('bookmark.tools.empty')}</div>
-          <div className="bm-tools__panel-subtitle">{t('bookmark.tools.emptyHint')}</div>
+          <div className={styles['bm-tools__panel-title']}>{t('bookmark.tools.empty')}</div>
+          <div className={styles['bm-tools__panel-subtitle']}>{t('bookmark.tools.emptyHint')}</div>
         </div>
-        <div className="bm-tools__panel-actions">
+        <div className={styles['bm-tools__panel-actions']}>
           <Button
             type="primary"
             loading={emptyLoading}
@@ -666,7 +666,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
           description={t('bookmark.tools.idle')}
-          className="bm-tools__empty"
+          className={styles['bm-tools__empty']}
         />
       )}
 
@@ -680,12 +680,12 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
           dataSource={emptyFolders}
           renderItem={(e) => (
             <List.Item>
-              <div className="bm-tools__row">
+              <div className={styles['bm-tools__row']}>
                 <FolderX size={ICON_SIZE.MEDIUM} className="bm-tools__row-icon is-warning" />
-                <div className="bm-tools__row-main">
-                  <div className="bm-tools__row-title">{e.folder.title || t('bookmark.tools.unnamed')}</div>
+                <div className={styles['bm-tools__row-main']}>
+                  <div className={styles['bm-tools__row-title']}>{e.folder.title || t('bookmark.tools.unnamed')}</div>
                   {e.size > 1 && (
-                    <div className="bm-tools__row-sub">
+                    <div className={styles['bm-tools__row-sub']}>
                       {t('bookmark.tools.emptyCascade', { count: e.size })}
                     </div>
                   )}
@@ -716,11 +716,11 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
       footer={null}
       width={920}
       title={
-        <div className="bm-tools__title">
+        <div className={styles['bm-tools__title']}>
           <Hash size={ICON_SIZE.MEDIUM} />
           <span>{t('bookmark.tools.title')}</span>
           {overview !== null && (
-            <span className="bm-tools__title-meta">
+            <span className={styles['bm-tools__title-meta']}>
               {t('bookmark.tools.titleMeta', {
                 bookmarks: overview.total,
                 folders: overview.folders,
@@ -730,10 +730,10 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
         </div>
       }
       destroyOnHidden
-      className="bm-tools__modal"
+      className={styles['bm-tools__modal']}
     >
-      <div className="bm-tools__layout">
-        <nav className="bm-tools__nav">
+      <div className={styles['bm-tools__layout']}>
+        <nav className={styles['bm-tools__nav']}>
           {navItems.map((item) => (
             <button
               key={item.key}
@@ -741,15 +741,15 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
               className={`bm-tools__nav-item${activeTool === item.key ? ' is-active' : ''}`}
               onClick={() => setActiveTool(item.key)}
             >
-              <span className="bm-tools__nav-icon">{item.icon}</span>
-              <span className="bm-tools__nav-label">{item.label}</span>
+              <span className={styles['bm-tools__nav-icon']}>{item.icon}</span>
+              <span className={styles['bm-tools__nav-label']}>{item.label}</span>
               {item.badge !== undefined && item.badge > 0 && (
-                <span className="bm-tools__nav-badge">{item.badge}</span>
+                <span className={styles['bm-tools__nav-badge']}>{item.badge}</span>
               )}
             </button>
           ))}
         </nav>
-        <section className="bm-tools__content">
+        <section className={styles['bm-tools__content']}>
           {renderActive()}
         </section>
       </div>

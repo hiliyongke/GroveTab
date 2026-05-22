@@ -17,7 +17,6 @@
 
 import { useEffect, useRef } from 'react';
 import { useSettingsStore } from '@/store';
-import './effects.css';
 
 /** 点击动效类型 */
 export type ClickEffectType = 'off' | 'ripple' | 'sparkle' | 'confetti' | 'petal';

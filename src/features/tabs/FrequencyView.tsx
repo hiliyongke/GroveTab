@@ -15,7 +15,7 @@ import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { Tag } from 'antd';
 import { CONFIG } from '@/shared/config';
 import { STORAGE_KEYS } from '@/shared/config/storage-keys';
-import './styles/views.css';
+import styles from './styles/views.module.less';
 
 const MAX_DISPLAY = CONFIG.ui.maxDisplay;
 
@@ -65,19 +65,19 @@ export function FrequencyView() {
 
   return (
     <div>
-      <div className="app-frequency-header">
-        <Flame size={ICON_SIZE.MEDIUM} className="app-frequency-header-icon" />
-        <span className="app-frequency-header-copy">
+      <div className={styles['app-frequency-header']}>
+        <Flame size={ICON_SIZE.MEDIUM} className={styles['app-frequency-header-icon']} />
+        <span className={styles['app-frequency-header-copy']}>
           {t('view.frequencyDesc', { count: sortedTabs.length })}
         </span>
         {isFallback && (
-          <Tag bordered={false} color="default" className="app-frequency-rebuild-tag">
+          <Tag bordered={false} color="default" className={styles['app-frequency-rebuild-tag']}>
             {t('view.frequencyRebuilding')}
           </Tag>
         )}
       </div>
 
-      <div className="app-frequency-list">
+      <div className={styles['app-frequency-list']}>
         {sortedTabs.map((entry, i) => (
           <TabItem
             key={entry.tab.id}
@@ -87,7 +87,7 @@ export function FrequencyView() {
             showHostname
             showUrlHint={ambiguousIds.has(entry.tab.id)}
             leading={
-              <span className={`app-frequency-rank${i < 3 ? ' is-top-rank' : ''}`}>
+              <span className={`${styles['app-frequency-rank']}${i < 3 ? ' is-top-rank' : ''}`}>
                 {i + 1}
               </span>
             }

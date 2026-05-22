@@ -77,7 +77,7 @@ import type {
   HistoryEventType,
   SnapshotDiff,
 } from '@/shared/types';
-import './HistoryPanel.css';
+import styles from './HistoryPanel.module.less';
 
 interface HistoryPanelProps {
   open: boolean;
@@ -169,15 +169,15 @@ function SnapshotDiffCard({
   const addedExtra = diff.added.length - addedShown.length;
   const removedExtra = diff.removed.length - removedShown.length;
   return (
-    <div className="history-diff-card">
-      <div className="history-diff-card-head">
-        <div className="history-diff-card-title">
+    <div className={styles['history-diff-card']}>
+      <div className={styles['history-diff-card-head']}>
+        <div className={styles['history-diff-card-title']}>
           <Camera size={ICON_SIZE.SMALL} />
           <span>{t('history.diffTitle')}</span>
         </div>
-        <span className="history-diff-card-subtitle">{t('history.diffSubtitle')}</span>
+        <span className={styles['history-diff-card-subtitle']}>{t('history.diffSubtitle')}</span>
       </div>
-      <div className="history-diff-card-total">
+      <div className={styles['history-diff-card-total']}>
         {t('history.diffTotalDelta', {
           today: diff.today.totalTabs,
           yesterday: diff.yesterday.totalTabs,
@@ -186,24 +186,24 @@ function SnapshotDiffCard({
         })}
       </div>
       {isFlat ? (
-        <div className="history-diff-empty">{t('history.diffEmpty')}</div>
+        <div className={styles['history-diff-empty']}>{t('history.diffEmpty')}</div>
       ) : (
-        <div className="history-diff-cols">
+        <div className={styles['history-diff-cols']}>
           {addedShown.length > 0 && (
-            <div className="history-diff-col">
-              <div className="history-diff-col-title history-diff-col-title--added">
+            <div className={styles['history-diff-col']}>
+              <div className={`${styles['history-diff-col-title']} ${styles['history-diff-col-title--added']}`}>
                 <TrendingUp size={ICON_SIZE.TINY} />
                 <span>{t('history.diffAdded')}</span>
               </div>
-              <ul className="history-diff-chips">
+              <ul className={styles['history-diff-chips']}>
                 {addedShown.map((item) => (
-                  <li key={`a-${item.host}`} className="history-diff-chip history-diff-chip--added">
-                    <span className="history-diff-chip-host">{item.host}</span>
-                    <span className="history-diff-chip-count">×{item.count}</span>
+                  <li key={`a-${item.host}`} className={`${styles['history-diff-chip']} ${styles['history-diff-chip--added']}`}>
+                    <span className={styles['history-diff-chip-host']}>{item.host}</span>
+                    <span className={styles['history-diff-chip-count']}>×{item.count}</span>
                   </li>
                 ))}
                 {addedExtra > 0 && (
-                  <li className="history-diff-chip history-diff-chip--more">
+                  <li className={`${styles['history-diff-chip']} ${styles['history-diff-chip--more']}`}>
                     {t('history.diffMore', { n: addedExtra })}
                   </li>
                 )}
@@ -211,20 +211,20 @@ function SnapshotDiffCard({
             </div>
           )}
           {removedShown.length > 0 && (
-            <div className="history-diff-col">
-              <div className="history-diff-col-title history-diff-col-title--removed">
+            <div className={styles['history-diff-col']}>
+              <div className={`${styles['history-diff-col-title']} ${styles['history-diff-col-title--removed']}`}>
                 <TrendingDown size={ICON_SIZE.TINY} />
                 <span>{t('history.diffRemoved')}</span>
               </div>
-              <ul className="history-diff-chips">
+              <ul className={styles['history-diff-chips']}>
                 {removedShown.map((item) => (
-                  <li key={`r-${item.host}`} className="history-diff-chip history-diff-chip--removed">
-                    <span className="history-diff-chip-host">{item.host}</span>
-                    <span className="history-diff-chip-count">×{item.count}</span>
+                  <li key={`r-${item.host}`} className={`${styles['history-diff-chip']} ${styles['history-diff-chip--removed']}`}>
+                    <span className={styles['history-diff-chip-host']}>{item.host}</span>
+                    <span className={styles['history-diff-chip-count']}>×{item.count}</span>
                   </li>
                 ))}
                 {removedExtra > 0 && (
-                  <li className="history-diff-chip history-diff-chip--more">
+                  <li className={`${styles['history-diff-chip']} ${styles['history-diff-chip--more']}`}>
                     {t('history.diffMore', { n: removedExtra })}
                   </li>
                 )}
@@ -420,7 +420,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
   // ── 渲染 ────────────────────────────────────
 
   const headerExtra = (
-    <div className="history-panel-header-extra">
+    <div className={styles['history-panel-header-extra']}>
       <Popconfirm
         title={t('history.clearAllConfirm')}
         onConfirm={() => { void handleClearAll(); }}
@@ -445,23 +445,23 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
   } as CSSProperties;
 
   const renderClosedItem = (rec: ClosedTabRecord) => (
-    <li key={rec.id} className="history-item">
+    <li key={rec.id} className={styles['history-item']}>
       {rec.favIconUrl !== '' ? (
-        <img src={rec.favIconUrl} alt="" className="history-item-favicon"
+        <img src={rec.favIconUrl} alt="" className={styles['history-item-favicon']}
           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
       ) : (
-        <span className="history-item-favicon-fallback"><Globe size={ICON_SIZE.SMALL} /></span>
+        <span className={styles['history-item-favicon-fallback']}><Globe size={ICON_SIZE.SMALL} /></span>
       )}
-      <div className="history-item-main" onClick={() => { void handleRestoreOne(rec); }}>
-        <div className="history-item-title">{rec.title || rec.url}</div>
-        <div className="history-item-subtitle">
+      <div className={styles['history-item-main']} onClick={() => { void handleRestoreOne(rec); }}>
+        <div className={styles['history-item-title']}>{rec.title || rec.url}</div>
+        <div className={styles['history-item-subtitle']}>
           <span>{rec.hostname || rec.url}</span>
-          <span className="history-item-dot">·</span>
+          <span className={styles['history-item-dot']}>·</span>
           <span>{relTime(rec.ts)}</span>
-          {rec.pinned && <Tag color="gold" className="history-item-tag">📌</Tag>}
+          {rec.pinned && <Tag color="gold" className={styles['history-item-tag']}>📌</Tag>}
         </div>
       </div>
-      <div className="history-item-actions">
+      <div className={styles['history-item-actions']}>
         <Tooltip title={t('history.restore')}>
           <Button
             type="text"
@@ -484,12 +484,12 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
 
   /** 整窗快照卡片（显示在最近关闭列表顶部） */
   const renderClosedWindow = (win: ClosedWindowRecord) => (
-    <li key={`win-${win.id}`} className="history-window-card">
-      <div className="history-window-card-head">
+    <li key={`win-${win.id}`} className={styles['history-window-card']}>
+      <div className={styles['history-window-card-head']}>
         <Layers size={ICON_SIZE.SMALL} />
         <span>{t('history.restoreWindow', { count: win.tabCount })}</span>
-        <span className="history-item-dot">·</span>
-        <span className="history-window-card-time">{relTime(win.ts)}</span>
+        <span className={styles['history-item-dot']}>·</span>
+        <span className={styles['history-window-card-time']}>{relTime(win.ts)}</span>
       </div>
       <Button
         size="small"
@@ -530,29 +530,29 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
     const isUndone = e.extra?.undone === true;
     return (
       <li key={e.id} className={`history-event${isUndone ? ' is-undone' : ''}`}>
-        <span className="history-event-icon">{eventIcon(e.type)}</span>
+        <span className={styles['history-event-icon']}>{eventIcon(e.type)}</span>
         <div
-          className="history-event-main"
+          className={styles['history-event-main']}
           onClick={() => {
             if (e.url !== undefined && e.url !== '') {
               void createTab({ url: e.url, active: true });
             }
           }}
         >
-          <div className="history-event-line">
-            <span className="history-event-action">{eventDescription(e)}</span>
+          <div className={styles['history-event-line']}>
+            <span className={styles['history-event-action']}>{eventDescription(e)}</span>
             {e.title !== undefined && e.title !== '' && (
-              <span className="history-event-target" title={e.url}>{e.title}</span>
+              <span className={styles['history-event-target']} title={e.url}>{e.title}</span>
             )}
             {isUndone && (
-              <Tag color="default" className="history-item-tag">{t('history.undone')}</Tag>
+              <Tag color="default" className={styles['history-item-tag']}>{t('history.undone')}</Tag>
             )}
           </div>
-          <div className="history-event-meta">
+          <div className={styles['history-event-meta']}>
             {e.hostname !== undefined && e.hostname !== '' && (
               <>
                 <span>{e.hostname}</span>
-                <span className="history-item-dot">·</span>
+                <span className={styles['history-item-dot']}>·</span>
               </>
             )}
             <span>{relTime(e.ts)}</span>
@@ -586,11 +586,11 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
       onClose={onClose}
       width={520}
       title={(
-        <div className="history-panel-title">
+        <div className={styles['history-panel-title']}>
           <History size={ICON_SIZE.MEDIUM} />
           <div>
             <div>{t('history.title')}</div>
-            <div className="history-panel-subtitle">{t('history.subtitle')}</div>
+            <div className={styles['history-panel-subtitle']}>{t('history.subtitle')}</div>
           </div>
         </div>
       )}
@@ -604,8 +604,8 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
       }}
       rootClassName="history-panel-root"
     >
-      <div className="history-panel-shell" style={drawerVars}>
-        <div className="history-panel-toolbar">
+      <div className={styles['history-panel-shell']} style={drawerVars}>
+        <div className={styles['history-panel-toolbar']}>
           <Input
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
@@ -639,7 +639,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
           )}
         </div>
 
-        <div className="history-panel-list">
+        <div className={styles['history-panel-list']}>
           {snapshotDiff !== null && (
             <SnapshotDiffCard diff={snapshotDiff} t={t} />
           )}
@@ -652,7 +652,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
             ) : (
               <>
                 {closedWindows.length > 0 && (
-                  <ul className="history-window-list">
+                  <ul className={styles['history-window-list']}>
                     {closedWindows.map(renderClosedWindow)}
                   </ul>
                 )}
@@ -660,9 +660,9 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
                   const list = groupedClosed.get(id);
                   if (!list || list.length === 0) return null;
                   return (
-                    <section key={id} className="history-group">
-                      <div className="history-group-title">{t(labelKey)}</div>
-                      <ul className="history-list">{list.map(renderClosedItem)}</ul>
+                    <section key={id} className={styles['history-group']}>
+                      <div className={styles['history-group-title']}>{t(labelKey)}</div>
+                      <ul className={styles['history-list']}>{list.map(renderClosedItem)}</ul>
                     </section>
                   );
                 })}
@@ -674,16 +674,16 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
                 description={loading ? '...' : t('history.empty')}
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
               >
-                <div className="history-empty-hint">{t('history.emptyHint')}</div>
+                <div className={styles['history-empty-hint']}>{t('history.emptyHint')}</div>
               </Empty>
             ) : (
               TIME_GROUPS.map(({ id, labelKey }) => {
                 const list = groupedEvents.get(id);
                 if (!list || list.length === 0) return null;
                 return (
-                  <section key={id} className="history-group">
-                    <div className="history-group-title">{t(labelKey)}</div>
-                    <ul className="history-list">{list.map(renderEvent)}</ul>
+                  <section key={id} className={styles['history-group']}>
+                    <div className={styles['history-group-title']}>{t(labelKey)}</div>
+                    <ul className={styles['history-list']}>{list.map(renderEvent)}</ul>
                   </section>
                 );
               })

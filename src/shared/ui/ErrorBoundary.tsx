@@ -9,7 +9,7 @@
  */
 import { Component, type ReactNode } from 'react';
 import { BRAND } from '@/shared/config/brand';
-import './status-surfaces.css';
+import styles from './status-surfaces.module.less';
 
 interface Props {
   children: ReactNode;
@@ -55,17 +55,17 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback(this.state.error, this.reset);
       }
       return (
-        <div role="alert" className="app-error-boundary">
-          <div className="app-error-boundary__title">
+        <div role="alert" className={styles['app-error-boundary']}>
+          <div className={styles['app-error-boundary__title']}>
             加载失败{this.props.label ? ` · ${this.props.label}` : ''}
           </div>
-          <div className="app-error-boundary__message">
+          <div className={styles['app-error-boundary__message']}>
             {this.state.error.message}
           </div>
           <button
             type="button"
             onClick={this.reset}
-            className="app-error-boundary__retry"
+            className={styles['app-error-boundary__retry']}
           >
             点击重试
           </button>

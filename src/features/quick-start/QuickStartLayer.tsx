@@ -8,6 +8,7 @@
 import { useEffect } from 'react';
 import { useSpeedDialStore, useSettingsStore } from '@/store';
 import { SpeedDialGrid } from './SpeedDialGrid';
+import styles from './QuickStartLayer.module.less';
 
 export function QuickStartLayer() {
   const sites = useSpeedDialStore((s) => s.sites);
@@ -24,7 +25,7 @@ export function QuickStartLayer() {
   if (!quickStartVisible) return null;
 
   return (
-    <section className="app-quick-start">
+    <section className={styles['app-quick-start']}>
       <SpeedDialGrid sites={sites} />
     </section>
   );

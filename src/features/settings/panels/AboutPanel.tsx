@@ -34,7 +34,7 @@ import {
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
 import { BRAND, getBrandDisplayName, getBrandSlogan } from '@/shared/config/brand';
-import './styles/about.css';
+import styles from './styles/about.module.less';
 
 const PKG_VERSION = (() => {
   try {
@@ -72,33 +72,33 @@ export function AboutPanel() {
   });
 
   return (
-    <div className="about-panel settings-panel-stack">
+    <div className={styles['about-panel settings-panel-stack']}>
       <section className="settings-section">
-        <div className="about-panel__hero" style={heroStyle}>
-        <div className="about-panel__logo">{BRAND.shortName}</div>
-        <div className="about-panel__brand">{brandName}</div>
-        <div className="about-panel__slogan">「{slogan}」</div>
-        <div className="about-panel__version">v{PKG_VERSION}</div>
+        <div className={styles['about-panel__hero']} style={heroStyle}>
+        <div className={styles['about-panel__logo']}>{BRAND.shortName}</div>
+        <div className={styles['about-panel__brand']}>{brandName}</div>
+        <div className={styles['about-panel__slogan']}>「{slogan}」</div>
+        <div className={styles['about-panel__version']}>v{PKG_VERSION}</div>
       </div>
       </section>
 
       <section className="settings-section">
         <div>
-        <div className="about-panel__section-title">{t('about.featuresTitle')}</div>
-        <div className="about-panel__feature-grid">
+        <div className={styles['about-panel__section-title']}>{t('about.featuresTitle')}</div>
+        <div className={styles['about-panel__feature-grid']}>
           {FEATURES.map((feature) => {
             const Icon = feature.icon;
             const featureStyle: React.CSSProperties = cssVars({
               '--about-feature-color': feature.color,
             });
             return (
-              <div key={feature.titleKey} className="about-panel__feature-card">
-                <div className="about-panel__feature-icon" style={featureStyle}>
+              <div key={feature.titleKey} className={styles['about-panel__feature-card']}>
+                <div className={styles['about-panel__feature-icon']} style={featureStyle}>
                   <Icon size={ICON_SIZE.LARGE} />
                 </div>
-                <div className="about-panel__feature-copy">
-                  <div className="about-panel__feature-title">{t(feature.titleKey)}</div>
-                  <div className="about-panel__feature-desc">{t(feature.descKey)}</div>
+                <div className={styles['about-panel__feature-copy']}>
+                  <div className={styles['about-panel__feature-title']}>{t(feature.titleKey)}</div>
+                  <div className={styles['about-panel__feature-desc']}>{t(feature.descKey)}</div>
                 </div>
               </div>
             );
@@ -109,11 +109,11 @@ export function AboutPanel() {
 
       <section className="settings-section">
         <div>
-        <div className="about-panel__tips-title">
+        <div className={styles['about-panel__tips-title']}>
           <Sparkles size={ICON_SIZE.MEDIUM} />
           {t('about.tipsTitle')}
         </div>
-        <ul className="about-panel__tips-list">
+        <ul className={styles['about-panel__tips-list']}>
           <li>{t('about.tip1')}</li>
           <li>{t('about.tip2')}</li>
           <li>{t('about.tip3')}</li>
@@ -122,12 +122,12 @@ export function AboutPanel() {
       </div>
       </section>
 
-      <Divider className="about-panel__divider" />
+      <Divider className={styles['about-panel__divider']} />
 
       <section className="settings-section">
-        <div className="about-panel__support">
-        <div className="about-panel__support-title">{t('about.supportTitle')}</div>
-        <div className="about-panel__support-actions">
+        <div className={styles['about-panel__support']}>
+        <div className={styles['about-panel__support-title']}>{t('about.supportTitle')}</div>
+        <div className={styles['about-panel__support-actions']}>
           <Button
             icon={<Code2 size={ICON_SIZE.MEDIUM} />}
             onClick={() => {
@@ -167,7 +167,7 @@ export function AboutPanel() {
             {t('about.changelog')}
           </Button>
         </div>
-        <div className="about-panel__support-copy">{t('about.madeWith')} ❤️ · {t('about.privacyLocal')}</div>
+        <div className={styles['about-panel__support-copy']}>{t('about.madeWith')} ❤️ · {t('about.privacyLocal')}</div>
       </div>
       </section>
     </div>

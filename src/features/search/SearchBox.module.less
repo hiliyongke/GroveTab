@@ -1,0 +1,447 @@
+/* ─── 搜索弹窗 Modal 容器 ─── */
+.search-box-dialog {
+  top: 12vh;
+  padding-bottom: 0;
+}
+
+.search-box-mask {
+  backdrop-filter: blur(var(--app-overlay-blur, 12px));
+  background: var(--app-overlay-mask-bg, rgba(15, 23, 42, 0.24));
+}
+
+.search-box-modal .ant-modal-content,
+.search-box-modal .ant-modal-body,
+.search-box-body {
+  padding: 0;
+}
+
+.search-box-modal .ant-modal-content {
+  overflow: hidden;
+  background: transparent;
+}
+
+.search-box-container {
+  overflow: hidden;
+  border: 1px solid var(--app-hairline, var(--ant-color-border-secondary));
+  box-shadow: var(--app-shadow-floating, var(--app-shadow-card));
+  backdrop-filter: var(--app-glass-filter);
+  -webkit-backdrop-filter: var(--app-glass-filter);
+}
+
+/* ─── 搜索弹窗外壳 ─── */
+.search-box-shell {
+  overflow: hidden;
+  color: var(--searchbox-text);
+}
+
+.search-box-header,
+.search-box-section-header,
+.search-box-item,
+.search-box-item-head,
+.search-box-footer,
+.search-box-shortcuts,
+.search-box-shortcut,
+.search-box-shortcut-keys,
+.search-box-kbd,
+.search-box-item-icon {
+  display: flex;
+  align-items: center;
+}
+
+.search-box-header,
+.search-box-footer,
+.search-box-shortcuts {
+  justify-content: space-between;
+}
+
+/* ─── 搜索输入头部 ─── */
+.search-box-header {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 10px 14px 10px 12px;
+  border-bottom: 1px solid var(--searchbox-border);
+}
+
+.search-box-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+}
+
+.search-box-input-prefix {
+  color: var(--searchbox-search-icon);
+}
+
+/* ─── 引擎切换触发器（输入框左侧） ─── */
+.search-box-engine-trigger {
+  all: unset;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 36px;
+  padding: 0 6px 0 8px;
+  border-radius: var(--app-radius-md, 8px);
+  cursor: pointer;
+  color: var(--searchbox-text-secondary);
+  background: transparent;
+  transition:
+    background var(--searchbox-transition),
+    color var(--searchbox-transition);
+}
+
+.search-box-engine-trigger:hover,
+.search-box-engine-trigger.is-open {
+  color: var(--searchbox-text);
+  background: var(--searchbox-fill-tertiary);
+}
+
+.search-box-engine-trigger:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--searchbox-engine-color, var(--searchbox-accent)) 60%, transparent);
+  outline-offset: 1px;
+}
+
+.search-box-engine-trigger-caret {
+  flex-shrink: 0;
+  opacity: 0.6;
+  transition: transform var(--searchbox-transition);
+}
+
+.search-box-engine-trigger.is-open .search-box-engine-trigger-caret {
+  transform: rotate(180deg);
+}
+
+.search-box-engine-logo {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--searchbox-engine-color, var(--searchbox-accent));
+}
+
+.search-box-engine-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #fff;
+}
+
+/* ─── 引擎切换 Popover 菜单 ─── */
+.search-box-engine-popover .ant-popover-inner {
+  padding: 6px;
+  border-radius: var(--app-radius-md, 10px);
+}
+
+.search-box-engine-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  min-width: 200px;
+  list-style: none;
+}
+
+.search-box-engine-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px 6px 8px;
+  border-radius: var(--app-radius-sm, 6px);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--searchbox-text);
+  transition: background var(--searchbox-transition);
+}
+
+.search-box-engine-menu-item:hover {
+  background: var(--searchbox-fill-tertiary);
+}
+
+.search-box-engine-menu-item.is-active {
+  background: color-mix(in srgb, var(--searchbox-engine-color, var(--searchbox-accent)) 12%, transparent);
+  color: var(--searchbox-text);
+  font-weight: 600;
+}
+
+.search-box-engine-menu-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-box-engine-menu-shortcut {
+  flex-shrink: 0;
+  font-family: var(--ant-font-family-code, ui-monospace, monospace);
+  font-size: 11px;
+  color: var(--searchbox-text-tertiary);
+  padding: 1px 5px;
+  border: 1px solid var(--searchbox-border);
+  border-radius: var(--app-radius-sm, 4px);
+  background: var(--searchbox-fill-quaternary);
+  line-height: 1.2;
+}
+
+.search-box-engine-menu-check {
+  flex-shrink: 0;
+  color: var(--searchbox-engine-color, var(--searchbox-accent));
+}
+
+/* 兼容旧 DOM，防止增量构建缓存期间样式断层 */
+.search-box-engine {
+  min-width: 132px;
+}
+
+.search-box-engine-icon {
+  color: var(--searchbox-text-secondary);
+}
+
+/* ─── 搜索结果列表区域 ─── */
+.search-box-list-area {
+  height: min(420px, 52vh);
+  min-height: 260px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.search-box-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 24px;
+}
+
+.search-box-empty-icon {
+  opacity: 0.4;
+}
+
+.search-box-empty-text {
+  font-size: 13px;
+  color: var(--searchbox-text-secondary);
+}
+
+/* ─── 搜索结果分组 ─── */
+.search-box-section {
+  padding-top: 2px;
+}
+
+.search-box-section-header {
+  justify-content: space-between;
+  padding: 8px 20px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--searchbox-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.search-box-section-count {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 var(--app-space-1);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 18px;
+  text-align: center;
+  border-radius: var(--app-radius-sm);
+  color: var(--searchbox-text-tertiary);
+  background: var(--searchbox-fill-quaternary);
+}
+
+.search-box-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0 0 4px;
+  list-style: none;
+}
+
+/* ─── 搜索结果条目 ─── */
+.search-box-item {
+  gap: 12px;
+  margin: var(--app-space-1) var(--app-space-2);
+  padding: var(--app-space-2) var(--app-space-3);
+  border-radius: var(--searchbox-radius);
+  cursor: pointer;
+  background: transparent;
+  transition: background var(--searchbox-transition);
+}
+
+.search-box-item.is-active {
+  background: var(--searchbox-fill-secondary);
+}
+
+.search-box-item-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-box-item-head {
+  gap: 8px;
+  min-width: 0;
+}
+
+.search-box-item-title,
+.search-box-item-subtitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-box-item-title {
+  min-width: 0;
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--searchbox-text);
+}
+
+.search-box-item-subtitle {
+  margin-top: 1px;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--searchbox-text-tertiary);
+}
+
+.search-box-item-favicon,
+.search-box-item-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: var(--app-radius-xs);
+}
+
+.search-box-item-favicon {
+  object-fit: cover;
+}
+
+.search-box-item-icon {
+  justify-content: center;
+  font-size: 11px;
+  color: var(--searchbox-item-icon-color);
+  background: var(--searchbox-item-icon-bg);
+}
+
+.search-box-tag {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.search-box-tag-list {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: min(220px, 40%);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.search-box-tag-list .search-box-tag {
+  max-width: 72px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-box-highlight {
+  padding: 0;
+  font-weight: 700;
+  color: var(--searchbox-accent);
+  background: transparent;
+}
+
+.search-box-enter-icon {
+  flex-shrink: 0;
+  color: var(--searchbox-text-tertiary);
+}
+
+/* ─── 底部快捷键栏 ─── */
+.search-box-footer {
+  gap: 16px;
+  padding: 0 18px;
+  min-height: 38px;
+  border-top: 1px solid var(--searchbox-border);
+  font-size: 11px;
+  color: var(--searchbox-text-tertiary);
+  background: var(--searchbox-fill-quaternary);
+}
+
+.search-box-status-text {
+  flex-shrink: 0;
+}
+
+.search-box-shortcuts {
+  flex: 1;
+  justify-content: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.search-box-shortcut {
+  gap: 5px;
+}
+
+.search-box-shortcut-keys {
+  gap: 3px;
+}
+
+.search-box-kbd {
+  justify-content: center;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 var(--app-space-1);
+  font-size: 10px;
+  line-height: 1;
+  border: 1px solid var(--searchbox-border);
+  border-radius: var(--app-radius-sm);
+  color: var(--searchbox-text-secondary);
+  background: var(--searchbox-fill-tertiary);
+  font-family: var(--ant-font-family-code, ui-monospace, monospace);
+}
+
+/* ─── 响应式适配 ─── */
+@media (max-width: 768px) {
+  .search-box-dialog {
+    max-width: calc(100vw - 24px);
+    margin-inline: 12px;
+  }
+
+  .search-box-header {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .search-box-engine-trigger {
+    height: 32px;
+  }
+
+  .search-box-list-area {
+    height: min(360px, 52vh);
+    min-height: 220px;
+  }
+
+  .search-box-empty {
+    min-height: 100%;
+  }
+
+  .search-box-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 8px 16px 10px;
+  }
+
+  .search-box-shortcuts {
+    justify-content: flex-start;
+  }
+}

@@ -20,7 +20,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSettingsStore } from '@/store';
 import { loadVideoBlobUrl } from './video-storage';
-import './effects.css';
 
 export function VideoBackground() {
   const conf = useSettingsStore((s) => s.settings.videoBackground);

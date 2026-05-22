@@ -35,7 +35,7 @@ import { getSkinCustomBaseValues } from '@/shared/theme/theme-customization';
 import type { UserSettings } from '@/shared/types';
 import { Field } from '@/features/settings/components/Field';
 import { BRAND } from '@/shared/config/brand';
-import './styles/appearance.css';
+import styles from './styles/appearance.module.less';
 
 interface AppearancePanelProps {
   settings: UserSettings;
@@ -75,13 +75,13 @@ function SliderField({
   onChange: (value: number) => void;
 }) {
   return (
-    <div className="appearance-slider-group">
-      <div className="appearance-slider-header">
-        <span className="appearance-slider-label">{label}</span>
-        <span className="appearance-slider-value">{value}{suffix}</span>
+    <div className={styles['appearance-slider-group']}>
+      <div className={styles['appearance-slider-header']}>
+        <span className={styles['appearance-slider-label']}>{label}</span>
+        <span className={styles['appearance-slider-value']}>{value}{suffix}</span>
       </div>
       <Slider min={min} max={max} step={step} value={value} onChange={onChange} />
-      <div className="appearance-slider-hint">{hint}</div>
+      <div className={styles['appearance-slider-hint']}>{hint}</div>
     </div>
   );
 }
@@ -98,10 +98,10 @@ function VisibilityRow({
   onChange: (value: boolean) => void;
 }) {
   return (
-    <div className="appearance-visibility-row">
+    <div className={styles['appearance-visibility-row']}>
       <div>
-        <div className="appearance-visibility-title">{label}</div>
-        <div className="appearance-visibility-hint">{hint}</div>
+        <div className={styles['appearance-visibility-title']}>{label}</div>
+        <div className={styles['appearance-visibility-hint']}>{hint}</div>
       </div>
       <Switch size="small" checked={checked} onChange={onChange} />
     </div>
@@ -128,9 +128,9 @@ function PresetCard({
       className={`appearance-preset-card${selected ? ' is-selected' : ''}`}
     >
       {preview}
-      <div className="appearance-preset-meta">
+      <div className={styles['appearance-preset-meta']}>
         <div className={`appearance-preset-title${selected ? ' is-selected' : ''}`}>{label}</div>
-        {description && <div className="appearance-preset-description">{description}</div>}
+        {description && <div className={styles['appearance-preset-description']}>{description}</div>}
       </div>
     </button>
   );
@@ -273,7 +273,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
       {/* ── 皮肤预设选择器 ── */}
       <section className="settings-section">
         <Field label={t('skin.title')} hint={t('skin.hint')}>
-          <div className="appearance-grid">
+          <div className={styles['appearance-grid']}>
             {SKIN_PRESETS.map((skin) => {
               const isSelected = settings.skinPreset === skin.id || (!settings.skinPreset && skin.id === 'glassmorphism');
               const gradientBg = `linear-gradient(135deg, ${skin.previewColors[0]}, ${skin.previewColors[1]}, ${skin.previewColors[2] ?? skin.previewColors[1]})`;
@@ -289,7 +289,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                   description={t(skin.descriptionKey)}
                   preview={(
                     <div
-                      className="appearance-preset-preview appearance-preset-preview--skin"
+                className={`${styles['appearance-preset-preview']} ${styles['appearance-preset-preview--skin']}`}
                       style={skinPreviewStyle}
                     >
                       {skin.compatibleMode !== 'both' && <ModeBadge mode={skin.compatibleMode} />}
@@ -305,9 +305,9 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
       {/* ── 极客模式：单 token 精细化定制 ── */}
       <section className="settings-section">
         <Field label={t('skin.customTitle')} hint={t('skin.customHint')}>
-          <div className="appearance-toggle-group">
-            <div className="appearance-toggle-row">
-              <span className="appearance-toggle-label">
+          <div className={styles['appearance-toggle-group']}>
+            <div className={styles['appearance-toggle-row']}>
+              <span className={styles['appearance-toggle-label']}>
                 {t('skin.customEnable')}
               </span>
               <Switch
@@ -323,7 +323,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
             </div>
 
             {settings.skinCustom !== undefined && (
-              <div className="appearance-custom-box">
+              <div className={styles['appearance-custom-box']}>
                 <SliderField
                   label={t('skin.customRadius')}
                   value={settings.skinCustom.borderRadius ?? skinCustomBase.borderRadius}
@@ -380,9 +380,9 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                   }}
                 />
 
-                <div className="appearance-slider-group">
-                  <div className="appearance-toggle-row">
-                    <span className="appearance-slider-label">{t('skin.customColorPrimary')}</span>
+                <div className={styles['appearance-slider-group']}>
+                  <div className={styles['appearance-toggle-row']}>
+                    <span className={styles['appearance-slider-label']}>{t('skin.customColorPrimary')}</span>
                     <ColorPicker
                       value={settings.skinCustom.colorPrimary ?? skinCustomBase.colorPrimary}
                       size="small"
@@ -394,7 +394,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                       }}
                     />
                   </div>
-                  <div className="appearance-slider-hint">{t('skin.customColorPrimaryHint')}</div>
+                  <div className={styles['appearance-slider-hint']}>{t('skin.customColorPrimaryHint')}</div>
                 </div>
 
                 <Button
@@ -429,14 +429,14 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
       {/* ══════════════════════════════════════════
           背景定制区
           ══════════════════════════════════════════ */}
-      <Divider className="appearance-divider">
+      <Divider className={styles['appearance-divider']}>
         {t('bg.sectionTitle')}
       </Divider>
 
       {/* ── 渐变背景预设 ── */}
       <section className="settings-section">
         <Field label={t('gradient.title')} hint={t('gradient.hint')}>
-          <div className="appearance-gradient-grid">
+          <div className={styles['appearance-gradient-grid']}>
             {GRADIENT_PRESETS.map((preset) => {
               const isSelected = settings.gradientPreset === preset.id;
               const previewBg =
@@ -462,11 +462,11 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                   className={`appearance-preset-card${isSelected ? ' is-selected' : ''}`}
                 >
                   <div
-                    className="appearance-preset-preview appearance-preset-preview--gradient appearance-preview-editable"
+                className={`${styles['appearance-preset-preview']} ${styles['appearance-preset-preview--gradient']} ${styles['appearance-preview-editable']}`}
                     style={gradientPreviewStyle}
                   >
                     {preset.compatibleMode !== 'both' && <ModeBadge mode={preset.compatibleMode} />}
-                    {preset.id === 'custom' && <Pencil size={ICON_SIZE.LARGE} className="appearance-preset-edit-icon" />}
+                    {preset.id === 'custom' && <Pencil size={ICON_SIZE.LARGE} className={styles['appearance-preset-edit-icon']} />}
                   </div>
                   <div className={`appearance-preset-label-only${isSelected ? ' is-selected' : ''}`}>
                     {t(preset.labelKey)}
@@ -478,10 +478,10 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
 
           {/* 自定义渐变编辑器 */}
           {settings.gradientPreset === 'custom' && (
-            <div className="appearance-editor-shell">
-              <div className="appearance-editor-header">
-                <span className="appearance-editor-title">
-                  <Pencil size={ICON_SIZE.MEDIUM} className="appearance-editor-icon" />
+            <div className={styles['appearance-editor-shell']}>
+              <div className={styles['appearance-editor-header']}>
+                <span className={styles['appearance-editor-title']}>
+                  <Pencil size={ICON_SIZE.MEDIUM} className={styles['appearance-editor-icon']} />
                   {t('gradient.customEditor')}
                 </span>
                 <Button
@@ -512,9 +512,9 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                     onChange={(value) => updateCustomGradient({ angle: value })}
                   />
 
-                  <div className="appearance-editor-stops">
+                  <div className={styles['appearance-editor-stops']}>
                     {customGradient.stops.map((stop, i) => (
-                      <div key={i} className="appearance-editor-stop">
+                      <div key={i} className={styles['appearance-editor-stop']}>
                         <ColorPicker
                           size="small"
                           value={stop.color}
@@ -537,7 +537,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                             newStops[i] = { ...target, position: v / 100 };
                             updateCustomGradient({ stops: newStops });
                           }}
-                          className="appearance-editor-slider"
+                          className={styles['appearance-editor-slider']}
                         />
                         {customGradient.stops.length > 2 && (
                           <Button
@@ -573,9 +573,9 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                     </Button>
                   )}
 
-                  <div className="appearance-editor-dark">
-                    <div className="appearance-editor-note">{t('gradient.darkModeConfig')}</div>
-                    <div className="appearance-editor-toggle-row">
+                  <div className={styles['appearance-editor-dark']}>
+                    <div className={styles['appearance-editor-note']}>{t('gradient.darkModeConfig')}</div>
+                    <div className={styles['appearance-editor-toggle-row']}>
                       <Switch
                         size="small"
                         checked={customGradient.darkStops != null}
@@ -591,13 +591,13 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                           }
                         }}
                       />
-                      <span className="appearance-mode-note">{t('gradient.independentDark')}</span>
+                      <span className={styles['appearance-mode-note']}>{t('gradient.independentDark')}</span>
                     </div>
 
                     {customGradient.darkStops && (
-                      <div className="appearance-editor-toggle-group">
+                      <div className={styles['appearance-editor-toggle-group']}>
                         {customGradient.darkStops.map((stop, i) => (
-                          <div key={i} className="appearance-editor-stop-dark">
+                          <div key={i} className={styles['appearance-editor-stop-dark']}>
                             <ColorPicker
                               size="small"
                               value={stop.color}
@@ -620,7 +620,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                                 newStops[i] = { ...target, position: v / 100 };
                                 updateCustomGradient({ darkStops: newStops });
                               }}
-                              className="appearance-editor-slider"
+                              className={styles['appearance-editor-slider']}
                             />
                           </div>
                         ))}
@@ -652,11 +652,11 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                     onClick={() => { void updateSettings({ backgroundImage: undefined }); }}
                   />
                 ) : (
-                  <Image size={ICON_SIZE.MEDIUM} className="appearance-muted-icon" />
+                  <Image size={ICON_SIZE.MEDIUM} className={styles['appearance-muted-icon']} />
                 )
               }
             />
-            <div className="appearance-fit-row">
+            <div className={styles['appearance-fit-row']}>
               <Upload
                 beforeUpload={(file) => {
                   handleFileUpload(file);
@@ -674,7 +674,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                   size="small"
                   value={settings.backgroundImage.fit}
                   onChange={(v) => updateBgImage({ fit: v })}
-                  className="appearance-fit-select"
+                  className={styles['appearance-fit-select']}
                   options={[
                     { value: 'cover', label: t('bg.fitCover') },
                     { value: 'contain', label: t('bg.fitContain') },
@@ -691,19 +691,19 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
       <section className="settings-section">
         <Field label={t('bg.overlayTitle')} hint={t('bg.overlayHint')}>
           <Space direction="vertical" size={8} className="settings-control-full">
-            <div className="appearance-editor-toggle-row">
+            <div className={styles['appearance-editor-toggle-row']}>
               <Switch
                 size="small"
                 checked={settings.backgroundOverlay?.enabled ?? false}
                 onChange={(checked) => updateBgOverlay({ enabled: checked })}
               />
-              <span className="appearance-mode-note">{t('bg.overlayEnabled')}</span>
+              <span className={styles['appearance-mode-note']}>{t('bg.overlayEnabled')}</span>
             </div>
 
             {(settings.backgroundOverlay?.enabled) && (
               <>
-                <div className="appearance-overlay-row">
-                  <span className="appearance-color-label">
+                <div className={styles['appearance-overlay-row']}>
+                  <span className={styles['appearance-color-label']}>
                     {t('bg.overlayColor')}
                   </span>
                   <ColorPicker
@@ -742,7 +742,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
       {/* ══════════════════════════════════════════
           布局定制区
           ══════════════════════════════════════════ */}
-      <Divider className="appearance-divider">
+      <Divider className={styles['appearance-divider']}>
         {t('layout.sectionTitle')}
       </Divider>
 
@@ -765,17 +765,17 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
       {/* ── 内容区最大宽度 ── */}
       <section className="settings-section">
         <Field label={t('layout.maxWidth')} hint={t('layout.maxWidthHint')}>
-          <div className="appearance-width-row">
+          <div className={styles['appearance-width-row']}>
             <InputNumber
               min={0}
               max={3000}
               step={40}
               value={settings.contentMaxWidth ?? 0}
               onChange={(v) => { void updateSettings({ contentMaxWidth: v ?? 0 }); }}
-              className="appearance-width-input"
+              className={styles['appearance-width-input']}
             />
-            <span className="appearance-width-unit">px</span>
-            <span className="appearance-width-note">
+            <span className={styles['appearance-width-unit']}>px</span>
+            <span className={styles['appearance-width-note']}>
               ({t('layout.maxWidthZero')})
             </span>
           </div>
@@ -785,7 +785,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
       {/* ══════════════════════════════════════════
           动效与无障碍
           ══════════════════════════════════════════ */}
-      <Divider className="appearance-divider">
+      <Divider className={styles['appearance-divider']}>
         {t('a11y.sectionTitle')}
       </Divider>
 
@@ -948,7 +948,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
       {/* ══════════════════════════════════════════
           UI 区域显隐
           ══════════════════════════════════════════ */}
-      <Divider className="appearance-divider">
+      <Divider className={styles['appearance-divider']}>
         {t('uiVisibility.sectionTitle')}
       </Divider>
 
@@ -989,10 +989,10 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                   onChange={(v) => void updateSettings({ showAddSiteButton: v })}
                 />
                 {/* 卡片尺寸：sm / md / lg / auto，便于适应不同站点数量与屏幕宽度 */}
-                <div className="appearance-visibility-row">
+                <div className={styles['appearance-visibility-row']}>
                   <div>
-                    <div className="appearance-visibility-title">{t('quickStart.cardSize')}</div>
-                    <div className="appearance-visibility-hint">{t('quickStart.cardSizeHint')}</div>
+                    <div className={styles['appearance-visibility-title']}>{t('quickStart.cardSize')}</div>
+                    <div className={styles['appearance-visibility-hint']}>{t('quickStart.cardSizeHint')}</div>
                   </div>
                   <Select
                     size="small"

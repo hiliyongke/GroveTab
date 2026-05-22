@@ -15,6 +15,7 @@
  */
 import { Button, Space, Typography, Empty } from 'antd';
 import type { ReactNode } from 'react';
+import styles from './FeatureEmptyState.module.less';
 
 const { Text, Paragraph } = Typography;
 
@@ -47,28 +48,28 @@ export function FeatureEmptyState({
   hints,
   size = 'default',
 }: FeatureEmptyStateProps) {
-  const image = icon ? <span className="feature-empty__icon">{icon}</span> : undefined;
+  const image = icon ? <span className={styles['feature-empty__icon']}>{icon}</span> : undefined;
 
   return (
-    <div className={`feature-empty feature-empty--${size}`}>
+    <div className={`${styles['feature-empty']} ${styles[`feature-empty--${size}`]}`}>
       <Empty
         image={image}
         description={
-          <span className="feature-empty__title">{title}</span>
+          <span className={styles['feature-empty__title']}>{title}</span>
         }
-        className="feature-empty__empty"
+        className={styles['feature-empty__empty']}
       />
       {description && (
-        <Paragraph type="secondary" className="feature-empty__description">
+        <Paragraph type="secondary" className={styles['feature-empty__description']}>
           {description}
         </Paragraph>
       )}
       {hints && hints.length > 0 && (
-        <div className="feature-empty__hints">
+        <div className={styles['feature-empty__hints']}>
           {hints.map((hint, i) => (
-            <div key={i} className="feature-empty__hint-item">
-              <span className="feature-empty__hint-dot" />
-              <Text type="secondary" className="feature-empty__hint-text">
+            <div key={i} className={styles['feature-empty__hint-item']}>
+              <span className={styles['feature-empty__hint-dot']} />
+              <Text type="secondary" className={styles['feature-empty__hint-text']}>
                 {hint}
               </Text>
             </div>
@@ -76,7 +77,7 @@ export function FeatureEmptyState({
         </div>
       )}
       {actions && actions.length > 0 && (
-        <div className="feature-empty__actions">
+        <div className={styles['feature-empty__actions']}>
           <Space wrap>
             {actions.map((action, i) => (
               <Button

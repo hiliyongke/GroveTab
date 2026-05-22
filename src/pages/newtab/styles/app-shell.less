@@ -1,3 +1,10 @@
+/* ─── 应用外壳布局（App Shell） ────────────────────────
+ *
+ * 承载：Header → Main Body → View Bottom
+ * 布局结构详见 ./index.less 中的全局样式
+ */
+
+/* ── 顶栏（Header） ── */
 .app-header-shell {
   position: sticky;
   top: 0;
@@ -96,7 +103,7 @@
   color: var(--ant-color-border);
 }
 
-/* 一键整理链接（整合自 DashboardOverview） */
+/* 一键整理链接 */
 .app-header-tidy-link {
   all: unset;
   box-sizing: border-box;
@@ -117,6 +124,7 @@
   opacity: 0.52;
 }
 
+/* ── 顶栏中部（搜索触发器 + 品牌） ── */
 .app-header-center {
   flex: 1 1 520px;
   min-width: 280px;
@@ -179,20 +187,21 @@
   text-overflow: ellipsis;
 }
 
-/* trigger 内的快捷键徽章：保证在窄宽度下也能完整展示，不被压扁 */
+/* 搜索触发器内快捷键徽章 */
 .app-header-search-trigger .app-kbd {
   flex-shrink: 0;
   min-width: 32px;
   padding: 2px 6px;
 }
 
+/* ── 顶栏右侧操作区 ── */
 .app-header-actions {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
 }
 
-/* 顶栏右侧操作区：统一所有按钮尺寸与图标对齐，避免大小/高低不齐 */
+/* 统一所有按钮尺寸与图标对齐 */
 .app-header-actions .ant-btn {
   height: 24px;
   min-width: 24px;
@@ -238,6 +247,7 @@
   font-size: 12.5px;
 }
 
+/* ── Hero 区 ── */
 .app-hero {
   display: flex;
   flex-direction: column;
@@ -319,11 +329,7 @@
   min-height: 0;
 }
 
-/* ── 视图侧边栏（left/right 模式） ──
- * 标签数量有限（≤ 6 项），不滚动；
- * 由于 .app-content-shell 是滚动容器，侧栏作为 .app-main-body 的 flex item
- * 自然填满 main-body 高度，内部 justify-content: center 即可实现上下居中。
- */
+/* ── 视图侧边栏（left/right 模式） ── */
 .app-view-sidebar {
   width: 180px;
   flex-shrink: 0;
@@ -381,6 +387,7 @@
   text-overflow: ellipsis;
 }
 
+/* ── Workspace 切换器 ── */
 .app-workspace-switcher {
   display: inline-flex;
 }
@@ -427,10 +434,7 @@
   }
 }
 
-/* ── 视图底部固定栏（bottom 模式） ──
- * 使用 position: fixed 钉在视口底部，水平居中、玻璃质感；
- * 标签数量极少（≤ 6 项）无需滚动；点击区域舒适，与顶部 header 风格呼应。
- */
+/* ── 视图底部固定栏（bottom 模式） ── */
 .app-view-bottom {
   position: fixed;
   left: 0;
@@ -488,7 +492,7 @@
   text-overflow: ellipsis;
 }
 
-/* bottom 模式下，主体内容预留底栏高度，避免最后一行被遮挡 */
+/* bottom 模式下，主体内容预留底栏高度 */
 .app-layout-shell--view-bottom {
   padding-bottom: 64px;
 }
@@ -511,12 +515,6 @@
 
 /* ═══════════════════════════════════════════════════════
  * Apple 皮肤：Hero 区覆盖
- *
- * 核心改变：
- *   - Hero 区更大留白，类似 Apple 产品页 Hero
- *   - 搜索框样式改为 Apple 搜索/筛选按钮风格
- *     （3px solid 边框、#fafafc 底色、11px 圆角）
- *   - 品牌标题更紧凑（line-height 1.14）
  * ═══════════════════════════════════════════════════════ */
 
 /* Apple：Hero 区更大留白 */
@@ -618,6 +616,7 @@
   padding-bottom: 80px;
 }
 
+/* ── 加载 / 空状态 ── */
 .app-page-loading,
 .app-suspense-fallback,
 .app-workspace-loading {
@@ -639,10 +638,8 @@
   gap: 12px;
 }
 
+/* ── 布局外壳 ── */
 .app-layout-shell {
-  /* 让整个 shell 自身限定为视口高度，内部内容区独立滚动；
-     这样滚动条出现在 .app-content-shell 内（视图侧栏左侧），
-     视图侧栏不会被遮挡也不再需要 sticky 吸附。 */
   height: 100vh;
   overflow: hidden;
   position: relative;
@@ -670,7 +667,6 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  /* 滚动容器：滚动条出现在内容区右侧（视图侧栏左侧） */
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -679,32 +675,19 @@
   max-width: var(--app-content-max-width);
 }
 
-/* ── 书签「树状视图」（脑图 / 架构图）画布模式 ──
- * 树状视图自身有平移缩放画布，不需要外层再出滚动条；
- * 同时取消底部 64px padding，避免画布与底部留出空白带。
- *
- * 高度链路（已存在的正确链路，无需额外干预）：
- *   .app-shell(100vh) → .app-main-body(flex:1, min-height:0)
- *   → .app-content-shell(flex:1, min-height:0)  ← 已默认填满 main-body 剩余高度
- *
- * 因此这里只关闭外层滚动 + 去除底部 padding 即可，
- * 不要再加 min/max-height（会与父级 flex 约束冲突，导致溢出被裁切而画布消失）。 */
+/* 书签树状视图画布模式：关闭外层滚动 + 去除底部 padding */
 .app-content-shell:has(.app-bookmark-shell .app-bookmark-result > .app-bm-tree) {
   overflow: hidden;
   padding-bottom: 0;
 }
 
-/* ── Workspace 区域容器 ──
- * 非树状视图：不需要 flex:1，内容自然撑开，由 .app-content-shell 整体滚动。
- * 树状视图（下方 :has 规则）：需要 flex:1+min-height:0+overflow:hidden，
- *   让画布严格填满剩余空间且不出现双滚动条。 */
+/* ── Workspace 区域容器 ── */
 .app-workspace-section {
   display: flex;
   flex-direction: column;
 }
 
-/* 树状视图（脑图/架构图）：section 必须撑满 .app-content-shell 剩余高度，
-   画布才能拿到正确的高度值；同时关闭滚动，由画布自身的 PanZoom 接管。 */
+/* 树状视图：section 必须撑满剩余高度 */
 .app-workspace-section:has(.app-bookmark-result > .app-bm-tree) {
   flex: 1;
   min-height: 0;
@@ -753,21 +736,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════
- * 全局悬浮容器（弹窗 / 抽屉 / Popover / Dropdown）磨砂效果
- *
- * 设计目标：
- *   antd v6 的 Modal/Drawer/Popover 默认使用 colorBgElevated 作为底色，
- *   而部分皮肤下该色为半透明（如 rgba(...,0.72)）。仅靠透明色显得很"飘"，
- *   缺乏材质感。这里在所有皮肤下统一加 backdrop-filter，让背后内容产生
- *   毛玻璃模糊；同时把底色用 color-mix 与 elevated 混入更高比例的不透明
- *   纯色，避免"看穿"感。
- *
- * 通过 ConfigProvider 注入的 className（见 AntdThemeProvider.tsx）：
- *   · Modal    → .app-modal__container
- *   · Drawer   → .app-drawer__section
- *   · Popover  → .app-popover__container
- * 还顺带覆盖未注入业务 class 的 antd 通用悬浮容器：
- *   · Dropdown 菜单 / Select 下拉 / Tooltip
+ * 全局悬浮容器磨砂效果
  * ═══════════════════════════════════════════════════════ */
 
 /* Modal 容器 */
@@ -784,7 +753,7 @@
   -webkit-backdrop-filter: var(--app-glass-filter, blur(20px) saturate(180%));
 }
 
-/* Popover 容器（hover 弹窗） */
+/* Popover 容器 */
 .app-popover__container .ant-popover-inner,
 .ant-popover-inner {
   background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container)) !important;
@@ -792,7 +761,7 @@
   -webkit-backdrop-filter: var(--app-glass-filter, blur(16px) saturate(180%));
 }
 
-/* Dropdown 菜单（包括 Select / Cascader / TreeSelect / DatePicker 等通用下拉） */
+/* Dropdown 菜单 */
 .ant-dropdown-menu,
 .ant-select-dropdown,
 .ant-cascader-dropdown,
@@ -804,7 +773,7 @@
   -webkit-backdrop-filter: var(--app-glass-filter, blur(16px) saturate(180%));
 }
 
-/* Tooltip：默认黑色不透明，无需磨砂；这里仅在 colorBgSpotlight 为半透明时兜底 */
+/* Tooltip */
 .ant-tooltip-inner {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);

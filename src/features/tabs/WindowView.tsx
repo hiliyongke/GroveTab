@@ -25,7 +25,7 @@ import { useT } from '@/shared/i18n';
 import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
 import { moveTabs } from '@/chrome';
-import './styles/views.css';
+import styles from './styles/views.module.less';
 
 /**
  * 多窗口管理视图
@@ -94,14 +94,14 @@ export function WindowView() {
   const allTabIds = tabs.map((t) => t.id);
 
   if (tabs.length === 0) {
-    return <Empty description={t('tabs.empty')} className="app-window-empty" />;
+    return <Empty description={t('tabs.empty')} className={styles['app-window-empty']} />;
   }
 
   return (
     <div>
       {/* 多窗口操作栏 */}
       {sortedWindowIds.length > 1 && (
-        <div className="app-window-toolbar">
+        <div className={styles['app-window-toolbar']}>
           <Button
             type="primary"
             icon={<Merge size={ICON_SIZE.MEDIUM} />}
@@ -125,22 +125,22 @@ export function WindowView() {
           return {
             key: String(windowId),
             label: (
-              <div className="app-window-panel-label">
-                <span className="app-window-panel-title">
+              <div className={styles['app-window-panel-label']}>
+                <span className={styles['app-window-panel-title']}>
                   {isCurrent ? t('window.current') : t('window.other')}
                 </span>
                 {isFocused && (
-                  <Tag color="green" className="app-window-panel-tag app-window-panel-tag--focused">
+                  <Tag color="green" className={`${styles['app-window-panel-tag']} ${styles['app-window-panel-tag--focused']}`}>
                     {t('window.focused')}
                   </Tag>
                 )}
-                <Tag className="app-window-panel-tag">
+                <Tag className={styles['app-window-panel-tag']}>
                   {windowTabs.length}
                 </Tag>
               </div>
             ),
             children: (
-              <div className="app-window-panel-body">
+              <div className={styles['app-window-panel-body']}>
                 {windowTabs.map((tab) => (
                   <TabItem
                     key={tab.id}

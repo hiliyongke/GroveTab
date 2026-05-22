@@ -26,7 +26,7 @@ import { useT } from '@/shared/i18n';
 import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
 import { Z } from '@/shared/config/z-index';
-import './styles/views.css';
+import styles from './styles/views.module.less';
 
 /**
  * 批量操作浮动栏
@@ -98,30 +98,30 @@ export function BatchActionBar() {
 
   return (
     <div
-      className="app-batch-bar app-surface-elevated"
+      className={`${styles['app-batch-bar']} app-surface-elevated`}
       role="toolbar"
       aria-label={t('selection.title')}
       style={batchBarStyle}
     >
       {/* 计数标签组：图标 + 选中数 */}
-      <div className="app-batch-bar__summary">
+      <div className={styles['app-batch-bar__summary']}>
         <Badge
           count={count}
           size="small"
           color={token.colorPrimary}
           offset={[0, 0]}
         >
-          <Pointer size={ICON_SIZE.LARGE} className="app-batch-bar__pointer" />
+          <Pointer size={ICON_SIZE.LARGE} className={styles['app-batch-bar__pointer']} />
         </Badge>
-        <span className="app-batch-bar__summary-copy">
+        <span className={styles['app-batch-bar__summary-copy']}>
           {t('selection.title')}
         </span>
       </div>
 
-      <div className="app-divider-soft" aria-hidden />
+<div className={styles['app-divider-soft']} aria-hidden />
 
       {/* 操作组：危险→中性→主要，视觉权重递增 */}
-      <div className="app-batch-bar__actions">
+      <div className={styles['app-batch-bar__actions']}>
         <Tooltip title={t('batch.close')} placement="top">
           <Popconfirm
             title={t('batch.closeConfirm', { count })}
@@ -134,7 +134,7 @@ export function BatchActionBar() {
             <Button
               size="small"
               danger
-              icon={<X size={ICON_SIZE.DEFAULT} className="app-batch-bar__danger-icon" />}
+              icon={<X size={ICON_SIZE.DEFAULT} className={styles['app-batch-bar__danger-icon']} />}
             >
               {t('batch.close')}
             </Button>
@@ -144,7 +144,7 @@ export function BatchActionBar() {
         <Tooltip title={t('batch.discard')} placement="top">
           <Button
             size="small"
-            icon={<Moon size={ICON_SIZE.DEFAULT} className="app-batch-bar__secondary-icon" />}
+            icon={<Moon size={ICON_SIZE.DEFAULT} className={styles['app-batch-bar__secondary-icon']} />}
             onClick={() => { void handleBatchDiscard(); }}
           >
             {t('batch.discard')}
@@ -171,13 +171,13 @@ export function BatchActionBar() {
         </Tooltip>
       </div>
 
-      <div className="app-divider-soft" aria-hidden />
+<div className={styles['app-divider-soft']} aria-hidden />
 
       <Tooltip title={t('batch.cancel')} placement="top">
         <Button
           size="small"
           type="text"
-          icon={<XCircle size={ICON_SIZE.DEFAULT} className="app-batch-bar__danger-icon" />}
+          icon={<XCircle size={ICON_SIZE.DEFAULT} className={styles['app-batch-bar__danger-icon']} />}
           onClick={exitSelectionMode}
           aria-label={t('batch.cancel')}
         />
