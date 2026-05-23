@@ -8,15 +8,22 @@
  *   - 使用 I18nProvider 支持国际化
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Tooltip, Input, Dropdown } from 'antd';
-import type { MenuProps } from 'antd';
-import { queryAllTabs, activateTab, closeTab, createTab, safeCall, getFaviconUrl } from '@/chrome/tabs';
-import { extractHostname } from '@/chrome/utils';
-import { feedback } from '@/shared/ui/feedback';
-import { I18nProvider, useT } from '@/shared/i18n';
-import { AntdThemeProvider } from '@/shared/ui/AntdThemeProvider';
-import './ArcSidebar.less';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { Tooltip, Input, Dropdown } from "antd";
+import type { MenuProps } from "antd";
+import {
+  queryAllTabs,
+  activateTab,
+  closeTab,
+  createTab,
+  safeCall,
+  getFaviconUrl,
+} from "@/chrome/tabs";
+import { extractHostname } from "@/chrome/utils";
+import { feedback } from "@/shared/ui/feedback";
+import { I18nProvider, useT } from "@/shared/i18n";
+import { AntdThemeProvider } from "@/shared/ui/AntdThemeProvider";
+import "./ArcSidebar.less";
 
 // Types
 interface ArcTab {
@@ -41,31 +48,31 @@ interface Space {
 // Mock data for Spaces
 const defaultSpaces: Space[] = [
   {
-    id: 'personal',
-    name: 'Personal',
-    icon: '\u{1F3E0}',
-    color: '#FF6B35',
+    id: "personal",
+    name: "Personal",
+    icon: "\u{1F3E0}",
+    color: "#FF6B35",
     tabs: [],
   },
   {
-    id: 'work',
-    name: 'Work',
-    icon: '\u{1F4BC}',
-    color: '#4ECDC4',
+    id: "work",
+    name: "Work",
+    icon: "\u{1F4BC}",
+    color: "#4ECDC4",
     tabs: [],
   },
   {
-    id: 'research',
-    name: 'Research',
-    icon: '\u{1F52C}',
-    color: '#45B7D1',
+    id: "research",
+    name: "Research",
+    icon: "\u{1F52C}",
+    color: "#45B7D1",
     tabs: [],
   },
   {
-    id: 'entertainment',
-    name: 'Entertainment',
-    icon: '\u{1F3AE}',
-    color: '#96CEB4',
+    id: "entertainment",
+    name: "Entertainment",
+    icon: "\u{1F3AE}",
+    color: "#96CEB4",
     tabs: [],
   },
 ];
@@ -78,15 +85,50 @@ const defaultSpaces: Space[] = [
  */
 function resolveFaviconUrl(url: string, favIconUrl?: string): string {
   const extensionFavicon = getFaviconUrl(url);
-  return extensionFavicon !== '' ? extensionFavicon : (favIconUrl ?? '');
+  return extensionFavicon !== "" ? extensionFavicon : (favIconUrl ?? "");
 }
+
+/**
+ * SpaceButton — 空间按钮组件（memoized style）
+ *
+ * 将 space button 提取为独立组件，使用 useMemo 缓存 style 对象，
+ * 避免在 .map() 回调中每次渲染都创建新的 style 对象。
+ */
+interface SpaceButtonProps {
+  space: Space;
+  isActive: boolean;
+  onActivate: (spaceId: string) => void;
+}
+
+const SpaceButton = React.memo<SpaceButtonProps>(({ space, isActive, onActivate }) => {
+  const buttonStyle = useMemo<React.CSSProperties>(
+    () =>
+      ({
+        "--space-color": space.color,
+      }) as React.CSSProperties,
+    [space.color],
+  );
+
+  return (
+    <Tooltip title={space.name} placement="right">
+      <button
+        className={`arc-space-btn ${isActive ? "active" : ""}`}
+        style={buttonStyle}
+        onClick={() => onActivate(space.id)}
+      >
+        <span className="arc-space-icon">{space.icon}</span>
+        {space.tabs.length > 0 && <span className="arc-space-badge">{space.tabs.length}</span>}
+      </button>
+    </Tooltip>
+  );
+});
 
 const ArcSidebarContent: React.FC = () => {
   const [tabs, setTabs] = useState<ArcTab[]>([]);
   const [spaces] = useState<Space[]>(defaultSpaces);
-  const [activeSpace, setActiveSpace] = useState<string>('personal');
+  const [activeSpace, setActiveSpace] = useState<string>("personal");
   const [commandBarVisible, setCommandBarVisible] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const searchQueryLowerCase = searchQuery.toLowerCase();
   const { t } = useT();
 
@@ -97,16 +139,16 @@ const ArcSidebarContent: React.FC = () => {
       const arcTabs: ArcTab[] = chromeTabs.map((tab) => ({
         id: tab.id!,
         windowId: tab.windowId,
-        title: tab.title ?? t('arcSidebar.newTab'),
-        url: tab.url ?? '',
-        favIconUrl: resolveFaviconUrl(tab.url ?? '', tab.favIconUrl),
+        title: tab.title ?? t("arcSidebar.newTab"),
+        url: tab.url ?? "",
+        favIconUrl: resolveFaviconUrl(tab.url ?? "", tab.favIconUrl),
         active: tab.active,
         pinned: tab.pinned,
         groupId: tab.groupId,
       }));
       setTabs(arcTabs);
     } catch (error) {
-      feedback.error(t('arcSidebar.loadTabsFailed'), error);
+      feedback.error(t("arcSidebar.loadTabsFailed"), error);
     }
   }, [t]);
 
@@ -132,44 +174,56 @@ const ArcSidebarContent: React.FC = () => {
   }, [loadTabs]);
 
   // Filter tabs based on search
-  const filteredTabs = useMemo(() =>
-    tabs.filter((tab) =>
-      tab.title.toLowerCase().includes(searchQueryLowerCase) ||
-      tab.url.toLowerCase().includes(searchQueryLowerCase),
-    ),
+  const filteredTabs = useMemo(
+    () =>
+      tabs.filter(
+        (tab) =>
+          tab.title.toLowerCase().includes(searchQueryLowerCase) ||
+          tab.url.toLowerCase().includes(searchQueryLowerCase),
+      ),
     [tabs, searchQueryLowerCase],
   );
 
   // Group tabs by domain using extractHostname
-  const groupedTabs = useMemo(() =>
-    filteredTabs.reduce((acc, tab) => {
-      const domain = extractHostname(tab.url).replace('www.', '') || 'Other';
-      acc[domain] ??= [];
-      acc[domain].push(tab);
-      return acc;
-    }, {} as Record<string, ArcTab[]>),
+  const groupedTabs = useMemo(
+    () =>
+      filteredTabs.reduce(
+        (acc, tab) => {
+          const domain = extractHostname(tab.url).replace("www.", "") || "Other";
+          acc[domain] ??= [];
+          acc[domain].push(tab);
+          return acc;
+        },
+        {} as Record<string, ArcTab[]>,
+      ),
     [filteredTabs],
   );
 
   // Tab click handler — use @/chrome wrapper
-  const handleTabClick = useCallback(async (tabId: number, windowId: number) => {
-    try {
-      await activateTab(tabId, windowId);
-    } catch (err) {
-      feedback.error(t('arcSidebar.activateTabFailed'), err);
-    }
-  }, [t]);
+  const handleTabClick = useCallback(
+    async (tabId: number, windowId: number) => {
+      try {
+        await activateTab(tabId, windowId);
+      } catch (err) {
+        feedback.error(t("arcSidebar.activateTabFailed"), err);
+      }
+    },
+    [t],
+  );
 
   // Close tab handler — use @/chrome wrapper
-  const handleCloseTab = useCallback(async (e: React.MouseEvent, tabId: number) => {
-    e.stopPropagation();
-    try {
-      await closeTab(tabId);
-      await loadTabs();
-    } catch (err) {
-      feedback.error(t('arcSidebar.closeTabFailed'), err);
-    }
-  }, [loadTabs, t]);
+  const handleCloseTab = useCallback(
+    async (e: React.MouseEvent, tabId: number) => {
+      e.stopPropagation();
+      try {
+        await closeTab(tabId);
+        await loadTabs();
+      } catch (err) {
+        feedback.error(t("arcSidebar.closeTabFailed"), err);
+      }
+    },
+    [loadTabs, t],
+  );
 
   // New tab handler — use @/chrome wrapper
   const handleNewTab = useCallback(async () => {
@@ -177,20 +231,23 @@ const ArcSidebarContent: React.FC = () => {
       await createTab({});
       await loadTabs();
     } catch (err) {
-      feedback.error(t('arcSidebar.newTabFailed'), err);
+      feedback.error(t("arcSidebar.newTabFailed"), err);
     }
   }, [loadTabs, t]);
 
   // Toggle pin — use safeCall wrapper
-  const handleTogglePin = useCallback(async (e: React.MouseEvent, tabId: number, pinned: boolean) => {
-    e.stopPropagation();
-    try {
-      await safeCall('tabs.update', () => chrome.tabs.update(tabId, { pinned: !pinned }));
-      await loadTabs();
-    } catch (err) {
-      feedback.error(t('arcSidebar.togglePinFailed'), err);
-    }
-  }, [loadTabs, t]);
+  const handleTogglePin = useCallback(
+    async (e: React.MouseEvent, tabId: number, pinned: boolean) => {
+      e.stopPropagation();
+      try {
+        await safeCall("tabs.update", () => chrome.tabs.update(tabId, { pinned: !pinned }));
+        await loadTabs();
+      } catch (err) {
+        feedback.error(t("arcSidebar.togglePinFailed"), err);
+      }
+    },
+    [loadTabs, t],
+  );
 
   const handleNewTabClick = useCallback(() => {
     void handleNewTab();
@@ -205,47 +262,76 @@ const ArcSidebarContent: React.FC = () => {
           await closeTab(activeTab.id);
         }
       } catch (err) {
-        feedback.error(t('arcSidebar.closeTabFailed'), err);
+        feedback.error(t("arcSidebar.closeTabFailed"), err);
       }
     })();
   }, [t]);
 
   const handleOpenNewWindow = useCallback(() => {
-    void safeCall('windows.create', () => chrome.windows.create());
+    void safeCall("windows.create", () => chrome.windows.create());
   }, []);
 
   const handleOpenOptions = useCallback(() => {
-    void safeCall('runtime.openOptionsPage', () => chrome.runtime.openOptionsPage());
+    void safeCall("runtime.openOptionsPage", () => chrome.runtime.openOptionsPage());
   }, []);
 
-  // Command bar actions
-  const commandActions: MenuProps['items'] = [
-    {
-      key: 'new-tab',
-      icon: <span style={{ fontSize: 14 }}>➕</span>,
-      label: t('arcSidebar.newTab'),
-      onClick: handleNewTabClick,
-    },
-    {
-      key: 'new-window',
-      icon: <span style={{ fontSize: 14 }}>🗔</span>,
-      label: t('arcSidebar.newWindow'),
-      onClick: handleOpenNewWindow,
-    },
-    {
-      key: 'close-tab',
-      icon: <span style={{ fontSize: 14 }}>✕</span>,
-      label: t('arcSidebar.closeCurrentTab'),
-      onClick: handleCloseCurrentTab,
-    },
-    { type: 'divider' },
-    {
-      key: 'settings',
-      icon: <span style={{ fontSize: 14 }}>⚙</span>,
-      label: t('arcSidebar.settings'),
-      onClick: handleOpenOptions,
-    },
-  ];
+  // Memoized icon styles to avoid recreating objects on each render
+  const smallIconStyle = useMemo<React.CSSProperties>(() => ({ fontSize: 14 }), []);
+  const menuIconStyle = useMemo<React.CSSProperties>(() => ({ fontSize: 16 }), []);
+  const commandBarIconStyle = useMemo<React.CSSProperties>(
+    () => ({ fontSize: 18, color: "var(--arc-text-muted)", marginRight: 12 }),
+    [],
+  );
+  const searchIconStyle = useMemo<React.CSSProperties>(
+    () => ({
+      color: "var(--arc-text-muted)",
+      fontSize: 14,
+      position: "absolute" as const,
+      left: 20,
+      zIndex: 1,
+    }),
+    [],
+  );
+  const emptyIconStyle = useMemo<React.CSSProperties>(() => ({ fontSize: 48, opacity: 0.3 }), []);
+
+  // Command bar actions - memoized to prevent recreation on each render
+  const commandActions = useMemo<MenuProps["items"]>(
+    () => [
+      {
+        key: "new-tab",
+        icon: <span style={smallIconStyle}>➕</span>,
+        label: t("arcSidebar.newTab"),
+        onClick: handleNewTabClick,
+      },
+      {
+        key: "new-window",
+        icon: <span style={smallIconStyle}>🗔</span>,
+        label: t("arcSidebar.newWindow"),
+        onClick: handleOpenNewWindow,
+      },
+      {
+        key: "close-tab",
+        icon: <span style={smallIconStyle}>✕</span>,
+        label: t("arcSidebar.closeCurrentTab"),
+        onClick: handleCloseCurrentTab,
+      },
+      { type: "divider" as const },
+      {
+        key: "settings",
+        icon: <span style={smallIconStyle}>⚙</span>,
+        label: t("arcSidebar.settings"),
+        onClick: handleOpenOptions,
+      },
+    ],
+    [
+      smallIconStyle,
+      t,
+      handleNewTabClick,
+      handleOpenNewWindow,
+      handleCloseCurrentTab,
+      handleOpenOptions,
+    ],
+  );
 
   return (
     <div className="arc-sidebar">
@@ -253,38 +339,38 @@ const ArcSidebarContent: React.FC = () => {
       <div className="arc-spaces-bar">
         <div className="arc-spaces-header">
           <Tooltip title="Arc Menu" placement="right">
-            <button className="arc-menu-btn" aria-label={t('arcSidebar.menu')}>
-              <span style={{ fontSize: 16 }} aria-hidden="true">⌘</span>
+            <button className="arc-menu-btn" aria-label={t("arcSidebar.menu")}>
+              <span style={menuIconStyle} aria-hidden="true">
+                ⌘
+              </span>
             </button>
           </Tooltip>
         </div>
 
         <div className="arc-spaces-list">
           {spaces.map((space) => (
-            <Tooltip key={space.id} title={space.name} placement="right">
-              <button
-                className={`arc-space-btn ${activeSpace === space.id ? 'active' : ''}`}
-                style={{ '--space-color': space.color } as React.CSSProperties}
-                onClick={() => setActiveSpace(space.id)}
-              >
-                <span className="arc-space-icon">{space.icon}</span>
-                {space.tabs.length > 0 && (
-                  <span className="arc-space-badge">{space.tabs.length}</span>
-                )}
-              </button>
-            </Tooltip>
+            <SpaceButton
+              key={space.id}
+              space={space}
+              isActive={activeSpace === space.id}
+              onActivate={setActiveSpace}
+            />
           ))}
         </div>
 
         <div className="arc-spaces-footer">
-          <Tooltip title={t('arcSidebar.addSpace')} placement="right">
-            <button className="arc-space-btn add-space" aria-label={t('arcSidebar.addSpace')}>
-              <span style={{ fontSize: 14 }} aria-hidden="true">+</span>
+          <Tooltip title={t("arcSidebar.addSpace")} placement="right">
+            <button className="arc-space-btn add-space" aria-label={t("arcSidebar.addSpace")}>
+              <span style={smallIconStyle} aria-hidden="true">
+                +
+              </span>
             </button>
           </Tooltip>
-          <Tooltip title={t('arcSidebar.settings')} placement="right">
-            <button className="arc-space-btn" aria-label={t('arcSidebar.settings')}>
-              <span style={{ fontSize: 14 }} aria-hidden="true">⚙</span>
+          <Tooltip title={t("arcSidebar.settings")} placement="right">
+            <button className="arc-space-btn" aria-label={t("arcSidebar.settings")}>
+              <span style={smallIconStyle} aria-hidden="true">
+                ⚙
+              </span>
             </button>
           </Tooltip>
         </div>
@@ -294,20 +380,22 @@ const ArcSidebarContent: React.FC = () => {
       <div className="arc-sidebar-content">
         {/* Search Bar */}
         <div className="arc-search-bar">
-          <span className="arc-search-icon" style={{ color: 'var(--arc-text-muted)', fontSize: 14, position: 'absolute', left: 20, zIndex: 1 }}>🔍</span>
+          <span className="arc-search-icon" style={searchIconStyle}>
+            🔍
+          </span>
           <Input
-            placeholder={t('arcSidebar.searchTabs')}
+            placeholder={t("arcSidebar.searchTabs")}
             className="arc-search-input"
             value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
           <kbd className="arc-shortcut">⌘K</kbd>
         </div>
 
         {/* Pinned Tabs */}
-        {filteredTabs.filter(t => t.pinned).length > 0 && (
+        {filteredTabs.filter((t) => t.pinned).length > 0 && (
           <div className="arc-section">
-            <div className="arc-section-title">{t('arcSidebar.pinned')}</div>
+            <div className="arc-section-title">{t("arcSidebar.pinned")}</div>
             <div className="arc-tabs-list">
               {filteredTabs
                 .filter((t) => t.pinned)
@@ -315,9 +403,15 @@ const ArcSidebarContent: React.FC = () => {
                   <ArcTabItem
                     key={tab.id}
                     tab={tab}
-                    onActivate={() => { void handleTabClick(tab.id, tab.windowId); }}
-                    onClose={(e) => { void handleCloseTab(e, tab.id); }}
-                    onTogglePin={(e) => { void handleTogglePin(e, tab.id, tab.pinned); }}
+                    onActivate={() => {
+                      void handleTabClick(tab.id, tab.windowId);
+                    }}
+                    onClose={(e) => {
+                      void handleCloseTab(e, tab.id);
+                    }}
+                    onTogglePin={(e) => {
+                      void handleTogglePin(e, tab.id, tab.pinned);
+                    }}
                     t={t}
                   />
                 ))}
@@ -330,24 +424,35 @@ const ArcSidebarContent: React.FC = () => {
           <div key={domain} className="arc-section">
             <div className="arc-section-title">
               <img
-                src={getFaviconUrl(`https://${domain}`) || `https://www.google.com/s2/favicons?domain=${domain}`}
+                src={
+                  getFaviconUrl(`https://${domain}`) ||
+                  `https://www.google.com/s2/favicons?domain=${domain}`
+                }
                 alt=""
                 className="arc-domain-favicon"
               />
               {domain}
-              <span className="arc-tab-count">{domainTabs.filter(t => !t.pinned).length}</span>
+              <span className="arc-tab-count">{domainTabs.filter((t) => !t.pinned).length}</span>
             </div>
             <div className="arc-tabs-list">
-              {domainTabs.filter((tab) => !tab.pinned).map((tab) => (
-                <ArcTabItem
-                  key={tab.id}
-                  tab={tab}
-                  onActivate={() => { void handleTabClick(tab.id, tab.windowId); }}
-                  onClose={(e) => { void handleCloseTab(e, tab.id); }}
-                  onTogglePin={(e) => { void handleTogglePin(e, tab.id, tab.pinned); }}
-                  t={t}
-                />
-              ))}
+              {domainTabs
+                .filter((tab) => !tab.pinned)
+                .map((tab) => (
+                  <ArcTabItem
+                    key={tab.id}
+                    tab={tab}
+                    onActivate={() => {
+                      void handleTabClick(tab.id, tab.windowId);
+                    }}
+                    onClose={(e) => {
+                      void handleCloseTab(e, tab.id);
+                    }}
+                    onTogglePin={(e) => {
+                      void handleTogglePin(e, tab.id, tab.pinned);
+                    }}
+                    t={t}
+                  />
+                ))}
             </div>
           </div>
         ))}
@@ -355,8 +460,10 @@ const ArcSidebarContent: React.FC = () => {
         {/* Empty State */}
         {filteredTabs.length === 0 && (
           <div className="arc-empty-state">
-            <span className="arc-empty-icon" style={{ fontSize: 48, opacity: 0.3 }}>🔍</span>
-            <p>{t('arcSidebar.noTabsFound')}</p>
+            <span className="arc-empty-icon" style={emptyIconStyle}>
+              🔍
+            </span>
+            <p>{t("arcSidebar.noTabsFound")}</p>
           </div>
         )}
       </div>
@@ -364,39 +471,47 @@ const ArcSidebarContent: React.FC = () => {
       {/* Bottom Actions */}
       <div className="arc-sidebar-footer">
         <button className="arc-footer-btn" onClick={handleNewTabClick}>
-          <span style={{ fontSize: 14 }}>➕</span>
-          <span>{t('arcSidebar.newTab')}</span>
+          <span style={smallIconStyle}>➕</span>
+          <span>{t("arcSidebar.newTab")}</span>
         </button>
-        <Dropdown menu={{ items: commandActions }} trigger={['click']} placement="topRight">
-          <button className="arc-footer-btn icon-only" aria-label={t('arcSidebar.moreActions')}>
-            <span style={{ fontSize: 16 }} aria-hidden="true">⋯</span>
+        <Dropdown menu={{ items: commandActions }} trigger={["click"]} placement="topRight">
+          <button className="arc-footer-btn icon-only" aria-label={t("arcSidebar.moreActions")}>
+            <span style={menuIconStyle} aria-hidden="true">
+              ⋯
+            </span>
           </button>
         </Dropdown>
       </div>
 
       {/* Command Bar Overlay */}
       {commandBarVisible && (
-        <div className="arc-command-bar-overlay" onClick={() => setCommandBarVisible(false)} role="dialog" aria-modal="true" aria-label={t('arcSidebar.commandBar')}>
-          <div className="arc-command-bar" onClick={e => e.stopPropagation()}>
+        <div
+          className="arc-command-bar-overlay"
+          onClick={() => setCommandBarVisible(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={t("arcSidebar.commandBar")}
+        >
+          <div className="arc-command-bar" onClick={(e) => e.stopPropagation()}>
             <Input
               autoFocus
-              placeholder={t('arcSidebar.commandPlaceholder')}
+              placeholder={t("arcSidebar.commandPlaceholder")}
               className="arc-command-input"
-              prefix={<span style={{ fontSize: 18, color: 'var(--arc-text-muted)', marginRight: 12 }}>⌘</span>}
+              prefix={<span style={commandBarIconStyle}>⌘</span>}
             />
             <div className="arc-command-results">
               <div className="arc-command-item">
                 <span>🔍</span>
-                <span>{t('arcSidebar.searchTabs')}</span>
+                <span>{t("arcSidebar.searchTabs")}</span>
               </div>
               <div className="arc-command-item">
                 <span>➕</span>
-                <span>{t('arcSidebar.newTab')}</span>
+                <span>{t("arcSidebar.newTab")}</span>
                 <kbd>⌘T</kbd>
               </div>
               <div className="arc-command-item">
                 <span>✕</span>
-                <span>{t('arcSidebar.closeCurrentTab')}</span>
+                <span>{t("arcSidebar.closeCurrentTab")}</span>
                 <kbd>⌘W</kbd>
               </div>
             </div>
@@ -432,15 +547,16 @@ function ArcTabItem({
 }) {
   return (
     <div
-      className={`arc-tab-item ${tab.pinned ? 'pinned' : ''} ${tab.active ? 'active' : ''}`}
+      className={`arc-tab-item ${tab.pinned ? "pinned" : ""} ${tab.active ? "active" : ""}`}
       onClick={onActivate}
     >
       <img
-        src={tab.favIconUrl || 'chrome://favicon/'}
+        src={tab.favIconUrl || "chrome://favicon/"}
         alt=""
         className="arc-tab-favicon"
         onError={(e) => {
-          (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="%23666"/></svg>';
+          (e.target as HTMLImageElement).src =
+            'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="%23666"/></svg>';
         }}
       />
       <span className="arc-tab-title">{tab.title}</span>
@@ -448,15 +564,15 @@ function ArcTabItem({
         <button
           className="arc-tab-action-btn"
           onClick={onTogglePin}
-          aria-label={tab.pinned ? t('arcSidebar.unpinTab') : t('arcSidebar.pinTab')}
+          aria-label={tab.pinned ? t("arcSidebar.unpinTab") : t("arcSidebar.pinTab")}
           aria-pressed={tab.pinned}
         >
-          {tab.pinned ? '★' : '☆'}
+          {tab.pinned ? "★" : "☆"}
         </button>
         <button
           className="arc-tab-action-btn close"
           onClick={onClose}
-          aria-label={t('arcSidebar.closeTab')}
+          aria-label={t("arcSidebar.closeTab")}
         >
           ✕
         </button>

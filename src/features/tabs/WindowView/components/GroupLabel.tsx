@@ -8,27 +8,58 @@
  * - 右键菜单（重命名/改色/取消分组）
  */
 
-import { useState, useCallback } from 'react';
-import { Tag, Button, Dropdown, Input } from 'antd';
-import { GripVertical, ArrowUpDown } from 'lucide-react';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { useSortable } from '@dnd-kit/sortable';
-import { useDroppable } from '@dnd-kit/core';
-import { CSS } from '@dnd-kit/utilities';
-import { useTabsStore } from '@/store';
-import { feedback } from '@/shared/ui/feedback';
-import { track as trackEvent } from '@/shared/utils/metrics';
-import { stringToColor } from '@/shared/utils/color';
+import { useState, useCallback, useMemo, memo } from "react";
+import { Tag, Button, Dropdown, Input } from "antd";
+import { GripVertical, ArrowUpDown } from "lucide-react";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useSortable } from "@dnd-kit/sortable";
+import { useDroppable } from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
+import { useTabsStore } from "@/store";
+import { feedback } from "@/shared/ui/feedback";
+import { track as trackEvent } from "@/shared/utils/metrics";
+import { stringToColor } from "@/shared/utils/color";
 import {
   recolorTabGroup,
   renameTabGroup,
   reorderTabs,
   sortTabsByRule,
-} from '@/features/tabs/services/window-tab-operations';
-import { GROUP_COLORS } from '../types';
-import type { GroupColor, GroupLabelProps, SmartSortRule } from '../types';
-import { GroupContextMenu } from './GroupContextMenu';
-import styles from '../WindowView.module.less';
+} from "@/features/tabs/services/window-tab-operations";
+import { GROUP_COLORS } from "../types";
+import type { GroupColor, GroupLabelProps, SmartSortRule } from "../types";
+import { GroupContextMenu } from "./GroupContextMenu";
+import styles from "../WindowView.module.less";
+
+/**
+ * ColorSwatch — 颜色样本按钮（memoized style）
+ *
+ * 提取为独立组件，使用 useMemo 缓存 style 对象，
+ * 避免在 .map() 回调中每次渲染都创建新的 style 对象。
+ */
+interface ColorSwatchProps {
+  color: GroupColor;
+  groupColor: GroupColor | undefined;
+  onClick: (color: GroupColor) => void;
+}
+
+const ColorSwatch = memo<ColorSwatchProps>(({ color, groupColor, onClick }) => {
+  const swatchStyle = useMemo<React.CSSProperties>(
+    () => ({ backgroundColor: stringToColor(color) }),
+    [color],
+  );
+
+  return (
+    <button
+      key={color}
+      type="button"
+      className={`${styles["app-window-card-group-color-swatch"]} ${color === groupColor ? styles["is-active"] : ""}`}
+      style={swatchStyle}
+      onClick={() => onClick(color)}
+    >
+      {color}
+    </button>
+  );
+});
 
 /**
  * 获取排序规则对应的 i18n 名称
@@ -38,14 +69,14 @@ import styles from '../WindowView.module.less';
  */
 function getSortRuleName(rule: SmartSortRule, t: (key: string) => string): string {
   switch (rule) {
-    case 'domain':
-      return t('window.smartSortByDomain');
-    case 'recentAccess':
-      return t('window.smartSortByRecentAccess');
-    case 'alphabetical':
-      return t('window.smartSortByAlphabetical');
-    case 'type':
-      return t('window.smartSortByType');
+    case "domain":
+      return t("window.smartSortByDomain");
+    case "recentAccess":
+      return t("window.smartSortByRecentAccess");
+    case "alphabetical":
+      return t("window.smartSortByAlphabetical");
+    case "type":
+      return t("window.smartSortByType");
   }
 }
 
@@ -62,7 +93,7 @@ function getSortRuleName(rule: SmartSortRule, t: (key: string) => string): strin
  */
 function GroupLabel({ groupId, groupTitle, groupColor, windowId, tabs, t }: GroupLabelProps) {
   const [editing, setEditing] = useState(false);
-  const [editValue, setEditValue] = useState(groupTitle ?? '');
+  const [editValue, setEditValue] = useState(groupTitle ?? "");
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
 
@@ -76,13 +107,13 @@ function GroupLabel({ groupId, groupTitle, groupColor, windowId, tabs, t }: Grou
     isDragging,
   } = useSortable({
     id: `group-label-sortable::${windowId}::${groupId}`,
-    data: { kind: 'group-label', groupId, windowId },
+    data: { kind: "group-label", groupId, windowId },
   });
 
   // 分组标签也可作为 droppable 区域（标签拖入该分组）
   const { setNodeRef: setGroupLabelRef } = useDroppable({
     id: `group-label::${windowId}::${groupId}`,
-    data: { kind: 'group-label', groupId, windowId },
+    data: { kind: "group-label", groupId, windowId },
   });
 
   const mergedRef = useCallback(
@@ -110,16 +141,16 @@ function GroupLabel({ groupId, groupTitle, groupColor, windowId, tabs, t }: Grou
         await reorderTabs(sortedIds);
 
         feedback.success(
-          t('window.smartSortGroupSuccess', {
+          t("window.smartSortGroupSuccess", {
             rule: getSortRuleName(rule, t),
             count: String(sortedIds.length),
           }),
         );
-        void trackEvent('smart_sort_group', { rule, groupId, count: sortedIds.length });
+        void trackEvent("smart_sort_group", { rule, groupId, count: sortedIds.length });
         void useTabsStore.getState().loadAllTabs({ silent: true });
       } catch (err) {
-        feedback.error(t('window.moveFailed'));
-        console.warn('[WindowView] group sort failed', err);
+        feedback.error(t("window.moveFailed"));
+        console.warn("[WindowView] group sort failed", err);
         void useTabsStore.getState().loadAllTabs({ silent: true });
       }
     },
@@ -143,12 +174,14 @@ function GroupLabel({ groupId, groupTitle, groupColor, windowId, tabs, t }: Grou
   const handleSaveTitle = () => {
     const newName = editValue.trim();
     if (newName && newName !== groupTitle) {
-      void renameTabGroup(groupId, newName).then(() => {
-        feedback.success(t('window.groupRename'));
-        void useTabsStore.getState().loadAllTabs({ silent: true });
-      }).catch(() => {
-        feedback.error(t('window.groupCreateFailed'));
-      });
+      void renameTabGroup(groupId, newName)
+        .then(() => {
+          feedback.success(t("window.groupRename"));
+          void useTabsStore.getState().loadAllTabs({ silent: true });
+        })
+        .catch(() => {
+          feedback.error(t("window.groupCreateFailed"));
+        });
     }
     setEditing(false);
   };
@@ -165,22 +198,24 @@ function GroupLabel({ groupId, groupTitle, groupColor, windowId, tabs, t }: Grou
   /**
    * 选择新颜色
    * @param color
- * @returns {void} 无返回值
+   * @returns {void} 无返回值
    */
   const handleColorChange = (color: GroupColor) => {
-    void recolorTabGroup(groupId, color).then(() => {
-      feedback.success(t('window.groupColor'));
-      void useTabsStore.getState().loadAllTabs({ silent: true });
-    }).catch(() => {
-      feedback.error(t('window.groupCreateFailed'));
-    });
+    void recolorTabGroup(groupId, color)
+      .then(() => {
+        feedback.success(t("window.groupColor"));
+        void useTabsStore.getState().loadAllTabs({ silent: true });
+      })
+      .catch(() => {
+        feedback.error(t("window.groupCreateFailed"));
+      });
     setShowColorPicker(false);
   };
 
   /**
    * 右键菜单
    * @param e
- * @returns {JSX.Element} JSX 元素
+   * @returns {JSX.Element} JSX 元素
    */
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -190,9 +225,9 @@ function GroupLabel({ groupId, groupTitle, groupColor, windowId, tabs, t }: Grou
 
   const labelStyle: React.CSSProperties = {
     transform: CSS.Translate.toString(transform),
-    transition: isDragging ? 'none' : transition,
+    transition: isDragging ? "none" : transition,
     opacity: isDragging ? 0.5 : 1,
-    position: 'relative',
+    position: "relative",
   };
 
   return (
@@ -201,33 +236,43 @@ function GroupLabel({ groupId, groupTitle, groupColor, windowId, tabs, t }: Grou
       {...attributes}
       {...listeners}
       style={labelStyle}
-      className={`${styles['app-window-card-group-label']} ${isDragging ? styles['is-dragging'] : ''}`}
+      className={`${styles["app-window-card-group-label"]} ${isDragging ? styles["is-dragging"] : ""}`}
       onContextMenu={handleContextMenu}
     >
       {/* 颜色标记（双击改色） */}
       <Tag
-        color={groupColor ?? 'default'}
-        className={styles['app-window-card-group-color-tag']}
+        color={groupColor ?? "default"}
+        className={styles["app-window-card-group-color-tag"]}
         onDoubleClick={handleColorDoubleClick}
       >
-        {groupTitle ?? t('tabGroup.unnamed')}
+        {groupTitle ?? t("tabGroup.unnamed")}
       </Tag>
 
       {/* 标签数量 */}
-      <span className={styles['app-tab-group-count']}>{tabs.length}</span>
+      <span className={styles["app-tab-group-count"]}>{tabs.length}</span>
 
       {/* 拖拽手柄 */}
-      <GripVertical size={ICON_SIZE.TINY} className={styles['app-window-card-group-grip']} />
+      <GripVertical size={ICON_SIZE.TINY} className={styles["app-window-card-group-grip"]} />
 
       {/* 分组内排序按钮 */}
       <Dropdown
-        trigger={['click']}
+        trigger={["click"]}
         menu={{
-          items: ([
-            { key: 'domain', label: t('window.smartSortByDomain'), icon: <span>🌐</span> },
-            { key: 'recentAccess', label: t('window.smartSortByRecentAccess'), icon: <span>⏱</span> },
-            { key: 'alphabetical', label: t('window.smartSortByAlphabetical'), icon: <span>🔤</span> },
-          ] as const).map((item) => ({
+          items: (
+            [
+              { key: "domain", label: t("window.smartSortByDomain"), icon: <span>🌐</span> },
+              {
+                key: "recentAccess",
+                label: t("window.smartSortByRecentAccess"),
+                icon: <span>⏱</span>,
+              },
+              {
+                key: "alphabetical",
+                label: t("window.smartSortByAlphabetical"),
+                icon: <span>🔤</span>,
+              },
+            ] as const
+          ).map((item) => ({
             key: item.key,
             label: item.label,
             icon: item.icon,
@@ -241,7 +286,7 @@ function GroupLabel({ groupId, groupTitle, groupColor, windowId, tabs, t }: Grou
           type="text"
           size="small"
           icon={<ArrowUpDown size={ICON_SIZE.TINY} />}
-          className={styles['app-window-card-group-sort-btn']}
+          className={styles["app-window-card-group-sort-btn"]}
           onClick={(e) => e.stopPropagation()}
         />
       </Dropdown>
@@ -256,30 +301,27 @@ function GroupLabel({ groupId, groupTitle, groupColor, windowId, tabs, t }: Grou
           onPressEnter={handleSaveTitle}
           onBlur={handleSaveTitle}
           onClick={(e) => e.stopPropagation()}
-          className={styles['app-window-card-group-name-input']}
+          className={styles["app-window-card-group-name-input"]}
         />
       ) : (
         <span
-          className={styles['app-window-card-group-name']}
+          className={styles["app-window-card-group-name"]}
           onDoubleClick={handleTitleDoubleClick}
         >
-          {groupTitle ?? t('tabGroup.unnamed')}
+          {groupTitle ?? t("tabGroup.unnamed")}
         </span>
       )}
 
       {/* 颜色选择器浮层 */}
       {showColorPicker && (
-        <div className={styles['app-window-card-group-color-picker']}>
+        <div className={styles["app-window-card-group-color-picker"]}>
           {GROUP_COLORS.map((color) => (
-            <button
+            <ColorSwatch
               key={color}
-              type="button"
-              className={`${styles['app-window-card-group-color-swatch']} ${color === groupColor ? styles['is-active'] : ''}`}
-              style={{ backgroundColor: stringToColor(color) }}
-              onClick={() => handleColorChange(color)}
-            >
-              {color}
-            </button>
+              color={color}
+              groupColor={groupColor}
+              onClick={handleColorChange}
+            />
           ))}
         </div>
       )}

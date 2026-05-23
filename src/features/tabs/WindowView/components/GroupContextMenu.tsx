@@ -7,20 +7,51 @@
  * - 取消分组
  */
 
-import { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import { Card, Button, Input } from 'antd';
-import { Pencil, Palette, Ungroup } from 'lucide-react';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { useTabsStore } from '@/store';
-import { feedback } from '@/shared/ui/feedback';
-import { stringToColor } from '@/shared/utils/color';
+import { useState, useEffect, useRef, useLayoutEffect, useMemo, memo } from "react";
+import { Card, Button, Input } from "antd";
+import { Pencil, Palette, Ungroup } from "lucide-react";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useTabsStore } from "@/store";
+import { feedback } from "@/shared/ui/feedback";
+import { stringToColor } from "@/shared/utils/color";
 import {
   recolorTabGroup,
   renameTabGroup,
   ungroupTabs,
-} from '@/features/tabs/services/window-tab-operations';
-import { GROUP_COLORS, type GroupColor, type GroupContextMenuProps } from '../types';
-import styles from '../WindowView.module.less';
+} from "@/features/tabs/services/window-tab-operations";
+import { GROUP_COLORS, type GroupColor, type GroupContextMenuProps } from "../types";
+import styles from "../WindowView.module.less";
+
+/**
+ * ColorSwatch — 颜色样本按钮（memoized style）
+ *
+ * 提取为独立组件，使用 useMemo 缓存 style 对象，
+ * 避免在 .map() 回调中每次渲染都创建新的 style 对象。
+ */
+interface ColorSwatchProps {
+  color: GroupColor;
+  groupColor: GroupColor | undefined;
+  onClick: (color: GroupColor) => void;
+}
+
+const ColorSwatch = memo<ColorSwatchProps>(({ color, groupColor, onClick }) => {
+  const swatchStyle = useMemo<React.CSSProperties>(
+    () => ({ backgroundColor: stringToColor(color) }),
+    [color],
+  );
+
+  return (
+    <button
+      key={color}
+      type="button"
+      className={`${styles["app-window-card-group-color-swatch"]} ${color === groupColor ? styles["is-active"] : ""}`}
+      style={swatchStyle}
+      onClick={() => onClick(color)}
+    >
+      {color}
+    </button>
+  );
+});
 
 /**
  *
@@ -34,7 +65,15 @@ import styles from '../WindowView.module.less';
  * @param root0.t
  * @returns {void} 无返回值
  */
-function GroupContextMenu({ x, y, groupId, groupTitle, groupColor, onClose, t }: GroupContextMenuProps) {
+function GroupContextMenu({
+  x,
+  y,
+  groupId,
+  groupTitle,
+  groupColor,
+  onClose,
+  t,
+}: GroupContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
 
   // 外部点击关闭
@@ -45,13 +84,13 @@ function GroupContextMenu({ x, y, groupId, groupTitle, groupColor, onClose, t }:
       }
     };
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === "Escape") onClose();
     };
-    document.addEventListener('mousedown', handleClick);
-    document.addEventListener('keydown', handleKey);
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleKey);
     return () => {
-      document.removeEventListener('mousedown', handleClick);
-      document.removeEventListener('keydown', handleKey);
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKey);
     };
   }, [onClose]);
 
@@ -70,7 +109,7 @@ function GroupContextMenu({ x, y, groupId, groupTitle, groupColor, onClose, t }:
 
   /** 重命名分组 */
   const [renaming, setRenaming] = useState(false);
-  const [renameValue, setRenameValue] = useState(groupTitle ?? '');
+  const [renameValue, setRenameValue] = useState(groupTitle ?? "");
   /**
    * 重命名分组
    *
@@ -81,12 +120,14 @@ function GroupContextMenu({ x, y, groupId, groupTitle, groupColor, onClose, t }:
   const handleRename = () => {
     const newName = renameValue.trim();
     if (newName && newName !== groupTitle) {
-      void renameTabGroup(groupId, newName).then(() => {
-        feedback.success(t('window.groupRename'));
-        void useTabsStore.getState().loadAllTabs({ silent: true });
-      }).catch(() => {
-        feedback.error(t('window.groupCreateFailed'));
-      });
+      void renameTabGroup(groupId, newName)
+        .then(() => {
+          feedback.success(t("window.groupRename"));
+          void useTabsStore.getState().loadAllTabs({ silent: true });
+        })
+        .catch(() => {
+          feedback.error(t("window.groupCreateFailed"));
+        });
     }
     setRenaming(false);
     onClose();
@@ -101,12 +142,14 @@ function GroupContextMenu({ x, y, groupId, groupTitle, groupColor, onClose, t }:
    * @returns 无返回值
    */
   const handleChangeColor = (color: GroupColor) => {
-    void recolorTabGroup(groupId, color).then(() => {
-      feedback.success(t('window.groupColor'));
-      void useTabsStore.getState().loadAllTabs({ silent: true });
-    }).catch(() => {
-      feedback.error(t('window.groupCreateFailed'));
-    });
+    void recolorTabGroup(groupId, color)
+      .then(() => {
+        feedback.success(t("window.groupColor"));
+        void useTabsStore.getState().loadAllTabs({ silent: true });
+      })
+      .catch(() => {
+        feedback.error(t("window.groupCreateFailed"));
+      });
     setShowColors(false);
     onClose();
   };
@@ -123,12 +166,14 @@ function GroupContextMenu({ x, y, groupId, groupTitle, groupColor, onClose, t }:
       .getState()
       .tabs.filter((t) => t.groupId === groupId && t.groupId !== -1)
       .map((t) => t.id);
-    void ungroupTabs(groupTabIds).then(() => {
-      feedback.success(t('window.groupUngrouped'));
-      void useTabsStore.getState().loadAllTabs({ silent: true });
-    }).catch(() => {
-      feedback.error(t('window.groupUngroupFailed'));
-    });
+    void ungroupTabs(groupTabIds)
+      .then(() => {
+        feedback.success(t("window.groupUngrouped"));
+        void useTabsStore.getState().loadAllTabs({ silent: true });
+      })
+      .catch(() => {
+        feedback.error(t("window.groupUngroupFailed"));
+      });
     onClose();
   };
 
@@ -137,21 +182,31 @@ function GroupContextMenu({ x, y, groupId, groupTitle, groupColor, onClose, t }:
       ref={menuRef}
       role="menu"
       onClick={(e) => e.stopPropagation()}
-      className={styles['app-window-group-context-menu']}
+      className={styles["app-window-group-context-menu"]}
       style={{
         left: position.left,
         top: position.top,
       }}
     >
-      <Card size="small" className={styles['app-window-group-context-menu__card']}>
+      <Card size="small" className={styles["app-window-group-context-menu__card"]}>
         {/* 重命名 */}
-        <Button type="text" block icon={<Pencil size={ICON_SIZE.MEDIUM} />} onClick={() => setRenaming(true)}>
-          {t('window.groupRename')}
+        <Button
+          type="text"
+          block
+          icon={<Pencil size={ICON_SIZE.MEDIUM} />}
+          onClick={() => setRenaming(true)}
+        >
+          {t("window.groupRename")}
         </Button>
 
         {/* 改色 */}
-        <Button type="text" block icon={<Palette size={ICON_SIZE.MEDIUM} />} onClick={() => setShowColors(true)}>
-          {t('window.groupColor')}
+        <Button
+          type="text"
+          block
+          icon={<Palette size={ICON_SIZE.MEDIUM} />}
+          onClick={() => setShowColors(true)}
+        >
+          {t("window.groupColor")}
         </Button>
 
         {/* 取消分组 */}
@@ -162,13 +217,13 @@ function GroupContextMenu({ x, y, groupId, groupTitle, groupColor, onClose, t }:
           icon={<Ungroup size={ICON_SIZE.MEDIUM} />}
           onClick={handleUngroup}
         >
-          {t('window.groupUngroup')}
+          {t("window.groupUngroup")}
         </Button>
       </Card>
 
       {/* 内联编辑：重命名 */}
       {renaming && (
-        <div className={styles['app-window-group-context-menu__inline-edit']}>
+        <div className={styles["app-window-group-context-menu__inline-edit"]}>
           <Input
             size="small"
             autoFocus
@@ -176,32 +231,29 @@ function GroupContextMenu({ x, y, groupId, groupTitle, groupColor, onClose, t }:
             onChange={(e) => setRenameValue(e.target.value)}
             onPressEnter={handleRename}
             onKeyDown={(e) => {
-              if (e.key === 'Escape') {
+              if (e.key === "Escape") {
                 e.stopPropagation();
                 setRenaming(false);
               }
             }}
-            placeholder={t('window.groupRename')}
+            placeholder={t("window.groupRename")}
           />
           <Button type="primary" size="small" onClick={handleRename}>
-            {t('context.save')}
+            {t("context.save")}
           </Button>
         </div>
       )}
 
       {/* 内联编辑：改色 */}
       {showColors && (
-        <div className={styles['app-window-group-context-menu__color-picker']}>
+        <div className={styles["app-window-group-context-menu__color-picker"]}>
           {GROUP_COLORS.map((color) => (
-            <button
+            <ColorSwatch
               key={color}
-              type="button"
-              className={`${styles['app-window-card-group-color-swatch']} ${color === groupColor ? styles['is-active'] : ''}`}
-              style={{ backgroundColor: stringToColor(color) }}
-              onClick={() => handleChangeColor(color)}
-            >
-              {color}
-            </button>
+              color={color}
+              groupColor={groupColor}
+              onClick={handleChangeColor}
+            />
           ))}
         </div>
       )}

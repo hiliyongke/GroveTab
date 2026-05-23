@@ -12,14 +12,36 @@
  *   - 纯 CSS/SVG 实现，不引入第三方依赖
  */
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, createContext, useContext, forwardRef, useImperativeHandle } from 'react';
-import { ChevronRight, ChevronDown, Folder, FolderOpen, ZoomIn, ZoomOut, Maximize2, RotateCcw, Eye, EyeOff } from 'lucide-react';
-import type { BookmarkNode } from '@/chrome/bookmarks';
-import { getFaviconUrl } from '@/chrome';
-import { useAccent } from '@/shared/hooks/use-accent';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { useT } from '@/shared/i18n';
-import styles from './styles/bookmark-tree.module.less';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  createContext,
+  useContext,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
+import {
+  ChevronRight,
+  ChevronDown,
+  Folder,
+  FolderOpen,
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+  RotateCcw,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import type { BookmarkNode } from "@/chrome/bookmarks";
+import { getFaviconUrl } from "@/chrome";
+import { useAccent } from "@/shared/hooks/use-accent";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useT } from "@/shared/i18n";
+import styles from "./styles/bookmark-tree.module.less";
 
 /**
  * 从 URL 提取 hostname
@@ -47,7 +69,7 @@ function getFallbackLetter(title: string, url: string): string {
   try {
     return new URL(url).hostname.charAt(0).toUpperCase();
   } catch {
-    return '?';
+    return "?";
   }
 }
 
@@ -66,10 +88,10 @@ function countBookmarks(nodes: BookmarkNode[] | undefined): number {
 }
 
 /** 树排布方向 */
-export type TreeOrientation = 'horizontal' | 'vertical';
+export type TreeOrientation = "horizontal" | "vertical";
 
 /** 偏好：是否在卡片中常驻显示 hostname（持久化到 localStorage） */
-const SHOW_HOST_KEY = 'app:bookmark-tree:showHost';
+const SHOW_HOST_KEY = "app:bookmark-tree:showHost";
 
 /**
  * 读取是否显示 hostname 的偏好设置
@@ -80,7 +102,7 @@ const SHOW_HOST_KEY = 'app:bookmark-tree:showHost';
  */
 function readShowHost(): boolean {
   try {
-    return localStorage.getItem(SHOW_HOST_KEY) === '1';
+    return localStorage.getItem(SHOW_HOST_KEY) === "1";
   } catch {
     return false;
   }
@@ -96,7 +118,7 @@ function readShowHost(): boolean {
  */
 function writeShowHost(v: boolean) {
   try {
-    localStorage.setItem(SHOW_HOST_KEY, v ? '1' : '0');
+    localStorage.setItem(SHOW_HOST_KEY, v ? "1" : "0");
   } catch {
     /* ignore */
   }
@@ -120,14 +142,8 @@ const CenterOnExpandContext = createContext<CenterFn | null>(null);
  * @param props.onOpen - 打开书签回调
  * @returns 叶子节点 JSX 元素
  */
-function TreeLeafNode({
-  node,
-  onOpen,
-}: {
-  node: BookmarkNode;
-  onOpen: (url: string) => void;
-}) {
-  const url = node.url ?? '';
+function TreeLeafNode({ node, onOpen }: { node: BookmarkNode; onOpen: (url: string) => void }) {
+  const url = node.url ?? "";
   const hostname = getHostname(url);
   const faviconUrl = getFaviconUrl(url);
   const accent = useAccent(faviconUrl || undefined, hostname);
@@ -136,45 +152,56 @@ function TreeLeafNode({
 
   const titleText = node.title || hostname;
 
+  // Memoize style objects to avoid recreating on each render
+  const leafStyle = useMemo<React.CSSProperties>(
+    () => ({ "--app-bm-accent": accent.bar }) as React.CSSProperties,
+    [accent.bar],
+  );
+  const fallbackStyle = useMemo<React.CSSProperties>(
+    () => ({ background: accent.soft, color: accent.text }),
+    [accent.soft, accent.text],
+  );
+
   return (
     <div
-      className={`app-bm-tree__leaf ${styles['app-bm-tree__leaf']}`}
-      style={{ '--app-bm-accent': accent.bar } as React.CSSProperties}
+      className={`app-bm-tree__leaf ${styles["app-bm-tree__leaf"]}`}
+      style={leafStyle}
       onClick={() => url && onOpen(url)}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter' && url) onOpen(url); }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && url) onOpen(url);
+      }}
       data-url={url}
     >
-      <span className={styles['app-bm-tree__leaf-bar']} />
+      <span className={styles["app-bm-tree__leaf-bar"]} />
       {faviconUrl && !faviconError ? (
         <img
           src={faviconUrl}
           alt=""
-          className={styles['app-bm-tree__leaf-favicon']}
+          className={styles["app-bm-tree__leaf-favicon"]}
           onError={() => setFaviconError(true)}
         />
       ) : (
-        <span
-          className={styles['app-bm-tree__leaf-favicon-fallback']}
-          style={{ background: accent.soft, color: accent.text }}
-        >
-          {getFallbackLetter(node.title ?? '', url)}
+        <span className={styles["app-bm-tree__leaf-favicon-fallback"]} style={fallbackStyle}>
+          {getFallbackLetter(node.title ?? "", url)}
         </span>
       )}
-      <div className={styles['app-bm-tree__leaf-main']}>
-        <div className={styles['app-bm-tree__leaf-title']}>{titleText}</div>
-        {showHost && <div className={styles['app-bm-tree__leaf-host']}>{hostname}</div>}
+      <div className={styles["app-bm-tree__leaf-main"]}>
+        <div className={styles["app-bm-tree__leaf-title"]}>{titleText}</div>
+        {showHost && <div className={styles["app-bm-tree__leaf-host"]}>{hostname}</div>}
       </div>
 
       {/* 自定义 hover 气泡：显示标题 + 完整 URL（hostname 加粗高亮） */}
-      <div className={styles['app-bm-tree__tooltip']} role="tooltip">
-        <div className={styles['app-bm-tree__tooltip-title']}>{titleText}</div>
-        <div className={styles['app-bm-tree__tooltip-url']}>
-          <span className={styles['app-bm-tree__tooltip-host']}>{hostname}</span>
-          <span className={styles['app-bm-tree__tooltip-path']}>{url.replace(/^https?:\/\/[^/]+/i, '') || '/'}</span>
+      <div className={styles["app-bm-tree__tooltip"]} role="tooltip">
+        <div className={styles["app-bm-tree__tooltip-title"]}>{titleText}</div>
+        <div className={styles["app-bm-tree__tooltip-url"]}>
+          <span className={styles["app-bm-tree__tooltip-host"]}>{hostname}</span>
+          <span className={styles["app-bm-tree__tooltip-path"]}>
+            {url.replace(/^https?:\/\/[^/]+/i, "") || "/"}
+          </span>
         </div>
-        <div className={styles['app-bm-tree__tooltip-arrow']} aria-hidden="true" />
+        <div className={styles["app-bm-tree__tooltip-arrow"]} aria-hidden="true" />
       </div>
     </div>
   );
@@ -245,46 +272,53 @@ function TreeFolderNode({
   }, [isEmpty, centerOnExpand]);
 
   return (
-    <div className={styles['app-bm-tree__folder-wrap']} data-depth={depth}>
+    <div className={styles["app-bm-tree__folder-wrap"]} data-depth={depth}>
       <button
         ref={folderBtnRef}
         type="button"
-        className={`app-bm-tree__folder ${styles['app-bm-tree__folder']}${expanded ? ` ${styles['is-expanded']}` : ''}${isEmpty ? ` ${styles['is-empty']}` : ''}`}
+        className={`app-bm-tree__folder ${styles["app-bm-tree__folder"]}${expanded ? ` ${styles["is-expanded"]}` : ""}${isEmpty ? ` ${styles["is-empty"]}` : ""}`}
         onClick={handleToggle}
         aria-expanded={expanded}
         title={title}
       >
-        <span className={styles['app-bm-tree__folder-icon']}>
+        <span className={styles["app-bm-tree__folder-icon"]}>
           {expanded ? <FolderOpen size={ICON_SIZE.SMALL} /> : <Folder size={ICON_SIZE.SMALL} />}
         </span>
-        <span className={styles['app-bm-tree__folder-text']}>
-          <span className={styles['app-bm-tree__folder-title']}>{title}</span>
-          <span className={styles['app-bm-tree__folder-meta']}>
-            {folderCount > 0 && <span className={styles['app-bm-tree__folder-stat']}>📁 {folderCount}</span>}
-            {linkCount > 0 && <span className={styles['app-bm-tree__folder-stat']}>🔗 {linkCount}</span>}
-            {isEmpty && <span className={`${styles['app-bm-tree__folder-stat']} ${styles['is-muted']}`}>空</span>}
+        <span className={styles["app-bm-tree__folder-text"]}>
+          <span className={styles["app-bm-tree__folder-title"]}>{title}</span>
+          <span className={styles["app-bm-tree__folder-meta"]}>
+            {folderCount > 0 && (
+              <span className={styles["app-bm-tree__folder-stat"]}>📁 {folderCount}</span>
+            )}
+            {linkCount > 0 && (
+              <span className={styles["app-bm-tree__folder-stat"]}>🔗 {linkCount}</span>
+            )}
+            {isEmpty && (
+              <span className={`${styles["app-bm-tree__folder-stat"]} ${styles["is-muted"]}`}>
+                空
+              </span>
+            )}
           </span>
         </span>
-        {!isEmpty && (
-          orientation === 'horizontal' ? (
+        {!isEmpty &&
+          (orientation === "horizontal" ? (
             <ChevronRight
               size={ICON_SIZE.SMALL}
-              className={`${styles['app-bm-tree__folder-chevron']}${expanded ? ` ${styles['is-expanded']}` : ''}`}
+              className={`${styles["app-bm-tree__folder-chevron"]}${expanded ? ` ${styles["is-expanded"]}` : ""}`}
             />
           ) : (
             <ChevronDown
               size={ICON_SIZE.SMALL}
-              className={`${styles['app-bm-tree__folder-chevron']} ${styles['is-vertical']}${expanded ? ` ${styles['is-expanded']}` : ''}`}
+              className={`${styles["app-bm-tree__folder-chevron"]} ${styles["is-vertical"]}${expanded ? ` ${styles["is-expanded"]}` : ""}`}
             />
-          )
-        )}
+          ))}
       </button>
       {expanded && !isEmpty && (
-        <div className={styles['app-bm-tree__children']} role="group">
+        <div className={styles["app-bm-tree__children"]} role="group">
           {/* 横向（脑图）模式：仍用 SVG 贝塞尔曲线；垂直（组织架构图）模式：用纯 CSS 伪元素绘制直角连线，永不错位 */}
-          {orientation === 'horizontal' && (
+          {orientation === "horizontal" && (
             <svg
-              className={styles['app-bm-tree__connector']}
+              className={styles["app-bm-tree__connector"]}
               preserveAspectRatio="none"
               viewBox="0 0 100 100"
               aria-hidden="true"
@@ -296,7 +330,7 @@ function TreeFolderNode({
                 return (
                   <path
                     key={idx}
-                    className={styles['app-bm-tree__connector-path']}
+                    className={styles["app-bm-tree__connector-path"]}
                     d={d}
                     vectorEffect="non-scaling-stroke"
                   />
@@ -306,7 +340,7 @@ function TreeFolderNode({
           )}
 
           <div
-            className={`${styles['app-bm-tree__children-col']}${orderedChildren.length === 1 ? ` ${styles['is-single']}` : ''}`}
+            className={`${styles["app-bm-tree__children-col"]}${orderedChildren.length === 1 ? ` ${styles["is-single"]}` : ""}`}
           >
             {orderedChildren.map((child) =>
               child.url ? (
@@ -343,13 +377,16 @@ export interface PanZoomHandle {
 /**
  * PanZoom 容器
  */
-const PanZoom = forwardRef<PanZoomHandle, {
-  children: React.ReactNode;
-  /** 工具栏右侧追加的额外按钮（如"显示域名"开关） */
-  extraToolbar?: React.ReactNode;
-  /** 布局方向：决定初始定位策略 */
-  orientation?: TreeOrientation;
-}>(function PanZoom({ children, extraToolbar, orientation = 'horizontal' }, ref) {
+const PanZoom = forwardRef<
+  PanZoomHandle,
+  {
+    children: React.ReactNode;
+    /** 工具栏右侧追加的额外按钮（如"显示域名"开关） */
+    extraToolbar?: React.ReactNode;
+    /** 布局方向：决定初始定位策略 */
+    orientation?: TreeOrientation;
+  }
+>(function PanZoom({ children, extraToolbar, orientation = "horizontal" }, ref) {
   const { t } = useT();
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -363,48 +400,59 @@ const PanZoom = forwardRef<PanZoomHandle, {
   const clampScale = useCallback((s: number) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, s)), []);
 
   /** 在视口某点（vx, vy 相对 viewport 左上）锚定缩放 */
-  const zoomAt = useCallback((nextScale: number, vx: number, vy: number) => {
-    setScale((prev) => {
-      const ns = clampScale(nextScale);
-      if (ns === prev) return prev;
-      // 保持鼠标下方的内容点不动：tx' = vx - (vx - tx) * ns/prev
-      setTx((prevTx) => vx - ((vx - prevTx) * ns) / prev);
-      setTy((prevTy) => vy - ((vy - prevTy) * ns) / prev);
-      return ns;
-    });
-  }, [clampScale]);
+  const zoomAt = useCallback(
+    (nextScale: number, vx: number, vy: number) => {
+      setScale((prev) => {
+        const ns = clampScale(nextScale);
+        if (ns === prev) return prev;
+        // 保持鼠标下方的内容点不动：tx' = vx - (vx - tx) * ns/prev
+        setTx((prevTx) => vx - ((vx - prevTx) * ns) / prev);
+        setTy((prevTy) => vy - ((vy - prevTy) * ns) / prev);
+        return ns;
+      });
+    },
+    [clampScale],
+  );
 
   /** 滚轮缩放 */
-  const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
-    // 只在持续按 Ctrl/Cmd 或非垂直滚动时缩放，避免误触；这里直接拦截所有滚轮以提供画布体验
-    e.preventDefault();
-    const rect = viewportRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const vx = e.clientX - rect.left;
-    const vy = e.clientY - rect.top;
-    // 触控板 deltaY 通常更小；统一按比例换算
-    const factor = Math.exp(-e.deltaY * 0.0015);
-    setScale((prev) => {
-      const ns = clampScale(prev * factor);
-      if (ns === prev) return prev;
-      setTx((prevTx) => vx - ((vx - prevTx) * ns) / prev);
-      setTy((prevTy) => vy - ((vy - prevTy) * ns) / prev);
-      return ns;
-    });
-  }, [clampScale]);
+  const handleWheel = useCallback(
+    (e: React.WheelEvent<HTMLDivElement>) => {
+      // 只在持续按 Ctrl/Cmd 或非垂直滚动时缩放，避免误触；这里直接拦截所有滚轮以提供画布体验
+      e.preventDefault();
+      const rect = viewportRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const vx = e.clientX - rect.left;
+      const vy = e.clientY - rect.top;
+      // 触控板 deltaY 通常更小；统一按比例换算
+      const factor = Math.exp(-e.deltaY * 0.0015);
+      setScale((prev) => {
+        const ns = clampScale(prev * factor);
+        if (ns === prev) return prev;
+        setTx((prevTx) => vx - ((vx - prevTx) * ns) / prev);
+        setTy((prevTy) => vy - ((vy - prevTy) * ns) / prev);
+        return ns;
+      });
+    },
+    [clampScale],
+  );
 
   /** 是否点在「可交互节点」上（避免误触发拖拽） */
   const isOnInteractive = useCallback((target: EventTarget | null) => {
     if (!(target instanceof Element)) return false;
-    return !!target.closest('.app-bm-tree__folder, .app-bm-tree__leaf, .app-bm-tree__panzoom-toolbar');
+    return !!target.closest(
+      ".app-bm-tree__folder, .app-bm-tree__leaf, .app-bm-tree__panzoom-toolbar",
+    );
   }, []);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.button !== 0) return;
-    if (isOnInteractive(e.target)) return;
-    draggingRef.current = { x: e.clientX, y: e.clientY, tx, ty };
-    setIsDragging(true);
-  }, [tx, ty, isOnInteractive]);
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (e.button !== 0) return;
+      if (isOnInteractive(e.target)) return;
+      draggingRef.current = { x: e.clientX, y: e.clientY, tx, ty };
+      setIsDragging(true);
+    },
+    [tx, ty, isOnInteractive],
+  );
 
   useEffect(() => {
     if (!isDragging) return;
@@ -418,11 +466,11 @@ const PanZoom = forwardRef<PanZoomHandle, {
       draggingRef.current = null;
       setIsDragging(false);
     };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
     return () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
     };
   }, [isDragging]);
 
@@ -444,9 +492,7 @@ const PanZoom = forwardRef<PanZoomHandle, {
     setTx((vw - cw * ns) / 2);
     // vertical（架构图）：根节点偏上约 28%，子树向下铺开自然进入视野
     // horizontal（脑图）：双向居中
-    setTy(orientation === 'vertical'
-      ? Math.max(24, vh * 0.28 - 60)
-      : (vh - ch * ns) / 2);
+    setTy(orientation === "vertical" ? Math.max(24, vh * 0.28 - 60) : (vh - ch * ns) / 2);
     window.setTimeout(() => setIsAnimating(false), 260);
   }, [clampScale, orientation]);
 
@@ -506,7 +552,7 @@ const PanZoom = forwardRef<PanZoomHandle, {
   useEffect(() => {
     const vp = viewportRef.current;
     if (!vp) return;
-    if (typeof ResizeObserver === 'undefined') return;
+    if (typeof ResizeObserver === "undefined") return;
     const ro = new ResizeObserver(() => {
       fit();
     });
@@ -514,10 +560,13 @@ const PanZoom = forwardRef<PanZoomHandle, {
     return () => ro.disconnect();
   }, [tryInitialPosition]);
 
-  const handleDoubleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (isOnInteractive(e.target)) return;
-    reset();
-  }, [reset, isOnInteractive]);
+  const handleDoubleClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (isOnInteractive(e.target)) return;
+      reset();
+    },
+    [reset, isOnInteractive],
+  );
 
   /** 阻止滚轮事件被 viewport 自身吞掉（React onWheel 在 passive: true 时 preventDefault 无效，这里手动绑非 passive） */
   useEffect(() => {
@@ -537,97 +586,99 @@ const PanZoom = forwardRef<PanZoomHandle, {
         return ns;
       });
     };
-    vp.addEventListener('wheel', listener, { passive: false });
-    return () => vp.removeEventListener('wheel', listener);
+    vp.addEventListener("wheel", listener, { passive: false });
+    return () => vp.removeEventListener("wheel", listener);
   }, []);
 
   const zoomPercent = Math.round(scale * 100);
 
+  // Memoize transform style to avoid recreating on each render
+  const contentStyle = useMemo<React.CSSProperties>(
+    () => ({ transform: `translate(${tx}px, ${ty}px) scale(${scale})` }),
+    [tx, ty, scale],
+  );
+
   return (
     <div
       ref={viewportRef}
-      className={`${styles['app-bm-tree__panzoom']}${isDragging ? ` ${styles['is-dragging']}` : ''}${isAnimating ? ` ${styles['is-animating']}` : ''}`}
+      className={`${styles["app-bm-tree__panzoom"]}${isDragging ? ` ${styles["is-dragging"]}` : ""}${isAnimating ? ` ${styles["is-animating"]}` : ""}`}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
       // onWheel 仍保留作为类型占位，真正绑定在 useEffect 中（非 passive）
       onWheel={handleWheel}
     >
-      <div
-        ref={contentRef}
-        className={styles['app-bm-tree__panzoom-content']}
-        style={{ transform: `translate(${tx}px, ${ty}px) scale(${scale})` }}
-      >
+      <div ref={contentRef} className={styles["app-bm-tree__panzoom-content"]} style={contentStyle}>
         {children}
       </div>
 
       <div
-        className={`app-bm-tree__panzoom-toolbar ${styles['app-bm-tree__panzoom-toolbar']}`}
+        className={`app-bm-tree__panzoom-toolbar ${styles["app-bm-tree__panzoom-toolbar"]}`}
         role="toolbar"
-        aria-label={t('bookmark.tree.zoomToolbar')}
+        aria-label={t("bookmark.tree.zoomToolbar")}
         onMouseDown={(e) => e.stopPropagation()}
         onDoubleClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
-          className={styles['app-bm-tree__panzoom-btn']}
+          className={styles["app-bm-tree__panzoom-btn"]}
           onClick={() => {
             const vp = viewportRef.current;
             if (!vp) return;
             const rect = vp.getBoundingClientRect();
             zoomAt(scale - ZOOM_STEP, rect.width / 2, rect.height / 2);
           }}
-          title={t('bookmark.tree.zoomOut')}
-          aria-label={t('bookmark.tree.zoomOut')}
+          title={t("bookmark.tree.zoomOut")}
+          aria-label={t("bookmark.tree.zoomOut")}
           disabled={scale <= ZOOM_MIN + 1e-3}
         >
           <ZoomOut size={ICON_SIZE.SMALL} />
         </button>
         <button
           type="button"
-          className={styles['app-bm-tree__panzoom-percent']}
+          className={styles["app-bm-tree__panzoom-percent"]}
           onClick={reset}
-          title={t('bookmark.tree.resetZoom')}
-          aria-label={t('bookmark.tree.resetZoom')}
+          title={t("bookmark.tree.resetZoom")}
+          aria-label={t("bookmark.tree.resetZoom")}
         >
           {zoomPercent}%
         </button>
         <button
           type="button"
-          className={styles['app-bm-tree__panzoom-btn']}
+          className={styles["app-bm-tree__panzoom-btn"]}
           onClick={() => {
             const vp = viewportRef.current;
             if (!vp) return;
             const rect = vp.getBoundingClientRect();
             zoomAt(scale + ZOOM_STEP, rect.width / 2, rect.height / 2);
           }}
-          title={t('bookmark.tree.zoomIn')}
-          aria-label={t('bookmark.tree.zoomIn')}
+          title={t("bookmark.tree.zoomIn")}
+          aria-label={t("bookmark.tree.zoomIn")}
           disabled={scale >= ZOOM_MAX - 1e-3}
         >
           <ZoomIn size={ICON_SIZE.SMALL} />
         </button>
-        <span className={styles['app-bm-tree__panzoom-divider']} aria-hidden="true" />
+        <span className={styles["app-bm-tree__panzoom-divider"]} aria-hidden="true" />
         <button
           type="button"
-          className={styles['app-bm-tree__panzoom-btn']}
+          className={styles["app-bm-tree__panzoom-btn"]}
           onClick={fit}
-          title={t('bookmark.tree.fitScreen')}
-          aria-label={t('bookmark.tree.fitScreen')}
+          title={t("bookmark.tree.fitScreen")}
+          aria-label={t("bookmark.tree.fitScreen")}
         >
           <Maximize2 size={ICON_SIZE.SMALL} />
         </button>
         <button
           type="button"
-          className={styles['app-bm-tree__panzoom-btn']}
+          className={styles["app-bm-tree__panzoom-btn"]}
           onClick={reset}
-          title={t('bookmark.tree.resetZoom')}
-          aria-label={t('bookmark.tree.resetZoom')}
+          title={t("bookmark.tree.resetZoom")}
+          aria-label={t("bookmark.tree.resetZoom")}
         >
           <RotateCcw size={ICON_SIZE.SMALL} />
         </button>
         {extraToolbar && (
           <>
-            <span className={styles['app-bm-tree__panzoom-divider']} aria-hidden="true" />
+            <span className={styles["app-bm-tree__panzoom-divider"]} aria-hidden="true" />
             {extraToolbar}
           </>
         )}
@@ -654,7 +705,7 @@ export function BookmarkTreeView({
   topSections,
   onOpenBookmark,
   resolveTitle,
-  orientation = 'horizontal',
+  orientation = "horizontal",
 }: {
   topSections: BookmarkNode[];
   onOpenBookmark: (url: string) => void;
@@ -681,10 +732,10 @@ export function BookmarkTreeView({
   const extraToolbar = (
     <button
       type="button"
-      className={`${styles['app-bm-tree__panzoom-btn']}${showHost ? ` ${styles['is-active']}` : ''}`}
+      className={`${styles["app-bm-tree__panzoom-btn"]}${showHost ? ` ${styles["is-active"]}` : ""}`}
       onClick={toggleShowHost}
-      title={showHost ? t('bookmark.tree.hideHost') : t('bookmark.tree.showHost')}
-      aria-label={showHost ? t('bookmark.tree.hideHost') : t('bookmark.tree.showHost')}
+      title={showHost ? t("bookmark.tree.hideHost") : t("bookmark.tree.showHost")}
+      aria-label={showHost ? t("bookmark.tree.hideHost") : t("bookmark.tree.showHost")}
       aria-pressed={showHost}
     >
       {showHost ? <Eye size={ICON_SIZE.SMALL} /> : <EyeOff size={ICON_SIZE.SMALL} />}
@@ -692,12 +743,14 @@ export function BookmarkTreeView({
   );
 
   return (
-    <div className={`app-bm-tree ${styles['app-bm-tree']} ${styles[`is-${orientation}`]}${showHost ? ` ${styles['show-host']}` : ''}`}>
+    <div
+      className={`app-bm-tree ${styles["app-bm-tree"]} ${styles[`is-${orientation}`]}${showHost ? ` ${styles["show-host"]}` : ""}`}
+    >
       <ShowHostContext.Provider value={showHost}>
         <CenterOnExpandContext.Provider value={centerOnExpand}>
           <PanZoom ref={panZoomRef} extraToolbar={extraToolbar} orientation={orientation}>
-            <div className={styles['app-bm-tree__canvas']}>
-              <div className={styles['app-bm-tree__roots']}>
+            <div className={styles["app-bm-tree__canvas"]}>
+              <div className={styles["app-bm-tree__roots"]}>
                 {topSections.map((section, idx) => (
                   <TreeFolderNode
                     key={section.id}

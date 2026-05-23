@@ -9,8 +9,8 @@
  *   - 搜索结果走独立通道
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Input, Button, Tag, Spin, Tooltip, Segmented } from 'antd';
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Input, Button, Tag, Spin, Tooltip, Segmented } from "antd";
 import {
   BookOpen,
   Search,
@@ -23,8 +23,8 @@ import {
   List as ListIcon,
   Network,
   GitBranch,
-} from 'lucide-react';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
+} from "lucide-react";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
 import {
   getBookmarkTree,
   searchBookmarks,
@@ -32,18 +32,18 @@ import {
   requestBookmarksPermission,
   hasBookmarksPermission,
   type BookmarkNode,
-} from '@/chrome/bookmarks';
-import { createTab, getFaviconUrl } from '@/chrome';
-import { useTabsStore } from '@/store';
-import { useT } from '@/shared/i18n';
-import { feedback } from '@/shared/ui/feedback';
-import { translate } from '@/shared/i18n/core';
-import { BookmarkToolsModal } from '@/features/bookmarks/BookmarkToolsModal';
-import { isSafeExternalUrl } from '@/shared/utils/url-safety';
-import { useAccent } from '@/shared/hooks/use-accent';
-import { FeatureEmptyState } from '@/shared/ui/FeatureEmptyState';
-import { BookmarkTreeView } from './BookmarkTreeView';
-import styles from './BookmarkView.module.less';
+} from "@/chrome/bookmarks";
+import { createTab, getFaviconUrl } from "@/chrome";
+import { useTabsStore } from "@/store";
+import { useT } from "@/shared/i18n";
+import { feedback } from "@/shared/ui/feedback";
+import { translate } from "@/shared/i18n/core";
+import { BookmarkToolsModal } from "@/features/bookmarks/BookmarkToolsModal";
+import { isSafeExternalUrl } from "@/shared/utils/url-safety";
+import { useAccent } from "@/shared/hooks/use-accent";
+import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
+import { BookmarkTreeView } from "./BookmarkTreeView";
+import styles from "./BookmarkView.module.less";
 
 /**
  * 合并 CSS 类名
@@ -54,11 +54,11 @@ import styles from './BookmarkView.module.less';
  * @returns 合并后的类名字符串
  */
 function cx(...classNames: Array<string | false | undefined>) {
-  return classNames.filter(Boolean).join(' ');
+  return classNames.filter(Boolean).join(" ");
 }
 
 /** 视图模式：列表 / 脈图（横向）/ 架构图（垂直） */
-type BookmarkLayout = 'list' | 'mindmap' | 'orgchart';
+type BookmarkLayout = "list" | "mindmap" | "orgchart";
 
 /**
  * 从 URL 提取 hostname 做展示和取色键
@@ -86,7 +86,7 @@ function getFallbackLetter(title: string, url: string): string {
   try {
     return new URL(url).hostname.charAt(0).toUpperCase();
   } catch {
-    return '?';
+    return "?";
   }
 }
 
@@ -101,10 +101,14 @@ function getFallbackLetter(title: string, url: string): string {
 function resolveFolderTitle(node: BookmarkNode, t: (key: string) => string): string {
   if (node.title?.trim()) return node.title;
   switch (node.id) {
-    case '1': return t('bookmark.folder.bar');
-    case '2': return t('bookmark.folder.others');
-    case '3': return t('bookmark.folder.mobile');
-    default: return t('bookmark.folder.unnamed');
+    case "1":
+      return t("bookmark.folder.bar");
+    case "2":
+      return t("bookmark.folder.others");
+    case "3":
+      return t("bookmark.folder.mobile");
+    default:
+      return t("bookmark.folder.unnamed");
   }
 }
 
@@ -146,7 +150,7 @@ function BookmarkRow({
   onOpen: (url: string) => void;
   highlight?: (text: string) => React.ReactNode;
 }) {
-  const url = node.url ?? '';
+  const url = node.url ?? "";
   const hostname = getHostname(url);
   const faviconUrl = getFaviconUrl(url);
   const accent = useAccent(faviconUrl || undefined, hostname);
@@ -156,47 +160,57 @@ function BookmarkRow({
     if (url) onOpen(url);
   }, [url, onOpen]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && url) onOpen(url);
-  }, [url, onOpen]);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" && url) onOpen(url);
+    },
+    [url, onOpen],
+  );
 
   const titleText = node.title || hostname;
 
+  // Memoize style objects to avoid recreating on each render
+  const rowStyle = useMemo<React.CSSProperties>(
+    () => ({ "--app-bm-accent": accent.bar }) as React.CSSProperties,
+    [accent.bar],
+  );
+  const fallbackStyle = useMemo<React.CSSProperties>(
+    () => ({ background: accent.soft, color: accent.text }),
+    [accent.soft, accent.text],
+  );
+
   return (
     <div
-      className={styles['app-bookmark-row']}
-      style={{ '--app-bm-accent': accent.bar } as React.CSSProperties}
+      className={styles["app-bookmark-row"]}
+      style={rowStyle}
       onClick={handleClick}
       role="button"
       tabIndex={0}
       onKeyDown={handleKeyDown}
       title={`${titleText}\n${url}`}
     >
-      <span className={styles['app-bookmark-row__bar']} />
+      <span className={styles["app-bookmark-row__bar"]} />
       {faviconUrl && !faviconError ? (
         <img
           src={faviconUrl}
           alt=""
-          className={styles['app-bookmark-row__favicon']}
+          className={styles["app-bookmark-row__favicon"]}
           onError={() => setFaviconError(true)}
         />
       ) : (
-        <span
-          className={styles['app-bookmark-row__favicon-fallback']}
-          style={{ background: accent.soft, color: accent.text }}
-        >
-          {getFallbackLetter(node.title ?? '', url)}
+        <span className={styles["app-bookmark-row__favicon-fallback"]} style={fallbackStyle}>
+          {getFallbackLetter(node.title ?? "", url)}
         </span>
       )}
-      <div className={styles['app-bookmark-row__main']}>
-        <div className={styles['app-bookmark-row__title']}>
+      <div className={styles["app-bookmark-row__main"]}>
+        <div className={styles["app-bookmark-row__title"]}>
           {highlight ? highlight(titleText) : titleText}
         </div>
-        <div className={styles['app-bookmark-row__hostname']}>
+        <div className={styles["app-bookmark-row__hostname"]}>
           {highlight ? highlight(hostname) : hostname}
         </div>
       </div>
-      <ExternalLink size={ICON_SIZE.SMALL} className={styles['app-bookmark-row__action']} />
+      <ExternalLink size={ICON_SIZE.SMALL} className={styles["app-bookmark-row__action"]} />
     </div>
   );
 }
@@ -231,23 +245,29 @@ function SubFolderGroup({
   const title = resolveTitle(folder);
 
   return (
-    <div className={styles['app-bookmark-subgroup']} style={{ '--app-bm-depth': depth } as React.CSSProperties}>
+    <div
+      className={styles["app-bookmark-subgroup"]}
+      style={{ "--app-bm-depth": depth } as React.CSSProperties}
+    >
       <button
         type="button"
-        className={styles['app-bookmark-subgroup__head']}
+        className={styles["app-bookmark-subgroup__head"]}
         onClick={() => setCollapsed((c) => !c)}
         aria-expanded={!collapsed}
       >
         <ChevronDown
           size={ICON_SIZE.SMALL}
-className={cx(styles['app-bookmark-subgroup__chevron'], collapsed && styles['is-collapsed'])}
+          className={cx(
+            styles["app-bookmark-subgroup__chevron"],
+            collapsed && styles["is-collapsed"],
+          )}
         />
-        <Folder size={ICON_SIZE.SMALL} className={styles['app-bookmark-subgroup__icon']} />
-        <span className={styles['app-bookmark-subgroup__title']}>{title}</span>
-        <span className={styles['app-bookmark-subgroup__count']}>{total}</span>
+        <Folder size={ICON_SIZE.SMALL} className={styles["app-bookmark-subgroup__icon"]} />
+        <span className={styles["app-bookmark-subgroup__title"]}>{title}</span>
+        <span className={styles["app-bookmark-subgroup__count"]}>{total}</span>
       </button>
       {!collapsed && (
-        <div className={styles['app-bookmark-subgroup__body']}>
+        <div className={styles["app-bookmark-subgroup__body"]}>
           {bookmarks.map((bm) => (
             <BookmarkRow key={bm.id} node={bm} onOpen={onOpenBookmark} />
           ))}
@@ -297,27 +317,32 @@ function TopFolderSection({
   const title = resolveTitle(folder);
 
   return (
-    <section className={styles['app-bookmark-section']}>
+    <section className={styles["app-bookmark-section"]}>
       <button
         type="button"
-        className={styles['app-bookmark-section__head']}
+        className={styles["app-bookmark-section__head"]}
         onClick={() => setCollapsed((c) => !c)}
         aria-expanded={!collapsed}
       >
         <ChevronDown
           size={ICON_SIZE.MEDIUM}
-className={cx(styles['app-bookmark-section__chevron'], collapsed && styles['is-collapsed'])}
+          className={cx(
+            styles["app-bookmark-section__chevron"],
+            collapsed && styles["is-collapsed"],
+          )}
         />
-        <span className={styles['app-bookmark-section__badge']}>
+        <span className={styles["app-bookmark-section__badge"]}>
           <BookmarkIcon size={14} />
         </span>
-        <h3 className={styles['app-bookmark-section__title']}>{title}</h3>
-        <Tag className={styles['app-bookmark-section__count']} bordered={false}>{total}</Tag>
+        <h3 className={styles["app-bookmark-section__title"]}>{title}</h3>
+        <Tag className={styles["app-bookmark-section__count"]} bordered={false}>
+          {total}
+        </Tag>
       </button>
       {!collapsed && (
-        <div className={styles['app-bookmark-section__body']}>
+        <div className={styles["app-bookmark-section__body"]}>
           {bookmarks.length > 0 && (
-            <div className={styles['app-bookmark-section__rows']}>
+            <div className={styles["app-bookmark-section__rows"]}>
               {bookmarks.map((bm) => (
                 <BookmarkRow key={bm.id} node={bm} onOpen={onOpenBookmark} />
               ))}
@@ -351,19 +376,16 @@ export function BookmarkView() {
   const [hasPermission, setHasPermission] = useState(false);
   const [checking, setChecking] = useState(true);
   const [bookmarks, setBookmarks] = useState<BookmarkNode[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<BookmarkNode[]>([]);
   const [searching, setSearching] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
-  const [layout, setLayout] = useState<BookmarkLayout>('list');
+  const [layout, setLayout] = useState<BookmarkLayout>("list");
   const tabs = useTabsStore((s) => s.tabs);
   const { t } = useT();
 
   /** 解析文件夹标题（支持 Chrome 默认文件夹） */
-  const resolveTitle = useCallback(
-    (n: BookmarkNode) => resolveFolderTitle(n, t),
-    [t],
-  );
+  const resolveTitle = useCallback((n: BookmarkNode) => resolveFolderTitle(n, t), [t]);
 
   /** 检查权限 */
   useEffect(() => {
@@ -390,7 +412,7 @@ export function BookmarkView() {
       const tree = await getBookmarkTree();
       setBookmarks(tree);
     } else {
-      feedback.error(translate('bookmark.permissionDenied'));
+      feedback.error(translate("bookmark.permissionDenied"));
     }
   }, []);
 
@@ -424,13 +446,13 @@ export function BookmarkView() {
    */
   const handleOpenBookmark = useCallback(async (url: string) => {
     if (!isSafeExternalUrl(url)) {
-      feedback.error(translate('bookmark.openFailed'));
+      feedback.error(translate("bookmark.openFailed"));
       return;
     }
     try {
       await createTab({ url });
     } catch (err) {
-      feedback.error(translate('bookmark.openFailed'), err);
+      feedback.error(translate("bookmark.openFailed"), err);
     }
   }, []);
 
@@ -443,7 +465,9 @@ export function BookmarkView() {
    * @returns 无返回值
    */
   const openBookmarkSync = useCallback(
-    (url: string) => { void handleOpenBookmark(url); },
+    (url: string) => {
+      void handleOpenBookmark(url);
+    },
     [handleOpenBookmark],
   );
 
@@ -458,12 +482,12 @@ export function BookmarkView() {
   const handleBookmarkAll = useCallback(async () => {
     let count = 0;
     for (const tab of tabs) {
-      if (!tab.url.startsWith('chrome://') && !tab.url.startsWith('chrome-extension://')) {
+      if (!tab.url.startsWith("chrome://") && !tab.url.startsWith("chrome-extension://")) {
         const result = await createBookmark({ title: tab.title, url: tab.url });
         if (result !== null) count++;
       }
     }
-    feedback.success(translate('bookmark.bookmarkedAll', { count }));
+    feedback.success(translate("bookmark.bookmarkedAll", { count }));
     const tree = await getBookmarkTree();
     setBookmarks(tree);
   }, [tabs]);
@@ -477,7 +501,7 @@ export function BookmarkView() {
     const visit = (nodes: BookmarkNode[]) => {
       for (const n of nodes) {
         if (n.url) continue;
-        if (n.id === '0') {
+        if (n.id === "0") {
           if (n.children) visit(n.children);
           continue;
         }
@@ -500,12 +524,16 @@ export function BookmarkView() {
     return (text: string): React.ReactNode => {
       const q = query.trim();
       if (!q || !text) return text;
-      const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const parts = text.split(new RegExp(`(${escaped})`, 'ig'));
+      const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const parts = text.split(new RegExp(`(${escaped})`, "ig"));
       return parts.map((part, i) =>
-        part.toLowerCase() === q.toLowerCase()
-          ? <mark key={i} className={styles['app-bookmark-highlight']}>{part}</mark>
-          : <span key={i}>{part}</span>,
+        part.toLowerCase() === q.toLowerCase() ? (
+          <mark key={i} className={styles["app-bookmark-highlight"]}>
+            {part}
+          </mark>
+        ) : (
+          <span key={i}>{part}</span>
+        ),
       );
     };
   }, []);
@@ -518,7 +546,7 @@ export function BookmarkView() {
 
   if (checking) {
     return (
-      <div className={styles['app-bookmark-loading-wrap']}>
+      <div className={styles["app-bookmark-loading-wrap"]}>
         <Spin />
       </div>
     );
@@ -526,119 +554,129 @@ export function BookmarkView() {
 
   if (!hasPermission) {
     return (
-      <div className={styles['app-bookmark-empty']}>
+      <div className={styles["app-bookmark-empty"]}>
         <FeatureEmptyState
-          title={t('bookmark.needPermission')}
-          icon={<BookOpen size={24} className={styles['app-bookmark-empty-icon']} />}
+          title={t("bookmark.needPermission")}
+          icon={<BookOpen size={24} className={styles["app-bookmark-empty-icon"]} />}
           actions={[
             {
-              text: t('bookmark.grantPermission'),
-              onClick: () => { void handleRequestPermission(); },
+              text: t("bookmark.grantPermission"),
+              onClick: () => {
+                void handleRequestPermission();
+              },
             },
           ]}
-          hints={[t('bookmark.hint1'), t('bookmark.hint2')]}
+          hints={[t("bookmark.hint1"), t("bookmark.hint2")]}
         />
       </div>
     );
   }
 
   return (
-    <div className={`app-bookmark-shell ${styles['app-bookmark-shell']}`}>
+    <div className={`app-bookmark-shell ${styles["app-bookmark-shell"]}`}>
       {/* 顶部头：标题 + 统计 + 工具按钮 */}
-      <header className={styles['app-bookmark-header']}>
-        <div className={styles['app-bookmark-header__title']}>
-          <BookOpen size={ICON_SIZE.MEDIUM} className={styles['app-bookmark-header__icon']} />
-          <span>{t('bookmark.title')}</span>
+      <header className={styles["app-bookmark-header"]}>
+        <div className={styles["app-bookmark-header__title"]}>
+          <BookOpen size={ICON_SIZE.MEDIUM} className={styles["app-bookmark-header__icon"]} />
+          <span>{t("bookmark.title")}</span>
           {totalBookmarks > 0 && (
-            <Tag bordered={false} className={styles['app-bookmark-header__count']}>{totalBookmarks}</Tag>
+            <Tag bordered={false} className={styles["app-bookmark-header__count"]}>
+              {totalBookmarks}
+            </Tag>
           )}
         </div>
-        <div className={styles['app-bookmark-header__actions']}>
+        <div className={styles["app-bookmark-header__actions"]}>
           <Segmented
             size="small"
             value={layout}
             onChange={(v) => setLayout(v as BookmarkLayout)}
             options={[
               {
-                value: 'list',
+                value: "list",
                 icon: (
-                  <Tooltip title={t('bookmark.layout.list')}>
+                  <Tooltip title={t("bookmark.layout.list")}>
                     <ListIcon size={ICON_SIZE.SMALL} />
                   </Tooltip>
                 ),
               },
               {
-                value: 'mindmap',
+                value: "mindmap",
                 icon: (
-                  <Tooltip title={t('bookmark.layout.mindmap')}>
+                  <Tooltip title={t("bookmark.layout.mindmap")}>
                     <Network size={ICON_SIZE.SMALL} />
                   </Tooltip>
                 ),
               },
               {
-                value: 'orgchart',
+                value: "orgchart",
                 icon: (
-                  <Tooltip title={t('bookmark.layout.orgchart')}>
+                  <Tooltip title={t("bookmark.layout.orgchart")}>
                     <GitBranch size={ICON_SIZE.SMALL} />
                   </Tooltip>
                 ),
               },
             ]}
           />
-          <Tooltip title={t('bookmark.bookmarkAll')}>
+          <Tooltip title={t("bookmark.bookmarkAll")}>
             <Button
               size="small"
               icon={<Plus size={ICON_SIZE.SMALL} />}
-              onClick={() => { void handleBookmarkAll(); }}
+              onClick={() => {
+                void handleBookmarkAll();
+              }}
             >
-              {t('bookmark.bookmarkAll')}
+              {t("bookmark.bookmarkAll")}
             </Button>
           </Tooltip>
-          <Tooltip title={t('bookmark.tools.entry')}>
+          <Tooltip title={t("bookmark.tools.entry")}>
             <Button
               size="small"
               icon={<Wrench size={ICON_SIZE.SMALL} />}
               onClick={() => setToolsOpen(true)}
             >
-              {t('bookmark.tools.entry')}
+              {t("bookmark.tools.entry")}
             </Button>
           </Tooltip>
         </div>
       </header>
 
       {/* 搜索栏 */}
-      <div className={styles['app-bookmark-search-wrap']}>
+      <div className={styles["app-bookmark-search-wrap"]}>
         <Input
-          prefix={<Search size={ICON_SIZE.MEDIUM} className={styles['app-bookmark-search-icon']} />}
-          placeholder={t('bookmark.searchPlaceholder')}
+          prefix={<Search size={ICON_SIZE.MEDIUM} className={styles["app-bookmark-search-icon"]} />}
+          placeholder={t("bookmark.searchPlaceholder")}
           value={searchQuery}
-          onChange={(e) => { void handleSearch(e.target.value); }}
+          onChange={(e) => {
+            void handleSearch(e.target.value);
+          }}
           allowClear
           size="large"
-          className={styles['app-bookmark-search']}
+          className={styles["app-bookmark-search"]}
         />
       </div>
 
       {/* 结果区 */}
-      <div className={`app-bookmark-result ${styles['app-bookmark-result']}`}>
+      <div className={`app-bookmark-result ${styles["app-bookmark-result"]}`}>
         {searchQuery ? (
           searching ? (
-            <div className={styles['app-bookmark-loading-wrap']}><Spin /></div>
+            <div className={styles["app-bookmark-loading-wrap"]}>
+              <Spin />
+            </div>
           ) : searchResults.length === 0 ? (
-            <div className={styles['app-bookmark-result-empty']}>
+            <div className={styles["app-bookmark-result-empty"]}>
               <FeatureEmptyState
-                title={t('bookmark.noResults')}
+                title={t("bookmark.noResults")}
                 size="small"
                 icon={<Search size={20} />}
-                hints={[t('bookmark.searchHint1'), t('bookmark.searchHint2')]}
+                hints={[t("bookmark.searchHint1"), t("bookmark.searchHint2")]}
               />
             </div>
           ) : (
-            <div className={styles['app-bookmark-search-results']}>
-              <div className={styles['app-bookmark-search-meta']}>
-                {t('bookmark.searchCount', { count: searchResults.length })}
+            <div className={styles["app-bookmark-search-results"]}>
+              <div className={styles["app-bookmark-search-meta"]}>
+                {t("bookmark.searchCount", { count: searchResults.length })}
               </div>
-              <div className={styles['app-bookmark-search-list']}>
+              <div className={styles["app-bookmark-search-list"]}>
                 {searchResults.map((item) => (
                   <BookmarkRow
                     key={item.id}
@@ -651,22 +689,22 @@ export function BookmarkView() {
             </div>
           )
         ) : topSections.length === 0 ? (
-          <div className={styles['app-bookmark-result-empty']}>
+          <div className={styles["app-bookmark-result-empty"]}>
             <FeatureEmptyState
-              title={t('bookmark.emptyTitle')}
+              title={t("bookmark.emptyTitle")}
               icon={<BookOpen size={20} />}
               size="small"
-              hints={[t('bookmark.hint1'), t('bookmark.hint2')]}
+              hints={[t("bookmark.hint1"), t("bookmark.hint2")]}
             />
           </div>
-        ) : layout === 'mindmap' ? (
+        ) : layout === "mindmap" ? (
           <BookmarkTreeView
             topSections={topSections}
             onOpenBookmark={openBookmarkSync}
             resolveTitle={resolveTitle}
             orientation="horizontal"
           />
-        ) : layout === 'orgchart' ? (
+        ) : layout === "orgchart" ? (
           <BookmarkTreeView
             topSections={topSections}
             onOpenBookmark={openBookmarkSync}
@@ -674,7 +712,7 @@ export function BookmarkView() {
             orientation="vertical"
           />
         ) : (
-          <div className={styles['app-bookmark-sections']}>
+          <div className={styles["app-bookmark-sections"]}>
             {topSections.map((section, idx) => (
               <TopFolderSection
                 key={section.id}
