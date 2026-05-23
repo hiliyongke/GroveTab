@@ -2,9 +2,9 @@
  * WindowView — 窗口管理视图（重构版）
  */
 
-import { useCallback, useMemo, useRef, useLayoutEffect, useState } from 'react';
-import { ConfigProvider, Empty, theme, App as AntdApp } from 'antd';
-import { useTabsStore } from '@/store';
+import { useCallback, useMemo, useRef, useLayoutEffect, useState } from "react";
+import { ConfigProvider, Empty, theme, App as AntdApp, Button, Flex, Segmented } from "antd";
+import { useTabsStore, useSettingsStore } from "@/store";
 import {
   DndContext,
   DragOverlay,
@@ -14,14 +14,14 @@ import {
   closestCorners,
   useSensor,
   useSensors,
-} from '@dnd-kit/core';
-import { WindowCard } from './components/WindowCard';
-import { DragPreview } from './components/DragPreview';
-import { useWindowDrag } from './hooks/use-window-drag';
-import { useWindowKeyboard } from './hooks/use-window-keyboard';
-import { useWindowMerge } from './hooks/use-window-merge';
-import { useWindowThumbnail } from './hooks/use-window-thumbnail';
-import styles from './WindowView.module.less';
+} from "@dnd-kit/core";
+import { WindowCard } from "./components/WindowCard";
+import { DragPreview } from "./components/DragPreview";
+import { useWindowDrag } from "./hooks/use-window-drag";
+import { useWindowKeyboard } from "./hooks/use-window-keyboard";
+import { useWindowMerge } from "./hooks/use-window-merge";
+import { useWindowThumbnail } from "./hooks/use-window-thumbnail";
+import styles from "./WindowView.module.less";
 
 /**
  * 监听 Alt 键状态
@@ -34,16 +34,16 @@ function useAltKey(): boolean {
   const [held, setHeld] = useState(false);
   useLayoutEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if (e.key === 'Alt') setHeld(true);
+      if (e.key === "Alt") setHeld(true);
     };
     const up = (e: KeyboardEvent) => {
-      if (e.key === 'Alt') setHeld(false);
+      if (e.key === "Alt") setHeld(false);
     };
-    window.addEventListener('keydown', down);
-    window.addEventListener('keyup', up);
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
     return () => {
-      window.removeEventListener('keydown', down);
-      window.removeEventListener('keyup', up);
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
     };
   }, []);
   return held;
@@ -93,9 +93,12 @@ function WindowView() {
   );
 
   /** 关闭单个标签 */
-  const closeSingleTab = useCallback((tabId: number): void => {
-    void closeSingleTabAction(tabId);
-  }, [closeSingleTabAction]);
+  const closeSingleTab = useCallback(
+    (tabId: number): void => {
+      void closeSingleTabAction(tabId);
+    },
+    [closeSingleTabAction],
+  );
 
   // —— Hooks ——
   const { activeDrag, handleDragStart, handleDragOver, handleDragEnd } = useWindowDrag({
@@ -117,12 +120,8 @@ function WindowView() {
     tabs,
   });
 
-  const {
-    thumbnailUrl,
-    thumbnailVisible,
-    handleThumbnailHover,
-    handleThumbnailLeave,
-  } = useWindowThumbnail();
+  const { thumbnailUrl, thumbnailVisible, handleThumbnailHover, handleThumbnailLeave } =
+    useWindowThumbnail();
 
   // —— dnd-kit 传感器 ——
   const sensors = useSensors(
@@ -130,9 +129,12 @@ function WindowView() {
     useSensor(TouchSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor),
   );
-  const handleDragEndSync = useCallback((event: Parameters<typeof handleDragEnd>[0]) => {
-    void handleDragEnd(event);
-  }, [handleDragEnd]);
+  const handleDragEndSync = useCallback(
+    (event: Parameters<typeof handleDragEnd>[0]) => {
+      void handleDragEnd(event);
+    },
+    [handleDragEnd],
+  );
 
   // 简单的 t() fallback
   const t = (key: string): string => key;
@@ -143,42 +145,62 @@ function WindowView() {
 
   // token fallback
   const token = {
-    colorBorderSecondary: '#eee',
-    colorBorder: '#ddd',
-    colorText: '#333',
-    colorTextTertiary: '#999',
-    colorFillSecondary: '#f5f5f5',
+    colorBorderSecondary: "#eee",
+    colorBorder: "#ddd",
+    colorText: "#333",
+    colorTextTertiary: "#999",
+    colorFillSecondary: "#f5f5f5",
   };
+
+  // WindowView 模式切换
+  const windowViewMode = useSettingsStore((s) => s.settings.windowViewMode ?? "window");
+  const updateSettings = useSettingsStore((s) => s.updateSettings);
+  const handleWindowViewModeChange = useCallback(
+    (value: string | number) => {
+      void updateSettings({ windowViewMode: value as "window" | "group" });
+    },
+    [updateSettings],
+  );
 
   return (
     <ConfigProvider theme={{ algorithm: theme.compactAlgorithm }}>
       <AntdApp>
-        <div
+        <Flex
+          vertical
           ref={containerRef}
-          className={styles['app-window-view']}
+          className={styles["app-window-view"]}
           onKeyDown={handleKeyDown}
           tabIndex={0}
           role="application"
-          aria-label={t('window.windows')}
+          aria-label={t("window.windows")}
         >
           {/* 工具栏 */}
-          <div className={styles['app-window-toolbar']}>
-            <button
-              type="button"
+          <div className={styles["app-window-toolbar"]}>
+            <Button
+              type="primary"
+              size="small"
               onClick={() => {
                 void handleMergeAll();
               }}
             >
-              {t('window.mergeAll')}
-            </button>
+              {t("window.mergeAll")}
+            </Button>
+
+            {/* WindowView 模式切换 */}
+            <Segmented
+              size="small"
+              value={windowViewMode}
+              onChange={handleWindowViewModeChange}
+              options={[
+                { label: "按窗口查看", value: "window" },
+                { label: "按分组查看", value: "group" },
+              ]}
+            />
           </div>
 
           {/* 窗口网格 */}
           {windows.size === 0 ? (
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description={t('window.noWindows')}
-            />
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t("window.noWindows")} />
           ) : (
             <DndContext
               sensors={sensors}
@@ -187,7 +209,7 @@ function WindowView() {
               onDragOver={handleDragOver}
               onDragEnd={handleDragEndSync}
             >
-              <div className={styles['app-window-grid']}>
+              <div className={styles["app-window-grid"]}>
                 {Array.from(windows.entries()).map(([windowId, windowTabs]) => {
                   const isCurrent = windowId === currentWindowId;
                   return (
@@ -215,13 +237,11 @@ function WindowView() {
 
               {/* 拖拽预览 */}
               <DragOverlay dropAnimation={null}>
-                {activeDrag ? (
-                  <DragPreview active={activeDrag} t={t} isAltHeld={altHeld} />
-                ) : null}
+                {activeDrag ? <DragPreview active={activeDrag} t={t} isAltHeld={altHeld} /> : null}
               </DragOverlay>
             </DndContext>
           )}
-        </div>
+        </Flex>
       </AntdApp>
     </ConfigProvider>
   );

@@ -2,12 +2,12 @@
  * 用户设置相关类型定义
  */
 
-import type { ViewMode } from './view';
+import type { ViewMode } from "./view";
 
 /** User settings */
-export type SearchScopeField = 'title' | 'hostname' | 'url';
-export type SearchSortMode = 'relevance' | 'recentAccess';
-export type BuiltInSearchEngineId = 'google' | 'bing' | 'baidu' | 'duckduckgo';
+export type SearchScopeField = "title" | "hostname" | "url";
+export type SearchSortMode = "relevance" | "recentAccess";
+export type BuiltInSearchEngineId = "google" | "bing" | "baidu" | "duckduckgo";
 export type CustomSearchEngineId = `custom:${string}`;
 export type SearchEngineId = BuiltInSearchEngineId | CustomSearchEngineId;
 
@@ -19,10 +19,10 @@ export interface CustomSearchEngine {
   color?: string;
 }
 
-export type NewtabPageMode = 'workspace' | 'trending' | 'devtools';
+export type NewtabPageMode = "workspace" | "trending" | "devtools";
 
 /** 视图标签栏位置 */
-export type ViewTabPosition = 'top' | 'left' | 'right' | 'bottom';
+export type ViewTabPosition = "top" | "left" | "right" | "bottom";
 
 export interface UserSettings {
   overrideNewTab: boolean;
@@ -31,7 +31,7 @@ export interface UserSettings {
   /** 视图标签栏位置：top（搜索栏下方水平）/ left / right（垂直侧栏）/ bottom（固定底部水平） */
   viewTabPosition?: ViewTabPosition;
   defaultView: ViewMode;
-  theme: 'light' | 'dark' | 'system';
+  theme: "light" | "dark" | "system";
   /**
    * 皮肤预设：
    *   - 'minimal'        ：极简毛玻璃（macOS 原生风格，默认）
@@ -42,7 +42,16 @@ export interface UserSettings {
    *   - 'nord'           ：Nord 寒色调（深蓝青冷，深浅皆宜）
    *   - 'solarized'      ：Solarized 太阳化（暖米 + 青黄对比）
    */
-  skinPreset?: 'minimal' | 'glassmorphism' | 'skeuomorphism' | 'aurora' | 'elegant' | 'nord' | 'solarized' | 'pastel' | 'apple';
+  skinPreset?:
+    | "minimal"
+    | "glassmorphism"
+    | "skeuomorphism"
+    | "aurora"
+    | "elegant"
+    | "nord"
+    | "solarized"
+    | "pastel"
+    | "apple";
 
   /**
    * UI Token 极客定制（v1.1 新增）：在皮肤预设基础上做单项覆盖。
@@ -84,18 +93,18 @@ export interface UserSettings {
    * 每个预设包含 light / dark 两套色值，运行期按 resolvedTheme 自动切换。
    */
   gradientPreset:
-    | 'default'
-    | 'slate'
-    | 'warm'
-    | 'ocean'
-    | 'forest'
-    | 'sunset'
-    | 'deepspace'
-    | 'midnight'
-    | 'pastel'
-    | 'aurora'
-    | 'sunrise'
-    | 'custom';
+    | "default"
+    | "slate"
+    | "warm"
+    | "ocean"
+    | "forest"
+    | "sunset"
+    | "deepspace"
+    | "midnight"
+    | "pastel"
+    | "aurora"
+    | "sunrise"
+    | "custom";
   /**
    * 自定义渐变配置（仅 gradientPreset='custom' 时生效）
    *   - stops：色标数组，每项 { color: '#hex', position: 0~1 }
@@ -109,9 +118,9 @@ export interface UserSettings {
     darkAngle?: number;
   };
   showIncognito: boolean;
-  language: 'zh-CN' | 'en';
+  language: "zh-CN" | "en";
   /** 域名分组视图的列数；'auto' 表示由容器宽度自动决定（默认），1–6 为手动锁定 */
-  domainGroupColumns?: 'auto' | 1 | 2 | 3 | 4 | 5 | 6;
+  domainGroupColumns?: "auto" | 1 | 2 | 3 | 4 | 5 | 6;
   /**
    * 时间轴分组粒度：
    *   - 'day' ：今天/昨天/本周/更早（默认，简洁）
@@ -120,7 +129,7 @@ export interface UserSettings {
    * 旧版本曾有第三档 'fine'（与 'hour' 行为高度重叠），已废弃。
    * 类型里保留该字面量仅为兼容已写入磁盘的旧设置，运行期会规整为 'hour'。
    */
-  timelineGranularity?: 'day' | 'hour' | 'fine';
+  timelineGranularity?: "day" | "hour" | "fine";
   /**
    * 时间轴是否在段名和条目上显示具体时间
    *   - 段名右侧显示该段访问时间范围（如 14:32–15:48），单条时显示单个时间
@@ -142,7 +151,7 @@ export interface UserSettings {
    *   - 'none'：完全隐藏身份色条（favicon 徽章的软色背景仍保留）
    * 两种色条都使用依主题自适应的纯实色（非渐变），视觉纪律一致。
    */
-  domainGroupAccentBarPosition?: 'left' | 'top' | 'none';
+  domainGroupAccentBarPosition?: "left" | "top" | "none";
   /**
    * 域名分组卡片的圆角档位：
    *   - 'none'：直角（0px），硬朗正式
@@ -151,21 +160,21 @@ export interface UserSettings {
    *   - 'large'：大圆角（16px），更柔和更"现代"
    * 影响 Card 本身及左/顶色条的同侧圆角。
    */
-  domainGroupCardRadius?: 'none' | 'small' | 'default' | 'large';
+  domainGroupCardRadius?: "none" | "small" | "default" | "large";
   /**
    * 域名分组的排序方式：
    *   - 'tabCount'（默认）：按组内标签数量降序，标签多的排前面
    *   - 'alphabetical'：按域名字母升序（A→Z）
    *   - 'recentAccess'：按组内最近访问时间降序，最近活跃的排前面
    */
-  domainGroupSortBy?: 'tabCount' | 'alphabetical' | 'recentAccess';
+  domainGroupSortBy?: "tabCount" | "alphabetical" | "recentAccess";
   /**
    * 网格视图卡片的展开触发方式：
    *   - 'click'（默认）：点击多 tab 卡片时弹出 Popover
    *   - 'hover'：鼠标悬停在多 tab 卡片上即展开 Popover，移开自动收起
    * 仅影响多 tab 卡片；单 tab 卡片始终为「点击直跳」。
    */
-  gridExpandTrigger?: 'click' | 'hover';
+  gridExpandTrigger?: "click" | "hover";
   /**
    * 搜索配置：
    *   - scope：搜索范围，选择哪些字段参与搜索匹配
@@ -195,7 +204,7 @@ export interface UserSettings {
    *
    * 当 searchUseHotSuggestions === false 时视为 off；否则默认 'local'。
    */
-  hotSuggestionSource?: 'off' | 'local' | 'preset' | 'trending';
+  hotSuggestionSource?: "off" | "local" | "preset" | "trending";
   /**
    * 自定义快捷键映射（页面内快捷键）
    *   - key: KeybindingAction（'search' | 'exitSelection' | 'selectAll'）
@@ -215,7 +224,7 @@ export interface UserSettings {
    */
   backgroundImage?: {
     url: string;
-    fit: 'cover' | 'contain' | 'repeat';
+    fit: "cover" | "contain" | "repeat";
     position?: string;
   };
 
@@ -241,7 +250,7 @@ export interface UserSettings {
    *   - 'comfortable'：宽松（大间距、大字号、适合大屏或视觉舒适优先）
    * 影响卡片间距、内容行间距、控件高度等全局比例。
    */
-  layoutDensity?: 'compact' | 'default' | 'comfortable';
+  layoutDensity?: "compact" | "default" | "comfortable";
 
   /**
    * 内容区最大宽度（px），0 表示不限制
@@ -255,7 +264,7 @@ export interface UserSettings {
    *   - 'on'：始终减弱动效（关闭过渡动画、hover 上浮等）
    *   - 'off'：始终启用动效，忽略系统偏好
    */
-  reducedMotion?: 'auto' | 'on' | 'off';
+  reducedMotion?: "auto" | "on" | "off";
 
   /**
    * UI 区域显隐控制
@@ -287,13 +296,20 @@ export interface UserSettings {
   showAddSiteButton?: boolean;
 
   /**
+   * WindowView 查看模式（Phase 1 新增）：
+   *   - 'window'（默认）：按窗口查看，每个窗口卡片内按 Tab Group 分组
+   *   - 'group'：按分组查看，忽略窗口边界，将所有 Tab Group 平铺展示
+   */
+  windowViewMode?: "window" | "group";
+
+  /**
    * 常用站点卡片尺寸（v1.4）。
    *   - 'sm'   ：紧凑（站点多时使用，单卡 ~120px）
    *   - 'md'   ：默认（单卡 ~160px，与 v1.3 行为一致）
    *   - 'lg'   ：宽松（站点少时使用，单卡 ~200px）
    *   - 'auto' ：根据站点数量自动适配（≤6 用 lg，7-14 用 md，>14 用 sm）
    */
-  quickStartCardSize?: 'sm' | 'md' | 'lg' | 'auto';
+  quickStartCardSize?: "sm" | "md" | "lg" | "auto";
 
   /**
    * 全局点击动效（v1.2）。
@@ -304,7 +320,7 @@ export interface UserSettings {
    *   - 'petal'    ：樱花飘落
    * reducedMotion 为 'on' 或系统偏好 reduce 时自动禁用。
    */
-  clickEffect?: 'off' | 'ripple' | 'sparkle' | 'confetti' | 'petal';
+  clickEffect?: "off" | "ripple" | "sparkle" | "confetti" | "petal";
 
   /**
    * 动态视频背景（v1.2）。
@@ -316,7 +332,7 @@ export interface UserSettings {
    *   - muted：默认 true（Chrome 要求 muted 才能 autoplay）
    */
   videoBackground?: {
-    type?: 'none' | 'url' | 'file';
+    type?: "none" | "url" | "file";
     src?: string;
     fileKey?: string;
     playbackRate?: number;
@@ -331,7 +347,7 @@ export interface UserSettings {
    *   - 'loose'（默认）：忽略 #hash + utm_* / fbclid / gclid
    *   - 'off'：禁用重复检测
    */
-  dedupStrictness?: 'strict' | 'loose' | 'off';
+  dedupStrictness?: "strict" | "loose" | "off";
 
   /**
    * 闲置阈值（分钟），用于 detectIdleTabs 与 Dashboard 闲置徽标。
@@ -352,7 +368,7 @@ export interface UserSettings {
   /**
    * 会话自动快照频率（F-23): 'off' | '6h' | '12h'（默认） | '24h'。
    */
-  autoSnapshotFrequency?: 'off' | '6h' | '12h' | '24h';
+  autoSnapshotFrequency?: "off" | "6h" | "12h" | "24h";
 
   /**
    * OG description 受控抓取开关（F-24），默认 false。
