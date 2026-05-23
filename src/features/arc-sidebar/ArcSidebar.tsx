@@ -23,7 +23,7 @@ import { extractHostname } from "@/chrome/utils";
 import { feedback } from "@/shared/ui/feedback";
 import { I18nProvider, useT } from "@/shared/i18n";
 import { AntdThemeProvider } from "@/shared/ui/AntdThemeProvider";
-import "./ArcSidebar.less";
+import styles from './ArcSidebar.module.less';
 
 // Types
 interface ArcTab {
@@ -112,12 +112,12 @@ const SpaceButton = React.memo<SpaceButtonProps>(({ space, isActive, onActivate 
   return (
     <Tooltip title={space.name} placement="right">
       <button
-        className={`arc-space-btn ${isActive ? "active" : ""}`}
+        className={`${styles.arcSpaceBtn} ${isActive ? styles.active : ''}`}
         style={buttonStyle}
         onClick={() => onActivate(space.id)}
       >
-        <span className="arc-space-icon">{space.icon}</span>
-        {space.tabs.length > 0 && <span className="arc-space-badge">{space.tabs.length}</span>}
+        <span className={styles.arcSpaceIcon}>{space.icon}</span>
+        {space.tabs.length > 0 && <span className={styles.arcSpaceBadge}>{space.tabs.length}</span>}
       </button>
     </Tooltip>
   );
@@ -334,12 +334,12 @@ const ArcSidebarContent: React.FC = () => {
   );
 
   return (
-    <div className="arc-sidebar">
+    <div className={styles.arcSidebar}>
       {/* Spaces Bar - Left Edge */}
-      <div className="arc-spaces-bar">
-        <div className="arc-spaces-header">
+      <div className={styles.arcSpacesBar}>
+        <div className={styles.arcSpacesHeader}>
           <Tooltip title="Arc Menu" placement="right">
-            <button className="arc-menu-btn" aria-label={t("arcSidebar.menu")}>
+            <button className={styles.arcMenuBtn} aria-label={t("arcSidebar.menu")}>
               <span style={menuIconStyle} aria-hidden="true">
                 ⌘
               </span>
@@ -347,7 +347,7 @@ const ArcSidebarContent: React.FC = () => {
           </Tooltip>
         </div>
 
-        <div className="arc-spaces-list">
+        <div className={styles.arcSpacesList}>
           {spaces.map((space) => (
             <SpaceButton
               key={space.id}
@@ -358,16 +358,16 @@ const ArcSidebarContent: React.FC = () => {
           ))}
         </div>
 
-        <div className="arc-spaces-footer">
+        <div className={styles.arcSpacesFooter}>
           <Tooltip title={t("arcSidebar.addSpace")} placement="right">
-            <button className="arc-space-btn add-space" aria-label={t("arcSidebar.addSpace")}>
+            <button className={`${styles.arcSpaceBtn} ${styles.addSpace}`} aria-label={t("arcSidebar.addSpace")}>
               <span style={smallIconStyle} aria-hidden="true">
                 +
               </span>
             </button>
           </Tooltip>
           <Tooltip title={t("arcSidebar.settings")} placement="right">
-            <button className="arc-space-btn" aria-label={t("arcSidebar.settings")}>
+            <button className={styles.arcSpaceBtn} aria-label={t("arcSidebar.settings")}>
               <span style={smallIconStyle} aria-hidden="true">
                 ⚙
               </span>
@@ -377,26 +377,26 @@ const ArcSidebarContent: React.FC = () => {
       </div>
 
       {/* Main Sidebar Content */}
-      <div className="arc-sidebar-content">
+      <div className={styles.arcSidebarContent}>
         {/* Search Bar */}
-        <div className="arc-search-bar">
-          <span className="arc-search-icon" style={searchIconStyle}>
+        <div className={styles.arcSearchBar}>
+          <span className={styles.arcSearchIcon} style={searchIconStyle}>
             🔍
           </span>
           <Input
             placeholder={t("arcSidebar.searchTabs")}
-            className="arc-search-input"
+            className={styles.arcSearchInput}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <kbd className="arc-shortcut">⌘K</kbd>
+          <kbd className={styles.arcShortcut}>⌘K</kbd>
         </div>
 
         {/* Pinned Tabs */}
         {filteredTabs.filter((t) => t.pinned).length > 0 && (
-          <div className="arc-section">
-            <div className="arc-section-title">{t("arcSidebar.pinned")}</div>
-            <div className="arc-tabs-list">
+          <div className={styles.arcSection}>
+            <div className={styles.arcSectionTitle}>{t("arcSidebar.pinned")}</div>
+            <div className={styles.arcTabsList}>
               {filteredTabs
                 .filter((t) => t.pinned)
                 .map((tab) => (
@@ -421,20 +421,20 @@ const ArcSidebarContent: React.FC = () => {
 
         {/* Tab Groups by Domain */}
         {Object.entries(groupedTabs).map(([domain, domainTabs]) => (
-          <div key={domain} className="arc-section">
-            <div className="arc-section-title">
+          <div key={domain} className={styles.arcSection}>
+            <div className={styles.arcSectionTitle}>
               <img
                 src={
                   getFaviconUrl(`https://${domain}`) ||
                   `https://www.google.com/s2/favicons?domain=${domain}`
                 }
                 alt=""
-                className="arc-domain-favicon"
+                className={styles.arcDomainFavicon}
               />
               {domain}
-              <span className="arc-tab-count">{domainTabs.filter((t) => !t.pinned).length}</span>
+              <span className={styles.arcTabCount}>{domainTabs.filter((t) => !t.pinned).length}</span>
             </div>
-            <div className="arc-tabs-list">
+            <div className={styles.arcTabsList}>
               {domainTabs
                 .filter((tab) => !tab.pinned)
                 .map((tab) => (
@@ -459,8 +459,8 @@ const ArcSidebarContent: React.FC = () => {
 
         {/* Empty State */}
         {filteredTabs.length === 0 && (
-          <div className="arc-empty-state">
-            <span className="arc-empty-icon" style={emptyIconStyle}>
+          <div className={styles.emptyState}>
+            <span className={styles.emptyIcon} style={emptyIconStyle}>
               🔍
             </span>
             <p>{t("arcSidebar.noTabsFound")}</p>
@@ -469,13 +469,13 @@ const ArcSidebarContent: React.FC = () => {
       </div>
 
       {/* Bottom Actions */}
-      <div className="arc-sidebar-footer">
-        <button className="arc-footer-btn" onClick={handleNewTabClick}>
+      <div className={styles.sidebarFooter}>
+        <button className={styles.footerBtn} onClick={handleNewTabClick}>
           <span style={smallIconStyle}>➕</span>
           <span>{t("arcSidebar.newTab")}</span>
         </button>
         <Dropdown menu={{ items: commandActions }} trigger={["click"]} placement="topRight">
-          <button className="arc-footer-btn icon-only" aria-label={t("arcSidebar.moreActions")}>
+          <button className={`${styles.footerBtn} ${styles.iconOnly}`} aria-label={t("arcSidebar.moreActions")}>
             <span style={menuIconStyle} aria-hidden="true">
               ⋯
             </span>
@@ -486,30 +486,30 @@ const ArcSidebarContent: React.FC = () => {
       {/* Command Bar Overlay */}
       {commandBarVisible && (
         <div
-          className="arc-command-bar-overlay"
+          className={styles.commandBarOverlay}
           onClick={() => setCommandBarVisible(false)}
           role="dialog"
           aria-modal="true"
           aria-label={t("arcSidebar.commandBar")}
         >
-          <div className="arc-command-bar" onClick={(e) => e.stopPropagation()}>
+          <div className={styles.commandBar} onClick={(e) => e.stopPropagation()}>
             <Input
               autoFocus
               placeholder={t("arcSidebar.commandPlaceholder")}
-              className="arc-command-input"
+              className={styles.commandInput}
               prefix={<span style={commandBarIconStyle}>⌘</span>}
             />
-            <div className="arc-command-results">
-              <div className="arc-command-item">
+            <div className={styles.commandResults}>
+              <div className={styles.commandItem}>
                 <span>🔍</span>
                 <span>{t("arcSidebar.searchTabs")}</span>
               </div>
-              <div className="arc-command-item">
+              <div className={styles.commandItem}>
                 <span>➕</span>
                 <span>{t("arcSidebar.newTab")}</span>
                 <kbd>⌘T</kbd>
               </div>
-              <div className="arc-command-item">
+              <div className={styles.commandItem}>
                 <span>✕</span>
                 <span>{t("arcSidebar.closeCurrentTab")}</span>
                 <kbd>⌘W</kbd>
@@ -547,22 +547,22 @@ function ArcTabItem({
 }) {
   return (
     <div
-      className={`arc-tab-item ${tab.pinned ? "pinned" : ""} ${tab.active ? "active" : ""}`}
+      className={`${styles.arcTabItem} ${tab.pinned ? styles.pinned : ''} ${tab.active ? styles.active : ''}`}
       onClick={onActivate}
     >
       <img
         src={tab.favIconUrl || "chrome://favicon/"}
         alt=""
-        className="arc-tab-favicon"
+        className={styles.arcTabFavicon}
         onError={(e) => {
           (e.target as HTMLImageElement).src =
             'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="%23666"/></svg>';
         }}
       />
-      <span className="arc-tab-title">{tab.title}</span>
-      <div className="arc-tab-actions">
+      <span className={styles.arcTabTitle}>{tab.title}</span>
+      <div className={styles.arcTabActions}>
         <button
-          className="arc-tab-action-btn"
+          className={styles.arcTabActionBtn}
           onClick={onTogglePin}
           aria-label={tab.pinned ? t("arcSidebar.unpinTab") : t("arcSidebar.pinTab")}
           aria-pressed={tab.pinned}
@@ -570,7 +570,7 @@ function ArcTabItem({
           {tab.pinned ? "★" : "☆"}
         </button>
         <button
-          className="arc-tab-action-btn close"
+          className={`${styles.arcTabActionBtn} ${styles.close}`}
           onClick={onClose}
           aria-label={t("arcSidebar.closeTab")}
         >

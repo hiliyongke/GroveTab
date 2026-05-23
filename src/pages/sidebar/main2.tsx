@@ -17,7 +17,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ConfigProvider, theme } from 'antd';
 import ArcSidebar from '../../features/arc-sidebar/ArcSidebar';
-import '../../features/arc-sidebar/ArcSidebar.less';
 
 /**
  * App —— Arc 风格侧边栏根组件
