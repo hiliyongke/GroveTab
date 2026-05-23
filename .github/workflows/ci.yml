@@ -14,10 +14,10 @@ permissions:
   contents: read
 
 jobs:
-  quality:
-    name: Lint · Type-check · Test · Build
+  lint:
+    name: Lint & Type-check
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
 
     steps:
       - name: Checkout
@@ -39,7 +39,6 @@ jobs:
 
       - name: Security audit
         run: pnpm audit --audit-level=high
-        continue-on-error: false
 
       - name: Type check
         run: pnpm run type-check
@@ -50,11 +49,77 @@ jobs:
       - name: Format check
         run: pnpm run format:check
 
+  test:
+    name: Test & Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Test (with coverage)
         run: pnpm run test:coverage
 
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 30
+
+  build:
+    name: Build & Bundle Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - name: Cache Vite build cache
+        uses: actions/cache@v4
+        with:
+          path: .vite
+          key: ${{ runner.os }}-vite-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-vite-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Build
         run: pnpm run build:fast
+
+      - name: Upload bundle analysis
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-analysis
+          path: dist/stats.html
+          if-no-files-found: ignore
 
       - name: Knip (dead code detection)
         run: pnpm run knip
