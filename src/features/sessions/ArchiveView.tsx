@@ -5,17 +5,12 @@
  * 复用 ArchivePanel 的全部业务逻辑，仅移除 Modal 外壳。
  */
 
-import { useState, useSyncExternalStore, useEffect, useMemo } from 'react';
-import {
-  Plus,
-  Save,
-  Info,
-  Inbox,
-} from 'lucide-react';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { Alert, Button, List, Spin, Input, Modal, Space } from 'antd';
-import { FeatureEmptyState } from '@/shared/ui/FeatureEmptyState';
-import type { ArchivedSession } from '@/shared/types';
+import { useState, useSyncExternalStore, useEffect, useMemo } from "react";
+import { Plus, Save, Info, Inbox } from "lucide-react";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { Alert, Button, List, Spin, Input, Modal, Space, Typography } from "antd";
+import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
+import type { ArchivedSession } from "@/shared/types";
 import {
   getArchivedSessions,
   deleteSession,
@@ -23,22 +18,22 @@ import {
   archiveAllTabs,
   mergeSessions,
   exportSingleSession,
-} from '@/services';
-import type { RestoreOutcome } from '@/services/archive';
-import { createTab, getCurrentWindow } from '@/chrome';
-import { useT } from '@/shared/i18n';
-import { track } from '@/shared/utils/metrics';
-import { useTabsStore, useUndoStore, useMetadataStore, useSettingsStore } from '@/store';
-import { feedback } from '@/shared/ui/feedback';
-import { appendHistoryEvent } from '@/repositories';
-import { registerHistoryUndoHandler } from '@/services/history/undo-bus';
-import { SessionItem } from './components/SessionItem';
-import { BatchOperationsMenu } from './components/BatchOperationsMenu';
-import { EnhancedRestoreDialog } from './components/EnhancedRestoreDialog';
-import { EnhancedRenameDialog } from './components/EnhancedRenameDialog';
-import { APP_EVENTS } from '@/shared/config/storage-keys';
-import { isSafeExternalUrl } from '@/shared/utils/url-safety';
-import styles from './styles/archive.module.less';
+} from "@/services";
+import type { RestoreOutcome } from "@/services/archive";
+import { createTab, getCurrentWindow } from "@/chrome";
+import { useT } from "@/shared/i18n";
+import { track } from "@/shared/utils/metrics";
+import { useTabsStore, useUndoStore, useMetadataStore, useSettingsStore } from "@/store";
+import { feedback } from "@/shared/ui/feedback";
+import { appendHistoryEvent } from "@/repositories";
+import { registerHistoryUndoHandler } from "@/services/history/undo-bus";
+import { SessionItem } from "./components/SessionItem";
+import { BatchOperationsMenu } from "./components/BatchOperationsMenu";
+import { EnhancedRestoreDialog } from "./components/EnhancedRestoreDialog";
+import { EnhancedRenameDialog } from "./components/EnhancedRenameDialog";
+import { APP_EVENTS } from "@/shared/config/storage-keys";
+import { isSafeExternalUrl } from "@/shared/utils/url-safety";
+import styles from "./styles/archive.module.less";
 
 /* ---------- 简易外部 store 同步归档列表 ---------- */
 let sessionsCache: ArchivedSession[] = [];
@@ -60,7 +55,7 @@ function getSessionsInitialized() {
 function notifySessionsListeners() {
   sessionsListeners.forEach((l) => l());
 }
-export async function refreshSessions() {
+async function refreshSessions() {
   sessionsCache = await getArchivedSessions();
   sessionsInitialized = true;
   notifySessionsListeners();
@@ -76,9 +71,9 @@ void refreshSessions();
  *
  * 这里在模块作用域调用一次即可：ArchiveView 是 lazy chunk，在面板首次打开时一定会被加载。
  */
-registerHistoryUndoHandler('archive_create', async (event) => {
+registerHistoryUndoHandler("archive_create", async (event) => {
   const sessionId = (event.undoContext as { sessionId?: string } | undefined)?.sessionId;
-  if (sessionId === undefined || sessionId === '') return false;
+  if (sessionId === undefined || sessionId === "") return false;
   await deleteSession(sessionId);
   await refreshSessions();
   return true;
@@ -95,7 +90,7 @@ export function ArchiveView() {
   /** 高亮会话（由 UndoToast 等跳转触发） */
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const [mergeOpen, setMergeOpen] = useState(false);
-  const [mergeName, setMergeName] = useState('');
+  const [mergeName, setMergeName] = useState("");
   /** 增强恢复对话框状态 */
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
   const [restoringSession, setRestoringSession] = useState<ArchivedSession | null>(null);
@@ -105,7 +100,7 @@ export function ArchiveView() {
   /** 折叠展开状态 */
   const [expandedSessions, setExpandedSessions] = useState<Set<string>>(new Set());
   /** 搜索过滤状态 */
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
   const tabCount = useTabsStore((s) => s.tabs.length);
   const { t, locale } = useT();
@@ -132,12 +127,14 @@ export function ArchiveView() {
 
   /** 拼音匹配函数（懒加载） */
   const enablePinyin = useSettingsStore((s) => s.settings.searchEnablePinyin ?? true);
-  const [pinyinMatchFn, setPinyinMatchFn] = useState<((text: string, query: string) => boolean) | null>(null);
+  const [pinyinMatchFn, setPinyinMatchFn] = useState<
+    ((text: string, query: string) => boolean) | null
+  >(null);
 
   useEffect(() => {
     if (!enablePinyin || pinyinMatchFn !== null) return;
     void (async () => {
-      const { pinyinMatch } = await import('@/shared/utils/pinyin');
+      const { pinyinMatch } = await import("@/shared/utils/pinyin");
       setPinyinMatchFn(() => pinyinMatch);
     })();
   }, [enablePinyin, pinyinMatchFn]);
@@ -154,14 +151,16 @@ export function ArchiveView() {
     for (const session of sessions) {
       const matchedIdxs = new Set<number>();
       // 会话名匹配
-      const nameMatch = session.name.toLowerCase().includes(query) ||
-        (enablePinyin && pinyinMatchFn !== null && pinyinMatchFn(session.name, query));
+      const nameMatch =
+        session.name.toLowerCase().includes(query) ||
+        (enablePinyin && pinyinMatchFn?.(session.name, query));
       // 标签页匹配
       for (let i = 0; i < session.tabs.length; i++) {
         const tab = session.tabs[i];
         if (!tab) continue;
         const titleMatch = tab.title?.toLowerCase().includes(query) ?? false;
-        const pinyinTitleMatch = enablePinyin && pinyinMatchFn !== null && tab.title && pinyinMatchFn(tab.title, query);
+        const pinyinTitleMatch =
+          enablePinyin && pinyinMatchFn !== null && tab.title && pinyinMatchFn(tab.title, query);
         const urlMatch = tab.url.toLowerCase().includes(query);
         if (titleMatch || pinyinTitleMatch || urlMatch) {
           matchedIdxs.add(i);
@@ -188,7 +187,7 @@ export function ArchiveView() {
   }, [isSearching, filteredSessions, matchedTabIndexes]);
 
   const handleRestore = (id: string) => {
-    const session = sessions.find(s => s.id === id);
+    const session = sessions.find((s) => s.id === id);
     if (session) {
       setRestoringSession(session);
       setRestoreDialogOpen(true);
@@ -198,13 +197,13 @@ export function ArchiveView() {
   const handleEnhancedRestoreComplete = async (outcome: RestoreOutcome) => {
     await refreshSessions();
     const total = restoringSession?.tabCount ?? outcome.restored;
-    void track('archive_restore', { restored: outcome.restored, total });
+    void track("archive_restore", { restored: outcome.restored, total });
     if (outcome.cancelled) {
-      feedback.info(t('archive.restoreCancelled', { restored: outcome.restored }));
+      feedback.info(t("archive.restoreCancelled", { restored: outcome.restored }));
     } else if (outcome.restored === total) {
-      feedback.success(t('archive.restoredOk'));
+      feedback.success(t("archive.restoredOk"));
     } else {
-      feedback.warning(t('archive.restorePartial', { restored: outcome.restored, total }));
+      feedback.warning(t("archive.restorePartial", { restored: outcome.restored, total }));
     }
     setRestoreDialogOpen(false);
     setRestoringSession(null);
@@ -213,10 +212,10 @@ export function ArchiveView() {
   const handleDelete = async (id: string) => {
     try {
       await deleteSession(id);
-      void track('archive_delete');
+      void track("archive_delete");
       await refreshSessions();
     } catch (err) {
-      feedback.error(t('archive.deleteFailed'), err);
+      feedback.error(t("archive.deleteFailed"), err);
     }
   };
 
@@ -224,22 +223,22 @@ export function ArchiveView() {
   const handleShare = async (id: string) => {
     const payload = await exportSingleSession(id);
     if (payload === null) {
-      feedback.error(t('archive.shareFailed'));
+      feedback.error(t("archive.shareFailed"));
       return;
     }
     try {
-      const blob = new Blob([payload.content], { type: 'application/json' });
+      const blob = new Blob([payload.content], { type: "application/json" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = payload.filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      feedback.success(t('archive.shareOk'));
+      feedback.success(t("archive.shareOk"));
     } catch (err) {
-      feedback.error(t('archive.shareFailed'), err);
+      feedback.error(t("archive.shareFailed"), err);
     }
   };
 
@@ -266,32 +265,32 @@ export function ArchiveView() {
     cancelSelect();
   };
 
-  const handleOpenMerge = async (ids: string[]) => {
+  const handleOpenMerge = (ids: string[]) => {
     if (ids.length < 2) {
-      feedback.warning(t('archive.mergeNeedTwo'));
+      feedback.warning(t("archive.mergeNeedTwo"));
       return;
     }
     setSelectedIds(new Set(ids));
-    setMergeName(t('archive.mergedDefaultName'));
+    setMergeName(t("archive.mergedDefaultName"));
     setMergeOpen(true);
   };
 
   const handleConfirmMerge = async () => {
     try {
       const newSession = await mergeSessions(Array.from(selectedIds), mergeName);
-      void track('archive_merge', { count: selectedIds.size });
+      void track("archive_merge", { count: selectedIds.size });
       await refreshSessions();
       setMergeOpen(false);
       cancelSelect();
-      feedback.success(t('archive.mergedOk', { count: newSession.tabCount }));
+      feedback.success(t("archive.mergedOk", { count: newSession.tabCount }));
       void useMetadataStore.getState().pushActivity({
         id: `merge-${newSession.id}`,
-        type: 'archive',
+        type: "archive",
         ts: Date.now(),
-        summary: t('archive.mergedActivity', { count: newSession.tabCount, name: newSession.name }),
+        summary: t("archive.mergedActivity", { count: newSession.tabCount, name: newSession.name }),
       });
     } catch (err) {
-      feedback.error(t('archive.mergeFailed'), err);
+      feedback.error(t("archive.mergeFailed"), err);
     }
   };
 
@@ -302,14 +301,14 @@ export function ArchiveView() {
 
   const handleOpenSingle = async (tab: { url: string }) => {
     if (!isSafeExternalUrl(tab.url)) {
-      feedback.error(t('archive.restoreFailed'));
+      feedback.error(t("archive.restoreFailed"));
       return;
     }
     try {
       const currentWindow = await getCurrentWindow();
       await createTab({ url: tab.url, windowId: currentWindow?.id, active: true });
     } catch (err) {
-      feedback.error(t('archive.restoreFailed'), err);
+      feedback.error(t("archive.restoreFailed"), err);
     }
   };
 
@@ -318,11 +317,11 @@ export function ArchiveView() {
     setArchivingCurrent(true);
     try {
       const result = await archiveAllTabs();
-      void track('archive_create', { count: result.archivedCount });
+      void track("archive_create", { count: result.archivedCount });
       const { archivedCount, closedCount, session } = result;
       // 同步记录到「插件历史」时间线，带上足够的 undo 上下文
       void appendHistoryEvent({
-        type: 'archive_create',
+        type: "archive_create",
         title: session.name,
         extra: { count: archivedCount, sessionId: session.id },
         undoable: true,
@@ -339,27 +338,29 @@ export function ArchiveView() {
         pinned: tab.pinned,
       }));
       const failCount = archivedCount - closedCount;
-      const subNote = failCount > 0 ? t('archive.closeIncomplete', { count: failCount }) : '';
-      void useUndoStore.getState().addRecord(
-        snapshots,
-        t('archive.archivedRichToast', { count: archivedCount, name: session.name }),
-        { archivedSessionId: session.id, subNote },
-      );
+      const subNote = failCount > 0 ? t("archive.closeIncomplete", { count: failCount }) : "";
+      void useUndoStore
+        .getState()
+        .addRecord(
+          snapshots,
+          t("archive.archivedRichToast", { count: archivedCount, name: session.name }),
+          { archivedSessionId: session.id, subNote },
+        );
 
       void useMetadataStore.getState().pushActivity({
         id: `archive-${session.id}`,
-        type: 'archive',
+        type: "archive",
         ts: Date.now(),
-        summary: t('activity.archived', { count: archivedCount, name: session.name }),
+        summary: t("activity.archived", { count: archivedCount, name: session.name }),
         primaryAction: {
-          id: 'view',
-          label: t('activity.viewArchive'),
-          kind: 'open_archive',
+          id: "view",
+          label: t("activity.viewArchive"),
+          kind: "open_archive",
           payload: session.id,
         },
       });
     } catch (err) {
-      feedback.error(t('archive.archiveFailed'), err);
+      feedback.error(t("archive.archiveFailed"), err);
     } finally {
       setArchivingCurrent(false);
     }
@@ -367,7 +368,7 @@ export function ArchiveView() {
 
   /** 全部展开/折叠 */
   const expandAll = () => {
-    const allIds = new Set(sessions.map(session => session.id));
+    const allIds = new Set(sessions.map((session) => session.id));
     setExpandedSessions(allIds);
   };
 
@@ -382,16 +383,16 @@ export function ArchiveView() {
         <div className={styles["app-archive-header__badge"]}>
           <Save size={ICON_SIZE.LARGE} className={styles["app-archive-header__icon"]} />
         </div>
-        <span className={styles["app-archive-header__title"]}>{t('archive.title')}</span>
+        <span className={styles["app-archive-header__title"]}>{t("archive.title")}</span>
         <Space size={4}>
           <BatchOperationsMenu
             selectedIds={selectedIds}
             totalCount={sessions.length}
             selectable={selectable}
             onToggleSelectMode={handleSelectModeChange}
-            onBatchRestore={async (ids) => {
+            onBatchRestore={(ids) => {
               for (const id of ids) {
-                await handleRestore(id);
+                handleRestore(id);
               }
             }}
             onBatchDelete={async (ids) => {
@@ -416,10 +417,12 @@ export function ArchiveView() {
             icon={<Plus size={ICON_SIZE.MEDIUM} />}
             loading={archivingCurrent}
             disabled={tabCount === 0}
-            onClick={() => { void handleArchiveCurrent(); }}
-            title={t('header.tabCount', { count: tabCount })}
+            onClick={() => {
+              void handleArchiveCurrent();
+            }}
+            title={t("header.tabCount", { count: tabCount })}
           >
-            {t('header.archive')}
+            {t("header.archive")}
           </Button>
         </Space>
       </div>
@@ -428,7 +431,7 @@ export function ArchiveView() {
         type="info"
         showIcon
         icon={<Info size={ICON_SIZE.MEDIUM} />}
-        description={t('archive.description')}
+        description={t("archive.description")}
         className={styles["app-archive-alert"]}
       />
 
@@ -436,7 +439,7 @@ export function ArchiveView() {
       <div className={styles["app-archive-search"]}>
         <Input.Search
           className={styles["app-archive-search__input"]}
-          placeholder={t('archive.searchPlaceholder')}
+          placeholder={t("archive.searchPlaceholder")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           allowClear
@@ -446,9 +449,9 @@ export function ArchiveView() {
       {/* 搜索结果统计 */}
       {searchQuery.trim() && (
         <div className={styles["app-archive-search-result"]}>
-          {t('archive.searchResults', {
+          {t("archive.searchResults", {
             count: filteredSessions.length,
-            total: sessions.length
+            total: sessions.length,
           })}
         </div>
       )}
@@ -462,7 +465,7 @@ export function ArchiveView() {
             onClick={expandAll}
             disabled={expandedSessions.size === filteredSessions.length}
           >
-            {t('archive.expandAll')}
+            {t("archive.expandAll")}
           </Button>
           <Button
             size="small"
@@ -470,7 +473,7 @@ export function ArchiveView() {
             onClick={collapseAll}
             disabled={expandedSessions.size === 0}
           >
-            {t('archive.collapseAll')}
+            {t("archive.collapseAll")}
           </Button>
         </div>
       )}
@@ -479,38 +482,36 @@ export function ArchiveView() {
         <div className={styles["app-archive-loading"]}>
           <div className={styles["app-archive-loading__content"]}>
             <Spin />
-            <span className={styles["app-archive-loading__copy"]}>{t('archive.loading')}</span>
+            <span className={styles["app-archive-loading__copy"]}>{t("archive.loading")}</span>
           </div>
         </div>
       ) : filteredSessions.length === 0 ? (
         <FeatureEmptyState
-          title={t('archive.empty')}
-          description={t('archive.emptyHint')}
+          title={t("archive.empty")}
+          description={t("archive.emptyHint")}
           icon={<Inbox size={ICON_SIZE.HERO} />}
-          hints={[
-            t('archive.emptyHint1'),
-            t('archive.emptyHint2'),
-            t('archive.emptyHint3'),
+          hints={[t("archive.emptyHint1"), t("archive.emptyHint2"), t("archive.emptyHint3")]}
+          actions={[
+            {
+              text: t("archive.archiveCurrentWindow"),
+              onClick: () => void archiveAllTabs(),
+              type: "primary",
+            },
           ]}
-          actions={[{
-            text: t('archive.archiveCurrentWindow'),
-            onClick: () => void archiveAllTabs(),
-            type: 'primary',
-          }]}
         />
       ) : (
         <List
           dataSource={filteredSessions}
           renderItem={(session) => (
             <div
-              className={`${styles['app-archive-session-shell']}${highlightId === session.id ? ' ' + styles['is-highlighted'] : ''}`}
+              className={`${styles["app-archive-session-shell"]}${highlightId === session.id ? " " + styles["is-highlighted"] : ""}`}
             >
               <SessionItem
                 session={session}
                 isExpanded={expandedSessions.has(session.id)}
                 locale={locale}
                 onToggleExpand={() => {
-                  setExpandedSessions(prev => {
+                  setExpandedSessions((prev) => {
                     const newSet = new Set(prev);
                     if (newSet.has(session.id)) {
                       newSet.delete(session.id);
@@ -520,11 +521,19 @@ export function ArchiveView() {
                     return newSet;
                   });
                 }}
-                onRestore={(id) => { void handleRestore(id); }}
-                onDelete={(id) => { void handleDelete(id); }}
+                onRestore={(id) => {
+                  void handleRestore(id);
+                }}
+                onDelete={(id) => {
+                  void handleDelete(id);
+                }}
                 onStartRenaming={startRenaming}
-                onOpenSingle={(tab) => { void handleOpenSingle(tab); }}
-                onShare={(id) => { void handleShare(id); }}
+                onOpenSingle={(tab) => {
+                  void handleOpenSingle(tab);
+                }}
+                onShare={(id) => {
+                  void handleShare(id);
+                }}
                 selectable={selectable}
                 selected={selectedIds.has(session.id)}
                 onToggleSelect={toggleSelect}
@@ -539,21 +548,21 @@ export function ArchiveView() {
       {/* 合并会话 Modal */}
       <Modal
         open={mergeOpen}
-        rootClassName={styles['app-archive-merge-modal']}
-        title={t('archive.mergeTitle')}
+        rootClassName={styles["app-archive-merge-modal"]}
+        title={t("archive.mergeTitle")}
         onCancel={() => setMergeOpen(false)}
         onOk={() => void handleConfirmMerge()}
-        okText={t('archive.merge')}
-        cancelText={t('archive.cancel')}
+        okText={t("archive.merge")}
+        cancelText={t("archive.cancel")}
         centered
       >
-        <p className={styles["app-archive-merge-copy"]}>
-          {t('archive.mergeDesc', { count: selectedIds.size })}
-        </p>
+        <Typography.Text className={styles["app-archive-merge-copy"]}>
+          {t("archive.mergeDesc", { count: selectedIds.size })}
+        </Typography.Text>
         <Input
           value={mergeName}
           onChange={(e) => setMergeName(e.target.value)}
-          placeholder={t('archive.mergeNamePlaceholder')}
+          placeholder={t("archive.mergeNamePlaceholder")}
         />
       </Modal>
 
@@ -568,7 +577,7 @@ export function ArchiveView() {
             setRestoreDialogOpen(false);
             setRestoringSession(null);
           }}
-          onRestoreComplete={handleEnhancedRestoreComplete}
+          onRestoreComplete={(outcome) => void handleEnhancedRestoreComplete(outcome)}
         />
       )}
 
@@ -579,7 +588,7 @@ export function ArchiveView() {
           sessionId={renamingSession.id}
           currentName={renamingSession.name}
           tabCount={renamingSession.tabCount}
-          tabUrls={renamingSession.tabs.map(tab => tab.url)}
+          tabUrls={renamingSession.tabs.map((tab) => tab.url)}
           onClose={() => {
             setRenamingDialogOpen(false);
             setRenamingSession(null);
@@ -588,9 +597,9 @@ export function ArchiveView() {
             try {
               await renameSession(id, newName);
               await refreshSessions();
-              feedback.success(t('archive.renameOk'));
+              feedback.success(t("archive.renameOk"));
             } catch (err) {
-              feedback.error(t('archive.rename'), err);
+              feedback.error(t("archive.rename"), err);
             }
           }}
         />

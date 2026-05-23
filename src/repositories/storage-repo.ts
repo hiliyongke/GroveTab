@@ -5,9 +5,9 @@
  * to avoid reading all data on every access.
  */
 
-import { storageGet, storageSet } from '@/chrome';
-import { storageRemove, storageGetAllKeys } from '@/chrome/tabs';
-import { STORAGE_KEYS } from '@/shared/config/storage-keys';
+import { storageGet, storageSet } from "@/chrome";
+import { storageRemove, storageGetAllKeys } from "@/chrome/tabs";
+import { STORAGE_KEYS } from "@/shared/config/storage-keys";
 import type {
   ActivityRecord,
   AutoSnapshotMeta,
@@ -21,7 +21,7 @@ import type {
   StorageMeta,
   UserSettings,
   Workspace,
-} from '@/shared/types';
+} from "@/shared/types";
 
 // ── Schema Version & Migration ────────────────────────
 // v1 → v2: v1.0 封板。新增 dedupStrictness / idleThresholdMinutes /
@@ -33,31 +33,31 @@ const CURRENT_SCHEMA_VERSION = 3;
 
 const DEFAULT_SETTINGS: UserSettings = {
   overrideNewTab: true,
-  newtabPageMode: 'workspace',
-  viewTabPosition: 'top',
-  defaultView: 'domain',
-  theme: 'system',
-  gradientPreset: 'default',
-  skinPreset: 'glassmorphism',
+  newtabPageMode: "workspace",
+  viewTabPosition: "top",
+  defaultView: "domain",
+  theme: "system",
+  gradientPreset: "default",
+  skinPreset: "glassmorphism",
   showIncognito: false,
-  language: 'zh-CN',
-  domainGroupColumns: 'auto',
+  language: "zh-CN",
+  domainGroupColumns: "auto",
   domainGroupShowItemFavicon: true,
-  domainGroupAccentBarPosition: 'left',
-  domainGroupCardRadius: 'default',
-  searchScope: ['title', 'hostname', 'url'],
+  domainGroupAccentBarPosition: "left",
+  domainGroupCardRadius: "default",
+  searchScope: ["title", "hostname", "url"],
   searchEnablePinyin: true,
-  searchSortBy: 'relevance',
-  searchDefaultEngine: 'bing',
-  searchEnabledEngines: ['bing', 'baidu', 'google', 'duckduckgo'],
+  searchSortBy: "relevance",
+  searchDefaultEngine: "bing",
+  searchEnabledEngines: ["bing", "baidu", "google", "duckduckgo"],
   searchCustomEngines: [],
   searchAutoFallbackToWeb: true,
   searchUseHistorySuggestions: true,
   searchUseHotSuggestions: true,
-  hotSuggestionSource: 'trending',
-  layoutDensity: 'default',
+  hotSuggestionSource: "trending",
+  layoutDensity: "default",
   contentMaxWidth: 0,
-  reducedMotion: 'auto',
+  reducedMotion: "auto",
   uiVisibility: {
     header: true,
     heroLogo: true,
@@ -70,15 +70,15 @@ const DEFAULT_SETTINGS: UserSettings = {
   },
   speedDialGroupEnabled: false,
   // v1.0 封板新增默认值
-  dedupStrictness: 'loose',
+  dedupStrictness: "loose",
   idleThresholdMinutes: 1440,
   undoWindowSeconds: 5,
   closeConfirmThreshold: 20,
-  autoSnapshotFrequency: '12h',
+  autoSnapshotFrequency: "12h",
   enableOgFetch: false,
   // v1.2 新增默认值
-  clickEffect: 'off',
-  videoBackground: { type: 'none' },
+  clickEffect: "off",
+  videoBackground: { type: "none" },
   // v1.4 插件原生历史记录默认值
   historyEnabled: true,
   historyRecordEvents: true,
@@ -129,8 +129,8 @@ export async function getSettings(): Promise<UserSettings> {
    * 旧值迁移：aurora → slate，sunrise → warm
    * 2026-04-23 预设体系重命名后，存量用户磁盘里可能还存着旧 ID。
    */
-  if (settings.gradientPreset === 'aurora') settings.gradientPreset = 'slate';
-  if (settings.gradientPreset === 'sunrise') settings.gradientPreset = 'warm';
+  if (settings.gradientPreset === "aurora") settings.gradientPreset = "slate";
+  if (settings.gradientPreset === "sunrise") settings.gradientPreset = "warm";
   /**
    * v1.0 封板：为缺失的新字段注入默认值（向前兼容，绝不抛错）。
    * 不使用展开合并整个 DEFAULT_SETTINGS，避免意外覆盖用户显式关闭的老字段。
@@ -143,7 +143,7 @@ function withDefaults(partial: Partial<UserSettings>): UserSettings {
   // uiVisibility 是嵌套对象，需要逐项合并避免覆盖用户设置
   merged.uiVisibility = {
     ...DEFAULT_SETTINGS.uiVisibility,
-    ...(partial.uiVisibility === undefined ? {} : partial.uiVisibility),
+    ...(partial.uiVisibility ?? {}),
   };
   return merged;
 }
@@ -231,7 +231,7 @@ export async function getSearchHistory(): Promise<SearchHistoryEntry[]> {
   const raw = (await getData<SearchHistoryEntry[] | string[]>(STORAGE_KEYS.searchHistory)) ?? [];
   if (raw.length === 0) return [];
   // 旧数据兼容：string[] → SearchHistoryEntry[]
-  if (typeof raw[0] === 'string') {
+  if (typeof raw[0] === "string") {
     const now = Date.now();
     return (raw as readonly string[]).map((query) => ({ query, ts: now, count: 1 }));
   }
@@ -253,7 +253,7 @@ export async function getRecentSearches(): Promise<string[]> {
  */
 export async function pushRecentSearch(query: string): Promise<string[]> {
   const normalized = query.trim();
-  if (normalized === '') return getRecentSearches();
+  if (normalized === "") return getRecentSearches();
 
   const existing = await getSearchHistory();
   const hit = existing.find((e) => e.query === normalized);
@@ -341,10 +341,6 @@ export async function saveOgEntry(entry: OgEntry): Promise<void> {
   await setData(STORAGE_KEYS.ogIndex, index);
 }
 
-export async function clearOgIndex(): Promise<void> {
-  await setData(STORAGE_KEYS.ogIndex, {});
-}
-
 // ── Auto Snapshot Meta (F-23) ──────────────────────────
 
 export async function getAutoSnapshotMeta(): Promise<AutoSnapshotMeta | undefined> {
@@ -388,7 +384,9 @@ export async function addSpeedDialSite(site: SpeedDialSite): Promise<SpeedDialSi
 }
 
 /** 更新一个常用站点（不可变操作） */
-export async function updateSpeedDialSite(updated: Partial<SpeedDialSite> & { id: string }): Promise<SpeedDialSite[]> {
+export async function updateSpeedDialSite(
+  updated: Partial<SpeedDialSite> & { id: string },
+): Promise<SpeedDialSite[]> {
   const sites = await getSpeedDialSites();
   const idx = sites.findIndex((s) => s.id === updated.id);
   const target = idx !== -1 ? sites[idx] : undefined;

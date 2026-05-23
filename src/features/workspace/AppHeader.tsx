@@ -1,22 +1,13 @@
-import { useCallback } from 'react';
-import { Layout, Space, Button, Tooltip, Tag } from 'antd';
-import {
-  Search,
-  Settings,
-  Sun,
-  Moon,
-  Monitor,
-  Globe,
-  BarChart3,
-  History,
-} from 'lucide-react';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { useSettingsStore } from '@/store';
-import { useT } from '@/shared/i18n';
-import { BRAND } from '@/shared/config/brand';
-import { DropdownMenu } from '@/features/workspace/DropdownMenu';
-import { WorkspaceSwitcher } from '@/features/workspace/WorkspaceSwitcher';
-import type { NewtabPageMode } from '@/shared/types';
+import { useCallback } from "react";
+import { Layout, Space, Button, Tooltip, Tag } from "antd";
+import { Search, Settings, Sun, Moon, Monitor, Globe, BarChart3, History } from "lucide-react";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useSettingsStore } from "@/store";
+import { useT } from "@/shared/i18n";
+import { BRAND } from "@/shared/config/brand";
+import { DropdownMenu } from "@/features/workspace/DropdownMenu";
+import { WorkspaceSwitcher } from "@/features/workspace/WorkspaceSwitcher";
+import type { NewtabPageMode } from "@/shared/types";
 
 const { Header } = Layout;
 
@@ -66,7 +57,7 @@ export function AppHeader({
   const { t } = useT();
   /** 循环切换 light → dark → system */
   const toggleTheme = useCallback(() => {
-    const next = theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light';
+    const next = theme === "light" ? "dark" : theme === "dark" ? "system" : "light";
     void updateSettings({ theme: next });
   }, [theme, updateSettings]);
 
@@ -77,9 +68,9 @@ export function AppHeader({
    *   - system → 显示器 🖥
    */
   const themeIcon =
-    theme === 'system' ? (
+    theme === "system" ? (
       <Monitor key="sys" size={ICON_SIZE.MEDIUM} className="app-icon app-icon--theme" />
-    ) : theme === 'dark' ? (
+    ) : theme === "dark" ? (
       <Moon key="dark" size={ICON_SIZE.MEDIUM} className="app-icon app-icon--theme" />
     ) : (
       <Sun key="light" size={ICON_SIZE.MEDIUM} className="app-icon app-icon--theme" />
@@ -89,42 +80,33 @@ export function AppHeader({
     <Header className="app-header-shell">
       {/* 左侧：小 logo + 状态摘要 */}
       <div className="app-header-left">
-        <img
-          src="/icons/logo.png"
-          alt={BRAND.name}
-          className="app-header-logo"
-        />
+        <img src="/icons/logo.png" alt={BRAND.name} className="app-header-logo" />
         {/* 状态徽标 */}
         <Tag
-          color={hasTidySuggestions ? 'gold' : 'green'}
-          className={`app-header-status-tag${compactSearchVisible ? ' is-hidden' : ''}`}
+          color={hasTidySuggestions ? "gold" : "green"}
+          className={`app-header-status-tag${compactSearchVisible ? " is-hidden" : ""}`}
         >
-          {hasTidySuggestions ? t('dashboard.tidyReady') : t('dashboard.allClear')}
+          {hasTidySuggestions ? t("dashboard.tidyReady") : t("dashboard.allClear")}
         </Tag>
         {/* 核心计数 —— 仅在吸附搜索未激活时显示 */}
-        <span
-          className={`app-header-metrics${compactSearchVisible ? ' is-hidden' : ''}`}
-        >
-          <span className="app-header-metric-strong">{tabCount}</span> {t('dashboard.tabsStat')}
+        <span className={`app-header-metrics${compactSearchVisible ? " is-hidden" : ""}`}>
+          <span className="app-header-metric-strong">{tabCount}</span> {t("dashboard.tabsStat")}
           <span className="app-header-dot">·</span>
-          <span className="app-header-metric-strong">{domainCount}</span> {t('dashboard.domainsStat')}
+          <span className="app-header-metric-strong">{domainCount}</span>{" "}
+          {t("dashboard.domainsStat")}
           {(duplicateTabsCount > 0 || idleTabsCount > 0) && (
             <>
               <span className="app-header-dot">·</span>
               <span
-                className={`app-header-metric-warning${hasTidySuggestions ? ' is-warning' : ''}`}
+                className={`app-header-metric-warning${hasTidySuggestions ? " is-warning" : ""}`}
               >
                 {duplicateTabsCount + idleTabsCount}
-              </span>{' '}
-              {t('header.pending')}
+              </span>{" "}
+              {t("header.pending")}
               {onTidy && (
-                <button
-                  type="button"
-                  className="app-header-tidy-link"
-                  onClick={onTidy}
-                >
-                  {t('dashboard.tidyAction')}
-                </button>
+                <Button type="link" className="app-header-tidy-link" onClick={onTidy}>
+                  {t("dashboard.tidyAction")}
+                </Button>
               )}
             </>
           )}
@@ -138,81 +120,77 @@ export function AppHeader({
         · Hero 搜索框在视野内时隐藏，滚出后渐显
       */}
       <div className="app-header-center">
-        <button
-          type="button"
+        <Button
+          type="text"
           onClick={onOpenSearch}
-          aria-label={t('search.placeholder')}
-          className={`app-compact-search app-header-search-trigger${compactSearchVisible ? ' is-visible' : ''}`}
+          aria-label={t("search.placeholder")}
+          className={`app-compact-search app-header-search-trigger${compactSearchVisible ? " is-visible" : ""}`}
         >
-          <Search size={ICON_SIZE.DEFAULT} className="app-icon app-icon--search app-header-search-icon" />
-          <span className="app-header-search-trigger-text">
-            {t('search.placeholder')}
-          </span>
+          <Search
+            size={ICON_SIZE.DEFAULT}
+            className="app-icon app-icon--search app-header-search-icon"
+          />
+          <span className="app-header-search-trigger-text">{t("search.placeholder")}</span>
           <span className="app-kbd" aria-hidden>
             ⌘K
           </span>
-        </button>
+        </Button>
       </div>
 
       <Space size={6} className="app-header-actions">
-        {pageMode !== 'workspace' && (
+        {pageMode !== "workspace" && (
           <Button
             size="small"
             type="text"
             icon={<Globe size={ICON_SIZE.SMALL} />}
-            onClick={() => onPageModeChange('workspace')}
+            onClick={() => onPageModeChange("workspace")}
           >
-            {t('pageMode.workspace')}
+            {t("pageMode.workspace")}
           </Button>
         )}
-        <DropdownMenu
-          currentPageMode={pageMode}
-          onPageModeChange={onPageModeChange}
-        />
+        <DropdownMenu currentPageMode={pageMode} onPageModeChange={onPageModeChange} />
         <WorkspaceSwitcher />
         <Tooltip title={t(`theme.${theme}`)}>
           <Button
             size="small"
             type="text"
             icon={
-              <span
-                key={theme}
-                className="app-theme-icon"
-              >
+              <span key={theme} className="app-theme-icon">
                 {themeIcon}
               </span>
-            }            onClick={toggleTheme}
+            }
+            onClick={toggleTheme}
             aria-label={t(`theme.${theme}`)}
           />
         </Tooltip>
-        <Tooltip title={t('header.settings')}>
+        <Tooltip title={t("header.settings")}>
           <Button
             size="small"
             type="text"
             icon={<Settings size={ICON_SIZE.SMALL} className="app-icon app-icon--settings" />}
             onClick={onSettings}
-            aria-label={t('header.settings')}
+            aria-label={t("header.settings")}
           />
         </Tooltip>
         {onInsights && (
-          <Tooltip title={t('insights.title')}>
+          <Tooltip title={t("insights.title")}>
             <Button
               size="small"
               type="text"
               icon={<BarChart3 size={ICON_SIZE.SMALL} className="app-icon app-icon--insights" />}
               onClick={onInsights}
-              aria-label={t('insights.title')}
+              aria-label={t("insights.title")}
             />
           </Tooltip>
         )}
         {onOpenHistory && (
-          <Tooltip title={t('header.history')}>
+          <Tooltip title={t("header.history")}>
             <Button
               size="small"
               type="text"
               icon={<History size={ICON_SIZE.SMALL} className="app-icon" />}
               onClick={onOpenHistory}
-              aria-label={t('header.history')}
+              aria-label={t("header.history")}
             />
           </Tooltip>
         )}

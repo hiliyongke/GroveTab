@@ -8,26 +8,19 @@
  * 支持受控激活 Tab（defaultActiveTab），便于从外部 hash（#about）直接切到指定 Tab。
  */
 
-import { Drawer } from 'antd';
-import { useState, useEffect, useCallback } from 'react';
-import {
-  Palette,
-  SlidersHorizontal,
-  Database,
-  KeyRound,
-  Info,
-  Shield,
-} from 'lucide-react';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { useSettingsStore } from '@/store';
-import { useT } from '@/shared/i18n';
-import styles from './settings.module.less';
-import { AppearancePanel } from './panels/AppearancePanel';
-import { BehaviorPanel } from './panels/BehaviorPanel';
-import { DataPanel } from './panels/DataPanel';
-import { ShortcutsPanel } from './panels/ShortcutsPanel';
-import { AboutPanel } from './panels/AboutPanel';
-import { PrivacyPanel } from './panels/PrivacyPanel';
+import { Drawer, Button, Typography } from "antd";
+import { useState, useEffect, useCallback } from "react";
+import { Palette, SlidersHorizontal, Database, KeyRound, Info, Shield } from "lucide-react";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useSettingsStore } from "@/store";
+import { useT } from "@/shared/i18n";
+import styles from "./settings.module.less";
+import { AppearancePanel } from "./panels/AppearancePanel";
+import { BehaviorPanel } from "./panels/BehaviorPanel";
+import { DataPanel } from "./panels/DataPanel";
+import { ShortcutsPanel } from "./panels/ShortcutsPanel";
+import { AboutPanel } from "./panels/AboutPanel";
+import { PrivacyPanel } from "./panels/PrivacyPanel";
 
 interface SettingsPanelProps {
   open: boolean;
@@ -44,7 +37,11 @@ interface TabConfig {
   component: React.ReactNode;
 }
 
-export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearance' }: SettingsPanelProps) {
+export function SettingsPanel({
+  open,
+  onOpenChange,
+  defaultActiveTab = "appearance",
+}: SettingsPanelProps) {
   const settings = useSettingsStore((s) => s.settings);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const { t } = useT();
@@ -62,39 +59,39 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
   /** Tab 配置 */
   const tabs: TabConfig[] = [
     {
-      key: 'appearance',
+      key: "appearance",
       icon: <Palette size={ICON_SIZE.MEDIUM} />,
-      labelKey: 'settings.appearance',
+      labelKey: "settings.appearance",
       component: <AppearancePanel settings={settings} updateSettings={updateSettings} />,
     },
     {
-      key: 'behavior',
+      key: "behavior",
       icon: <SlidersHorizontal size={ICON_SIZE.MEDIUM} />,
-      labelKey: 'settings.behavior',
+      labelKey: "settings.behavior",
       component: <BehaviorPanel settings={settings} updateSettings={updateSettings} />,
     },
     {
-      key: 'data',
+      key: "data",
       icon: <Database size={ICON_SIZE.MEDIUM} />,
-      labelKey: 'settings.data',
+      labelKey: "settings.data",
       component: <DataPanel />,
     },
     {
-      key: 'privacy',
+      key: "privacy",
       icon: <Shield size={ICON_SIZE.MEDIUM} />,
-      labelKey: 'settings.privacy',
+      labelKey: "settings.privacy",
       component: <PrivacyPanel settings={settings} updateSettings={updateSettings} />,
     },
     {
-      key: 'shortcuts',
+      key: "shortcuts",
       icon: <KeyRound size={ICON_SIZE.MEDIUM} />,
-      labelKey: 'settings.shortcuts',
+      labelKey: "settings.shortcuts",
       component: <ShortcutsPanel />,
     },
     {
-      key: 'about',
+      key: "about",
       icon: <Info size={ICON_SIZE.MEDIUM} />,
-      labelKey: 'settings.about',
+      labelKey: "settings.about",
       component: <AboutPanel />,
     },
   ];
@@ -108,44 +105,42 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
       onClose={handleClose}
       destroyOnClose
       width={704}
-      title={t('settings.title')}
+      title={t("settings.title")}
       classNames={{
-        mask: styles['settings-drawer__mask'],
-        header: styles['settings-drawer__header'],
-        title: styles['settings-drawer__title'],
-        body: styles['settings-drawer__body'],
-        section: styles['settings-drawer__section'],
+        mask: styles["settings-drawer__mask"],
+        header: styles["settings-drawer__header"],
+        title: styles["settings-drawer__title"],
+        body: styles["settings-drawer__body"],
+        section: styles["settings-drawer__section"],
       }}
-      rootClassName={styles['settings-drawer']}
+      rootClassName={styles["settings-drawer"]}
     >
-      <div className={styles['settings-shell']}>
+      <div className={styles["settings-shell"]}>
         {/* 左侧图标导航 */}
-        <nav className={styles['settings-nav']}>
-          <div className={styles['settings-nav__list']}>
+        <nav className={styles["settings-nav"]}>
+          <div className={styles["settings-nav__list"]}>
             {tabs.map((tab) => (
-              <button
+              <Button
                 key={tab.key}
-                type="button"
-                className={`${styles['settings-nav__item']}${activeTab === tab.key ? ` ${styles['is-active']}` : ''}`}
+                type="text"
+                className={`${styles["settings-nav__item"]}${activeTab === tab.key ? ` ${styles["is-active"]}` : ""}`}
                 onClick={() => setActiveTab(tab.key)}
               >
-                <span className={styles['settings-nav__icon']}>{tab.icon}</span>
-                <span className={styles['settings-nav__label']}>{t(tab.labelKey)}</span>
-              </button>
+                <span className={styles["settings-nav__icon"]}>{tab.icon}</span>
+                <span className={styles["settings-nav__label"]}>{t(tab.labelKey)}</span>
+              </Button>
             ))}
           </div>
         </nav>
 
         {/* 右侧内容区 */}
-        <main className={styles['settings-content']}>
-          <div className={styles['settings-content__header']}>
-            <h2 className={styles['settings-content__title']}>
+        <main className={styles["settings-content"]}>
+          <div className={styles["settings-content__header"]}>
+            <Typography.Title level={2} className={styles["settings-content__title"]}>
               {activeItem && t(activeItem.labelKey)}
-            </h2>
+            </Typography.Title>
           </div>
-          <div className={styles['settings-content__body']}>
-            {activeItem?.component}
-          </div>
+          <div className={styles["settings-content__body"]}>{activeItem?.component}</div>
         </main>
       </div>
     </Drawer>

@@ -11,23 +11,16 @@
  *     操作后会用 `feedback` 给出 toast 反馈
  */
 
-import { useState } from 'react';
-import {
-  Switch,
-  Select,
-  Slider,
-  Button,
-  Popconfirm,
-  Space,
-} from 'antd';
-import { Trash2, Eraser } from 'lucide-react';
+import { useState } from "react";
+import { Switch, Select, Slider, Button, Popconfirm, Space, Typography } from "antd";
+import { Trash2, Eraser } from "lucide-react";
 
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { useT } from '@/shared/i18n';
-import { feedback } from '@/shared/ui/feedback';
-import { Field } from '@/features/settings/components/Field';
-import { clearAllNativeHistory } from '@/repositories';
-import type { UserSettings } from '@/shared/types';
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useT } from "@/shared/i18n";
+import { feedback } from "@/shared/ui/feedback";
+import { Field } from "@/features/settings/components/Field";
+import { clearAllNativeHistory } from "@/repositories";
+import type { UserSettings } from "@/shared/types";
 
 interface PrivacyPanelProps {
   settings: UserSettings;
@@ -36,11 +29,11 @@ interface PrivacyPanelProps {
 
 /** TTL 候选选项（小时） */
 const TTL_OPTIONS: Array<{ value: number; labelKey: string }> = [
-  { value: 24, labelKey: 'privacy.ttl1d' },
-  { value: 72, labelKey: 'privacy.ttl3d' },
-  { value: 168, labelKey: 'privacy.ttl7d' },
-  { value: 720, labelKey: 'privacy.ttl30d' },
-  { value: 0, labelKey: 'privacy.ttlForever' },
+  { value: 24, labelKey: "privacy.ttl1d" },
+  { value: 72, labelKey: "privacy.ttl3d" },
+  { value: 168, labelKey: "privacy.ttl7d" },
+  { value: 720, labelKey: "privacy.ttl30d" },
+  { value: 0, labelKey: "privacy.ttlForever" },
 ];
 
 export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
@@ -58,9 +51,9 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
     setClearing(true);
     try {
       await clearAllNativeHistory();
-      feedback.success(t('history.cleared'));
+      feedback.success(t("history.cleared"));
     } catch (err) {
-      feedback.error(t('history.cleared'), err);
+      feedback.error(t("history.cleared"), err);
     } finally {
       setClearing(false);
     }
@@ -73,25 +66,25 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
     <div className="settings-panel-stack">
       {/* ── 主开关 ───────────────────────────────────── */}
       <section className="settings-section">
-        <h3 className="settings-section__title">{t('privacy.sectionMaster')}</h3>
+        <Typography.Title level={3} className="settings-section__title">
+          {t("privacy.sectionMaster")}
+        </Typography.Title>
         <div className="settings-section__body">
-          <Field
-            label={t('privacy.enableHistory')}
-            hint={t('privacy.enableHistoryHint')}
-          >
+          <Field label={t("privacy.enableHistory")} hint={t("privacy.enableHistoryHint")}>
             <Switch
               checked={enabled}
-              onChange={(v) => { void updateSettings({ historyEnabled: v }); }}
+              onChange={(v) => {
+                void updateSettings({ historyEnabled: v });
+              }}
             />
           </Field>
-          <Field
-            label={t('privacy.recordEvents')}
-            hint={t('privacy.recordEventsHint')}
-          >
+          <Field label={t("privacy.recordEvents")} hint={t("privacy.recordEventsHint")}>
             <Switch
               checked={recordEvents}
               disabled={disabled}
-              onChange={(v) => { void updateSettings({ historyRecordEvents: v }); }}
+              onChange={(v) => {
+                void updateSettings({ historyRecordEvents: v });
+              }}
             />
           </Field>
         </div>
@@ -99,11 +92,13 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
 
       {/* ── 容量与过期 ────────────────────────────────── */}
       <section className="settings-section" style={{ opacity: disabled ? 0.55 : 1 }}>
-        <h3 className="settings-section__title">{t('privacy.sectionCapacity')}</h3>
+        <Typography.Title level={3} className="settings-section__title">
+          {t("privacy.sectionCapacity")}
+        </Typography.Title>
         <div className="settings-section__body">
           <Field
-            label={t('privacy.maxClosedTabs')}
-            hint={t('privacy.maxClosedTabsHint', { value: maxClosed })}
+            label={t("privacy.maxClosedTabs")}
+            hint={t("privacy.maxClosedTabsHint", { value: maxClosed })}
           >
             <Slider
               min={10}
@@ -111,14 +106,16 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
               step={10}
               value={maxClosed}
               disabled={disabled}
-              onChange={(v) => { void updateSettings({ historyMaxClosedTabs: v }); }}
-              marks={{ 10: '10', 50: '50', 200: '200', 500: '500' }}
+              onChange={(v) => {
+                void updateSettings({ historyMaxClosedTabs: v });
+              }}
+              marks={{ 10: "10", 50: "50", 200: "200", 500: "500" }}
             />
           </Field>
 
           <Field
-            label={t('privacy.maxEvents')}
-            hint={t('privacy.maxEventsHint', { value: maxEvents })}
+            label={t("privacy.maxEvents")}
+            hint={t("privacy.maxEventsHint", { value: maxEvents })}
           >
             <Slider
               min={50}
@@ -126,20 +123,21 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
               step={50}
               value={maxEvents}
               disabled={disabled || !recordEvents}
-              onChange={(v) => { void updateSettings({ historyMaxEvents: v }); }}
-              marks={{ 50: '50', 500: '500', 2000: '2k', 5000: '5k' }}
+              onChange={(v) => {
+                void updateSettings({ historyMaxEvents: v });
+              }}
+              marks={{ 50: "50", 500: "500", 2000: "2k", 5000: "5k" }}
             />
           </Field>
 
-          <Field
-            label={t('privacy.closedTabTtl')}
-            hint={t('privacy.closedTabTtlHint')}
-          >
+          <Field label={t("privacy.closedTabTtl")} hint={t("privacy.closedTabTtlHint")}>
             <Select
               value={ttlHours}
               disabled={disabled}
-              style={{ width: '100%', maxWidth: 280 }}
-              onChange={(v) => { void updateSettings({ historyClosedTabsTtlHours: v }); }}
+              style={{ width: "100%", maxWidth: 280 }}
+              onChange={(v) => {
+                void updateSettings({ historyClosedTabsTtlHours: v });
+              }}
               options={TTL_OPTIONS.map((opt) => ({
                 value: opt.value,
                 label: t(opt.labelKey),
@@ -151,25 +149,33 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
 
       {/* ── URL 黑名单 ────────────────────────────────── */}
       <section className="settings-section" style={{ opacity: disabled ? 0.55 : 1 }}>
-        <h3 className="settings-section__title">{t('privacy.sectionBlocklist')}</h3>
+        <Typography.Title level={3} className="settings-section__title">
+          {t("privacy.sectionBlocklist")}
+        </Typography.Title>
         <div className="settings-section__body">
-          <Field
-            label={t('privacy.urlBlocklist')}
-            hint={t('privacy.urlBlocklistHint')}
-          >
+          <Field label={t("privacy.urlBlocklist")} hint={t("privacy.urlBlocklistHint")}>
             <Select
               mode="tags"
               value={blocklist}
               disabled={disabled}
-              style={{ width: '100%' }}
-              placeholder={t('privacy.urlBlocklistPlaceholder')}
-              tokenSeparators={[',', ' ', '\n']}
+              style={{ width: "100%" }}
+              placeholder={t("privacy.urlBlocklistPlaceholder")}
+              tokenSeparators={[",", " ", "\n"]}
               onChange={(v: string[]) => {
                 // 规整：转小写 / 去重 / 去前缀
-                const cleaned = Array.from(new Set(
-                  v.map((s) => s.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, ''))
-                    .filter((s) => s !== ''),
-                ));
+                const cleaned = Array.from(
+                  new Set(
+                    v
+                      .map((s) =>
+                        s
+                          .trim()
+                          .toLowerCase()
+                          .replace(/^https?:\/\//, "")
+                          .replace(/\/.*$/, ""),
+                      )
+                      .filter((s) => s !== ""),
+                  ),
+                );
                 void updateSettings({ historyUrlBlocklist: cleaned });
               }}
             />
@@ -179,28 +185,25 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
 
       {/* ── 危险区 ────────────────────────────────────── */}
       <section className="settings-section">
-        <h3 className="settings-section__title">{t('privacy.sectionDanger')}</h3>
+        <Typography.Title level={3} className="settings-section__title">
+          {t("privacy.sectionDanger")}
+        </Typography.Title>
         <div className="settings-section__body">
-          <Field
-            label={t('privacy.clearAll')}
-            hint={t('privacy.clearAllHint')}
-          >
+          <Field label={t("privacy.clearAll")} hint={t("privacy.clearAllHint")}>
             <Space>
               <Popconfirm
-                title={t('history.clearAllConfirm')}
-                onConfirm={() => { void handleClearAll(); }}
+                title={t("history.clearAllConfirm")}
+                onConfirm={() => {
+                  void handleClearAll();
+                }}
                 okButtonProps={{ danger: true }}
               >
-                <Button
-                  danger
-                  loading={clearing}
-                  icon={<Trash2 size={ICON_SIZE.SMALL} />}
-                >
-                  {t('privacy.clearAllButton')}
+                <Button danger loading={clearing} icon={<Trash2 size={ICON_SIZE.SMALL} />}>
+                  {t("privacy.clearAllButton")}
                 </Button>
               </Popconfirm>
               <Popconfirm
-                title={t('privacy.resetDefaultsConfirm')}
+                title={t("privacy.resetDefaultsConfirm")}
                 onConfirm={() => {
                   void updateSettings({
                     historyEnabled: true,
@@ -210,11 +213,11 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
                     historyClosedTabsTtlHours: 168,
                     historyUrlBlocklist: [],
                   });
-                  feedback.success(t('privacy.resetDefaultsDone'));
+                  feedback.success(t("privacy.resetDefaultsDone"));
                 }}
               >
                 <Button icon={<Eraser size={ICON_SIZE.SMALL} />}>
-                  {t('privacy.resetDefaults')}
+                  {t("privacy.resetDefaults")}
                 </Button>
               </Popconfirm>
             </Space>

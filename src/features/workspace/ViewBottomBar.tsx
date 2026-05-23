@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { useT } from '@/shared/i18n';
-import { VIEW_CONFIGS, type ViewMode } from '@/shared/config/views';
+import { useMemo } from "react";
+import { Button } from "antd";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useT } from "@/shared/i18n";
+import { VIEW_CONFIGS, type ViewMode } from "@/shared/config/views";
 
 /**
  * ViewBottomBar —— 视图切换底部固定栏（bottom 模式）
@@ -38,17 +39,17 @@ export function ViewBottomBar({
         {items.map((v) => {
           const isActive = viewMode === v.id;
           return (
-            <button
+            <Button
               key={v.id}
-              type="button"
-              className={`app-view-bottom__item${isActive ? ' is-active' : ''}`}
-              aria-current={isActive ? 'page' : undefined}
+              type="text"
+              className={`app-view-bottom__item${isActive ? " is-active" : ""}`}
+              aria-current={isActive ? "page" : undefined}
               onClick={() => onViewChange(v.id)}
               title={v.label}
             >
               <v.Icon size={ICON_SIZE.MEDIUM} />
               <span className="app-view-bottom__label">{v.label}</span>
-            </button>
+            </Button>
           );
         })}
       </div>

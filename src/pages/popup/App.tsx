@@ -11,18 +11,18 @@
  * 无 Tab 时归档按钮置灰 + 提示。
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Input, Tooltip, Typography, Empty } from 'antd';
-import { AntdThemeProvider } from '@/shared/ui/AntdThemeProvider';
-import { LayoutGrid, Save, Search, ExternalLink, X, Settings } from 'lucide-react';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { archiveCurrentWindowTabs } from '@/services';
-import { BRAND } from '@/shared/config/brand';
-import { buildSearchUrl } from '@/shared/config/search-engines';
-import type { SearchEngineId } from '@/shared/types';
-import { getSettings } from '@/repositories';
-import { activateTab, closeTab, createTab, getFaviconUrl, queryAllTabs } from '@/chrome';
-import { I18nProvider, useT } from '@/shared/i18n';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Button, Input, Tooltip, Typography, Empty } from "antd";
+import { AntdThemeProvider } from "@/shared/ui/AntdThemeProvider";
+import { LayoutGrid, Save, Search, ExternalLink, X, Settings } from "lucide-react";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { archiveCurrentWindowTabs } from "@/services";
+import { BRAND } from "@/shared/config/brand";
+import { buildSearchUrl } from "@/shared/config/search-engines";
+import type { SearchEngineId } from "@/shared/types";
+import { getSettings } from "@/repositories";
+import { activateTab, closeTab, createTab, getFaviconUrl, queryAllTabs } from "@/chrome";
+import { I18nProvider, useT } from "@/shared/i18n";
 
 const { Text } = Typography;
 
@@ -40,7 +40,7 @@ function extractHostname(url: string): string {
   try {
     return new URL(url).hostname;
   } catch {
-    return '';
+    return "";
   }
 }
 
@@ -53,19 +53,19 @@ async function focusTab(tab: RecentTab): Promise<void> {
     try {
       await createTab({ url: tab.url, active: true });
     } catch (err) {
-      console.warn('[Popup] focusTab: createTab failed', err);
+      console.warn("[Popup] focusTab: createTab failed", err);
     }
   }
 }
 
 function PopupContent() {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [recentTabs, setRecentTabs] = useState<RecentTab[]>([]);
   const [hasAnyTab, setHasAnyTab] = useState(true);
   const [archiving, setArchiving] = useState(false);
-  const [archiveError, setArchiveError] = useState('');
+  const [archiveError, setArchiveError] = useState("");
   /** 从用户设置读默认搜索引擎；暂以 Google 兑底 */
-  const [defaultEngine, setDefaultEngine] = useState<SearchEngineId>('google');
+  const [defaultEngine, setDefaultEngine] = useState<SearchEngineId>("google");
   const { t } = useT();
 
   // 读设置同步默认引擎
@@ -94,16 +94,16 @@ function PopupContent() {
         if (!alive) return;
         setHasAnyTab(all.length > 0);
         const list: RecentTab[] = all
-          .filter((tab) => tab.id !== undefined && tab.url !== undefined && tab.url !== '')
+          .filter((tab) => tab.id !== undefined && tab.url !== undefined && tab.url !== "")
           .map((tab) => {
-            const url = tab.url ?? '';
+            const url = tab.url ?? "";
             const extensionFavicon = getFaviconUrl(url);
             return {
               id: tab.id!,
               windowId: tab.windowId,
               title: tab.title ?? url,
               url,
-              favIconUrl: extensionFavicon !== '' ? extensionFavicon : (tab.favIconUrl ?? ''),
+              favIconUrl: extensionFavicon !== "" ? extensionFavicon : (tab.favIconUrl ?? ""),
               hostname: extractHostname(url),
               lastAccessed: tab.lastAccessed ?? 0,
             };
@@ -121,33 +121,34 @@ function PopupContent() {
 
   const filteredTabs = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (q === '') return recentTabs;
-    return recentTabs.filter((tab) =>
-      tab.title.toLowerCase().includes(q) ||
-      tab.url.toLowerCase().includes(q) ||
-      tab.hostname.toLowerCase().includes(q),
+    if (q === "") return recentTabs;
+    return recentTabs.filter(
+      (tab) =>
+        tab.title.toLowerCase().includes(q) ||
+        tab.url.toLowerCase().includes(q) ||
+        tab.hostname.toLowerCase().includes(q),
     );
   }, [recentTabs, query]);
-  const isSearching = query.trim() !== '';
+  const isSearching = query.trim() !== "";
   const tabCountLabel = isSearching
-    ? t('popup.matchingTabs', { matched: filteredTabs.length, total: recentTabs.length })
-    : t('popup.allTabs', { count: recentTabs.length });
+    ? t("popup.matchingTabs", { matched: filteredTabs.length, total: recentTabs.length })
+    : t("popup.allTabs", { count: recentTabs.length });
 
   const openNewTab = useCallback(() => {
-    void createTab({ url: chrome.runtime.getURL('src/pages/newtab/index.html') });
+    void createTab({ url: chrome.runtime.getURL("src/pages/newtab/index.html") });
     window.close();
   }, []);
 
   const archiveAll = useCallback(async () => {
     if (archiving) return;
     setArchiving(true);
-    setArchiveError('');
+    setArchiveError("");
     try {
       await archiveCurrentWindowTabs();
       window.close();
     } catch (err) {
       console.warn(`${BRAND.logTag}/popup archive failed`, err);
-      setArchiveError(t('popup.archiveFailed'));
+      setArchiveError(t("popup.archiveFailed"));
     } finally {
       setArchiving(false);
     }
@@ -156,7 +157,7 @@ function PopupContent() {
   /** 快速走全网搜索（回车时触发）—— 使用用户默认引擎 */
   const runWebSearch = useCallback(() => {
     const q = query.trim();
-    if (q === '') return;
+    if (q === "") return;
     void createTab({ url: buildSearchUrl(defaultEngine, q), active: true });
     window.close();
   }, [query, defaultEngine]);
@@ -165,9 +166,7 @@ function PopupContent() {
     <div className="popup-shell">
       {/* 顶部品牌 */}
       <div className="popup-brand">
-        <div className="popup-brand-mark">
-          {BRAND.shortName}
-        </div>
+        <div className="popup-brand-mark">{BRAND.shortName}</div>
         <Text strong className="popup-brand-name">
           {BRAND.name}
         </Text>
@@ -179,7 +178,7 @@ function PopupContent() {
         size="middle"
         allowClear
         className="popup-search"
-        placeholder={t('popup.searchPlaceholder')}
+        placeholder={t("popup.searchPlaceholder")}
         prefix={<Search size={ICON_SIZE.MEDIUM} className="popup-search-icon" />}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
@@ -187,10 +186,12 @@ function PopupContent() {
       />
 
       <div className="popup-meta">
-        <Text type="secondary" className="popup-meta-text">{tabCountLabel}</Text>
+        <Text type="secondary" className="popup-meta-text">
+          {tabCountLabel}
+        </Text>
         {filteredTabs.length > 0 && (
           <Text type="secondary" className="popup-meta-hint">
-            {t('popup.scrollHint')}
+            {t("popup.scrollHint")}
           </Text>
         )}
       </div>
@@ -201,7 +202,11 @@ function PopupContent() {
           <div className="popup-list-empty">
             <Empty
               image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description={<Text type="secondary" className="popup-empty-text">{t('popup.noRecentTabs')}</Text>}
+              description={
+                <Text type="secondary" className="popup-empty-text">
+                  {t("popup.noRecentTabs")}
+                </Text>
+              }
             />
           </div>
         ) : (
@@ -230,27 +235,25 @@ function PopupContent() {
       {/* 底部：操作按钮区 */}
       <div className="popup-actions">
         {/* 主操作：归档 —— 独占整行 */}
-        <Tooltip title={!hasAnyTab ? t('popup.noTabsToArchive') : ''} mouseEnterDelay={0.3}>
+        <Tooltip title={!hasAnyTab ? t("popup.noTabsToArchive") : ""} mouseEnterDelay={0.3}>
           <Button
             type="primary"
             icon={<Save size={ICON_SIZE.MEDIUM} />}
             block
             loading={archiving}
             disabled={!hasAnyTab || archiving}
-            onClick={() => { void archiveAll(); }}
+            onClick={() => {
+              void archiveAll();
+            }}
             className="popup-actions__primary"
           >
-            {t('popup.archiveWindow')}
+            {t("popup.archiveWindow")}
           </Button>
         </Tooltip>
         {/* 次要操作：打开工作台 + 设置 —— 并排 */}
         <div className="popup-actions__secondary">
-          <Button
-            icon={<LayoutGrid size={ICON_SIZE.MEDIUM} />}
-            block
-            onClick={openNewTab}
-          >
-            {t('popup.openWorkspace')}
+          <Button icon={<LayoutGrid size={ICON_SIZE.MEDIUM} />} block onClick={openNewTab}>
+            {t("popup.openWorkspace")}
             <ExternalLink size={ICON_SIZE.MICRO} className="popup-external-icon" />
           </Button>
           <Button
@@ -258,37 +261,33 @@ function PopupContent() {
             block
             onClick={() => {
               void createTab({
-                url: chrome.runtime.getURL('src/pages/newtab/index.html') + '#settings',
+                url: chrome.runtime.getURL("src/pages/newtab/index.html") + "#settings",
               });
               window.close();
             }}
           >
-            {t('header.settings')}
+            {t("header.settings")}
           </Button>
         </div>
       </div>
 
       {/* 底部"关于"链接：跳转 newtab 并自动切到 About Tab */}
       <div className="popup-about">
-        <button
-          type="button"
+        <Button
+          type="text"
           onClick={() => {
             void createTab({
-              url: chrome.runtime.getURL('src/pages/newtab/index.html') + '#about',
+              url: chrome.runtime.getURL("src/pages/newtab/index.html") + "#about",
             });
             window.close();
           }}
           className="popup-about-link"
         >
-          {t('popup.aboutGroveTab', { brand: BRAND.name })}
-        </button>
+          {t("popup.aboutGroveTab", { brand: BRAND.name })}
+        </Button>
       </div>
 
-      {archiveError !== '' && (
-        <div className="popup-error">
-          {archiveError}
-        </div>
-      )}
+      {archiveError !== "" && <div className="popup-error">{archiveError}</div>}
     </div>
   );
 }
@@ -305,13 +304,11 @@ function RecentTabRow({
 }) {
   const { t } = useT();
   return (
-    <div
-      className="popup-row app-hover-reveal-host"
-    >
-      <button
-        type="button"
+    <div className="popup-row app-hover-reveal-host">
+      <Button
+        type="text"
         onClick={onClick}
-        aria-label={t('popup.openTab', { title: tab.title })}
+        aria-label={t("popup.openTab", { title: tab.title })}
         className="popup-row-main"
       >
         <img
@@ -322,29 +319,25 @@ function RecentTabRow({
           referrerPolicy="no-referrer"
           className="popup-row-favicon"
           onError={(e) => {
-            e.currentTarget.style.visibility = 'hidden';
+            e.currentTarget.style.visibility = "hidden";
           }}
         />
         <div className="popup-row-content">
-          <span className="popup-row-title">
-            {tab.title}
-          </span>
-          <span className="popup-row-host">
-            {tab.hostname}
-          </span>
+          <span className="popup-row-title">{tab.title}</span>
+          <span className="popup-row-host">{tab.hostname}</span>
         </div>
-      </button>
-      <button
-        type="button"
+      </Button>
+      <Button
+        type="text"
         onClick={(e) => {
           e.stopPropagation();
           onClose();
         }}
-        aria-label={t('popup.closeTab', { title: tab.title })}
+        aria-label={t("popup.closeTab", { title: tab.title })}
         className="popup-row-close app-hover-reveal"
       >
         <X size={ICON_SIZE.SMALL} />
-      </button>
+      </Button>
     </div>
   );
 }

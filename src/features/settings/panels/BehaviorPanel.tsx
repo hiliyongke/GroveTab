@@ -8,12 +8,13 @@
  * 4. SearchSettings - 搜索设置
  */
 
-import type { UserSettings } from '@/shared/types';
-import { useT } from '@/shared/i18n';
-import { GeneralSettings } from './GeneralSettings';
-import { ViewLayoutSettings } from './ViewLayoutSettings';
-import { TimelineSettings } from './TimelineSettings';
-import { SearchSettings } from './SearchSettings';
+import type { UserSettings } from "@/shared/types";
+import { Typography } from "antd";
+import { useT } from "@/shared/i18n";
+import { GeneralSettings } from "./GeneralSettings";
+import { ViewLayoutSettings } from "./ViewLayoutSettings";
+import { TimelineSettings } from "./TimelineSettings";
+import { SearchSettings } from "./SearchSettings";
 
 interface BehaviorPanelProps {
   settings: UserSettings;
@@ -29,23 +30,23 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
   const { t } = useT();
   const sections = [
     {
-      key: 'general',
-      title: t('settings.sectionGeneral'),
+      key: "general",
+      title: t("settings.sectionGeneral"),
       content: <GeneralSettings settings={settings} updateSettings={updateSettings} />,
     },
     {
-      key: 'view-layout',
-      title: t('settings.sectionViewLayout'),
+      key: "view-layout",
+      title: t("settings.sectionViewLayout"),
       content: <ViewLayoutSettings settings={settings} updateSettings={updateSettings} />,
     },
     {
-      key: 'timeline',
-      title: t('settings.sectionTimeline'),
+      key: "timeline",
+      title: t("settings.sectionTimeline"),
       content: <TimelineSettings settings={settings} updateSettings={updateSettings} />,
     },
     {
-      key: 'search',
-      title: t('settings.sectionSearch'),
+      key: "search",
+      title: t("settings.sectionSearch"),
       content: <SearchSettings settings={settings} updateSettings={updateSettings} />,
     },
   ];
@@ -54,7 +55,9 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
     <div className="settings-panel-stack">
       {sections.map((section) => (
         <section key={section.key} className="settings-section">
-          <h3 className="settings-section__title">{section.title}</h3>
+          <Typography.Title level={3} className="settings-section__title">
+            {section.title}
+          </Typography.Title>
           <div className="settings-section__body">{section.content}</div>
         </section>
       ))}

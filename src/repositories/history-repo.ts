@@ -13,8 +13,8 @@
  *   - SW 与 UI 都依赖本仓库；不要依赖 React/DOM
  */
 
-import { storageGet, storageSet } from '@/chrome';
-import { STORAGE_KEYS } from '@/shared/config/storage-keys';
+import { storageGet, storageSet } from "@/chrome";
+import { STORAGE_KEYS } from "@/shared/config/storage-keys";
 import type {
   ClosedTabRecord,
   ClosedWindowRecord,
@@ -22,29 +22,24 @@ import type {
   HistoryEvent,
   SnapshotDiff,
   UserSettings,
-} from '@/shared/types';
+} from "@/shared/types";
 
 // ── 容量与过滤策略 ─────────────────────────
 
 /** HistoryEvent 默认最大保留条数（足够支撑「今天 / 昨天 / 本周」浏览） */
-export const MAX_HISTORY_EVENTS = 500;
+const MAX_HISTORY_EVENTS = 500;
 /** HistoryEvent TTL：30 天 */
-export const HISTORY_EVENT_TTL_MS = 30 * 24 * 3600 * 1000;
-
-/** 最近关闭的默认最大保留条数（最高频功能，给得稍多） */
-export const MAX_CLOSED_TABS = 100;
-/** 最近关闭默认 TTL：7 天（很久之前的 closed tab 用户多半也不想恢复了） */
-export const CLOSED_TAB_TTL_MS = 7 * 24 * 3600 * 1000;
+const HISTORY_EVENT_TTL_MS = 30 * 24 * 3600 * 1000;
 
 /** 整窗关闭快照最大数量 */
-export const MAX_CLOSED_WINDOWS = 30;
+const MAX_CLOSED_WINDOWS = 30;
 
 // ── 隐私设置读取（与 settings-slice 解耦，在 SW 中也可用） ────────────
 
 /**
  * 历史记录运行时实际生效的限制参数（从 UserSettings 读出并装载默认值）。
  */
-export interface HistoryLimits {
+interface HistoryLimits {
   enabled: boolean;
   recordEvents: boolean;
   maxClosedTabs: number;
@@ -54,10 +49,10 @@ export interface HistoryLimits {
 }
 
 /** 安全清洗设置：充填默认 + 范围 clamp。 */
-export function resolveHistoryLimits(settings?: Partial<UserSettings>): HistoryLimits {
+function resolveHistoryLimits(settings?: Partial<UserSettings>): HistoryLimits {
   const s = settings ?? {};
   const clamp = (v: number | undefined, fallback: number, min: number, max: number): number => {
-    if (typeof v !== 'number' || Number.isNaN(v)) return fallback;
+    if (typeof v !== "number" || Number.isNaN(v)) return fallback;
     return Math.min(max, Math.max(min, Math.floor(v)));
   };
   const ttlHours = clamp(s.historyClosedTabsTtlHours, 168, 0, 24 * 365);
@@ -67,7 +62,9 @@ export function resolveHistoryLimits(settings?: Partial<UserSettings>): HistoryL
     maxClosedTabs: clamp(s.historyMaxClosedTabs, 50, 10, 500),
     maxEvents: clamp(s.historyMaxEvents, MAX_HISTORY_EVENTS, 50, 5000),
     closedTabsTtlMs: ttlHours === 0 ? Number.POSITIVE_INFINITY : ttlHours * 3600 * 1000,
-    blocklist: Array.isArray(s.historyUrlBlocklist) ? s.historyUrlBlocklist.map((s) => s.toLowerCase()) : [],
+    blocklist: Array.isArray(s.historyUrlBlocklist)
+      ? s.historyUrlBlocklist.map((s) => s.toLowerCase())
+      : [],
   };
 }
 
@@ -92,17 +89,17 @@ function isHostnameBlocked(hostname: string, blocklist: string[]): boolean {
  * - 空 url 也忽略（pendingUrl 没解析出来时会出现）
  */
 const IGNORED_URL_PREFIXES = [
-  'chrome://',
-  'chrome-extension://',
-  'edge://',
-  'about:',
-  'about://',
-  'view-source:',
-  'file://',
+  "chrome://",
+  "chrome-extension://",
+  "edge://",
+  "about:",
+  "about://",
+  "view-source:",
+  "file://",
 ];
 
 export function isUrlIgnored(url: string | undefined): boolean {
-  if (url === undefined || url === '') return true;
+  if (url === undefined || url === "") return true;
   const lower = url.toLowerCase();
   return IGNORED_URL_PREFIXES.some((prefix) => lower.startsWith(prefix));
 }
@@ -111,13 +108,13 @@ function safeHostname(url: string): string {
   try {
     return new URL(url).hostname;
   } catch {
-    return '';
+    return "";
   }
 }
 
 function genId(): string {
   // crypto.randomUUID 在 SW 与现代浏览器均可用；fallback 兜底
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
   }
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
@@ -132,9 +129,7 @@ export async function getHistoryEvents(): Promise<HistoryEvent[]> {
   const raw = (await storageGet<HistoryEvent[]>(STORAGE_KEYS.historyEvents)) ?? [];
   if (raw.length === 0) return [];
   const cutoff = Date.now() - HISTORY_EVENT_TTL_MS;
-  return raw
-    .filter((e) => e.ts >= cutoff)
-    .sort((a, b) => b.ts - a.ts);
+  return raw.filter((e) => e.ts >= cutoff).sort((a, b) => b.ts - a.ts);
 }
 
 /**
@@ -148,7 +143,7 @@ export async function getHistoryEvents(): Promise<HistoryEvent[]> {
  *   5. 落盘 + 返回最新列表
  */
 export async function appendHistoryEvent(
-  partial: Omit<HistoryEvent, 'id' | 'ts'> & Partial<Pick<HistoryEvent, 'id' | 'ts'>>,
+  partial: Omit<HistoryEvent, "id" | "ts"> & Partial<Pick<HistoryEvent, "id" | "ts">>,
 ): Promise<HistoryEvent[]> {
   if (partial.incognito === true) {
     // 隐身事件：直接丢弃，永不落盘
@@ -164,8 +159,8 @@ export async function appendHistoryEvent(
   if (!limits.enabled || !limits.recordEvents) {
     return getHistoryEvents();
   }
-  const hostname = partial.hostname ?? (partial.url ? safeHostname(partial.url) : '');
-  if (hostname !== '' && isHostnameBlocked(hostname, limits.blocklist)) {
+  const hostname = partial.hostname ?? (partial.url ? safeHostname(partial.url) : "");
+  if (hostname !== "" && isHostnameBlocked(hostname, limits.blocklist)) {
     return getHistoryEvents();
   }
 
@@ -177,7 +172,7 @@ export async function appendHistoryEvent(
     url: partial.url,
     favIconUrl: partial.favIconUrl,
     windowId: partial.windowId,
-    hostname: hostname === '' ? undefined : hostname,
+    hostname: hostname === "" ? undefined : hostname,
     incognito: false,
     extra: partial.extra,
     undoable: partial.undoable,
@@ -217,16 +212,8 @@ export async function markHistoryEventUndone(id: string): Promise<HistoryEvent[]
 }
 
 /** 按类型批量删除（如"清空所有搜索类事件"） */
-export async function deleteHistoryEventsByType(types: Array<HistoryEvent['type']>): Promise<HistoryEvent[]> {
-  const set = new Set(types);
-  const existing = (await storageGet<HistoryEvent[]>(STORAGE_KEYS.historyEvents)) ?? [];
-  const next = existing.filter((e) => !set.has(e.type));
-  await storageSet(STORAGE_KEYS.historyEvents, next);
-  return next;
-}
-
 /** 清空全部历史事件 */
-export async function clearHistoryEvents(): Promise<void> {
+async function clearHistoryEvents(): Promise<void> {
   await storageSet(STORAGE_KEYS.historyEvents, []);
 }
 
@@ -239,12 +226,11 @@ export async function getClosedTabs(): Promise<ClosedTabRecord[]> {
   const raw = (await storageGet<ClosedTabRecord[]>(STORAGE_KEYS.closedTabs)) ?? [];
   if (raw.length === 0) return [];
   const limits = await loadLimits();
-  const cutoff = limits.closedTabsTtlMs === Number.POSITIVE_INFINITY
-    ? -Infinity
-    : Date.now() - limits.closedTabsTtlMs;
-  return raw
-    .filter((e) => e.ts >= cutoff)
-    .sort((a, b) => b.ts - a.ts);
+  const cutoff =
+    limits.closedTabsTtlMs === Number.POSITIVE_INFINITY
+      ? -Infinity
+      : Date.now() - limits.closedTabsTtlMs;
+  return raw.filter((e) => e.ts >= cutoff).sort((a, b) => b.ts - a.ts);
 }
 
 /**
@@ -253,7 +239,8 @@ export async function getClosedTabs(): Promise<ClosedTabRecord[]> {
  * @returns 最新列表（已 LRU/TTL 截断）
  */
 export async function pushClosedTab(
-  partial: Omit<ClosedTabRecord, 'id' | 'ts' | 'hostname'> & Partial<Pick<ClosedTabRecord, 'id' | 'ts' | 'hostname'>>,
+  partial: Omit<ClosedTabRecord, "id" | "ts" | "hostname"> &
+    Partial<Pick<ClosedTabRecord, "id" | "ts" | "hostname">>,
 ): Promise<ClosedTabRecord[]> {
   if (partial.incognito) return getClosedTabs();
   if (isUrlIgnored(partial.url)) return getClosedTabs();
@@ -261,7 +248,7 @@ export async function pushClosedTab(
   const limits = await loadLimits();
   if (!limits.enabled) return getClosedTabs();
   const hostname = partial.hostname ?? safeHostname(partial.url);
-  if (hostname !== '' && isHostnameBlocked(hostname, limits.blocklist)) {
+  if (hostname !== "" && isHostnameBlocked(hostname, limits.blocklist)) {
     return getClosedTabs();
   }
 
@@ -279,9 +266,10 @@ export async function pushClosedTab(
   };
 
   const existing = (await storageGet<ClosedTabRecord[]>(STORAGE_KEYS.closedTabs)) ?? [];
-  const cutoff = limits.closedTabsTtlMs === Number.POSITIVE_INFINITY
-    ? -Infinity
-    : Date.now() - limits.closedTabsTtlMs;
+  const cutoff =
+    limits.closedTabsTtlMs === Number.POSITIVE_INFINITY
+      ? -Infinity
+      : Date.now() - limits.closedTabsTtlMs;
   const next = [record, ...existing.filter((e) => e.ts >= cutoff)].slice(0, limits.maxClosedTabs);
   await storageSet(STORAGE_KEYS.closedTabs, next);
   return next;
@@ -296,7 +284,7 @@ export async function deleteClosedTab(id: string): Promise<ClosedTabRecord[]> {
 }
 
 /** 清空"最近关闭"列表 */
-export async function clearClosedTabs(): Promise<void> {
+async function clearClosedTabs(): Promise<void> {
   await storageSet(STORAGE_KEYS.closedTabs, []);
 }
 
@@ -308,7 +296,7 @@ export async function getClosedWindows(): Promise<ClosedWindowRecord[]> {
 }
 
 export async function pushClosedWindow(
-  partial: Omit<ClosedWindowRecord, 'id' | 'ts'> & Partial<Pick<ClosedWindowRecord, 'id' | 'ts'>>,
+  partial: Omit<ClosedWindowRecord, "id" | "ts"> & Partial<Pick<ClosedWindowRecord, "id" | "ts">>,
 ): Promise<ClosedWindowRecord[]> {
   const record: ClosedWindowRecord = {
     id: partial.id ?? genId(),
@@ -331,14 +319,14 @@ export async function deleteClosedWindow(id: string): Promise<ClosedWindowRecord
   return next;
 }
 
-export async function clearClosedWindows(): Promise<void> {
+async function clearClosedWindows(): Promise<void> {
   await storageSet(STORAGE_KEYS.closedWindows, []);
 }
 
 // ── DailySnapshot：每日标签页快照（驱动「昨天 → 今天」对比） ──
 
 /** 默认保留多少天的快照（FIFO 截断；超出按日期最早淘汰） */
-export const MAX_DAILY_SNAPSHOTS = 14;
+const MAX_DAILY_SNAPSHOTS = 14;
 
 /**
  * 把一个时间戳格式化为 `YYYY-MM-DD`（按用户本地时区）。
@@ -347,8 +335,8 @@ export const MAX_DAILY_SNAPSHOTS = 14;
 export function snapshotDateKey(ts: number = Date.now()): string {
   const d = new Date(ts);
   const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
 }
 
@@ -367,22 +355,18 @@ export async function upsertDailySnapshot(snapshot: DailySnapshot): Promise<Dail
   const filtered = existing.filter((s) => s.dateKey !== snapshot.dateKey);
   const merged = [...filtered, snapshot].sort((a, b) => a.dateKey.localeCompare(b.dateKey));
   // 超过上限 → 砍掉最早的
-  const next = merged.length > MAX_DAILY_SNAPSHOTS
-    ? merged.slice(merged.length - MAX_DAILY_SNAPSHOTS)
-    : merged;
+  const next =
+    merged.length > MAX_DAILY_SNAPSHOTS
+      ? merged.slice(merged.length - MAX_DAILY_SNAPSHOTS)
+      : merged;
   await storageSet(STORAGE_KEYS.dailySnapshots, next);
   return next;
 }
 
-/** 取昨天那条（YYYY-MM-DD 严格匹配，没拍则 undefined） */
-export async function getYesterdaySnapshot(referenceTs: number = Date.now()): Promise<DailySnapshot | undefined> {
-  const yKey = snapshotDateKey(referenceTs - 24 * 3600 * 1000);
-  const all = await getDailySnapshots();
-  return all.find((s) => s.dateKey === yKey);
-}
-
 /** 取今天那条 */
-export async function getTodaySnapshot(referenceTs: number = Date.now()): Promise<DailySnapshot | undefined> {
+export async function getTodaySnapshot(
+  referenceTs: number = Date.now(),
+): Promise<DailySnapshot | undefined> {
   const key = snapshotDateKey(referenceTs);
   const all = await getDailySnapshots();
   return all.find((s) => s.dateKey === key);
@@ -398,8 +382,8 @@ export function diffSnapshots(
   if (yesterday === undefined || today === undefined) return null;
   const yMap = new Map<string, number>(yesterday.hosts);
   const tMap = new Map<string, number>(today.hosts);
-  const added: SnapshotDiff['added'] = [];
-  const removed: SnapshotDiff['removed'] = [];
+  const added: SnapshotDiff["added"] = [];
+  const removed: SnapshotDiff["removed"] = [];
   for (const [host, count] of tMap) {
     if (!yMap.has(host)) added.push({ host, count });
   }
@@ -419,7 +403,7 @@ export function diffSnapshots(
 }
 
 /** 清空所有每日快照 */
-export async function clearDailySnapshots(): Promise<void> {
+async function clearDailySnapshots(): Promise<void> {
   await storageSet(STORAGE_KEYS.dailySnapshots, []);
 }
 

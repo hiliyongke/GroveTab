@@ -4,20 +4,20 @@
  */
 
 type ActivityType =
-  | 'archive'
-  | 'restore'
-  | 'import'
-  | 'export'
-  | 'permission'
-  | 'clear_archive'
-  | 'dedup_merge'
-  | 'snapshot';
+  | "archive"
+  | "restore"
+  | "import"
+  | "export"
+  | "permission"
+  | "clear_archive"
+  | "dedup_merge"
+  | "snapshot";
 
 interface ActivityAction {
   id: string;
   label: string;
   /** 行动按钮类型：undo 调用 undoGroup；open 跳转面板；custom 由调用方处理 */
-  kind: 'undo' | 'open_archive' | 'open_import_result' | 'custom';
+  kind: "undo" | "open_archive" | "open_import_result" | "custom";
   /** 可选负载：undo 时为 undoGroupId；open_archive 时为 sessionId */
   payload?: string;
 }
@@ -34,5 +34,3 @@ export interface ActivityRecord {
   /** 如果对应 undo-slice 中的 UndoGroup，记录其 id 以便回滚 */
   undoGroupId?: string;
 }
-
-export type { ActivityType, ActivityAction };

@@ -7,9 +7,10 @@
  *    用户点击后重置 error state 再渲染 children）
  *  - 默认 UI：紧凑"加载失败 · 点击重试"占位，适合单个 Widget 卡片
  */
-import { Component, type ReactNode } from 'react';
-import { BRAND } from '@/shared/config/brand';
-import styles from './status-surfaces.module.less';
+import { Component, type ReactNode } from "react";
+import { Button } from "antd";
+import { BRAND } from "@/shared/config/brand";
+import styles from "./status-surfaces.module.less";
 
 interface Props {
   children: ReactNode;
@@ -37,10 +38,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
   override componentDidCatch(error: Error, info: { componentStack: string }): void {
     console.error(
-      `${BRAND.logTag} ErrorBoundary${this.props.label ? ` (${this.props.label})` : ''}`,
+      `${BRAND.logTag} ErrorBoundary${this.props.label ? ` (${this.props.label})` : ""}`,
       error,
     );
-    console.error('Component stack:', info.componentStack);
+    console.error("Component stack:", info.componentStack);
   }
 
   private reset = (): void => {
@@ -55,20 +56,18 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback(this.state.error, this.reset);
       }
       return (
-        <div role="alert" className={styles['app-error-boundary']}>
-          <div className={styles['app-error-boundary__title']}>
-            加载失败{this.props.label ? ` · ${this.props.label}` : ''}
+        <div role="alert" className={styles["app-error-boundary"]}>
+          <div className={styles["app-error-boundary__title"]}>
+            加载失败{this.props.label ? ` · ${this.props.label}` : ""}
           </div>
-          <div className={styles['app-error-boundary__message']}>
-            {this.state.error.message}
-          </div>
-          <button
-            type="button"
+          <div className={styles["app-error-boundary__message"]}>{this.state.error.message}</div>
+          <Button
+            type="primary"
             onClick={this.reset}
-            className={styles['app-error-boundary__retry']}
+            className={styles["app-error-boundary__retry"]}
           >
             点击重试
-          </button>
+          </Button>
         </div>
       );
     }

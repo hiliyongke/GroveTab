@@ -7,6 +7,8 @@
  *   - 间距紧凑但不拥挤
  */
 
+import { Typography } from "antd";
+
 interface FieldProps {
   label: string;
   hint?: string;
@@ -16,14 +18,12 @@ interface FieldProps {
 export function Field({ label, hint, children }: FieldProps) {
   return (
     <div className="settings-field">
-      <div className="settings-field__label">
-        {label}
-      </div>
+      <div className="settings-field__label">{label}</div>
       {children}
       {hint && (
-        <p className="settings-field__hint">
+        <Typography.Text className="settings-field__hint" type="secondary">
           {hint}
-        </p>
+        </Typography.Text>
       )}
     </div>
   );

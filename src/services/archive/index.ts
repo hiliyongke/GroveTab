@@ -12,18 +12,27 @@
  */
 
 // 存储路由
-export { initArchiveStorage, getArchivedSessions, saveSessions } from './archive-storage';
+export { initArchiveStorage, getArchivedSessions, saveSessions } from "./archive-storage";
 
 // 归档操作
-export { archiveAllTabs, archiveCurrentWindowTabs, archiveSelectedTabs } from './archive-operations';
-export type { ArchiveOperationResult } from './archive-operations';
+export {
+  archiveAllTabs,
+  archiveCurrentWindowTabs,
+  archiveSelectedTabs,
+} from "./archive-operations";
 
 // 恢复操作
-export { restoreSession } from './archive-restore';
-export type { RestoreStrategy, RestoreOptions, RestoreOutcome } from './archive-restore';
+export { restoreSession } from "./archive-restore";
+export type { RestoreStrategy, RestoreOutcome } from "./archive-restore";
 
 // 会话管理
-export { deleteSession, renameSession, mergeSessions, exportSingleSession, createAutoSnapshot } from './archive-session-management';
+export {
+  deleteSession,
+  renameSession,
+  mergeSessions,
+  exportSingleSession,
+  createAutoSnapshot,
+} from "./archive-session-management";
 
 // 工具函数（仅内部使用，通常不对外暴露；如有需要可取消注释）
 // export { isArchivableTab, toArchivedTab, buildDefaultSessionName, canonicalUrlKey } from './archive-utils';
