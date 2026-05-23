@@ -39,6 +39,26 @@
    - 包含 `.app-header-shell`, `.app-hero`, `.app-content-shell` 等
    - 建议：这些是全局布局类，应保持全局
 
+## 📊 迁移进度
+
+- ✅ **阶段 1：清理重复文件**（已完成）
+  - 删除 `src/pages/newtab/index.less`（与 `global.less` 重复）
+  - 更新 `newtab/main.tsx` 和 `popup/main.tsx` 导入
+
+- ✅ **阶段 2：迁移 ArcSidebar 组件样式**（已完成）
+  - `ArcSidebar.less` → `ArcSidebar.module.less`
+  - 转换所有类名：kebab-case → camelCase
+  - Commit: `b2f12b0`
+
+- ✅ **阶段 3：迁移 Popup 页面样式**（已完成）
+  - `popup/styles/index.less` → `index.module.less`
+  - 更新 `App.tsx` 使用 CSS Modules
+  - Commit: `bea1863`
+
+- ✅ **阶段 4：更新文档**（已完成）
+  - 创建 `docs/STYLES_GUIDE.md`
+  - 更新本迁移计划
+
 ## 迁移步骤
 
 ### 阶段 1：清理重复文件（优先级：高）
@@ -93,6 +113,6 @@
 
 ## 参考资料
 
-- 现有样式指南：`/Users/yorke/Desktop/tabs/STYLES_GUIDE.md`
+- **样式开发指南**：`docs/STYLES_GUIDE.md`（包含规范、常见错误、最佳实践）
 - CSS Modules 官方文档：https://github.com/css-modules/css-modules
 - Vite CSS Modules 配置：`vite.config.ts`
