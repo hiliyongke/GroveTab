@@ -4,41 +4,16 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Asia/Shanghai"
-    open-pull-requests-limit: 10
-    versioning-strategy: increase
-    labels:
-      - "dependencies"
-    commit-message:
-      prefix: "chore(deps)"
-      include: "scope"
+    open-pull-requests-limit: 5
+    # Group minor and patch updates together
     groups:
-      react:
-        patterns:
-          - "react"
-          - "react-dom"
-          - "@types/react"
-          - "@types/react-dom"
-      dev-tooling:
-        patterns:
-          - "eslint*"
-          - "@typescript-eslint/*"
-          - "typescript-eslint"
-          - "prettier"
-          - "vitest"
-          - "@vitest/*"
-          - "knip"
-          - "husky"
-          - "lint-staged"
-      types:
-        patterns:
-          - "@types/*"
-
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "monthly"
-    commit-message:
-      prefix: "chore(ci)"
+      production:
+        dependency-type: "production"
+        update-types:
+          - "version-update:semver-patch"
+          - "version-update:semver-minor"
+      development:
+        dependency-type: "development"
+        update-types:
+          - "version-update:semver-patch"
+          - "version-update:semver-minor"
