@@ -57,7 +57,7 @@
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "tinykeys": "^3.0.0",
-    "tldts": "^7.0.28",
+    "tldts": "^7.0.30",
     "zustand": "^5.0.12"
   },
   "devDependencies": {
