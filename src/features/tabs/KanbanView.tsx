@@ -14,11 +14,11 @@
  *   - 列内/跨列拖拽 → moveCard/reorderCard
  */
 
-import { useEffect, useMemo, useState } from 'react';
-import { Button, Card, Input, Popconfirm, theme, App as AntApp } from 'antd';
-import { Plus, Trash2, Save, PenLine, X, GripVertical } from 'lucide-react';
-import { cssVars } from '@/shared/utils/css-vars';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
+import { useEffect, useMemo, useState, memo } from "react";
+import { Button, Card, Input, Popconfirm, theme, App as AntApp } from "antd";
+import { Plus, Trash2, Save, PenLine, X, GripVertical } from "lucide-react";
+import { cssVars } from "@/shared/utils/css-vars";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
 import {
   DndContext,
   DragOverlay,
@@ -31,27 +31,27 @@ import {
   useSensors,
   type DragEndEvent,
   type DragStartEvent,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
   SortableContext,
   horizontalListSortingStrategy,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import type { KanbanCard, KanbanColumn } from '@/shared/types';
-import { useKanbanStore, useTabsStore } from '@/store';
-import { archiveSelectedTabs } from '@/services';
-import { useT } from '@/shared/i18n';
-import { useReducedMotionPreference } from '@/shared/hooks/use-reduced-motion';
-import styles from './KanbanView.module.less';
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import type { KanbanCard, KanbanColumn } from "@/shared/types";
+import { useKanbanStore, useTabsStore } from "@/store";
+import { archiveSelectedTabs } from "@/services";
+import { useT } from "@/shared/i18n";
+import { useReducedMotionPreference } from "@/shared/hooks/use-reduced-motion";
+import styles from "./KanbanView.module.less";
 
 /** 拖拽数据类型：区分「源 tab」「列内卡片」「列自身」 */
 type DragData =
-  | { kind: 'tab-source'; card: KanbanCard }
-  | { kind: 'card'; columnId: string; url: string }
-  | { kind: 'column'; columnId: string };
+  | { kind: "tab-source"; card: KanbanCard }
+  | { kind: "card"; columnId: string; url: string }
+  | { kind: "column"; columnId: string };
 
 interface ActiveDrag {
   id: string;
@@ -98,7 +98,7 @@ export function KanbanView() {
   }, [loaded, loadKanban]);
 
   const liveUrls = useMemo(() => new Set(tabs.map((t) => t.url)), [tabs]);
-  const [newColumnName, setNewColumnName] = useState('');
+  const [newColumnName, setNewColumnName] = useState("");
   const [active, setActive] = useState<ActiveDrag | null>(null);
 
   // Sensors: 指针（拖动需 6px 激活，避免点击误触）、触屏（按住 200ms）、键盘
@@ -109,13 +109,13 @@ export function KanbanView() {
   );
 
   const kanbanThemeStyle: React.CSSProperties = cssVars({
-    '--app-kanban-source-bg': token.colorFillQuaternary,
-    '--app-kanban-surface-bg': token.colorBgContainer,
-    '--app-kanban-border': token.colorBorderSecondary,
-    '--app-kanban-column-bg': token.colorFillQuaternary,
-    '--app-kanban-column-hover-bg': token.colorPrimaryBg,
-    '--app-kanban-overlay-border': token.colorPrimary,
-    '--app-kanban-overlay-shadow': token.boxShadowSecondary,
+    "--app-kanban-source-bg": token.colorFillQuaternary,
+    "--app-kanban-surface-bg": token.colorBgContainer,
+    "--app-kanban-border": token.colorBorderSecondary,
+    "--app-kanban-column-bg": token.colorFillQuaternary,
+    "--app-kanban-column-hover-bg": token.colorPrimaryBg,
+    "--app-kanban-overlay-border": token.colorPrimary,
+    "--app-kanban-overlay-shadow": token.boxShadowSecondary,
   });
 
   /**
@@ -127,14 +127,14 @@ export function KanbanView() {
    */
   const handleAddColumn = async () => {
     const name = newColumnName.trim();
-    if (name === '') return;
+    if (name === "") return;
     try {
       await addColumn(name);
-      setNewColumnName('');
-      message.success(t('kanban.addColumnOk', { name }));
+      setNewColumnName("");
+      message.success(t("kanban.addColumnOk", { name }));
     } catch (err) {
-      message.error(t('kanban.addFailed'));
-      console.warn('[kanban] addColumn failed', err);
+      message.error(t("kanban.addFailed"));
+      console.warn("[kanban] addColumn failed", err);
     }
   };
 
@@ -149,15 +149,15 @@ export function KanbanView() {
   const handleSaveAsSession = async (col: KanbanColumn) => {
     const live = tabs.filter((t) => col.cards.some((c) => c.url === t.url));
     if (live.length === 0) {
-      message.warning(t('kanban.emptyColumn'));
+      message.warning(t("kanban.emptyColumn"));
       return;
     }
     try {
       await archiveSelectedTabs(live.map((t) => t.id));
-      message.success(t('archive.archivedOk', { count: live.length }));
+      message.success(t("archive.archivedOk", { count: live.length }));
     } catch (err) {
-      message.error(t('kanban.archiveFailed'));
-      console.warn('[kanban] archive failed', err);
+      message.error(t("kanban.archiveFailed"));
+      console.warn("[kanban] archive failed", err);
     }
   };
 
@@ -189,34 +189,38 @@ export function KanbanView() {
     if (!over) return;
     const activeData = a.data.current as DragData | undefined;
     const overData = over.data.current as
-      | { kind: 'card'; columnId: string; url: string }
-      | { kind: 'column-body'; columnId: string }
-      | { kind: 'column'; columnId: string }
+      | { kind: "card"; columnId: string; url: string }
+      | { kind: "column-body"; columnId: string }
+      | { kind: "column"; columnId: string }
       | undefined;
     if (!activeData) return;
 
     try {
       // 1) 源 Tab 拖入列或卡片位置 → addCard（不关闭原 Tab）
-      if (activeData.kind === 'tab-source') {
-        const destCol = overData?.kind === 'card' ? overData.columnId
-          : overData?.kind === 'column-body' ? overData.columnId
-          : overData?.kind === 'column' ? overData.columnId
-          : null;
+      if (activeData.kind === "tab-source") {
+        const destCol =
+          overData?.kind === "card"
+            ? overData.columnId
+            : overData?.kind === "column-body"
+              ? overData.columnId
+              : overData?.kind === "column"
+                ? overData.columnId
+                : null;
         if (!destCol) return;
         await addCard(destCol, activeData.card);
         return;
       }
 
       // 2) 卡片拖动
-      if (activeData.kind === 'card') {
+      if (activeData.kind === "card") {
         // 拖到列空白处 → 移动到该列末尾
-        if (overData?.kind === 'column-body') {
+        if (overData?.kind === "column-body") {
           if (overData.columnId === activeData.columnId) return;
           await moveCard(activeData.columnId, overData.columnId, activeData.url);
           return;
         }
         // 拖到某卡片上 → 列内 reorder 或跨列移动到该卡片前
-        if (overData?.kind === 'card') {
+        if (overData?.kind === "card") {
           // 同列 reorder
           if (overData.columnId === activeData.columnId) {
             const col = columns.find((c) => c.id === activeData.columnId);
@@ -236,7 +240,7 @@ export function KanbanView() {
       }
 
       // 3) 列排序
-      if (activeData.kind === 'column' && overData?.kind === 'column') {
+      if (activeData.kind === "column" && overData?.kind === "column") {
         if (activeData.columnId === overData.columnId) return;
         const fromIndex = columns.findIndex((c) => c.id === activeData.columnId);
         const toIndex = columns.findIndex((c) => c.id === overData.columnId);
@@ -244,8 +248,8 @@ export function KanbanView() {
         await reorderColumns(fromIndex, toIndex);
       }
     } catch (err) {
-      message.error(t('kanban.dragFailed'));
-      console.warn('[kanban] drag operation failed', err);
+      message.error(t("kanban.dragFailed"));
+      console.warn("[kanban] drag operation failed", err);
     }
   };
 
@@ -257,11 +261,11 @@ export function KanbanView() {
       onDragEnd={(e) => void onDragEnd(e)}
       onDragCancel={() => setActive(null)}
     >
-      <div className={styles['app-kanban-theme']} style={kanbanThemeStyle}>
-        <div className={styles['app-kanban-view']}>
+      <div className={styles["app-kanban-theme"]} style={kanbanThemeStyle}>
+        <div className={styles["app-kanban-view"]}>
           {/* 左侧：实时 Tab 源栏 —— 只作为拖出源，不是排序目标 */}
-          <div className={styles['app-kanban-source']}>
-            <div className={styles['app-kanban-source__title']}>{t('kanban.title')}</div>
+          <div className={styles["app-kanban-source"]}>
+            <div className={styles["app-kanban-source__title"]}>{t("kanban.title")}</div>
             {tabs.map((tab) => (
               <TabSourceItem
                 key={tab.id}
@@ -293,15 +297,15 @@ export function KanbanView() {
                 onRename={(name) => void renameColumn(col.id, name)}
                 onRemove={() => {
                   removeColumn(col.id).catch((err) => {
-                    message.error(t('kanban.removeColumnFailed'));
-                    console.warn('[kanban] removeColumn failed', err);
+                    message.error(t("kanban.removeColumnFailed"));
+                    console.warn("[kanban] removeColumn failed", err);
                   });
                 }}
                 onSaveAsSession={() => void handleSaveAsSession(col)}
                 onRemoveCard={(url) => {
                   removeCard(col.id, url).catch((err) => {
-                    message.error(t('kanban.removeCardFailed'));
-                    console.warn('[kanban] removeCard failed', err);
+                    message.error(t("kanban.removeCardFailed"));
+                    console.warn("[kanban] removeCard failed", err);
                   });
                 }}
               />
@@ -309,12 +313,12 @@ export function KanbanView() {
           </SortableContext>
 
           {/* 新增列 */}
-          <div className={styles['app-kanban-add-column']}>
+          <div className={styles["app-kanban-add-column"]}>
             <Input
               value={newColumnName}
               onChange={(e) => setNewColumnName(e.target.value)}
               onPressEnter={() => void handleAddColumn()}
-              placeholder={t('kanban.addColumn')}
+              placeholder={t("kanban.addColumn")}
               suffix={
                 <Button
                   size="small"
@@ -344,16 +348,22 @@ export function KanbanView() {
  * @param root0.reduced - 是否简化显示
  * @returns {JSX.Element} 卡片元素
  */
-function TabSourceItem({ card, reduced }: { card: KanbanCard; reduced: boolean }) {
+const TabSourceItem = memo(function TabSourceItem({
+  card,
+  reduced,
+}: {
+  card: KanbanCard;
+  reduced: boolean;
+}) {
   const id = `tab-source::${card.url}`;
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
-    data: { kind: 'tab-source', card } satisfies DragData,
+    data: { kind: "tab-source", card } satisfies DragData,
   });
   const sourceItemStyle: React.CSSProperties = {
     opacity: isDragging ? 0.4 : 1,
     transform: CSS.Translate.toString(transform),
-    transition: reduced ? 'none' : transition,
+    transition: reduced ? "none" : transition,
   };
 
   return (
@@ -361,18 +371,24 @@ function TabSourceItem({ card, reduced }: { card: KanbanCard; reduced: boolean }
       ref={setNodeRef}
       {...attributes}
       {...listeners}
-      className={`${styles['app-kanban-card']} ${styles['app-kanban-card--source']}`}
+      className={`${styles["app-kanban-card"]} ${styles["app-kanban-card--source"]}`}
       style={sourceItemStyle}
     >
-      {card.favIconUrl !== undefined && card.favIconUrl !== '' && (
-        <img src={card.favIconUrl} alt="" width={12} height={12} className={styles['app-kanban-card__favicon']} />
+      {card.favIconUrl !== undefined && card.favIconUrl !== "" && (
+        <img
+          src={card.favIconUrl}
+          alt=""
+          width={12}
+          height={12}
+          className={styles["app-kanban-card__favicon"]}
+        />
       )}
-      <span className={styles['app-kanban-card__title']} title={card.title}>
+      <span className={styles["app-kanban-card__title"]} title={card.title}>
         {card.title}
       </span>
     </div>
   );
-}
+});
 
 // ── 子组件：单列 ──────────────────────────────────
 interface KanbanColumnViewProps {
@@ -401,7 +417,7 @@ interface KanbanColumnViewProps {
  * @param root0.onRemoveCard - 移除卡片回调
  * @returns {JSX.Element} 列元素
  */
-function KanbanColumnView({
+const KanbanColumnView = memo(function KanbanColumnView({
   col,
   liveUrls,
   tabs,
@@ -415,39 +431,39 @@ function KanbanColumnView({
   // 整列拖拽（useSortable 把列作为 SortableContext 中的一项）
   const sortable = useSortable({
     id: `col::${col.id}`,
-    data: { kind: 'column', columnId: col.id } satisfies DragData,
+    data: { kind: "column", columnId: col.id } satisfies DragData,
   });
 
   // 列空白处作为 droppable，用于"拖到空白/末尾"
   const body = useDroppable({
     id: `col-body::${col.id}`,
-    data: { kind: 'column-body', columnId: col.id },
+    data: { kind: "column-body", columnId: col.id },
   });
 
   const columnWrapStyle: React.CSSProperties = {
     transform: CSS.Translate.toString(sortable.transform),
-    transition: reduced ? 'none' : sortable.transition,
+    transition: reduced ? "none" : sortable.transition,
     opacity: sortable.isDragging ? 0.5 : 1,
   };
 
   const columnCardStyle: React.CSSProperties = {
-    transition: reduced ? 'none' : 'background 120ms',
+    transition: reduced ? "none" : "background 120ms",
   };
 
   /* eslint-disable react-hooks/refs -- dnd-kit's useSortable returns ref callbacks, attributes, and listeners that must be spread during render; this is the standard dnd-kit integration pattern */
   return (
     <div
       ref={sortable.setNodeRef}
-      className={styles['app-kanban-column-wrap']}
+      className={styles["app-kanban-column-wrap"]}
       style={columnWrapStyle}
     >
       <Card
         size="small"
-        className={`${styles['app-kanban-column']}${body.isOver ? ` ${styles['is-over']}` : ''}`}
+        className={`${styles["app-kanban-column"]}${body.isOver ? ` ${styles["is-over"]}` : ""}`}
         style={columnCardStyle}
-        classNames={{ body: styles['app-kanban-column__body'] }}
+        classNames={{ body: styles["app-kanban-column__body"] }}
         title={
-          <div className={styles['app-kanban-column__header']}>
+          <div className={styles["app-kanban-column__header"]}>
             {/* 列拖拽句柄 —— 只有点住这里才能拖整列 */}
             <Button
               type="text"
@@ -455,31 +471,31 @@ function KanbanColumnView({
               icon={<GripVertical size={ICON_SIZE.TINY} />}
               {...sortable.attributes}
               {...sortable.listeners}
-              className={styles['app-kanban-column__drag-handle']}
-              aria-label={t('kanban.renameColumn')}
+              className={styles["app-kanban-column__drag-handle"]}
+              aria-label={t("kanban.renameColumn")}
             />
             <ColumnNameEditor col={col} onRename={onRename} />
-            <span className={styles['app-kanban-column__count']}>{col.cards.length}</span>
+            <span className={styles["app-kanban-column__count"]}>{col.cards.length}</span>
             <Button
               type="text"
               size="small"
               icon={<Save size={ICON_SIZE.TINY} />}
               onClick={onSaveAsSession}
-              title={t('kanban.saveAsSession')}
+              title={t("kanban.saveAsSession")}
             />
-            <Popconfirm title={t('kanban.removeColumn')} onConfirm={onRemove}>
+            <Popconfirm title={t("kanban.removeColumn")} onConfirm={onRemove}>
               <Button type="text" size="small" icon={<Trash2 size={ICON_SIZE.TINY} />} />
             </Popconfirm>
           </div>
         }
       >
-        <div ref={body.setNodeRef} className={styles['app-kanban-column__dropzone']}>
+        <div ref={body.setNodeRef} className={styles["app-kanban-column__dropzone"]}>
           <SortableContext
             items={col.cards.map((c) => `card::${col.id}::${c.url}`)}
             strategy={verticalListSortingStrategy}
           >
             {col.cards.length === 0 ? (
-              <div className={styles['app-kanban-column__empty']}>{t('kanban.emptyColumn')}</div>
+              <div className={styles["app-kanban-column__empty"]}>{t("kanban.emptyColumn")}</div>
             ) : (
               col.cards.map((card) => (
                 <SortableCard
@@ -500,7 +516,7 @@ function KanbanColumnView({
     </div>
   );
   /* eslint-enable react-hooks/refs */
-}
+});
 
 // ── 子组件：列内卡片 ──────────────────────────────────
 interface SortableCardProps {
@@ -525,14 +541,22 @@ interface SortableCardProps {
  * @param root0.onRemove - 移除回调
  * @returns {JSX.Element} 卡片元素
  */
-function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: SortableCardProps) {
+const SortableCard = memo(function SortableCard({
+  card,
+  columnId,
+  offline,
+  tabs,
+  t,
+  reduced,
+  onRemove,
+}: SortableCardProps) {
   const id = `card::${columnId}::${card.url}`;
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
-    data: { kind: 'card', columnId, url: card.url } satisfies DragData,
+    data: { kind: "card", columnId, url: card.url } satisfies DragData,
   });
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
-  
+
   /**
    * 激活卡片（点击或按键）
    *
@@ -544,7 +568,7 @@ function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: S
     if (offline) {
       // 离线状态：在新标签页中打开 URL
       try {
-        void window.open(card.url, '_blank');
+        void window.open(card.url, "_blank");
       } catch {
         /* ignore */
       }
@@ -559,7 +583,7 @@ function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: S
   const sortableCardStyle: React.CSSProperties = {
     opacity: isDragging ? 0.4 : offline ? 0.55 : 1,
     transform: CSS.Translate.toString(transform),
-    transition: reduced ? 'none' : transition,
+    transition: reduced ? "none" : transition,
   };
 
   return (
@@ -567,11 +591,11 @@ function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: S
       ref={setNodeRef}
       {...attributes}
       {...listeners}
-      className={`${styles['app-kanban-card']}${offline ? ` ${styles['is-offline']}` : ''}`}
+      className={`${styles["app-kanban-card"]}${offline ? ` ${styles["is-offline"]}` : ""}`}
       style={sortableCardStyle}
       onClick={handleActivate}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           handleActivate();
         }
@@ -579,12 +603,18 @@ function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: S
       role="button"
       tabIndex={0}
     >
-      {card.favIconUrl !== undefined && card.favIconUrl !== '' && (
-        <img src={card.favIconUrl} alt="" width={12} height={12} className={styles['app-kanban-card__favicon']} />
+      {card.favIconUrl !== undefined && card.favIconUrl !== "" && (
+        <img
+          src={card.favIconUrl}
+          alt=""
+          width={12}
+          height={12}
+          className={styles["app-kanban-card__favicon"]}
+        />
       )}
       <span
-        className={`${styles['app-kanban-card__title']} ${styles['app-kanban-card__title--grow']}`}
-        title={offline ? `${card.title} · ${t('kanban.offline')}` : card.title}
+        className={`${styles["app-kanban-card__title"]} ${styles["app-kanban-card__title--grow"]}`}
+        title={offline ? `${card.title} · ${t("kanban.offline")}` : card.title}
       >
         {card.title}
       </span>
@@ -596,11 +626,11 @@ function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: S
           e.stopPropagation();
           onRemove();
         }}
-        aria-label={t('kanban.removeCard')}
+        aria-label={t("kanban.removeCard")}
       />
     </div>
   );
-}
+});
 
 // ── 子组件：列名编辑（inline） ──────────────────────────────────
 /**
@@ -610,7 +640,13 @@ function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: S
  * @param root0.onRename - 重命名回调
  * @returns {JSX.Element} 编辑器元素
  */
-function ColumnNameEditor({ col, onRename }: { col: KanbanColumn; onRename: (name: string) => void }) {
+function ColumnNameEditor({
+  col,
+  onRename,
+}: {
+  col: KanbanColumn;
+  onRename: (name: string) => void;
+}) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(col.name);
   if (editing) {
@@ -621,23 +657,25 @@ function ColumnNameEditor({ col, onRename }: { col: KanbanColumn; onRename: (nam
         onChange={(e) => setValue(e.target.value)}
         autoFocus
         onPressEnter={() => {
-          onRename(value.trim() !== '' ? value.trim() : col.name);
+          onRename(value.trim() !== "" ? value.trim() : col.name);
           setEditing(false);
         }}
         onBlur={() => {
-          onRename(value.trim() !== '' ? value.trim() : col.name);
+          onRename(value.trim() !== "" ? value.trim() : col.name);
           setEditing(false);
         }}
       />
     );
   }
   return (
-    <span
-      className={styles['app-kanban-column__name']}
-      onDoubleClick={() => setEditing(true)}
-    >
+    <span className={styles["app-kanban-column__name"]} onDoubleClick={() => setEditing(true)}>
       {col.name}
-      <Button type="text" size="small" icon={<PenLine size={ICON_SIZE.TINY} />} onClick={() => setEditing(true)} />
+      <Button
+        type="text"
+        size="small"
+        icon={<PenLine size={ICON_SIZE.TINY} />}
+        onClick={() => setEditing(true)}
+      />
     </span>
   );
 }
@@ -651,21 +689,32 @@ function ColumnNameEditor({ col, onRename }: { col: KanbanColumn; onRename: (nam
  */
 function DragPreview({ active }: { active: ActiveDrag }) {
   const { t } = useT();
-  if (active.data.kind === 'column') {
+  if (active.data.kind === "column") {
     return (
-      <div className={`${styles['app-kanban-overlay']} ${styles['app-kanban-overlay--column']}`}>
-        {t('kanban.draggingColumn')}
+      <div className={`${styles["app-kanban-overlay"]} ${styles["app-kanban-overlay--column"]}`}>
+        {t("kanban.draggingColumn")}
       </div>
     );
   }
-  const card = active.data.kind === 'card' ? null : active.data.kind === 'tab-source' ? active.data.card : null;
+  const card =
+    active.data.kind === "card"
+      ? null
+      : active.data.kind === "tab-source"
+        ? active.data.card
+        : null;
   return (
-    <div className={styles['app-kanban-overlay']}>
-      {card?.favIconUrl !== undefined && card.favIconUrl !== '' && (
-        <img src={card.favIconUrl} alt="" width={12} height={12} className={styles['app-kanban-card__favicon']} />
+    <div className={styles["app-kanban-overlay"]}>
+      {card?.favIconUrl !== undefined && card.favIconUrl !== "" && (
+        <img
+          src={card.favIconUrl}
+          alt=""
+          width={12}
+          height={12}
+          className={styles["app-kanban-card__favicon"]}
+        />
       )}
-      <span className={styles['app-kanban-card__title']}>
-        {card ? card.title : t('kanban.draggingCard')}
+      <span className={styles["app-kanban-card__title"]}>
+        {card ? card.title : t("kanban.draggingCard")}
       </span>
     </div>
   );

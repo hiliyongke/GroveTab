@@ -10,33 +10,27 @@
  * - 关闭窗口按钮
  */
 
-import { useState, useMemo, useCallback, useRef } from 'react';
-import { Card, Tag, Button, Tooltip, Dropdown } from 'antd';
-import {
-  ChevronDown,
-  X,
-  Monitor,
-  FolderPlus,
-  ArrowUpDown,
-} from 'lucide-react';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { useTabsStore } from '@/store';
-import { feedback } from '@/shared/ui/feedback';
-import { translate } from '@/shared/i18n/core';
-import { cssVars } from '@/shared/utils/css-vars';
-import { track as trackEvent } from '@/shared/utils/metrics';
+import { useState, useMemo, useCallback, useRef, memo } from "react";
+import { Card, Tag, Button, Tooltip, Dropdown } from "antd";
+import { ChevronDown, X, Monitor, FolderPlus, ArrowUpDown } from "lucide-react";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useTabsStore } from "@/store";
+import { feedback } from "@/shared/ui/feedback";
+import { translate } from "@/shared/i18n/core";
+import { cssVars } from "@/shared/utils/css-vars";
+import { track as trackEvent } from "@/shared/utils/metrics";
 import {
   closeWindowTabs,
   reorderTabs,
   sortTabsByRule,
-} from '@/features/tabs/services/window-tab-operations';
-import { useDroppable } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import type { DragData, WindowCardProps, SmartSortRule } from '../types';
-import { SortableTabItem } from './SortableTabItem';
-import { GroupLabel } from './GroupLabel';
-import styles from '../WindowView.module.less';
-import type { LiveTab } from '@/shared/types/tab';
+} from "@/features/tabs/services/window-tab-operations";
+import { useDroppable } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import type { DragData, WindowCardProps, SmartSortRule } from "../types";
+import { SortableTabItem } from "./SortableTabItem";
+import { GroupLabel } from "./GroupLabel";
+import styles from "../WindowView.module.less";
+import type { LiveTab } from "@/shared/types/tab";
 
 /**
  * 获取排序规则对应的 i18n 名称
@@ -49,14 +43,14 @@ import type { LiveTab } from '@/shared/types/tab';
  */
 function getSortRuleName(rule: SmartSortRule, t: (key: string) => string): string {
   switch (rule) {
-    case 'domain':
-      return t('window.smartSortByDomain');
-    case 'recentAccess':
-      return t('window.smartSortByRecentAccess');
-    case 'alphabetical':
-      return t('window.smartSortByAlphabetical');
-    case 'type':
-      return t('window.smartSortByType');
+    case "domain":
+      return t("window.smartSortByDomain");
+    case "recentAccess":
+      return t("window.smartSortByRecentAccess");
+    case "alphabetical":
+      return t("window.smartSortByAlphabetical");
+    case "type":
+      return t("window.smartSortByType");
   }
 }
 
@@ -89,7 +83,7 @@ function getSortRuleName(rule: SmartSortRule, t: (key: string) => string): strin
  * @param props.thumbnailUrl - 缩略图 URL
  * @returns 窗口卡片 JSX 元素
  */
-function WindowCard({
+const WindowCard = memo(function WindowCard({
   windowId,
   windowTabs,
   windowInfo,
@@ -113,20 +107,23 @@ function WindowCard({
   // 窗口卡片作为跨窗口拖拽的 drop zone
   const { setNodeRef: setDropZoneRef, isOver } = useDroppable({
     id: `window-drop-zone::${windowId}`,
-    data: { kind: 'window-drop-zone', windowId } satisfies DragData,
+    data: { kind: "window-drop-zone", windowId } satisfies DragData,
   });
 
   // 分组区域作为拖入分组的 drop zone
   const { setNodeRef: setGroupZoneRef, isOver: isGroupZoneOver } = useDroppable({
     id: `group-zone::${windowId}`,
-    data: { kind: 'group-zone', windowId } satisfies DragData,
+    data: { kind: "group-zone", windowId } satisfies DragData,
   });
 
   const isFocused = windowInfo?.focused ?? false;
 
   /** 按分组 ID 将窗口内标签分组（用于显示分组标题） */
   const tabGroups = useMemo(() => {
-    const map = new Map<number, { groupId: number; groupTitle?: string; groupColor?: string; tabs: LiveTab[] }>();
+    const map = new Map<
+      number,
+      { groupId: number; groupTitle?: string; groupColor?: string; tabs: LiveTab[] }
+    >();
     for (const tab of windowTabs) {
       const gid = tab.groupId ?? -1;
       if (!map.has(gid)) {
@@ -154,10 +151,10 @@ function WindowCard({
       setClosing(true);
       try {
         const count = await closeWindowTabs(windowTabs);
-        feedback.success(translate('window.closedWindow', { count }));
+        feedback.success(translate("window.closedWindow", { count }));
         void useTabsStore.getState().loadAllTabs({ silent: true });
       } catch (err) {
-        feedback.error(translate('window.closeFailed'), err);
+        feedback.error(translate("window.closeFailed"), err);
       } finally {
         setClosing(false);
       }
@@ -179,16 +176,16 @@ function WindowCard({
         await reorderTabs(sortedIds);
 
         feedback.success(
-          t('window.smartSortSuccess', {
+          t("window.smartSortSuccess", {
             rule: getSortRuleName(rule, t),
             count: String(sortedIds.length),
           }),
         );
-        void trackEvent('smart_sort', { rule, windowId, count: sortedIds.length });
+        void trackEvent("smart_sort", { rule, windowId, count: sortedIds.length });
         void useTabsStore.getState().loadAllTabs({ silent: true });
       } catch (err) {
-        feedback.error(t('window.moveFailed'));
-        console.warn('[WindowView] smart sort failed', err);
+        feedback.error(t("window.moveFailed"));
+        console.warn("[WindowView] smart sort failed", err);
         void useTabsStore.getState().loadAllTabs({ silent: true });
       }
     },
@@ -211,16 +208,32 @@ function WindowCard({
     onThumbnailLeave();
   }, [onThumbnailLeave]);
 
+  /** 稳定跳转回调 —— 避免内联函数导致子组件重渲染 */
+  const handleJump = useCallback(
+    (id: number, wid: number) => {
+      void jumpToTab(id, wid);
+    },
+    [jumpToTab],
+  );
+
+  /** 稳定关闭回调 —— 避免内联函数导致子组件重渲染 */
+  const handleClose = useCallback(
+    (id: number) => {
+      void closeSingleTab(id);
+    },
+    [closeSingleTab],
+  );
+
   const cardStyle = useMemo<React.CSSProperties>(
     () => ({
-      overflow: 'hidden',
-      position: 'relative',
-      boxShadow: 'var(--app-shadow-card)',
+      overflow: "hidden",
+      position: "relative",
+      boxShadow: "var(--app-shadow-card)",
       border: `1px solid ${token.colorBorderSecondary}`,
       ...cssVars({
-        '--app-hover-border': token.colorBorder,
-        '--app-window-card-header-border': collapsed ? 'transparent' : token.colorBorderSecondary,
-        '--app-row-hover-bg': token.colorFillSecondary,
+        "--app-hover-border": token.colorBorder,
+        "--app-window-card-header-border": collapsed ? "transparent" : token.colorBorderSecondary,
+        "--app-row-hover-bg": token.colorFillSecondary,
       }),
     }),
     [collapsed, token],
@@ -228,20 +241,20 @@ function WindowCard({
 
   /** 当前是否正处于跨窗口拖拽中（标签来自其他窗口拖到此窗口卡片上） */
   const isCrossWindowDragTarget =
-    isOver && activeDrag?.data.kind === 'tab' && activeDrag.data.windowId !== windowId;
+    isOver && activeDrag?.data.kind === "tab" && activeDrag.data.windowId !== windowId;
 
   return (
     <Card
       ref={setDropZoneRef}
       size="small"
-      className={`${styles['app-window-card']} ${isCrossWindowDragTarget ? styles['is-drag-over'] : ''}`}
-      classNames={{ body: styles['app-window-card__body'] }}
+      className={`${styles["app-window-card"]} ${isCrossWindowDragTarget ? styles["is-drag-over"] : ""}`}
+      classNames={{ body: styles["app-window-card__body"] }}
       style={cardStyle}
     >
       {/* 窗口身份色条 —— 当前窗口用主色，其他窗口用中性色 */}
       <div
         aria-hidden
-        className={`${styles['app-accent-bar--left']} ${isCurrent ? styles['is-primary'] : ''}`}
+        className={`${styles["app-accent-bar--left"]} ${isCurrent ? styles["is-primary"] : ""}`}
       />
 
       {/* 头部：可点击折叠 + 缩略图预览 */}
@@ -251,36 +264,36 @@ function WindowCard({
         onMouseEnter={handleHeaderMouseEnter}
         onMouseLeave={handleHeaderMouseLeave}
         aria-expanded={!collapsed}
-        aria-label={collapsed ? t('tabs.expand') : t('tabs.collapse')}
-        className={`app-row-hover ${styles['app-window-card-header']}`}
+        aria-label={collapsed ? t("tabs.expand") : t("tabs.collapse")}
+        className={`app-row-hover ${styles["app-window-card-header"]}`}
       >
         <ChevronDown
           size={ICON_SIZE.TINY}
-          className={`${styles['app-window-card-chevron']}${collapsed ? ` ${styles['is-collapsed']}` : ''}`}
+          className={`${styles["app-window-card-chevron"]}${collapsed ? ` ${styles["is-collapsed"]}` : ""}`}
         />
-        <div className={styles['app-window-card-badge']}>
-          <Monitor size={ICON_SIZE.SMALL} className={styles['app-window-card-badge-icon']} />
+        <div className={styles["app-window-card-badge"]}>
+          <Monitor size={ICON_SIZE.SMALL} className={styles["app-window-card-badge-icon"]} />
         </div>
-        <span className={styles['app-window-card-title']}>
-          {isCurrent ? t('window.current') : t('window.other')}
+        <span className={styles["app-window-card-title"]}>
+          {isCurrent ? t("window.current") : t("window.other")}
         </span>
         {isFocused && (
-          <Tag color="green" className={styles['app-window-card-focused-tag']}>
-            {t('window.focused')}
+          <Tag color="green" className={styles["app-window-card-focused-tag"]}>
+            {t("window.focused")}
           </Tag>
         )}
-        <Tag className={styles['app-window-card-count']}>{windowTabs.length}</Tag>
+        <Tag className={styles["app-window-card-count"]}>{windowTabs.length}</Tag>
       </button>
 
       {/* 缩略图预览浮层 */}
       {thumbnailUrl && (
-        <div className={styles['app-window-thumbnail']}>
-          <img src={thumbnailUrl} alt="" className={styles['app-window-thumbnail-img']} />
+        <div className={styles["app-window-thumbnail"]}>
+          <img src={thumbnailUrl} alt="" className={styles["app-window-thumbnail-img"]} />
         </div>
       )}
 
       {/* 关闭整个窗口 */}
-      <Tooltip title={t('window.closeWindow')}>
+      <Tooltip title={t("window.closeWindow")}>
         <Button
           type="text"
           size="small"
@@ -291,20 +304,42 @@ function WindowCard({
           onClick={(e: React.MouseEvent) => {
             void handleCloseWindow(e);
           }}
-          className={`app-hover-reveal ${styles['app-window-card-action']} ${styles['app-window-card-action--close']}${closing ? ` ${styles['is-visible']}` : ''}`}
+          className={`app-hover-reveal ${styles["app-window-card-action"]} ${styles["app-window-card-action--close"]}${closing ? ` ${styles["is-visible"]}` : ""}`}
         />
       </Tooltip>
 
       {/* 智能排序 */}
       <Dropdown
-        trigger={['click']}
+        trigger={["click"]}
         menu={{
-          items: ([
-            { key: 'domain', label: t('window.smartSortByDomain'), description: t('window.smartSortByDomainDesc'), icon: <span>🌐</span> },
-            { key: 'recentAccess', label: t('window.smartSortByRecentAccess'), description: t('window.smartSortByRecentAccessDesc'), icon: <span>⏱</span> },
-            { key: 'alphabetical', label: t('window.smartSortByAlphabetical'), description: t('window.smartSortByAlphabeticalDesc'), icon: <span>🔤</span> },
-            { key: 'type', label: t('window.smartSortByType'), description: t('window.smartSortByTypeDesc'), icon: <span>📑</span> },
-          ] as const).map((item) => ({
+          items: (
+            [
+              {
+                key: "domain",
+                label: t("window.smartSortByDomain"),
+                description: t("window.smartSortByDomainDesc"),
+                icon: <span>🌐</span>,
+              },
+              {
+                key: "recentAccess",
+                label: t("window.smartSortByRecentAccess"),
+                description: t("window.smartSortByRecentAccessDesc"),
+                icon: <span>⏱</span>,
+              },
+              {
+                key: "alphabetical",
+                label: t("window.smartSortByAlphabetical"),
+                description: t("window.smartSortByAlphabeticalDesc"),
+                icon: <span>🔤</span>,
+              },
+              {
+                key: "type",
+                label: t("window.smartSortByType"),
+                description: t("window.smartSortByTypeDesc"),
+                icon: <span>📑</span>,
+              },
+            ] as const
+          ).map((item) => ({
             key: item.key,
             label: item.label,
             icon: item.icon,
@@ -314,21 +349,21 @@ function WindowCard({
           },
         }}
       >
-        <Tooltip title={t('window.smartSort')}>
+        <Tooltip title={t("window.smartSort")}>
           <Button
             type="text"
             size="small"
             icon={<ArrowUpDown size={ICON_SIZE.SMALL} />}
-            className={`app-hover-reveal ${styles['app-window-card-action']} ${styles['app-window-card-sort-btn']}`}
+            className={`app-hover-reveal ${styles["app-window-card-action"]} ${styles["app-window-card-sort-btn"]}`}
           />
         </Tooltip>
       </Dropdown>
 
       {/* 标签列表 —— 按分组展示 */}
       {!collapsed && (
-        <div className={styles['app-window-card-list']}>
+        <div className={styles["app-window-card-list"]}>
           {tabGroups.map((group) => (
-            <div key={group.groupId} className={styles['app-window-card-group']}>
+            <div key={group.groupId} className={styles["app-window-card-group"]}>
               {/* 分组标题行（仅非"未分组"时显示） */}
               {group.groupId !== -1 && (
                 <GroupLabel
@@ -351,12 +386,8 @@ function WindowCard({
                     key={`tab::${windowId}::${tab.id}`}
                     tab={tab}
                     windowId={windowId}
-                    onJump={(id, wid) => {
-                      void jumpToTab(id, wid);
-                    }}
-                    onClose={(id) => {
-                      void closeSingleTab(id);
-                    }}
+                    onJump={handleJump}
+                    onClose={handleClose}
                     showHostname
                     selectable
                     visibleTabIds={allTabIds}
@@ -370,15 +401,15 @@ function WindowCard({
           {/* 新建分组区域 —— 拖入标签自动 chrome.tabs.group */}
           <div
             ref={setGroupZoneRef}
-            className={`${styles['app-window-card-group-zone']} ${isGroupZoneOver ? styles['is-drag-over'] : ''}`}
+            className={`${styles["app-window-card-group-zone"]} ${isGroupZoneOver ? styles["is-drag-over"] : ""}`}
           >
             <FolderPlus size={ICON_SIZE.SMALL} />
-            <span>{t('window.groupTabs')}</span>
+            <span>{t("window.groupTabs")}</span>
           </div>
         </div>
       )}
     </Card>
   );
-}
+});
 
 export { WindowCard, type SmartSortRule };

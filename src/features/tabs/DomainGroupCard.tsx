@@ -16,15 +16,10 @@
  *   - 子项 favicon 显示可通过设置 `domainGroupShowItemFavicon` 切换
  */
 
-import { useState, useCallback, useMemo } from 'react';
-import { Card, Tag, Button, Tooltip, theme } from 'antd';
-import {
-  ChevronDown,
-  X,
-  Globe,
-  Moon,
-} from 'lucide-react';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
+import { useState, useCallback, useMemo, memo } from "react";
+import { Card, Tag, Button, Tooltip, theme } from "antd";
+import { ChevronDown, X, Globe, Moon } from "lucide-react";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
 import {
   DndContext,
   PointerSensor,
@@ -33,27 +28,27 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
   sortableKeyboardCoordinates,
   arrayMove,
   useSortable,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import type { DomainGroup } from '@/shared/utils/domain';
-import { useAccent } from '@/shared/hooks/use-accent';
-import { getFaviconUrl } from '@/features/quick-start/utils/site-utils';
-import type { SpeedDialSite } from '@/shared/types';
-import { useResolvedTheme } from '@/shared/hooks/use-resolved-theme';
-import { findAmbiguousTitleIds } from '@/shared/utils/url-display';
-import { cssVars } from '@/shared/utils/css-vars';
-import { useReducedMotionPreference } from '@/shared/hooks/use-reduced-motion';
-import { TabItem } from './TabItem';
-import { useTabsStore, useSettingsStore } from '@/store';
-import { useT } from '@/shared/i18n';
-import styles from './styles/items.module.less';
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import type { DomainGroup } from "@/shared/utils/domain";
+import { useAccent } from "@/shared/hooks/use-accent";
+import { getFaviconUrl } from "@/features/quick-start/utils/site-utils";
+import type { SpeedDialSite } from "@/shared/types";
+import { useResolvedTheme } from "@/shared/hooks/use-resolved-theme";
+import { findAmbiguousTitleIds } from "@/shared/utils/url-display";
+import { cssVars } from "@/shared/utils/css-vars";
+import { useReducedMotionPreference } from "@/shared/hooks/use-reduced-motion";
+import { TabItem } from "./TabItem";
+import { useTabsStore, useSettingsStore } from "@/store";
+import { useT } from "@/shared/i18n";
+import styles from "./styles/items.module.less";
 
 interface DomainGroupCardProps {
   group: DomainGroup;
@@ -71,7 +66,10 @@ interface DomainGroupCardProps {
  * @param props.initialCollapsed - 初始是否折叠（可选，默认 false）
  * @returns 域名分组卡片 JSX 元素
  */
-export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroupCardProps) {
+export const DomainGroupCard = memo(function DomainGroupCard({
+  group,
+  initialCollapsed = false,
+}: DomainGroupCardProps) {
   const [collapsed, setCollapsed] = useState(initialCollapsed);
   const [faviconError, setFaviconError] = useState(false);
   /** 关闭整个分组的 in-flight 标记，防止重复点击 + 驱动 Button loading */
@@ -87,17 +85,11 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
   const closeDomainGroup = useTabsStore((s) => s.closeDomainGroup);
   const discardDomainGroup = useTabsStore((s) => s.discardDomainGroup);
   /** 用户是否开启「子项显示域名图标」——domain 分组视图的专属 UI 偏好 */
-  const showItemFavicon = useSettingsStore(
-    (s) => s.settings.domainGroupShowItemFavicon ?? true,
-  );
+  const showItemFavicon = useSettingsStore((s) => s.settings.domainGroupShowItemFavicon ?? true);
   /** 身份色条位置偏好（left/top/none），默认 left */
-  const barPosition = useSettingsStore(
-    (s) => s.settings.domainGroupAccentBarPosition ?? 'left',
-  );
+  const barPosition = useSettingsStore((s) => s.settings.domainGroupAccentBarPosition ?? "left");
   /** 卡片圆角档位偏好（none/small/default/large），默认 default */
-  const radiusPreset = useSettingsStore(
-    (s) => s.settings.domainGroupCardRadius ?? 'default',
-  );
+  const radiusPreset = useSettingsStore((s) => s.settings.domainGroupCardRadius ?? "default");
   const { t } = useT();
   const { token } = theme.useToken();
   const resolvedTheme = useResolvedTheme();
@@ -112,13 +104,13 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
    */
   const cardRadius = useMemo(() => {
     switch (radiusPreset) {
-      case 'none':
+      case "none":
         return 0;
-      case 'small':
+      case "small":
         return 4;
-      case 'large':
+      case "large":
         return 16;
-      case 'default':
+      case "default":
       default:
         return token.borderRadiusLG;
     }
@@ -146,7 +138,7 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
         setClosing(false);
       }
     },
-        [closeDomainGroup, closing, group.domain],
+    [closeDomainGroup, closing, group.domain],
   );
 
   /**
@@ -158,7 +150,7 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
     if (!firstTab) return undefined;
     // 构造与 SiteCard 完全一致的 mock SiteCard
     const mockSite: Partial<SpeedDialSite> = {
-      url: firstTab.url?.startsWith('http') ? firstTab.url : `https://${group.domain}`,
+      url: firstTab.url?.startsWith("http") ? firstTab.url : `https://${group.domain}`,
       favIconUrl: firstTab.favIconUrl,
     };
     return getFaviconUrl(mockSite as SpeedDialSite);
@@ -173,8 +165,7 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
    *   - 深色主题 → barDark（高饱和 ~0.80、中高亮 ~0.66），暗底上闪亮可辨
    * 旧 accent 可能没有新字段（缓存过的）—— 兜底到 `accent.bar`
    */
-  const barColor =
-    (resolvedTheme === 'dark' ? accent.barDark : accent.barLight) ?? accent.bar;
+  const barColor = (resolvedTheme === "dark" ? accent.barDark : accent.barLight) ?? accent.bar;
 
   /** 同组内 title 重复的 tab id 集合 —— 驱动 URL 消歧行的显示 */
   const ambiguousIds = useMemo(() => findAmbiguousTitleIds(group.tabs), [group.tabs]);
@@ -210,11 +201,24 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
   const visibleTabIds = useMemo(() => tabOrder.map((t) => t.id), [tabOrder]);
 
   /** 拖拽完成时只更新 ID 顺序，不直接操作完整 tab 对象 */
-  const handleReorder = useCallback(
-    (newOrder: typeof group.tabs) => {
-      setOrderOverride(newOrder.map((t) => t.id));
+  const handleReorder = useCallback((newOrder: typeof group.tabs) => {
+    setOrderOverride(newOrder.map((t) => t.id));
+  }, []);
+
+  /** 稳定跳转回调 —— 避免内联函数导致子组件重渲染 */
+  const handleJump = useCallback(
+    (id: number, wid: number) => {
+      void jumpToTab(id, wid);
     },
-    [],
+    [jumpToTab],
+  );
+
+  /** 稳定关闭回调 —— 避免内联函数导致子组件重渲染 */
+  const handleClose = useCallback(
+    (id: number) => {
+      void closeSingleTab(id);
+    },
+    [closeSingleTab],
   );
 
   /** @dnd-kit 传感器：指针（5px 激活防误触）+ 键盘 */
@@ -248,29 +252,39 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
   const cardStyle = useMemo<React.CSSProperties>(
     () => ({
       borderRadius: cardRadius || 12,
-      overflow: 'hidden',
-      position: 'relative',
-      boxShadow: 'var(--app-shadow-card)',
+      overflow: "hidden",
+      position: "relative",
+      boxShadow: "var(--app-shadow-card)",
       border: `1px solid ${token.colorBorderSecondary}`,
       ...cssVars({
-        '--app-hover-border': token.colorBorder,
-        '--app-domain-card-radius': `${cardRadius || 12}px`,
-        '--app-domain-card-bar': barColor,
-        '--app-domain-card-badge-bg': accent.soft,
-        '--app-domain-card-header-border': collapsed ? 'transparent' : token.colorBorderSecondary,
-        '--app-domain-card-chevron-color': token.colorTextTertiary,
-        '--app-domain-card-title-color': token.colorText,
-        '--app-row-hover-bg': token.colorFillSecondary,
+        "--app-hover-border": token.colorBorder,
+        "--app-domain-card-radius": `${cardRadius || 12}px`,
+        "--app-domain-card-bar": barColor,
+        "--app-domain-card-badge-bg": accent.soft,
+        "--app-domain-card-header-border": collapsed ? "transparent" : token.colorBorderSecondary,
+        "--app-domain-card-chevron-color": token.colorTextTertiary,
+        "--app-domain-card-title-color": token.colorText,
+        "--app-row-hover-bg": token.colorFillSecondary,
       }),
     }),
-    [accent.soft, barColor, cardRadius, collapsed, token.colorBorder, token.colorBorderSecondary, token.colorFillSecondary, token.colorText, token.colorTextTertiary],
+    [
+      accent.soft,
+      barColor,
+      cardRadius,
+      collapsed,
+      token.colorBorder,
+      token.colorBorderSecondary,
+      token.colorFillSecondary,
+      token.colorText,
+      token.colorTextTertiary,
+    ],
   );
 
   return (
     <Card
       size="small"
-      className={`app-card-interactive app-hover-reveal-host ${styles['app-domain-group-card']}`}
-      classNames={{ body: styles['app-domain-group-card__body'] }}
+      className={`app-card-interactive app-hover-reveal-host ${styles["app-domain-group-card"]}`}
+      classNames={{ body: styles["app-domain-group-card__body"] }}
       style={cardStyle}
     >
       {/*
@@ -281,23 +295,19 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
         色条始终使用依主题挑好的 barLight/barDark 纯实色，无渐变、无霓虹。
         无障碍：aria-hidden，不参与语义。
       */}
-      {barPosition === 'left' && (
-        <div aria-hidden className={styles['app-accent-bar--left']} />
-      )}
-      {barPosition === 'top' && (
-        <div aria-hidden className={styles['app-accent-bar--top']} />
-      )}
+      {barPosition === "left" && <div aria-hidden className={styles["app-accent-bar--left"]} />}
+      {barPosition === "top" && <div aria-hidden className={styles["app-accent-bar--top"]} />}
       {/* 分组头部 —— 可点击展开/折叠 */}
       <button
         type="button"
         onClick={toggleCollapse}
         aria-expanded={!collapsed}
-        aria-label={collapsed ? t('tabs.expand') : t('tabs.collapse')}
-        className={`app-row-hover ${styles['app-domain-group-header']}`}
+        aria-label={collapsed ? t("tabs.expand") : t("tabs.collapse")}
+        className={`app-row-hover ${styles["app-domain-group-header"]}`}
       >
         <ChevronDown
           size={ICON_SIZE.TINY}
-          className={`${styles['app-domain-group-chevron']}${collapsed ? ` ${styles['is-collapsed']}` : ''}`}
+          className={`${styles["app-domain-group-chevron"]}${collapsed ? ` ${styles["is-collapsed"]}` : ""}`}
         />
 
         {/*
@@ -305,45 +315,43 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
           内部要么嵌 favicon，要么在占位图标。把"色彩=身份"的语义集中在这块小徽章里，
           多卡并排时视觉协同——左边条 + 徽章 是同色系，一眼就能把"这是什么网站"传达出去。
         */}
-        <div className={styles['app-domain-group-badge']}>
+        <div className={styles["app-domain-group-badge"]}>
           {faviconUrl && !faviconError ? (
             <img
               src={faviconUrl}
               alt=""
-              className={styles['app-domain-group-badge-favicon']}
+              className={styles["app-domain-group-badge-favicon"]}
               onError={() => setFaviconError(true)}
             />
           ) : (
-            <Globe size={ICON_SIZE.SMALL} className={styles['app-domain-group-badge-icon']} />
+            <Globe size={ICON_SIZE.SMALL} className={styles["app-domain-group-badge-icon"]} />
           )}
         </div>
 
-        <span className={styles['app-domain-group-title']}>
-          {group.domain}
-        </span>
+        <span className={styles["app-domain-group-title"]}>{group.domain}</span>
 
-        <Tag className={styles['app-domain-group-count']}>
-          {group.tabs.length}
-        </Tag>
+        <Tag className={styles["app-domain-group-count"]}>{group.tabs.length}</Tag>
       </button>
 
       {/* 休眠整组——释放内存但保留标签页位置 */}
-      <Tooltip title={t('tabs.discardGroup')}>
+      <Tooltip title={t("tabs.discardGroup")}>
         <Button
           type="text"
           size="small"
           icon={<Moon size={ICON_SIZE.SMALL} />}
           onClick={(e) => {
             e.stopPropagation();
-            void discardDomainGroup(group.domain).catch(() => { /* store 已 toast */ });
+            void discardDomainGroup(group.domain).catch(() => {
+              /* store 已 toast */
+            });
           }}
-          aria-label={t('tabs.discardGroup')}
-          className={`app-hover-reveal ${styles['app-domain-group-action']} ${styles['app-domain-group-action--discard']}`}
+          aria-label={t("tabs.discardGroup")}
+          className={`app-hover-reveal ${styles["app-domain-group-action"]} ${styles["app-domain-group-action--discard"]}`}
         />
       </Tooltip>
 
       {/* 关闭整个域名 —— 独立按钮，绝对定位覆盖在 header 右侧 */}
-      <Tooltip title={t('tabs.closeDomain')}>
+      <Tooltip title={t("tabs.closeDomain")}>
         <Button
           type="text"
           size="small"
@@ -351,32 +359,30 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
           loading={closing}
           disabled={closing}
           icon={closing ? undefined : <X size={ICON_SIZE.SMALL} />}
-          onClick={(e: React.MouseEvent) => { void handleCloseAll(e); }}
-          aria-label={t('tabs.closeDomain')}
+          onClick={(e: React.MouseEvent) => {
+            void handleCloseAll(e);
+          }}
+          aria-label={t("tabs.closeDomain")}
           // closing 时强制显示（is-visible），其余情况由 hover/focus 驱动
-          className={`app-hover-reveal ${styles['app-domain-group-action']} ${styles['app-domain-group-action--close']}${closing ? ` ${styles['is-visible']}` : ''}`}
+          className={`app-hover-reveal ${styles["app-domain-group-action"]} ${styles["app-domain-group-action--close"]}${closing ? ` ${styles["is-visible"]}` : ""}`}
         />
       </Tooltip>
 
       {/* 标签列表 — 使用 @dnd-kit 实现分组内拖拽排序 */}
       {!collapsed && (
-        <div className={styles['app-domain-group-list']}>
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={onDragEnd}
-          >
+        <div className={styles["app-domain-group-list"]}>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
             <SortableContext
               items={tabOrder.map((t) => t.id)}
               strategy={verticalListSortingStrategy}
             >
-              <div className={styles['app-domain-group-sortable']}>
+              <div className={styles["app-domain-group-sortable"]}>
                 {tabOrder.map((tab) => (
                   <SortableDomainTabItem
                     key={tab.id}
                     tab={tab}
-                    onJump={(id, wid) => { void jumpToTab(id, wid); }}
-                    onClose={(id) => { void closeSingleTab(id); }}
+                    onJump={handleJump}
+                    onClose={handleClose}
                     hideFavicon={!showItemFavicon}
                     showUrlHint={ambiguousIds.has(tab.id)}
                     selectable
@@ -391,12 +397,12 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
       )}
     </Card>
   );
-}
+});
 
 // ── 子组件：可拖拽排序的标签行 ──────────────────────────────────
 
 interface SortableDomainTabItemProps {
-  tab: Parameters<typeof TabItem>[0]['tab'];
+  tab: Parameters<typeof TabItem>[0]["tab"];
   onJump: (id: number, windowId: number) => void;
   onClose: (id: number) => void;
   hideFavicon: boolean;
@@ -431,21 +437,16 @@ function SortableDomainTabItem({
   visibleTabIds,
   reduced,
 }: SortableDomainTabItemProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: tab.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: tab.id,
+  });
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
-    transition: reduced ? 'none' : transition,
-    zIndex: isDragging ? 10 : 'auto',
-    position: 'relative',
-    boxShadow: isDragging ? '0 4px 12px rgba(0,0,0,0.12)' : undefined,
+    transition: reduced ? "none" : transition,
+    zIndex: isDragging ? 10 : "auto",
+    position: "relative",
+    boxShadow: isDragging ? "0 4px 12px rgba(0,0,0,0.12)" : undefined,
   };
 
   return (
@@ -454,7 +455,7 @@ function SortableDomainTabItem({
       {...attributes}
       {...listeners}
       style={style}
-      className={styles['app-domain-group-sortable-item']}
+      className={styles["app-domain-group-sortable-item"]}
     >
       <TabItem
         tab={tab}

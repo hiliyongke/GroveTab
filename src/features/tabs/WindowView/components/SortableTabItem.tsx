@@ -5,11 +5,12 @@
  * 使标签可以在窗口内拖拽排序
  */
 
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import type { SortableTabItemProps, DragData } from '../types';
-import { TabItem } from '@/features/tabs/TabItem';
-import styles from '../WindowView.module.less';
+import { memo } from "react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import type { SortableTabItemProps, DragData } from "../types";
+import { TabItem } from "@/features/tabs/TabItem";
+import styles from "../WindowView.module.less";
 
 /**
  *
@@ -24,7 +25,7 @@ import styles from '../WindowView.module.less';
  * @param root0.reduced
  * @returns {void} 无返回值
  */
-function SortableTabItem({
+const SortableTabItem = memo(function SortableTabItem({
   tab,
   windowId,
   onJump,
@@ -35,23 +36,16 @@ function SortableTabItem({
   reduced,
 }: SortableTabItemProps) {
   const sortableId = `tab::${windowId}::${tab.id}`;
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: sortableId,
-    data: { kind: 'tab' as const, tabId: tab.id, windowId, url: tab.url } as DragData,
+    data: { kind: "tab" as const, tabId: tab.id, windowId, url: tab.url } as DragData,
   });
 
   const sortableStyle: React.CSSProperties = {
     opacity: isDragging ? 0.4 : 1,
     transform: CSS.Translate.toString(transform),
-    transition: reduced ? 'none' : transition,
-    position: 'relative',
+    transition: reduced ? "none" : transition,
+    position: "relative",
   };
 
   return (
@@ -60,7 +54,7 @@ function SortableTabItem({
       {...attributes}
       {...listeners}
       style={sortableStyle}
-      className={`${styles['app-window-card-sortable-item']}${isDragging ? ` ${styles['is-dragging']}` : ''}`}
+      className={`${styles["app-window-card-sortable-item"]}${isDragging ? ` ${styles["is-dragging"]}` : ""}`}
     >
       <TabItem
         tab={tab}
@@ -72,6 +66,6 @@ function SortableTabItem({
       />
     </div>
   );
-}
+});
 
 export { SortableTabItem };
