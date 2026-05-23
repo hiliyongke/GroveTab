@@ -108,17 +108,18 @@ function KeybindingRecorder({
 
   return (
     <div className={styles['settings-keybinding-recorder']}>
-      <button
-        type="button"
+      <Button
+        type="default"
         onClick={() => setRecording(true)}
         aria-label={
           recording ? t('shortcuts.recording') : t('shortcuts.resetHint')
         }
         aria-pressed={recording}
         className={`${styles['settings-keybinding-trigger']}${recording ? ` ${styles['settings-keybinding-trigger--recording']}` : ''}`}
+        style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
       >
         {recording ? t('shortcuts.recording') : formatDisplay(currentKeys)}
-      </button>
+      </Button>
       <Button
         type="text"
         size="small"

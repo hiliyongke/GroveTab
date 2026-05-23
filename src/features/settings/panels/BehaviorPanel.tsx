@@ -9,6 +9,7 @@
  */
 
 import type { UserSettings } from '@/shared/types';
+import { Typography } from 'antd';
 import { useT } from '@/shared/i18n';
 import { GeneralSettings } from './GeneralSettings';
 import { ViewLayoutSettings } from './ViewLayoutSettings';
@@ -60,7 +61,9 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
     <div className={styles['settings-panel-stack']}>
       {sections.map((section) => (
         <section key={section.key} className={styles['settings-section']}>
-          <h3 className={styles['settings-section__title']}>{section.title}</h3>
+          <Typography.Title level={3} className={styles['settings-section__title']} style={{ margin: 0 }}>
+            {section.title}
+          </Typography.Title>
           <div className={styles['settings-section__body']}>{section.content}</div>
         </section>
       ))}

@@ -134,13 +134,14 @@ export function AppHeader({
               </span>{' '}
               {t('header.pending')}
               {onTidy && (
-                <button
-                  type="button"
+                <Button
+                  type="link"
+                  size="small"
                   className="app-header-tidy-link"
                   onClick={onTidy}
                 >
                   {t('dashboard.tidyAction')}
-                </button>
+                </Button>
               )}
             </>
           )}
@@ -154,8 +155,8 @@ export function AppHeader({
         · Hero 搜索框在视野内时隐藏，滚出后渐显
       */}
       <div className="app-header-center">
-        <button
-          type="button"
+        <Button
+          type="default"
           onClick={onOpenSearch}
           aria-label={t('search.placeholder')}
           className={`app-compact-search app-header-search-trigger${compactSearchVisible ? ' is-visible' : ''}`}
@@ -167,7 +168,7 @@ export function AppHeader({
           <span className="app-kbd" aria-hidden>
             ⌘K
           </span>
-        </button>
+        </Button>
       </div>
 
       <Space size={6} className="app-header-actions">

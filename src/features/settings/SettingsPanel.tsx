@@ -8,7 +8,7 @@
  * 支持受控激活 Tab（defaultActiveTab），便于从外部 hash（#about）直接切到指定 Tab。
  */
 
-import { Drawer } from 'antd';
+import { Drawer, Button, Typography, Flex } from 'antd';
 import { useState, useEffect, useCallback } from 'react';
 import {
   Palette,
@@ -144,36 +144,36 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
       }}
       rootClassName={styles['settings-drawer']}
     >
-      <div className={styles['settings-shell']}>
+      <Flex className={styles['settings-shell']} style={{ height: '100%', overflow: 'hidden' }}>
         {/* 左侧图标导航 */}
         <nav className={styles['settings-nav']}>
-          <div className={styles['settings-nav__list']}>
+          <Flex vertical className={styles['settings-nav__list']}>
             {tabs.map((tab) => (
-              <button
+              <Button
                 key={tab.key}
-                type="button"
+                type="text"
                 className={`${styles['settings-nav__item']}${activeTab === tab.key ? ` ${styles['is-active']}` : ''}`}
                 onClick={() => setActiveTab(tab.key)}
               >
                 <span className={styles['settings-nav__icon']}>{tab.icon}</span>
                 <span className={styles['settings-nav__label']}>{t(tab.labelKey)}</span>
-              </button>
+              </Button>
             ))}
-          </div>
+          </Flex>
         </nav>
 
         {/* 右侧内容区 */}
-        <main className={styles['settings-content']}>
-          <div className={styles['settings-content__header']}>
-            <h2 className={styles['settings-content__title']}>
-              {activeItem && t(activeItem.labelKey)}
-            </h2>
-          </div>
+      <Flex vertical className={styles['settings-content']}>
+        <Flex className={styles['settings-content__header']}>
+          <Typography.Title level={2} className={styles['settings-content__title']}>
+            {activeItem && t(activeItem.labelKey)}
+          </Typography.Title>
+        </Flex>
           <div className={styles['settings-content__body']}>
             {activeItem?.component}
           </div>
-        </main>
-      </div>
+        </Flex>
+      </Flex>
     </Drawer>
   );
 }

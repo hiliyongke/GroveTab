@@ -9,7 +9,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Tooltip, Input, Dropdown } from "antd";
+import { Tooltip, Input, Dropdown, Button } from "antd";
 import type { MenuProps } from "antd";
 import {
   queryAllTabs,
@@ -111,14 +111,15 @@ const SpaceButton = React.memo<SpaceButtonProps>(({ space, isActive, onActivate 
 
   return (
     <Tooltip title={space.name} placement="right">
-      <button
+      <Button
         className={`${styles.arcSpaceBtn} ${isActive ? styles.active : ''}`}
         style={buttonStyle}
         onClick={() => onActivate(space.id)}
+        type="text"
       >
         <span className={styles.arcSpaceIcon}>{space.icon}</span>
         {space.tabs.length > 0 && <span className={styles.arcSpaceBadge}>{space.tabs.length}</span>}
-      </button>
+      </Button>
     </Tooltip>
   );
 });
@@ -339,11 +340,11 @@ const ArcSidebarContent: React.FC = () => {
       <div className={styles.arcSpacesBar}>
         <div className={styles.arcSpacesHeader}>
           <Tooltip title="Arc Menu" placement="right">
-            <button className={styles.arcMenuBtn} aria-label={t("arcSidebar.menu")}>
+            <Button className={styles.arcMenuBtn} aria-label={t("arcSidebar.menu")} type="text">
               <span style={menuIconStyle} aria-hidden="true">
                 ⌘
               </span>
-            </button>
+            </Button>
           </Tooltip>
         </div>
 
@@ -360,18 +361,18 @@ const ArcSidebarContent: React.FC = () => {
 
         <div className={styles.arcSpacesFooter}>
           <Tooltip title={t("arcSidebar.addSpace")} placement="right">
-            <button className={`${styles.arcSpaceBtn} ${styles.addSpace}`} aria-label={t("arcSidebar.addSpace")}>
+            <Button className={`${styles.arcSpaceBtn} ${styles.addSpace}`} aria-label={t("arcSidebar.addSpace")} type="text">
               <span style={smallIconStyle} aria-hidden="true">
                 +
               </span>
-            </button>
+            </Button>
           </Tooltip>
           <Tooltip title={t("arcSidebar.settings")} placement="right">
-            <button className={styles.arcSpaceBtn} aria-label={t("arcSidebar.settings")}>
+            <Button className={styles.arcSpaceBtn} aria-label={t("arcSidebar.settings")} type="text">
               <span style={smallIconStyle} aria-hidden="true">
                 ⚙
               </span>
-            </button>
+            </Button>
           </Tooltip>
         </div>
       </div>
@@ -470,16 +471,16 @@ const ArcSidebarContent: React.FC = () => {
 
       {/* Bottom Actions */}
       <div className={styles.sidebarFooter}>
-        <button className={styles.footerBtn} onClick={handleNewTabClick}>
+        <Button className={styles.footerBtn} onClick={handleNewTabClick} type="text">
           <span style={smallIconStyle}>➕</span>
           <span>{t("arcSidebar.newTab")}</span>
-        </button>
+        </Button>
         <Dropdown menu={{ items: commandActions }} trigger={["click"]} placement="topRight">
-          <button className={`${styles.footerBtn} ${styles.iconOnly}`} aria-label={t("arcSidebar.moreActions")}>
+          <Button className={`${styles.footerBtn} ${styles.iconOnly}`} aria-label={t("arcSidebar.moreActions")} type="text">
             <span style={menuIconStyle} aria-hidden="true">
               ⋯
             </span>
-          </button>
+          </Button>
         </Dropdown>
       </div>
 
@@ -561,21 +562,25 @@ function ArcTabItem({
       />
       <span className={styles.arcTabTitle}>{tab.title}</span>
       <div className={styles.arcTabActions}>
-        <button
+        <Button
           className={styles.arcTabActionBtn}
           onClick={onTogglePin}
           aria-label={tab.pinned ? t("arcSidebar.unpinTab") : t("arcSidebar.pinTab")}
           aria-pressed={tab.pinned}
+          type="text"
+          size="small"
         >
           {tab.pinned ? "★" : "☆"}
-        </button>
-        <button
+        </Button>
+        <Button
           className={`${styles.arcTabActionBtn} ${styles.close}`}
           onClick={onClose}
           aria-label={t("arcSidebar.closeTab")}
+          type="text"
+          size="small"
         >
           ✕
-        </button>
+        </Button>
       </div>
     </div>
   );

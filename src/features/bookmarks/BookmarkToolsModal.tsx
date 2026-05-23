@@ -337,34 +337,34 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
       </div>
 
       <div className={styles['bm-tools__quick-grid']}>
-        <button type="button" className={styles['bm-tools__quick']} onClick={() => setActiveTool('dedupe')}>
+        <Button type="default" className={styles['bm-tools__quick']} onClick={() => setActiveTool('dedupe')}>
           <Copy size={ICON_SIZE.MEDIUM} />
           <div className={styles['bm-tools__quick-text']}>
             <span className={styles['bm-tools__quick-title']}>{t('bookmark.tools.dedupe')}</span>
             <span className={styles['bm-tools__quick-desc']}>{t('bookmark.tools.dedupeShort')}</span>
           </div>
-        </button>
-        <button type="button" className={styles['bm-tools__quick']} onClick={() => setActiveTool('health')}>
+        </Button>
+        <Button type="default" className={styles['bm-tools__quick']} onClick={() => setActiveTool('health')}>
           <HeartPulse size={ICON_SIZE.MEDIUM} />
           <div className={styles['bm-tools__quick-text']}>
             <span className={styles['bm-tools__quick-title']}>{t('bookmark.tools.health')}</span>
             <span className={styles['bm-tools__quick-desc']}>{t('bookmark.tools.healthShort')}</span>
           </div>
-        </button>
-        <button type="button" className={styles['bm-tools__quick']} onClick={() => setActiveTool('organize')}>
+        </Button>
+        <Button type="default" className={styles['bm-tools__quick']} onClick={() => setActiveTool('organize')}>
           <FolderTree size={ICON_SIZE.MEDIUM} />
           <div className={styles['bm-tools__quick-text']}>
             <span className={styles['bm-tools__quick-title']}>{t('bookmark.tools.organize')}</span>
             <span className={styles['bm-tools__quick-desc']}>{t('bookmark.tools.organizeShort')}</span>
           </div>
-        </button>
-        <button type="button" className={styles['bm-tools__quick']} onClick={() => setActiveTool('empty')}>
+        </Button>
+        <Button type="default" className={styles['bm-tools__quick']} onClick={() => setActiveTool('empty')}>
           <FolderX size={ICON_SIZE.MEDIUM} />
           <div className={styles['bm-tools__quick-text']}>
             <span className={styles['bm-tools__quick-title']}>{t('bookmark.tools.empty')}</span>
             <span className={styles['bm-tools__quick-desc']}>{t('bookmark.tools.emptyShort')}</span>
           </div>
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -761,9 +761,9 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
       <div className={styles['bm-tools__layout']}>
         <nav className={styles['bm-tools__nav']}>
           {navItems.map((item) => (
-            <button
+            <Button
               key={item.key}
-              type="button"
+              type="text"
               className={`bm-tools__nav-item${activeTool === item.key ? ' is-active' : ''}`}
               onClick={() => setActiveTool(item.key)}
             >
@@ -772,7 +772,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
               {item.badge !== undefined && item.badge > 0 && (
                 <span className={styles['bm-tools__nav-badge']}>{item.badge}</span>
               )}
-            </button>
+            </Button>
           ))}
         </nav>
         <section className={styles['bm-tools__content']}>

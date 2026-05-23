@@ -19,6 +19,7 @@ import {
   Button,
   Popconfirm,
   Space,
+  Typography,
 } from 'antd';
 import { Trash2, Eraser } from 'lucide-react';
 
@@ -93,7 +94,7 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
     <div className={styles['settings-panel-stack']}>
       {/* ── 主开关 ───────────────────────────────────── */}
       <section className={styles['settings-section']}>
-        <h3 className={styles['settings-section__title']}>{t('privacy.sectionMaster')}</h3>
+        <Typography.Title level={3} className={styles['settings-section__title']} style={{ margin: 0 }}>{t('privacy.sectionMaster')}</Typography.Title>
         <div className={styles['settings-section__body']}>
           <Field
             label={t('privacy.enableHistory')}
@@ -119,7 +120,7 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
 
       {/* ── 容量与过期 ────────────────────────────────── */}
       <section className={styles['settings-section']} style={{ opacity: disabled ? 0.55 : 1 }}>
-        <h3 className={styles['settings-section__title']}>{t('privacy.sectionCapacity')}</h3>
+        <Typography.Title level={3} className={styles['settings-section__title']} style={{ margin: 0 }}>{t('privacy.sectionCapacity')}</Typography.Title>
         <div className={styles['settings-section__body']}>
           <Field
             label={t('privacy.maxClosedTabs')}
@@ -171,7 +172,7 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
 
       {/* ── URL 黑名单 ────────────────────────────────── */}
       <section className={styles['settings-section']} style={{ opacity: disabled ? 0.55 : 1 }}>
-        <h3 className={styles['settings-section__title']}>{t('privacy.sectionBlocklist')}</h3>
+        <Typography.Title level={3} className={styles['settings-section__title']} style={{ margin: 0 }}>{t('privacy.sectionBlocklist')}</Typography.Title>
         <div className={styles['settings-section__body']}>
           <Field
             label={t('privacy.urlBlocklist')}
@@ -199,7 +200,7 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
 
       {/* ── 危险区 ────────────────────────────────────── */}
       <section className={styles['settings-section']}>
-        <h3 className={styles['settings-section__title']}>{t('privacy.sectionDanger')}</h3>
+        <Typography.Title level={3} className={styles['settings-section__title']} style={{ margin: 0 }}>{t('privacy.sectionDanger')}</Typography.Title>
         <div className={styles['settings-section__body']}>
           <Field
             label={t('privacy.clearAll')}

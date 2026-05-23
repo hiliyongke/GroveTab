@@ -171,17 +171,18 @@ function PresetCard({
   onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
+    <Button
+      type="text"
       onClick={onClick}
       className={`${styles['appearance-preset-card']}${selected ? ` ${styles['appearance-preset-card--selected']}` : ''}`}
+      style={{ display: 'flex', flexDirection: 'column', padding: 0, height: 'auto', border: 'none', background: 'transparent' }}
     >
       {preview}
       <div className={styles['appearance-preset-meta']}>
         <div className={`${styles['appearance-preset-title']}${selected ? ` ${styles['appearance-preset-title--selected']}` : ''}`}>{label}</div>
         {description && <div className={styles['appearance-preset-description']}>{description}</div>}
       </div>
-    </button>
+    </Button>
   );
 }
 
@@ -509,14 +510,15 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                 '--appearance-edit-icon': isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.4)',
               });
               return (
-                <button
+                <Button
                   key={preset.id}
-                  type="button"
+                  type="text"
                   onClick={() => {
                     void updateSettings({ gradientPreset: preset.id });
                     if (preset.id === 'custom') setShowGradientEditor(true);
                   }}
                   className={`${styles['appearance-preset-card']}${isSelected ? ` ${styles['appearance-preset-card--selected']}` : ''}`}
+                  style={{ display: 'flex', flexDirection: 'column', padding: 0, height: 'auto', border: 'none', background: 'transparent' }}
                 >
                   <div
                 className={`${styles['appearance-preset-preview']} ${styles['appearance-preset-preview--gradient']} ${styles['appearance-preview-editable']}`}
@@ -528,7 +530,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                   <div className={`${styles['appearance-preset-label-only']}${isSelected ? ` ${styles['appearance-preset-label-only--selected']}` : ''}`}>
                     {t(preset.labelKey)}
                   </div>
-                </button>
+                </Button>
               );
             })}
           </div>

@@ -8,29 +8,12 @@
  *   - 列间距 16px、卡片垂直间距 14px
  */
 
-import { useMemo } from 'react';
+import { useMemo, memo, type CSSProperties } from 'react';
 import { useTabsStore, useMetadataStore, useSettingsStore } from '@/store';
 import { groupTabsByDomain } from '@/shared/utils/domain';
 import { cssVars } from '@/shared/utils/css-vars';
 import { DomainGroupCard } from './DomainGroupCard';
 import styles from './styles/items.module.less';
-
-/**
- * 构造响应式 multi-column 布局样式
- *
- * 根据配置返回固定列数或响应式列宽的 CSS 属性。
- *
- * @param forcedColumns - 若用户在设置中显式指定列数（1–6），则强制使用该列数；
- *                        否则返回纯响应式配置（按 `column-width` 自适应）
- * @returns 包含 CSS 自定义属性的样式对象
- */
-function getColumnVars(forcedColumns: number | null): React.CSSProperties {
-  if (forcedColumns && forcedColumns >= 1 && forcedColumns <= 6) {
-    return cssVars({ '--app-domain-column-count': String(forcedColumns) });
-  }
-
-  return cssVars({ '--app-domain-column-width': '320px' });
-}
 
 /**
  * 域名分组视图（默认视图）
@@ -43,7 +26,7 @@ function getColumnVars(forcedColumns: number | null): React.CSSProperties {
  *
  * @returns 域名分组视图 JSX 元素
  */
-export function DomainGroupView() {
+export const DomainGroupView = memo(function DomainGroupView() {
   const tabs = useTabsStore((s) => s.tabs);
   const pinnedUrls = useMetadataStore((s) => s.pinnedUrls);
   // 仅当用户显式设置了 1–6 的有效数值时才锁定列数，'auto' 或 undefined 走响应式
@@ -89,10 +72,21 @@ export function DomainGroupView() {
     return null;
   }
 
+  // 缓存列样式对象，避免每次渲染创建新对象
+  const columnStyle = useMemo<CSSProperties>(
+    () => {
+      if (forcedColumns !== null) {
+        return cssVars({ '--app-domain-column-count': String(forcedColumns) });
+      }
+      return cssVars({ '--app-domain-column-width': '320px' });
+    },
+    [forcedColumns],
+  );
+
   return (
     <div
       className={`${styles['app-domain-masonry']}${forcedColumns !== null ? ` ${styles['is-fixed-columns']}` : ''}`}
-      style={getColumnVars(forcedColumns)}
+      style={columnStyle}
     >
       {sortedGroups.map((group) => (
         <div key={group.domain} className={styles['app-domain-masonry-item']}>
@@ -104,4 +98,4 @@ export function DomainGroupView() {
       ))}
     </div>
   );
-}
+});

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Button } from 'antd';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
 import { WORKSPACE_VIEW_CONFIGS } from '@/features/workspace/view-catalog';
@@ -43,9 +44,9 @@ export function ViewSidebar({
         {viewSidebarItems.map((v) => {
           const isActive = viewMode === v.id;
           return (
-            <button
+            <Button
               key={v.id}
-              type="button"
+              type="text"
               className={`app-view-sidebar__item${isActive ? ' is-active' : ''}`}
               aria-current={isActive ? 'page' : undefined}
               onClick={() => onViewChange(v.id)}
@@ -53,7 +54,7 @@ export function ViewSidebar({
             >
               <v.Icon size={ICON_SIZE.MEDIUM} />
               <span className="app-view-sidebar__label">{v.label}</span>
-            </button>
+            </Button>
           );
         })}
       </div>

@@ -37,9 +37,23 @@
 
 /* ── Shell：两栏布局 ── */
 .settings-shell {
-  display: flex;
   height: 100%;
   overflow: hidden;
+}
+
+.settings-content {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.settings-content__header {
+  padding: 18px 28px 0;
+  flex-shrink: 0;
+}
+
+.settings-content__title {
+  margin: 0;
 }
 
 /* ── 左侧图标导航栏 ── */
@@ -53,9 +67,6 @@
 }
 
 .settings-nav__list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
   padding: var(--app-space-4) var(--app-space-2);
 }
 
@@ -104,15 +115,11 @@
 /* ── 右侧内容区 ── */
 .settings-content {
   flex: 1;
-  display: flex;
-  flex-direction: column;
   min-width: 0;
   overflow: hidden;
 }
 
 .settings-content__header {
-  display: flex;
-  align-items: center;
   padding: 18px 28px 0;
   flex-shrink: 0;
 }
@@ -355,6 +362,6 @@
 @media (prefers-reduced-motion: reduce) {
   .settings-nav__item,
   .settings-content__header {
-    transition: none !important;
+    transition: none;
   }
 }

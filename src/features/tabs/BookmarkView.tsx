@@ -10,7 +10,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Input, Button, Tag, Spin, Tooltip, Segmented } from "antd";
+import { Input, Button, Tag, Spin, Tooltip, Segmented, Flex, Space } from "antd";
 import {
   BookOpen,
   Search,
@@ -180,7 +180,7 @@ function BookmarkRow({
   );
 
   return (
-    <div
+    <Flex
       className={styles["app-bookmark-row"]}
       style={rowStyle}
       onClick={handleClick}
@@ -188,6 +188,8 @@ function BookmarkRow({
       tabIndex={0}
       onKeyDown={handleKeyDown}
       title={`${titleText}\n${url}`}
+      align="center"
+      gap={8}
     >
       <span className={styles["app-bookmark-row__bar"]} />
       {faviconUrl && !faviconError ? (
@@ -211,7 +213,7 @@ function BookmarkRow({
         </div>
       </div>
       <ExternalLink size={ICON_SIZE.SMALL} className={styles["app-bookmark-row__action"]} />
-    </div>
+    </Flex>
   );
 }
 
@@ -249,11 +251,20 @@ function SubFolderGroup({
       className={styles["app-bookmark-subgroup"]}
       style={{ "--app-bm-depth": depth } as React.CSSProperties}
     >
-      <button
-        type="button"
+      <Flex
         className={styles["app-bookmark-subgroup__head"]}
         onClick={() => setCollapsed((c) => !c)}
         aria-expanded={!collapsed}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setCollapsed((c) => !c);
+          }
+        }}
+        align="center"
+        gap={6}
       >
         <ChevronDown
           size={ICON_SIZE.SMALL}
@@ -265,7 +276,7 @@ function SubFolderGroup({
         <Folder size={ICON_SIZE.SMALL} className={styles["app-bookmark-subgroup__icon"]} />
         <span className={styles["app-bookmark-subgroup__title"]}>{title}</span>
         <span className={styles["app-bookmark-subgroup__count"]}>{total}</span>
-      </button>
+      </Flex>
       {!collapsed && (
         <div className={styles["app-bookmark-subgroup__body"]}>
           {bookmarks.map((bm) => (
@@ -318,11 +329,20 @@ function TopFolderSection({
 
   return (
     <section className={styles["app-bookmark-section"]}>
-      <button
-        type="button"
+      <Flex
         className={styles["app-bookmark-section__head"]}
         onClick={() => setCollapsed((c) => !c)}
         aria-expanded={!collapsed}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setCollapsed((c) => !c);
+          }
+        }}
+        align="center"
+        gap={8}
       >
         <ChevronDown
           size={ICON_SIZE.MEDIUM}
@@ -338,7 +358,7 @@ function TopFolderSection({
         <Tag className={styles["app-bookmark-section__count"]} bordered={false}>
           {total}
         </Tag>
-      </button>
+      </Flex>
       {!collapsed && (
         <div className={styles["app-bookmark-section__body"]}>
           {bookmarks.length > 0 && (
@@ -528,10 +548,12 @@ export function BookmarkView() {
       const parts = text.split(new RegExp(`(${escaped})`, "ig"));
       return parts.map((part, i) =>
         part.toLowerCase() === q.toLowerCase() ? (
+          // eslint-disable-next-line react/no-array-index-key
           <mark key={i} className={styles["app-bookmark-highlight"]}>
             {part}
           </mark>
         ) : (
+          // eslint-disable-next-line react/no-array-index-key
           <span key={i}>{part}</span>
         ),
       );
@@ -575,8 +597,8 @@ export function BookmarkView() {
   return (
     <div className={`app-bookmark-shell ${styles["app-bookmark-shell"]}`}>
       {/* 顶部头：标题 + 统计 + 工具按钮 */}
-      <header className={styles["app-bookmark-header"]}>
-        <div className={styles["app-bookmark-header__title"]}>
+      <Flex className={styles["app-bookmark-header"]} justify="space-between" align="center">
+        <Flex className={styles["app-bookmark-header__title"]} align="center" gap={8}>
           <BookOpen size={ICON_SIZE.MEDIUM} className={styles["app-bookmark-header__icon"]} />
           <span>{t("bookmark.title")}</span>
           {totalBookmarks > 0 && (
@@ -584,8 +606,8 @@ export function BookmarkView() {
               {totalBookmarks}
             </Tag>
           )}
-        </div>
-        <div className={styles["app-bookmark-header__actions"]}>
+        </Flex>
+        <Space className={styles["app-bookmark-header__actions"]} size="small">
           <Segmented
             size="small"
             value={layout}
@@ -637,8 +659,8 @@ export function BookmarkView() {
               {t("bookmark.tools.entry")}
             </Button>
           </Tooltip>
-        </div>
-      </header>
+        </Space>
+      </Flex>
 
       {/* 搜索栏 */}
       <div className={styles["app-bookmark-search-wrap"]}>

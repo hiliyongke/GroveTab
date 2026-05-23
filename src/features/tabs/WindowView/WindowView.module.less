@@ -8,14 +8,14 @@
 
 /* ── 主容器 ── */
 .app-window-view {
-  display: flex;
-  flex-direction: column;
   height: 100%;
   padding: 16px;
   overflow: auto;
 }
 
 /* ── 窗口网格（主网格布局） ── */
+/* 注意：使用 CSS Grid 实现自适应列数，antd Flex 无法完全替代此布局 */
+/* eslint-disable-next-line no-display-grid */
 .app-window-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -197,8 +197,8 @@
 }
 
 /* ── 跨窗口拖放目标高亮 ── */
-.app-window-card.is-drag-over {
-  border-color: var(--ant-color-primary) !important;
+html .app-window-card.is-drag-over {
+  border-color: var(--ant-color-primary);
   box-shadow: 0 0 0 2px var(--ant-color-primary), var(--app-shadow-card);
   transition: border-color 0.15s, box-shadow 0.15s;
 }

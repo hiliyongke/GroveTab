@@ -3,6 +3,7 @@ import {
   Layout,
   Spin,
   Typography,
+  Flex,
 } from 'antd';
 import { useTabsStore, useSettingsStore, useSelectionStore } from '@/store';
 import { useShallow } from 'zustand/shallow';
@@ -352,12 +353,12 @@ function AppContent() {
 
   if (!checked) {
     return (
-      <div className="app-page-loading">
-        <div className="app-page-loading-inner">
+      <Flex className="app-page-loading" justify="center" align="center">
+        <Flex vertical align="center" gap={12}>
           <Spin />
           <Text type="secondary">{t('tabs.loading')}</Text>
-        </div>
-      </div>
+        </Flex>
+      </Flex>
     );
   }
 
@@ -393,7 +394,7 @@ function AppContent() {
       )}
 
       {/* 主体区：侧边栏 + 内容 */}
-      <div className="app-main-body">
+      <Flex className="app-main-body" flex={1} style={{ minHeight: 0 }}>
         {pageMode === 'workspace' && showViewSwitcher && viewTabPosition === 'left' && (
           <ViewSidebar
             viewMode={viewMode}
@@ -432,12 +433,20 @@ function AppContent() {
 
         {/* workspace 内容区：使用 AppWorkspace 子组件渲染 */}
         {pageMode === 'trending' && (
-          <Suspense fallback={<div className="app-suspense-fallback"><Spin /></div>}>
+          <Suspense fallback={
+            <Flex justify="center" align="center" style={{ padding: '40px 0' }}>
+              <Spin />
+            </Flex>
+          }>
             <TrendingPage />
           </Suspense>
         )}
         {pageMode === 'devtools' && (
-          <Suspense fallback={<div className="app-suspense-fallback"><Spin /></div>}>
+          <Suspense fallback={
+            <Flex justify="center" align="center" style={{ padding: '40px 0' }}>
+              <Spin />
+            </Flex>
+          }>
             <DeveloperToolsPage />
           </Suspense>
         )}
@@ -462,7 +471,7 @@ function AppContent() {
             position="right"
           />
         )}
-      </div>
+      </Flex>
 
       {pageMode === 'workspace' && showViewSwitcher && viewTabPosition === 'bottom' && (
         <ViewBottomBar

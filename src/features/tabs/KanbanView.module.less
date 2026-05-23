@@ -1,17 +1,21 @@
-@import (reference) '@/styles/mixins.less';
-
 /* KanbanView —— 看板视图（@dnd-kit/core + @dnd-kit/sortable） */
 
 .app-kanban-theme {
   background: var(--app-kanban-surface-bg);
   border-radius: var(--ant-border-radius-lg);
   border: 1px solid var(--app-kanban-border);
+  /* 使用 antd Token 对应的 CSS 变量，支持主题切换 */
+  --app-kanban-source-bg: var(--ant-color-fill-quaternary);
+  --app-kanban-surface-bg: var(--ant-color-bg-container);
+  --app-kanban-border: var(--ant-color-border-secondary);
+  --app-kanban-column-bg: var(--ant-color-fill-quaternary);
+  --app-kanban-column-hover-bg: var(--ant-color-primary-bg);
+  --app-kanban-overlay-border: var(--ant-color-primary);
+  --app-kanban-overlay-shadow: var(--ant-box-shadow-secondary);
 }
 
 .app-kanban-view {
-  display: flex;
-  flex-direction: row;
-  gap: 12px;
+  /* display: flex 已移至 JSX 中使用 <Flex> */
   min-height: 72px;
   padding: 8px 0;
   overflow-x: auto;
@@ -24,7 +28,7 @@
   padding: 8px;
   border-radius: var(--ant-border-radius);
   background: var(--app-kanban-source-bg);
-  .flex-column(4px);
+  /* .flex-column(4px) 已移至 JSX 中使用 <Flex vertical gap={1}> */
   max-height: 560px;
   overflow-y: auto;
 }
@@ -40,7 +44,7 @@
 
 /* 看板卡片 */
 .app-kanban-card {
-  .flex-row-center(6px);
+  /* .flex-row-center() 已移至 JSX 中使用 <Flex align="center" gap={6}> */
   padding: 6px 10px;
   cursor: move;
   border-radius: var(--ant-border-radius-sm);
@@ -67,7 +71,9 @@
 
 .app-kanban-card__title {
   font-size: 12px;
-  .text-truncate();
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .app-kanban-card__title--grow {
@@ -82,9 +88,7 @@
 }
 
 .app-kanban-column {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  /* display: flex 已移至 JSX 中使用 <Flex vertical> */
 }
 
 .app-kanban-column.is-over {
@@ -93,13 +97,11 @@
 }
 
 .app-kanban-column__body {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  /* display: flex 已移至 JSX 中使用 <Flex vertical> */
 }
 
 .app-kanban-column__header {
-  .flex-row-center(6px);
+  /* .flex-row-center() 已移至 JSX 中使用 <Flex align="center" gap={6}> */
   padding: 4px 6px;
 }
 
@@ -108,7 +110,7 @@
 }
 
 .app-kanban-column__name {
-  .flex-row-center(4px);
+  /* .flex-row-center() 已移至 JSX 中使用 <Flex align="center" gap={4}> */
   font-size: 12px;
 }
 
@@ -119,20 +121,9 @@
 }
 
 .app-kanban-column__dropzone {
-  .flex-column(4px);
+  /* .flex-column() 已移至 JSX 中使用 <Flex vertical gap={4}> */
   min-height: 80px;
   padding: 6px;
-}
-
-.app-kanban-column__empty {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 80px;
-  background: var(--ant-color-fill);
-  color: var(--ant-color-text-tertiary);
-  font-size: 12px;
-  border-radius: var(--ant-border-radius-sm);
 }
 
 /* 新增列 */
@@ -142,9 +133,18 @@
   padding: 8px;
 }
 
+/* 空列提示：文字居中（由 <Flex> 组件提供 flex 布局） */
+.app-kanban-column__empty {
+  min-height: 80px;
+  background: var(--ant-color-fill);
+  color: var(--ant-color-text-tertiary);
+  font-size: 12px;
+  border-radius: var(--ant-border-radius-sm);
+}
+
 /* DragOverlay 抬升副本 */
 .app-kanban-overlay {
-  .flex-row-center(6px);
+  /* .flex-row-center() 已移至 JSX 中使用 <Flex align="center" gap={6}> */
   padding: 8px 14px;
   border-radius: var(--ant-border-radius);
   border: 1px solid var(--app-kanban-overlay-border);

@@ -1,0 +1,272 @@
+/**
+ * Ant Design v6 Token 映射表
+ *
+ * 本文件将项目自定义变量与 Ant Design v6 Design Token 建立映射关系。
+ * 通用变量改为引用 antd Token（如 var(--ant-padding-xs)），
+ * 项目特定变量（如 @app-card-gap, @app-header-height）予以保留。
+ *
+ * 使用方式：
+ *   1. 在组件 Less 文件中 import 本文件
+ *   2. 通用间距/圆角/字体直接使用已映射的变量（如 @app-space-3）
+ *   3. 项目特定变量继续使用原有 Less 变量
+ *
+ * 设计原则：
+ *   1. 通用语义变量优先映射至 antd v6 Design Token
+ *   2. 项目特定变量（布局尺寸、交互参数）保持为 Less 编译时常量
+ *   3. 映射关系跟随 antd v6 官方 Token 命名规范
+ *
+ * antd v6 CSS 变量前缀说明：
+ *   - 项目已配置 cssVar: { key: 'app' }，antd Token 以 --app-* 暴露
+ *   - 为与 antd 官方文档保持一致，映射时使用 --ant-* 前缀（运行时应存在对应 --app-* 变量）
+ *   - 若运行时 --ant-* 变量不存在，需在 ConfigProvider 中确保 cssVar 配置正确
+ */
+
+/* ═══════════════════════════════════════════════════════
+ * 一、通用语义变量 → antd v6 Token 映射
+ * ═══════════════════════════════════════════════════════ */
+
+/* ── 间距体系（映射至 antd v6 Spacing Token） ── */
+
+/**
+ * 间距映射说明：
+ *   antd v6 内置间距 Token：paddingXS(4px) / paddingSM(8px) / padding(12px) / paddingLG(16px) / paddingXL(24px)
+ *   项目原有 6 级间距调整为映射至 antd 最接近的 Token。
+ */
+@app-space-1: var(--ant-padding-xs);   /* 4px  → antd paddingXS  */
+@app-space-2: var(--ant-padding-sm);   /* 8px  → antd paddingSM  */
+@app-space-3: var(--ant-padding);      /* 12px → antd padding    */
+@app-space-4: var(--ant-padding-lg);   /* 16px → antd paddingLG  */
+@app-space-5: var(--ant-padding-xl);   /* 24px → antd paddingXL  */
+@app-space-6: var(--ant-padding-2xl);  /* 32px → antd padding2XL */
+
+/**
+ *  margin 映射（antd v6 同时提供 margin* Token）
+ *  若项目需要独立 margin 控制，可取消注释下方变量
+ */
+/*
+@app-margin: var(--ant-margin);
+@app-margin-xs: var(--ant-margin-xs);
+@app-margin-sm: var(--ant-margin-sm);
+@app-margin-lg: var(--ant-margin-lg);
+@app-margin-xl: var(--ant-margin-xl);
+*/
+
+/* ── 圆角体系（映射至 antd v6 Border Radius Token） ── */
+
+/**
+ * 圆角映射说明：
+ *   antd v6 内置圆角 Token：borderRadiusXS(2px) / borderRadiusSM(4px) / borderRadius(6px) /
+ *                              borderRadiusLG(8px) / borderRadiusOuter(980px)
+ *   与项目原有变量一一对应。
+ */
+@app-radius-xs: var(--ant-border-radius-xs);     /* 2px  */
+@app-radius-sm: var(--ant-border-radius-sm);     /* 4px  */
+@app-radius-md: var(--ant-border-radius);        /* 6px  */
+@app-radius-lg: var(--ant-border-radius-lg);     /* 8px  */
+@app-radius-pill: var(--ant-border-radius-outer); /* 980px */
+@app-radius-circle: 50%;  /* 无直接 antd token，保留为常量 */
+
+/* ── 字体体系（映射至 antd v6 Typography Token） ── */
+
+/**
+ * 字号映射说明：
+ *   antd v6 内置字号 Token：fontSize(14px) / fontSizeLG(16px) / fontSizeSM(12px)
+ *   项目基准正文字号映射至 antd fontSize。
+ */
+@app-font-size: var(--ant-font-size);  /* 14px */
+
+/**
+ * 标题字号（antd v6 提供 fontSizeHeading1~5）
+ *   若项目标题需要跟随 antd 动态缩放，可映射至对应 Token
+ */
+/*
+@app-font-size-h1: var(--ant-font-size-heading-1);  // 32px
+@app-font-size-h2: var(--ant-font-size-heading-2);  // 24px
+@app-font-size-h3: var(--ant-font-size-heading-3);  // 20px
+@app-font-size-h4: var(--ant-font-size-heading-4);  // 16px
+@app-font-size-h5: var(--ant-font-size-heading-5);  // 14px
+*/
+
+/** 等宽字体栈（项目自定义，antd 提供 fontFamilyCode） */
+@app-font-family-code: var(--ant-font-family-code);
+
+/** 正文行高（antd v6 提供 lineHeight） */
+/*
+@app-line-height: var(--ant-line-height);
+*/
+
+/* ── 动效时长（映射至 antd v6 Motion Token） ── */
+
+/**
+ * 动效映射说明：
+ *   antd v6 内置动效 Token：motionDurationSlow(0.3s) / motionDurationMid(0.2s) / motionDurationFast(0.1s)
+ *   项目原有变量与 antd 命名略有不同，此处建立映射。
+ */
+@app-motion-duration: var(--ant-motion-duration-mid);    /* 0.2s */
+@app-motion-duration-slow: var(--ant-motion-duration-slow); /* 0.3s */
+@app-motion-duration-fast: var(--ant-motion-duration-fast); /* 0.1s */
+
+/**
+ * 动效缓动函数（antd v6 提供 motionEaseInOut / motionEaseOut）
+ */
+/*
+@app-motion-ease-in-out: var(--ant-motion-ease-in-out);
+@app-motion-ease-out: var(--ant-motion-ease-out);
+*/
+
+/* ── 边框体系（映射至 antd v6 Border Token） ── */
+
+/**
+ * 边框宽度（antd v6 提供 lineWidth）
+ *   项目卡片边框宽度若需跟随 antd 主题，可映射至 lineWidth
+ */
+/*
+@app-card-border-width: var(--ant-line-width);
+@app-card-hover-border-width: var(--ant-line-width);
+*/
+
+/* ── 控件高度（映射至 antd v6 Control Token） ── */
+
+/**
+ * 控件高度（antd v6 提供 controlHeight / controlHeightLG / controlHeightSM）
+ *   项目搜索框高度可映射至 controlHeightLG
+ */
+/*
+@app-search-height: var(--ant-control-height-lg);
+*/
+
+
+/* ═══════════════════════════════════════════════════════
+ * 二、项目特定变量（保留为 Less 编译时常量）
+ * ═══════════════════════════════════════════════════════ */
+
+/**
+ * 以下变量为项目业务逻辑特有，无法通过 antd Token 替代：
+ *   - 卡片间距（@app-card-gap）：业务布局参数
+ *   - 头部高度（@app-header-height）：固定布局尺寸
+ *   - 卡片交互参数（@app-card-lift-distance 等）：业务动效逻辑
+ *   - 毛玻璃参数（@app-glass-blur 等）：项目视觉特效
+ *   - 纹理参数（@app-texture-noise-opacity 等）：项目视觉特效
+ *
+ * 这些变量保持为 Less 编译时常量，支持 density-scale 动态缩放。
+ */
+
+/* ── 卡片间距（业务布局参数，保留 Less 变量） ── */
+/* 注意：若需跟随 antd 间距体系，可改为 var(--ant-padding-lg) */
+/* @app-card-gap: ceil(16px * @density-scale); */
+/* @app-card-padding: ceil(16px * @density-scale); */
+/* @app-section-gap: ceil(24px * @density-scale); */
+
+/**
+ * 上方变量已在 _variables.less 中定义。
+ * 本文件通过 import 继承，此处不再重复定义，仅作注释说明保留原因。
+ */
+
+/* ── 组件高度（业务布局参数，保留 Less 变量） ── */
+/**
+ * @app-header-height: 48px;
+ * @app-search-height: 44px;
+ * 这两个变量为固定布局尺寸，不建议映射至 antd controlHeight（antd 控件高度可随密度缩放）。
+ * 若需要跟随密度缩放，可在业务组件中通过 calc() 使用 antd Token。
+ */
+
+/* ── 卡片交互（业务动效逻辑，保留 Less 变量） ── */
+/**
+ * @app-card-border-width: 1px;
+ * @app-card-hover-border-width: 1px;
+ * @app-card-lift-distance: 2px;
+ * 这三个变量控制卡片交互细节，属于业务层逻辑。
+ * 若需要跟随 antd 边框/阴影体系，可分别映射至：
+ *   - @app-card-border-width  →  var(--ant-line-width)
+ *   - @app-card-lift-distance →  var(--ant-shadow-*)（通过阴影模拟上浮效果）
+ */
+
+/* ── 毛玻璃参数（项目视觉特效，无 antd 对应 Token） ── */
+/**
+ * @app-glass-blur: 20px;
+ * @app-glass-saturate: 180;
+ * 这两个变量控制 backdrop-filter 效果，属于项目自定义视觉特效。
+ * antd v6 不提供毛玻璃相关 Token，保留为项目常量。
+ */
+
+/* ── 纹理参数（项目视觉特效，无 antd 对应 Token） ── */
+/**
+ * @app-texture-noise-opacity: 0.03;
+ * @app-texture-grid-opacity: 0.03;
+ * 这两个变量控制背景纹理叠加，属于项目自定义视觉特效。
+ * antd v6 不提供纹理相关 Token，保留为项目常量。
+ */
+
+
+/* ═══════════════════════════════════════════════════════
+ * 三、antd v6 色板 Token 引用示例（供业务组件使用）
+ * ═══════════════════════════════════════════════════════ */
+
+/**
+ * 以下为 antd v6 常用色板 Token，供业务组件直接引用。
+ * 无需定义为 Less 变量，直接在 CSS 中使用 var(--ant-*) 即可。
+ *
+ * 主色系：
+ *   var(--ant-color-primary)        主色
+ *   var(--ant-color-primary-hover)  主色 hover
+ *   var(--ant-color-primary-active)  主色 active
+ *
+ * 功能色：
+ *   var(--ant-color-success)  成功色
+ *   var(--ant-color-warning)  警告色
+ *   var(--ant-color-error)    错误色
+ *   var(--ant-color-info)     信息色
+ *
+ * 文本色：
+ *   var(--ant-color-text)         主文本
+ *   var(--ant-color-text-secondary)  次要文本
+ *   var(--ant-color-text-tertiary)   辅助文本
+ *
+ * 背景色：
+ *   var(--ant-color-bg-container)  容器背景
+ *   var(--ant-color-bg-elevated)   浮层背景
+ *   var(--ant-color-bg-layout)     布局背景
+ *
+ * 边框色：
+ *   var(--ant-color-border)         默认边框
+ *   var(--ant-color-border-secondary) 次要边框
+ *
+ * 使用示例（在 .less 文件中）：
+ *   .my-component {
+ *     color: var(--ant-color-primary);
+ *     background: var(--ant-color-bg-container);
+ *     border-radius: var(--ant-border-radius);
+ *     padding: var(--ant-padding);
+ *   }
+ */
+
+
+/* ═══════════════════════════════════════════════════════
+ * 四、迁移指南
+ * ═══════════════════════════════════════════════════════ */
+
+/**
+ * 如何将业务组件从硬编码值迁移至 antd Token：
+ *
+ * 步骤 1：确认组件使用的项目变量
+ *   例如：.my-card { padding: @app-space-3; border-radius: @app-radius-md; }
+ *
+ * 步骤 2：检查本文件中是否已映射对应变量
+ *   例如：@app-space-3 已映射至 var(--ant-padding)
+ *         @app-radius-md 已映射至 var(--ant-border-radius)
+ *
+ * 步骤 3：若已映射，无需修改（变量已指向 antd Token）
+ *   若未映射，评估是否应映射至 antd Token 或保留为项目变量
+ *
+ * 步骤 4：对于动态值（需跟随主题切换），优先使用 antd Token
+ *   例如：颜色、间距、圆角等应映射至 antd Token
+ *
+ * 步骤 5：对于固定业务值，保留为项目 Less 变量
+ *   例如：布局尺寸、交互参数等保留原有定义
+ *
+ * 注意事项：
+ *   1. antd Token 通过 CSS 变量实现，运行时可动态切换主题
+ *   2. Less 变量为编译时常量，无法运行时切换
+ *   3. 若业务组件需要支持动态主题，必须使用 antd Token（CSS 变量）
+ *   4. 若业务组件为静态样式，可使用 Less 变量（编译时确定）
+ */

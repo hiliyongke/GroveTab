@@ -49,15 +49,17 @@ const ColorSwatch = memo<ColorSwatchProps>(({ color, groupColor, onClick }) => {
   );
 
   return (
-    <button
+    <Button
       key={color}
-      type="button"
+      type="text"
+      size="small"
       className={`${styles["app-window-card-group-color-swatch"]} ${color === groupColor ? styles["is-active"] : ""}`}
-      style={swatchStyle}
+      style={{ ...swatchStyle, width: '24px', height: '24px', padding: 0, minWidth: '24px' }}
       onClick={() => onClick(color)}
+      aria-label={`Color: ${color}`}
     >
       {color}
-    </button>
+    </Button>
   );
 });
 

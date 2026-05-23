@@ -87,8 +87,11 @@ export interface SkinPreset {
 
   /** ── 品牌色 ── */
   colorPrimary: string;
-  /** 品牌色 hover 态 */
-  colorPrimaryHover: string;
+  /**
+   * 品牌色 hover 态（可选）
+   * 如不提供，将在 theme-customization.ts 中通过 color-mix() 从 colorPrimary 自动派生
+   */
+  colorPrimaryHover?: string;
 
   /** ── 圆角体系 ── */
   borderRadius: number;
@@ -155,8 +158,8 @@ export interface SkinPreset {
     height: number;
   };
 
-  /** ── 品牌 Logo 渐变 ── */
-  logoGradient: string;
+  /** ── 品牌 Logo 渐变（可选，未提供时自动从主色派生）── */
+  logoGradient?: string;
   logoGlowShadow: { light: string; dark: string };
 
   /** ── 浮动操作栏配置 ── */
@@ -180,8 +183,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
     compatibleMode: 'both',
 
     colorPrimary: '#2B6BFF',
-    colorPrimaryHover: '#5A8CFF',
-
+    // colorPrimaryHover 由 theme-customization.ts 自动派生
     borderRadius: 12,
     borderRadiusLG: 16,
     borderRadiusSM: 9,
@@ -267,7 +269,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
       height: 58,
     },
 
-    logoGradient: 'linear-gradient(135deg, #2B6BFF, #7EA8FF)',
+    // logoGradient 由 theme-customization.ts 自动从主色派生
     logoGlowShadow: {
       light: '0 8px 18px rgba(43,107,255,0.22)',
       dark: '0 8px 18px rgba(43,107,255,0.18)',
@@ -299,8 +301,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
     compatibleMode: 'both',
 
     colorPrimary: '#0078D4',
-    colorPrimaryHover: '#2B88D8',
-
+    // colorPrimaryHover 由 theme-customization.ts 自动派生
     borderRadius: 8,
     borderRadiusLG: 12,
     borderRadiusSM: 6,
@@ -386,7 +387,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
       height: 48,
     },
 
-    logoGradient: 'linear-gradient(135deg, #0078D4, #2B88D8)',
+    // logoGradient 由 theme-customization.ts 自动从主色派生
     logoGlowShadow: {
       light: '0 2px 10px rgba(0,120,212,0.18)',
       dark: '0 2px 10px rgba(0,120,212,0.14)',
@@ -408,8 +409,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
     compatibleMode: 'light',
 
     colorPrimary: '#B8956A',
-    colorPrimaryHover: '#C9A87C',
-
+    // colorPrimaryHover 由 theme-customization.ts 自动派生
     borderRadius: 8,
     borderRadiusLG: 10,
     borderRadiusSM: 6,
@@ -495,7 +495,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
       height: 52,
     },
 
-    logoGradient: 'linear-gradient(135deg, #B8956A, #C9A87C)',
+    // logoGradient 由 theme-customization.ts 自动从主色派生
     logoGlowShadow: {
       light: '0 2px 8px rgba(184,149,106,0.18)',
       dark: '0 2px 8px rgba(184,149,106,0.15)',
@@ -517,8 +517,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
     compatibleMode: 'dark',
 
     colorPrimary: '#9B8EC4',
-    colorPrimaryHover: '#B3A8D4',
-
+    // colorPrimaryHover 由 theme-customization.ts 自动派生
     borderRadius: 14,
     borderRadiusLG: 18,
     borderRadiusSM: 10,
@@ -604,7 +603,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
       height: 56,
     },
 
-    logoGradient: 'linear-gradient(135deg, #9B8EC4, #7ABFB8)',
+    // logoGradient 由 theme-customization.ts 自动从主色派生
     logoGlowShadow: {
       light: '0 2px 12px rgba(155,142,196,0.18)',
       dark: '0 2px 16px rgba(155,142,196,0.15), 0 0 30px rgba(122,191,184,0.08)',
@@ -626,8 +625,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
     compatibleMode: 'both',
 
     colorPrimary: '#8B7D6B',
-    colorPrimaryHover: '#A09080',
-
+    // colorPrimaryHover 由 theme-customization.ts 自动派生
     borderRadius: 6,
     borderRadiusLG: 8,
     borderRadiusSM: 4,
@@ -713,7 +711,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
       height: 54,
     },
 
-    logoGradient: 'linear-gradient(135deg, #8B7D6B, #B8A898)',
+    // logoGradient 由 theme-customization.ts 自动从主色派生
     logoGlowShadow: {
       light: '0 2px 8px rgba(139,125,107,0.15)',
       dark: '0 2px 8px rgba(139,125,107,0.12)',
@@ -735,8 +733,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
     compatibleMode: 'both',
 
     colorPrimary: '#5E81AC',
-    colorPrimaryHover: '#81A1C1',
-
+    // colorPrimaryHover 由 theme-customization.ts 自动派生
     borderRadius: 6,
     borderRadiusLG: 10,
     borderRadiusSM: 4,
@@ -794,7 +791,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
     searchBox: { height: 46, borderRadius: 8, fontSize: 14 },
     header: { height: 52 },
 
-    logoGradient: 'linear-gradient(135deg, #5E81AC, #88C0D0)',
+    // logoGradient 由 theme-customization.ts 自动从主色派生
     logoGlowShadow: {
       light: '0 2px 8px rgba(94,129,172,0.22)',
       dark: '0 2px 8px rgba(136,192,208,0.26)',
@@ -814,8 +811,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
     compatibleMode: 'both',
 
     colorPrimary: '#3D8EB9',
-    colorPrimaryHover: '#4FA3C4',
-
+    // colorPrimaryHover 由 theme-customization.ts 自动派生
     borderRadius: 4, borderRadiusLG: 8, borderRadiusSM: 3, borderRadiusXS: 2,
     controlHeight: 32, controlHeightLG: 40, controlHeightSM: 24,
 
@@ -867,7 +863,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
     searchBox: { height: 46, borderRadius: 4, fontSize: 14 },
     header: { height: 52 },
 
-    logoGradient: 'linear-gradient(135deg, #3D8EB9, #B58900)',
+    // logoGradient 由 theme-customization.ts 自动从主色派生
     logoGlowShadow: {
       light: '0 2px 8px rgba(61,142,185,0.16)',
       dark: '0 2px 8px rgba(42,161,152,0.15)',
@@ -887,8 +883,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
     compatibleMode: 'both',
 
     colorPrimary: '#8A94E0',
-    colorPrimaryHover: '#A8B0F0',
-
+    // colorPrimaryHover 由 theme-customization.ts 自动派生
     borderRadius: 18,
     borderRadiusLG: 24,
     borderRadiusSM: 14,
@@ -974,7 +969,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
       height: 60,
     },
 
-    logoGradient: 'linear-gradient(135deg, #8A94E0, #F0A8C0)',
+    // logoGradient 由 theme-customization.ts 自动从主色派生
     logoGlowShadow: {
       light: '0 2px 16px rgba(138,148,224,0.18)',
       dark: '0 2px 16px rgba(138,148,224,0.15)',
@@ -996,8 +991,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
     compatibleMode: 'both',
 
     colorPrimary: '#0071e3',
-    colorPrimaryHover: '#2997ff',
-
+    // colorPrimaryHover 由 theme-customization.ts 自动派生
     borderRadius: 8,
     borderRadiusLG: 12,
     borderRadiusSM: 5,
@@ -1083,7 +1077,7 @@ export const SKIN_PRESETS: SkinPreset[] = [
       height: 48,
     },
 
-    logoGradient: 'linear-gradient(135deg, #0071e3, #2997ff)',
+    // logoGradient 由 theme-customization.ts 自动从主色派生
     logoGlowShadow: {
       light: '0 0 0 2px #0071e3',
       dark: '0 0 0 2px #0071e3',

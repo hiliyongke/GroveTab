@@ -8,7 +8,7 @@
  *   - 容器高度用 `min(100vh - 240px, tabs * 36)`，短列表不撑开，长列表滚动
  */
 
-import { useMemo, useRef, useCallback } from "react";
+import { useMemo, useRef, useCallback, memo, type CSSProperties } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useTabsStore } from "@/store";
 import { TabItem } from "./TabItem";
@@ -30,7 +30,7 @@ const VIEWPORT_RESERVE = CONFIG.ui.viewportReserve;
  *
  * @returns 紧凑视图 JSX 元素
  */
-export function CompactView() {
+const CompactView = memo(function CompactView() {
   const tabs = useTabsStore((s) => s.tabs);
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
   const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
@@ -71,19 +71,30 @@ export function CompactView() {
 
   /** 短列表不撑满视口；长列表按视口高度滚动 */
   const containerMaxHeight = `min(calc(100vh - ${VIEWPORT_RESERVE}px), ${sortedTabs.length * ROW_HEIGHT + 8}px)`;
-  const containerStyle: React.CSSProperties = {
-    maxHeight: containerMaxHeight,
-    minHeight: Math.min(sortedTabs.length, 6) * ROW_HEIGHT,
-  };
-  const spacerStyle = { height: virtualizer.getTotalSize() };
+
+  // 缓存容器样式，避免每次渲染创建新对象
+  const containerStyle = useMemo<CSSProperties>(
+    () => ({
+      maxHeight: containerMaxHeight,
+      minHeight: Math.min(sortedTabs.length, 6) * ROW_HEIGHT,
+    }),
+    [containerMaxHeight, sortedTabs.length],
+  );
+
+  // 虚拟化必需的动态高度（无法通过 CSS 实现）
+  const spacerHeight = virtualizer.getTotalSize();
 
   return (
     <div ref={parentRef} className={styles["app-compact-view"]} style={containerStyle}>
-      <div className={styles["app-compact-view-spacer"]} style={spacerStyle}>
+      {/* 虚拟化 Spacer：高度必须动态计算，无法使用 CSS Modules */}
+      <div className={styles["app-compact-view-spacer"]} style={{ height: spacerHeight } as CSSProperties}>
         {virtualizer.getVirtualItems().map((virtualRow) => {
           const tab = sortedTabs[virtualRow.index];
           if (!tab) return null;
-          const itemStyle: React.CSSProperties = {
+
+          // 虚拟化定位：每个 item 需要绝对定位和动态 Y 偏移
+          // 这是 @tanstack/react-virtual 的标准用法，无法通过 CSS 实现
+          const itemStyle: CSSProperties = {
             height: ROW_HEIGHT,
             transform: `translateY(${virtualRow.start}px)`,
           };
@@ -104,4 +115,6 @@ export function CompactView() {
       </div>
     </div>
   );
-}
+});
+
+export default CompactView;

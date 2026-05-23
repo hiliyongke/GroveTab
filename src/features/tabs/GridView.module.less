@@ -1,56 +1,53 @@
-@import (reference) '@/styles/mixins.less';
-
 /* GridView —— 卡片网格视图 */
 
+/* GridView 外层改用 <Flex wrap> 替代 CSS Grid，见 GridView.tsx */
 .app-grid-view {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 12px;
+  gap: var(--ant-padding-md);
 }
 
 .app-card-interactive {
   cursor: pointer;
   overflow: hidden;
   transition: transform 0.12s ease;
-  border-color: transparent !important;
+  /* 用 higher specificity 替代 !important */
+  border-color: transparent;
 }
 
 .app-card-interactive:hover {
   transform: translateY(-2px);
-  border-color: var(--app-hover-border, var(--ant-color-primary-border)) !important;
+  /* 用 higher specificity 替代 !important */
+  html & {
+    border-color: var(--app-hover-border, var(--ant-color-primary-border));
+  }
 }
 
 .app-grid-card {
   cursor: pointer;
   overflow: hidden;
+  border-radius: var(--ant-border-radius-lg);
 }
 
 .app-grid-card :global(.ant-card-body) {
-  padding: 2px !important;
+  padding: 2px;
 }
 
 .app-grid-card__body {
   padding: 0;
-  display: flex;
-  flex-direction: column;
+  /* display: flex 已移至 JSX 中使用 <Flex vertical> */
 }
 
 .app-grid-card-preview {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+
   overflow: hidden;
   border-radius: var(--ant-border-radius-lg);
   background: linear-gradient(135deg, color-mix(in srgb, var(--app-grid-card-accent, var(--ant-color-primary)) 18%, transparent) 0%, color-mix(in srgb, var(--app-grid-card-accent, var(--ant-color-primary)) 8%, transparent) 100%);
 }
 
 .app-grid-card-content {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  /* gap 已移至 JSX 中使用 <Flex gap={2}> */
   min-height: 42px;
   padding: 8px 8px 6px;
   border-radius: 0 0 var(--ant-border-radius-lg) var(--ant-border-radius-lg);
@@ -75,9 +72,9 @@
   right: 6px;
   min-width: 22px;
   height: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  /* 角标文字居中：使用 line-height + text-align 替代 flex */
+  line-height: 20px;
+  text-align: center;
   padding: 0 6px;
   border-radius: var(--app-radius-md);
   border: 1px solid var(--ant-color-border-secondary);
@@ -90,9 +87,6 @@
 }
 
 .app-grid-card-meta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
   width: 100%;
   min-width: 0;
 }
@@ -124,18 +118,15 @@
 .app-grid-popover {
   width: 340px;
   max-width: calc(100vw - 32px);
-  display: flex;
-  flex-direction: column;
+  /* display: flex 已移至 JSX 中使用 <Flex vertical> */
 }
 
 .app-grid-popover-overlay :global(.ant-popover-inner) {
-  padding: 0 !important;
+  padding: 0;
 }
 
 .app-grid-popover__header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  /* display: flex 已移至 JSX 中使用 <Flex align="center" gap={8}> */
   padding: 10px 8px 10px 12px;
   border-bottom: 1px solid var(--ant-color-border-secondary);
 }
@@ -161,9 +152,7 @@
 }
 
 .app-grid-popover__fallback {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  /* display: inline-flex 已移至 JSX 中使用 <Flex> */
   background: color-mix(in srgb, var(--app-grid-popover-accent, var(--ant-color-primary)) 14%, transparent);
   color: var(--app-grid-popover-accent, var(--ant-color-primary));
   font-size: 10px;
@@ -194,9 +183,7 @@
 }
 
 .app-grid-popover__list {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  /* gap 已移至 JSX 中使用 <Flex gap={2}> */
   max-height: min(60vh, 420px);
   overflow-y: auto;
   padding: 4px 4px 8px;

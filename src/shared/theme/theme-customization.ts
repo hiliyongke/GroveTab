@@ -63,8 +63,11 @@ function scaleHeadingFont(baseSize: number, bodyFontSize: number): number {
  * @returns hover 状态的主色值
  */
 function resolvePrimaryHoverColor(base: SkinPreset, customColor?: string): string {
-  if (!customColor) return base.colorPrimaryHover;
-  return `color-mix(in srgb, ${customColor} 78%, white)`;
+  const primary = customColor ?? base.colorPrimary;
+  // 如果皮肤自定义了 hover 颜色且未自定义主色，优先使用皮肤定义
+  if (!customColor && base.colorPrimaryHover) return base.colorPrimaryHover;
+  // 否则从主色派生 hover 颜色（混合 78% 白色）
+  return `color-mix(in srgb, ${primary} 78%, white)`;
 }
 
 /**
@@ -350,9 +353,8 @@ export function buildAppThemeVars(
     '--app-shadow-floating': isDark ? skin.shadow.floating.dark : skin.shadow.floating.light,
     '--app-shadow-brand-glow': isDark ? skin.shadow.brandGlow.dark : skin.shadow.brandGlow.light,
 
-    '--app-logo-gradient': custom?.colorPrimary
-      ? `linear-gradient(135deg, ${skin.colorPrimary}, ${skin.colorPrimaryHover})`
-      : skin.logoGradient,
+    // logo 渐变统一从主色和 hover 色派生；皮肤可通过 logoGradient 字段自定义
+    '--app-logo-gradient': skin.logoGradient ?? `linear-gradient(135deg, ${skin.colorPrimary}, ${skin.colorPrimaryHover})`,
     '--app-logo-glow': isDark ? skin.logoGlowShadow.dark : skin.logoGlowShadow.light,
 
     '--app-search-height': `${scaleByDensity(skin.searchBox.height, density)}px`,
@@ -389,7 +391,7 @@ export function buildAppThemeVars(
 
     '--app-brand': skin.colorPrimary,
     '--app-color-primary': skin.colorPrimary,
-    '--app-color-primary-hover': skin.colorPrimaryHover,
+    '--app-color-primary-hover': skin.colorPrimaryHover ?? resolvePrimaryHoverColor(skin, undefined),
     '--app-color-success': 'var(--ant-color-success)',
     '--app-color-warning': 'var(--ant-color-warning)',
     '--app-color-error': 'var(--ant-color-error)',

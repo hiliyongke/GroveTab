@@ -18,8 +18,8 @@
  *       4. 不打断 Grid 的浏览上下文
  */
 
-import { useMemo, useCallback, useState } from "react";
-import { Button, Card, Popover, theme } from "antd";
+import { useMemo, useCallback, useState, memo } from "react";
+import { Button, Card, Flex, Popover } from "antd";
 import { Volume2, X } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useTabsStore, useSettingsStore } from "@/store";
@@ -80,7 +80,7 @@ export function GridView() {
   };
 
   return (
-    <div className={styles["app-grid-view"]}>
+    <Flex wrap className={styles["app-grid-view"]}>
       {groups.map((group) => (
         <GridCard
           key={group.domain}
@@ -100,7 +100,7 @@ export function GridView() {
           expandTrigger={expandTrigger}
         />
       ))}
-    </div>
+    </Flex>
   );
 }
 
@@ -134,7 +134,7 @@ interface GridCardProps {
  * @param root0.expandTrigger - 展开触发方式
  * @returns {JSX.Element} 卡片元素
  */
-function GridCard({
+const GridCard = memo(function GridCard({
   domain,
   colorKey,
   tabs,
@@ -147,7 +147,6 @@ function GridCard({
   expandTrigger,
 }: GridCardProps) {
   const [faviconError, setFaviconError] = useState(false);
-  const { token } = theme.useToken();
   const hasAudible = tabs.some((tab) => tab.audible);
   const first = tabs[0];
   const isMulti = tabs.length > 1;
@@ -155,16 +154,12 @@ function GridCard({
   const accent = useAccent(first?.favIconUrl, colorKey);
   const color = accent.bar;
 
-  // 缓存卡片样式对象，避免每次渲染创建新对象
+  // 动态 CSS 变量：基于 favicon 计算的主题色，无法通过静态 CSS 实现
   const cardStyle = useMemo(
-    () => ({
-      borderRadius: token.borderRadiusLG,
-      ...cssVars({
-        "--app-hover-border": token.colorPrimaryBorder,
-        "--app-grid-card-accent": color,
-      }),
+    () => cssVars({
+      "--app-grid-card-accent": color,
     }),
-    [token.borderRadiusLG, token.colorPrimaryBorder, color],
+    [color],
   );
 
   /**
@@ -198,7 +193,7 @@ function GridCard({
       style={cardStyle}
     >
       {/* 缩略图区 —— 16:10 宽高比 */}
-      <div className={styles["app-grid-card-preview"]}>
+      <Flex align="center" justify="center" className={styles["app-grid-card-preview"]}>
         {first?.favIconUrl && !faviconError ? (
           <img
             src={first.favIconUrl}
@@ -212,10 +207,10 @@ function GridCard({
 
         {/* 多 tab 角标：数字，右上角 */}
         {isMulti && <span className={styles["app-grid-card-count"]}>{tabs.length}</span>}
-      </div>
+      </Flex>
 
       {/* 底部信息区 */}
-      <div className={styles["app-grid-card-content"]}>
+      <Flex vertical gap={2} className={styles["app-grid-card-content"]}>
         <div className={styles["app-grid-card-meta"]}>
           <span className={styles["app-grid-card-domain"]}>{domain}</span>
           {hasAudible && (
@@ -223,7 +218,7 @@ function GridCard({
           )}
         </div>
         <span className={styles["app-grid-card-copy"]}>{countLabel}</span>
-      </div>
+      </Flex>
     </Card>
   );
 
@@ -233,8 +228,8 @@ function GridCard({
   /**
    * 计算 Popover 鼠标延迟配置
    *
-   * hover 模式下加 100ms 进入延迟，避免鼠标穿过卡片瞬间触发；
-   * 离开延迟 150ms，让用户能从卡片移到浮层而不会先关掉。
+   * hover 模式下加 100ms 进入延迟，避免鼠标穿过卡片瞬间触发
+   * 离开延迟 150ms，让用户能从卡片移到浮层而不会先关掉
    *
    * @returns 延迟配置对象，hover 模式下包含 mouseEnterDelay 和 mouseLeaveDelay
    */
@@ -267,7 +262,7 @@ function GridCard({
       {cardNode}
     </Popover>
   );
-}
+});
 
 interface DomainTabsPanelProps {
   domain: string;
@@ -330,14 +325,18 @@ function DomainTabsPanel({
   };
 
   const hasFavicon = typeof faviconSrc === "string" && faviconSrc.length > 0;
-  const popoverStyle: React.CSSProperties = cssVars({
-    "--app-grid-popover-accent": accentColor,
-  });
+  const popoverStyle = useMemo(
+    () =>
+      cssVars({
+        "--app-grid-popover-accent": accentColor,
+      }),
+    [accentColor],
+  );
 
   return (
-    <div className={styles["app-grid-popover"]} style={popoverStyle}>
+    <Flex vertical className={styles["app-grid-popover"]} style={popoverStyle}>
       {/* Header —— 色条 + favicon + 域名 + 计数 + 关闭 */}
-      <div className={styles["app-grid-popover__header"]}>
+      <Flex align="center" gap={8} className={styles["app-grid-popover__header"]}>
         {/* 左侧身份色条 */}
         <span aria-hidden className={styles["app-grid-popover__accent"]} />
         {/* favicon */}
@@ -349,9 +348,9 @@ function DomainTabsPanel({
             onError={() => setFaviconFailed(true)}
           />
         ) : (
-          <span aria-hidden className={styles["app-grid-popover__fallback"]}>
+          <Flex align="center" justify="center" className={styles["app-grid-popover__fallback"]}>
             {domain.charAt(0).toUpperCase()}
-          </span>
+          </Flex>
         )}
         {/* 域名 —— 允许省略 */}
         <span title={domain} className={styles["app-grid-popover__title"]}>
@@ -370,10 +369,10 @@ function DomainTabsPanel({
           icon={<X size={ICON_SIZE.MEDIUM} />}
           className={styles["app-grid-popover__close"]}
         />
-      </div>
+      </Flex>
 
       {/* 列表区 */}
-      <div className={styles["app-grid-popover__list"]}>
+      <Flex vertical gap={2} className={styles["app-grid-popover__list"]}>
         {tabs.map((tab) => (
           <TabItem
             key={tab.id}
@@ -382,8 +381,8 @@ function DomainTabsPanel({
             onClose={handleCloseTab}
             showUrlHint={ambiguousIds.has(tab.id)}
           />
-        ))}
-      </div>
-    </div>
+          ))}
+      </Flex>
+    </Flex>
   );
 }

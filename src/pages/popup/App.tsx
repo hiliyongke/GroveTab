@@ -12,7 +12,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button, Input, Tooltip, Typography, Empty } from "antd";
+import { Button, Flex, Input, Tooltip, Typography, Empty, Row, Col } from "antd";
 import { AntdThemeProvider } from "@/shared/ui/AntdThemeProvider";
 import { LayoutGrid, Save, Search, ExternalLink, X, Settings } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
@@ -180,14 +180,14 @@ function PopupContent() {
   }, [query, defaultEngine]);
 
   return (
-    <div className={styles.popupShell}>
+    <Flex vertical className={styles.popupShell} style={{ height: '100%' }}>
       {/* 顶部品牌 */}
-      <div className={styles.popupBrand}>
+      <Flex align="center" gap={10} className={styles.popupBrand} style={{ marginBottom: 10 }}>
         <div className={styles.popupBrandMark}>{BRAND.shortName}</div>
         <Text strong className={styles.popupBrandName}>
           {BRAND.name}
         </Text>
-      </div>
+      </Flex>
 
       {/* 顶部搜索框 */}
       <Input
@@ -202,7 +202,7 @@ function PopupContent() {
         onPressEnter={runWebSearch}
       />
 
-      <div className={styles.popupMeta}>
+      <Flex align="center" justify="space-between" gap={8} className={styles.popupMeta} style={{ marginBottom: 6, padding: '0 2px' }}>
         <Text type="secondary" className={styles.popupMetaText}>
           {tabCountLabel}
         </Text>
@@ -211,10 +211,10 @@ function PopupContent() {
             {t("popup.scrollHint")}
           </Text>
         )}
-      </div>
+      </Flex>
 
       {/* 中部：全部 Tab 列表 */}
-      <div className={styles.popupList}>
+      <div className={styles.popupList} style={{ flex: 1, overflowY: 'auto' }}>
         {filteredTabs.length === 0 ? (
           <div className={styles.popupListEmpty}>
             <Empty
@@ -250,7 +250,7 @@ function PopupContent() {
       </div>
 
       {/* 底部：操作按钮区 */}
-      <div className={styles.popupActions}>
+      <Flex vertical gap={8} className={styles.popupActions}>
         {/* 主操作：归档 —— 独占整行 */}
         <Tooltip title={!hasAnyTab ? t("popup.noTabsToArchive") : ""} mouseEnterDelay={0.3}>
           <Button
@@ -268,30 +268,34 @@ function PopupContent() {
           </Button>
         </Tooltip>
         {/* 次要操作：打开工作台 + 设置 —— 并排 */}
-        <div className={styles.popupActionsSecondary}>
-          <Button icon={<LayoutGrid size={ICON_SIZE.MEDIUM} />} block onClick={openNewTab}>
-            {t("popup.openWorkspace")}
-            <ExternalLink size={ICON_SIZE.MICRO} className={styles.popupExternalIcon} />
-          </Button>
-          <Button
-            icon={<Settings size={ICON_SIZE.MEDIUM} />}
-            block
-            onClick={() => {
-              void createTab({
-                url: chrome.runtime.getURL("src/pages/newtab/index.html") + "#settings",
-              });
-              window.close();
-            }}
-          >
-            {t("header.settings")}
-          </Button>
-        </div>
-      </div>
+        <Row gutter={8} className={styles.popupActionsSecondary}>
+          <Col span={12}>
+            <Button icon={<LayoutGrid size={ICON_SIZE.MEDIUM} />} block onClick={openNewTab}>
+              {t("popup.openWorkspace")}
+              <ExternalLink size={ICON_SIZE.MICRO} className={styles.popupExternalIcon} />
+            </Button>
+          </Col>
+          <Col span={12}>
+            <Button
+              icon={<Settings size={ICON_SIZE.MEDIUM} />}
+              block
+              onClick={() => {
+                void createTab({
+                  url: chrome.runtime.getURL("src/pages/newtab/index.html") + "#settings",
+                });
+                window.close();
+              }}
+            >
+              {t("header.settings")}
+            </Button>
+          </Col>
+        </Row>
+      </Flex>
 
       {/* 底部"关于"链接：跳转 newtab 并自动切到 About Tab */}
-      <div className={styles.popupAbout}>
-        <button
-          type="button"
+      <div className={styles.popupAbout} style={{ marginTop: 10, textAlign: 'center' }}>
+        <Button
+          type="link"
           onClick={() => {
             void createTab({
               url: chrome.runtime.getURL("src/pages/newtab/index.html") + "#about",
@@ -301,11 +305,11 @@ function PopupContent() {
           className={styles.popupAboutLink}
         >
           {t("popup.aboutGroveTab", { brand: BRAND.name })}
-        </button>
+        </Button>
       </div>
 
       {archiveError !== "" && <div className={styles.popupError}>{archiveError}</div>}
-    </div>
+    </Flex>
   );
 }
 
@@ -334,12 +338,13 @@ function RecentTabRow({
 }) {
   const { t } = useT();
   return (
-    <div className={`${styles.popupRow} app-hover-reveal-host`}>
-      <button
-        type="button"
+    <Flex className={`${styles.popupRow} app-hover-reveal-host`} align="center" gap={8}>
+      <Button
+        type="text"
         onClick={onClick}
         aria-label={t("popup.openTab", { title: tab.title })}
         className={styles.popupRowMain}
+        style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 8, padding: 'var(--app-space-2) var(--app-space-2)', height: 'auto' }}
       >
         <img
           src={tab.favIconUrl}
@@ -352,23 +357,24 @@ function RecentTabRow({
             e.currentTarget.style.visibility = "hidden";
           }}
         />
-        <div className={styles.popupRowContent}>
+        <Flex vertical className={styles.popupRowContent} style={{ minWidth: 0, flex: 1 }}>
           <span className={styles.popupRowTitle}>{tab.title}</span>
           <span className={styles.popupRowHost}>{tab.hostname}</span>
-        </div>
-      </button>
-      <button
-        type="button"
+        </Flex>
+      </Button>
+      <Button
+        type="text"
+        danger
         onClick={(e) => {
           e.stopPropagation();
           onClose();
         }}
         aria-label={t("popup.closeTab", { title: tab.title })}
         className={`${styles.popupRowClose} app-hover-reveal`}
-      >
-        <X size={ICON_SIZE.SMALL} />
-      </button>
-    </div>
+        style={{ width: 18, height: 18, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--ant-border-radius-sm)', color: 'var(--ant-color-error)' }}
+        icon={<X size={ICON_SIZE.SMALL} />}
+      />
+    </Flex>
   );
 }
 

@@ -36,6 +36,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
+import { Button } from "antd";
 import type { BookmarkNode } from "@/chrome/bookmarks";
 import { getFaviconUrl } from "@/chrome";
 import { useAccent } from "@/shared/hooks/use-accent";
@@ -273,13 +274,14 @@ function TreeFolderNode({
 
   return (
     <div className={styles["app-bm-tree__folder-wrap"]} data-depth={depth}>
-      <button
+      <Button
         ref={folderBtnRef}
-        type="button"
+        type="text"
         className={`app-bm-tree__folder ${styles["app-bm-tree__folder"]}${expanded ? ` ${styles["is-expanded"]}` : ""}${isEmpty ? ` ${styles["is-empty"]}` : ""}`}
         onClick={handleToggle}
         aria-expanded={expanded}
         title={title}
+        style={{ display: 'flex', alignItems: 'center', gap: '6px', width: '100%', padding: '4px 8px' }}
       >
         <span className={styles["app-bm-tree__folder-icon"]}>
           {expanded ? <FolderOpen size={ICON_SIZE.SMALL} /> : <Folder size={ICON_SIZE.SMALL} />}
@@ -312,7 +314,7 @@ function TreeFolderNode({
               className={`${styles["app-bm-tree__folder-chevron"]} ${styles["is-vertical"]}${expanded ? ` ${styles["is-expanded"]}` : ""}`}
             />
           ))}
-      </button>
+      </Button>
       {expanded && !isEmpty && (
         <div className={styles["app-bm-tree__children"]} role="group">
           {/* 横向（脑图）模式：仍用 SVG 贝塞尔曲线；垂直（组织架构图）模式：用纯 CSS 伪元素绘制直角连线，永不错位 */}
@@ -618,8 +620,9 @@ const PanZoom = forwardRef<
         onMouseDown={(e) => e.stopPropagation()}
         onDoubleClick={(e) => e.stopPropagation()}
       >
-        <button
-          type="button"
+        <Button
+          type="text"
+          size="small"
           className={styles["app-bm-tree__panzoom-btn"]}
           onClick={() => {
             const vp = viewportRef.current;
@@ -630,20 +633,21 @@ const PanZoom = forwardRef<
           title={t("bookmark.tree.zoomOut")}
           aria-label={t("bookmark.tree.zoomOut")}
           disabled={scale <= ZOOM_MIN + 1e-3}
-        >
-          <ZoomOut size={ICON_SIZE.SMALL} />
-        </button>
-        <button
-          type="button"
+          icon={<ZoomOut size={ICON_SIZE.SMALL} />}
+        />
+        <Button
+          type="text"
+          size="small"
           className={styles["app-bm-tree__panzoom-percent"]}
           onClick={reset}
           title={t("bookmark.tree.resetZoom")}
           aria-label={t("bookmark.tree.resetZoom")}
         >
           {zoomPercent}%
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          type="text"
+          size="small"
           className={styles["app-bm-tree__panzoom-btn"]}
           onClick={() => {
             const vp = viewportRef.current;
@@ -654,28 +658,27 @@ const PanZoom = forwardRef<
           title={t("bookmark.tree.zoomIn")}
           aria-label={t("bookmark.tree.zoomIn")}
           disabled={scale >= ZOOM_MAX - 1e-3}
-        >
-          <ZoomIn size={ICON_SIZE.SMALL} />
-        </button>
+          icon={<ZoomIn size={ICON_SIZE.SMALL} />}
+        />
         <span className={styles["app-bm-tree__panzoom-divider"]} aria-hidden="true" />
-        <button
-          type="button"
+        <Button
+          type="text"
+          size="small"
           className={styles["app-bm-tree__panzoom-btn"]}
           onClick={fit}
           title={t("bookmark.tree.fitScreen")}
           aria-label={t("bookmark.tree.fitScreen")}
-        >
-          <Maximize2 size={ICON_SIZE.SMALL} />
-        </button>
-        <button
-          type="button"
+          icon={<Maximize2 size={ICON_SIZE.SMALL} />}
+        />
+        <Button
+          type="text"
+          size="small"
           className={styles["app-bm-tree__panzoom-btn"]}
           onClick={reset}
           title={t("bookmark.tree.resetZoom")}
           aria-label={t("bookmark.tree.resetZoom")}
-        >
-          <RotateCcw size={ICON_SIZE.SMALL} />
-        </button>
+          icon={<RotateCcw size={ICON_SIZE.SMALL} />}
+        />
         {extraToolbar && (
           <>
             <span className={styles["app-bm-tree__panzoom-divider"]} aria-hidden="true" />
@@ -730,16 +733,16 @@ export function BookmarkTreeView({
   }, []);
 
   const extraToolbar = (
-    <button
-      type="button"
+    <Button
+      type="text"
+      size="small"
       className={`${styles["app-bm-tree__panzoom-btn"]}${showHost ? ` ${styles["is-active"]}` : ""}`}
       onClick={toggleShowHost}
       title={showHost ? t("bookmark.tree.hideHost") : t("bookmark.tree.showHost")}
       aria-label={showHost ? t("bookmark.tree.hideHost") : t("bookmark.tree.showHost")}
       aria-pressed={showHost}
-    >
-      {showHost ? <Eye size={ICON_SIZE.SMALL} /> : <EyeOff size={ICON_SIZE.SMALL} />}
-    </button>
+      icon={showHost ? <Eye size={ICON_SIZE.SMALL} /> : <EyeOff size={ICON_SIZE.SMALL} />}
+    />
   );
 
   return (

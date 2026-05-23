@@ -51,7 +51,7 @@ export interface WorkspaceViewConfig {
 /** 时间线视图 - 按时间轴展示标签 */
 const TimelineView = lazy(() => import('@/features/tabs/TimelineView').then((module) => ({ default: module.TimelineView })));
 /** 紧凑列表视图 - 紧凑模式展示标签列表 */
-const CompactView = lazy(() => import('@/features/tabs/CompactView').then((module) => ({ default: module.CompactView })));
+const CompactView = lazy(() => import('@/features/tabs/CompactView'));
 /** 网格视图 - 卡片网格展示标签 */
 const GridView = lazy(() => import('@/features/tabs/GridView').then((module) => ({ default: module.GridView })));
 /** 访问频率视图 - 按访问频率排序展示 */

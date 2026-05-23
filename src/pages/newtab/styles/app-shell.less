@@ -322,13 +322,6 @@
   max-width: 100%;
 }
 
-/* ── 主体区包裹层（侧边栏 + 内容并排） ── */
-.app-main-body {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-}
-
 /* ── 视图侧边栏（left/right 模式） ── */
 .app-view-sidebar {
   width: 180px;
@@ -534,11 +527,11 @@
 /* Apple：slogan 更低调 */
 [data-skin='apple'] .app-hero-slogan {
   font-size: 13px;
-  color: rgba(0, 0, 0, 0.48);
+  color: var(--app-slogan-color, rgba(0, 0, 0, 0.48));
 }
 
 [data-theme='dark'][data-skin='apple'] .app-hero-slogan {
-  color: rgba(255, 255, 255, 0.48);
+  color: var(--app-slogan-color-dark, rgba(255, 255, 255, 0.48));
 }
 
 /* Apple：Hero 搜索框 - 改为 Apple Filter/Search 按钮风格 */
@@ -570,12 +563,12 @@
 }
 
 /* Apple：搜索框图标色 */
-[data-skin='apple'] .app-hero-search-icon {
-  color: rgba(0, 0, 0, 0.48) !important;
+[data-skin='apple'] .app-hero-search .app-hero-search-icon {
+  color: var(--app-search-icon-color, rgba(0, 0, 0, 0.48));
 }
 
-[data-theme='dark'][data-skin='apple'] .app-hero-search-icon {
-  color: rgba(255, 255, 255, 0.48) !important;
+[data-theme='dark'][data-skin='apple'] .app-hero-search .app-hero-search-icon {
+  color: var(--app-search-icon-color-dark, rgba(255, 255, 255, 0.48));
 }
 
 /* Apple：搜索框 ⌘K 键帽 */
@@ -617,8 +610,6 @@
 }
 
 /* ── 加载 / 空状态 ── */
-.app-page-loading,
-.app-suspense-fallback,
 .app-workspace-loading {
   display: flex;
   align-items: center;
@@ -629,7 +620,6 @@
   min-height: 100vh;
 }
 
-.app-page-loading-inner,
 .app-workspace-loading-inner,
 .app-empty-state-content {
   display: flex;
@@ -698,11 +688,6 @@
   margin-bottom: 16px;
 }
 
-.app-suspense-fallback {
-  padding: 40px 0;
-  text-align: center;
-}
-
 .app-workspace-loading,
 .app-empty-state {
   padding: 80px 0;
@@ -740,35 +725,35 @@
  * ═══════════════════════════════════════════════════════ */
 
 /* Modal 容器 */
-.app-modal__container {
-  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container)) !important;
+html .app-modal__container {
+  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container));
   backdrop-filter: var(--app-glass-filter, blur(20px) saturate(180%));
   -webkit-backdrop-filter: var(--app-glass-filter, blur(20px) saturate(180%));
 }
 
 /* Drawer 容器 */
-.app-drawer__section {
-  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container)) !important;
+html .app-drawer__section {
+  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container));
   backdrop-filter: var(--app-glass-filter, blur(20px) saturate(180%));
   -webkit-backdrop-filter: var(--app-glass-filter, blur(20px) saturate(180%));
 }
 
 /* Popover 容器 */
-.app-popover__container .ant-popover-inner,
-.ant-popover-inner {
-  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container)) !important;
+html .app-popover__container .ant-popover-inner,
+html .ant-popover-inner {
+  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container));
   backdrop-filter: var(--app-glass-filter, blur(16px) saturate(180%));
   -webkit-backdrop-filter: var(--app-glass-filter, blur(16px) saturate(180%));
 }
 
 /* Dropdown 菜单 */
-.ant-dropdown-menu,
-.ant-select-dropdown,
-.ant-cascader-dropdown,
-.ant-tree-select-dropdown,
-.ant-picker-dropdown .ant-picker-panel-container,
-.ant-color-picker .ant-popover-inner {
-  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container)) !important;
+html .ant-dropdown-menu,
+html .ant-select-dropdown,
+html .ant-cascader-dropdown,
+html .ant-tree-select-dropdown,
+html .ant-picker-dropdown .ant-picker-panel-container,
+html .ant-color-picker .ant-popover-inner {
+  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container));
   backdrop-filter: var(--app-glass-filter, blur(16px) saturate(180%));
   -webkit-backdrop-filter: var(--app-glass-filter, blur(16px) saturate(180%));
 }
@@ -784,6 +769,6 @@
   .app-hero-search,
   .app-view-sidebar__item,
   .app-view-bottom__item {
-    transition: none !important;
+    transition: none;
   }
 }

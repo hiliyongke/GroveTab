@@ -10,7 +10,13 @@
  * 用法：
  *   @import (reference) '~@/shared/styles/_variables.less';
  *   .my-component { padding: @app-space-3; }
+ *
+ * Ant Design Token 映射：
+ *   通用变量已映射至 Ant Design v6 Design Token（通过 _antd-tokens.less）
+ *   项目特定变量保留为 Less 编译时常量
  */
+
+@import (reference) '@/shared/styles/_antd-tokens.less';
 
 /* ═══════════════════════════════════════════════════════
  * 间距体系（4px 基础单位，支持密度缩放）

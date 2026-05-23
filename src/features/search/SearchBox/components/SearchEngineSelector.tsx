@@ -5,7 +5,7 @@
  */
 
 import { useState } from "react";
-import { Popover } from "antd";
+import { Popover, Button } from "antd";
 import { ChevronDown, Check } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import type { SearchEngineId, SearchEngineOption } from "@/shared/config/search-engines";
@@ -40,8 +40,8 @@ interface EngineTriggerProps {
  */
 function EngineTrigger({ currentEngineOption, isOpen, onClick, t }: EngineTriggerProps) {
   return (
-    <button
-      type="button"
+    <Button
+      type="text"
       className={cx(styles["search-box-engine-trigger"], isOpen && styles["is-open"])}
       style={cssVars({ "--searchbox-engine-color": currentEngineOption.color })}
       aria-haspopup="listbox"
@@ -62,7 +62,7 @@ function EngineTrigger({ currentEngineOption, isOpen, onClick, t }: EngineTrigge
         className={styles["search-box-engine-trigger-caret"]}
         aria-hidden="true"
       />
-    </button>
+      </Button>
   );
 }
 

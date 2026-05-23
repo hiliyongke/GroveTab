@@ -8,7 +8,7 @@
  * 不再直接监听 chrome.storage.onChanged（遵循项目架构约定）。
  */
 
-import { useEffect, useMemo, useCallback } from "react";
+import { useEffect, useMemo, useCallback, memo } from "react";
 import { useTabsStore, useStatsStore } from "@/store";
 import { useT } from "@/shared/i18n";
 import { findAmbiguousTitleIds } from "@/shared/utils/url-display";
@@ -32,7 +32,7 @@ const MAX_DISPLAY = CONFIG.ui.maxDisplay;
  *
  * @returns 频率视图 JSX 元素
  */
-export function FrequencyView() {
+export const FrequencyView = memo(function FrequencyView() {
   const tabs = useTabsStore((s) => s.tabs);
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
   const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
@@ -120,4 +120,6 @@ export function FrequencyView() {
       </div>
     </div>
   );
-}
+});
+
+export default FrequencyView;

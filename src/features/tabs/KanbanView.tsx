@@ -15,9 +15,8 @@
  */
 
 import { useEffect, useMemo, useState, memo } from "react";
-import { Button, Card, Input, Popconfirm, theme, App as AntApp } from "antd";
+import { Button, Card, Flex, Input, Popconfirm, App as AntApp } from "antd";
 import { Plus, Trash2, Save, PenLine, X, GripVertical } from "lucide-react";
-import { cssVars } from "@/shared/utils/css-vars";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import {
   DndContext,
@@ -76,7 +75,6 @@ interface ActiveDrag {
  * @returns 看板视图 JSX 元素
  */
 export function KanbanView() {
-  const { token } = theme.useToken();
   const { t } = useT();
   const { message } = AntApp.useApp();
   const columns = useKanbanStore((s) => s.columns);
@@ -107,16 +105,6 @@ export function KanbanView() {
     useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
-
-  const kanbanThemeStyle: React.CSSProperties = cssVars({
-    "--app-kanban-source-bg": token.colorFillQuaternary,
-    "--app-kanban-surface-bg": token.colorBgContainer,
-    "--app-kanban-border": token.colorBorderSecondary,
-    "--app-kanban-column-bg": token.colorFillQuaternary,
-    "--app-kanban-column-hover-bg": token.colorPrimaryBg,
-    "--app-kanban-overlay-border": token.colorPrimary,
-    "--app-kanban-overlay-shadow": token.boxShadowSecondary,
-  });
 
   /**
    * 添加新列
@@ -261,10 +249,10 @@ export function KanbanView() {
       onDragEnd={(e) => void onDragEnd(e)}
       onDragCancel={() => setActive(null)}
     >
-      <div className={styles["app-kanban-theme"]} style={kanbanThemeStyle}>
-        <div className={styles["app-kanban-view"]}>
+      <div className={styles["app-kanban-theme"]}>
+        <Flex className={styles["app-kanban-view"]}>
           {/* 左侧：实时 Tab 源栏 —— 只作为拖出源，不是排序目标 */}
-          <div className={styles["app-kanban-source"]}>
+          <Flex vertical gap={1} className={styles["app-kanban-source"]}>
             <div className={styles["app-kanban-source__title"]}>{t("kanban.title")}</div>
             {tabs.map((tab) => (
               <TabSourceItem
@@ -279,7 +267,7 @@ export function KanbanView() {
                 reduced={reduced}
               />
             ))}
-          </div>
+          </Flex>
 
           {/* 右侧：列排序层 —— 每列作为一个可排序单元 */}
           <SortableContext
@@ -329,7 +317,7 @@ export function KanbanView() {
               }
             />
           </div>
-        </div>
+        </Flex>
       </div>
 
       {/* DragOverlay：拖拽时渲染的抬升副本 */}
@@ -360,11 +348,14 @@ const TabSourceItem = memo(function TabSourceItem({
     id,
     data: { kind: "tab-source", card } satisfies DragData,
   });
-  const sourceItemStyle: React.CSSProperties = {
-    opacity: isDragging ? 0.4 : 1,
-    transform: CSS.Translate.toString(transform),
-    transition: reduced ? "none" : transition,
-  };
+  const sourceItemStyle = useMemo(
+    () => ({
+      opacity: isDragging ? 0.4 : 1,
+      transform: CSS.Translate.toString(transform),
+      transition: reduced ? "none" : transition,
+    }),
+    [isDragging, transform, reduced, transition],
+  );
 
   return (
     <div
@@ -440,15 +431,21 @@ const KanbanColumnView = memo(function KanbanColumnView({
     data: { kind: "column-body", columnId: col.id },
   });
 
-  const columnWrapStyle: React.CSSProperties = {
-    transform: CSS.Translate.toString(sortable.transform),
-    transition: reduced ? "none" : sortable.transition,
-    opacity: sortable.isDragging ? 0.5 : 1,
-  };
+  const columnWrapStyle = useMemo(
+    () => ({
+      transform: CSS.Translate.toString(sortable.transform),
+      transition: reduced ? "none" : sortable.transition,
+      opacity: sortable.isDragging ? 0.5 : 1,
+    }),
+    [sortable.transform, reduced, sortable.transition, sortable.isDragging],
+  );
 
-  const columnCardStyle: React.CSSProperties = {
-    transition: reduced ? "none" : "background 120ms",
-  };
+  const columnCardStyle = useMemo(
+    () => ({
+      transition: reduced ? "none" : "background 120ms",
+    }),
+    [reduced],
+  );
 
   /* eslint-disable react-hooks/refs -- dnd-kit's useSortable returns ref callbacks, attributes, and listeners that must be spread during render; this is the standard dnd-kit integration pattern */
   return (
@@ -495,7 +492,9 @@ const KanbanColumnView = memo(function KanbanColumnView({
             strategy={verticalListSortingStrategy}
           >
             {col.cards.length === 0 ? (
-              <div className={styles["app-kanban-column__empty"]}>{t("kanban.emptyColumn")}</div>
+              <Flex align="center" justify="center" className={styles["app-kanban-column__empty"]}>
+                {t("kanban.emptyColumn")}
+              </Flex>
             ) : (
               col.cards.map((card) => (
                 <SortableCard
@@ -580,11 +579,14 @@ const SortableCard = memo(function SortableCard({
     }
   };
 
-  const sortableCardStyle: React.CSSProperties = {
-    opacity: isDragging ? 0.4 : offline ? 0.55 : 1,
-    transform: CSS.Translate.toString(transform),
-    transition: reduced ? "none" : transition,
-  };
+  const sortableCardStyle = useMemo(
+    () => ({
+      opacity: isDragging ? 0.4 : offline ? 0.55 : 1,
+      transform: CSS.Translate.toString(transform),
+      transition: reduced ? "none" : transition,
+    }),
+    [isDragging, offline, transform, reduced, transition],
+  );
 
   return (
     <div

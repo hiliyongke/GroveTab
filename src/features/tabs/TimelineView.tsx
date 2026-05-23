@@ -18,8 +18,8 @@
  *   `fine` 归一化为 `hour` 保持向后兼容。
  */
 
-import { useMemo, useState } from 'react';
-import { Timeline, theme } from 'antd';
+import { useMemo, useState, memo } from 'react';
+import { Timeline, Button, Flex, theme } from 'antd';
 import { ChevronDown } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useTabsStore, useSettingsStore } from '@/store';
@@ -273,7 +273,7 @@ function getTimeSegments(
  * @param props.onToggle - 切换折叠状态的回调
  * @returns {void} 无返回值
  */
-function SegmentHeader({
+const SegmentHeader = memo(function SegmentHeader({
   label,
   rangeText,
   count,
@@ -288,38 +288,41 @@ function SegmentHeader({
 }) {
   const { token } = theme.useToken();
 
+  // 动态 CSS 变量：基于 antd 主题 Token，无法通过静态 CSS 实现
+  const buttonStyle = useMemo(
+    () => cssVars({
+      '--app-color': token.colorTextSecondary,
+      '--app-color-hover': token.colorText,
+    }),
+    [token.colorTextSecondary, token.colorText],
+  );
+
   return (
-    <button
-      type="button"
+    <Button
+      type="text"
       onClick={onToggle}
       aria-expanded={!collapsed}
       className={`${styles['app-timeline-segment-header']} ${styles['app-timeline-segment-trigger']}`}
-      style={
-        {
-          transition: `color ${token.motionDurationFast}`,
-          ...cssVars({
-            '--app-color': token.colorTextSecondary,
-            '--app-color-hover': token.colorText,
-          }),
-        }
-      }
+      style={buttonStyle}
     >
-      <span>{label}</span>
-      {rangeText && (
-        <span className={styles['app-timeline-segment-range']}>
-          {rangeText}
-        </span>
-      )}
-        <span className={styles['app-timeline-segment-count']}>
-        {count}
-      </span>
-      <ChevronDown
-        size={ICON_SIZE.MICRO}
-        className={`${styles['app-timeline-segment-chevron']}${collapsed ? ` ${styles['is-collapsed']}` : ''}`}
-      />
-    </button>
+      <Flex align="center" gap={4}>
+        <span>{label}</span>
+        {rangeText && (
+          <span className={styles['app-timeline-segment-range']}>
+            {rangeText}
+          </span>
+        )}
+          <span className={styles['app-timeline-segment-count']}>
+            {count}
+          </span>
+        <ChevronDown
+          size={ICON_SIZE.MICRO}
+          className={`${styles['app-timeline-segment-chevron']}${collapsed ? ` ${styles['is-collapsed']}` : ''}`}
+        />
+      </Flex>
+    </Button>
   );
-}
+});
 
 /**
  * 时间段节点内容（标题 + 可折叠的 TabItem 列表）
@@ -328,7 +331,7 @@ function SegmentHeader({
  * @param root0.showExactTime
  * @returns {void} 无返回值
  */
-function SegmentContent({
+const SegmentContent = memo(function SegmentContent({
   segment,
   showExactTime,
 }: {
@@ -383,7 +386,7 @@ function SegmentContent({
       )}
     </div>
   );
-}
+});
 
 /**
  * 时间轴视图（主组件）

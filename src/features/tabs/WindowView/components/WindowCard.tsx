@@ -258,14 +258,15 @@ const WindowCard = memo(function WindowCard({
       />
 
       {/* 头部：可点击折叠 + 缩略图预览 */}
-      <button
-        type="button"
+      <Button
+        type="text"
         onClick={toggleCollapse}
         onMouseEnter={handleHeaderMouseEnter}
         onMouseLeave={handleHeaderMouseLeave}
         aria-expanded={!collapsed}
         aria-label={collapsed ? t("tabs.expand") : t("tabs.collapse")}
         className={`app-row-hover ${styles["app-window-card-header"]}`}
+        style={{ display: 'flex', alignItems: 'center', gap: '6px', width: '100%', padding: '4px 8px' }}
       >
         <ChevronDown
           size={ICON_SIZE.TINY}
@@ -283,7 +284,7 @@ const WindowCard = memo(function WindowCard({
           </Tag>
         )}
         <Tag className={styles["app-window-card-count"]}>{windowTabs.length}</Tag>
-      </button>
+      </Button>
 
       {/* 缩略图预览浮层 */}
       {thumbnailUrl && (

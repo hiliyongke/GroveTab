@@ -298,12 +298,13 @@ export const DomainGroupCard = memo(function DomainGroupCard({
       {barPosition === "left" && <div aria-hidden className={styles["app-accent-bar--left"]} />}
       {barPosition === "top" && <div aria-hidden className={styles["app-accent-bar--top"]} />}
       {/* 分组头部 —— 可点击展开/折叠 */}
-      <button
-        type="button"
+      <Button
+        type="text"
         onClick={toggleCollapse}
         aria-expanded={!collapsed}
         aria-label={collapsed ? t("tabs.expand") : t("tabs.collapse")}
         className={`app-row-hover ${styles["app-domain-group-header"]}`}
+        style={{ display: 'flex', alignItems: 'center', gap: '6px', width: '100%', padding: '4px 8px' }}
       >
         <ChevronDown
           size={ICON_SIZE.TINY}
@@ -331,7 +332,7 @@ export const DomainGroupCard = memo(function DomainGroupCard({
         <span className={styles["app-domain-group-title"]}>{group.domain}</span>
 
         <Tag className={styles["app-domain-group-count"]}>{group.tabs.length}</Tag>
-      </button>
+      </Button>
 
       {/* 休眠整组——释放内存但保留标签页位置 */}
       <Tooltip title={t("tabs.discardGroup")}>

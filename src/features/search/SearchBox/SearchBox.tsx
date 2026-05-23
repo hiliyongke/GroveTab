@@ -14,7 +14,7 @@
  */
 
 import { useState, useMemo, useRef, useCallback } from "react";
-import { Modal, Input, theme } from "antd";
+import { Modal, Input, theme, Button } from "antd";
 import type { InputRef } from "antd/es/input/Input";
 import { Search, History } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
@@ -197,8 +197,8 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
             className={styles["search-box-input"]}
           />
           {onOpenHistory !== undefined && (
-            <button
-              type="button"
+            <Button
+              type="text"
               className={styles["search-box-history-trigger"]}
               onClick={() => {
                 close();
@@ -208,7 +208,7 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
               title={t("search")}
             >
               <History size={ICON_SIZE.SMALL} aria-hidden="true" />
-            </button>
+            </Button>
           )}
         </div>
 

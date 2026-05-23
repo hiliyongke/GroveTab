@@ -8,6 +8,7 @@
  *  - 默认 UI：紧凑"加载失败 · 点击重试"占位，适合单个 Widget 卡片
  */
 import { Component, type ReactNode } from 'react';
+import { Button } from 'antd';
 import { BRAND } from '@/shared/config/brand';
 import styles from './status-surfaces.module.less';
 
@@ -96,13 +97,13 @@ export class ErrorBoundary extends Component<Props, State> {
           <div className={styles['app-error-boundary__message']}>
             {this.state.error.message}
           </div>
-          <button
-            type="button"
+          <Button
+            type="text"
             onClick={this.reset}
             className={styles['app-error-boundary__retry']}
           >
             点击重试
-          </button>
+          </Button>
         </div>
       );
     }
