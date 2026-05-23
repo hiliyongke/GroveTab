@@ -3,20 +3,13 @@
  * 提供多选模式和批量操作功能，支持恢复、删除、合并等操作
  */
 
-import { useState } from 'react';
-import {
-  Undo2,
-  Trash2,
-  GitMerge,
-  Download,
-  CheckSquare,
-  X,
-} from 'lucide-react';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import type { MenuProps} from 'antd';
-import { Button, Dropdown, Space, Popconfirm, Tooltip, Badge } from 'antd';
-import { useT } from '@/shared/i18n';
-import { feedback } from '@/shared/ui/feedback';
+import { useState } from "react";
+import { Undo2, Trash2, GitMerge, Download, CheckSquare, X } from "lucide-react";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import type { MenuProps } from "antd";
+import { Button, Dropdown, Space, Popconfirm, Tooltip, Badge } from "antd";
+import { useT } from "@/shared/i18n";
+import { feedback } from "@/shared/ui/feedback";
 
 export interface BatchOperationsMenuProps {
   /** 选中的会话ID集合 */
@@ -28,15 +21,15 @@ export interface BatchOperationsMenuProps {
   /** 切换选择模式 */
   onToggleSelectMode: (enabled: boolean) => void;
   /** 批量恢复选中的会话 */
-  onBatchRestore: (ids: string[]) => Promise<void>;
+  onBatchRestore: (ids: string[]) => void | Promise<void>;
   /** 批量删除选中的会话 */
-  onBatchDelete: (ids: string[]) => Promise<void>;
+  onBatchDelete: (ids: string[]) => void | Promise<void>;
   /** 合并选中的会话 */
-  onMergeSessions: (ids: string[]) => Promise<void>;
+  onMergeSessions: (ids: string[]) => void | Promise<void>;
   /** 导出选中的会话 */
-  onExportSessions: (ids: string[]) => Promise<void>;
+  onExportSessions: (ids: string[]) => void | Promise<void>;
   /** 清空所有会话 */
-  onClearAll: () => Promise<void>;
+  onClearAll: () => void | Promise<void>;
 }
 
 export function BatchOperationsMenu({
@@ -54,11 +47,11 @@ export function BatchOperationsMenu({
   const [operating, setOperating] = useState(false);
 
   const selectedCount = selectedIds.size;
-  
-  const menuItems: MenuProps['items'] = [
+
+  const menuItems: MenuProps["items"] = [
     {
-      key: 'restore',
-      label: t('archive.batchRestore'),
+      key: "restore",
+      label: t("archive.batchRestore"),
       icon: <Undo2 size={ICON_SIZE.SMALL} />,
       disabled: selectedCount === 0 || operating,
       onClick: () => {
@@ -66,9 +59,9 @@ export function BatchOperationsMenu({
           setOperating(true);
           try {
             await onBatchRestore(Array.from(selectedIds));
-            feedback.success(t('archive.batchRestoreSuccess', { count: selectedCount }));
+            feedback.success(t("archive.batchRestoreSuccess", { count: selectedCount }));
           } catch (_error) {
-            feedback.error(t('archive.batchRestoreFailed'));
+            feedback.error(t("archive.batchRestoreFailed"));
           } finally {
             setOperating(false);
           }
@@ -76,8 +69,8 @@ export function BatchOperationsMenu({
       },
     },
     {
-      key: 'delete',
-      label: t('archive.batchDelete'),
+      key: "delete",
+      label: t("archive.batchDelete"),
       icon: <Trash2 size={ICON_SIZE.SMALL} />,
       danger: true,
       disabled: selectedCount === 0 || operating,
@@ -86,9 +79,9 @@ export function BatchOperationsMenu({
           setOperating(true);
           try {
             await onBatchDelete(Array.from(selectedIds));
-            feedback.success(t('archive.batchDeleteSuccess', { count: selectedCount }));
+            feedback.success(t("archive.batchDeleteSuccess", { count: selectedCount }));
           } catch (_error) {
-            feedback.error(t('archive.batchDeleteFailed'));
+            feedback.error(t("archive.batchDeleteFailed"));
           } finally {
             setOperating(false);
           }
@@ -96,11 +89,11 @@ export function BatchOperationsMenu({
       },
     },
     {
-      type: 'divider',
+      type: "divider",
     },
     {
-      key: 'merge',
-      label: t('archive.merge'),
+      key: "merge",
+      label: t("archive.merge"),
       icon: <GitMerge size={ICON_SIZE.SMALL} />,
       disabled: selectedCount < 2 || operating,
       onClick: () => {
@@ -109,7 +102,7 @@ export function BatchOperationsMenu({
           try {
             await onMergeSessions(Array.from(selectedIds));
           } catch (_error) {
-            feedback.error(t('archive.mergeFailed'));
+            feedback.error(t("archive.mergeFailed"));
           } finally {
             setOperating(false);
           }
@@ -117,8 +110,8 @@ export function BatchOperationsMenu({
       },
     },
     {
-      key: 'export',
-      label: t('archive.batchExport'),
+      key: "export",
+      label: t("archive.batchExport"),
       icon: <Download size={ICON_SIZE.SMALL} />,
       disabled: selectedCount === 0 || operating,
       onClick: () => {
@@ -126,9 +119,9 @@ export function BatchOperationsMenu({
           setOperating(true);
           try {
             await onExportSessions(Array.from(selectedIds));
-            feedback.success(t('archive.batchExportSuccess', { count: selectedCount }));
+            feedback.success(t("archive.batchExportSuccess", { count: selectedCount }));
           } catch (_error) {
-            feedback.error(t('archive.batchExportFailed'));
+            feedback.error(t("archive.batchExportFailed"));
           } finally {
             setOperating(false);
           }
@@ -141,7 +134,7 @@ export function BatchOperationsMenu({
     <Space size={8}>
       {/* 选择模式切换 */}
       {!selectable ? (
-        <Tooltip title={t('archive.selectMode')}>
+        <Tooltip title={t("archive.selectMode")}>
           <Button
             size="small"
             type="text"
@@ -149,7 +142,7 @@ export function BatchOperationsMenu({
             onClick={() => onToggleSelectMode(true)}
             disabled={totalCount === 0}
           >
-            {t('archive.selectMode')}
+            {t("archive.selectMode")}
           </Button>
         </Tooltip>
       ) : (
@@ -159,31 +152,22 @@ export function BatchOperationsMenu({
             count={selectedCount}
             showZero={false}
             size="small"
-            classNames={{ indicator: 'app-archive-batch-menu__badge-indicator' }}
+            classNames={{ indicator: "app-archive-batch-menu__badge-indicator" }}
           >
             <span className="app-archive-batch-menu__summary">
-              {t('archive.selectedCount', { count: selectedCount })}
+              {t("archive.selectedCount", { count: selectedCount })}
             </span>
           </Badge>
 
           {/* 批量操作下拉菜单 */}
-          <Dropdown
-            menu={{ items: menuItems }}
-            placement="bottomRight"
-            disabled={operating}
-          >
-            <Button
-              size="small"
-              type="primary"
-              loading={operating}
-              disabled={selectedCount === 0}
-            >
-              {t('archive.batchOperations')}
+          <Dropdown menu={{ items: menuItems }} placement="bottomRight" disabled={operating}>
+            <Button size="small" type="primary" loading={operating} disabled={selectedCount === 0}>
+              {t("archive.batchOperations")}
             </Button>
           </Dropdown>
 
           {/* 取消选择 */}
-          <Tooltip title={t('archive.cancelSelect')}>
+          <Tooltip title={t("archive.cancelSelect")}>
             <Button
               size="small"
               type="text"
@@ -197,20 +181,17 @@ export function BatchOperationsMenu({
       {/* 清空所有会话 */}
       {totalCount > 0 && (
         <Popconfirm
-          title={t('archive.clearAllConfirmTitle')}
-          description={t('archive.clearAllConfirmDesc', { count: totalCount })}
-          onConfirm={() => { void onClearAll(); }}
-          okText={t('archive.clearAllConfirmOk')}
-          cancelText={t('archive.clearAllConfirmCancel')}
+          title={t("archive.clearAllConfirmTitle")}
+          description={t("archive.clearAllConfirmDesc", { count: totalCount })}
+          onConfirm={() => {
+            void onClearAll();
+          }}
+          okText={t("archive.clearAllConfirmOk")}
+          cancelText={t("archive.clearAllConfirmCancel")}
           okButtonProps={{ danger: true }}
         >
-          <Tooltip title={t('archive.clearAll')}>
-            <Button
-              size="small"
-              type="text"
-              danger
-              icon={<Trash2 size={ICON_SIZE.DEFAULT} />}
-            />
+          <Tooltip title={t("archive.clearAll")}>
+            <Button size="small" type="text" danger icon={<Trash2 size={ICON_SIZE.DEFAULT} />} />
           </Tooltip>
         </Popconfirm>
       )}
