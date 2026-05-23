@@ -19,7 +19,8 @@ import { getFaviconUrl } from '@/chrome';
 import { useAccent } from '@/shared/hooks/useAccent';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
-import './styles/bookmark-tree.less';
+import { Button, Divider } from 'antd';
+import styles from './styles/bookmark-tree.module.less';
 
 /** 从 URL 提取 hostname */
 function getHostname(url: string): string {
@@ -97,7 +98,7 @@ function TreeLeafNode({
 
   return (
     <div
-      className="app-bm-tree__leaf"
+      className={styles.leaf}
       style={{ '--app-bm-accent': accent.bar } as React.CSSProperties}
       onClick={() => url && onOpen(url)}
       role="button"
@@ -105,35 +106,35 @@ function TreeLeafNode({
       onKeyDown={(e) => { if (e.key === 'Enter' && url) onOpen(url); }}
       data-url={url}
     >
-      <span className="app-bm-tree__leaf-bar" />
+      <span className={styles.leafBar} />
       {faviconUrl && !faviconError ? (
         <img
           src={faviconUrl}
           alt=""
-          className="app-bm-tree__leaf-favicon"
+          className={styles.leafFavicon}
           onError={() => setFaviconError(true)}
         />
       ) : (
         <span
-          className="app-bm-tree__leaf-favicon-fallback"
+          className={styles.leafFaviconFallback}
           style={{ background: accent.soft, color: accent.text }}
         >
           {getFallbackLetter(node.title ?? '', url)}
         </span>
       )}
-      <div className="app-bm-tree__leaf-main">
-        <div className="app-bm-tree__leaf-title">{titleText}</div>
-        {showHost && <div className="app-bm-tree__leaf-host">{hostname}</div>}
+      <div className={styles.leafMain}>
+        <div className={styles.leafTitle}>{titleText}</div>
+        {showHost && <div className={styles.leafHost}>{hostname}</div>}
       </div>
 
       {/* 自定义 hover 气泡：显示标题 + 完整 URL（hostname 加粗高亮） */}
-      <div className="app-bm-tree__tooltip" role="tooltip">
-        <div className="app-bm-tree__tooltip-title">{titleText}</div>
-        <div className="app-bm-tree__tooltip-url">
-          <span className="app-bm-tree__tooltip-host">{hostname}</span>
-          <span className="app-bm-tree__tooltip-path">{url.replace(/^https?:\/\/[^/]+/i, '') || '/'}</span>
+      <div className={styles.tooltip} role="tooltip">
+        <div className={styles.tooltipTitle}>{titleText}</div>
+        <div className={styles.tooltipUrl}>
+          <span className={styles.tooltipHost}>{hostname}</span>
+          <span className={styles.tooltipPath}>{url.replace(/^https?:\/\/[^/]+/i, '') || '/'}</span>
         </div>
-        <div className="app-bm-tree__tooltip-arrow" aria-hidden="true" />
+        <div className={styles.tooltipArrow} aria-hidden="true" />
       </div>
     </div>
   );
@@ -193,47 +194,47 @@ function TreeFolderNode({
   }, [isEmpty, centerOnExpand]);
 
   return (
-    <div className="app-bm-tree__folder-wrap" data-depth={depth}>
-      <button
+    <div className={styles.folderWrap} data-depth={depth}>
+      <Button
         ref={folderBtnRef}
-        type="button"
-        className={`app-bm-tree__folder${expanded ? ' is-expanded' : ''}${isEmpty ? ' is-empty' : ''}`}
+        type="text"
+        className={`${styles.folder}${expanded ? ` ${styles.folderIsExpanded}` : ''}${isEmpty ? ` ${styles.folderIsEmpty}` : ''}`}
         onClick={handleToggle}
         aria-expanded={expanded}
         title={title}
       >
-        <span className="app-bm-tree__folder-icon">
+        <span className={styles.folderIcon}>
           {expanded ? <FolderOpen size={ICON_SIZE.SMALL} /> : <Folder size={ICON_SIZE.SMALL} />}
         </span>
-        <span className="app-bm-tree__folder-text">
-          <span className="app-bm-tree__folder-title">{title}</span>
-          <span className="app-bm-tree__folder-meta">
-            {folderCount > 0 && <span className="app-bm-tree__folder-stat">📁 {folderCount}</span>}
-            {linkCount > 0 && <span className="app-bm-tree__folder-stat">🔗 {linkCount}</span>}
-            {isEmpty && <span className="app-bm-tree__folder-stat is-muted">空</span>}
+        <span className={styles.folderText}>
+          <span className={styles.folderTitle}>{title}</span>
+          <span className={styles.folderMeta}>
+            {folderCount > 0 && <span className={`${styles.folderStat}`}>📁 {folderCount}</span>}
+            {linkCount > 0 && <span className={`${styles.folderStat}`}>🔗 {linkCount}</span>}
+            {isEmpty && <span className={`${styles.folderStat} ${styles.folderStatIsMuted}`}>空</span>}
           </span>
         </span>
         {!isEmpty && (
           (orientation === 'horizontal' ? (
             <ChevronRight
               size={ICON_SIZE.SMALL}
-              className={`app-bm-tree__folder-chevron${expanded ? ' is-expanded' : ''}`}
+              className={`${styles.folderChevron}${expanded ? ` ${styles.folderChevronIsExpanded}` : ''}`}
             />
           ) : (
             <ChevronDown
               size={ICON_SIZE.SMALL}
-              className={`app-bm-tree__folder-chevron is-vertical${expanded ? ' is-expanded' : ''}`}
+              className={`${styles.folderChevron} is-vertical${expanded ? ` ${styles.folderChevronIsExpanded}` : ''}`}
             />
           ))
         )}
-      </button>
+      </Button>
 
       {expanded && !isEmpty && (
-        <div className="app-bm-tree__children" role="group">
+        <div className={styles.children} role="group">
           {/* 横向（脑图）模式：仍用 SVG 贝塞尔曲线；垂直（组织架构图）模式：用纯 CSS 伪元素绘制直角连线，永不错位 */}
           {orientation === 'horizontal' && (
             <svg
-              className="app-bm-tree__connector"
+              className={styles.connector}
               preserveAspectRatio="none"
               viewBox="0 0 100 100"
               aria-hidden="true"
@@ -245,7 +246,7 @@ function TreeFolderNode({
                 return (
                   <path
                     key={idx}
-                    className="app-bm-tree__connector-path"
+                    className={styles.connectorPath}
                     d={d}
                     vectorEffect="non-scaling-stroke"
                   />
@@ -255,7 +256,7 @@ function TreeFolderNode({
           )}
 
           <div
-            className={`app-bm-tree__children-col${orderedChildren.length === 1 ? ' is-single' : ''}`}
+            className={`${styles.childrenCol}${orderedChildren.length === 1 ? ` ${styles.childrenColIsSingle}` : ''}`}
           >
             {orderedChildren.map((child) =>
               child.url ? (
@@ -516,9 +517,10 @@ const PanZoom = forwardRef<PanZoomHandle, {
         onMouseDown={(e) => e.stopPropagation()}
         onDoubleClick={(e) => e.stopPropagation()}
       >
-        <button
-          type="button"
-          className="app-bm-tree__panzoom-btn"
+        <Button
+          type="text"
+          size="small"
+          className={styles['app-bm-tree__panzoom-btn']}
           onClick={() => {
             const vp = viewportRef.current;
             if (!vp) return;
@@ -530,19 +532,21 @@ const PanZoom = forwardRef<PanZoomHandle, {
           disabled={scale <= ZOOM_MIN + 1e-3}
         >
           <ZoomOut size={ICON_SIZE.SMALL} />
-        </button>
-        <button
-          type="button"
-          className="app-bm-tree__panzoom-percent"
+        </Button>
+        <Button
+          type="text"
+          size="small"
+          className={styles['app-bm-tree__panzoom-percent']}
           onClick={reset}
           title={t('bookmark.tree.resetZoom')}
           aria-label={t('bookmark.tree.resetZoom')}
         >
           {zoomPercent}%
-        </button>
-        <button
-          type="button"
-          className="app-bm-tree__panzoom-btn"
+        </Button>
+        <Button
+          type="text"
+          size="small"
+          className={styles['app-bm-tree__panzoom-btn']}
           onClick={() => {
             const vp = viewportRef.current;
             if (!vp) return;
@@ -554,26 +558,28 @@ const PanZoom = forwardRef<PanZoomHandle, {
           disabled={scale >= ZOOM_MAX - 1e-3}
         >
           <ZoomIn size={ICON_SIZE.SMALL} />
-        </button>
-        <span className="app-bm-tree__panzoom-divider" aria-hidden="true" />
-        <button
-          type="button"
-          className="app-bm-tree__panzoom-btn"
+        </Button>
+        <Divider type="vertical" className={styles['app-bm-tree__panzoom-divider']} aria-hidden="true" />
+        <Button
+          type="text"
+          size="small"
+          className={styles['app-bm-tree__panzoom-btn']}
           onClick={fit}
           title={t('bookmark.tree.fitScreen')}
           aria-label={t('bookmark.tree.fitScreen')}
         >
           <Maximize2 size={ICON_SIZE.SMALL} />
-        </button>
-        <button
-          type="button"
-          className="app-bm-tree__panzoom-btn"
+        </Button>
+        <Button
+          type="text"
+          size="small"
+          className={styles['app-bm-tree__panzoom-btn']}
           onClick={reset}
           title={t('bookmark.tree.resetZoom')}
           aria-label={t('bookmark.tree.resetZoom')}
         >
           <RotateCcw size={ICON_SIZE.SMALL} />
-        </button>
+        </Button>
         {extraToolbar && (
           <>
             <span className="app-bm-tree__panzoom-divider" aria-hidden="true" />
@@ -619,25 +625,25 @@ export function BookmarkTreeView({
   }, []);
 
   const extraToolbar = (
-    <button
-      type="button"
-      className={`app-bm-tree__panzoom-btn${showHost ? ' is-active' : ''}`}
+    <Button
+      type="text"
+      className={`${styles['panzoom-btn']}${showHost ? ` ${styles['panzoom-btn--active']}` : ''}`}
       onClick={toggleShowHost}
       title={showHost ? t('bookmark.tree.hideHost') : t('bookmark.tree.showHost')}
       aria-label={showHost ? t('bookmark.tree.hideHost') : t('bookmark.tree.showHost')}
       aria-pressed={showHost}
     >
       {showHost ? <Eye size={ICON_SIZE.SMALL} /> : <EyeOff size={ICON_SIZE.SMALL} />}
-    </button>
+    </Button>
   );
 
   return (
-    <div className={`app-bm-tree is-${orientation}${showHost ? ' show-host' : ''}`}>
+    <div className={`${styles.wrap} is-${orientation}${showHost ? ' show-host' : ''}`}>
       <ShowHostContext.Provider value={showHost}>
         <CenterOnExpandContext.Provider value={centerOnExpand}>
         <PanZoom ref={panZoomRef} extraToolbar={extraToolbar} orientation={orientation}>
-            <div className="app-bm-tree__canvas">
-              <div className="app-bm-tree__roots">
+            <div className={styles.canvas}>
+              <div className={styles.roots}>
                 {topSections.map((section, idx) => (
                   <TreeFolderNode
                     key={section.id}

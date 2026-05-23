@@ -9,11 +9,11 @@
  *   - 清空所有归档
  */
 
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { Button, Space, Progress, Alert, App, Input, Popconfirm, Empty, Divider } from 'antd';
+import { useState, useEffect, useCallback } from 'react';
+import { Button, Space, Progress, Alert, App, Input, Popconfirm, Empty, Divider, Upload } from 'antd';
 import {
   Download,
-  Upload,
+  Upload as UploadIcon,
   Trash2,
   HardDrive,
   Save,
@@ -59,7 +59,6 @@ export function DataPanel() {
   const [profileName, setProfileName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     void getQuotaStatus().then(setQuotaInfo);
@@ -114,13 +113,9 @@ export function DataPanel() {
     message.success(t('settings.exportDone'));
   };
 
-  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file == null) return;
-
+  const handleImport = async (file: File) => {
     if (file.size > MAX_IMPORT_FILE_BYTES) {
       setImportStatus(t('settings.importTooLarge', { size: '2 MB' }));
-      if (fileInputRef.current !== null) fileInputRef.current.value = '';
       return;
     }
 
@@ -141,7 +136,6 @@ export function DataPanel() {
     const { sessions, errors } = parseImportJSON(importText);
     if (errors.length > 0) {
       setImportStatus(t('settings.importError', { count: errors.length }));
-      if (fileInputRef.current !== null) fileInputRef.current.value = '';
       return;
     }
     const existing = await getArchivedSessions();
@@ -149,7 +143,6 @@ export function DataPanel() {
     const newSessions = sessions.filter((session) => !existingIds.has(session.id));
     await saveSessions([...newSessions, ...existing]);
     setImportStatus(t('settings.importDone', { count: newSessions.length }));
-    if (fileInputRef.current !== null) fileInputRef.current.value = '';
   };
 
   const handleClearAll = () => {
@@ -289,16 +282,18 @@ export function DataPanel() {
         <Button block icon={<Download size={ICON_SIZE.MEDIUM} />} onClick={() => { void handleExport(); }}>
           {t('settings.export')}
         </Button>
-        <Button block icon={<Upload size={ICON_SIZE.MEDIUM} />} onClick={() => fileInputRef.current?.click()}>
-          {t('settings.import')}
-        </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
+        <Upload
           accept=".json"
-          className={styles['data-panel__file-input']}
-          onChange={(e) => { void handleImport(e); }}
-        />
+          showUploadList={false}
+          beforeUpload={(file) => {
+            void handleImport(file as File);
+            return false; // 阻止实际上传
+          }}
+        >
+          <Button block icon={<UploadIcon size={ICON_SIZE.MEDIUM} />}>
+            {t('settings.import')}
+          </Button>
+        </Upload>
         {importStatus !== null && (
           <div className={styles['data-panel__import-status']}>{importStatus}</div>
         )}

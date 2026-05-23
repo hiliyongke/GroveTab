@@ -19,7 +19,7 @@
  */
 
 import { useMemo, useState } from 'react';
-import { Timeline, theme } from 'antd';
+import { Timeline, Button, theme } from 'antd';
 import { ChevronDown } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useTabsStore, useSettingsStore } from '@/store';
@@ -261,8 +261,8 @@ function SegmentHeader({
   const { token } = theme.useToken();
 
   return (
-    <button
-      type="button"
+    <Button
+      type="text"
       onClick={onToggle}
       aria-expanded={!collapsed}
       className={`${styles['app-timeline-segment-header']} ${styles['app-timeline-segment-trigger']}`}
@@ -282,14 +282,14 @@ function SegmentHeader({
           {rangeText}
         </span>
       )}
-        <span className={styles['app-timeline-segment-count']}>
+      <span className={styles['app-timeline-segment-count']}>
         {count}
       </span>
       <ChevronDown
         size={ICON_SIZE.MICRO}
         className={`${styles['app-timeline-segment-chevron']}${collapsed ? ` ${styles['is-collapsed']}` : ''}`}
       />
-    </button>
+    </Button>
   );
 }
 

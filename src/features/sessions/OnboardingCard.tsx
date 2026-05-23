@@ -178,16 +178,15 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
 
         <Space wrap size={12} className={styles["onboarding-card__features"]}>
           <Tag
-            bordered={false}
             color="processing"
             className={styles["onboarding-card__feature-tag"]}
           >
             {t("onboarding.featureSearch")}
           </Tag>
-          <Tag bordered={false} color="gold" className={styles["onboarding-card__feature-tag"]}>
+          <Tag color="gold" className={styles["onboarding-card__feature-tag"]}>
             {t("onboarding.featureArchive")}
           </Tag>
-          <Tag bordered={false} color="green" className={styles["onboarding-card__feature-tag"]}>
+          <Tag color="green" className={styles["onboarding-card__feature-tag"]}>
             {t("onboarding.featureGroup")}
           </Tag>
         </Space>

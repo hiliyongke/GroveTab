@@ -311,34 +311,34 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
       </div>
 
       <div className={styles['bm-tools__quick-grid']}>
-        <button type="button" className={styles['bm-tools__quick']} onClick={() => setActiveTool('dedupe')}>
+        <Button type="text" className={styles['bm-tools__quick']} onClick={() => setActiveTool('dedupe')}>
           <Copy size={ICON_SIZE.MEDIUM} />
           <div className={styles['bm-tools__quick-text']}>
             <span className={styles['bm-tools__quick-title']}>{t('bookmark.tools.dedupe')}</span>
             <span className={styles['bm-tools__quick-desc']}>{t('bookmark.tools.dedupeShort')}</span>
           </div>
-        </button>
-        <button type="button" className={styles['bm-tools__quick']} onClick={() => setActiveTool('health')}>
+        </Button>
+        <Button type="text" className={styles['bm-tools__quick']} onClick={() => setActiveTool('health')}>
           <HeartPulse size={ICON_SIZE.MEDIUM} />
           <div className={styles['bm-tools__quick-text']}>
             <span className={styles['bm-tools__quick-title']}>{t('bookmark.tools.health')}</span>
             <span className={styles['bm-tools__quick-desc']}>{t('bookmark.tools.healthShort')}</span>
           </div>
-        </button>
-        <button type="button" className={styles['bm-tools__quick']} onClick={() => setActiveTool('organize')}>
+        </Button>
+        <Button type="text" className={styles['bm-tools__quick']} onClick={() => setActiveTool('organize')}>
           <FolderTree size={ICON_SIZE.MEDIUM} />
           <div className={styles['bm-tools__quick-text']}>
             <span className={styles['bm-tools__quick-title']}>{t('bookmark.tools.organize')}</span>
             <span className={styles['bm-tools__quick-desc']}>{t('bookmark.tools.organizeShort')}</span>
           </div>
-        </button>
-        <button type="button" className={styles['bm-tools__quick']} onClick={() => setActiveTool('empty')}>
+        </Button>
+        <Button type="text" className={styles['bm-tools__quick']} onClick={() => setActiveTool('empty')}>
           <FolderX size={ICON_SIZE.MEDIUM} />
           <div className={styles['bm-tools__quick-text']}>
             <span className={styles['bm-tools__quick-title']}>{t('bookmark.tools.empty')}</span>
             <span className={styles['bm-tools__quick-desc']}>{t('bookmark.tools.emptyShort')}</span>
           </div>
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -393,7 +393,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
               <div className={styles['bm-tools__group-header']}>
                 <SiteIcon url={g.items[0]?.url ?? g.key} />
                 <div className={styles['bm-tools__group-title']} title={g.key}>{g.key}</div>
-                <Tag color="orange" bordered={false}>
+                <Tag color="orange">
                   {t('bookmark.tools.dedupeItems', { count: g.items.length })}
                 </Tag>
               </div>
@@ -405,8 +405,8 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
                       <div className={styles['bm-tools__row-sub']}>{item.url}</div>
                     </div>
                     {idx === 0
-                      ? <Tag color="green" bordered={false}>{t('bookmark.tools.keep')}</Tag>
-                      : <Tag color="red" bordered={false}>{t('bookmark.tools.willRemove')}</Tag>}
+                      ? <Tag color="green">{t('bookmark.tools.keep')}</Tag>
+                      : <Tag color="red">{t('bookmark.tools.willRemove')}</Tag>}
                   </div>
                 ))}
               </div>
@@ -517,7 +517,6 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
                 <div className={styles['bm-tools__row-sub']}>{r.bookmark.url}</div>
               </div>
               <Tag
-                bordered={false}
                 color={r.status === 'ok' ? 'green' : r.status === 'timeout' ? 'orange' : r.status === 'dead' ? 'red' : 'default'}
               >
                 {t(`bookmark.tools.status${r.status.charAt(0).toUpperCase() + r.status.slice(1)}` as never)}

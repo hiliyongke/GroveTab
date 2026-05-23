@@ -9,7 +9,7 @@
  */
 
 import { useCallback } from 'react';
-import { Button, Badge, Tooltip, Popconfirm, theme } from 'antd';
+import { Button, Badge, Tooltip, Popconfirm, Divider, theme } from 'antd';
 import {
   X,
   Moon,
@@ -118,7 +118,7 @@ export function BatchActionBar() {
         </span>
       </div>
 
-<div className={styles['app-divider-soft']} aria-hidden />
+      <Divider type="vertical" className={styles['app-divider-soft']} aria-hidden />
 
       {/* 操作组：危险→中性→主要，视觉权重递增 */}
       <div className={styles['app-batch-bar__actions']}>

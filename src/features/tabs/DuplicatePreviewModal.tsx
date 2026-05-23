@@ -12,7 +12,8 @@
  */
 
 import { useEffect, useMemo, useState, useCallback } from 'react';
-import { App, Button, Modal, Space, Tag, Typography, theme } from 'antd';
+import { App, Button, Modal, Radio, Space, Tag, Typography, theme } from 'antd';
+import type { RadioChangeEvent } from 'antd/es/radio/interface';
 import type { LiveTab } from '@/shared/types';
 import type { DupGroup } from '@/shared/utils/dedupe';
 import { useTabsStore, useMetadataStore } from '@/store';
@@ -209,29 +210,39 @@ interface GroupSectionProps {
 
 function GroupSection({ group, keeperId, onChange, token: _token, t, locale }: GroupSectionProps) {
   const closeCount = keeperId === undefined ? group.tabs.length : group.tabs.length - 1;
+  const [radioValue, setRadioValue] = useState<string>(keeperId?.toString() ?? '');
+
+  useEffect(() => {
+    setRadioValue(keeperId?.toString() ?? '');
+  }, [keeperId]);
+
+  const handleChange = (e: RadioChangeEvent) => {
+    const val = e.target.value;
+    setRadioValue(val);
+    onChange(parseInt(val, 10));
+  };
+
   return (
     <div className={styles['app-duplicate-group']}>
       <div className={styles['app-duplicate-group__header']}>
         <Text strong className={styles['app-duplicate-group__title']}>
           {group.canonicalUrl}
         </Text>
-        <Tag color="gold" bordered={false} className={styles['app-duplicate-group__tag']}>
+        <Tag color="gold" className={styles['app-duplicate-group__tag']}>
           {t('dedup.willClose', { count: closeCount })}
         </Tag>
       </div>
-      <div className={styles['app-duplicate-group__list']}>
+      <Radio.Group
+        value={radioValue}
+        onChange={handleChange}
+        className={styles['app-duplicate-group__list']}
+      >
         {group.tabs.map((tab: LiveTab) => (
-          <label
+          <Radio
             key={tab.id}
-            className={`${styles['app-duplicate-option']}${keeperId === tab.id ? ' is-selected' : ''}`}
+            value={tab.id.toString()}
+            className={`${styles['app-duplicate-option']}${keeperId === tab.id ? ` ${styles['is-selected']}` : ''}`}
           >
-            <input
-              type="radio"
-              name={`group-${group.canonicalUrl}`}
-              checked={keeperId === tab.id}
-              onChange={() => onChange(tab.id)}
-              className={styles['app-duplicate-option__radio']}
-            />
             {tab.favIconUrl !== '' && (
               <img src={tab.favIconUrl} alt="" className={styles['app-duplicate-option__favicon']} />
             )}
@@ -251,9 +262,9 @@ function GroupSection({ group, keeperId, onChange, token: _token, t, locale }: G
                 {formatOpenedAt(tab.lastAccessed, locale)}
               </Text>
             </div>
-          </label>
+          </Radio>
         ))}
-      </div>
+      </Radio.Group>
     </div>
   );
 }

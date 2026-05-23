@@ -232,8 +232,8 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
         <div aria-hidden className={styles['app-accent-bar--top']} />
       )}
       {/* 分组头部 —— 可点击展开/折叠 */}
-      <button
-        type="button"
+      <Button
+        type="text"
         onClick={toggleCollapse}
         aria-expanded={!collapsed}
         aria-label={collapsed ? t('tabs.expand') : t('tabs.collapse')}
@@ -252,14 +252,14 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
         <div className={styles['app-domain-group-badge']}>
           {faviconUrl && !faviconError ? (
             <img
-              src={faviconUrl}
-              alt=""
-              className={styles['app-domain-group-badge-favicon']}
-              onError={() => setFaviconError(true)}
-            />
-          ) : (
-            <Globe size={ICON_SIZE.SMALL} className={styles['app-domain-group-badge-icon']} />
-          )}
+                  src={faviconUrl}
+                  alt=""
+                  className={styles['app-domain-group-badge-favicon']}
+                  onError={() => setFaviconError(true)}
+                />
+              ) : (
+                <Globe size={ICON_SIZE.SMALL} className={styles['app-domain-group-badge-icon']} />
+              )}
         </div>
 
         <span className={styles['app-domain-group-title']}>
@@ -269,7 +269,7 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
         <Tag className={styles['app-domain-group-count']}>
           {group.tabs.length}
         </Tag>
-      </button>
+      </Button>
 
       {/* 休眠整组——释放内存但保留标签页位置 */}
       <Tooltip title={t('tabs.discardGroup')}>

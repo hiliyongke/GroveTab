@@ -196,23 +196,23 @@ function SubFolderGroup({
       className={styles["app-bookmark-subgroup"]}
       style={{ "--app-bm-depth": depth } as React.CSSProperties}
     >
-      <button
-        type="button"
-        className={styles["app-bookmark-subgroup__head"]}
-        onClick={() => setCollapsed((c) => !c)}
-        aria-expanded={!collapsed}
-      >
-        <ChevronDown
-          size={ICON_SIZE.SMALL}
-          className={cx(
-            styles["app-bookmark-subgroup__chevron"],
-            collapsed && styles["is-collapsed"],
-          )}
-        />
-        <Folder size={ICON_SIZE.SMALL} className={styles["app-bookmark-subgroup__icon"]} />
-        <span className={styles["app-bookmark-subgroup__title"]}>{title}</span>
-        <span className={styles["app-bookmark-subgroup__count"]}>{total}</span>
-      </button>
+        <Button
+          type="text"
+          className={styles["app-bookmark-subgroup__head"]}
+          onClick={() => setCollapsed((c) => !c)}
+          aria-expanded={!collapsed}
+        >
+          <ChevronDown
+            size={ICON_SIZE.SMALL}
+            className={cx(
+              styles["app-bookmark-subgroup__chevron"],
+              collapsed && styles["is-collapsed"],
+            )}
+          />
+          <Folder size={ICON_SIZE.SMALL} className={styles["app-bookmark-subgroup__icon"]} />
+          <span className={styles["app-bookmark-subgroup__title"]}>{title}</span>
+          <span className={styles["app-bookmark-subgroup__count"]}>{total}</span>
+        </Button>
       {!collapsed && (
         <div className={styles["app-bookmark-subgroup__body"]}>
           {bookmarks.map((bm) => (
@@ -278,7 +278,7 @@ function TopFolderSection({
         <Typography.Title level={3} className={styles["app-bookmark-section__title"]}>
           {title}
         </Typography.Title>
-        <Tag className={styles["app-bookmark-section__count"]} bordered={false}>
+        <Tag className={styles["app-bookmark-section__count"]}>
           {total}
         </Tag>
       </Button>
@@ -470,7 +470,7 @@ export function BookmarkView() {
           <BookOpen size={ICON_SIZE.MEDIUM} className={styles["app-bookmark-header__icon"]} />
           <span>{t("bookmark.title")}</span>
           {totalBookmarks > 0 && (
-            <Tag bordered={false} className={styles["app-bookmark-header__count"]}>
+            <Tag className={styles["app-bookmark-header__count"]}>
               {totalBookmarks}
             </Tag>
           )}
