@@ -27,6 +27,7 @@ import { useT } from '@/shared/i18n';
 import { findAmbiguousTitleIds } from '@/shared/utils/url-display';
 import { cssVars } from '@/shared/utils/css-vars';
 import { TabItem } from './TabItem';
+import { TIME_CONSTANTS } from '@/shared/config/constants';
 import type { LiveTab } from '@/shared/types';
 import styles from './TimelineView.module.less';
 
@@ -146,7 +147,7 @@ function bucketByHour(
  * @returns 返回 [时间段|null, 剩余标签数组] 元组
  */
 function extractJustNow(tabs: LiveTab[], t: TFn): [TimeSegment | null, LiveTab[]] {
-  const threshold = Date.now() - 30 * 60 * 1000;
+  const threshold = Date.now() - TIME_CONSTANTS.MS_30_MINUTES;
   const recent: LiveTab[] = [];
   const rest: LiveTab[] = [];
   for (const tab of tabs) {
@@ -183,8 +184,8 @@ function getTimeSegments(
   t: TFn,
 ): TimeSegment[] {
   const todayStart = new Date().setHours(0, 0, 0, 0);
-  const yesterdayStart = todayStart - 86400000;
-  const weekStart = todayStart - 6 * 86400000;
+  const yesterdayStart = todayStart - TIME_CONSTANTS.MS_PER_DAY;
+  const weekStart = todayStart - 6 * TIME_CONSTANTS.MS_PER_DAY;
 
   // 先按天粗分
   const todayTabs: LiveTab[] = [];

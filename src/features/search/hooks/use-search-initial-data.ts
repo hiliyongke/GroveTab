@@ -11,9 +11,10 @@ import { getRecentSearches, getSearchHistory, getClosedTabs } from '@/repositori
 import { STORAGE_KEYS } from '@/shared/config/storage-keys';
 import { fetchMultipleBoards } from '@/services/trending-service';
 import type { HotKeywordSource } from '@/shared/config/search-engines';
+import { SEARCH_CONSTANTS } from '@/shared/config/constants';
 
 /** Debounce delay (ms) for history search queries */
-const SEARCH_DEBOUNCE_MS = 180;
+const SEARCH_DEBOUNCE_MS = SEARCH_CONSTANTS.DEBOUNCE_MS;
 
 /** Platforms to fetch trending data from when cache is empty */
 const SEARCH_TRENDING_PLATFORMS = ['weibo', 'baidu', 'toutiao'];

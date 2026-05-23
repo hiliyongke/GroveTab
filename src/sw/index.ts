@@ -32,6 +32,7 @@ import { toDayStrUTC } from '@/shared/utils/date';
 import { BRAND } from '@/shared/config/brand';
 import { CONFIG } from '@/shared/config';
 import { APP_INTERNAL_IDS, STORAGE_KEYS } from '@/shared/config/storage-keys';
+import { PERFORMANCE_CONSTANTS, TRENDING_CONSTANTS, TIME_CONSTANTS, OG_CONSTANTS } from '@/shared/config/constants';
 
 /** 统一日志前缀：SW 内所有 console.log/warn/error 都走 SW_LOG_TAG */
 const SW_LOG_TAG = `${BRAND.logTag} SW`;
@@ -542,13 +543,13 @@ async function autoSnapshotIfNeeded(): Promise<void> {
     const freqMs = (() => {
       switch (freq) {
         case '6h':
-          return 6 * 3600 * 1000;
+          return 6 * TIME_CONSTANTS.MS_PER_HOUR;
         case '12h':
-          return 12 * 3600 * 1000;
+          return 12 * TIME_CONSTANTS.MS_PER_HOUR;
         case '24h':
-          return 24 * 3600 * 1000;
+          return 24 * TIME_CONSTANTS.MS_PER_HOUR;
         default:
-          return 12 * 3600 * 1000;
+          return 12 * TIME_CONSTANTS.MS_PER_HOUR;
       }
     })();
 
@@ -659,7 +660,8 @@ async function maybeFetchOg(url: string): Promise<void> {
     // 已存在则跳过
     const { getOgEntry, saveOgEntry } = await import('@/repositories');
     const existing = await getOgEntry(url);
-    if (existing !== undefined && Date.now() - existing.fetchedAt < 7 * 86400_000) return;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if (existing !== undefined && Date.now() - existing.fetchedAt < OG_CONSTANTS.CACHE_TTL_MS) return;
 
     // 增加并发计数
     await chrome.storage.session.set({ ogInFlight: currentInFlight + 1 });
@@ -723,14 +725,12 @@ async function refreshTrendingCache(): Promise<void> {
     if (boardIds.length === 0) return;
 
     // 使用小尘API刷新每个已缓存的平台
-    const FETCH_TIMEOUT_MS = 6000;
-    const MAX_ITEMS = 20;
     const API_BASE = 'https://api.xcvts.cn/api/hotlist';
 
     for (const boardId of boardIds) {
       try {
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+        const timer = setTimeout(() => controller.abort(), PERFORMANCE_CONSTANTS.FETCH_TIMEOUT_MS);
         const resp = await fetch(`${API_BASE}?type=${encodeURIComponent(boardId)}`, {
           signal: controller.signal,
         });
@@ -748,7 +748,7 @@ async function refreshTrendingCache(): Promise<void> {
         if (json.success !== true || !Array.isArray(json.data)) continue;
         if (json.data.length === 0) continue;
 
-        const items = json.data.slice(0, MAX_ITEMS).map((raw) => ({
+        const items = json.data.slice(0, TRENDING_CONSTANTS.MAX_ITEMS_PER_BOARD).map((raw) => ({
           id: String(raw.index ?? raw.id ?? ''),
           title: String(raw.title ?? ''),
           desc: raw.desc ? String(raw.desc) : undefined,

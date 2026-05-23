@@ -69,9 +69,9 @@ import {
 } from '@/shared/config/search-engines';
 import { iconColor, iconColorAlpha, type IconRole } from '@/shared/utils/icon-colors';
 import styles from './SearchBox.module.less';
+import { SEARCH_CONSTANTS } from '@/shared/config/constants';
 
 const DEFAULT_SEARCH_SCOPE: SearchScopeField[] = ['title', 'hostname', 'url'];
-const SEARCH_DEBOUNCE_MS = 180;
 const SEARCH_TRENDING_PLATFORMS = ['weibo', 'baidu', 'toutiao'];
 
 type PinyinMatchFn = (text: string, query: string) => boolean;
@@ -517,7 +517,7 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
     if (!open) return;
     const timer = window.setTimeout(() => {
       setDebouncedQuery(normalizedQuery);
-    }, SEARCH_DEBOUNCE_MS);
+    }, SEARCH_CONSTANTS.DEBOUNCE_MS);
     return () => {
       window.clearTimeout(timer);
     };

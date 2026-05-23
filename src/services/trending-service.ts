@@ -10,18 +10,13 @@
 import { storageGet, storageSet } from '@/chrome';
 import type { HotBoardData, TrendingCache, TrendingCategory, TrendingItem } from '@/shared/types';
 import { STORAGE_KEYS } from '@/shared/config/storage-keys';
+import { TRENDING_CONSTANTS } from '@/shared/config/constants';
 
 /** 存储 key */
 const CACHE_KEY = STORAGE_KEYS.trendingCache;
 
 /** API 基础地址 */
 const API_BASE = 'https://api.xcvts.cn/api/hotlist';
-
-/** 请求超时（毫秒） */
-const FETCH_TIMEOUT_MS = 8000;
-
-/** 单个平台最多返回的条目数 */
-const MAX_ITEMS_PER_BOARD = 20;
 
 // ── 平台配置 ──────────────────────────────────────────
 
@@ -158,7 +153,7 @@ async function fetchFromXcvts(platformId: string): Promise<HotBoardData | null> 
 
   try {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+    const timer = setTimeout(() => controller.abort(), TRENDING_CONSTANTS.FETCH_TIMEOUT_MS);
 
     const resp = await fetch(`${API_BASE}?type=${encodeURIComponent(platformId)}`, {
       signal: controller.signal,
@@ -181,7 +176,7 @@ async function fetchFromXcvts(platformId: string): Promise<HotBoardData | null> 
     if (json.data.length === 0) return null;
 
     const items = json.data
-      .slice(0, MAX_ITEMS_PER_BOARD)
+      .slice(0, TRENDING_CONSTANTS.MAX_ITEMS_PER_BOARD)
       .map(normalizeItem)
       .filter((item) => item.title !== '');
 

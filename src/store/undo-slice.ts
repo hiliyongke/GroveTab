@@ -24,10 +24,9 @@ import { useSettingsStore } from './settings-slice';
 import { filterSafeExternalUrls } from '@/shared/utils/url-safety';
 import { BRAND } from '@/shared/config/brand';
 import { STORAGE_KEYS } from '@/shared/config/storage-keys';
+import { UNDO_CONSTANTS } from '@/shared/config/constants';
 
 const UNDO_STORAGE_KEY = STORAGE_KEYS.undo;
-const DEFAULT_UNDO_TTL_MS = 5_000;
-const MAX_UNDO_RECORDS = 5;
 
 /**
  * 获取撤销 Toast 的 TTL（毫秒）
@@ -40,12 +39,12 @@ const MAX_UNDO_RECORDS = 5;
  */
 function getUndoTtlMs(): number {
   const seconds = useSettingsStore.getState().settings.undoWindowSeconds;
-  if (typeof seconds !== 'number' || !Number.isFinite(seconds)) return DEFAULT_UNDO_TTL_MS;
+  if (typeof seconds !== 'number' || !Number.isFinite(seconds)) return UNDO_CONSTANTS.TTL_MS;
   return Math.min(10, Math.max(3, seconds)) * 1_000;
 }
 
 interface UndoState {
-  /** 撤销记录列表（最多保留 MAX_UNDO_RECORDS 条） */
+  /** 撤销记录列表（最多保留 UNDO_CONSTANTS.MAX_RECORDS 条） */
   records: UndoRecord[];
   /** 当前活跃的撤销记录（用于 Toast 展示，TTL 后自动清除） */
   activeToast: UndoRecord | null;
@@ -89,7 +88,7 @@ export const useUndoStore = create<UndoState>((set, get) => ({
       subNote: extra?.subNote,
     };
 
-    const records = [record, ...get().records].slice(0, MAX_UNDO_RECORDS);
+    const records = [record, ...get().records].slice(0, UNDO_CONSTANTS.MAX_RECORDS);
     // 关键：同步落 in-memory，再 fire-and-forget 持久化。
     //   历史 Bug：若 `await setData(...)` 因 chrome.storage.local 异常而 hang，
     //   上游 `closeSingleTab` / `closeMultipleTabs` 会被卡在 await，

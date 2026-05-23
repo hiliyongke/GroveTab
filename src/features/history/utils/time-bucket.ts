@@ -4,6 +4,8 @@
  * "时间分组"对应的展示顺序与标签 key
  */
 
+import { TIME_CONSTANTS } from '@/shared/config/constants';
+
 export type TimeBucketId = 'today' | 'yesterday' | 'thisWeek' | 'earlier';
 
 /** 时间分组的定义：id 与 i18n key */
@@ -22,8 +24,8 @@ export const TIME_GROUPS: Array<{ id: TimeBucketId; labelKey: string }> = [
 export function bucketize(ts: number): TimeBucketId {
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  const yesterdayStart = todayStart - 24 * 3600 * 1000;
-  const thisWeekStart = todayStart - 6 * 24 * 3600 * 1000;
+  const yesterdayStart = todayStart - TIME_CONSTANTS.MS_PER_DAY;
+  const thisWeekStart = todayStart - 6 * TIME_CONSTANTS.MS_PER_DAY;
   if (ts >= todayStart) return 'today';
   if (ts >= yesterdayStart) return 'yesterday';
   if (ts >= thisWeekStart) return 'thisWeek';
