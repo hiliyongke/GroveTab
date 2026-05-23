@@ -8,12 +8,12 @@
  *   - 容器高度用 `min(100vh - 240px, tabs * 36)`，短列表不撑开，长列表滚动
  */
 
-import { useMemo, useRef } from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { useTabsStore } from '@/store';
-import { TabItem } from './TabItem';
-import { CONFIG } from '@/shared/config';
-import styles from './CompactView.module.less';
+import { useMemo, useRef, useCallback } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { useTabsStore } from "@/store";
+import { TabItem } from "./TabItem";
+import { CONFIG } from "@/shared/config";
+import styles from "./CompactView.module.less";
 
 const ROW_HEIGHT = CONFIG.ui.rowHeight;
 /** 容器最大高度（留给 Header + Hero + pb 的空间） */
@@ -35,9 +35,25 @@ export function CompactView() {
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
   const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
 
+  /** 稳定跳转回调 —— 避免内联函数导致子组件重渲染 */
+  const handleJump = useCallback(
+    (id: number, wid: number) => {
+      void jumpToTab(id, wid);
+    },
+    [jumpToTab],
+  );
+
+  /** 稳定关闭回调 —— 避免内联函数导致子组件重渲染 */
+  const handleClose = useCallback(
+    (id: number) => {
+      void closeSingleTab(id);
+    },
+    [closeSingleTab],
+  );
+
   const sortedTabs = useMemo(
     () => [...tabs].sort((a, b) => b.lastAccessed - a.lastAccessed),
-    [tabs]
+    [tabs],
   );
 
   /** 当前视图内所有可见 tab ID 列表（供 Shift 范围选） */
@@ -62,12 +78,8 @@ export function CompactView() {
   const spacerStyle = { height: virtualizer.getTotalSize() };
 
   return (
-    <div
-      ref={parentRef}
-      className={styles['app-compact-view']}
-      style={containerStyle}
-    >
-      <div className={styles['app-compact-view-spacer']} style={spacerStyle}>
+    <div ref={parentRef} className={styles["app-compact-view"]} style={containerStyle}>
+      <div className={styles["app-compact-view-spacer"]} style={spacerStyle}>
         {virtualizer.getVirtualItems().map((virtualRow) => {
           const tab = sortedTabs[virtualRow.index];
           if (!tab) return null;
@@ -77,15 +89,11 @@ export function CompactView() {
           };
 
           return (
-            <div
-              key={tab.id}
-              className={styles['app-compact-view-item']}
-              style={itemStyle}
-            >
+            <div key={tab.id} className={styles["app-compact-view-item"]} style={itemStyle}>
               <TabItem
                 tab={tab}
-                onJump={(id, wid) => { void jumpToTab(id, wid); }}
-                onClose={(id) => { void closeSingleTab(id); }}
+                onJump={handleJump}
+                onClose={handleClose}
                 showHostname
                 selectable
                 visibleTabIds={visibleTabIds}
