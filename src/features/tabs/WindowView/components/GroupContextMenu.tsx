@@ -251,7 +251,7 @@ function GroupContextMenu({
             <ColorSwatch
               key={color}
               color={color}
-              groupColor={groupColor}
+              groupColor={groupColor as GroupColor | undefined}
               onClick={handleChangeColor}
             />
           ))}

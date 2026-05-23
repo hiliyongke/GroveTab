@@ -319,7 +319,7 @@ function GroupLabel({ groupId, groupTitle, groupColor, windowId, tabs, t }: Grou
             <ColorSwatch
               key={color}
               color={color}
-              groupColor={groupColor}
+              groupColor={groupColor as GroupColor | undefined}
               onClick={handleColorChange}
             />
           ))}

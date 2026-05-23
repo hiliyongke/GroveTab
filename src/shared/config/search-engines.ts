@@ -10,9 +10,11 @@
  * 所有数据源都不强制联网，国内环境默认 off / local 即可。
  */
 
-import type { SearchEngineId, SearchHistoryEntry, TrendingCache } from '@/shared/types';
-import type { CustomSearchEngine } from '@/shared/types/settings';
-import type { Locale } from '@/shared/i18n';
+import type { SearchEngineId, SearchHistoryEntry, TrendingCache } from "@/shared/types";
+import type { CustomSearchEngine } from "@/shared/types/settings";
+import type { Locale } from "@/shared/i18n";
+
+export type { SearchEngineId } from "@/shared/types";
 
 export interface SearchEngineOption {
   id: SearchEngineId;
@@ -28,35 +30,35 @@ export interface SearchEngineOption {
  */
 export const SEARCH_ENGINE_OPTIONS: SearchEngineOption[] = [
   {
-    id: 'bing',
-    label: 'Bing',
-    searchUrl: 'https://www.bing.com/search?q={query}',
-    iconUrl: 'https://www.bing.com/favicon.ico',
-    color: '#008373',
+    id: "bing",
+    label: "Bing",
+    searchUrl: "https://www.bing.com/search?q={query}",
+    iconUrl: "https://www.bing.com/favicon.ico",
+    color: "#008373",
     builtIn: true,
   },
   {
-    id: 'baidu',
-    label: '百度',
-    searchUrl: 'https://www.baidu.com/s?wd={query}',
-    iconUrl: 'https://www.baidu.com/favicon.ico',
-    color: '#315efb',
+    id: "baidu",
+    label: "百度",
+    searchUrl: "https://www.baidu.com/s?wd={query}",
+    iconUrl: "https://www.baidu.com/favicon.ico",
+    color: "#315efb",
     builtIn: true,
   },
   {
-    id: 'google',
-    label: 'Google',
-    searchUrl: 'https://www.google.com/search?q={query}',
-    iconUrl: 'https://www.google.com/favicon.ico',
-    color: '#4285f4',
+    id: "google",
+    label: "Google",
+    searchUrl: "https://www.google.com/search?q={query}",
+    iconUrl: "https://www.google.com/favicon.ico",
+    color: "#4285f4",
     builtIn: true,
   },
   {
-    id: 'duckduckgo',
-    label: 'DuckDuckGo',
-    searchUrl: 'https://duckduckgo.com/?q={query}',
-    iconUrl: 'https://duckduckgo.com/favicon.ico',
-    color: '#de5833',
+    id: "duckduckgo",
+    label: "DuckDuckGo",
+    searchUrl: "https://duckduckgo.com/?q={query}",
+    iconUrl: "https://duckduckgo.com/favicon.ico",
+    color: "#de5833",
     builtIn: true,
   },
 ];
@@ -64,42 +66,42 @@ export const SEARCH_ENGINE_OPTIONS: SearchEngineOption[] = [
 /**
  * 热词来源联合类型，需与 UserSettings.hotSuggestionSource 对齐。
  */
-export type HotKeywordSource = 'off' | 'local' | 'preset' | 'trending';
+export type HotKeywordSource = "off" | "local" | "preset" | "trending";
 
 /**
  * 预设热词表（显式选择 preset 时展示）。
  * 这些是"静态兜底"，不代表当下热榜；默认 local 不再自动退回预设，避免给用户"这是固定写死"的错觉。
  */
 const PRESET_HOT_KEYWORDS: Record<Locale, string[]> = {
-  'zh-CN': [
-    'AI 工具',
-    'React 19',
-    'TypeScript 6',
-    'Chrome 插件',
-    '效率工具',
-    '前端性能优化',
-    '产品设计灵感',
-    '网页可访问性',
-    'Vite 最佳实践',
-    'Figma 组件库',
+  "zh-CN": [
+    "AI 工具",
+    "React 19",
+    "TypeScript 6",
+    "Chrome 插件",
+    "效率工具",
+    "前端性能优化",
+    "产品设计灵感",
+    "网页可访问性",
+    "Vite 最佳实践",
+    "Figma 组件库",
   ],
   en: [
-    'AI tools',
-    'React 19',
-    'TypeScript 6',
-    'Chrome extension',
-    'productivity tools',
-    'frontend performance',
-    'design inspiration',
-    'web accessibility',
-    'Vite best practices',
-    'component library',
+    "AI tools",
+    "React 19",
+    "TypeScript 6",
+    "Chrome extension",
+    "productivity tools",
+    "frontend performance",
+    "design inspiration",
+    "web accessibility",
+    "Vite best practices",
+    "component library",
   ],
 };
 
 /** 最多返回热词个数 */
 const MAX_HOT_ITEMS = 8;
-const TRENDING_BOARD_PRIORITY = ['weibo', 'baidu', 'toutiao', 'zhihu', 'bilihot'];
+const TRENDING_BOARD_PRIORITY = ["weibo", "baidu", "toutiao", "zhihu", "bilihot"];
 
 /**
  * 标准化搜索引擎 URL
@@ -113,9 +115,11 @@ const TRENDING_BOARD_PRIORITY = ['weibo', 'baidu', 'toutiao', 'zhihu', 'bilihot'
  */
 export function normalizeSearchUrl(url: string): string {
   const trimmed = url.trim();
-  if (trimmed === '') return '';
+  if (trimmed === "") return "";
   const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
-  return withProtocol.includes('{query}') ? withProtocol : `${withProtocol}${withProtocol.includes('?') ? '&' : '?'}q={query}`;
+  return withProtocol.includes("{query}")
+    ? withProtocol
+    : `${withProtocol}${withProtocol.includes("?") ? "&" : "?"}q={query}`;
 }
 
 /**
@@ -129,21 +133,25 @@ export function normalizeSearchUrl(url: string): string {
  * @param iconUrl - 可选的品牌图标 URL
  * @returns 自定义搜索引擎配置对象
  */
-export function createCustomSearchEngine(label: string, searchUrl: string, iconUrl?: string): CustomSearchEngine {
+export function createCustomSearchEngine(
+  label: string,
+  searchUrl: string,
+  iconUrl?: string,
+): CustomSearchEngine {
   const normalizedLabel = label.trim();
   const normalizedUrl = normalizeSearchUrl(searchUrl);
   const normalizedSlug = normalizedLabel
     .toLowerCase()
-    .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-  const slug = normalizedSlug === '' ? 'engine' : normalizedSlug;
+    .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  const slug = normalizedSlug === "" ? "engine" : normalizedSlug;
   const normalizedIconUrl = iconUrl?.trim();
   return {
     id: `custom:${slug}-${Date.now()}`,
     label: normalizedLabel,
     searchUrl: normalizedUrl,
-    iconUrl: normalizedIconUrl === '' ? undefined : normalizedIconUrl,
-    color: '#64748b',
+    iconUrl: normalizedIconUrl === "" ? undefined : normalizedIconUrl,
+    color: "#64748b",
   };
 }
 
@@ -156,15 +164,17 @@ export function createCustomSearchEngine(label: string, searchUrl: string, iconU
  * @param customEngines - 用户自定义搜索引擎数组
  * @returns 所有搜索引擎选项列表
  */
-export function getAllSearchEngineOptions(customEngines: CustomSearchEngine[] = []): SearchEngineOption[] {
+export function getAllSearchEngineOptions(
+  customEngines: CustomSearchEngine[] = [],
+): SearchEngineOption[] {
   const customOptions = customEngines
-    .filter((item) => item.label.trim() !== '' && item.searchUrl.trim() !== '')
+    .filter((item) => item.label.trim() !== "" && item.searchUrl.trim() !== "")
     .map<SearchEngineOption>((item) => ({
       id: item.id,
       label: item.label,
       searchUrl: normalizeSearchUrl(item.searchUrl),
       iconUrl: item.iconUrl,
-      color: item.color ?? '#64748b',
+      color: item.color ?? "#64748b",
       builtIn: false,
     }));
   return [...SEARCH_ENGINE_OPTIONS, ...customOptions];
@@ -232,7 +242,10 @@ export function getSearchEngineOption(
   engineId: SearchEngineId,
   customEngines: CustomSearchEngine[] = [],
 ): SearchEngineOption {
-  return getAllSearchEngineOptions(customEngines).find((item) => item.id === engineId) ?? SEARCH_ENGINE_OPTIONS[0]!;
+  return (
+    getAllSearchEngineOptions(customEngines).find((item) => item.id === engineId) ??
+    SEARCH_ENGINE_OPTIONS[0]!
+  );
 }
 
 /**
@@ -246,8 +259,15 @@ export function getSearchEngineOption(
  * @param customEngines - 用户自定义搜索引擎数组
  * @returns 完整的搜索 URL
  */
-export function buildSearchUrl(engineId: SearchEngineId, query: string, customEngines: CustomSearchEngine[] = []): string {
-  return getSearchEngineOption(engineId, customEngines).searchUrl.replace('{query}', encodeURIComponent(query.trim()));
+export function buildSearchUrl(
+  engineId: SearchEngineId,
+  query: string,
+  customEngines: CustomSearchEngine[] = [],
+): string {
+  return getSearchEngineOption(engineId, customEngines).searchUrl.replace(
+    "{query}",
+    encodeURIComponent(query.trim()),
+  );
 }
 
 /**
@@ -273,7 +293,7 @@ export function resolveTrendingKeywords(cache: TrendingCache | undefined): strin
     board.items.forEach((item) => {
       const title = item.title.trim();
       const key = title.toLowerCase();
-      if (title === '' || seen.has(key)) return;
+      if (title === "" || seen.has(key)) return;
       seen.add(key);
       keywords.push(title);
     });
@@ -301,9 +321,9 @@ export function resolveHotKeywords(
   history: SearchHistoryEntry[] = [],
   trendingCache?: TrendingCache,
 ): string[] {
-  if (source === 'off') return [];
-  if (source === 'trending') return resolveTrendingKeywords(trendingCache);
-  if (source === 'local') {
+  if (source === "off") return [];
+  if (source === "trending") return resolveTrendingKeywords(trendingCache);
+  if (source === "local") {
     if (history.length === 0) return [];
     return rankHistoryAsHot(history);
   }
