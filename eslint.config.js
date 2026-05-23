@@ -4,6 +4,8 @@ import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import jsdoc from 'eslint-plugin-jsdoc';
+import react from 'eslint-plugin-react';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
 
 export default tseslint.config(
   { ignores: ['dist', '.planning', 'node_modules', '*.d.ts', 'tests', 'build/', '.husky/'] },
@@ -30,6 +32,8 @@ export default tseslint.config(
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
       jsdoc: jsdoc,
+      'react': react,
+      'jsx-a11y': jsxA11y,
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
@@ -77,6 +81,20 @@ export default tseslint.config(
         contexts: ['!FunctionExpression[parent.init.type="FunctionExpression"]', '!ArrowFunctionExpression[parent.init.type="ArrowFunctionExpression"]'],
         exemptedBy: ['returns', 'type', 'class'],
       }],
+
+      /* React 性能优化规则 */
+      'react/jsx-key': 'error',
+      'react/jsx-no-useless-fragment': 'warn',
+      'react/no-array-index-key': 'warn',
+      'react/no-children-prop': 'warn',
+      'react/no-danger': 'warn',
+      'react/no-set-state': 'off', // Zustand 使用 setState
+
+      /* 无障碍访问规则 */
+      'jsx-a11y/alt-text': 'warn',
+      'jsx-a11y/anchor-is-valid': 'warn',
+      'jsx-a11y/click-events-have-key-events': 'warn',
+      'jsx-a11y/no-static-element-interactions': 'warn',
     },
   },
   // 例外文件：类型声明文件不需要 JSDoc 注释
