@@ -1,7 +1,7 @@
-import { discardTab as chromeDiscardTab, getFaviconUrl } from '@/chrome';
-import { extractHostname, isSelfNewTabPage, shouldDisplayUrl } from '@/chrome';
-import type { ClosedTabSnapshot, LiveTab, WindowInfo } from '@/shared/types';
-import type { ChromeTabGroup } from '@/chrome';
+import { discardTab as chromeDiscardTab, getFaviconUrl } from "@/chrome";
+import { extractHostname, isSelfNewTabPage, shouldDisplayUrl } from "@/chrome";
+import type { ClosedTabSnapshot, LiveTab, WindowInfo } from "@/shared/types";
+import type { ChromeTabGroup } from "@/chrome";
 
 /**
  * 标签服务
@@ -33,12 +33,12 @@ export interface DiscardBatchResult {
 export function toLiveTab(tab: chrome.tabs.Tab, currentWindowId: number): LiveTab | null {
   if (tab.id == null) return null;
 
-  const url = tab.url ?? tab.pendingUrl ?? '';
+  const url = tab.url ?? tab.pendingUrl ?? "";
   if (isSelfNewTabPage(tab)) return null;
   if (!shouldDisplayUrl(url)) return null;
 
   const extensionFavicon = getFaviconUrl(url);
-  const favIconUrl = extensionFavicon !== '' ? extensionFavicon : (tab.favIconUrl ?? '');
+  const favIconUrl = extensionFavicon !== "" ? extensionFavicon : (tab.favIconUrl ?? "");
 
   return {
     id: tab.id,
@@ -108,7 +108,10 @@ export function toClosedTabSnapshot(tab: LiveTab): ClosedTabSnapshot {
  * @param allTabs - 所有标签的 Chrome 标签对象数组
  * @returns 窗口 ID → WindowInfo 的映射表
  */
-export function buildWindowMap(allWindows: chrome.windows.Window[], allTabs: chrome.tabs.Tab[]): Map<number, WindowInfo> {
+export function buildWindowMap(
+  allWindows: chrome.windows.Window[],
+  allTabs: chrome.tabs.Tab[],
+): Map<number, WindowInfo> {
   const tabsCountByWindowId = new Map<number, number>();
 
   for (const tab of allTabs) {
@@ -122,7 +125,7 @@ export function buildWindowMap(allWindows: chrome.windows.Window[], allTabs: chr
     windowMap.set(win.id, {
       id: win.id,
       focused: win.focused,
-      type: win.type ?? 'normal',
+      type: win.type ?? "normal",
       incognito: win.incognito,
       tabsCount: tabsCountByWindowId.get(win.id) ?? 0,
     });
@@ -141,10 +144,12 @@ export function buildWindowMap(allWindows: chrome.windows.Window[], allTabs: chr
  * @param discarded - 新的丢弃状态
  * @returns 更新后的标签列表（新数组）
  */
-export function patchTabDiscardedState(tabs: LiveTab[], tabId: number, discarded: boolean): LiveTab[] {
-  return tabs.map((tab) => (
-    tab.id === tabId ? { ...tab, discarded } : tab
-  ));
+export function patchTabDiscardedState(
+  tabs: LiveTab[],
+  tabId: number,
+  discarded: boolean,
+): LiveTab[] {
+  return tabs.map((tab) => (tab.id === tabId ? { ...tab, discarded } : tab));
 }
 
 /**
@@ -183,7 +188,7 @@ export async function discardTabsBatch(tabIds: number[]): Promise<DiscardBatchRe
     const tabId = tabIds[index];
     if (tabId === undefined) return;
 
-    if (result.status === 'fulfilled') {
+    if (result.status === "fulfilled") {
       succeededIds.push(tabId);
       return;
     }
@@ -192,4 +197,36 @@ export async function discardTabsBatch(tabIds: number[]): Promise<DiscardBatchRe
   });
 
   return { succeededIds, failedIds };
+}
+
+/**
+ * 关闭前确认（超过阈值时弹出确认对话框）
+ *
+ * @param count - 要关闭的 tab 数量
+ * @param threshold - 关闭确认阈值（tab 数量），超过此值会弹出确认对话框
+ * @param titleKey - 标题翻译键
+ * @param contentKey - 内容翻译键
+ * @param contentValues - 内容翻译变量
+ * @returns 是否确认关闭
+ */
+export async function confirmBeforeClose(
+  count: number,
+  threshold: number,
+  titleKey: string,
+  contentKey: string,
+  contentValues: Record<string, string | number>,
+): Promise<boolean> {
+  if (count <= threshold) return true;
+
+  const { feedback } = await import("@/shared/ui/feedback");
+  const { translate } = await import("@/shared/i18n/core");
+
+  return new Promise<boolean>((resolve) => {
+    feedback.modal.confirm({
+      title: translate(titleKey),
+      content: translate(contentKey, contentValues),
+      onOk: () => resolve(true),
+      onCancel: () => resolve(false),
+    });
+  });
 }

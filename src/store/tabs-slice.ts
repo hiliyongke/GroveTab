@@ -25,27 +25,38 @@
  *     修复 "chrome 端已改变但 UI 未同步" 的幽灵态
  */
 
-import { create } from 'zustand';
-import type { LiveTab, SwBroadcastMessage, WindowInfo } from '@/shared/types';
-import { queryAllTabs, getAllWindows, getCurrentWindow, activateTab, closeTab, closeTabs, getFaviconUrl, queryTabGroups } from '@/chrome';
-import { extractHostname, shouldDisplayUrl, isSelfNewTabPage } from '@/chrome';
-import { feedback } from '@/shared/ui/feedback';
-import { translate } from '@/shared/i18n/core';
-import { swBroadcast } from '@/shared/utils/sw-broadcast';
-import { track } from '@/shared/utils/metrics';
+import { create } from "zustand";
+import type { LiveTab, SwBroadcastMessage, WindowInfo } from "@/shared/types";
+import {
+  queryAllTabs,
+  getAllWindows,
+  getCurrentWindow,
+  activateTab,
+  closeTab,
+  closeTabs,
+  getFaviconUrl,
+  queryTabGroups,
+} from "@/chrome";
+import { extractHostname, shouldDisplayUrl, isSelfNewTabPage } from "@/chrome";
+import { feedback } from "@/shared/ui/feedback";
+import { translate } from "@/shared/i18n/core";
+import { swBroadcast } from "@/shared/utils/sw-broadcast";
+import { track } from "@/shared/utils/metrics";
 import {
   buildTabGroupMap,
   buildWindowMap,
+  confirmBeforeClose,
   discardTabsBatch,
   patchTabDiscardedState,
   toClosedTabSnapshot,
   toLiveTab,
   withTabGroupInfo,
-} from '@/features/tabs/services/tabs-service';
-import { useUndoStore } from './undo-slice';
-import { useSelectionStore } from './selection-slice';
-import { useSettingsStore } from './settings-slice';
-import { BRAND } from '@/shared/config/brand';
+} from "@/features/tabs/services/tabs-service";
+import { useUndoStore } from "./undo-slice";
+import { useSelectionStore } from "./selection-slice";
+import { useSettingsStore } from "./settings-slice";
+import { BRAND } from "@/shared/config/brand";
+import { TABS_CONSTANTS } from "@/shared/config/constants";
 
 interface TabsState {
   /** 所有实时标签页列表（已过滤，用于展示） */
@@ -98,7 +109,9 @@ interface TabsState {
  */
 function getCloseConfirmThreshold(): number {
   const value = useSettingsStore.getState().settings.closeConfirmThreshold;
-  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : 20;
+  return typeof value === "number" && Number.isFinite(value) && value > 0
+    ? value
+    : TABS_CONSTANTS.DEFAULT_CLOSE_CONFIRM_THRESHOLD;
 }
 
 /**
@@ -110,7 +123,7 @@ function getCloseConfirmThreshold(): number {
  * @returns 表示"无窗口"的 ID 值
  */
 function getWindowIdNone(): number {
-  return typeof chrome !== 'undefined' && chrome.windows !== undefined
+  return typeof chrome !== "undefined" && chrome.windows !== undefined
     ? chrome.windows.WINDOW_ID_NONE
     : -1;
 }
@@ -124,7 +137,7 @@ function getWindowIdNone(): number {
  * @returns 初始窗口 ID（扩展环境为 WINDOW_ID_CURRENT，否则为 -1）
  */
 function getInitialCurrentWindowId(): number {
-  return typeof chrome !== 'undefined' && chrome.windows !== undefined
+  return typeof chrome !== "undefined" && chrome.windows !== undefined
     ? chrome.windows.WINDOW_ID_CURRENT
     : -1;
 }
@@ -173,7 +186,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       });
     } catch (err) {
       if (!silent) {
-        feedback.error(translate('tabs.loadFailed'), err);
+        feedback.error(translate("tabs.loadFailed"), err);
       } else {
         console.warn(`${BRAND.logTag} silent refresh failed`, err);
       }
@@ -185,69 +198,69 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     const { tabs } = get();
 
     switch (message.type) {
-      case 'tab-created': {
+      case "tab-created": {
         // broadcast 驱动的刷新必须静默：否则每次新开 tab，主视图就闪一次全屏 Spin
         void get().loadAllTabs({ silent: true });
         break;
       }
-      case 'tab-updated': {
+      case "tab-updated": {
         const { id, url, title, favIconUrl } = message.payload;
         set({
           tabs: tabs.flatMap((t) => {
             if (t.id !== id) return [t];
-            const incomingUrl = typeof url === 'string' ? url : t.url;
-            if (typeof url === 'string' && (isSelfNewTabPage({ url }) || !shouldDisplayUrl(url))) {
+            const incomingUrl = typeof url === "string" ? url : t.url;
+            if (typeof url === "string" && (isSelfNewTabPage({ url }) || !shouldDisplayUrl(url))) {
               useSelectionStore.getState().removeIds([t.id]);
               return [];
             }
             // 同步沿用 tabToLiveTab 的策略：若有 URL 就走扩展同源 favicon，
             // 避免 sw 广播把远程 favIconUrl 写回 store 导致 `<img>` 跨域报错。
-            const extensionFavicon = incomingUrl !== '' ? getFaviconUrl(incomingUrl) : '';
-            const incomingTitle = typeof title === 'string' && title !== '' ? title : t.title;
-            const incomingFavicon = typeof favIconUrl === 'string' ? favIconUrl : t.favIconUrl;
-            return [{
-              ...t,
-              url: incomingUrl,
-              title: incomingTitle,
-              favIconUrl: extensionFavicon !== '' ? extensionFavicon : incomingFavicon,
-              hostname: typeof url === 'string' && url !== '' ? extractHostname(url) : t.hostname,
-            }];
+            const extensionFavicon = incomingUrl !== "" ? getFaviconUrl(incomingUrl) : "";
+            const incomingTitle = typeof title === "string" && title !== "" ? title : t.title;
+            const incomingFavicon = typeof favIconUrl === "string" ? favIconUrl : t.favIconUrl;
+            return [
+              {
+                ...t,
+                url: incomingUrl,
+                title: incomingTitle,
+                favIconUrl: extensionFavicon !== "" ? extensionFavicon : incomingFavicon,
+                hostname: typeof url === "string" && url !== "" ? extractHostname(url) : t.hostname,
+              },
+            ];
           }),
         });
         break;
       }
-      case 'tab-removed': {
+      case "tab-removed": {
         const { id } = message.payload;
-        if (typeof id === 'number') {
+        if (typeof id === "number") {
           useSelectionStore.getState().removeIds([id]);
         }
         set({ tabs: tabs.filter((t) => t.id !== id) });
         break;
       }
-      case 'tab-activated': {
+      case "tab-activated": {
         const { id } = message.payload;
         set({
-          tabs: tabs.map((t) =>
-            t.id === id ? { ...t, lastAccessed: Date.now() } : t,
-          ),
+          tabs: tabs.map((t) => (t.id === id ? { ...t, lastAccessed: Date.now() } : t)),
         });
         break;
       }
-      case 'tab-moved': {
+      case "tab-moved": {
         // 同 tab-created：静默刷新，避免主视图闪 Spin
         void get().loadAllTabs({ silent: true });
         break;
       }
-      case 'tab-discarded': {
+      case "tab-discarded": {
         const { id, discarded } = message.payload;
-        if (typeof id === 'number' && typeof discarded === 'boolean') {
+        if (typeof id === "number" && typeof discarded === "boolean") {
           set({ tabs: patchTabDiscardedState(tabs, id, discarded) });
         }
         break;
       }
-      case 'window-focus-changed': {
+      case "window-focus-changed": {
         const { windowId } = message.payload;
-        if (typeof windowId === 'number' && windowId !== getWindowIdNone()) {
+        if (typeof windowId === "number" && windowId !== getWindowIdNone()) {
           set({
             currentWindowId: windowId,
             tabs: tabs.map((t) => ({
@@ -264,10 +277,10 @@ export const useTabsStore = create<TabsState>((set, get) => ({
   jumpToTab: async (tabId, windowId) => {
     try {
       await activateTab(tabId, windowId);
-      void track('tab_jump', { tabId, windowId, otherWindow: windowId !== get().currentWindowId });
+      void track("tab_jump", { tabId, windowId, otherWindow: windowId !== get().currentWindowId });
     } catch (err) {
       // 常见失败：目标 tab 已被用户关闭、窗口已 minimize 等——给出明确反馈
-      feedback.error(translate('tabs.jumpFailed'), err);
+      feedback.error(translate("tabs.jumpFailed"), err);
       set({ error: String(err) });
       // 兜底刷新，清掉 UI 里已经不存在的 tab
       void get().loadAllTabs({ silent: true });
@@ -301,10 +314,10 @@ export const useTabsStore = create<TabsState>((set, get) => ({
           console.warn(`${BRAND.logTag} addRecord failed, undo will be unavailable`, err);
         });
       await closeTab(tabId);
-      void track('tab_close', { title: tab.title, hostname: tab.hostname });
+      void track("tab_close", { title: tab.title, hostname: tab.hostname });
       // 关闭成功后不强制刷新——SW broadcast 的 tab-removed 会驱动 UI 移除
     } catch (err) {
-      feedback.error(translate('tabs.closeFailed'), err);
+      feedback.error(translate("tabs.closeFailed"), err);
       set({ error: String(err) });
       // 兜底：可能真关掉了但 broadcast 丢失，silent 刷新同步 UI
       void get().loadAllTabs({ silent: true });
@@ -334,13 +347,13 @@ export const useTabsStore = create<TabsState>((set, get) => ({
           console.warn(`${BRAND.logTag} addRecord failed, undo will be unavailable`, err);
         });
       await closeTabs(tabIds);
-      void track('tab_close_batch', { count: targets.length });
+      void track("tab_close_batch", { count: targets.length });
     } catch (err) {
       // 同时落入 store error 和 feedback：
       //   - feedback 让用户立即看到结果
       //   - set error 让未来的错误面板/重试 UI 可消费
       //   - throw 让直接调用方（DedupInfoBar 合并按钮等）能感知失败并切回非 loading
-      feedback.error(translate('tabs.closeFailed'), err);
+      feedback.error(translate("tabs.closeFailed"), err);
       set({ error: String(err) });
       void get().loadAllTabs({ silent: true });
       throw err;
@@ -357,22 +370,19 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     if (nonPinned.length === 0) return;
 
     /**
-     * 批量关闭安全阈值：超过 20 个 tab 时弹出确认对话框
+     * 批量关闭安全阈值：超过阈值时弹出确认对话框
      *
-     * 使用 antd Modal.confirm 让用户二次确认，避免误操作。
+     * 使用公共函数 confirmBeforeClose 让用户二次确认，避免误操作。
      * 确认后才执行关闭；取消则静默返回。
      */
-    if (nonPinned.length > getCloseConfirmThreshold()) {
-      const confirmed = await new Promise<boolean>((resolve) => {
-        feedback.modal.confirm({
-          title: translate('tabs.closeConfirmTitle'),
-          content: translate('tabs.closeDomainConfirmContent', { domain, count: nonPinned.length }),
-          onOk: () => resolve(true),
-          onCancel: () => resolve(false),
-        });
-      });
-      if (!confirmed) return;
-    }
+    const confirmed = await confirmBeforeClose(
+      nonPinned.length,
+      getCloseConfirmThreshold(),
+      "tabs.closeConfirmTitle",
+      "tabs.closeDomainConfirmContent",
+      { domain, count: nonPinned.length },
+    );
+    if (!confirmed) return;
 
     try {
       const snapshots = nonPinned.map(toClosedTabSnapshot);
@@ -384,10 +394,10 @@ export const useTabsStore = create<TabsState>((set, get) => ({
         });
       await closeTabs(nonPinned.map((t) => t.id));
       // 批量操作给出成功反馈，让用户明确感知"点了就有结果"
-      feedback.success(translate('tabs.closedCount', { count: nonPinned.length }));
-      void track('tab_close_domain', { domain, count: nonPinned.length });
+      feedback.success(translate("tabs.closedCount", { count: nonPinned.length }));
+      void track("tab_close_domain", { domain, count: nonPinned.length });
     } catch (err) {
-      feedback.error(translate('tabs.closeGroupFailed'), err);
+      feedback.error(translate("tabs.closeGroupFailed"), err);
       set({ error: String(err) });
       void get().loadAllTabs({ silent: true });
       throw err;
@@ -400,22 +410,19 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     if (nonPinned.length === 0) return;
 
     /**
-     * 批量关闭安全阈值：超过 20 个 tab 时弹出确认对话框
+     * 批量关闭安全阈值：超过阈值时弹出确认对话框
      *
-     * 使用 antd Modal.confirm 让用户二次确认，避免误操作。
+     * 使用公共函数 confirmBeforeClose 让用户二次确认，避免误操作。
      * 确认后才执行关闭；取消则静默返回。
      */
-    if (nonPinned.length > getCloseConfirmThreshold()) {
-      const confirmed = await new Promise<boolean>((resolve) => {
-        feedback.modal.confirm({
-          title: translate('tabs.closeConfirmTitle'),
-          content: translate('tabs.closeConfirmContent', { count: nonPinned.length }),
-          onOk: () => resolve(true),
-          onCancel: () => resolve(false),
-        });
-      });
-      if (!confirmed) return;
-    }
+    const confirmed = await confirmBeforeClose(
+      nonPinned.length,
+      getCloseConfirmThreshold(),
+      "tabs.closeConfirmTitle",
+      "tabs.closeConfirmContent",
+      { count: nonPinned.length },
+    );
+    if (!confirmed) return;
 
     try {
       const snapshots = nonPinned.map(toClosedTabSnapshot);
@@ -426,10 +433,10 @@ export const useTabsStore = create<TabsState>((set, get) => ({
           console.warn(`${BRAND.logTag} addRecord failed, undo will be unavailable`, err);
         });
       await closeTabs(nonPinned.map((t) => t.id));
-      feedback.success(translate('tabs.closedCount', { count: nonPinned.length }));
-      void track('tab_close_all', { count: nonPinned.length });
+      feedback.success(translate("tabs.closedCount", { count: nonPinned.length }));
+      void track("tab_close_all", { count: nonPinned.length });
     } catch (err) {
-      feedback.error(translate('tabs.closeFailed'), err);
+      feedback.error(translate("tabs.closeFailed"), err);
       set({ error: String(err) });
       void get().loadAllTabs({ silent: true });
       throw err;
@@ -440,15 +447,15 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     const { succeededIds } = await discardTabsBatch([tabId]);
     if (succeededIds.length === 0) {
       const err = new Error(`Discard failed for tab ${tabId}`);
-      feedback.error(translate('tabs.discardFailed'), err);
+      feedback.error(translate("tabs.discardFailed"), err);
       set({ error: String(err) });
       throw err;
     }
 
     set((state) => ({ tabs: patchTabDiscardedState(state.tabs, tabId, true) }));
-    feedback.success(translate('tabs.discarded'));
-    void track('tab_discard', { tabId });
-    swBroadcast('tab-discarded', { id: tabId, discarded: true });
+    feedback.success(translate("tabs.discarded"));
+    void track("tab_discard", { tabId });
+    swBroadcast("tab-discarded", { id: tabId, discarded: true });
   },
 
   discardMultipleTabs: async (tabIds) => {
@@ -456,59 +463,57 @@ export const useTabsStore = create<TabsState>((set, get) => ({
 
     const { succeededIds, failedIds } = await discardTabsBatch(tabIds);
     if (succeededIds.length === 0) {
-      const err = new Error('Discard failed for all selected tabs');
-      feedback.error(translate('tabs.discardFailed'), err);
+      const err = new Error("Discard failed for all selected tabs");
+      feedback.error(translate("tabs.discardFailed"), err);
       set({ error: String(err) });
       throw err;
     }
 
     const succeededSet = new Set(succeededIds);
     set((state) => ({
-      tabs: state.tabs.map((tab) => (
-        succeededSet.has(tab.id) ? { ...tab, discarded: true } : tab
-      )),
+      tabs: state.tabs.map((tab) => (succeededSet.has(tab.id) ? { ...tab, discarded: true } : tab)),
     }));
 
-    feedback.success(translate('tabs.discardedCount', { count: succeededIds.length }));
-    void track('tab_discard_batch', { count: succeededIds.length });
+    feedback.success(translate("tabs.discardedCount", { count: succeededIds.length }));
+    void track("tab_discard_batch", { count: succeededIds.length });
     if (failedIds.length > 0) {
-      feedback.warning(translate('tabs.discardPartial', { count: failedIds.length }));
+      feedback.warning(translate("tabs.discardPartial", { count: failedIds.length }));
     }
 
     for (const tabId of succeededIds) {
-      swBroadcast('tab-discarded', { id: tabId, discarded: true });
+      swBroadcast("tab-discarded", { id: tabId, discarded: true });
     }
   },
 
   discardDomainGroup: async (domain) => {
     const { tabs } = get();
-    const groupTabs = tabs.filter((tab) => tab.hostname === domain && !tab.pinned && !tab.discarded);
+    const groupTabs = tabs.filter(
+      (tab) => tab.hostname === domain && !tab.pinned && !tab.discarded,
+    );
     if (groupTabs.length === 0) return;
 
     const { succeededIds, failedIds } = await discardTabsBatch(groupTabs.map((tab) => tab.id));
     if (succeededIds.length === 0) {
       const err = new Error(`Discard failed for domain ${domain}`);
-      feedback.error(translate('tabs.discardFailed'), err);
+      feedback.error(translate("tabs.discardFailed"), err);
       set({ error: String(err) });
       throw err;
     }
 
     const succeededSet = new Set(succeededIds);
     set((state) => ({
-      tabs: state.tabs.map((tab) => (
-        succeededSet.has(tab.id) ? { ...tab, discarded: true } : tab
-      )),
+      tabs: state.tabs.map((tab) => (succeededSet.has(tab.id) ? { ...tab, discarded: true } : tab)),
     }));
 
-    feedback.success(translate('tabs.discardedGroup', { domain, count: succeededIds.length }));
-    void track('tab_discard_domain', { domain, count: succeededIds.length });
+    feedback.success(translate("tabs.discardedGroup", { domain, count: succeededIds.length }));
+    void track("tab_discard_domain", { domain, count: succeededIds.length });
     if (failedIds.length > 0) {
-      feedback.warning(translate('tabs.discardPartial', { count: failedIds.length }));
+      feedback.warning(translate("tabs.discardPartial", { count: failedIds.length }));
     }
 
     for (const tab of groupTabs) {
       if (succeededSet.has(tab.id)) {
-        swBroadcast('tab-discarded', { id: tab.id, discarded: true, windowId: tab.windowId });
+        swBroadcast("tab-discarded", { id: tab.id, discarded: true, windowId: tab.windowId });
       }
     }
   },
