@@ -29,6 +29,11 @@ interface StoredFile {
   savedAt: number;
 }
 
+/**
+ * 打开 IndexedDB 数据库
+ *
+ * @returns {Promise<IDBDatabase>} 返回打开的 IndexedDB 数据库实例
+ */
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
@@ -43,6 +48,12 @@ function openDB(): Promise<IDBDatabase> {
   });
 }
 
+/**
+ * 在 IndexedDB 事务中执行读写操作
+ * @param mode - 事务模式（只读/读写）
+ * @param fn - 操作回调
+ * @returns {Promise<T>} 返回事务操作的结果
+ */
 async function withStore<T>(
   mode: IDBTransactionMode,
   fn: (store: IDBObjectStore) => IDBRequest<T>,
@@ -58,7 +69,11 @@ async function withStore<T>(
   });
 }
 
-/** 保存文件，返回持久化 key。 */
+/**
+ * 保存文件，返回持久化 key。
+ * @param file - 待保存的视频文件
+ * @returns {Promise<string>} 返回持久化存储的 key
+ */
 export async function saveVideoFile(file: File): Promise<string> {
   const key = `v_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   const row: StoredFile = {
@@ -71,7 +86,11 @@ export async function saveVideoFile(file: File): Promise<string> {
   return key;
 }
 
-/** 读出文件的 Blob URL（内存态）。调用方不再使用时必须 URL.revokeObjectURL。 */
+/**
+ * 读出文件的 Blob URL（内存态）。调用方不再使用时必须 URL.revokeObjectURL。
+ * @param key - 文件持久化 key
+ * @returns {Promise<string | null>} 返回 Blob 的 URL 对象，未找到时返回 null
+ */
 export async function loadVideoBlobUrl(key: string): Promise<string | null> {
   const row = await withStore<StoredFile | undefined>(
     'readonly',
@@ -81,7 +100,11 @@ export async function loadVideoBlobUrl(key: string): Promise<string | null> {
   return URL.createObjectURL(row.blob);
 }
 
-/** 删除文件。 */
+/**
+ * 删除文件。
+ * @param key - 待删除文件的 key
+ * @returns {Promise<void>}
+ */
 export async function removeVideoFile(key: string): Promise<void> {
   await withStore('readwrite', (store) => store.delete(key));
 }

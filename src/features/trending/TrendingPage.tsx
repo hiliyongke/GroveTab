@@ -62,14 +62,30 @@ const STEALTH_OPTIONS: Array<{ value: StealthModeConfig['disguise']; labelKey: s
   { value: 'code', labelKey: 'trending.stealthCode', icon: <Code2 size={ICON_SIZE.DEFAULT} /> },
 ];
 
+/**
+ *
+ * @param {...any} classNames
+ * @returns {void} 无返回值
+ */
 function cx(...classNames: Array<string | false | undefined>) {
   return classNames.filter(Boolean).join(' ');
 }
 
+/**
+ *
+ * @param vars
+ * @returns {void} 无返回值
+ */
 function cssVars(vars: Record<string, string | undefined>): CSSProperties {
   return vars;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.disguise
+ * @returns {void} 无返回值
+ */
 function StealthDisguise({ disguise }: { disguise: StealthModeConfig['disguise'] }) {
   const content = useMemo(() => {
     switch (disguise) {
@@ -135,7 +151,7 @@ classNames={{ body: styles['trending-disguise-card__body'] }}
           {content.items.map((item, index) => (
             <div
               key={`${disguise}-${index}`}
-className={cx(styles['trending-disguise-row'], index < content.items.length - 1 && 'has-divider')}
+className={cx(styles['trending-disguise-row'], index < content.items.length - 1 && styles['has-divider'])}
             >
               {item.from && <span className={styles['trending-disguise-from']}>{item.from}</span>}
               <span className={styles['trending-disguise-subject']}>{item.subject}</span>
@@ -148,14 +164,27 @@ className={cx(styles['trending-disguise-row'], index < content.items.length - 1 
   );
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.rank
+ * @returns {void} 无返回值
+ */
 function RankBadge({ rank }: { rank: number }) {
   if (rank <= 3) {
-return <span className={cx(styles['trending-rank-badge'], 'is-top', styles[`is-rank-${rank}`])}>{rank}</span>;
+return <span className={cx(styles['trending-rank-badge'], styles['is-top'], styles[`is-rank-${rank}`])}>{rank}</span>;
   }
 
-return <span className={`${styles['trending-rank-badge']} is-plain`}>{rank}</span>;
+return <span className={`${styles['trending-rank-badge']} ${styles['is-plain']}`}>{rank}</span>;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.item
+ * @param root0.rank
+ * @returns {void} 无返回值
+ */
 function TrendingListItem({ item, rank }: { item: HotBoardData['items'][0]; rank: number }) {
   return (
     <Tooltip title={item.title} placement="topLeft" mouseEnterDelay={0.6}>
@@ -178,6 +207,15 @@ function TrendingListItem({ item, rank }: { item: HotBoardData['items'][0]; rank
   );
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.platformId
+ * @param root0.platformName
+ * @param root0.platformSubtitle
+ * @param root0.onRefresh
+ * @returns {void} 无返回值
+ */
 function HotBoardSkeletonCard({
   platformId,
   platformName,
@@ -214,8 +252,8 @@ function HotBoardSkeletonCard({
           <Button
             type="text"
             size="small"
-icon={<RefreshCw size={ICON_SIZE.SMALL} className={cx(styles['trending-refresh-icon'], refreshing && 'is-spinning')} />}
-            onClick={handleRefresh}
+icon={<RefreshCw size={ICON_SIZE.SMALL} className={cx(styles['trending-refresh-icon'], refreshing && styles['is-spinning'])} />}
+            onClick={() => { void handleRefresh(); }}
             disabled={refreshing}
           />
         </Tooltip>
@@ -230,7 +268,7 @@ icon={<RefreshCw size={ICON_SIZE.SMALL} className={cx(styles['trending-refresh-i
         ) : errored ? (
           <>
             <Text type="danger" className={styles['trending-board-card__placeholder-text']}>{t('trending.noData')}</Text>
-            <Button type="link" size="small" onClick={handleRefresh} className={styles['trending-board-card__retry-btn']}>
+            <Button type="link" size="small" onClick={() => { void handleRefresh(); }} className={styles['trending-board-card__retry-btn']}>
               {t('trending.refresh')}
             </Button>
           </>
@@ -245,12 +283,19 @@ icon={<RefreshCw size={ICON_SIZE.SMALL} className={cx(styles['trending-refresh-i
   );
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.board
+ * @param root0.onRefresh
+ * @returns {void} 无返回值
+ */
 function HotBoardCard({
   board,
   onRefresh,
 }: {
   board: HotBoardData;
-  onRefresh: (id: string) => void;
+  onRefresh: (id: string) => Promise<void>;
 }) {
   const { t } = useT();
   const [refreshing, setRefreshing] = useState(false);
@@ -275,7 +320,7 @@ function HotBoardCard({
             type="text"
             size="small"
 icon={<RefreshCw size={ICON_SIZE.SMALL} className={cx(styles['trending-refresh-icon'], refreshing && 'is-spinning')} />}
-            onClick={handleRefresh}
+            onClick={() => { void handleRefresh(); }}
             disabled={refreshing}
           />
         </Tooltip>
@@ -304,6 +349,9 @@ icon={<RefreshCw size={ICON_SIZE.SMALL} className={cx(styles['trending-refresh-i
   );
 }
 
+/**
+ *
+ */
 export function TrendingPage() {
   const { t } = useT();
   const [category, setCategory] = useState<TrendingCategory>('all');
@@ -374,7 +422,7 @@ export function TrendingPage() {
       [
         { value: 'default' as const, label: t('trending.groupDefault') },
         { value: 'compact' as const, label: t('trending.groupCompact') },
-      ] as any,
+      ] as Array<{ value: TrendingGroupMode; label: string }>,
     [t],
   );
 
@@ -391,7 +439,7 @@ export function TrendingPage() {
                 icon={option.icon}
                 aria-pressed={stealthMode.disguise === option.value}
                 onClick={() => setStealthMode((prev) => ({ ...prev, disguise: option.value }))}
-className={cx(styles['trending-stealth-toolbar__button'], stealthMode.disguise === option.value && 'is-active')}
+className={cx(styles['trending-stealth-toolbar__button'], stealthMode.disguise === option.value && styles['is-active'])}
               />
             ))}
             <Button
@@ -424,7 +472,7 @@ className={cx(styles['trending-stealth-toolbar__button'], stealthMode.disguise =
                 <Button
                   type="text"
                   size="small"
-icon={<RefreshCw size={ICON_SIZE.SMALL} className={cx(styles['trending-refresh-icon'], loading && 'is-spinning')} />}
+icon={<RefreshCw size={ICON_SIZE.SMALL} className={cx(styles['trending-refresh-icon'], loading && styles['is-spinning'])} />}
                   onClick={handleRefreshAll}
                   loading={loading}
                 />
@@ -483,7 +531,7 @@ className={`${styles['trending-toolbar-card__segment']} ${styles['trending-toolb
       ) : activePlatforms.length === 0 ? (
         <Empty description={t('trending.noPlatforms')} className={styles['trending-empty-state']} />
       ) : (
-<div className={cx(styles['trending-grid'], groupMode === 'compact' && 'is-compact')}>
+<div className={cx(styles['trending-grid'], groupMode === 'compact' && styles['is-compact'])}>
           {activePlatforms.map((platform) => {
             const board = boards[platform.id];
             if (!board) {
@@ -502,7 +550,7 @@ className={`${styles['trending-toolbar-card__segment']} ${styles['trending-toolb
               <HotBoardCard
                 key={platform.id}
                 board={board}
-                onRefresh={handleRefreshBoard}
+                onRefresh={async (id) => { await handleRefreshBoard(id); }}
               />
             );
           })}

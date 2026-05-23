@@ -15,7 +15,7 @@ import { Tag, Collapse, Empty } from 'antd';
 import { useTabsStore } from '@/store';
 import { TabItem } from './TabItem';
 import { useT } from '@/shared/i18n';
-import styles from './styles/views.module.less';
+import styles from './TabGroupView.module.less';
 
 /**
  * Chrome Tab Group 颜色映射到 antd Tag color
@@ -45,6 +45,16 @@ interface TabGroupData {
 
 /**
  * Chrome Tab Group 视图
+ *
+ * 一级按 Chrome 原生分组，二级按域名展示标签页。
+ * 未分组的标签归入"未分组"区域。
+ *
+ * 设计：
+ *   - 使用 antd Card + Collapse 展示分组
+ *   - 每个分组卡片显示组名（或颜色标记）、标签数量
+ *   - 支持将域名分组同步到 Chrome Tab Group
+ *
+ * @returns Chrome Tab Group 视图 JSX 元素
  */
 export function TabGroupView() {
   const tabs = useTabsStore((s) => s.tabs);

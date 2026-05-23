@@ -12,12 +12,14 @@
 
 import type { LiveTab } from '@/shared/types';
 
-/** 闲置等级 */
+/** 闲置等级：'idle'（超过阈值）| 'stale'（超过阈值 7 倍或 7 天） */
 type IdleLevel = 'idle' | 'stale';
 
 /** 闲置标签信息 */
 export interface IdleTabInfo {
+  /** 标签页对象 */
   tab: LiveTab;
+  /** 闲置等级 */
   level: IdleLevel;
   /** 最后访问距今的小时数 */
   hoursSinceAccess: number;
@@ -73,6 +75,9 @@ export function detectIdleTabs(tabs: LiveTab[], thresholdMinutes?: number): Idle
 
 /**
  * 格式化闲置时间为友好字符串
+ *
+ * @param hours 闲置小时数
+ * @returns 友好字符串（如 "3 小时"、"5 天"、"2 周"）
  */
 export function formatIdleTime(hours: number): string {
   if (hours < 48) return `${hours} 小时`;

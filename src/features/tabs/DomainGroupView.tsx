@@ -18,8 +18,11 @@ import styles from './styles/items.module.less';
 /**
  * 构造响应式 multi-column 布局样式
  *
+ * 根据配置返回固定列数或响应式列宽的 CSS 属性。
+ *
  * @param forcedColumns - 若用户在设置中显式指定列数（1–6），则强制使用该列数；
  *                        否则返回纯响应式配置（按 `column-width` 自适应）
+ * @returns 包含 CSS 自定义属性的样式对象
  */
 function getColumnVars(forcedColumns: number | null): React.CSSProperties {
   if (forcedColumns && forcedColumns >= 1 && forcedColumns <= 6) {
@@ -30,7 +33,15 @@ function getColumnVars(forcedColumns: number | null): React.CSSProperties {
 }
 
 /**
- * 域名分组视图
+ * 域名分组视图（默认视图）
+ *
+ * 设计：
+ *   - 完全响应式列数：`column-width: 320px` 让浏览器按容器宽度自动决定列数
+ *   - settings 里的 domainGroupColumns 仍作"是否固定列数"的可选 override
+ *   - 使用 CSS multi-column 实现伪瀑布流：高矮不一的分组自然错位排布
+ *   - 列间距 16px、卡片垂直间距 14px
+ *
+ * @returns 域名分组视图 JSX 元素
  */
 export function DomainGroupView() {
   const tabs = useTabsStore((s) => s.tabs);

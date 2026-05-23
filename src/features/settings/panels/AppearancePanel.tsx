@@ -25,6 +25,8 @@ import {
   Trash2,
 } from 'lucide-react';
 import { cssVars } from '@/shared/utils/css-vars';
+import { darkenHex, parseAlpha, hexToRgba } from '@/shared/utils/color';
+import { optimizeBackgroundImage } from '@/services/image-optimizer';
 
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
@@ -42,19 +44,41 @@ interface AppearancePanelProps {
   updateSettings: (patch: Partial<UserSettings>) => void | Promise<void>;
 }
 
-const MAX_BACKGROUND_IMAGE_SOURCE_BYTES = 20 * 1024 * 1024;
-const MAX_BACKGROUND_IMAGE_EDGE = 1920;
-const BACKGROUND_IMAGE_QUALITY = 0.84;
 const MAX_VIDEO_BACKGROUND_FILE_BYTES = 50 * 1024 * 1024;
 
+/**
+ * 皮肤模式标识徽章
+ *
+ * 根据模式显示太阳/月亮图标。
+ *
+ * @param props - 组件属性
+ * @param props.mode - 皮肤模式（'light' | 'dark'）
+ * @returns 皮肤模式标识徽章 JSX 元素
+ */
 function ModeBadge({ mode }: { mode: 'light' | 'dark' }) {
   return (
-    <span className={`appearance-mode-badge is-${mode}`}>
+    <span className={`${styles['appearance-mode-badge']} ${styles[`appearance-mode-badge--${mode}`]}`}>
       {mode === 'dark' ? <Moon size={ICON_SIZE.XS} /> : <Sun size={ICON_SIZE.XS} />}
     </span>
   );
 }
 
+/**
+ * 滑块设置字段
+ *
+ * 封装 antd Slider 组件，用于数值设置。
+ *
+ * @param props - 组件属性
+ * @param props.label - 字段标签
+ * @param props.value - 当前值
+ * @param props.min - 最小值
+ * @param props.max - 最大值
+ * @param props.step - 步长
+ * @param props.hint - 提示文本
+ * @param props.suffix - 后缀（默认 'px'）
+ * @param props.onChange - 变更回调
+ * @returns 滑块设置字段 JSX 元素
+ */
 function SliderField({
   label,
   value,
@@ -86,6 +110,18 @@ function SliderField({
   );
 }
 
+/**
+ * 可见性切换行组件
+ *
+ * 渲染设置项的可见性切换行，包含标签、提示文本和 Switch 开关。
+ *
+ * @param props - 组件属性
+ * @param props.label - 字段标签
+ * @param props.hint - 提示文本
+ * @param props.checked - 是否选中
+ * @param props.onChange - 变更回调
+ * @returns 可见性切换行 JSX 元素
+ */
 function VisibilityRow({
   label,
   hint,
@@ -108,6 +144,19 @@ function VisibilityRow({
   );
 }
 
+/**
+ * 皮肤预设卡片组件
+ *
+ * 渲染皮肤预设选择卡片，显示预览、标签和描述信息。
+ *
+ * @param props - 组件属性
+ * @param props.selected - 是否选中
+ * @param props.preview - 预览元素
+ * @param props.label - 标签文本
+ * @param props.description - 描述文本（可选）
+ * @param props.onClick - 点击回调
+ * @returns 皮肤预设卡片 JSX 元素
+ */
 function PresetCard({
   selected,
   preview,
@@ -125,58 +174,28 @@ function PresetCard({
     <button
       type="button"
       onClick={onClick}
-      className={`appearance-preset-card${selected ? ' is-selected' : ''}`}
+      className={`${styles['appearance-preset-card']}${selected ? ` ${styles['appearance-preset-card--selected']}` : ''}`}
     >
       {preview}
       <div className={styles['appearance-preset-meta']}>
-        <div className={`appearance-preset-title${selected ? ' is-selected' : ''}`}>{label}</div>
+        <div className={`${styles['appearance-preset-title']}${selected ? ` ${styles['appearance-preset-title--selected']}` : ''}`}>{label}</div>
         {description && <div className={styles['appearance-preset-description']}>{description}</div>}
       </div>
     </button>
   );
 }
 
-/** 将上传背景图压缩为 WebP data URL，避免原图 base64 长期占用 storage 与渲染内存。 */
-async function optimizeBackgroundImage(file: File): Promise<string> {
-  if (!file.type.startsWith('image/')) {
-    throw new Error('请选择图片文件');
-  }
-  if (file.size > MAX_BACKGROUND_IMAGE_SOURCE_BYTES) {
-    throw new Error('图片不能超过 20MB');
-  }
-
-  const objectUrl = URL.createObjectURL(file);
-  const image = new window.Image();
-  try {
-    image.decoding = 'async';
-    image.src = objectUrl;
-    await image.decode();
-
-    const sourceWidth = image.naturalWidth;
-    const sourceHeight = image.naturalHeight;
-    if (sourceWidth <= 0 || sourceHeight <= 0) {
-      throw new Error('图片尺寸无效');
-    }
-
-    const scale = Math.min(1, MAX_BACKGROUND_IMAGE_EDGE / Math.max(sourceWidth, sourceHeight));
-    const targetWidth = Math.max(1, Math.round(sourceWidth * scale));
-    const targetHeight = Math.max(1, Math.round(sourceHeight * scale));
-    const canvas = document.createElement('canvas');
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
-    const ctx = canvas.getContext('2d', { alpha: true });
-    if (ctx === null) throw new Error('无法处理图片');
-    ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
-    const dataUrl = canvas.toDataURL('image/webp', BACKGROUND_IMAGE_QUALITY);
-    canvas.width = 1;
-    canvas.height = 1;
-    return dataUrl;
-  } finally {
-    image.src = '';
-    URL.revokeObjectURL(objectUrl);
-  }
-}
-
+/**
+ * 外观设置面板主组件
+ *
+ * 包含皮肤预设、语言选择、渐变背景、自定义背景图、
+ * 背景遮罩层、布局密度、动效控制等设置项。
+ *
+ * @param props - 组件属性
+ * @param props.settings - 当前用户设置
+ * @param props.updateSettings - 更新设置回调
+ * @returns 外观设置面板 JSX 元素
+ */
 export function AppearancePanel({ settings, updateSettings }: AppearancePanelProps) {
   const { t } = useT();
   const { message } = App.useApp();
@@ -203,6 +222,14 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
     ),
   });
 
+  /**
+   * 安全更新自定义渐变配置
+   *
+   * 合并当前渐变配置与补丁配置，并更新设置。
+   *
+   * @param patch - 渐变配置补丁（部分配置）
+   * @returns 无返回值
+   */
   const updateCustomGradient = useCallback(
     (patch: Partial<UserSettings['customGradient']>) => {
       const merged = { ...customGradient, ...patch };
@@ -214,7 +241,14 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
     [customGradient, updateSettings],
   );
 
-  /** 安全更新 backgroundImage */
+  /**
+   * 安全更新背景图片配置
+   *
+   * 合并当前背景图片配置与补丁配置，并更新设置。
+   *
+   * @param patch - 背景图片配置补丁（部分配置）
+   * @returns 无返回值
+   */
   const updateBgImage = useCallback(
     (patch: Partial<NonNullable<UserSettings['backgroundImage']>>) => {
       const current = settings.backgroundImage ?? { url: '', fit: 'cover' as const };
@@ -223,7 +257,14 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
     [settings.backgroundImage, updateSettings],
   );
 
-  /** 安全更新 backgroundOverlay */
+  /**
+   * 安全更新背景遮罩配置
+   *
+   * 合并当前背景遮罩配置与补丁配置，并更新设置。
+   *
+   * @param patch - 背景遮罩配置补丁（部分配置）
+   * @returns 无返回值
+   */
   const updateBgOverlay = useCallback(
     (patch: Partial<NonNullable<UserSettings['backgroundOverlay']>>) => {
       const current = settings.backgroundOverlay ?? {
@@ -237,7 +278,16 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
     [settings.backgroundOverlay, updateSettings],
   );
 
-  /** 安全更新 uiVisibility（内联 fallback 确保所有属性有默认值） */
+  /**
+   * 安全更新 UI 可见性配置
+   *
+   * 合并当前 UI 可见性配置与更新值，并更新设置。
+   * 内联 fallback 确保所有属性有默认值。
+   *
+   * @param key - UI 可见性配置键名
+   * @param value - 是否可见
+   * @returns 无返回值
+   */
   const updateUiVisibility = useCallback(
     (key: keyof NonNullable<UserSettings['uiVisibility']>, value: boolean) => {
       const current = settings.uiVisibility ?? {
@@ -255,7 +305,14 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
     [settings.uiVisibility, updateSettings],
   );
 
-  /** 处理文件上传：先压缩降采样，再写入背景图配置。 */
+  /**
+   * 处理背景图片文件上传
+   *
+   * 先压缩降采样，再写入背景图配置。
+   *
+   * @param file - 上传的图片文件
+   * @returns 无返回值
+   */
   const handleFileUpload = useCallback(
     (file: File) => {
       void optimizeBackgroundImage(file)
@@ -459,7 +516,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                     void updateSettings({ gradientPreset: preset.id });
                     if (preset.id === 'custom') setShowGradientEditor(true);
                   }}
-                  className={`appearance-preset-card${isSelected ? ' is-selected' : ''}`}
+                  className={`${styles['appearance-preset-card']}${isSelected ? ` ${styles['appearance-preset-card--selected']}` : ''}`}
                 >
                   <div
                 className={`${styles['appearance-preset-preview']} ${styles['appearance-preset-preview--gradient']} ${styles['appearance-preview-editable']}`}
@@ -468,7 +525,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                     {preset.compatibleMode !== 'both' && <ModeBadge mode={preset.compatibleMode} />}
                     {preset.id === 'custom' && <Pencil size={ICON_SIZE.LARGE} className={styles['appearance-preset-edit-icon']} />}
                   </div>
-                  <div className={`appearance-preset-label-only${isSelected ? ' is-selected' : ''}`}>
+                  <div className={`${styles['appearance-preset-label-only']}${isSelected ? ` ${styles['appearance-preset-label-only--selected']}` : ''}`}>
                     {t(preset.labelKey)}
                   </div>
                 </button>
@@ -1014,52 +1071,4 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
       </section>
     </div>
   );
-}
-
-/**
- * 将 HEX 色值暗化指定比例
- * 支持 3 位简写（#fff）、6 位（#ffffff）、8位（#ffffffaa，忽略 alpha）
- */
-function darkenHex(hex: string, ratio: number): string {
-  // 移除 # 前缀
-  let h = hex.replace('#', '');
-
-  // 处理 3 位简写（如 #fff → #ffffff）
-  if (h.length === 3) {
-    h = h[0]! + h[0]! + h[1]! + h[1]! + h[2]! + h[2]!;
-  }
-
-  // 处理 8 位 hex（带 alpha），忽略 alpha 部分
-  if (h.length === 8) {
-    h = h.slice(0, 6);
-  }
-
-  // 校验长度，无法解析时返回原值
-  if (h.length !== 6) {
-    return hex;
-  }
-
-  const r = Math.round(parseInt(h.slice(0, 2), 16) * (1 - ratio));
-  const g = Math.round(parseInt(h.slice(2, 4), 16) * (1 - ratio));
-  const b = Math.round(parseInt(h.slice(4, 6), 16) * (1 - ratio));
-  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-}
-
-/**
- * 从 rgba 字符串解析 alpha 值
- */
-function parseAlpha(rgba: string): number {
-  const match = /[\d.]+(?=\))/.exec(rgba);
-  return match ? parseFloat(match[0]) : 0.35;
-}
-
-/**
- * HEX + alpha → rgba 字符串
- */
-function hexToRgba(hex: string, alpha: number): string {
-  const h = hex.replace('#', '');
-  const r = parseInt(h.slice(0, 2), 16);
-  const g = parseInt(h.slice(2, 4), 16);
-  const b = parseInt(h.slice(4, 6), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
 }

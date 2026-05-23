@@ -15,6 +15,7 @@
 
 import { storageGet, storageSet } from '@/chrome';
 import { STORAGE_KEYS } from '@/shared/config/storage-keys';
+import { formatDateKey } from '@/shared/utils/date';
 import type {
   ClosedTabRecord,
   ClosedWindowRecord,
@@ -53,7 +54,14 @@ export interface HistoryLimits {
   blocklist: string[];
 }
 
-/** 安全清洗设置：充填默认 + 范围 clamp。 */
+/**
+ * 安全清洗设置：充填默认 + 范围 clamp。
+ *
+ * 将所有用户设置字段归一到合法范围，避免 NaN、越界值污染下游逻辑。
+ *
+ * @param settings 用户原始设置（可能残缺或非法）
+ * @returns 归一化后的历史记录限制参数
+ */
 export function resolveHistoryLimits(settings?: Partial<UserSettings>): HistoryLimits {
   const s = settings ?? {};
   const clamp = (v: number | undefined, fallback: number, min: number, max: number): number => {
@@ -73,14 +81,27 @@ export function resolveHistoryLimits(settings?: Partial<UserSettings>): HistoryL
 
 /**
  * SW 上下文使用：从 chrome.storage 读取 settings，并返回 HistoryLimits。
+ *
  * 未设置时全部走默认值（充分反脆、不依赖仓库封装）。
+ * 本函数封装了 storageGet + resolveHistoryLimits 的两步操作，供仓库内部复用。
+ *
+ * @returns 归一化后的历史记录限制参数
  */
 async function loadLimits(): Promise<HistoryLimits> {
   const settings = await storageGet<UserSettings>(STORAGE_KEYS.settings);
   return resolveHistoryLimits(settings);
 }
 
-/** hostname 是否命中用户黑名单（含子域名后缀匹配）。 */
+/**
+ * hostname 是否命中用户黑名单（含子域名后缀匹配）。
+ *
+ * 支持后缀匹配：`blocklist` 中包含 `example.com` 时，
+ * `sub.example.com` 也会被判定为命中。
+ *
+ * @param hostname 待检测的 hostname
+ * @param blocklist 用户配置的黑名单列表（已转小写）
+ * @returns 命中黑名单返回 true，否则返回 false
+ */
 function isHostnameBlocked(hostname: string, blocklist: string[]): boolean {
   if (blocklist.length === 0) return false;
   const h = hostname.toLowerCase();
@@ -101,12 +122,30 @@ const IGNORED_URL_PREFIXES = [
   'file://',
 ];
 
+/**
+ * URL 是否应被忽略（内置协议、空值等）。
+ *
+ * 内置页面（chrome://、edge:// 等）和空 URL 不产生历史记录，
+ * 避免污染用户时间线。
+ *
+ * @param url 待检测的 URL（可能未定义）
+ * @returns 应忽略返回 true，否则返回 false
+ */
 export function isUrlIgnored(url: string | undefined): boolean {
   if (url === undefined || url === '') return true;
   const lower = url.toLowerCase();
   return IGNORED_URL_PREFIXES.some((prefix) => lower.startsWith(prefix));
 }
 
+/**
+ * 从 URL 中安全提取 hostname。
+ *
+ * 包裹 `new URL()` 避免非法 URL 抛错，解析失败返回空字符串。
+ * 供 `appendHistoryEvent` 等函数在无 DOM 环境下使用。
+ *
+ * @param url 待解析的 URL 字符串
+ * @returns hostname 字符串；解析失败返回空字符串
+ */
 function safeHostname(url: string): string {
   try {
     return new URL(url).hostname;
@@ -115,6 +154,13 @@ function safeHostname(url: string): string {
   }
 }
 
+/**
+ * 生成唯一 ID（优先 crypto.randomUUID，失败回退到时间戳 + 随机串）。
+ *
+ * Service Worker 环境与现代浏览器均可用；回退方案保证离线可用。
+ *
+ * @returns 唯一 ID 字符串
+ */
 function genId(): string {
   // crypto.randomUUID 在 SW 与现代浏览器均可用；fallback 兜底
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -127,6 +173,11 @@ function genId(): string {
 
 /**
  * 读取所有历史事件（按 ts 倒序，已过滤 TTL）。
+ *
+ * 自动剔除超过 `HISTORY_EVENT_TTL_MS` 的过期事件，
+ * 返回按时间倒序排列的列表。
+ *
+ * @returns 历史事件数组（倒序）
  */
 export async function getHistoryEvents(): Promise<HistoryEvent[]> {
   const raw = (await storageGet<HistoryEvent[]>(STORAGE_KEYS.historyEvents)) ?? [];
@@ -146,6 +197,8 @@ export async function getHistoryEvents(): Promise<HistoryEvent[]> {
  *   3. 尊重用户设置：全局开关 / 事件录入开关 / 黑名单 / 容量
  *   4. LRU 截断到 settings.historyMaxEvents
  *   5. 落盘 + 返回最新列表
+ * @param partial 事件描述（缺 id/ts 时自动补）
+ * @returns 写入后的最新历史事件列表
  */
 export async function appendHistoryEvent(
   partial: Omit<HistoryEvent, 'id' | 'ts'> & Partial<Pick<HistoryEvent, 'id' | 'ts'>>,
@@ -190,7 +243,12 @@ export async function appendHistoryEvent(
   await storageSet(STORAGE_KEYS.historyEvents, next);
   return next;
 }
-/** 删除单条历史事件 */
+/**
+ * 删除单条历史事件。
+ *
+ * @param id 要删除的事件 ID
+ * @returns 删除后的最新历史事件列表
+ */
 export async function deleteHistoryEvent(id: string): Promise<HistoryEvent[]> {
   const existing = (await storageGet<HistoryEvent[]>(STORAGE_KEYS.historyEvents)) ?? [];
   const next = existing.filter((e) => e.id !== id);
@@ -200,7 +258,12 @@ export async function deleteHistoryEvent(id: string): Promise<HistoryEvent[]> {
 
 /**
  * 将一条事件标记为「已撤销」。
- * 仅将 undoable 置为 false，并记录 undone:true 于 extra，保留 trail；不从列表中移除。
+ *
+ * 仅将 undoable 置为 false，并记录 undone:true 于 extra，保留 trail；
+ * 不从列表中移除，便于审计。
+ *
+ * @param id 要标记撤销的事件 ID
+ * @returns 更新后的最新历史事件列表
  */
 export async function markHistoryEventUndone(id: string): Promise<HistoryEvent[]> {
   const existing = (await storageGet<HistoryEvent[]>(STORAGE_KEYS.historyEvents)) ?? [];
@@ -216,7 +279,12 @@ export async function markHistoryEventUndone(id: string): Promise<HistoryEvent[]
   return next;
 }
 
-/** 按类型批量删除（如"清空所有搜索类事件"） */
+/**
+ * 按类型批量删除（如"清空所有搜索类事件"）。
+ *
+ * @param types 要删除的事件类型数组
+ * @returns 删除后的最新历史事件列表
+ */
 export async function deleteHistoryEventsByType(types: Array<HistoryEvent['type']>): Promise<HistoryEvent[]> {
   const set = new Set(types);
   const existing = (await storageGet<HistoryEvent[]>(STORAGE_KEYS.historyEvents)) ?? [];
@@ -234,6 +302,10 @@ export async function clearHistoryEvents(): Promise<void> {
 
 /**
  * 读取最近关闭的标签（按 ts 倒序，已按设置中的 TTL 过滤）。
+ *
+ * 自动剔除超过用户设置 TTL 的过期记录。
+ *
+ * @returns 最近关闭的标签列表（倒序）
  */
 export async function getClosedTabs(): Promise<ClosedTabRecord[]> {
   const raw = (await storageGet<ClosedTabRecord[]>(STORAGE_KEYS.closedTabs)) ?? [];
@@ -250,6 +322,7 @@ export async function getClosedTabs(): Promise<ClosedTabRecord[]> {
 /**
  * 追加一条"最近关闭"记录。
  *
+ * @param partial
  * @returns 最新列表（已 LRU/TTL 截断）
  */
 export async function pushClosedTab(
@@ -287,7 +360,12 @@ export async function pushClosedTab(
   return next;
 }
 
-/** 删除单条"最近关闭"（用户手动从列表移除，或恢复后清理） */
+/**
+ * 删除单条"最近关闭"（用户手动从列表移除，或恢复后清理）。
+ *
+ * @param id 要删除的记录 ID
+ * @returns 删除后的最新列表
+ */
 export async function deleteClosedTab(id: string): Promise<ClosedTabRecord[]> {
   const existing = (await storageGet<ClosedTabRecord[]>(STORAGE_KEYS.closedTabs)) ?? [];
   const next = existing.filter((e) => e.id !== id);
@@ -302,11 +380,24 @@ export async function clearClosedTabs(): Promise<void> {
 
 // ── ClosedWindow CRUD ──────────────────────────────
 
+/**
+ * 读取所有整窗关闭快照（按 ts 倒序）。
+ *
+ * @returns 整窗关闭快照列表（倒序）
+ */
 export async function getClosedWindows(): Promise<ClosedWindowRecord[]> {
   const raw = (await storageGet<ClosedWindowRecord[]>(STORAGE_KEYS.closedWindows)) ?? [];
   return [...raw].sort((a, b) => b.ts - a.ts);
 }
 
+/**
+ * 追加一条整窗关闭快照。
+ *
+ * 自动注入 id/ts，按 `MAX_CLOSED_WINDOWS` 截断。
+ *
+ * @param partial 快照描述（缺 id/ts 时自动补）
+ * @returns 写入后的最新列表
+ */
 export async function pushClosedWindow(
   partial: Omit<ClosedWindowRecord, 'id' | 'ts'> & Partial<Pick<ClosedWindowRecord, 'id' | 'ts'>>,
 ): Promise<ClosedWindowRecord[]> {
@@ -324,6 +415,12 @@ export async function pushClosedWindow(
   return next;
 }
 
+/**
+ * 删除单条整窗关闭快照。
+ *
+ * @param id 要删除的快照 ID
+ * @returns 删除后的最新列表
+ */
 export async function deleteClosedWindow(id: string): Promise<ClosedWindowRecord[]> {
   const existing = (await storageGet<ClosedWindowRecord[]>(STORAGE_KEYS.closedWindows)) ?? [];
   const next = existing.filter((e) => e.id !== id);
@@ -331,6 +428,9 @@ export async function deleteClosedWindow(id: string): Promise<ClosedWindowRecord
   return next;
 }
 
+/**
+ *
+ */
 export async function clearClosedWindows(): Promise<void> {
   await storageSet(STORAGE_KEYS.closedWindows, []);
 }
@@ -342,17 +442,14 @@ export const MAX_DAILY_SNAPSHOTS = 14;
 
 /**
  * 把一个时间戳格式化为 `YYYY-MM-DD`（按用户本地时区）。
- * 这里不引外部依赖，避免 SW 的额外开销。
+ * 委托给 shared/utils/date 的统一实现，保持与 stats-slice 一致。
  */
-export function snapshotDateKey(ts: number = Date.now()): string {
-  const d = new Date(ts);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
+export const snapshotDateKey = formatDateKey;
 
-/** 读取所有快照（按 dateKey 升序：旧 → 新） */
+/** 读取所有快照（按 dateKey 升序：旧 → 新）。
+ *
+ * @returns 每日快照数组（升序）
+ */
 export async function getDailySnapshots(): Promise<DailySnapshot[]> {
   const raw = (await storageGet<DailySnapshot[]>(STORAGE_KEYS.dailySnapshots)) ?? [];
   return [...raw].sort((a, b) => a.dateKey.localeCompare(b.dateKey));
@@ -361,6 +458,9 @@ export async function getDailySnapshots(): Promise<DailySnapshot[]> {
 /**
  * 写入一份当日快照；同 dateKey 已存在时直接覆盖（一天一条），
  * 数据按 dateKey 升序保存，超过保留上限按最早 FIFO 截断。
+ *
+ * @param snapshot 当日快照数据
+ * @returns 写入后的最新快照列表
  */
 export async function upsertDailySnapshot(snapshot: DailySnapshot): Promise<DailySnapshot[]> {
   const existing = (await storageGet<DailySnapshot[]>(STORAGE_KEYS.dailySnapshots)) ?? [];
@@ -374,14 +474,28 @@ export async function upsertDailySnapshot(snapshot: DailySnapshot): Promise<Dail
   return next;
 }
 
-/** 取昨天那条（YYYY-MM-DD 严格匹配，没拍则 undefined） */
+/**
+ * 取昨天那条（YYYY-MM-DD 严格匹配，没拍则 undefined）。
+ *
+ * 用于「昨天 → 今天」的对比场景。
+ *
+ * @param referenceTs 参考时间戳（默认当前时间）
+ * @returns 昨天的快照；不存在则返回 undefined
+ */
 export async function getYesterdaySnapshot(referenceTs: number = Date.now()): Promise<DailySnapshot | undefined> {
   const yKey = snapshotDateKey(referenceTs - 24 * 3600 * 1000);
   const all = await getDailySnapshots();
   return all.find((s) => s.dateKey === yKey);
 }
 
-/** 取今天那条 */
+/**
+ * 取今天那条。
+ *
+ * 用于获取当日的标签页快照。
+ *
+ * @param referenceTs 参考时间戳（默认当前时间）
+ * @returns 今天的快照；不存在则返回 undefined
+ */
 export async function getTodaySnapshot(referenceTs: number = Date.now()): Promise<DailySnapshot | undefined> {
   const key = snapshotDateKey(referenceTs);
   const all = await getDailySnapshots();
@@ -389,7 +503,14 @@ export async function getTodaySnapshot(referenceTs: number = Date.now()): Promis
 }
 
 /**
- * 计算「昨天 → 今天」的 diff。任一缺失则返回 null（外层据此降级展示）。
+ * 计算「昨天 → 今天」的 diff。
+ *
+ * 对比两个快照的 hosts  map，生成新增/消失的域名列表和标签页数量变化。
+ * 任一快照缺失则返回 null，外层据此降级展示。
+ *
+ * @param yesterday 昨天的快照（可能 undefined）
+ * @param today 今天的快照（可能 undefined）
+ * @returns 包含新增/消失列表和数量变化的 diff 对象；无法对比时返回 null
  */
 export function diffSnapshots(
   yesterday: DailySnapshot | undefined,

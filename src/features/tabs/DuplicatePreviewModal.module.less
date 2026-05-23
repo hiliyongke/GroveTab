@@ -1,0 +1,130 @@
+@import (reference) '@/styles/mixins.less';
+
+/* DuplicatePreviewModal —— 重复合并预览 Modal */
+
+.app-duplicate-footer {
+  .flex-row-between(12px);
+  flex-wrap: wrap;
+}
+
+.app-duplicate-summary {
+  font-size: 12px;
+}
+
+.app-duplicate-groups {
+  .flex-column(12px);
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+  padding-right: 4px;
+  .scrollbar-thin();
+}
+
+.app-duplicate-group {
+  border: 1px solid var(--ant-color-border-secondary);
+  border-radius: var(--ant-border-radius-lg);
+  overflow: hidden;
+  background: var(--ant-color-bg-container);
+}
+
+.app-duplicate-group__header {
+  .flex-row-between(12px);
+  align-items: flex-start;
+  padding: 12px 14px;
+  background: var(--ant-color-fill-quaternary);
+  border-bottom: 1px solid var(--ant-color-border-secondary);
+}
+
+.app-duplicate-group__title {
+  .text-truncate();
+  display: block;
+  font-size: 13px;
+}
+
+.app-duplicate-group__tag {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.app-duplicate-group__list {
+  .flex-column(0);
+}
+
+.app-duplicate-option {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  border-top: 1px solid var(--ant-color-border-secondary);
+  transition: background-color 0.15s ease;
+}
+
+.app-duplicate-option:hover {
+  background: var(--ant-color-fill-quaternary);
+}
+
+.is-selected {
+  background: var(--ant-color-primary-bg);
+}
+
+.app-duplicate-option__radio {
+  margin: 0;
+}
+
+.app-duplicate-option__favicon {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.app-duplicate-option__content {
+  .flex-column(2px);
+  min-width: 0;
+}
+
+.app-duplicate-option__title,
+.app-duplicate-option__url,
+.app-duplicate-option__meta {
+  .text-truncate();
+}
+
+.app-duplicate-option__title {
+  color: var(--ant-color-text);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.app-duplicate-option__url {
+  color: var(--ant-color-text-tertiary);
+  font-size: 11.5px;
+}
+
+.app-duplicate-option__aside {
+  .flex-column(2px);
+  align-items: flex-end;
+  min-width: 88px;
+}
+
+.app-duplicate-option__meta {
+  max-width: 180px;
+  font-size: 11px;
+}
+
+@media (max-width: 640px) {
+  .app-duplicate-option {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .app-duplicate-option__aside {
+    grid-column: 2;
+    align-items: flex-start;
+    min-width: 0;
+    padding-left: 28px;
+  }
+
+  .app-duplicate-footer {
+    align-items: stretch;
+  }
+}

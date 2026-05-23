@@ -21,7 +21,7 @@ import { BRAND } from '@/shared/config/brand';
 import { buildSearchUrl } from '@/shared/config/search-engines';
 import type { SearchEngineId } from '@/shared/types';
 import { getSettings } from '@/repositories';
-import { activateTab, closeTab, createTab, getFaviconUrl, queryAllTabs } from '@/chrome';
+import { activateTab, closeTab, createTab, getFaviconUrl, queryAllTabs, extractHostname } from '@/chrome';
 import { I18nProvider, useT } from '@/shared/i18n';
 
 const { Text } = Typography;
@@ -36,15 +36,14 @@ interface RecentTab {
   lastAccessed: number;
 }
 
-function extractHostname(url: string): string {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return '';
-  }
-}
-
-/** 打开一个 Tab：激活该 Tab 并聚焦其窗口 */
+/**
+ * 打开一个 Tab：激活该 Tab 并聚焦其窗口
+ *
+ * 若目标 Tab 不存在（已关闭），兜底新开该 URL。
+ *
+ * @param tab 最近标签页对象
+ * @returns 无返回值（异步操作）
+ */
 async function focusTab(tab: RecentTab): Promise<void> {
   try {
     await activateTab(tab.id, tab.windowId);
@@ -58,6 +57,16 @@ async function focusTab(tab: RecentTab): Promise<void> {
   }
 }
 
+/**
+ * PopupContent —— 弹出窗口主内容组件
+ *
+ * 360×520 四区布局：
+ *   - 顶部：全局搜索框
+ *   - 中部：最近打开的标签页列表
+ *   - 底部：归档当前窗口按钮 + 打开工作台按钮
+ *
+ * @returns 弹出窗口主界面 JSX
+ */
 function PopupContent() {
   const [query, setQuery] = useState('');
   const [recentTabs, setRecentTabs] = useState<RecentTab[]>([]);
@@ -293,7 +302,20 @@ function PopupContent() {
   );
 }
 
-/** 单行最近 Tab */
+/**
+ * 单行最近 Tab 行组件
+ *
+ * 展示单个标签页的 favicon、标题、域名，
+ * 支持点击激活和关闭操作。
+ *
+ * @param tab 最近标签页对象
+ * @param tab.tab
+ * @param onClick 点击行回调
+ * @param tab.onClick
+ * @param onClose 关闭按钮回调
+ * @param tab.onClose
+ * @returns 单行最近 Tab JSX
+ */
 function RecentTabRow({
   tab,
   onClick,
@@ -349,6 +371,14 @@ function RecentTabRow({
   );
 }
 
+/**
+ * App —— 弹出窗口根组件
+ *
+ * 包裹 AntdThemeProvider 与 I18nProvider，
+ * 渲染 PopupContent 主内容。
+ *
+ * @returns 弹出窗口根节点 JSX
+ */
 function App() {
   return (
     <AntdThemeProvider>

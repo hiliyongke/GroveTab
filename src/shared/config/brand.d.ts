@@ -90,18 +90,33 @@ export declare const BRAND: BrandIdentity;
  *
  * 之所以不用 i18n `t()`——本模块要在 i18n 初始化前也可用（例如
  * `ErrorBoundary` 的 fallback 文案），因此自带轻量回退链。
+ *
+ * @param field 多语言字段（如 `BRAND.slogan`）
+ * @param locale 目标语言（如 'zh-CN'、'en'）
+ * @param fallback 回退文案（可选）
+ * @returns 当前语言的文案字符串
  */
 export declare function pickLocaleField(field: Record<string, string>, locale: string, fallback?: string): string;
 /**
  * 便捷：按 locale 取当前品牌的本地化名。
+ *
  * 英文环境只返回 `BRAND.name`；其它语言若有 `localizedName[locale]` 则取之。
+ *
+ * @param locale 目标语言（如 'zh-CN'、'en'）
+ * @returns 本地化的品牌显示名
  */
 export declare function getBrandDisplayName(locale: string): string;
 /**
  * 便捷：按 locale 取当前品牌的 slogan。
+ *
+ * @param locale 目标语言（如 'zh-CN'、'en'）
+ * @returns 当前语言的品牌 slogan
  */
 export declare function getBrandSlogan(locale: string): string;
 /**
  * 便捷：按 locale 取当前品牌的 tagline。
+ *
+ * @param locale 目标语言（如 'zh-CN'、'en'）
+ * @returns 当前语言的品牌 tagline
  */
 export declare function getBrandTagline(locale: string): string;

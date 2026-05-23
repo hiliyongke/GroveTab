@@ -28,7 +28,7 @@ import { stringToColor } from '@/shared/utils/color';
 import { splitTabToSide } from '@/chrome';
 import { Z } from '@/shared/config/z-index';
 import { CONFIG } from '@/shared/config';
-import styles from './styles/views.module.less';
+import styles from './TabContextMenu.module.less';
 
 interface TabContextMenuProps {
   x: number;
@@ -45,7 +45,12 @@ interface TabContextMenuProps {
 
 const MENU_WIDTH = CONFIG.ui.menuWidth;
 
-/** 标准化 URL：去掉协议前缀和常见跟踪参数，用于去重比较 */
+/**
+ * 标准化 URL：去掉协议前缀和常见跟踪参数，用于去重比较
+ *
+ * @param url - 要标准化的 URL 字符串
+ * @returns 标准化后的 URL 字符串
+ */
 function normalizeUrl(url: string): string {
   try {
     const u = new URL(url);
@@ -62,6 +67,24 @@ function normalizeUrl(url: string): string {
 
 /**
  * 标签右键上下文菜单
+ *
+ * 设计：
+ *   - 外层使用 antd Popover 风格的浮层（手动定位 + Card 实现，避免动态 anchor 绑定）
+ *   - 菜单项使用 antd Button(type="text") 保持一致视觉
+ *   - 标签使用 antd Tag（closable）
+ *   - 输入使用 an td Input / Input.TextArea
+ *   - 边界钳制：防止菜单超出 viewport
+ *   - ESC 关闭
+ *
+ * @param props - 组件属性
+ * @param props.x - 鼠标点击 X 坐标
+ * @param props.y - 鼠标点击 Y 坐标
+ * @param props.url - 标签 URL
+ * @param props.title - 标签页标题，用于添加到常用站点
+ * @param props.favIconUrl - 标签页 favicon，用于添加到常用站点
+ * @param props.tabId - 标签页 ID，用于休眠等需要 tabId 的操作
+ * @param props.onClose - 关闭菜单回调
+ * @returns {JSX.Element} 标签右键上下文菜单 JSX 元素
  */
 export function TabContextMenu({ x, y, url, title, favIconUrl, tabId, onClose }: TabContextMenuProps) {
   const { t } = useT();
@@ -115,6 +138,13 @@ export function TabContextMenu({ x, y, url, title, favIconUrl, tabId, onClose }:
     });
   }, [x, y]);
 
+  /**
+   * 为当前标签添加标签
+   *
+   * 验证输入，添加标签并重置输入框。
+   *
+   * @returns 无返回值
+   */
   const handleAddTag = () => {
     const v = tagValue.trim();
     if (v) {
@@ -124,6 +154,13 @@ export function TabContextMenu({ x, y, url, title, favIconUrl, tabId, onClose }:
     }
   };
 
+  /**
+   * 保存当前标签的备注
+   *
+   * 将输入框中的备注内容保存到 store，并关闭备注输入框。
+   *
+   * @returns 无返回值
+   */
   const handleSaveNote = () => {
     void setNote(url, noteValue);
     setShowNoteInput(false);

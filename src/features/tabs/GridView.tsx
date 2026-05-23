@@ -25,15 +25,28 @@ import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useTabsStore, useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { groupTabsByDomain } from '@/shared/utils/domain';
-import { useAccent } from '@/shared/hooks/useAccent';
+import { useAccent } from '@/shared/hooks/use-accent';
 import { findAmbiguousTitleIds } from '@/shared/utils/url-display';
 import { cssVars } from '@/shared/utils/css-vars';
 import { TabItem } from './TabItem';
 import type { LiveTab } from '@/shared/types';
-import styles from './styles/views.module.less';
+import styles from './GridView.module.less';
 
 /**
  * 网格视图主组件：每个域名一张大卡片
+ *
+ * 设计：
+ *   - 响应式列数（CSS grid auto-fill）
+ *   - 缩略图区基于域名色的浅色渐变，提供弱识别
+ *   - hover 卡片上浮 2px，边框染品牌色
+ *   - 卡片角标显示该域名下的 tab 数
+ *
+ * 交互：
+ *   - **单 tab**：点击直接跳转（快捷路径）
+ *   - **多 tab**：点击展开 Popover（锚定到卡片、无遮罩、带 arrow），
+ *     展示该域名下的完整列表
+ *
+ * @returns 网格视图 JSX 元素
  */
 export function GridView() {
   const tabs = useTabsStore((s) => s.tabs);
@@ -56,7 +69,13 @@ export function GridView() {
 
   if (groups.length === 0) return null;
 
-  /** Popover 内点击「跳转」：跳完顺手关闭浮层 */
+  /**
+   * Popover 内点击「跳转」：跳完顺手关闭浮层
+   *
+   * @param tabId - 标签 ID
+   * @param windowId - 窗口 ID
+   * @returns 无返回值
+   */
   const handleJumpFromPopover = (tabId: number, windowId: number) => {
     void jumpToTab(tabId, windowId);
     setActiveDomain(null);
@@ -102,6 +121,18 @@ interface GridCardProps {
 
 /**
  * 单张域名卡片
+ * @param root0
+ * @param root0.domain - 域名
+ * @param root0.colorKey - 颜色键
+ * @param root0.tabs - 标签页列表
+ * @param root0.onJump - 跳转回调
+ * @param root0.open - 是否展开
+ * @param root0.onOpenChange - 展开变化回调
+ * @param root0.onJumpFromPopover - 从弹出框跳转回调
+ * @param root0.onCloseTab - 关闭标签页回调
+ * @param root0.countLabel - 计数标签
+ * @param root0.expandTrigger - 展开触发方式
+ * @returns {JSX.Element} 卡片元素
  */
 function GridCard({
   domain,
@@ -125,11 +156,15 @@ function GridCard({
   const color = accent.bar;
 
   /**
-   * 点击卡片：
+   * 点击卡片
+   *
+   * 处理卡片点击逻辑：
    *   - 单 tab：直接跳转
    *   - 多 tab + click 模式：切换 Popover
    *   - 多 tab + hover 模式：保留点击=跳转到首个 tab 的快捷路径
    *     （hover 已能展开浮层，再让点击切换会语义打架）
+   *
+   * @returns 无返回值
    */
   const handleCardClick = () => {
     if (isMulti) {
@@ -200,8 +235,12 @@ function GridCard({
   if (!isMulti) return cardNode;
 
   /**
+   * 计算 Popover 鼠标延迟配置
+   *
    * hover 模式下加 100ms 进入延迟，避免鼠标穿过卡片瞬间触发；
    * 离开延迟 150ms，让用户能从卡片移到浮层而不会先关掉。
+   *
+   * @returns 延迟配置对象，hover 模式下包含 mouseEnterDelay 和 mouseLeaveDelay
    */
   const popoverMouseDelay =
     expandTrigger === 'hover' ? { mouseEnterDelay: 0.1, mouseLeaveDelay: 0.15 } : {};
@@ -255,6 +294,15 @@ interface DomainTabsPanelProps {
  *   │   TabItem                   │
  *   │   TabItem                   │  ← 列表区，满高度滚动
  *   └────────────────────────────┘
+ * @param root0
+ * @param root0.domain
+ * @param root0.tabs
+ * @param root0.accentColor
+ * @param root0.faviconSrc
+ * @param root0.onJump
+ * @param root0.onCloseTab
+ * @param root0.onClose
+ * @returns {JSX.Element} 域名多 tab 快速预览面板 JSX 元素
  */
 function DomainTabsPanel({
   domain,
@@ -272,8 +320,13 @@ function DomainTabsPanel({
   const ambiguousIds = useMemo(() => findAmbiguousTitleIds(tabs), [tabs]);
 
   /**
+   * 关闭标签并处理浮层状态
+   *
    * 关闭某个 tab 后如果已没东西可看就收起浮层；
    * 由于 tabs 由父层实时下发，这里拿到的长度即为当前快照值。
+   *
+   * @param id - 要关闭的标签 ID
+   * @returns 无返回值
    */
   const handleCloseTab = (id: number) => {
     onCloseTab(id);

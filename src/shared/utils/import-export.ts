@@ -1,5 +1,14 @@
 /**
- * 归档导入导出工具。
+ * 归档导入导出工具
+ *
+ * 支持多种格式：
+ *   - JSON：应用自有格式（含 version 字段）
+ *   - Markdown： `## 会话名` + `- [title](url)` 列表
+ *   - TXT：一行一 URL，会话间空行分隔
+ *   - HTML：Netscape Bookmark File Format（可被其他浏览器导入）
+ *   - OneTab：URL | title 格式，空行分组
+ *
+ * 导入时自动识别格式，并支持冲突策略（skip / append / replace）。
  */
 
 import type { ArchivedSession, ArchivedTab } from '@/shared/types';
@@ -7,18 +16,36 @@ import { BRAND } from '@/shared/config/brand';
 import { CONFIG } from '@/shared/config';
 import { isSafeExternalUrl } from '@/shared/utils/url-safety';
 
+/** 当前导出格式版本号 */
 const CURRENT_EXPORT_VERSION = 1;
+/** 最大可导入会话数 */
 const MAX_IMPORT_SESSIONS = CONFIG.business.maxImportSessions;
+/** 单会话最大标签数 */
 const MAX_IMPORT_TABS_PER_SESSION = CONFIG.business.maxImportTabsPerSession;
+/** 字符串字段最大长度（防超长输入） */
 const MAX_STRING_LENGTH = CONFIG.business.maxStringLength;
 
-/** 导出归档会话为 JSON 字符串。 */
+/**
+ * 导出归档会话为 JSON 字符串
+ *
+ * 输出格式：{ version: 1, exportedAt: number, sessions: [...] }
+ *
+ * @param sessions 归档会话数组
+ * @returns 格式化的 JSON 字符串
+ */
 export function exportSessionsJSON(sessions: ArchivedSession[]): string {
   return JSON.stringify({ version: CURRENT_EXPORT_VERSION, exportedAt: Date.now(), sessions }, null, 2);
 }
 
-/** 下载字符串内容为文件。 */
-export function downloadFile(content: string, filename: string, type = 'application/json') {
+/**
+ * 触发浏览器下载，将内容保存为本地文件
+ *
+ * @param content  文件内容字符串
+ * @param filename 下载文件名（如 "archive.json"）
+ * @param type     MIME 类型（默认 "application/json"）
+ * @returns 无返回值
+ */
+export function downloadFile(content: string, filename: string, type = 'application/json'): void {
   const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -28,23 +55,46 @@ export function downloadFile(content: string, filename: string, type = 'applicat
   URL.revokeObjectURL(url);
 }
 
-/** 判断值是否为普通对象。 */
+/**
+ * 类型守卫：判断值是否为普通对象（非 null、非数组）
+ *
+ * @param value 待检测值
+ * @returns 是否为 Record<string, unknown>
+ */
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-/** 把任意字符串字段规整到可接受长度。 */
+/**
+ * 将输入值规整为安全字符串
+ *
+ * 非字符串类型回退到 fallback；字符串去首尾空白并截断到最大长度。
+ *
+ * @param value    待处理值
+ * @param fallback 非字符串时的回退值（默认 ''）
+ * @returns 规整后的字符串
+ */
 function normalizeString(value: unknown, fallback = ''): string {
   if (typeof value !== 'string') return fallback;
   return value.trim().slice(0, MAX_STRING_LENGTH);
 }
 
-/** URL 基础校验：仅允许可安全打开的 http/https 外部网页。 */
+/**
+ * URL 安全校验：仅允许 http/https 协议
+ *
+ * @param value 待校验 URL 字符串
+ * @returns 是否为可安全打开的外部网页 URL
+ */
 function isValidUrl(value: string): boolean {
   return isSafeExternalUrl(value);
 }
 
-/** 从 URL 推导 hostname，供导入时兜底。 */
+/**
+ * 从 URL 字符串中提取 hostname（导入时兜底用）
+ *
+ * @param url 完整 URL 字符串
+ * @returns hostname，解析失败返回空字符串
+ */
 function deriveHostname(url: string): string {
   try {
     return new URL(url).hostname;
@@ -53,7 +103,15 @@ function deriveHostname(url: string): string {
   }
 }
 
-/** 校验单个归档标签。 */
+/**
+ * 校验并解析单个归档标签
+ *
+ * @param rawTab      原始标签数据
+ * @param sessionName 所属会话名（用于错误提示）
+ * @param index       在会话中的索引（用于错误提示）
+ * @param errors     错误信息收集数组
+ * @returns 解析后的 ArchivedTab，校验失败返回 null
+ */
 function parseArchivedTab(rawTab: unknown, sessionName: string, index: number, errors: string[]): ArchivedTab | null {
   if (!isRecord(rawTab)) {
     errors.push(`Invalid tab in session "${sessionName}" at index ${index}`);
@@ -75,7 +133,14 @@ function parseArchivedTab(rawTab: unknown, sessionName: string, index: number, e
   };
 }
 
-/** 校验单个归档会话。 */
+/**
+ * 校验并解析单个归档会话
+ *
+ * @param rawSession 原始会话数据
+ * @param index      会话索引（用于错误提示）
+ * @param errors     错误信息收集数组
+ * @returns 解析后的 ArchivedSession，校验失败返回 null
+ */
 function parseArchivedSession(rawSession: unknown, index: number, errors: string[]): ArchivedSession | null {
   if (!isRecord(rawSession)) {
     errors.push(`Invalid session at index ${index}`);
@@ -127,7 +192,18 @@ function parseArchivedSession(rawSession: unknown, index: number, errors: string
   };
 }
 
-/** 解析导入 JSON，并做严格结构校验。 */
+/**
+ * 解析导入 JSON 并做严格结构校验
+ *
+ * 校验项：
+ *   - 必须包含 sessions 数组
+ *   - 版本号必须匹配（或不校验版本）
+ *   - 每个会话和标签结构必须合法
+ *   - 单会话标签数不超过上限
+ *
+ * @param text JSON 字符串
+ * @returns 解析结果（sessions 数组 + 错误列表）
+ */
 export function parseImportJSON(text: string): { sessions: ArchivedSession[]; errors: string[] } {
   const errors: string[] = [];
 
@@ -170,6 +246,9 @@ export function parseImportJSON(text: string): { sessions: ArchivedSession[]; er
 
 /**
  * Markdown 导出：`## 会话名` + `- [title](url)`。
+ *
+ * @param sessions - 待导出的归档会话数组
+ * @returns Markdown 格式字符串
  */
 export function exportSessionsMarkdown(sessions: ArchivedSession[]): string {
   const lines: string[] = [`# ${BRAND.name} 归档 · ${new Date().toLocaleString()}`, ''];
@@ -186,6 +265,9 @@ export function exportSessionsMarkdown(sessions: ArchivedSession[]): string {
 
 /**
  * TXT 导出：一行一 URL，会话间空行分隔。
+ *
+ * @param sessions - 待导出的归档会话数组
+ * @returns 纯文本格式字符串（每行一个 URL）
  */
 export function exportSessionsText(sessions: ArchivedSession[]): string {
   const lines: string[] = [];
@@ -198,6 +280,9 @@ export function exportSessionsText(sessions: ArchivedSession[]): string {
 
 /**
  * HTML 导出：Netscape Bookmark File Format 1（可被其他浏览器导入）。
+ *
+ * @param sessions - 待导出的归档会话数组
+ * @returns HTML 格式书签文件字符串
  */
 export function exportSessionsHTML(sessions: ArchivedSession[]): string {
   const parts: string[] = [
@@ -220,6 +305,12 @@ export function exportSessionsHTML(sessions: ArchivedSession[]): string {
   return parts.join('\n');
 }
 
+/**
+ * HTML 转义：将特殊字符转为实体
+ *
+ * @param s 原始字符串
+ * @returns 转义后的安全字符串
+ */
 function escapeHtml(s: string): string {
   return s
     .replaceAll('&', '&amp;')
@@ -228,6 +319,12 @@ function escapeHtml(s: string): string {
     .replaceAll('"', '&quot;');
 }
 
+/**
+ * HTML 属性值转义（复用 escapeHtml 逻辑）
+ *
+ * @param s 原始字符串
+ * @returns 可用于属性值的转义字符串
+ */
 function escapeAttr(s: string): string {
   return escapeHtml(s);
 }
@@ -236,6 +333,9 @@ function escapeAttr(s: string): string {
 
 /**
  * 从 Netscape HTML 书签解析会话（H3 = 会话名，A = Tab；未分组归入"未命名"）。
+ *
+ * @param text - HTML 格式的文本内容
+ * @returns 解析后的会话数组和错误列表
  */
 export function parseImportHTML(text: string): { sessions: ArchivedSession[]; errors: string[] } {
   const errors: string[] = [];
@@ -313,6 +413,9 @@ export function parseImportHTML(text: string): { sessions: ArchivedSession[]; er
 
 /**
  * 从 OneTab 格式文本解析（URL | title，一行一条，空行分组）。
+ *
+ * @param text - OneTab 格式的文本内容
+ * @returns 解析后的会话数组和错误列表
  */
 export function parseImportOneTab(text: string): { sessions: ArchivedSession[]; errors: string[] } {
   const errors: string[] = [];
@@ -357,6 +460,9 @@ export function parseImportOneTab(text: string): { sessions: ArchivedSession[]; 
 
 /**
  * 自动识别文本格式（JSON / HTML / OneTab）。
+ *
+ * @param text - 待识别的文本内容
+ * @returns 解析后的会话数组和错误列表
  */
 export function parseImportAuto(text: string): { sessions: ArchivedSession[]; errors: string[] } {
   const trimmed = text.trim();
@@ -382,6 +488,11 @@ export interface ImportApplyResult {
 
 /**
  * 把解析到的 sessions 按策略合并进已有 sessions，返回新的 sessions 数组与统计。
+ *
+ * @param existing - 已有的归档会话数组
+ * @param incoming - 导入的归档会话数组
+ * @param strategy - 冲突处理策略
+ * @returns 合并后的会话数组和导入统计
  */
 export function applyImport(
   existing: ArchivedSession[],
@@ -447,6 +558,9 @@ export function applyImport(
 
 /**
  * 校验导入源体量限制：5MB / 20K 行 / 单会话 500KB。
+ *
+ * @param text - 待校验的文本内容
+ * @returns 校验错误信息，通过则返回 null
  */
 export function validateImportSizeLimits(text: string): string | null {
   const byteLength = new Blob([text]).size;

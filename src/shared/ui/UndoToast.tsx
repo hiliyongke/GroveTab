@@ -19,8 +19,12 @@ import { APP_EVENTS } from '@/shared/config/storage-keys';
 import styles from './status-surfaces.module.less';
 
 /**
- * 触发"打开 Archive 并高亮 session"的跨组件事件。
- * App.tsx 监听该事件并调用 setShowArchive(true)。
+ * 触发"打开 Archive 并高亮 session"的跨组件事件
+ *
+ * 通过 CustomEvent 派发事件，App.tsx 监听该事件并调用 setShowArchive(true)。
+ * 如果传入 sessionId，ArchivePanel 会高亮对应的会话。
+ *
+ * @param sessionId - 要高亮的归档会话 ID（可选）
  */
 function openArchivePanel(sessionId?: string) {
   if (typeof window === 'undefined') return;
@@ -30,7 +34,17 @@ function openArchivePanel(sessionId?: string) {
 }
 
 /**
- * 撤销提示浮条（富交互）
+ * UndoToast — 关闭 / 归档后的撤销提示（富交互版）
+ *
+ * 设计：
+ *   - 底部居中浮动胶囊（antd token 控制配色）
+ *   - 归档场景：文案 "已归档 N 个标签到「{sessionName}」" + [查看归档] + [撤销]
+ *   - 普通关闭场景：保持原 [撤销] 单按钮形态
+ *   - 若 record.subNote 非空（如 "M 个关闭失败"），在副行展示
+ *
+ * 通过 useUndoStore 驱动显示/隐藏，撤销操作后自动消失。
+ *
+ * @returns 撤销提示 UI；无活跃 toast 时返回 null
  */
 export function UndoToast() {
   const activeToast = useUndoStore((s) => s.activeToast);

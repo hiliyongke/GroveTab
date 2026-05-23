@@ -10,7 +10,7 @@
  *   - 所有交互走 antd Button + Tag + Tooltip 原生组件
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
 import type { LiveTab } from '@/shared/types';
 import { Button, Tag, Tooltip, Checkbox, theme } from 'antd';
 import { Globe,
@@ -70,9 +70,25 @@ interface TabItemProps {
 }
 
 /**
- * 单条标签行
+ * 单条标签行组件
+ *
+ * 渲染单个标签页的行项，包含 favicon、标题、状态图标和操作按钮。
+ * 支持多选模式、右键菜单、拖拽等交互。
+ *
+ * @param props - 组件属性
+ * @param props.tab - 标签数据
+ * @param props.onJump - 跳转回调
+ * @param props.onClose - 关闭回调
+ * @param props.leading - 行首前置元素（可选）
+ * @param props.showHostname - 是否显示域名（可选）
+ * @param props.hideFavicon - 是否隐藏 favicon（可选）
+ * @param props.showUrlHint - 是否显示 URL 消歧提示（可选）
+ * @param props.trailing - 行尾附加元素（可选）
+ * @param props.selectable - 是否支持多选（可选）
+ * @param props.visibleTabIds - 当前视图可见标签 ID 列表（可选）
+ * @returns 单条标签行 JSX 元素
  */
-export function TabItem({ tab, onJump, onClose, leading, showHostname = false, hideFavicon = false, showUrlHint = false, trailing, selectable = false, visibleTabIds = [] }: TabItemProps) {
+export const TabItem = memo(function TabItem({ tab, onJump, onClose, leading, showHostname = false, hideFavicon = false, showUrlHint = false, trailing, selectable = false, visibleTabIds = [] }: TabItemProps) {
   const { t } = useT();
   const { token } = theme.useToken();
   const isPinned = useMetadataStore((s) => s.isPinned(tab.url));
@@ -87,7 +103,12 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
   const [faviconError, setFaviconError] = useState(false);
   const speedDialSites = useSpeedDialStore((s) => s.sites);
   const addSite = useSpeedDialStore((s) => s.addSite);
-  /** 标准化 URL：去掉协议前缀和常见跟踪参数，用于去重比较 */
+  /**
+   * 标准化 URL：去掉协议前缀和常见跟踪参数，用于去重比较
+   *
+   * @param url - 要标准化的 URL 字符串
+   * @returns 标准化后的 URL 字符串
+   */
   const normalizeUrl = (url: string): string => {
     try {
       const u = new URL(url);
@@ -107,7 +128,15 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
   /** 友好展示串：路径 + 关键参数，失败回落到原 URL */
   const urlHint = showUrlHint ? formatUrlForDisplay(tab.url) : '';
 
-  /** 多选模式下点击逻辑：Ctrl/Cmd+点击 或 selectionMode 已开启时切换选中 */
+  /**
+   * 处理标签行点击事件
+   *
+   * 多选模式下 Ctrl/Cmd+点击或 selectionMode 已开启时切换选中状态。
+   * 正常点击时跳转至对应标签。
+   *
+   * @param e - 鼠标点击事件
+   * @returns 无返回值
+   */
   const handleClick = useCallback((e: React.MouseEvent) => {
     // 多选模式下的点击逻辑
     if (selectable && (e.ctrlKey || e.metaKey || selectionMode)) {
@@ -119,7 +148,14 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
     onJump(tab.id, tab.windowId);
   }, [selectable, selectionMode, tab.id, tab.windowId, toggleSelect, visibleTabIds, onJump]);
 
-  /** 长按进入多选模式 */
+  /**
+   * 处理右键菜单事件
+   *
+   * 长按进入多选模式，或显示右键菜单。
+   *
+   * @param e - 鼠标事件
+   * @returns 无返回值
+   */
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -132,10 +168,14 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
     setContextMenu({ x: e.clientX, y: e.clientY });
   }, [selectable, selectionMode, tab.id, visibleTabIds, enterSelectionMode, toggleSelect]);
   /**
-   * 关闭按钮 handler：
-   *   - onClose (即 store.closeSingleTab) 是 async，失败会 throw
-   *   - 这里用 void + catch 吞掉 rejection，避免浏览器抛 unhandled promise 警告
-   *   - 失败 toast 已由 store 统一弹出，此处无需再次提示
+   * 处理标签关闭按钮点击
+   *
+   * onClose (即 store.closeSingleTab) 是 async，失败会 throw。
+   * 这里用 void + catch 吞掉 rejection，避免浏览器抛 unhandled promise 警告。
+   * 失败 toast 已由 store 统一弹出，此处无需再次提示。
+   *
+   * @param e - 鼠标事件
+   * @returns 无返回值
    */
   const handleClose = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -332,4 +372,4 @@ export function TabItem({ tab, onJump, onClose, leading, showHostname = false, h
       )}
     </>
   );
-}
+});

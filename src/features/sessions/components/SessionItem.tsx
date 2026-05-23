@@ -19,8 +19,7 @@ import {
 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { Button, List, Tooltip, Popconfirm, Checkbox } from 'antd';
-import { format } from 'date-fns';
-import { zhCN, enUS } from 'date-fns/locale';
+import { formatShortDateTime } from '@/shared/utils/date';
 import type { ArchivedSession, ArchivedTab } from '@/shared/types';
 import { useT } from '@/shared/i18n';
 
@@ -45,6 +44,25 @@ interface SessionItemProps {
   matchedTabIndexes?: Set<number>;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.session
+ * @param root0.isExpanded
+ * @param root0.locale
+ * @param root0.onToggleExpand
+ * @param root0.onRestore
+ * @param root0.onDelete
+ * @param root0.onStartRenaming
+ * @param root0.onOpenSingle
+ * @param root0.onShare
+ * @param root0.selectable
+ * @param root0.selected
+ * @param root0.onToggleSelect
+ * @param root0.highlightQuery
+ * @param root0.matchedTabIndexes
+ * @returns {void} 无返回值
+ */
 export function SessionItem({
   session,
   isExpanded,
@@ -63,7 +81,11 @@ export function SessionItem({
 }: SessionItemProps) {
   const { t } = useT();
 
-  /** 高亮匹配关键词的文本 */
+  /**
+   * 高亮匹配关键词的文本
+   * @param text - 原始文本
+   * @returns {React.ReactNode} 高亮后的 JSX 元素或原文本
+   */
   const highlightText = (text: string): React.ReactNode => {
     if (!highlightQuery?.trim()) return text;
     const lowerText = text.toLowerCase();
@@ -127,9 +149,7 @@ export function SessionItem({
           <div className="app-archive-item__meta">
             {t('archive.tabCount', { count: session.tabCount })}
             <span className="app-archive-item__meta-divider">·</span>
-            {format(session.createdAt, 'MMM d, HH:mm', {
-              locale: locale === 'zh-CN' ? zhCN : enUS,
-            })}
+            {formatShortDateTime(session.createdAt, locale)}
           </div>
         </div>
 

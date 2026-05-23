@@ -20,8 +20,8 @@ import { DomainGroupView } from '@/features/tabs/DomainGroupView';
 import { SelectionModeNotice } from '@/features/tabs/SelectionModeNotice';
 import { FeatureEmptyState } from '@/shared/ui/FeatureEmptyState';
 import { useT } from '@/shared/i18n';
-import type { ViewMode } from '@/shared/config/views';
-import { getViewComponentMap } from '@/shared/config/view-registry';
+import type { ViewMode } from '@/shared/types';
+import { getWorkspaceViewComponent } from '@/features/workspace/view-catalog';
 
 interface AppWorkspaceProps {
   /** 初始化是否完成 */
@@ -42,6 +42,28 @@ interface AppWorkspaceProps {
   onOpenSettings: () => void;
 }
 
+/**
+ * Workspace 模式下的主内容区渲染组件
+ *
+ * 从 AppContent 中拆分而来，职责：
+ *   - 渲染 OnboardingCard（首次引导）
+ *   - 渲染 SelectionModeNotice（多选模式提示）
+ *   - 渲染 TidySuggestionBar（整理建议栏）
+ *   - 渲染主视图内容（loading / empty / view component）
+ *
+ * 设计原则：纯渲染组件，所有状态由父组件 AppContent 通过 props 传入。
+ *
+ * @param props - 组件属性
+ * @param props.checked - 初始化是否完成
+ * @param props.initError - 初始化错误信息
+ * @param props.showOnboarding - 是否显示新手引导
+ * @param props.viewMode - 当前视图模式
+ * @param props.onDismissOnboarding - 关闭新手引导回调
+ * @param props.onRetryInit - 重试初始化回调
+ * @param props.onOpenArchive - 打开归档面板回调
+ * @param props.onOpenSettings - 打开设置面板回调
+ * @returns {void} 无返回值
+ */
 export function AppWorkspace({
   checked,
   initError,
@@ -68,9 +90,9 @@ export function AppWorkspace({
   const tabCount = useMemo(() => tabs.length, [tabs]);
 
   /* ---------- useMemo 缓存视图组件 ---------- */
+   
   const ViewComponent = useMemo(() => {
-    const Comp = getViewComponentMap()[viewMode];
-    return Comp !== undefined ? Comp : null;
+    return getWorkspaceViewComponent(viewMode);
   }, [viewMode]);
 
   /* ---------- 事件处理 ---------- */
@@ -143,6 +165,7 @@ export function AppWorkspace({
           />
         ) : ViewComponent !== null ? (
           <Suspense fallback={<div className="app-suspense-fallback"><Spin /></div>}>
+            {/* eslint-disable-next-line react-hooks/static-components -- ViewComponent is a lazy-loaded component reference resolved from a static catalog; the dynamic component pattern is intentional for code-split view switching */}
             <ViewComponent />
           </Suspense>
         ) : <DomainGroupView />}

@@ -1,0 +1,160 @@
+@import (reference) '@/styles/mixins.less';
+
+/* KanbanView —— 看板视图（@dnd-kit/core + @dnd-kit/sortable） */
+
+.app-kanban-theme {
+  background: var(--app-kanban-surface-bg);
+  border-radius: var(--ant-border-radius-lg);
+  border: 1px solid var(--app-kanban-border);
+}
+
+.app-kanban-view {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  min-height: 72px;
+  padding: 8px 0;
+  overflow-x: auto;
+}
+
+/* 左侧：实时 Tab 源栏 */
+.app-kanban-source {
+  flex-shrink: 0;
+  width: 200px;
+  padding: 8px;
+  border-radius: var(--ant-border-radius);
+  background: var(--app-kanban-source-bg);
+  .flex-column(4px);
+  max-height: 560px;
+  overflow-y: auto;
+}
+
+.app-kanban-source__title {
+  color: var(--ant-color-text-secondary);
+  font-size: 11px;
+  border-bottom: 1px solid var(--ant-color-split, var(--app-kanban-border));
+  font-weight: 600;
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+}
+
+/* 看板卡片 */
+.app-kanban-card {
+  .flex-row-center(6px);
+  padding: 6px 10px;
+  cursor: move;
+  border-radius: var(--ant-border-radius-sm);
+  border: 1px solid var(--app-kanban-border);
+  background: var(--app-kanban-surface-bg);
+  transition: opacity 120ms, background 120ms;
+}
+
+.app-kanban-card--source {
+  cursor: grab;
+  font-size: 11px;
+}
+
+.app-kanban-card.is-offline {
+  border-style: dashed;
+}
+
+.app-kanban-card__favicon {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  object-fit: contain;
+}
+
+.app-kanban-card__title {
+  font-size: 12px;
+  .text-truncate();
+}
+
+.app-kanban-card__title--grow {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 看板列 */
+.app-kanban-column-wrap {
+  flex-shrink: 0;
+  width: 260px;
+}
+
+.app-kanban-column {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.app-kanban-column.is-over {
+  border-color: var(--app-kanban-overlay-border);
+  box-shadow: 0 0 0 1px var(--app-kanban-overlay-border);
+}
+
+.app-kanban-column__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.app-kanban-column__header {
+  .flex-row-center(6px);
+  padding: 4px 6px;
+}
+
+.app-kanban-column__drag-handle {
+  cursor: grab;
+}
+
+.app-kanban-column__name {
+  .flex-row-center(4px);
+  font-size: 12px;
+}
+
+.app-kanban-column__count {
+  color: var(--ant-color-text-tertiary);
+  font-size: 11px;
+  margin-left: auto;
+}
+
+.app-kanban-column__dropzone {
+  .flex-column(4px);
+  min-height: 80px;
+  padding: 6px;
+}
+
+.app-kanban-column__empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80px;
+  background: var(--ant-color-fill);
+  color: var(--ant-color-text-tertiary);
+  font-size: 12px;
+  border-radius: var(--ant-border-radius-sm);
+}
+
+/* 新增列 */
+.app-kanban-add-column {
+  flex-shrink: 0;
+  width: 240px;
+  padding: 8px;
+}
+
+/* DragOverlay 抬升副本 */
+.app-kanban-overlay {
+  .flex-row-center(6px);
+  padding: 8px 14px;
+  border-radius: var(--ant-border-radius);
+  border: 1px solid var(--app-kanban-overlay-border);
+  background: var(--app-kanban-surface-bg);
+  box-shadow: var(--app-kanban-overlay-shadow);
+  opacity: 0.9;
+  font-size: 12px;
+}
+
+.app-kanban-overlay--column {
+  font-size: 14px;
+  font-weight: 500;
+}

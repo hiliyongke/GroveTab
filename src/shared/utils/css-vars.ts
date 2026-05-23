@@ -10,6 +10,8 @@ import type { CSSProperties } from 'react';
 /**
  * 将 CSS 自定义属性键值对转换为 React.CSSProperties 对象。
  *
+ * @param vars - CSS 自定义属性键值对，值为 undefined 时会被过滤掉
+ * @returns 包含 CSS 自定义属性的 React.CSSProperties 对象
  * @example
  * ```tsx
  * const style = cssVars({

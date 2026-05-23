@@ -1,3 +1,19 @@
+/**
+ * useAppInitialization — 应用启动初始化 Hook
+ *
+ * 集中管理应用启动时的初始化逻辑：
+ *   - 并行加载设置、标签页、撤销记录、元数据
+ *   - 检测新手引导状态
+ *   - 处理 URL hash 信号（如 #search 自动聚焦搜索框）
+ *   - 注册全局撤销处理器
+ *   - 监听 Hero 搜索框滚动吸附
+ *
+ * 设计要点：
+ *   - 使用 Promise.allSettled 保证部分失败不影响其他初始化
+ *   - 通过 ref 避免闭包陷阱和无限循环
+ *   - 注册撤销处理器时避免 StrictMode 重复注册
+ */
+
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useSettingsStore, useTabsStore, useUndoStore, useMetadataStore } from '@/store';
 import { initArchiveStorage } from '@/services/archive';
@@ -31,6 +47,9 @@ let tagUndoRegistered = false;
  *   - heroSearchRef: RefObject<HTMLDivElement | null> —— Hero 搜索框的 DOM 引用
  *   - retry: () => void —— 重置错误状态（调用方需配合递增 initRunId 触发重试）
  *   - dismissOnboarding: () => void —— 关闭新手引导
+ *
+ * @param initRunId - 初始化运行 ID，变更时触发重新初始化（用于重试机制）
+ * @returns 包含初始化状态、错误信息、新手引导状态、搜索状态、紧凑搜索可见性、重试函数、关闭引导函数的对象
  */
 export function useAppInitialization(initRunId: number) {
   const { t } = useT();
@@ -101,7 +120,7 @@ export function useAppInitialization(initRunId: number) {
           tagUndoRegistered = true;
           registerHistoryUndoHandler('tab_tagged', async (event) => {
             const ctx = event.undoContext as { url?: string; tag?: string } | undefined;
-            if (ctx === undefined || ctx.url === undefined || ctx.tag === undefined) return false;
+            if (ctx?.url === undefined || ctx.tag === undefined) return false;
             await useMetadataStore.getState().removeTag(ctx.url, ctx.tag);
             return true;
           });

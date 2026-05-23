@@ -42,8 +42,13 @@ const handlers = new Map<HistoryEventType, HistoryUndoHandler>();
 
 /**
  * 注册一个事件 type 的撤销实现。
+ *
  * 同一 type 第二次调用会覆盖前次注册（便于热更新场景），
  * 返回值为 unregister 函数。
+ *
+ * @param type 要注册的事件类型
+ * @param handler 撤销处理函数
+ * @returns 取消注册的函数（调用后移除该 handler）
  */
 export function registerHistoryUndoHandler(
   type: HistoryEventType,
@@ -57,7 +62,12 @@ export function registerHistoryUndoHandler(
   };
 }
 
-/** 当前 type 是否已有撤销实现注册 */
+/**
+ * 当前 type 是否已有撤销实现注册。
+ *
+ * @param type 要查询的事件类型
+ * @returns 已注册返回 true，否则返回 false
+ */
 export function hasHistoryUndoHandler(type: HistoryEventType): boolean {
   return handlers.has(type);
 }
@@ -65,6 +75,7 @@ export function hasHistoryUndoHandler(type: HistoryEventType): boolean {
 /**
  * 触发某条事件的撤销。
  *
+ * @param event
  * @returns true：撤销成功；false：未注册 handler 或 handler 返回 false。
  *   抛错时由调用方自行 toast。
  */

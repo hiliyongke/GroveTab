@@ -21,7 +21,17 @@ const dictionaries: Record<Locale, Record<string, string>> = {
   en,
 };
 
-/** 在 dictionaries 中按 locale 查找并替换占位符 */
+/**
+ * 在字典中查找 key 对应的翻译文本，并替换占位符
+ *
+ * 查找顺序：目标 locale → 英语回退 → key 原样返回。
+ * 占位符格式为 `{name}`，依次用 params 中的值替换。
+ *
+ * @param locale 目标语言
+ * @param key    翻译键，如 'tabs.close'
+ * @param params 占位符替换表（可选），如 { count: 3 }
+ * @returns 替换后的翻译文本
+ */
 function lookup(
   locale: Locale,
   key: string,
@@ -37,10 +47,14 @@ function lookup(
 }
 
 /**
- * 根据 Locale 和 key 获取翻译（组件与非组件通用）
+ * 根据指定语言和 key 获取翻译文本
+ *
+ * 组件和非组件环境均可直接调用。内部委托给 `lookup`。
+ *
  * @param locale 目标语言
- * @param key    翻译 key
- * @param params 占位符替换 Map
+ * @param key    翻译键，对应字典中的键名
+ * @param params 占位符替换表（可选），如 { count: 3 }
+ * @returns 替换后的翻译文本
  */
 export function translateWithLocale(
   locale: Locale,
@@ -56,8 +70,9 @@ export function translateWithLocale(
  * 适用于 store action、chrome API 回调、SW 桥等脱离 React tree 的场景。
  * 从 settings store 直接读 language，不依赖 Context。
  *
- * @param key    同 useT 的 key
- * @param params 占位符替换 Map
+ * @param key    翻译键，同 useT 的 key
+ * @param params 占位符替换表（可选），如 { count: 3 }
+ * @returns 替换后的翻译文本
  */
 export function translate(
   key: string,

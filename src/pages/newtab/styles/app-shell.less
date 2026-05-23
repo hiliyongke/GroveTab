@@ -778,3 +778,12 @@
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
+
+/* ── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .app-hero-search,
+  .app-view-sidebar__item,
+  .app-view-bottom__item {
+    transition: none !important;
+  }
+}

@@ -12,7 +12,8 @@
     "sessions",
     "contextMenus",
     "tabGroups",
-    "activeTab"
+    "activeTab",
+    "sidePanel"
   ],
   "optional_permissions": ["history", "bookmarks"],
   "host_permissions": [],
@@ -53,7 +54,18 @@
     "open-history": {
       "suggested_key": { "default": "Alt+H" },
       "description": "Open history timeline in __MSG_appName__"
+    },
+    "toggle-arc-sidebar": {
+      "suggested_key": { "default": "Alt+A" },
+      "description": "Toggle Arc-style sidebar"
+    },
+    "open-command-bar": {
+      "suggested_key": { "default": "Alt+Shift+Space" },
+      "description": "Open Arc command bar"
     }
+  },
+  "side_panel": {
+    "default_path": "src/pages/sidebar/index.html"
   },
   "incognito": "split"
 }

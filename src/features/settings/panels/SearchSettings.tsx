@@ -27,6 +27,7 @@ import { Field } from '@/features/settings/components/Field';
 import { setData } from '@/repositories/storage-repo';
 import { feedback } from '@/shared/ui/feedback';
 import { STORAGE_KEYS } from '@/shared/config/storage-keys';
+import styles from '../settings.module.less';
 
 interface SearchSettingsProps {
   settings: UserSettings;
@@ -45,6 +46,15 @@ interface LocalCustomSearchEngine {
   color?: string;
 }
 
+/**
+ * 创建自定义搜索引擎 ID
+ *
+ * 根据标签名生成 slug，并确保 ID 唯一。
+ *
+ * @param label - 搜索引擎标签名
+ * @param existing - 已存在的自定义搜索引擎列表
+ * @returns 唯一的搜索引擎 ID
+ */
 function createCustomEngineId(label: string, existing: LocalCustomSearchEngine[]): `custom:${string}` {
   const slug = label
     .trim()
@@ -64,6 +74,23 @@ function createCustomEngineId(label: string, existing: LocalCustomSearchEngine[]
 
 /**
  * 搜索设置组件
+ *
+ * 包含：
+ *  1. 搜索范围设置
+ *  2. 拼音搜索开关
+ *  3. 搜索结果排序
+ *  4. 默认搜索引擎
+ *  5. 启用的搜索引擎
+ *  6. 自动回退到网页搜索
+ *  7. 使用历史建议
+ *  8. 使用热词建议
+ *  9. 热词来源选择
+ *  10. 清空最近搜索
+ *
+ * @param props - 组件属性
+ * @param props.settings - 当前用户设置
+ * @param props.updateSettings - 更新设置回调
+ * @returns 搜索设置组件 JSX 元素
  */
 export function SearchSettings({ settings, updateSettings }: SearchSettingsProps) {
   const { t } = useT();
@@ -80,11 +107,23 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
       : (enabledEngines[0] ?? 'google');
   const canAddCustomEngine = customEngineName.trim() !== '' && customEngineUrl.trim() !== '';
 
-  /** 防 ESLint `no-misused-promises`：`updateSettings` 异步但表单回调需要 `void`。 */
+  /**
+   * 防 ESLint `no-misused-promises`：`updateSettings` 异步但表单回调需要 `void`。
+   *
+   * @param patch - 部分用户设置对象
+   * @returns void
+   */
   const handleSetting = (patch: Partial<UserSettings>) => {
     void updateSettings(patch);
   };
 
+  /**
+   * 添加自定义搜索引擎
+   *
+   * 验证输入，生成搜索引擎配置，并更新设置。
+   *
+   * @returns 无返回值
+   */
   const handleAddCustomEngine = () => {
     if (!canAddCustomEngine) return;
     const rawUrl = customEngineUrl.trim();
@@ -114,13 +153,13 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
   };
 
   return (
-    <div className="settings-panel-stack settings-panel-stack--regular">
+    <div className={`${styles['settings-panel-stack']} ${styles['settings-panel-stack--regular']}`}>
       <Field
         label={t('settings.searchScope')}
         hint={t('settings.searchScopeHint')}
       >
         <Checkbox.Group
-          className="settings-checkbox-group"
+          className={styles['settings-checkbox-group']}
           value={settings.searchScope ?? ['title', 'hostname', 'url']}
           onChange={(values) => {
             if (values.length === 0) return;
@@ -170,7 +209,7 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
         <Select<SearchEngineId>
           value={defaultSearchEngine}
           onChange={(value) => handleSetting({ searchDefaultEngine: value })}
-          className="settings-control-full"
+          className={styles['settings-control-full']}
           options={enabledEngines.map((engineId) => {
             const option = allEngines.find((item) => item.id === engineId);
             return {
@@ -186,7 +225,7 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
         hint={t('settings.searchEnabledEnginesHint')}
       >
         <Checkbox.Group
-          className="settings-checkbox-group"
+          className={styles['settings-checkbox-group']}
           value={enabledEngines}
           onChange={(values) => {
             if (values.length === 0) return;
@@ -209,7 +248,7 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
         label={t('settings.customSearchEngine')}
         hint={t('settings.customSearchEngineHint')}
       >
-        <Space.Compact className="settings-control-full">
+        <Space.Compact className={styles['settings-control-full']}>
           <Input
             value={customEngineName}
             onChange={(e) => setCustomEngineName(e.target.value)}
@@ -273,7 +312,7 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
           value={settings.hotSuggestionSource ?? 'local'}
           disabled={settings.searchUseHotSuggestions === false}
           onChange={(v) => handleSetting({ hotSuggestionSource: v })}
-          className="settings-control-full"
+          className={styles['settings-control-full']}
           options={[
             { value: 'local', label: t('settings.hotSourceLocal') },
             { value: 'preset', label: t('settings.hotSourcePreset') },

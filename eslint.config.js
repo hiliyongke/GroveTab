@@ -3,6 +3,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
+import jsdoc from 'eslint-plugin-jsdoc';
 
 export default tseslint.config(
   { ignores: ['dist', '.planning', 'node_modules', '*.d.ts', 'tests', 'build/', '.husky/'] },
@@ -28,6 +29,7 @@ export default tseslint.config(
     plugins: {
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
+      jsdoc: jsdoc,
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
@@ -59,6 +61,30 @@ export default tseslint.config(
       '@typescript-eslint/no-inferrable-types': 'warn',
       '@typescript-eslint/prefer-for-of': 'warn',
       '@typescript-eslint/prefer-function-type': 'warn',
+
+      /* JSDoc 规范检查 - 简化版 */
+      'jsdoc/require-jsdoc': ['warn', {
+        require: {
+          FunctionDeclaration: true,
+          MethodDefinition: true,
+          ClassDeclaration: true,
+          ArrowFunctionExpression: false,
+          FunctionExpression: false,
+        },
+      }],
+      'jsdoc/require-param': 'warn',
+      'jsdoc/require-returns': ['warn', {
+        contexts: ['!FunctionExpression[parent.init.type="FunctionExpression"]', '!ArrowFunctionExpression[parent.init.type="ArrowFunctionExpression"]'],
+        exemptedBy: ['returns', 'type', 'class'],
+      }],
+    },
+  },
+  // 例外文件：类型声明文件不需要 JSDoc 注释
+  {
+    files: ['**/*.d.ts'],
+    rules: {
+      'jsdoc/require-file-overview': 'off',
+      'jsdoc/require-jsdoc': 'off',
     },
   },
 );

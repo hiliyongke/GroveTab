@@ -133,6 +133,13 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
 
 /**
  * 将色标数组 + 角度拼接成 CSS linear-gradient 字符串
+ *
+ * 将颜色停止点数组按位置排序后，拼接成标准的 CSS linear-gradient 字符串。
+ * 每个色标包含颜色和位置（0-1 之间）。
+ *
+ * @param stops - 颜色停止点数组，每项包含 color 和 position
+ * @param angle - 渐变角度（单位：度）
+ * @returns CSS linear-gradient 字符串
  */
 export function buildGradient(stops: Array<{ color: string; position: number }>, angle: number): string {
   const sorted = [...stops].sort((a, b) => a.position - b.position);
@@ -140,7 +147,22 @@ export function buildGradient(stops: Array<{ color: string; position: number }>,
   return `linear-gradient(${angle}deg, ${colorStops})`;
 }
 
-/** 根据 ID 和当前模式快速查找渐变 CSS */
+/**
+ * 根据 ID 和当前模式快速查找渐变 CSS
+ *
+ * 解析渐变预设或自定义渐变配置，返回对应的 CSS linear-gradient 字符串。
+ * 支持浅色/深色模式独立配置，自定义渐变优先于预设。
+ * 包含旧预设迁移逻辑（aurora → slate，sunrise → warm）。
+ *
+ * @param id - 渐变预设 ID
+ * @param isDark - 是否深色模式
+ * @param customGradient - 自定义渐变配置（可选）
+ * @param customGradient.stops - 浅色模式色标数组
+ * @param customGradient.angle - 浅色模式渐变角度
+ * @param customGradient.darkStops - 深色模式色标数组（可选）
+ * @param customGradient.darkAngle - 深色模式渐变角度（可选）
+ * @returns CSS linear-gradient 字符串
+ */
 export function resolveGradient(id: GradientPresetId, isDark: boolean, customGradient?: { stops: Array<{ color: string; position: number }>; angle: number; darkStops?: Array<{ color: string; position: number }>; darkAngle?: number }): string {
   if (id === 'custom' && customGradient) {
     const stops = (isDark && customGradient.darkStops) ? customGradient.darkStops : customGradient.stops;

@@ -35,6 +35,7 @@ import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
 import { BRAND, getBrandDisplayName, getBrandSlogan } from '@/shared/config/brand';
 import styles from './styles/about.module.less';
+import settingsStyles from '../settings.module.less';
 
 const PKG_VERSION = (() => {
   try {
@@ -63,6 +64,14 @@ const FEATURES: FeatureCard[] = [
   { icon: Palette, titleKey: 'about.feature.skin.title', descKey: 'about.feature.skin.desc', color: '#9B8EC4' },
 ];
 
+/**
+ * 关于面板组件
+ *
+ * 展示产品介绍、核心能力卡片、快捷键速览和版本信息。
+ * 作为 SettingsPanel 的一个 Tab 渲染，支持国际化。
+ *
+ * @returns 关于面板 JSX 元素
+ */
 export function AboutPanel() {
   const { t, locale } = useT();
   const brandName = getBrandDisplayName(locale);
@@ -72,8 +81,8 @@ export function AboutPanel() {
   });
 
   return (
-    <div className={styles['about-panel settings-panel-stack']}>
-      <section className="settings-section">
+    <div className={`${styles['about-panel']} ${settingsStyles['settings-panel-stack']}`}>
+      <section className={settingsStyles['settings-section']}>
         <div className={styles['about-panel__hero']} style={heroStyle}>
         <div className={styles['about-panel__logo']}>{BRAND.shortName}</div>
         <div className={styles['about-panel__brand']}>{brandName}</div>
@@ -82,7 +91,7 @@ export function AboutPanel() {
       </div>
       </section>
 
-      <section className="settings-section">
+      <section className={settingsStyles['settings-section']}>
         <div>
         <div className={styles['about-panel__section-title']}>{t('about.featuresTitle')}</div>
         <div className={styles['about-panel__feature-grid']}>
@@ -107,7 +116,7 @@ export function AboutPanel() {
       </div>
       </section>
 
-      <section className="settings-section">
+      <section className={settingsStyles['settings-section']}>
         <div>
         <div className={styles['about-panel__tips-title']}>
           <Sparkles size={ICON_SIZE.MEDIUM} />
@@ -124,7 +133,7 @@ export function AboutPanel() {
 
       <Divider className={styles['about-panel__divider']} />
 
-      <section className="settings-section">
+      <section className={settingsStyles['settings-section']}>
         <div className={styles['about-panel__support']}>
         <div className={styles['about-panel__support-title']}>{t('about.supportTitle')}</div>
         <div className={styles['about-panel__support-actions']}>

@@ -26,13 +26,15 @@ import { useT } from '@/shared/i18n';
 import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
 import { Z } from '@/shared/config/z-index';
-import styles from './styles/views.module.less';
+import styles from './BatchActionBar.module.less';
 
 /**
  * 批量操作浮动栏
  *
  * 仅在 selectionMode=true 且 selectedIds 非空时渲染。
  * 固定在视口底部居中，z-index 高于内容区。
+ *
+ * @returns 批量操作浮动栏 JSX 元素
  */
 export function BatchActionBar() {
   const selectedIds = useSelectionStore((s) => s.selectedIds);
@@ -46,7 +48,11 @@ export function BatchActionBar() {
 
   const count = selectedIds.size;
 
-  /** 批量关闭 */
+  /**
+   * 批量关闭选中的标签
+   *
+   * @returns 无返回值
+   */
   const handleBatchClose = useCallback(async () => {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
@@ -58,7 +64,11 @@ export function BatchActionBar() {
     }
   }, [selectedIds, closeMultipleTabs, resetAfterBatch]);
 
-  /** 批量休眠。 */
+  /**
+   * 批量休眠选中的标签
+   *
+   * @returns 无返回值
+   */
   const handleBatchDiscard = useCallback(async () => {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
@@ -70,7 +80,13 @@ export function BatchActionBar() {
     }
   }, [selectedIds, discardMultipleTabs, resetAfterBatch]);
 
-  /** 批量归档：统一走归档服务，避免直接写 storage。 */
+  /**
+   * 批量归档选中的标签
+   *
+   * 统一走归档服务，避免直接写 storage。
+   *
+   * @returns 无返回值
+   */
   const handleBatchArchive = useCallback(async () => {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;

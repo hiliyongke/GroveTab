@@ -12,6 +12,14 @@ import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useMetadataStore, useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 
+/**
+ * Workspace 切换器组件
+ *
+ * 显示当前激活的 workspace 高亮 chip + 下拉切换所有 workspaces + 清除筛选。
+ * 不含创建/编辑 UI —— 那些由 DataPanel 中的"工作区"区块承担。
+ *
+ * @returns Workspace 切换器 JSX 元素
+ */
 export function WorkspaceSwitcher() {
   const { t } = useT();
   const workspaces = useMetadataStore((s) => s.workspaces);

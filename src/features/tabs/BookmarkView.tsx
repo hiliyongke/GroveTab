@@ -40,11 +40,19 @@ import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
 import { BookmarkToolsModal } from '@/features/bookmarks/BookmarkToolsModal';
 import { isSafeExternalUrl } from '@/shared/utils/url-safety';
-import { useAccent } from '@/shared/hooks/useAccent';
+import { useAccent } from '@/shared/hooks/use-accent';
 import { FeatureEmptyState } from '@/shared/ui/FeatureEmptyState';
 import { BookmarkTreeView } from './BookmarkTreeView';
-import styles from './styles/views.module.less';
+import styles from './BookmarkView.module.less';
 
+/**
+ * 合并 CSS 类名
+ *
+ * 过滤掉 falsy 值（false、undefined、空字符串），用空格连接。
+ *
+ * @param classNames - CSS 类名列表
+ * @returns 合并后的类名字符串
+ */
 function cx(...classNames: Array<string | false | undefined>) {
   return classNames.filter(Boolean).join(' ');
 }
@@ -52,7 +60,12 @@ function cx(...classNames: Array<string | false | undefined>) {
 /** 视图模式：列表 / 脈图（横向）/ 架构图（垂直） */
 type BookmarkLayout = 'list' | 'mindmap' | 'orgchart';
 
-/** 从 URL 提取 hostname 做展示和取色键 */
+/**
+ * 从 URL 提取 hostname 做展示和取色键
+ *
+ * @param url - 待提取的 URL
+ * @returns hostname 或原始 URL（解析失败时）
+ */
 function getHostname(url: string): string {
   try {
     return new URL(url).hostname;
@@ -61,7 +74,13 @@ function getHostname(url: string): string {
   }
 }
 
-/** 从标题/URL 提取首字母作为 favicon 回退 */
+/**
+ * 从标题/URL 提取首字母作为 favicon 回退
+ *
+ * @param title - 书签标题
+ * @param url - 书签 URL
+ * @returns 首字母大写
+ */
 function getFallbackLetter(title: string, url: string): string {
   if (title) return title.charAt(0).toUpperCase();
   try {
@@ -74,6 +93,10 @@ function getFallbackLetter(title: string, url: string): string {
 /**
  * Chrome 默认根级文件夹的 ID 与友好名映射
  * 0: 根  1: 书签栏  2: 其他书签  3: 移动设备书签
+ *
+ * @param node - 书签节点
+ * @param t - 国际化翻译函数
+ * @returns 解析后的文件夹标题
  */
 function resolveFolderTitle(node: BookmarkNode, t: (key: string) => string): string {
   if (node.title?.trim()) return node.title;
@@ -85,7 +108,14 @@ function resolveFolderTitle(node: BookmarkNode, t: (key: string) => string): str
   }
 }
 
-/** 递归统计书签总数 */
+/**
+ * 递归统计书签总数
+ *
+ * 遍历书签树，统计所有包含 URL 的叶节点数量。
+ *
+ * @param nodes - 书签节点数组
+ * @returns 书签总数
+ */
 function countBookmarks(nodes: BookmarkNode[] | undefined): number {
   if (!nodes) return 0;
   return nodes.reduce((sum, n) => {
@@ -96,7 +126,17 @@ function countBookmarks(nodes: BookmarkNode[] | undefined): number {
 
 // ── 子组件 ──
 
-/** 单个书签行项 */
+/**
+ * 单个书签行项组件
+ *
+ * 渲染书签的单个行项目，包含 favicon、标题和访问链接。
+ *
+ * @param props - 组件属性
+ * @param props.node - 书签节点
+ * @param props.onOpen - 打开书签回调
+ * @param props.highlight - 高亮文本的函数（可选）
+ * @returns 书签行项 JSX 元素
+ */
 function BookmarkRow({
   node,
   onOpen,
@@ -163,6 +203,12 @@ function BookmarkRow({
 
 /**
  * 子文件夹分组（次级标题样式，无卡片包裹，用左侧缩进 + 折叠头表达层级）
+ * @param root0
+ * @param root0.folder - 文件夹节点
+ * @param root0.onOpenBookmark - 打开书签回调
+ * @param root0.depth - 嵌套深度
+ * @param root0.resolveTitle - 标题解析函数
+ * @returns {JSX.Element} 分组元素
  */
 function SubFolderGroup({
   folder,
@@ -223,6 +269,12 @@ className={cx(styles['app-bookmark-subgroup__chevron'], collapsed && styles['is-
 /**
  * 顶层文件夹分区（书签栏 / 其他书签 / 移动设备）
  * 设计上不再做卡片包裹，而是用「分区头 + 内容列表」的扁平结构
+ * @param root0
+ * @param root0.folder
+ * @param root0.onOpenBookmark
+ * @param root0.defaultOpen
+ * @param root0.resolveTitle
+ * @returns {JSX.Element} 顶层文件夹分区 JSX 元素
  */
 function TopFolderSection({
   folder,
@@ -288,6 +340,13 @@ className={cx(styles['app-bookmark-section__chevron'], collapsed && styles['is-c
 
 // ── 主组件 ──
 
+/**
+ * 书签视图主组件
+ *
+ * 展示用户书签，支持搜索、权限请求和多种布局展示。
+ *
+ * @returns {JSX.Element} 书签视图 JSX 元素
+ */
 export function BookmarkView() {
   const [hasPermission, setHasPermission] = useState(false);
   const [checking, setChecking] = useState(true);
@@ -317,6 +376,13 @@ export function BookmarkView() {
     });
   }, []);
 
+  /**
+   * 请求书签读取权限
+   *
+   * 请求浏览器书签权限，成功后加载书签树。
+   *
+   * @returns 无返回值
+   */
   const handleRequestPermission = useCallback(async () => {
     const granted = await requestBookmarksPermission();
     if (granted) {
@@ -328,6 +394,14 @@ export function BookmarkView() {
     }
   }, []);
 
+  /**
+   * 执行书签搜索
+   *
+   * 根据用户输入的查询关键词搜索书签，并更新搜索结果状态。
+   *
+   * @param query - 搜索查询字符串
+   * @returns 无返回值
+   */
   const handleSearch = useCallback(async (query: string) => {
     setSearchQuery(query);
     if (!query.trim()) {
@@ -340,6 +414,14 @@ export function BookmarkView() {
     setSearching(false);
   }, []);
 
+  /**
+   * 打开书签链接
+   *
+   * 检查 URL 安全性后在新标签页中打开书签。
+   *
+   * @param url - 要打开的书签 URL
+   * @returns 无返回值
+   */
   const handleOpenBookmark = useCallback(async (url: string) => {
     if (!isSafeExternalUrl(url)) {
       feedback.error(translate('bookmark.openFailed'));
@@ -352,11 +434,27 @@ export function BookmarkView() {
     }
   }, []);
 
+  /**
+   * 同步打开书签（无 async）
+   *
+   * 封装 handleOpenBookmark 为同步调用，用于事件处理器。
+   *
+   * @param url - 要打开的书签 URL
+   * @returns 无返回值
+   */
   const openBookmarkSync = useCallback(
     (url: string) => { void handleOpenBookmark(url); },
     [handleOpenBookmark],
   );
 
+  /**
+   * 将所有非 Chrome 内部标签页添加为书签
+   *
+   * 遍历当前所有标签页，跳过 chrome:// 和 chrome-extension:// 协议的页面，
+   * 将其余页面添加到书签中，并在完成后刷新书签树。
+   *
+   * @returns 无返回值
+   */
   const handleBookmarkAll = useCallback(async () => {
     let count = 0;
     for (const tab of tabs) {
@@ -390,7 +488,14 @@ export function BookmarkView() {
     return result.filter((s) => countBookmarks(s.children) > 0);
   }, [bookmarks]);
 
-  /** 高亮搜索关键词 */
+  /**
+   * 创建搜索关键词高亮函数
+   *
+   * 返回一个函数，该函数根据搜索关键词对文本进行高亮处理。
+   *
+   * @param query - 搜索关键词
+   * @returns 返回接受文本参数并返回高亮 JSX 的函数
+   */
   const buildHighlight = useCallback((query: string) => {
     return (text: string): React.ReactNode => {
       const q = query.trim();
@@ -438,7 +543,7 @@ export function BookmarkView() {
   }
 
   return (
-    <div className={styles['app-bookmark-shell']}>
+    <div className={`app-bookmark-shell ${styles['app-bookmark-shell']}`}>
       {/* 顶部头：标题 + 统计 + 工具按钮 */}
       <header className={styles['app-bookmark-header']}>
         <div className={styles['app-bookmark-header__title']}>
@@ -515,7 +620,7 @@ export function BookmarkView() {
       </div>
 
       {/* 结果区 */}
-      <div className={styles['app-bookmark-result']}>
+      <div className={`app-bookmark-result ${styles['app-bookmark-result']}`}>
         {searchQuery ? (
           searching ? (
             <div className={styles['app-bookmark-loading-wrap']}><Spin /></div>

@@ -681,12 +681,46 @@ const zhCN: Record<string, string> = {
   'tabGroup.ungrouped': '未分组',
   'tabGroup.unnamed': '未命名分组',
   // 多窗口管理
-  'window.current': '当前窗口',
+'window.current': '当前窗口',
   'window.other': '其他窗口',
   'window.focused': '活跃',
   'window.mergeAll': '合并到当前窗口',
   'window.mergedAll': '已将 {count} 个标签合并到当前窗口',
   'window.mergeFailed': '合并窗口失败，请重试',
+  'window.closeWindow': '关闭窗口',
+  'window.closedWindow': '已关闭 {count} 个标签',
+  'window.closeFailed': '关闭窗口失败，请重试',
+  'window.tabMoved': '标签已移动到目标窗口',
+  'window.moveFailed': '移动标签失败，请重试',
+  // 跨窗口拖拽 & 分组编辑
+  'window.dragToOtherWindow': '拖到其他窗口移动标签',
+  'window.dragCopyToOtherWindow': '按住 Alt 拖拽可复制到目标窗口',
+  'window.syncAfterReorder': '标签顺序已同步至浏览器',
+  'window.syncFailed': '同步标签顺序失败',
+  'window.groupTabs': '分组标签',
+  'window.groupCreated': '已创建分组「{name}」',
+  'window.groupCreateFailed': '创建分组失败，请重试',
+  'window.groupRename': '重命名分组',
+  'window.groupColor': '更改分组颜色',
+  'window.groupUngroup': '取消分组',
+  'window.groupUngrouped': '已取消分组',
+  'window.groupUngroupFailed': '取消分组失败，请重试',
+  'window.groupMovedToWindow': '已将 {count} 个标签的分组移动到目标窗口',
+  'window.dragGroupToOtherWindow': '拖到其他窗口移动整个分组',
+
+  // ── 智能排序 ──
+  'window.smartSort': '智能排序',
+  'window.smartSortByDomain': '按域名',
+  'window.smartSortByRecentAccess': '按最近访问',
+  'window.smartSortByAlphabetical': '按标题字母',
+  'window.smartSortByType': '按标签类型',
+  'window.smartSortByDomainDesc': '按标签的域名聚合排列，同域名的标签相邻',
+  'window.smartSortByRecentAccessDesc': '按标签最后访问时间降序排列，最近使用的排前面',
+  'window.smartSortByAlphabeticalDesc': '按标签标题字母升序排列（A→Z）',
+  'window.smartSortByTypeDesc': '按标签类型分组排序：固定标签 → 分组标签 → 普通标签',
+  'window.smartSortGroup': '分组内排序',
+  'window.smartSortSuccess': '已按「{rule}」排序 {count} 个标签',
+  'window.smartSortGroupSuccess': '已按「{rule}」排序分组内 {count} 个标签',
   // 书签
   'bookmark.needPermission': '需要授权才能访问浏览器书签',
   'bookmark.grantPermission': '授权访问书签',
@@ -978,6 +1012,18 @@ const zhCN: Record<string, string> = {
   'popup.closeTab': '关闭标签页 {title}',
 
   // ══════════════════════════════════════════════════
+  // Arc 侧边栏
+  // ══════════════════════════════════════════════════
+  'arcSidebar.menu': '菜单',
+  'arcSidebar.addSpace': '添加空间',
+  'arcSidebar.settings': '设置',
+  'arcSidebar.moreActions': '更多操作',
+  'arcSidebar.pinTab': '固定标签页',
+  'arcSidebar.unpinTab': '取消固定',
+  'arcSidebar.closeTab': '关闭标签页',
+  'arcSidebar.commandBar': '命令栏',
+
+  // ══════════════════════════════════════════════════
   // 设置面板 section 标题
   // ══════════════════════════════════════════════════
   'settings.sectionGeneral': '通用行为',
@@ -1099,5 +1145,9 @@ const zhCN: Record<string, string> = {
   'history.undoFailed': '撤销失败',
   'history.undoNotSupported': '未注册撤销处理',
   'history.undone': '已撤销',
+
+  // ── Error ────────────────────────
+  'error.panelCrash': '{label}面板加载失败',
+  'error.retry': '重试',
 };
 export default zhCN;

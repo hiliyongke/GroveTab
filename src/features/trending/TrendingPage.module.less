@@ -1,12 +1,16 @@
+@import (reference) '@/styles/mixins.less';
+
 .trending-page {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  .flex-column(16px);
   padding: 28px 0 0;
 }
 
 .trending-page--stealth {
   gap: 18px;
+}
+
+.trending-stealth-content {
+  display: flex;
 }
 
 .trending-surface-card {
@@ -81,6 +85,10 @@
   flex: 0 0 auto;
 }
 
+.trending-toolbar-card__segment {
+  min-width: 0;
+}
+
 .trending-toolbar-card__icon {
   width: 32px;
   height: 32px;
@@ -110,7 +118,7 @@
   flex-shrink: 0;
 }
 
-.trending-refresh-icon.is-spinning {
+.is-spinning {
   animation: app-spin 1s linear infinite;
 }
 
@@ -140,7 +148,7 @@
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
 }
 
-.trending-grid.is-compact {
+.is-compact {
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
@@ -273,7 +281,7 @@
   flex-shrink: 0;
 }
 
-.trending-rank-badge.is-top {
+.is-top {
   width: 20px;
   height: 20px;
   border-radius: var(--app-radius-sm);
@@ -282,19 +290,19 @@
   color: var(--ant-color-text-inverse, #fff);
 }
 
-.trending-rank-badge.is-rank-1 {
+.is-rank-1 {
   background: var(--ant-color-error);
 }
 
-.trending-rank-badge.is-rank-2 {
+.is-rank-2 {
   background: var(--ant-color-gold, #faad14);
 }
 
-.trending-rank-badge.is-rank-3 {
+.is-rank-3 {
   background: var(--ant-color-gold-active, #d48806);
 }
 
-.trending-rank-badge.is-plain {
+.is-plain {
   width: 20px;
   font-size: 12px;
   font-weight: 600;
@@ -311,7 +319,7 @@
   padding: 2px 6px;
 }
 
-.trending-stealth-toolbar__button.is-active {
+.is-active {
   color: var(--ant-color-text);
   background: var(--ant-color-fill-tertiary);
 }
@@ -330,7 +338,7 @@
   font-size: 13px;
 }
 
-.trending-disguise-row.has-divider {
+.has-divider {
   border-bottom: 1px solid var(--ant-color-border-secondary);
 }
 

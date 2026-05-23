@@ -42,29 +42,47 @@ const EMPTY_ACTIVITY: readonly ActivityRecord[] = Object.freeze([]);
 const EMPTY_WORKSPACES: readonly Workspace[] = Object.freeze([]);
 
 interface MetadataState {
+  /** 标签映射表（URL → 标签数组），持久化到 chrome.storage.local */
   tags: Record<string, string[]>;
+  /** 备注映射表（URL → 备注文本），持久化到 chrome.storage.local */
   notes: Record<string, string>;
+  /** 固定 URL 集合（快速访问固定标签页） */
   pinnedUrls: Set<string>;
   /** 最近操作 ring buffer（由 repositories 持久化；最多 20 条，72h 过期） */
   recentActivity: readonly ActivityRecord[];
-  /** 用户自定义工作区（最多 3 个） */
+  /** 用户自定义工作区列表（最多 3 个） */
   workspaces: readonly Workspace[];
 
+  // Actions
+  /** 从 chrome.storage.local 加载所有元数据（tags, notes, pins, activity, workspaces） */
   loadMetadata: () => Promise<void>;
+  /** 为指定 URL 添加标签（自动去重，附加可撤销的历史事件） */
   addTag: (url: string, tag: string) => Promise<void>;
+  /** 移除指定 URL 的指定标签 */
   removeTag: (url: string, tag: string) => Promise<void>;
+  /** 为指定 URL 设置备注（空字符串时删除备注） */
   setNote: (url: string, note: string) => Promise<void>;
+  /** 删除指定 URL 的备注 */
   removeNote: (url: string) => Promise<void>;
+  /** 切换指定 URL 的固定状态（固定↔取消固定） */
   togglePin: (url: string) => Promise<void>;
+  /** 检查指定 URL 是否已固定 */
   isPinned: (url: string) => boolean;
+  /** 获取指定 URL 的标签列表（无标签时返回空数组） */
   getTags: (url: string) => readonly string[];
+  /** 获取指定 URL 的备注（无备注时返回空字符串） */
   getNote: (url: string) => string;
 
   // ── v1.0 封板新增 ──
+  /** 推送一条最近操作记录（会写入 ring buffer 并持久化） */
   pushActivity: (record: ActivityRecord) => Promise<void>;
+  /** 清空所有最近操作记录 */
   clearActivity: () => Promise<void>;
+  /** 设置工作区列表（外部已截断到最多 3 个） */
   setWorkspaces: (list: Workspace[]) => Promise<void>;
+  /** 新增或更新工作区（已存在则更新，否则追加；超过 3 个时静默拒绝） */
   upsertWorkspace: (workspace: Workspace) => Promise<void>;
+  /** 根据 id 删除工作区 */
   removeWorkspace: (id: string) => Promise<void>;
 }
 
@@ -199,7 +217,15 @@ export const useMetadataStore = create<MetadataState>((set, get) => ({
   },
 }));
 
-/** Normalize URL for consistent keying (strip hash + trailing slash) */
+/**
+ * 规范化 URL，作为存储键
+ *
+ * 移除 hash 部分和末尾斜杠，确保同一 URL 的不同表示形式
+ * （如 https://example.com#top 和 https://example.com/）使用相同的键。
+ *
+ * @param url 原始 URL 字符串
+ * @returns 规范化后的 URL 字符串；解析失败则返回原值
+ */
 function normalizeKey(url: string): string {
   try {
     const parsed = new URL(url);

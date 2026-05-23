@@ -7,7 +7,14 @@
 
 import { archiveCurrentWindowTabs as archiveCurrentWindowTabsFromService } from '@/services/archive';
 
-/** 归档当前窗口所有可归档标签页。 */
+/**
+ * 归档当前窗口所有可归档标签页
+ *
+ * 转发调用 services/archive 中的真正实现，
+ * 保持 SW 层轻量。
+ *
+ * @returns 无返回值（异步操作）
+ */
 export async function archiveCurrentWindowTabs(): Promise<void> {
   await archiveCurrentWindowTabsFromService();
 }

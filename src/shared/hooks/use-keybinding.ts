@@ -22,6 +22,9 @@ import { useSettingsStore } from '@/store';
  *   - `Mod`    → `$mod`
  *   - 单字母   → `Key{X}`（tinykeys 对单字母用 KeyCode 更稳）
  *   - 其他键   → 原样保留（Escape / Enter / Tab 等）
+ *
+ * @param key - 快捷键字符串（如 'Mod+k'、'Escape'）
+ * @returns tinykeys 格式的快捷键模式字符串
  */
 function toTinyKeysPattern(key: string): string {
   const parts = key.split('+').map((p) => p.trim());
@@ -43,7 +46,13 @@ function toTinyKeysPattern(key: string): string {
 }
 
 /**
- * 是否应当在输入聚焦元素上阻断快捷键。
+ * 是否应当在输入聚焦元素上阻断快捷键
+ *
+ * 当焦点在 input、textarea 或 contentEditable 元素上时，
+ * 默认不触发快捷键（避免与用户输入冲突）。
+ *
+ * @param e - 键盘事件对象
+ * @returns 如果应当阻断快捷键则返回 true，否则返回 false
  */
 function shouldBlockInInput(e: KeyboardEvent): boolean {
   const target = e.target as HTMLElement | null;
@@ -53,7 +62,13 @@ function shouldBlockInInput(e: KeyboardEvent): boolean {
 }
 
 /**
- * 在页面内注册一个快捷键动作。
+ * 在页面内注册一个快捷键动作
+ *
+ * 基于 tinykeys 实现，支持修饰键（Mod/Shift/Alt）和单键快捷键。
+ * 在输入框内默认禁用（Esc 和 allowInInput 标记的动作例外）。
+ *
+ * @param action - 快捷键动作标识符（如 'search'、'exitSelection'）
+ * @param handler - 快捷键触发时的回调函数
  */
 export function useKeybinding(action: KeybindingAction, handler: () => void): void {
   const customKeybindings = useSettingsStore((s) => s.settings.customKeybindings);
@@ -81,7 +96,12 @@ export function useKeybinding(action: KeybindingAction, handler: () => void): vo
 }
 
 /**
- * 获取当前所有快捷键的解析结果（供 ShortcutsPanel 消费）
+ * 获取当前所有快捷键的解析结果
+ *
+ * 返回所有快捷键动作的解析结果，供 ShortcutsPanel 等组件消费显示。
+ * 包含动作标识、标签、提示、快捷键字符串和是否自定义等信息。
+ *
+ * @returns 快捷键解析结果数组，每项包含 action、label、hint、keys、isCustom
  */
 export function useResolvedKeybindings(): Array<{
   action: KeybindingAction;

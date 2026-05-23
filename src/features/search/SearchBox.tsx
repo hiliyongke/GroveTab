@@ -155,15 +155,39 @@ interface SearchSection {
   items: UniversalSearchItem[];
 }
 
+/**
+ * 合并 CSS 类名
+ *
+ * 过滤掉 falsy 值（false、undefined、空字符串），用空格连接。
+ *
+ * @param classNames - CSS 类名列表
+ * @returns 合并后的类名字符串
+ */
 function cx(...classNames: Array<string | false | undefined>) {
   return classNames.filter(Boolean).join(' ');
 }
 
+/**
+ * 将 CSS 变量对象转为 React CSSProperties
+ *
+ * 用于通过 style 属性传递 CSS 变量。
+ *
+ * @param vars - CSS 变量键值对
+ * @returns React CSSProperties 对象
+ */
 function cssVars(vars: Record<string, string>): CSSProperties {
   return vars;
 }
 
-/** Normalize URL exactly like metadata-slice so search can resolve tab tags reliably. */
+/**
+ * 归一化 URL（与 metadata-slice 一致）
+ *
+ * 用于搜索时可靠地解析标签。
+ * 去除 hash 并清理末尾斜杠。
+ *
+ * @param url - 待归一化的 URL
+ * @returns 归一化后的 URL
+ */
 function normalizeMetadataKey(url: string): string {
   try {
     const parsed = new URL(url);
@@ -174,20 +198,40 @@ function normalizeMetadataKey(url: string): string {
   }
 }
 
+/**
+ * 归一化搜索文本
+ *
+ * 去除首尾空格并转为小写。
+ *
+ * @param text - 原始搜索文本
+ * @returns 归一化后的文本
+ */
 function normalizeSearchText(text: string): string {
   return text.trim().toLowerCase();
 }
 
 /**
- * 小键盘提示胶囊。
+ * 小键盘提示胶囊组件
+ *
+ * 用于展示键盘快捷键提示（如 ⌘↵）。
+ *
+ * @param props - 组件属性
+ * @param props.children - 键盘按键文本
+ * @returns JSX 元素
  */
 function Kbd({ children }: { children: ReactNode }) {
   return <span className={styles["search-box-kbd"]}>{children}</span>;
 }
 
 /**
- * 对文本中的命中片段做高亮。
+ * 对文本中的命中片段做高亮
+ *
+ * 在文本中找到与查询匹配的部分，用 <mark> 标签高亮显示。
+ *
+ * @param text - 原始文本
+ * @param query - 搜索查询字符串
  * @param keyPrefix - 唯一前缀，用于生成稳定的 React key
+ * @returns 高亮后的 React 节点
  */
 function renderHighlightedText(text: string, query: string, keyPrefix: string): ReactNode {
   const normalizedQuery = query.trim();
@@ -212,6 +256,14 @@ function renderHighlightedText(text: string, query: string, keyPrefix: string): 
   });
 }
 
+/**
+ * 获取搜索结果项的图标和角色
+ *
+ * 根据搜索结果类型返回对应的图标和图标角色（用于颜色编码）。
+ *
+ * @param item - 搜索结果项
+ * @returns 图标和图标角色
+ */
 function getItemIconMeta(item: UniversalSearchItem): { icon: ReactNode; iconRole: IconRole } {
   switch (item.type) {
     case 'tab':
@@ -236,7 +288,19 @@ function getItemIconMeta(item: UniversalSearchItem): { icon: ReactNode; iconRole
 }
 
 /**
- * 全能搜索浮层。
+ * 全能搜索浮层
+ *
+ * 设计目标：
+ *   1. 优先在当前标签页中快速检索并切换。
+ *   2. 提供最近搜索、历史记录、热门关键词联想。
+ *   3. 当本地结果不足时，直接给出网页搜索动作，模拟主流搜索引擎体验。
+ *   4. 保持键盘优先与轻量界面，确保输入响应足够快。
+ *
+ * @param props - 组件属性
+ * @param props.open - 受控：是否打开
+ * @param props.onOpenChange - 受控：开关切换回调
+ * @param props.onOpenHistory - 点击「查看全部历史」时的回调；未传时不展示该入口
+ * @returns {void} 无返回值
  */
 export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps) {
   const [query, setQuery] = useState('');
@@ -843,6 +907,7 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
   /**
    * 执行网页搜索。
    * @param active - 是否切换到新打开的 Tab；Alt+Enter 等场景需要后台打开（false）
+ * @returns {void} 无返回值
    */
   const runWebSearch = useCallback(async (
     searchQuery: string,

@@ -69,20 +69,38 @@ const PLATFORMS: PlatformMeta[] = [
   { id: 'ifanr', name: '爱范儿', subtitle: '快讯', category: 'news', color: '#d22222', order: 17 },
 ];
 
-/** 获取指定分类下的平台列表 */
+/**
+ * 获取指定分类下的平台列表。
+ *
+ * @param category 榜单分类（'all' | 'comprehensive' | 'tech' | 'entertainment' | 'community' | 'news'）
+ * @returns 匹配分类的平台元信息数组
+ */
 export function getPlatformsByCategory(category: TrendingCategory): PlatformMeta[] {
   if (category === 'all') return PLATFORMS;
   return PLATFORMS.filter((p) => p.category === category);
 }
 
-/** 获取平台品牌色 */
+/**
+ * 获取平台品牌色。
+ *
+ * @param platformId 平台 ID（如 'weibo'、'baidu'）
+ * @returns 平台品牌色（HEX 字符串）；未找到返回默认色
+ */
 export function getPlatformColor(platformId: string): string {
   return PLATFORMS.find((p) => p.id === platformId)?.color ?? '#1677ff';
 }
 
 // ── 数据标准化 ────────────────────────────────────────
 
-/** 格式化热度值 */
+/**
+ * 格式化热度值。
+ *
+ * 将数字热度格式化为"万"/"亿"后缀；
+ * 若已为格式化字符串（含"万"/"亿"）则直接返回。
+ *
+ * @param hot 原始热度值（数字、字符串或 undefined）
+ * @returns 格式化后的热度字符串；无效输入返回空字符串
+ */
 function formatHot(hot: number | string | undefined): string {
   if (hot === undefined || hot === '' || hot === 0) return '';
   if (typeof hot === 'string') {
@@ -97,7 +115,15 @@ function formatHot(hot: number | string | undefined): string {
   return String(hot);
 }
 
-/** 将原始 API 条目标准化为 TrendingItem */
+/**
+ * 将原始 API 条目标准化为 TrendingItem。
+ *
+ * 统一不同平台的字段命名（hot/hot_zh/heat → hot），
+ * 并格式化为统一的 TrendingItem 结构。
+ *
+ * @param raw 原始 API 返回条目
+ * @returns 标准化后的热榜条目
+ */
 function normalizeItem(raw: Record<string, unknown>): TrendingItem {
   const hotRaw = raw.hot ?? raw.hot_zh ?? raw.heat;
   const hot = typeof hotRaw === 'number' ? hotRaw : undefined;
@@ -118,7 +144,14 @@ function normalizeItem(raw: Record<string, unknown>): TrendingItem {
 
 // ── API 请求 ──────────────────────────────────────────
 
-/** 从小尘API获取单个平台的热榜数据 */
+/**
+ * 从小尘API获取单个平台的热榜数据。
+ *
+ * 请求超时 8 秒；失败或数据非法返回 null。
+ *
+ * @param platformId 平台 ID（如 'weibo'、'baidu'）
+ * @returns 热榜数据；失败返回 null
+ */
 async function fetchFromXcvts(platformId: string): Promise<HotBoardData | null> {
   const platform = PLATFORMS.find((p) => p.id === platformId);
   if (!platform) return null;
@@ -168,12 +201,19 @@ async function fetchFromXcvts(platformId: string): Promise<HotBoardData | null> 
 
 // ── 缓存读写 ──────────────────────────────────────────
 
-/** 读取缓存 */
+/** 读取缓存。
+ *
+ * @returns 缓存对象；未找到返回 undefined
+ */
 async function getCache(): Promise<TrendingCache | undefined> {
   return storageGet<TrendingCache>(CACHE_KEY);
 }
 
-/** 写入缓存 */
+/**
+ * 写入缓存。
+ *
+ * @param cache 完整缓存对象（含 boards 和 lastRefreshAt）
+ */
 async function setCache(cache: TrendingCache): Promise<void> {
   await storageSet(CACHE_KEY, cache);
 }
@@ -187,6 +227,7 @@ async function setCache(cache: TrendingCache): Promise<void> {
  *
  * @param platformIds 平台 ID 列表
  * @param maxConcurrent 最大并发数，默认 4
+ * @returns 平台 ID → 热榜数据的映射（仅成功获取的平台）
  */
 export async function fetchMultipleBoards(
   platformIds: string[],
@@ -195,6 +236,9 @@ export async function fetchMultipleBoards(
   const results: Record<string, HotBoardData> = {};
   const queue = [...platformIds];
 
+  /**
+   *
+   */
   async function worker(): Promise<void> {
     while (queue.length > 0) {
       const id = queue.shift();
@@ -233,7 +277,12 @@ export async function fetchMultipleBoards(
 }
 
 /**
- * 强制刷新指定平台的热榜数据（跳过缓存）
+ * 强制刷新指定平台的热榜数据（跳过缓存）。
+ *
+ * 刷新成功后会更新缓存。
+ *
+ * @param platformId 平台 ID
+ * @returns 刷新后的热榜数据；失败返回 null
  */
 export async function forceRefreshBoard(platformId: string): Promise<HotBoardData | null> {
   const result = await fetchFromXcvts(platformId);

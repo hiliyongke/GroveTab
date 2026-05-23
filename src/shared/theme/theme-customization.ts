@@ -1,10 +1,27 @@
+/**
+ * 主题定制模块
+ *
+ * 将皮肤预设（skin-presets.ts）转换为 Ant Design 和消费层可用的样式 token：
+ *   - buildAntdThemeConfig  →  Ant Design v6 ThemeConfig（seed + component token）
+ *   - buildAppThemeVars     →  `--app-*` CSS 自定义属性（业务层消费）
+ *
+ * 设计原则：
+ *   1. 所有视觉参数从 SkinPreset 派生，不在本文件硬编码色值
+ *   2. 极客定制（skinCustom）仅在用户开启后覆盖单项，其余保留预设默认值
+ *   3. 密度缩放（densityScale）统一由 scaleByDensity 处理，确保间距/字号/控件高度成比例
+ *   4. 暗色模式切换由 isDark 参数驱动，本模块不读取媒体查询
+ */
+
 import type { ThemeConfig } from 'antd';
 import { theme as antdTheme } from 'antd';
 import type { UserSettings } from '@/shared/types';
 import { getSkinPreset, type SkinPreset, type SkinPresetId } from './skin-presets';
 
+/** 布局密度别名，剥离 undefined 使下游调用更安静 */
 export type LayoutDensity = NonNullable<UserSettings['layoutDensity']>;
+/** 极客定制覆盖项，剥离 undefined 使下游调用更安静 */
 export type SkinCustomOverride = NonNullable<UserSettings['skinCustom']>;
+/** 应用级 CSS 自定义属性映射，所有 `--app-*` 变量统一用此类型约束 */
 export type AppThemeVars = Record<`--app-${string}`, string>;
 
 const BASE_BODY_FONT_SIZE = 14;
@@ -14,26 +31,65 @@ const DENSITY_SCALE_MAP: Record<LayoutDensity, number> = {
   comfortable: 1.15,
 };
 
+/**
+ * 按布局密度缩放数值
+ * @param value - 基准值（对应 default 密度下的 px 值）
+ * @param density - 当前布局密度档位
+ * @returns 缩放后的整数 px 值
+ */
 function scaleByDensity(value: number, density: LayoutDensity): number {
   return Math.round(value * DENSITY_SCALE_MAP[density]);
 }
 
+/**
+ * 按基准字号比例缩放标题字号
+ * @param baseSize - 标题基准字号（对应 bodyFontSize=14 时的 px 值）
+ * @param bodyFontSize - 当前皮肤基准字号
+ * @returns 缩放后的标题字号（取整）
+ */
 function scaleHeadingFont(baseSize: number, bodyFontSize: number): number {
   return Math.round((baseSize / BASE_BODY_FONT_SIZE) * bodyFontSize);
 }
 
+/**
+ * 解析主色 hover 状态颜色
+ *
+ * 如果用户在极客模式中自定义了主色，
+ * 则基于自定义颜色生成 hover 态（混合 78% 白色）。
+ * 否则使用皮肤预设的 hover 颜色。
+ *
+ * @param base - 皮肤预设配置
+ * @param customColor - 用户自定义的主色（可选）
+ * @returns hover 状态的主色值
+ */
 function resolvePrimaryHoverColor(base: SkinPreset, customColor?: string): string {
   if (!customColor) return base.colorPrimaryHover;
   return `color-mix(in srgb, ${customColor} 78%, white)`;
 }
 
+/**
+ * 获取布局密度缩放系数
+ *
+ * 返回当前密度设置对应的缩放系数：
+ *   - compact: 0.85（缩小 15%）
+ *   - default: 1（原始尺寸）
+ *   - comfortable: 1.15（放大 15%）
+ *
+ * @param density - 布局密度设置
+ * @returns 密度缩放系数
+ */
 function getDensityScale(density: LayoutDensity): number {
   return DENSITY_SCALE_MAP[density];
 }
 
 /**
+ * 获取极客定制的基线值
+ *
  * 开启极客定制时，表单控件应回落到当前皮肤的基线值，而不是一组全局硬编码默认值。
  * 否则用户只要打开开关，就会瞬间把当前皮肤改造成另一套视觉体系。
+ *
+ * @param skinId - 皮肤 ID
+ * @returns 包含 borderRadius、fontSize、controlHeight、borderWidth、colorPrimary 的基线值对象
  */
 export function getSkinCustomBaseValues(skinId: SkinPresetId) {
   const skin = getSkinPreset(skinId);
@@ -46,6 +102,16 @@ export function getSkinCustomBaseValues(skinId: SkinPresetId) {
   };
 }
 
+/**
+ * 应用极客定制覆盖
+ *
+ * 将用户自定义的覆盖项应用到基础皮肤配置上。
+ * 对于未自定义的字段，保留基础皮肤的默认值。
+ *
+ * @param base - 基础皮肤配置
+ * @param custom - 用户自定义的覆盖项（可选）
+ * @returns 应用覆盖后的新皮肤配置
+ */
 function applySkinCustom(base: SkinPreset, custom?: SkinCustomOverride): SkinPreset {
   if (!custom) return base;
 
@@ -76,8 +142,16 @@ function applySkinCustom(base: SkinPreset, custom?: SkinCustomOverride): SkinPre
 }
 
 /**
+ * 构建 Ant Design 主题配置对象
+ *
  * Ant Design v6 官方推荐把主题定制收敛到 ConfigProvider.theme，
  * 由 seed token + component token 统一生成运行时样式，而不是到处覆盖 `.ant-*` 选择器。
+ *
+ * @param skinId - 皮肤预设 ID
+ * @param isDark - 是否为暗色模式
+ * @param density - 布局密度档位
+ * @param custom - 极客定制覆盖项（可选）
+ * @returns 完整的 Ant Design ThemeConfig 对象
  */
 export function buildAntdThemeConfig(
   skinId: SkinPresetId,
@@ -234,8 +308,17 @@ export function buildAntdThemeConfig(
 }
 
 /**
+ * 构建应用级 CSS 自定义属性
+ *
  * 业务层不应该直接消费 antd 内部 DOM 结构，因此这里把业务视觉原语桥接成 `--app-*` 变量：
  * 卡片阴影、毛玻璃、业务 hover、纹理等都只读这一层。
+ *
+ * @param skinId - 皮肤预设 ID
+ * @param isDark - 是否为暗色模式
+ * @param density - 布局密度档位
+ * @param reducedMotion - 是否减弱动效（尊重用户偏好或系统设置）
+ * @param custom - 极客定制覆盖项（可选）
+ * @returns 包含全部 `--app-*` CSS 变量的对象
  */
 export function buildAppThemeVars(
   skinId: SkinPresetId,

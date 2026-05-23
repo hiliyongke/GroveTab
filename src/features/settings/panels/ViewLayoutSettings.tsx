@@ -16,8 +16,9 @@ import { Select, Segmented, Switch } from 'antd';
 
 import type { NewtabPageMode, UserSettings, ViewTabPosition } from '@/shared/types';
 import { useT } from '@/shared/i18n';
-import { VIEW_CONFIGS } from '@/shared/config/views';
+import { WORKSPACE_VIEW_CONFIGS } from '@/features/workspace/view-catalog';
 import { Field } from '@/features/settings/components/Field';
+import styles from '../settings.module.less';
 
 interface ViewLayoutSettingsProps {
   settings: UserSettings;
@@ -26,11 +27,29 @@ interface ViewLayoutSettingsProps {
 
 /**
  * 视图与布局设置组件
+ *
+ * 包含：
+ * 1. 默认视图选择
+ * 2. 域名分组列数
+ * 3. 域名分组显示 favicon 开关
+ * 4. 域名分组强调条位置
+ * 5. 域名分组卡片圆角
+ * 6. 网格视图展开触发方式
+ *
+ * @param props - 组件属性
+ * @param props.settings - 当前用户设置
+ * @param props.updateSettings - 更新设置回调
+ * @returns 视图与布局设置组件 JSX 元素
  */
 export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSettingsProps) {
   const { t } = useT();
 
-  /** 防 ESLint `no-misused-promises`：`updateSettings` 异步但表单回调需要 `void`。 */
+  /**
+   * 防 ESLint `no-misused-promises`：`updateSettings` 异步但表单回调需要 `void`。
+   *
+   * @param patch - 部分用户设置对象
+   * @returns void
+   */
   const handleSetting = (patch: Partial<UserSettings>) => {
     void updateSettings(patch);
   };
@@ -38,7 +57,7 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
   /** 默认视图下拉选项，缓存以避免每次渲染重建数组 */
   const defaultViewOptions = useMemo(
     () =>
-      VIEW_CONFIGS.map((view) => ({
+      WORKSPACE_VIEW_CONFIGS.map((view) => ({
         value: view.id,
         label: t(view.labelKey),
       })),
@@ -46,7 +65,7 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
   );
 
   return (
-    <div className="settings-panel-stack settings-panel-stack--regular">
+    <div className={`${styles['settings-panel-stack']} ${styles['settings-panel-stack--regular']}`}>
       <Field label={t('settings.defaultPageMode')} hint={t('settings.defaultPageModeHint')}>
         <Segmented
           block
@@ -64,7 +83,7 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
         <Select
           value={settings.defaultView}
           onChange={(value) => handleSetting({ defaultView: value })}
-          className="settings-control-full"
+          className={styles['settings-control-full']}
           options={defaultViewOptions}
         />
       </Field>

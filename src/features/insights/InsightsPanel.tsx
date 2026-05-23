@@ -30,15 +30,29 @@ import styles from './insights.module.less';
 const { Text, Title } = Typography;
 
 /**
- * 事件名归一化：旧 `newtabOpens` 合并到 `newtab_open`，
+ * 事件名归一化
+ *
+ * 旧 `newtabOpens` 合并到 `newtab_open`，
  * 避免 Top 5 中出现两条 label 相同但 event 不同的重复项。
+ *
+ * @param event - 原始事件名
+ * @returns 归一化后的事件名
  */
 function normalizeEvent(event: string): string {
   if (event === 'newtabOpens') return 'newtab_open';
   return event;
 }
 
-/** 事件类型 → 可读名称映射（走 i18n） */
+/**
+ * 事件类型转可读名称
+ *
+ * 通过 i18n 系统将事件类型映射为可读名称。
+ * 未命中的 i18n key 会原样返回，此时退化为原始事件名。
+ *
+ * @param event - 事件类型
+ * @param t - i18n 翻译函数
+ * @returns {string} 返回可读的事件名称
+ */
 function getEventLabel(
   event: string,
   t: (key: string, params?: Record<string, string | number>) => string,
@@ -55,7 +69,14 @@ interface InsightsPanelProps {
   onClose: () => void;
 }
 
-/** 校验 StatsData 结构完整性，防止 daily 缺失导致迭代报错 */
+/**
+ * 校验 StatsData 结构完整性
+ *
+ * 防止 daily 缺失导致迭代报错。
+ *
+ * @param data - 待校验的数据
+ * @returns {data is StatsData} 若结构完整则返回 true
+ */
 function isValidStatsData(data: StatsData | undefined | null): data is StatsData {
   if (data == null) return false;
   if (!Array.isArray(data.daily)) return false;
@@ -63,6 +84,14 @@ function isValidStatsData(data: StatsData | undefined | null): data is StatsData
   return true;
 }
 
+/**
+ * 将 Date 转为本地日期 key（YYYY-MM-DD）
+ *
+ * 用于按天聚合统计数据。
+ *
+ * @param date - 日期对象
+ * @returns {string} 返回本地日期字符串（如 "2024-01-15"）
+ */
 function toLocalDayKey(date: Date): string {
   const yyyy = date.getFullYear();
   const mm = String(date.getMonth() + 1).padStart(2, '0');
@@ -70,6 +99,22 @@ function toLocalDayKey(date: Date): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+/**
+ * 本地隐私洞察仪表盘
+ *
+ * 全部本地计算，零外部请求。4 个卡片：
+ *   ① 近 7 天每日新标签页打开次数（折线图）
+ *   ② Top 10 访问域名（柱状图）
+ *   ③ 累计归档 tab 数 + 估算节省内存
+ *   ④ 使用频率前 5 的操作
+ *
+ * 仅使用纯 SVG，不引入 echarts / chart.js，控制包体增量 ≤ 15 KB。
+ *
+ * @param props - 组件属性
+ * @param props.open - 是否打开面板
+ * @param props.onClose - 关闭面板回调
+ * @returns {JSX.Element} 返回洞察面板 JSX 元素
+ */
 export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
   const { token } = theme.useToken();
   const { t } = useT();
@@ -310,7 +355,14 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
   );
 }
 
-/** 纯 SVG 折线图（轻量） */
+/**
+ * 纯 SVG 折线图（轻量）
+ * @param root0 - 组件属性
+ * @param root0.data - 数据点数组
+ * @param root0.labels - 标签数组
+ * @param root0.color - 线条颜色
+ * @returns {JSX.Element} 返回折线图 JSX 元素
+ */
 function LineChart({ data, labels, color }: { data: number[]; labels: string[]; color: string }) {
   const width = 300;
   const height = 120;
@@ -357,7 +409,13 @@ function LineChart({ data, labels, color }: { data: number[]; labels: string[]; 
   );
 }
 
-/** 条形列表（轻量柱状） */
+/**
+ * 条形列表（轻量柱状）
+ * @param root0 - 组件属性
+ * @param root0.items - 数据项数组
+ * @param root0.color - 柱状图颜色
+ * @returns {JSX.Element} 返回条形列表 JSX 元素
+ */
 function BarList({ items, color }: { items: Array<{ label: string; value: number }>; color: string }) {
   const { token } = theme.useToken();
   const max = Math.max(1, ...items.map((i) => i.value));

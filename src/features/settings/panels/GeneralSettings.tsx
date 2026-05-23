@@ -16,6 +16,7 @@ import type { UserSettings } from '@/shared/types';
 import { useT } from '@/shared/i18n';
 import { Field } from '@/features/settings/components/Field';
 import { BRAND } from '@/shared/config/brand';
+import styles from '../settings.module.less';
 
 interface GeneralSettingsProps {
   settings: UserSettings;
@@ -24,11 +25,29 @@ interface GeneralSettingsProps {
 
 /**
  * 通用行为设置组件
+ *
+ * 包含：
+ * 1. 接管新标签页开关
+ * 2. 去重严格度选择
+ * 3. 闲置阈值选择
+ * 4. Undo 撤销窗口选择
+ * 5. 自动快照频率选择
+ * 6. OG description 抓取开关
+ *
+ * @param props - 组件属性
+ * @param props.settings - 当前用户设置
+ * @param props.updateSettings - 更新设置回调
+ * @returns 通用行为设置组件 JSX 元素
  */
 export function GeneralSettings({ settings, updateSettings }: GeneralSettingsProps) {
   const { t } = useT();
 
-  /** 防 ESLint `no-misused-promises`：`updateSettings` 异步但表单回调需要 `void`。 */
+  /**
+   * 防 ESLint `no-misused-promises`：`updateSettings` 异步但表单回调需要 `void`。
+   *
+   * @param patch - 部分用户设置对象
+   * @returns void
+   */
   const handleSetting = (patch: Partial<UserSettings>) => {
     void updateSettings(patch);
   };
@@ -50,7 +69,7 @@ export function GeneralSettings({ settings, updateSettings }: GeneralSettingsPro
   })();
 
   return (
-    <div className="settings-panel-stack settings-panel-stack--compact">
+    <div className={`${styles['settings-panel-stack']} ${styles['settings-panel-stack--compact']}`}>
       {/* ── 接管新标签页 ── */}
       <Field
         label={t('settings.overrideNewTab')}
@@ -81,7 +100,7 @@ export function GeneralSettings({ settings, updateSettings }: GeneralSettingsPro
         <Select
           value={settings.idleThresholdMinutes ?? 1440}
           onChange={(value) => handleSetting({ idleThresholdMinutes: value })}
-          className="settings-control-full"
+          className={styles['settings-control-full']}
           options={[
             { value: 360, label: t('settings.idle6h') },
             { value: 720, label: t('settings.idle12h') },
@@ -97,7 +116,7 @@ export function GeneralSettings({ settings, updateSettings }: GeneralSettingsPro
         <Select
           value={settings.undoWindowSeconds ?? 5}
           onChange={(value) => handleSetting({ undoWindowSeconds: value })}
-          className="settings-control-full"
+          className={styles['settings-control-full']}
           options={[3, 5, 7, 10].map((n) => ({ value: n, label: t('settings.undoWindowSeconds', { n }) }))}
         />
       </Field>
@@ -142,6 +161,8 @@ export function GeneralSettings({ settings, updateSettings }: GeneralSettingsPro
           }}
         />
       </Field>
+
+
     </div>
   );
 }

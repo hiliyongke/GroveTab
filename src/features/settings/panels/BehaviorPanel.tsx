@@ -14,6 +14,7 @@ import { GeneralSettings } from './GeneralSettings';
 import { ViewLayoutSettings } from './ViewLayoutSettings';
 import { TimelineSettings } from './TimelineSettings';
 import { SearchSettings } from './SearchSettings';
+import styles from '../settings.module.less';
 
 interface BehaviorPanelProps {
   settings: UserSettings;
@@ -24,6 +25,11 @@ interface BehaviorPanelProps {
  * 行为设置面板主组件
  *
  * 组合多个子组件，按功能模块展示所有行为相关设置项。
+ *
+ * @param props - 组件属性
+ * @param props.settings - 当前用户设置
+ * @param props.updateSettings - 更新设置回调
+ * @returns 行为设置面板 JSX 元素
  */
 export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) {
   const { t } = useT();
@@ -51,11 +57,11 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
   ];
 
   return (
-    <div className="settings-panel-stack">
+    <div className={styles['settings-panel-stack']}>
       {sections.map((section) => (
-        <section key={section.key} className="settings-section">
-          <h3 className="settings-section__title">{section.title}</h3>
-          <div className="settings-section__body">{section.content}</div>
+        <section key={section.key} className={styles['settings-section']}>
+          <h3 className={styles['settings-section__title']}>{section.title}</h3>
+          <div className={styles['settings-section__body']}>{section.content}</div>
         </section>
       ))}
     </div>

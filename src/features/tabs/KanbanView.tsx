@@ -45,7 +45,7 @@ import { useKanbanStore, useTabsStore } from '@/store';
 import { archiveSelectedTabs } from '@/services';
 import { useT } from '@/shared/i18n';
 import { useReducedMotionPreference } from '@/shared/hooks/use-reduced-motion';
-import styles from './styles/views.module.less';
+import styles from './KanbanView.module.less';
 
 /** 拖拽数据类型：区分「源 tab」「列内卡片」「列自身」 */
 type DragData =
@@ -58,6 +58,23 @@ interface ActiveDrag {
   data: DragData;
 }
 
+/**
+ * 看板视图
+ *
+ * 历史：v1.2 使用原生 HTML5 Drag-and-Drop API，触屏体验差、无键盘可达、
+ * 无 DragOverlay 视觉反馈。v1.3 改用 `@dnd-kit/core` + `@dnd-kit/sortable`，
+ * 支持：
+ *   - 卡片在**列内重排序** + 跨列移动（统一的 DndContext）
+ *   - 列的**整列排序**（另一层 SortableContext）
+ *   - 触屏（TouchSensor activationDelay:200ms）+ 键盘（KeyboardSensor）
+ *   - DragOverlay 抬升副本：拖拽时显示阴影 + 0.9 透明
+ *
+ * 保留既有语义：
+ *   - 左侧 "实时 Tab 源" 列拖入目标列 → 复制一份到列，**不关闭**原 Tab（addCard）
+ *   - 列内/跨列拖拽 → moveCard/reorderCard
+ *
+ * @returns 看板视图 JSX 元素
+ */
 export function KanbanView() {
   const { token } = theme.useToken();
   const { t } = useT();
@@ -101,6 +118,13 @@ export function KanbanView() {
     '--app-kanban-overlay-shadow': token.boxShadowSecondary,
   });
 
+  /**
+   * 添加新列
+   *
+   * 验证列名后调用 store 添加列，并清空输入框。
+   *
+   * @returns 无返回值
+   */
   const handleAddColumn = async () => {
     const name = newColumnName.trim();
     if (name === '') return;
@@ -114,6 +138,14 @@ export function KanbanView() {
     }
   };
 
+  /**
+   * 将分组内标签存档为会话
+   *
+   * 获取分组内仍在打开的标签，调用存档服务进行保存。
+   *
+   * @param col - 要存档的分组
+   * @returns 无返回值
+   */
   const handleSaveAsSession = async (col: KanbanColumn) => {
     const live = tabs.filter((t) => col.cards.some((c) => c.url === t.url));
     if (live.length === 0) {
@@ -129,12 +161,28 @@ export function KanbanView() {
     }
   };
 
+  /**
+   * 拖拽开始事件处理
+   *
+   * 记录当前拖拽的元素数据和 ID。
+   *
+   * @param event - 拖拽开始事件
+   * @returns 无返回值
+   */
   const onDragStart = (event: DragStartEvent) => {
     const data = event.active.data.current as DragData | undefined;
     if (!data) return;
     setActive({ id: String(event.active.id), data });
   };
 
+  /**
+   * 拖拽结束事件处理
+   *
+   * 处理拖拽结束后的逻辑：移动卡片、排序等。
+   *
+   * @param event - 拖拽结束事件
+   * @returns 无返回值
+   */
   const onDragEnd = async (event: DragEndEvent) => {
     const { active: a, over } = event;
     setActive(null);
@@ -221,6 +269,7 @@ export function KanbanView() {
                   url: tab.url,
                   title: tab.title,
                   favIconUrl: tab.favIconUrl,
+                  // eslint-disable-next-line react-hooks/purity -- Date.now() provides a stable-enough timestamp for addedAt; re-render would produce a different value but that's acceptable for display purposes
                   addedAt: Date.now(),
                 }}
                 reduced={reduced}
@@ -288,6 +337,13 @@ export function KanbanView() {
 }
 
 // ── 子组件：源 Tab 卡片 ──────────────────────────────────
+/**
+ * 渲染拖拽源卡片
+ * @param root0
+ * @param root0.card - 卡片数据
+ * @param root0.reduced - 是否简化显示
+ * @returns {JSX.Element} 卡片元素
+ */
 function TabSourceItem({ card, reduced }: { card: KanbanCard; reduced: boolean }) {
   const id = `tab-source::${card.url}`;
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -331,6 +387,20 @@ interface KanbanColumnViewProps {
   onRemoveCard: (url: string) => void;
 }
 
+/**
+ * 渲染看板列
+ * @param root0
+ * @param root0.col - 列数据
+ * @param root0.liveUrls - 活跃 URL 集合
+ * @param root0.tabs - 标签页列表
+ * @param root0.t - 翻译函数
+ * @param root0.reduced - 是否简化显示
+ * @param root0.onRename - 重命名回调
+ * @param root0.onRemove - 移除列回调
+ * @param root0.onSaveAsSession - 保存为会话回调
+ * @param root0.onRemoveCard - 移除卡片回调
+ * @returns {JSX.Element} 列元素
+ */
 function KanbanColumnView({
   col,
   liveUrls,
@@ -364,6 +434,7 @@ function KanbanColumnView({
     transition: reduced ? 'none' : 'background 120ms',
   };
 
+  /* eslint-disable react-hooks/refs -- dnd-kit's useSortable returns ref callbacks, attributes, and listeners that must be spread during render; this is the standard dnd-kit integration pattern */
   return (
     <div
       ref={sortable.setNodeRef}
@@ -428,6 +499,7 @@ function KanbanColumnView({
       </Card>
     </div>
   );
+  /* eslint-enable react-hooks/refs */
 }
 
 // ── 子组件：列内卡片 ──────────────────────────────────
@@ -441,6 +513,18 @@ interface SortableCardProps {
   onRemove: () => void;
 }
 
+/**
+ * 渲染可排序的卡片
+ * @param root0
+ * @param root0.card - 卡片数据
+ * @param root0.columnId - 列 ID
+ * @param root0.offline - 是否离线
+ * @param root0.tabs - 标签页列表
+ * @param root0.t - 翻译函数
+ * @param root0.reduced - 是否简化显示
+ * @param root0.onRemove - 移除回调
+ * @returns {JSX.Element} 卡片元素
+ */
 function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: SortableCardProps) {
   const id = `card::${columnId}::${card.url}`;
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -448,7 +532,14 @@ function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: S
     data: { kind: 'card', columnId, url: card.url } satisfies DragData,
   });
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
-
+  
+  /**
+   * 激活卡片（点击或按键）
+   *
+   * 离线状态在新标签页打开 URL，在线状态跳转到对应标签页。
+   *
+   * @returns 无返回值
+   */
   const handleActivate = () => {
     if (offline) {
       // 离线状态：在新标签页中打开 URL
@@ -512,6 +603,13 @@ function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: S
 }
 
 // ── 子组件：列名编辑（inline） ──────────────────────────────────
+/**
+ * 列名编辑器
+ * @param root0
+ * @param root0.col - 列数据
+ * @param root0.onRename - 重命名回调
+ * @returns {JSX.Element} 编辑器元素
+ */
 function ColumnNameEditor({ col, onRename }: { col: KanbanColumn; onRename: (name: string) => void }) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(col.name);
@@ -545,6 +643,12 @@ function ColumnNameEditor({ col, onRename }: { col: KanbanColumn; onRename: (nam
 }
 
 // ── 子组件：DragOverlay 抬升副本 ──────────────────────────────────
+/**
+ * 拖拽预览
+ * @param root0
+ * @param root0.active - 当前拖拽的活动数据
+ * @returns {JSX.Element} 预览元素
+ */
 function DragPreview({ active }: { active: ActiveDrag }) {
   const { t } = useT();
   if (active.data.kind === 'column') {

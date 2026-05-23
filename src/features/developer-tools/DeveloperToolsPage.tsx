@@ -12,33 +12,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Empty, Input, Segmented, Tag, Tooltip, Typography } from 'antd';
 import {
-  Activity,
   ArrowRightLeft,
-  Binary,
   Braces,
   Check,
-  Clock,
-  Code2,
   Copy,
-  Dices,
-  FileJson,
-  FileType,
-  GitCompare,
-  Globe2,
-  Hash,
   Heart,
-  KeyRound,
-  Link,
-  Palette,
   Regex,
-  Ruler,
   Search,
-  Server,
   Shield,
   Star,
   Terminal,
   Trash2,
-  Type,
   Wrench,
 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
@@ -46,7 +30,16 @@ import { cssVars } from '@/shared/utils/css-vars';
 import { useT } from '@/shared/i18n';
 import { BRAND } from '@/shared/config/brand';
 import type { DevToolCategory, DevToolDefinition } from './tool-registry';
-import { DEV_TOOLS, getToolsByCategory, searchTools } from './tool-registry';
+import {
+  AUTO_EXECUTE_TOOL_IDS,
+  CATEGORY_ICONS,
+  CATEGORY_LABEL_KEYS,
+  DEV_TOOLS,
+  TOOL_EXAMPLES,
+  TOOL_ICONS,
+  getToolsByCategory,
+  searchTools,
+} from './tool-registry';
 import type {
   Base64Action,
   HashAlgorithm,
@@ -57,58 +50,20 @@ import type {
   UrlAction,
   UrlQueryAction,
 } from './local-tools';
-import {
-  base64Transform,
-  basicAuth,
-  caseConvert,
-  colorParse,
-  cronDescribe,
-  cssUnitConvert,
-  csvToJson,
-  curlToFetch,
-  hashDigest,
-  htmlEntityTransform,
-  httpHeaderParse,
-  httpStatusLookup,
-  jsonPathQuery,
-  jsonToCsv,
-  jsonToTypeScript,
-  jsonToYaml,
-  jsonTransform,
-  jwtDecode,
-  mimeLookup,
-  radixTransform,
-  randomGenerate,
-  regexTest,
-  sqlFormat,
-  stringEscape,
-  textDiff,
-  textStats,
-  timestampTransform,
-  urlParse,
-  urlQueryTransform,
-  urlTransform,
-  yamlToJson,
-} from './local-tools';
+import type { ToolExecutorParams } from './tool-executor';
+import { executeTool } from './tool-executor';
 import styles from './DeveloperToolsPage.module.less';
 
 const { Text, Title } = Typography;
 
 const STORAGE_KEY_FAV = 'devtools:favorites';
 
-/** 支持自动实时执行的工具 */
-const AUTO_EXECUTE_TOOL_IDS = new Set([
-  'json-format', 'json-to-ts', 'json-path', 'yaml-json', 'csv-json',
-  'jwt-decoder', 'basic-auth', 'sql-format',
-  'url-parse', 'url-query', 'url-codec', 'curl-fetch',
-  'http-status', 'http-header', 'ua-parse',
-  'base64-codec', 'html-entity', 'string-escape',
-  'regex-test', 'text-diff', 'case-convert', 'text-stats',
-  'timestamp', 'cron', 'hash', 'radix', 'css-unit',
-  'color-preview', 'mime-type',
-]);
-
-/** 防抖 hook */
+/**
+ * 防抖 hook
+ * @param value - 需要防抖的值
+ * @param delay - 防抖延迟毫秒数
+ * @returns {T} 返回防抖后的状态值
+ */
 function useDebounce<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {
@@ -118,7 +73,11 @@ function useDebounce<T>(value: T, delay: number): T {
   return debounced;
 }
 
-/** 读取 localStorage 字符串数组 */
+/**
+ * 读取 localStorage 字符串数组
+ * @param key - localStorage 的键名
+ * @returns {string[]} 返回解析后的字符串数组，解析失败返回空数组
+ */
 function readStringArray(key: string): string[] {
   try {
     const raw = localStorage.getItem(key);
@@ -130,7 +89,12 @@ function readStringArray(key: string): string[] {
   }
 }
 
-/** 写入 localStorage 字符串数组 */
+/**
+ * 写入 localStorage 字符串数组
+ * @param key - localStorage 的键名
+ * @param value - 待写入的字符串数组
+ * @returns {void}
+ */
 function writeStringArray(key: string, value: string[]) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
@@ -138,99 +102,6 @@ function writeStringArray(key: string, value: string[]) {
     // 忽略写入失败
   }
 }
-
-const CATEGORY_ICONS: Record<DevToolCategory, React.ReactNode> = {
-  data: <Braces size={ICON_SIZE.DEFAULT} />,
-  encoding: <Link size={ICON_SIZE.DEFAULT} />,
-  time: <Clock size={ICON_SIZE.DEFAULT} />,
-  crypto: <Shield size={ICON_SIZE.DEFAULT} />,
-  number: <Hash size={ICON_SIZE.DEFAULT} />,
-  generator: <Dices size={ICON_SIZE.DEFAULT} />,
-  color: <Palette size={ICON_SIZE.DEFAULT} />,
-  frontend: <Code2 size={ICON_SIZE.DEFAULT} />,
-  backend: <Server size={ICON_SIZE.DEFAULT} />,
-  network: <Globe2 size={ICON_SIZE.DEFAULT} />,
-};
-
-const CATEGORY_LABEL_KEYS: Record<DevToolCategory, string> = {
-  data: 'devtools.catData',
-  encoding: 'devtools.catEncoding',
-  time: 'devtools.catTime',
-  crypto: 'devtools.catCrypto',
-  number: 'devtools.catNumber',
-  generator: 'devtools.catGenerator',
-  color: 'devtools.catColor',
-  frontend: 'devtools.catFrontend',
-  backend: 'devtools.catBackend',
-  network: 'devtools.catNetwork',
-};
-
-/** 工具图标映射 */
-const TOOL_ICONS: Record<string, React.ReactNode> = {
-  'json-format': <Braces size={ICON_SIZE.LARGE} />,
-  'json-to-ts': <FileJson size={ICON_SIZE.LARGE} />,
-  'json-path': <Braces size={ICON_SIZE.LARGE} />,
-  'yaml-json': <FileJson size={ICON_SIZE.LARGE} />,
-  'csv-json': <FileType size={ICON_SIZE.LARGE} />,
-  'jwt-decoder': <KeyRound size={ICON_SIZE.LARGE} />,
-  'basic-auth': <Shield size={ICON_SIZE.LARGE} />,
-  'sql-format': <Terminal size={ICON_SIZE.LARGE} />,
-  'url-parse': <Globe2 size={ICON_SIZE.LARGE} />,
-  'url-query': <Globe2 size={ICON_SIZE.LARGE} />,
-  'url-codec': <Link size={ICON_SIZE.LARGE} />,
-  'curl-fetch': <Terminal size={ICON_SIZE.LARGE} />,
-  'http-status': <Activity size={ICON_SIZE.LARGE} />,
-  'http-header': <Globe2 size={ICON_SIZE.LARGE} />,
-  'ua-parse': <Globe2 size={ICON_SIZE.LARGE} />,
-  'base64-codec': <Binary size={ICON_SIZE.LARGE} />,
-  'html-entity': <Code2 size={ICON_SIZE.LARGE} />,
-  'string-escape': <Code2 size={ICON_SIZE.LARGE} />,
-  'regex-test': <Regex size={ICON_SIZE.LARGE} />,
-  'text-diff': <GitCompare size={ICON_SIZE.LARGE} />,
-  'case-convert': <Type size={ICON_SIZE.LARGE} />,
-  'text-stats': <Type size={ICON_SIZE.LARGE} />,
-  timestamp: <Clock size={ICON_SIZE.LARGE} />,
-  cron: <Clock size={ICON_SIZE.LARGE} />,
-  hash: <Shield size={ICON_SIZE.LARGE} />,
-  radix: <Hash size={ICON_SIZE.LARGE} />,
-  'css-unit': <Ruler size={ICON_SIZE.LARGE} />,
-  'color-preview': <Palette size={ICON_SIZE.LARGE} />,
-  'mime-type': <FileType size={ICON_SIZE.LARGE} />,
-  'random-gen': <Dices size={ICON_SIZE.LARGE} />,
-};
-
-/** 工具示例数据 */
-const TOOL_EXAMPLES: Record<string, { input?: string; input2?: string; pattern?: string; flags?: string; mode?: string }> = {
-  'json-format': { input: JSON.stringify({ name: BRAND.name, version: '1.3', features: ['tabs', 'widgets', 'devtools'] }) },
-  'json-to-ts': { input: JSON.stringify({ id: 1, name: BRAND.name, active: true, profile: { role: 'admin', tags: ['dev', 'ops'] } }) },
-  'json-path': { input: '{"user":{"name":"Tom","age":30,"address":{"city":"Beijing"}}}', pattern: '$.user.address.city' },
-  'yaml-json': { input: `name: ${BRAND.name}\nversion: "1.3"\nfeatures:\n  - tabs\n  - widgets` },
-  'csv-json': { input: 'name,age,city\nTom,30,Beijing\nJerry,25,Shanghai' },
-  'jwt-decoder': { input: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' },
-  'basic-auth': { input: 'admin:secret123' },
-  'sql-format': { input: 'select id,name from users where active=1 order by created_at desc limit 10' },
-  'url-parse': { input: `${BRAND.productUrl}?tab=readme#overview` },
-  'url-query': { input: 'https://example.com/search?q=devtools&lang=zh&page=1' },
-  'url-codec': { input: 'https://example.com/search?q=开发工具&page=1' },
-  'curl-fetch': { input: 'curl -X POST https://api.example.com/users -H "Content-Type: application/json" -d \'{"name":"Tom"}\'' },
-  'http-status': { input: '404' },
-  'http-header': { input: 'Content-Type: application/json\nAuthorization: Bearer token123\nX-Request-ID: abc-123' },
-  'ua-parse': { input: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' },
-  'base64-codec': { input: 'Hello 世界' },
-  'html-entity': { input: '<div class="container">Tom & Jerry</div>' },
-  'string-escape': { input: 'Hello "World"\nNew line\tTab' },
-  'regex-test': { input: 'hello world hello', pattern: 'hello', flags: 'g' },
-  'text-diff': { input: 'line1\nline2\nline3', input2: 'line1\nline2 modified\nline4' },
-  'case-convert': { input: 'user profile card' },
-  'text-stats': { input: 'Hello world!\n你好，世界！\nThis is a test.' },
-  timestamp: { input: '1700000000' },
-  cron: { input: '*/5 * * * *' },
-  hash: { input: `${BRAND.name} DevTools` },
-  radix: { input: '255' },
-  'css-unit': { input: '16px' },
-  'color-preview': { input: '#1677FF' },
-  'mime-type': { input: 'json' },
-};
 
 interface ToolCardProps {
   tool: DevToolDefinition;
@@ -242,11 +113,23 @@ interface ToolCardProps {
   onToggleFavorite: (event: React.MouseEvent) => void;
 }
 
+/**
+ * 工具卡片组件
+ * @param root0 - 组件属性
+ * @param root0.tool - 工具定义
+ * @param root0.title - 标题
+ * @param root0.description - 描述
+ * @param root0.selected - 是否选中
+ * @param root0.favorited - 是否已收藏
+ * @param root0.onClick - 点击回调
+ * @param root0.onToggleFavorite - 切换收藏回调
+ * @returns {JSX.Element} 返回工具卡片 JSX 元素
+ */
 function ToolCard({ tool, title, description, selected, favorited, onClick, onToggleFavorite }: ToolCardProps) {
   return (
     <button
       type="button"
-      className={`devtools-card${selected ? ' is-selected' : ''}`}
+      className={`${styles['devtools-card']}${selected ? ` ${styles['devtools-card--selected']}` : ''}`}
       onClick={onClick}
       aria-pressed={selected}
     >
@@ -276,6 +159,14 @@ interface ToolPanelProps {
   onUse: () => void;
 }
 
+/**
+ * 工具面板组件
+ *
+ * @param root0 - 组件属性
+ * @param root0.tool - 工具定义
+ * @param root0.onUse - 使用回调
+ * @returns {JSX.Element} 返回工具面板 JSX 元素
+ */
 function ToolPanel({ tool, onUse }: ToolPanelProps) {
   const { t } = useT();
   /** 当前工具 id，用于检测工具切换 */
@@ -354,74 +245,33 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
     [colorValue],
   );
 
-  const runTool = useCallback(async (primary: string, secondary: string) => {
-    switch (tool.id) {
-      case 'json-format':
-        return jsonTransform(primary, jsonAction);
-      case 'json-to-ts':
-        return jsonToTypeScript(primary, rootName || 'Root');
-      case 'json-path':
-        return jsonPathQuery(primary, regexPattern);
-      case 'yaml-json':
-        return yamlAction === 'yamlToJson' ? yamlToJson(primary) : jsonToYaml(primary);
-      case 'csv-json':
-        return csvAction === 'csvToJson' ? csvToJson(primary) : jsonToCsv(primary);
-      case 'jwt-decoder':
-        return jwtDecode(primary);
-      case 'basic-auth':
-        return basicAuth(primary, basicAuthAction);
-      case 'sql-format':
-        return sqlFormat(primary);
-      case 'url-parse':
-        return urlParse(primary);
-      case 'url-query':
-        return urlQueryTransform(primary, urlQueryAction);
-      case 'url-codec':
-        return urlTransform(primary, urlAction);
-      case 'curl-fetch':
-        return curlToFetch(primary);
-      case 'http-status':
-        return httpStatusLookup(primary);
-      case 'http-header':
-        return httpHeaderParse(primary);
-      case 'ua-parse':
-        return { output: '', error: 'ua-parse not implemented' };
-      case 'base64-codec':
-        return base64Transform(primary, base64Action);
-      case 'html-entity':
-        return htmlEntityTransform(primary, htmlEntityAction);
-      case 'string-escape':
-        return stringEscape(primary, escapeMode);
-      case 'regex-test':
-        return regexTest(primary, regexPattern, regexFlags);
-      case 'text-diff':
-        return textDiff(primary, secondary);
-      case 'case-convert':
-        return caseConvert(primary);
-      case 'timestamp':
-        return timestampTransform(primary, timestampAction);
-      case 'cron':
-        return cronDescribe(primary);
-      case 'hash':
-        return hashDigest(primary, hashAlgo);
-      case 'radix':
-        return radixTransform(primary, fromRadix, toRadix);
-      case 'css-unit':
-        return cssUnitConvert(primary, baseFontSize);
-      case 'color-preview':
-        return colorParse(primary);
-      case 'mime-type':
-        return mimeLookup(primary);
-      case 'text-stats':
-        return textStats(primary);
-      case 'random-gen':
-        return randomGenerate(randomAction, randomLen);
-      default:
-        return { output: '', error: '未知工具' };
-    }
-  }, [tool.id, jsonAction, rootName, yamlAction, csvAction, basicAuthAction, escapeMode, urlQueryAction, urlAction, base64Action, htmlEntityAction, regexPattern, regexFlags, timestampAction, hashAlgo, fromRadix, toRadix, baseFontSize, randomAction, randomLen]);
+  const executorParams: ToolExecutorParams = useMemo(() => ({
+    jsonAction,
+    rootName,
+    yamlAction,
+    csvAction,
+    basicAuthAction,
+    escapeMode,
+    urlQueryAction,
+    urlAction,
+    base64Action,
+    htmlEntityAction,
+    regexPattern,
+    regexFlags,
+    timestampAction,
+    hashAlgo,
+    fromRadix,
+    toRadix,
+    baseFontSize,
+    randomAction,
+    randomLen,
+  }), [jsonAction, rootName, yamlAction, csvAction, basicAuthAction, escapeMode, urlQueryAction, urlAction, base64Action, htmlEntityAction, regexPattern, regexFlags, timestampAction, hashAlgo, fromRadix, toRadix, baseFontSize, randomAction, randomLen]);
 
-  const applyResult = useCallback((result: Awaited<ReturnType<typeof runTool>>) => {
+  const runTool = useCallback(async (primary: string, secondary: string) => {
+    return executeTool(tool.id, primary, secondary, executorParams);
+  }, [tool.id, executorParams]);
+
+  const applyResult = useCallback((result: Awaited<ReturnType<typeof executeTool>>) => {
     setOutput(result.output);
     setMeta(result.meta ?? '');
     setError(result.error ?? '');
@@ -536,7 +386,7 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
       case 'jwt-decoder':
         return 'eyJhbGciOi...';
       case 'basic-auth':
-        return basicAuthAction === 'encode' ? 'admin:secret123' : 'Basic YWRtaW46c2VjcmV0MTIz';
+        return basicAuthAction === 'encode' ? 'username:password' : 'Basic dXNlcm5hbWU6cGFzc3dvcmQ=';
       case 'sql-format':
         return 'select id,name from users where active=1';
       case 'url-parse':
@@ -550,7 +400,7 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
       case 'http-status':
         return '404';
       case 'http-header':
-        return 'Content-Type: application/json\nAuthorization: Bearer token123';
+        return 'Content-Type: application/json\nAuthorization: Bearer eyJhbGci...';
       case 'ua-parse':
         return 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36...';
       case 'base64-codec':
@@ -718,6 +568,8 @@ function ToolPanel({ tool, onUse }: ToolPanelProps) {
  *   - 顶部：收藏区（仅当无搜索 / category=all 时展示）
  *   - 主体：根据分类与搜索过滤后的工具列表
  *   - 收藏区与主列表共用同一份 React 渲染逻辑，避免手动 DOM 操作引发的状态错位
+ *
+ * @returns {JSX.Element} 返回开发工具栏主页面 JSX 元素
  */
 export function DeveloperToolsPage() {
   const { t } = useT();

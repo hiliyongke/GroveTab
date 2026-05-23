@@ -1,0 +1,53 @@
+@import (reference) '@/styles/mixins.less';
+
+/* FrequencyView —— 按使用频率排序视图 */
+
+.app-frequency-list {
+  .flex-column(2px);
+}
+
+.app-frequency-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 0 10px;
+}
+
+.app-frequency-header-icon,
+.app-frequency-rank.is-top-rank {
+  color: var(--ant-color-primary);
+}
+
+.app-frequency-header-copy {
+  color: var(--ant-color-text-tertiary);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.app-frequency-rebuild-tag {
+  margin: 0;
+  font-size: 10.5px;
+}
+
+.app-frequency-rank {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--ant-color-fill-secondary);
+  color: var(--ant-color-text-tertiary);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.app-frequency-rank.is-top-rank {
+  background: var(--ant-color-primary-bg);
+}

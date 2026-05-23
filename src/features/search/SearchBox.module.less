@@ -1,3 +1,5 @@
+@import (reference) '@/styles/mixins.less';
+
 /* ─── 搜索弹窗 Modal 容器 ─── */
 .search-box-dialog {
   top: 12vh;
@@ -9,13 +11,13 @@
   background: var(--app-overlay-mask-bg, rgba(15, 23, 42, 0.24));
 }
 
-.search-box-modal .ant-modal-content,
-.search-box-modal .ant-modal-body,
+.search-box-modal :global(.ant-modal-content),
+.search-box-modal :global(.ant-modal-body),
 .search-box-body {
   padding: 0;
 }
 
-.search-box-modal .ant-modal-content {
+.search-box-modal :global(.ant-modal-content) {
   overflow: hidden;
   background: transparent;
 }
@@ -71,6 +73,28 @@
 
 .search-box-input-prefix {
   color: var(--searchbox-search-icon);
+}
+
+.search-box-history-trigger {
+  all: unset;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: var(--app-radius-md, 8px);
+  color: var(--searchbox-text-secondary);
+  cursor: pointer;
+  transition:
+    background var(--searchbox-transition),
+    color var(--searchbox-transition);
+}
+
+.search-box-history-trigger:hover,
+.search-box-history-trigger:focus-visible {
+  color: var(--searchbox-text);
+  background: var(--searchbox-fill-tertiary);
 }
 
 /* ─── 引擎切换触发器（输入框左侧） ─── */
@@ -135,7 +159,7 @@
 }
 
 /* ─── 引擎切换 Popover 菜单 ─── */
-.search-box-engine-popover .ant-popover-inner {
+.search-box-engine-popover :global(.ant-popover-inner) {
   padding: 6px;
   border-radius: var(--app-radius-md, 10px);
 }
@@ -443,5 +467,16 @@
 
   .search-box-shortcuts {
     justify-content: flex-start;
+  }
+}
+
+/* ── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .search-box-history-trigger,
+  .search-box-engine-trigger,
+  .search-box-engine-trigger-caret,
+  .search-box-engine-menu-item,
+  .search-box-item {
+    transition: none !important;
   }
 }

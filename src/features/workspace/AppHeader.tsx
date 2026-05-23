@@ -21,7 +21,7 @@ import type { NewtabPageMode } from '@/shared/types';
 const { Header } = Layout;
 
 /**
- * 顶栏：轻量工具条（标签计数 + 吸附搜索 + 操作按钮）
+ * 顶栏：轻量工具条
  *
  * 设计策略：
  *   - 不再放品牌 logo（已移到 HeroBar 居中展示），Header 仅作功能栏
@@ -29,6 +29,22 @@ const { Header } = Layout;
  *   - 中部：滚动吸附搜索触发器（Hero 搜索框滚出视野时渐显）
  *   - 右侧：归档 / 明暗切换 / 设置
  *   - 整体更薄更轻，把视觉重心让给 Hero 区的品牌 + 搜索
+ *
+ * @param props - 组件属性
+ * @param props.tabCount - 标签数量
+ * @param props.domainCount - 域名数量
+ * @param props.duplicateTabsCount - 重复标签数量
+ * @param props.idleTabsCount - 闲置标签数量
+ * @param props.hasTidySuggestions - 是否有整理建议
+ * @param props.compactSearchVisible - 吸附搜索是否可见
+ * @param props.pageMode - 页面模式
+ * @param props.onPageModeChange - 页面模式切换回调
+ * @param props.onSettings - 打开设置回调
+ * @param props.onOpenSearch - 打开搜索回调
+ * @param props.onInsights - 打开洞察回调
+ * @param props.onTidy - 打开整理回调
+ * @param props.onOpenHistory - 打开历史回调
+ * @returns {void} 无返回值
  */
 export function AppHeader({
   tabCount,

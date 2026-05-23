@@ -1,0 +1,573 @@
+/* Arc Sidebar Styles - Arc Browser Inspired Design */
+
+/* ===== CSS Variables (全局，供 JS 读取) ===== */
+:root {
+  --arc-bg-primary: #1a1a1a;
+  --arc-bg-secondary: #242424;
+  --arc-bg-hover: #2a2a2a;
+  --arc-bg-active: #333333;
+  --arc-text-primary: #ffffff;
+  --arc-text-secondary: #999999;
+  --arc-text-muted: #666666;
+  --arc-border-color: #333333;
+  --arc-accent: #FF6B35;
+  --arc-accent-focus: rgba(255, 107, 53, 0.15);
+  --arc-badge-text: #ffffff;
+  --arc-danger: #e74c3c;
+  --arc-danger-text: #ffffff;
+  --arc-overlay-bg: rgba(0, 0, 0, 0.6);
+  --arc-shadow-heavy: rgba(0, 0, 0, 0.4);
+  --arc-spaces-width: 48px;
+  --arc-sidebar-width: 280px;
+  --arc-tab-height: 36px;
+  --arc-radius: 8px;
+  --arc-radius-sm: 6px;
+}
+
+/* ===== Main Layout ===== */
+.arc-sidebar {
+  display: flex;
+  height: 100vh;
+  background: var(--arc-bg-primary);
+  color: var(--arc-text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  overflow: hidden;
+}
+
+/* ===== Spaces Bar (Left Edge) ===== */
+.arc-spaces-bar {
+  width: var(--arc-spaces-width);
+  background: var(--arc-bg-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+  border-right: 1px solid var(--arc-border-color);
+  z-index: 10;
+}
+
+.arc-spaces-header {
+  margin-bottom: 12px;
+}
+
+.arc-menu-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--arc-text-secondary);
+  cursor: pointer;
+  border-radius: var(--arc-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.15s ease;
+}
+
+.arc-menu-btn:hover {
+  background: var(--arc-bg-hover);
+  color: var(--arc-text-primary);
+}
+
+.arc-spaces-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  padding: 0 8px;
+}
+
+.arc-space-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--arc-text-secondary);
+  cursor: pointer;
+  border-radius: var(--arc-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.15s ease;
+  position: relative;
+  margin: 0 auto;
+}
+
+.arc-space-btn:hover {
+  background: var(--arc-bg-hover);
+  color: var(--arc-text-primary);
+}
+
+.arc-space-btn.active {
+  background: var(--arc-bg-active);
+  color: var(--arc-text-primary);
+}
+
+.arc-space-btn.active::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 16px;
+  background: var(--space-color, var(--arc-accent));
+  border-radius: 0 2px 2px 0;
+}
+
+.arc-space-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.arc-space-badge {
+  position: absolute;
+  top: -2px;
+  right: -4px;
+  background: var(--arc-accent);
+  color: var(--arc-badge-text);
+  font-size: 9px;
+  font-weight: 600;
+  min-width: 14px;
+  height: 14px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+}
+
+.arc-spaces-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 8px 0;
+  border-top: 1px solid var(--arc-border-color);
+  width: 100%;
+}
+
+.arc-space-btn.add-space {
+  color: var(--arc-text-muted);
+}
+
+/* ===== Main Sidebar Content ===== */
+.arc-sidebar-content {
+  flex: 1;
+  width: var(--arc-sidebar-width);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ===== Search Bar ===== */
+.arc-search-bar {
+  padding: 12px 12px 8px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.arc-search-icon {
+  color: var(--arc-text-muted);
+  font-size: 14px;
+  position: absolute;
+  left: 20px;
+  z-index: 1;
+}
+
+.arc-search-input {
+  width: 100%;
+}
+
+.arc-search-input .ant-input {
+  background: var(--arc-bg-secondary) !important;
+  border: 1px solid var(--arc-border-color) !important;
+  color: var(--arc-text-primary) !important;
+  padding-left: 32px !important;
+  padding-right: 40px !important;
+  border-radius: var(--arc-radius) !important;
+  height: 32px;
+  font-size: 13px;
+}
+
+.arc-search-input .ant-input::placeholder {
+  color: var(--arc-text-muted);
+}
+
+.arc-search-input .ant-input:focus {
+  border-color: var(--arc-accent) !important;
+  box-shadow: 0 0 0 2px var(--arc-accent-focus) !important;
+}
+
+.arc-shortcut {
+  position: absolute;
+  right: 20px;
+  background: var(--arc-bg-active);
+  color: var(--arc-text-muted);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: inherit;
+  border: none;
+}
+
+/* ===== Sections ===== */
+.arc-section {
+  padding: 4px 8px;
+}
+
+.arc-section-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--arc-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.arc-domain-favicon {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+.arc-tab-count {
+  margin-left: auto;
+  background: var(--arc-bg-active);
+  color: var(--arc-text-muted);
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-size: 10px;
+}
+
+/* ===== Tab Items ===== */
+.arc-tabs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.arc-tab-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  height: var(--arc-tab-height);
+  border-radius: var(--arc-radius-sm);
+  cursor: pointer;
+  transition: all 0.12s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.arc-tab-item:hover {
+  background: var(--arc-bg-hover);
+}
+
+.arc-tab-item.active {
+  background: var(--arc-bg-active);
+}
+
+.arc-tab-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background: var(--arc-accent);
+  border-radius: 0 2px 2px 0;
+}
+
+.arc-tab-item.pinned {
+  opacity: 0.85;
+}
+
+.arc-tab-favicon {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.arc-tab-title {
+  flex: 1;
+  font-size: 13px;
+  color: var(--arc-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.arc-tab-item:hover .arc-tab-title {
+  color: var(--arc-text-primary);
+}
+
+.arc-tab-item.active .arc-tab-title {
+  font-weight: 500;
+}
+
+/* ===== Tab Actions ===== */
+.arc-tab-actions {
+  display: none;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.arc-tab-item:hover .arc-tab-actions {
+  display: flex;
+}
+
+.arc-tab-action-btn {
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  color: var(--arc-text-muted);
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  transition: all 0.12s ease;
+  padding: 0;
+}
+
+.arc-tab-action-btn:hover {
+  background: var(--arc-bg-active);
+  color: var(--arc-text-primary);
+}
+
+.arc-tab-action-btn.close:hover {
+  background: var(--arc-danger);
+  color: var(--arc-danger-text);
+}
+
+/* ===== Footer ===== */
+.arc-sidebar-footer {
+  padding: 8px;
+  border-top: 1px solid var(--arc-border-color);
+  display: flex;
+  gap: 4px;
+}
+
+.arc-footer-btn {
+  flex: 1;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--arc-text-secondary);
+  cursor: pointer;
+  border-radius: var(--arc-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  transition: all 0.12s ease;
+}
+
+.arc-footer-btn:hover {
+  background: var(--arc-bg-hover);
+  color: var(--arc-text-primary);
+}
+
+.arc-footer-btn.icon-only {
+  flex: 0 0 32px;
+}
+
+/* ===== Command Bar ===== */
+.arc-command-bar-overlay {
+  position: fixed;
+  top: 0;
+  left: var(--arc-spaces-width);
+  right: 0;
+  bottom: 0;
+  background: var(--arc-overlay-bg);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 120px;
+  z-index: 1000;
+  animation: arcFadeIn 0.15s ease;
+}
+
+@keyframes arcFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.arc-command-bar {
+  width: 560px;
+  background: var(--arc-bg-secondary);
+  border: 1px solid var(--arc-border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 16px 48px var(--arc-shadow-heavy);
+  animation: arcSlideDown 0.2s ease;
+}
+
+@keyframes arcSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.arc-command-input {
+  width: 100%;
+}
+
+.arc-command-input .ant-input {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid var(--arc-border-color) !important;
+  color: var(--arc-text-primary) !important;
+  padding: 16px 20px !important;
+  font-size: 15px;
+  border-radius: 0 !important;
+}
+
+.arc-command-input .ant-input-prefix {
+  color: var(--arc-text-muted);
+  margin-right: 12px;
+  font-size: 18px;
+}
+
+.arc-command-results {
+  padding: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.arc-command-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--arc-radius);
+  cursor: pointer;
+  transition: all 0.1s ease;
+  color: var(--arc-text-secondary);
+  font-size: 14px;
+}
+
+.arc-command-item:hover {
+  background: var(--arc-bg-hover);
+  color: var(--arc-text-primary);
+}
+
+.arc-command-item kbd {
+  margin-left: auto;
+  background: var(--arc-bg-active);
+  color: var(--arc-text-muted);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: inherit;
+  border: none;
+}
+
+/* ===== Empty State ===== */
+.arc-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  color: var(--arc-text-muted);
+}
+
+.arc-empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.3;
+}
+
+.arc-empty-state p {
+  font-size: 13px;
+}
+
+/* ===== Scrollbar ===== */
+.arc-sidebar-content::-webkit-scrollbar,
+.arc-spaces-list::-webkit-scrollbar,
+.arc-command-results::-webkit-scrollbar {
+  width: 6px;
+}
+
+.arc-sidebar-content::-webkit-scrollbar-track,
+.arc-spaces-list::-webkit-scrollbar-track,
+.arc-command-results::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.arc-sidebar-content::-webkit-scrollbar-thumb,
+.arc-spaces-list::-webkit-scrollbar-thumb,
+.arc-command-results::-webkit-scrollbar-thumb {
+  background: var(--arc-bg-active);
+  border-radius: 3px;
+}
+
+.arc-sidebar-content::-webkit-scrollbar-thumb:hover,
+.arc-spaces-list::-webkit-scrollbar-thumb:hover,
+.arc-command-results::-webkit-scrollbar-thumb:hover {
+  background: var(--arc-text-muted);
+}
+
+/* ===== Animations ===== */
+@keyframes arcTabEnter {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.arc-tab-item {
+  animation: arcTabEnter 0.15s ease;
+}
+
+/* ===== Reduced Motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  .arc-menu-btn,
+  .arc-space-btn,
+  .arc-tab-item,
+  .arc-tab-action-btn,
+  .arc-footer-btn,
+  .arc-command-item {
+    transition: none;
+  }
+
+  .arc-tab-item {
+    animation: none;
+  }
+
+  .arc-command-bar-overlay {
+    animation: none;
+  }
+
+  .arc-command-bar {
+    animation: none;
+  }
+}

@@ -21,7 +21,11 @@ interface SpeedDialAddModalProps {
   existingGroups: string[];
 }
 
-/** 安全获取 URL 的 hostname，失败返回原始 URL */
+/**
+ * 安全获取 URL 的 hostname，失败返回原始 URL
+ * @param url - 待解析的 URL
+ * @returns {string} 返回 URL 的 hostname，失败返回原始 URL
+ */
 function safeGetHostname(url: string): string {
   try {
     return new URL(url).hostname;
@@ -30,11 +34,26 @@ function safeGetHostname(url: string): string {
   }
 }
 
-/** 生成简易唯一 ID */
+/** 生成简易唯一 ID
+ * @returns {string} 返回简易唯一 ID 字符串
+ */
 function uid(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
 
+/**
+ * 新增/编辑常用站点弹窗
+ *
+ * 支持手动输入 URL、标题和分组。
+ * 分组模式下显示分组选择器（可从已有分组选，也可输入新分组名）。
+ *
+ * @param root0 - 组件属性
+ * @param root0.open - 是否打开弹窗
+ * @param root0.onClose - 关闭回调
+ * @param root0.editingSite - 待编辑的站点（null 为新增模式）
+ * @param root0.existingGroups - 已有分组名列表
+ * @returns {JSX.Element} 返回弹窗 JSX 元素
+ */
 export function SpeedDialAddModal({ open, onClose, editingSite, existingGroups }: SpeedDialAddModalProps) {
   const { t } = useT();
   const addSite = useSpeedDialStore((s) => s.addSite);

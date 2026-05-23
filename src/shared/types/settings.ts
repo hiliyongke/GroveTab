@@ -1,7 +1,8 @@
 /**
- * Settings Type Definitions
- * 用户设置相关类型
+ * 用户设置相关类型定义
  */
+
+import type { ViewMode } from './view';
 
 /** User settings */
 export type SearchScopeField = 'title' | 'hostname' | 'url';
@@ -29,7 +30,7 @@ export interface UserSettings {
   newtabPageMode?: NewtabPageMode;
   /** 视图标签栏位置：top（搜索栏下方水平）/ left / right（垂直侧栏）/ bottom（固定底部水平） */
   viewTabPosition?: ViewTabPosition;
-  defaultView: 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'bookmarks' | 'kanban' | 'archive';
+  defaultView: ViewMode;
   theme: 'light' | 'dark' | 'system';
   /**
    * 皮肤预设：

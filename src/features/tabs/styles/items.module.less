@@ -1,3 +1,5 @@
+@import (reference) "@/styles/mixins.less";
+
 .app-domain-masonry {
   column-gap: var(--app-domain-column-gap, 20px);
   column-fill: balance;
@@ -12,7 +14,7 @@
 .app-domain-masonry-item {
   break-inside: avoid;
   page-break-inside: avoid;
-  margin-bottom: 16px;
+  margin-bottom: @app-space-4;
 }
 
 .app-domain-group-card {
@@ -48,9 +50,7 @@
 }
 
 .app-domain-group-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  .flex-row-center(10px);
   width: 100%;
   height: 48px;
   padding: 0 80px 0 14px;
@@ -72,19 +72,13 @@
 }
 
 .app-domain-group-badge {
-  width: 26px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  .icon-container(26px);
   border-radius: var(--app-radius-sm);
   background: var(--app-domain-card-badge-bg);
 }
 
 .app-domain-group-badge-favicon {
-  width: 16px;
-  height: 16px;
+  .icon-container();
   border-radius: var(--app-radius-xs);
 }
 
@@ -93,16 +87,13 @@
 }
 
 .app-domain-group-title {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
+  .meta-truncate();
+  .text-truncate();
   color: var(--app-domain-card-title-color);
   font-size: 13px;
   font-weight: 600;
   line-height: 1.3;
   letter-spacing: -0.01em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .app-domain-group-count {
@@ -117,12 +108,7 @@
 .app-domain-group-action {
   position: absolute;
   top: 10px;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  .icon-container(28px);
 }
 
 .app-domain-group-action--discard {
@@ -138,9 +124,7 @@
 }
 
 .app-domain-group-sortable {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  .flex-column(2px);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -153,9 +137,7 @@
 
 .app-tab-item {
   position: relative;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  .flex-row-center(10px);
   width: 100%;
   min-height: 40px;
   padding: var(--app-space-1) var(--app-space-3);
@@ -187,19 +169,12 @@
 }
 
 .app-tab-item-favicon {
-  width: 16px;
-  height: 16px;
+  .icon-container();
   border-radius: var(--app-radius-xs);
-  flex-shrink: 0;
 }
 
 .app-tab-item-favicon-fallback {
-  width: 16px;
-  height: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  .icon-container();
   border-radius: var(--app-radius-xs);
   background: var(--app-tab-fallback-bg);
 }
@@ -212,10 +187,8 @@
 }
 
 .app-tab-item-main {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
+  .meta-truncate();
+  .flex-column();
   justify-content: center;
 }
 
@@ -224,30 +197,24 @@
 }
 
 .app-tab-item-head {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  .flex-row-center(6px);
   min-width: 0;
 }
 
 .app-tab-item-title {
+  .meta-truncate();
+  .text-truncate();
   flex: 0 1 auto;
-  min-width: 0;
-  overflow: hidden;
   color: var(--app-tab-text);
   font-size: 12.5px;
   font-weight: 500;
   line-height: 1.3;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .app-tab-item-hostname,
 .app-tab-item-url-hint {
-  overflow: hidden;
+  .text-truncate();
   color: var(--app-tab-text-tertiary);
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .app-tab-item-hostname {
@@ -277,9 +244,7 @@
 }
 
 .app-tab-item-status {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  .flex-row-center(4px);
   flex-shrink: 0;
 }
 
@@ -288,13 +253,7 @@
 }
 
 .app-tab-item-action {
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  .icon-container(24px);
 }
 
 .app-tab-item-action--favorite.is-active {

@@ -1,0 +1,23 @@
+@import (reference) '@/styles/mixins.less';
+
+/* CompactView —— 虚拟化平铺列表 */
+
+.app-compact-view {
+  overflow-y: auto;
+  padding-right: 4px;
+  .scrollbar-thin();
+}
+
+.app-compact-view-spacer {
+  position: relative;
+  width: 100%;
+  display: flex;
+}
+
+.app-compact-view-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+}

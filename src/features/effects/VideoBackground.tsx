@@ -21,6 +21,26 @@ import { useEffect, useRef, useState } from 'react';
 import { useSettingsStore } from '@/store';
 import { loadVideoBlobUrl } from './video-storage';
 
+/**
+ * 动态视频背景组件
+ *
+ * 渲染：
+ *   全屏 fixed <video>，autoplay muted loop playsinline；
+ *   zIndex: -1（在 body 背景之上、内容之下）；
+ *   opacity 由 backgroundOverlay 控制（不在本组件处理，保持职责单一）。
+ *
+ * 数据源：
+ *   settings.videoBackground:
+ *     { type: 'url', src: 'https://...' }
+ *     { type: 'file', fileKey: 'v_xxx' } → 从 IndexedDB 读 Blob → objectURL
+ *
+ * 降级：
+ *   - settings.reducedMotion=='on' 或系统 prefers-reduced-motion → 只展示第一帧（video.pause()）
+ *   - loadVideoBlobUrl 失败（文件被外部清了）→ 静默降级为无视频
+ *   - 标签不可见时（visibilitychange → hidden）pause 省电，回来时 play。
+ *
+ * @returns {JSX.Element | null} 返回视频背景 JSX 元素或 null
+ */
 export function VideoBackground() {
   const conf = useSettingsStore((s) => s.settings.videoBackground);
   const reducedMotion = useSettingsStore((s) => s.settings.reducedMotion) ?? 'auto';

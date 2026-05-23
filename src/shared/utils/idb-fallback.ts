@@ -25,19 +25,34 @@ const QUOTA_THRESHOLD = CONFIG.cache.idbQuotaThreshold; // 可配置阈值
 /** IndexedDB 实例缓存 */
 let dbInstance: IDBDatabase | null = null;
 
-/** 统一把 IndexedDB 的错误值包装成 Error。 */
+/**
+ * 统一把 IndexedDB 的错误值包装成 Error。
+ *
+ * @param error - 原始错误值
+ * @param label - 错误标签，用于标识错误来源
+ * @returns 包装后的 Error 对象
+ */
 function toIDBError(error: unknown, label: string): Error {
   if (error instanceof Error) return error;
   return new Error(`[IDB Fallback] ${label} failed`);
 }
 
-/** 归档会话数组的最小类型守卫。 */
+/**
+ * 归档会话数组的最小类型守卫。
+ *
+ * @param value - 待检查的值
+ * @returns 是归档会话数组返回 true，否则返回 false
+ */
 function isArchivedSessionArray(value: unknown): value is ArchivedSession[] {
   return Array.isArray(value);
 }
 
 /**
  * 打开（或复用）IndexedDB 连接
+ *
+ * 如果已存在连接则直接返回，否则新建连接并缓存。
+ *
+ * @returns IndexedDB 数据库连接实例
  */
 function openDB(): Promise<IDBDatabase> {
   if (dbInstance) return Promise.resolve(dbInstance);
@@ -63,6 +78,10 @@ function openDB(): Promise<IDBDatabase> {
 
 /**
  * 检查是否应该降级到 IndexedDB
+ *
+ * 当 chrome.storage.local 使用率超过阈值时返回 true。
+ *
+ * @returns 应该降级返回 true，否则返回 false
  */
 export async function shouldFallbackToIDB(): Promise<boolean> {
   try {
@@ -110,6 +129,8 @@ async function migrateSessionsToIDB(): Promise<number> {
 
 /**
  * 从 IndexedDB 读取所有归档会话
+ *
+ * @returns 归档会话数组
  */
 export async function getSessionsFromIDB(): Promise<ArchivedSession[]> {
   const db = await openDB();
@@ -125,6 +146,8 @@ export async function getSessionsFromIDB(): Promise<ArchivedSession[]> {
 
 /**
  * 将归档会话保存到 IndexedDB
+ *
+ * @param sessions - 待保存的归档会话数组
  */
 export async function saveSessionsToIDB(sessions: ArchivedSession[]): Promise<void> {
   const db = await openDB();
@@ -145,6 +168,8 @@ export async function saveSessionsToIDB(sessions: ArchivedSession[]): Promise<vo
 
 /**
  * 检查 IndexedDB 中是否有已迁移的数据
+ *
+ * @returns 是否存在已迁移的数据
  */
 export async function hasIDBData(): Promise<boolean> {
   try {
@@ -167,6 +192,8 @@ export async function hasIDBData(): Promise<boolean> {
  *
  * 在应用初始化时调用。如果检测到 chrome.storage.local 使用率超过阈值，
  * 且 IndexedDB 中尚无数据，则执行迁移。
+ *
+ * @returns 无返回值
  */
 export async function autoFallbackIfNeeded(): Promise<void> {
   try {

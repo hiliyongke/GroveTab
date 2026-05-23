@@ -1,3 +1,5 @@
+@import (reference) "@/styles/mixins.less";
+
 /**
  * TidySuggestionBar — 智能整理建议栏
  *
@@ -29,8 +31,7 @@
 /* ── 摘要行 ── */
 .tidy-suggestion__summary,
 .tidy-suggestion__section-header {
-  display: flex;
-  align-items: center;
+  .flex-row-center(0);
 }
 
 .tidy-suggestion__summary {

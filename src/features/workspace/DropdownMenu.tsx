@@ -5,7 +5,14 @@ import { useT } from '@/shared/i18n';
 import type { NewtabPageMode } from '@/shared/types';
 
 /**
- * 空间切换下拉菜单——将 trending / devtools 降为二级入口。
+ * 空间切换下拉菜单
+ *
+ * 将 trending / devtools 降为二级入口。
+ *
+ * @param props - 组件属性
+ * @param props.currentPageMode - 当前页面模式
+ * @param props.onPageModeChange - 页面模式切换回调
+ * @returns {void} 无返回值
  */
 export function DropdownMenu({
   currentPageMode,

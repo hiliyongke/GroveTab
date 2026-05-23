@@ -1,0 +1,68 @@
+@import (reference) '@/styles/mixins.less';
+
+/* TimelineView —— 按访问时间段展示（antd Timeline 版） */
+
+.app-timeline-view {
+  padding: 8px 0;
+}
+
+.app-timeline-segment {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.app-timeline-segment.is-collapsed {
+  display: none;
+}
+
+.app-timeline-segment-list {
+  .flex-column(2px);
+}
+
+.app-timeline-segment__header {
+  .flex-row-center(8px);
+}
+
+.app-timeline-segment-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 0;
+  color: var(--app-color, var(--ant-color-text-secondary));
+  background: none;
+  border: none;
+}
+
+.app-timeline-segment-header:hover {
+  color: var(--app-color-hover, var(--ant-color-text));
+}
+
+.app-timeline-segment-range {
+  color: var(--ant-color-text-tertiary);
+  font-size: 11px;
+}
+
+.app-timeline-segment-count {
+  background: var(--ant-color-primary-bg);
+  color: var(--ant-color-primary);
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+.app-timeline-segment-chevron {
+  transition: transform var(--ant-motion-duration-fast, 0.2s);
+  margin-left: auto;
+}
+
+.app-timeline-segment-chevron.is-collapsed {
+  transform: rotate(-90deg);
+}
+
+.app-timeline-segment-time {
+  color: var(--ant-color-text-tertiary);
+  font-size: 11px;
+  flex-shrink: 0;
+}

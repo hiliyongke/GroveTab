@@ -1,0 +1,268 @@
+@import (reference) "@/styles/mixins.less";
+
+/* ═══════════════════════════════════════════════════════
+   WindowView — 多窗口管理 · 自适应卡片布局
+   CSS Grid auto-fill + minmax(280px, 1fr)
+   少窗口撑满宽度，多窗口瀑布排列
+   ═══════════════════════════════════════════════════════ */
+
+/* ── 空状态 ── */
+.app-window-empty {
+  margin-top: 60px;
+}
+
+/* ── masonry 容器 ── */
+.app-window-masonry {
+  .flex-column(12px);
+}
+
+/* ── 操作栏 ── */
+.app-window-toolbar {
+  .flex-row-center(8px);
+  flex-shrink: 0;
+  padding: 4px 0;
+}
+
+/* ── 自适应网格（核心：auto-fill + minmax 实现宽度自适应撑满） ──
+ *
+ * 行为：
+ *   1 个窗口 → 单列撑满
+ *   2 个窗口 → 双列等宽
+ *   3 个窗口 → 双列（2+1）
+ *   N 个窗口 → 每列最小 280px，自动填充列数
+ *
+ * grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))
+ *   → 容器宽 800px 时：3 列 280px（1fr=266px）
+ *   → 容器宽 600px 时：2 列 1fr=300px
+ *   → 容器宽 320px 时：1 列撑满
+ */
+.app-window-masonry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: @app-space-4;
+  align-items: start;
+}
+
+/* ── grid 单项 ── */
+.app-window-masonry-item {
+  min-width: 0; /* 防止内容溢出 grid cell */
+}
+
+/* ── 窗口卡片 ── */
+.app-window-card {
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--app-shadow-card);
+}
+
+.app-window-card__body {
+  padding: 0;
+}
+
+/* ── 窗口身份色条（左侧） ── */
+.app-accent-bar--left {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: var(--ant-color-border);
+  border-top-left-radius: var(--ant-border-radius-lg);
+  border-bottom-left-radius: var(--ant-border-radius-lg);
+}
+
+/* 当前窗口色条用主色 */
+.app-accent-bar--left.is-primary {
+  background: var(--ant-color-primary);
+  width: 3px;
+}
+
+/* ── 卡片头部（可折叠） ── */
+.app-window-card-header {
+  .flex-row-center(10px);
+  width: 100%;
+  height: 48px;
+  padding: 0 80px 0 14px;
+  border: none;
+  border-bottom: 1px solid var(--app-window-card-header-border, transparent);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+/* ── 折叠箭头 ── */
+.app-window-card-chevron {
+  flex-shrink: 0;
+  color: var(--ant-color-text-tertiary);
+  transition: transform var(--ant-motion-duration-mid);
+}
+
+.app-window-card-chevron.is-collapsed {
+  transform: rotate(-90deg);
+}
+
+/* ── 窗口图标徽章 ── */
+.app-window-card-badge {
+  .icon-container(26px);
+  border-radius: var(--app-radius-sm);
+  background: var(--ant-color-fill-quaternary);
+}
+
+.app-window-card-badge-icon {
+  color: var(--ant-color-text-secondary);
+}
+
+.app-accent-bar--left.is-primary ~ .app-window-card-header .app-window-card-badge-icon {
+  color: var(--ant-color-primary);
+}
+
+/* ── 窗口标题 ── */
+.app-window-card-title {
+  .meta-truncate();
+  .text-truncate();
+  color: var(--ant-color-text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+/* ── 焦点标签 ── */
+.app-window-card-focused-tag {
+  margin: 0;
+  flex-shrink: 0;
+  font-size: 11px;
+  line-height: 16px;
+}
+
+/* ── 标签数量 ── */
+.app-window-card-count {
+  margin: 0;
+  flex-shrink: 0;
+  height: 18px;
+  padding: 0 6px;
+  font-size: 11px;
+  line-height: 18px;
+}
+
+/* ── 操作按钮（绝对定位在卡片头部右侧） ── */
+.app-window-card-action {
+  position: absolute;
+  top: 10px;
+  .icon-container(28px);
+}
+
+.app-window-card-action--close {
+  right: 8px;
+}
+
+/* ── 标签列表区域 ── */
+.app-window-card-list {
+  padding: 6px;
+}
+
+/* ── 拖拽排序列表 ── */
+.app-window-card-sortable {
+  .flex-column(2px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-window-card-sortable-item {
+  cursor: grab;
+  list-style: none;
+}
+
+.app-window-card-sortable-item.is-dragging {
+  opacity: 0.4;
+  cursor: grabbing;
+}
+
+/* ── 跨窗口拖放目标高亮 ── */
+.app-window-card.is-drag-over {
+  border-color: var(--ant-color-primary) !important;
+  box-shadow: 0 0 0 2px var(--ant-color-primary), var(--app-shadow-card);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+/* ── 分组区域 ── */
+.app-window-card-group-zone {
+  .flex-row-center(6px);
+  margin-top: 6px;
+  padding: 8px 12px;
+  border: 2px dashed var(--ant-color-border);
+  border-radius: var(--app-radius-sm);
+  color: var(--ant-color-text-tertiary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.app-window-card-group-zone.is-drag-over {
+  border-color: var(--ant-color-primary);
+  background: var(--ant-color-primary-bg);
+  color: var(--ant-color-primary);
+}
+
+/* ── DragOverlay 抬升副本 ── */
+.app-kanban-overlay {
+  .flex-row-center(8px);
+  padding: 12px 16px;
+  background: var(--ant-color-bg-elevated);
+  border: 1px solid var(--ant-color-primary);
+  border-radius: var(--ant-border-radius-lg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  opacity: 0.9;
+  cursor: grabbing;
+}
+
+.app-kanban-card__title {
+  .text-truncate();
+  color: var(--ant-color-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ── 关闭按钮显隐 ── */
+.app-hover-reveal {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+
+.app-window-card-header:hover .app-hover-reveal,
+.app-hover-reveal.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── 行 hover ── */
+.app-row-hover:hover {
+  background: var(--app-row-hover-bg, transparent);
+}
+
+/* ── 智能排序按钮 ── */
+.app-window-card-sort-btn {
+  position: absolute;
+  top: 10px;
+  right: 36px;
+  .icon-container(28px);
+}
+
+.app-window-card-sort-btn .app-sort-menu-item-icon {
+  margin-right: 8px;
+  color: var(--ant-color-text-tertiary);
+}
+
+.app-window-card-sort-btn .app-sort-menu-item-desc {
+  font-size: 11px;
+  color: var(--ant-color-text-quaternary);
+}
+
+/* ── 分组内排序按钮 ── */
+.app-window-card-group-sort-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+

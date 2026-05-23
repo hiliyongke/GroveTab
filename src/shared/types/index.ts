@@ -1,6 +1,5 @@
 /**
- * Shared Type Definitions
- * 全局共享类型 — barrel export
+ * 共享类型定义 — 统一导出
  *
  * 按功能域拆分，统一从此文件导出。
  * 外部仍使用 `import { ... } from '@/shared/types'` 即可，无需修改导入路径。
@@ -18,6 +17,7 @@ export type { StorageKey, StorageMeta } from './storage';
 // ── 用户设置 ──────────────────────────────
 export type {
   SearchScopeField,
+  SearchSortMode,
   SearchEngineId,
   BuiltInSearchEngineId,
   CustomSearchEngineId,
@@ -26,6 +26,7 @@ export type {
   ViewTabPosition,
   UserSettings,
 } from './settings';
+export type { ViewMode } from './view';
 // ── 撤销系统 ──────────────────────────────────────
 export type { ClosedTabSnapshot, UndoRecord } from './undo';
 

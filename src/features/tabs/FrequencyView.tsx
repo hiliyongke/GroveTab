@@ -3,6 +3,9 @@
  *
  * 升级：优先使用 SW StatsCollector 写入的统计数据（近 7 天激活次数），
  * 数据缺失时回退到 lastAccessed 近似并显示"数据重建中"提示。
+ *
+ * 统计数据刷新通过 sw-broadcast 的 stats-updated 消息驱动，
+ * 不再直接监听 chrome.storage.onChanged（遵循项目架构约定）。
  */
 
 import { useEffect, useMemo } from 'react';
@@ -14,11 +17,21 @@ import { Flame } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { Tag } from 'antd';
 import { CONFIG } from '@/shared/config';
-import { STORAGE_KEYS } from '@/shared/config/storage-keys';
-import styles from './styles/views.module.less';
+import styles from './FrequencyView.module.less';
 
 const MAX_DISPLAY = CONFIG.ui.maxDisplay;
 
+/**
+ * 按使用频率排序的标签视图
+ *
+ * 升级：优先使用 SW StatsCollector 写入的统计数据（近 7 天激活次数），
+ * 数据缺失时回退到 lastAccessed 近似并显示"数据重建中"提示。
+ *
+ * 统计数据刷新通过 sw-broadcast 的 stats-updated 消息驱动，
+ * 不再直接监听 chrome.storage.onChanged（遵循项目架构约定）。
+ *
+ * @returns 频率视图 JSX 元素
+ */
 export function FrequencyView() {
   const tabs = useTabsStore((s) => s.tabs);
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
@@ -30,22 +43,12 @@ export function FrequencyView() {
   const { t } = useT();
 
   // 首次进入视图时加载统计数据
+  // 后续刷新由 sw-broadcast 的 stats-updated 消息驱动（见 useSwBroadcast）
   useEffect(() => {
     if (!statsLoaded) {
       void loadStats();
     }
   }, [statsLoaded, loadStats]);
-
-  useEffect(() => {
-    if (typeof chrome === 'undefined' || chrome.storage?.onChanged === undefined) return;
-    const listener = (changes: Record<string, chrome.storage.StorageChange>, areaName: string) => {
-      if (areaName === 'local' && changes[STORAGE_KEYS.stats] !== undefined) {
-        void loadStats();
-      }
-    };
-    chrome.storage.onChanged.addListener(listener);
-    return () => chrome.storage.onChanged.removeListener(listener);
-  }, [loadStats]);
 
   const sortedTabs = useMemo(() => {
     const withScore = tabs.map((tab) => {
@@ -87,7 +90,7 @@ export function FrequencyView() {
             showHostname
             showUrlHint={ambiguousIds.has(entry.tab.id)}
             leading={
-              <span className={`${styles['app-frequency-rank']}${i < 3 ? ' is-top-rank' : ''}`}>
+              <span className={`${styles['app-frequency-rank']}${i < 3 ? ` ${styles['is-top-rank']}` : ''}`}>
                 {i + 1}
               </span>
             }

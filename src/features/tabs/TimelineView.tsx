@@ -28,7 +28,7 @@ import { findAmbiguousTitleIds } from '@/shared/utils/url-display';
 import { cssVars } from '@/shared/utils/css-vars';
 import { TabItem } from './TabItem';
 import type { LiveTab } from '@/shared/types';
-import styles from './styles/views.module.less';
+import styles from './TimelineView.module.less';
 
 /** 翻译函数类型（与 useT 返回的 t 对齐） */
 type TFn = (key: string, vars?: Record<string, string | number>) => string;
@@ -42,6 +42,9 @@ interface TimeSegment {
 
 /**
  * 将毫秒时间戳格式化为 HH:mm（两位补零）
+ *
+ * @param ts - 毫秒时间戳
+ * @returns 格式化的时间字符串（如 "14:30"）
  */
 function formatHM(ts: number): string {
   const d = new Date(ts);
@@ -52,9 +55,13 @@ function formatHM(ts: number): string {
 
 /**
  * 取一组 tab 在该段内的访问时间跨度
+ *
  *   - 单条：返回 "HH:mm"
  *   - 多条且首尾相同分钟：返回 "HH:mm"
  *   - 多条：返回 "HH:mm – HH:mm"
+ *
+ * @param tabs - 标签数组
+ * @returns 时间跨度字符串
  */
 function formatSegmentRange(tabs: LiveTab[]): string {
   if (tabs.length === 0) return '';
@@ -91,6 +98,7 @@ function formatSegmentRange(tabs: LiveTab[]): string {
  * @param tabs       待分组的标签
  * @param dayPrefix  桶名前缀（跨天时传 "昨天 "）
  * @param keyPrefix  段 key 前缀，避免今天/昨天冲突
+ * @returns 返回按小时倒序排列的时间段数组
  */
 function bucketByHour(
   tabs: LiveTab[],
@@ -132,6 +140,10 @@ function bucketByHour(
  * 今天的"刚刚"段特殊处理：< 30 分钟的访问单独成段，置于最前
  *
  * 段内 tabs 按访问时间倒序，最新的在最上面。
+ *
+ * @param tabs - 标签数组
+ * @param t - i18n 翻译函数
+ * @returns 返回 [时间段|null, 剩余标签数组] 元组
  */
 function extractJustNow(tabs: LiveTab[], t: TFn): [TimeSegment | null, LiveTab[]] {
   const threshold = Date.now() - 30 * 60 * 1000;
@@ -163,6 +175,7 @@ function extractJustNow(tabs: LiveTab[], t: TFn): [TimeSegment | null, LiveTab[]
  * @param tabs        全量标签
  * @param granularity 粒度档位（day/hour）
  * @param t           i18n 翻译函数
+ * @returns 返回排序后的时间段数组
  */
 function getTimeSegments(
   tabs: LiveTab[],
@@ -187,7 +200,13 @@ function getTimeSegments(
     else olderTabs.push(tab);
   }
 
-  /** 段内按访问时间倒序的工具函数 */
+  /**
+   * 段内按访问时间倒序的工具函数
+   *
+   * @param a - 第一个标签
+   * @param b - 第二个标签
+   * @returns 返回时间差（用于倒序排序）
+   */
   const byAccessDesc = (a: LiveTab, b: LiveTab) =>
     (b.lastAccessed || 0) - (a.lastAccessed || 0);
 
@@ -244,6 +263,14 @@ function getTimeSegments(
 
 /**
  * 段标题（可折叠点击区）
+ *
+ * @param props - 组件属性
+ * @param props.label - 时间段标签（如"今天"、"昨天"）
+ * @param props.rangeText - 时间范围文本（可选）
+ * @param props.count - 该时间段内的标签数量
+ * @param props.collapsed - 是否折叠
+ * @param props.onToggle - 切换折叠状态的回调
+ * @returns {void} 无返回值
  */
 function SegmentHeader({
   label,
@@ -295,6 +322,10 @@ function SegmentHeader({
 
 /**
  * 时间段节点内容（标题 + 可折叠的 TabItem 列表）
+ * @param root0
+ * @param root0.segment
+ * @param root0.showExactTime
+ * @returns {void} 无返回值
  */
 function SegmentContent({
   segment,
@@ -355,6 +386,16 @@ function SegmentContent({
 
 /**
  * 时间轴视图（主组件）
+ *
+ * 设计：
+ *   - 外层使用 antd `Timeline`，每个非空时段作为一个节点
+ *   - 排序遵循「最新优先」：段级、段内 tab 均按 `lastAccessed` 倒序
+ *   - 节点 dot 颜色随段向下变浅（最新最亮，越旧越暗）
+ *   - 支持两档分组粒度（配置项 `timelineGranularity`）：
+ *       - day  —— 今天/昨天/本周/更早（默认，简洁）
+ *       - hour —— 今天 + 昨天都按「整点小时」桶细分并倒序
+ *
+ * @returns 时间轴视图 JSX 元素
  */
 export function TimelineView() {
   const tabs = useTabsStore((s) => s.tabs);

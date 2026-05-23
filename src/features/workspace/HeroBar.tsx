@@ -5,8 +5,8 @@ import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
 import { getBrandDisplayName, getBrandSlogan } from '@/shared/config/brand';
 import { BRAND } from '@/shared/config/brand';
-import { VIEW_CONFIGS, type ViewMode } from '@/shared/config/views';
-import type { ViewTabPosition } from '@/shared/types';
+import { WORKSPACE_VIEW_CONFIGS } from '@/features/workspace/view-catalog';
+import type { ViewMode, ViewTabPosition } from '@/shared/types';
 
 /**
  * Hero 区：品牌 Logo + 搜索框 + 视图切换
@@ -17,6 +17,19 @@ import type { ViewTabPosition } from '@/shared/types';
  *   - 搜索框居中、超宽、带辉光阴影——第一视觉焦点
  *   - 视图切换在搜索框下方，紧凑 Tab 行
  *   - 整体垂直节奏：logo → 搜索 → 视图，间距递减
+ *
+ * @param props - 组件属性
+ * @param props.viewMode - 当前视图模式
+ * @param props.onViewChange - 视图切换回调
+ * @param props.onOpenSearch - 打开搜索回调
+ * @param props.sentinelRef - 吸附哨兵元素引用
+ * @param props.showLogo - 是否显示 Logo
+ * @param props.showTitle - 是否显示标题
+ * @param props.showSlogan - 是否显示标语
+ * @param props.showSearch - 是否显示搜索框
+ * @param props.showViewSwitcher - 是否显示视图切换器
+ * @param props.viewTabPosition - 视图 Tab 位置
+ * @returns {void} 无返回值
  */
 export function HeroBar({
   viewMode,
@@ -51,13 +64,13 @@ export function HeroBar({
   /**
    * Segmented 视图切换 options。
    *
-   * 之前这里每次 AppHeader 渲染都会调用 VIEW_CONFIGS.map 重建整个数组与 label JSX，
+   * 之前这里每次渲染都会调用视图配置数组 map 重建整个数组与 label JSX，
    * 导致 antd Segmented 内部判等失败、无意义地重新布局。此处用 useMemo 缓存，
    * 依赖 t——i18n 语言切换时自动刷新标签文案。
    */
   const viewSegmentedOptions = useMemo(
     () =>
-      VIEW_CONFIGS.map((v) => ({
+      WORKSPACE_VIEW_CONFIGS.map((v) => ({
         value: v.id,
         label: (
           <span className="app-view-option">

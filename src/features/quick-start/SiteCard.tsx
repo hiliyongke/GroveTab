@@ -13,9 +13,9 @@ import { GripVertical, Pencil, Trash2, ExternalLink, MoreHorizontal } from 'luci
 import { cssVars } from '@/shared/utils/css-vars';
 import { useT } from '@/shared/i18n';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { useAccent } from '@/shared/hooks/useAccent';
+import { useAccent } from '@/shared/hooks/use-accent';
 import type { SpeedDialSite } from '@/shared/types';
-import { getHostname, getInitial, getFaviconUrl } from './utils/siteUtils';
+import { getHostname, getInitial, getFaviconUrl } from './utils/site-utils';
 
 interface SiteCardProps {
   site: SpeedDialSite;
@@ -33,6 +33,21 @@ interface SiteCardProps {
   onDelete: (id: string) => void;
 }
 
+/**
+ * 常用站点卡片（纯渲染组件）
+ *
+ * 菜单使用 antd Dropdown（自带 portal），彻底避免 overflow 裁切问题。
+ * 拖拽由父组件 SortableSiteCard 通过 useSortable 注入。
+ *
+ * @param root0 - 组件属性
+ * @param root0.site - 站点对象
+ * @param root0.dragListeners - 拖拽监听器
+ * @param root0.dragAttributes - 拖拽属性
+ * @param root0.isDragging - 是否正在拖拽
+ * @param root0.onEdit - 编辑回调
+ * @param root0.onDelete - 删除回调
+ * @returns {JSX.Element} 返回站点卡片 JSX 元素
+ */
 export function SiteCard({
   site,
   dragListeners,

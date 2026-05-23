@@ -29,6 +29,10 @@ const DEFAULT_MAX_VALUE_LENGTH = 16;
  *   - `https://x.com/app/very/long/path/detail/123` → `/…/detail/123`
  *   - `https://x.com/#/settings/profile` → `#/settings/profile`
  *   - `https://x.com/` → `/`（首页）
+ *
+ * @param rawUrl - 原始 URL 字符串
+ * @param options - 展示格式化选项
+ * @returns 格式化后的 URL 展示字符串
  */
 export function formatUrlForDisplay(
   rawUrl: string,
@@ -74,6 +78,9 @@ export function formatUrlForDisplay(
 
 /**
  * 压缩路径：段数 ≤ 2 保留全部，否则首段 + … + 末段
+ *
+ * @param pathname - URL 路径名
+ * @returns 压缩后的路径字符串，空路径返回空字符串
  */
 function compressPath(pathname: string): string {
   if (!pathname || pathname === '/') return '';
@@ -85,6 +92,10 @@ function compressPath(pathname: string): string {
 
 /**
  * 格式化 query：取前 2 个非空参数，超长 value 用 … 收尾
+ *
+ * @param params - URL 查询参数对象
+ * @param maxValueLength - 单个参数值的最大字符数
+ * @returns 格式化后的 query 字符串，无参数返回空字符串
  */
 function formatQuery(params: URLSearchParams, maxValueLength: number): string {
   const entries: string[] = [];
@@ -104,6 +115,10 @@ function formatQuery(params: URLSearchParams, maxValueLength: number): string {
 
 /**
  * 字符串中部省略：`abc…xyz`
+ *
+ * @param str - 原始字符串
+ * @param maxLength - 最大长度，超出时从中间省略
+ * @returns 省略后的字符串
  */
 function truncateMiddle(str: string, maxLength: number): string {
   if (str.length <= maxLength) return str;
@@ -120,6 +135,9 @@ function truncateMiddle(str: string, maxLength: number): string {
  *   - 空 title（loading 中）不参与
  *
  * 返回的集合用于驱动 `TabItem.showUrlHint`
+ *
+ * @param tabs - 标签页数组
+ * @returns 包含重复标题 tab ID 的集合
  */
 export function findAmbiguousTitleIds(
   tabs: ReadonlyArray<{ id: number; title?: string }>,

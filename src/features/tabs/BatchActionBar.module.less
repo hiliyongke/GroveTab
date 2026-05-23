@@ -1,0 +1,68 @@
+@import (reference) '@/styles/mixins.less';
+
+/* BatchActionBar —— 多选批量操作浮动栏 */
+
+.app-batch-bar {
+  .z-fixed();
+  bottom: 24px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: min(calc(100vw - 24px), 760px);
+  padding: 10px 14px;
+  transform: translateX(-50%);
+}
+
+.app-batch-bar__summary {
+  .flex-row-center(10px);
+  min-width: 0;
+}
+
+.app-batch-bar__pointer {
+  color: var(--ant-color-primary);
+}
+
+.app-batch-bar__summary-copy {
+  .text-truncate();
+  color: var(--ant-color-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.app-divider-soft {
+  .divider-soft();
+}
+
+.app-batch-bar__actions {
+  .flex-row-center(8px);
+  flex-wrap: wrap;
+}
+
+.app-batch-bar__danger-icon {
+  color: var(--app-batch-bar-danger-icon, var(--ant-color-error));
+}
+
+.app-batch-bar__secondary-icon {
+  color: var(--app-batch-bar-discard-icon, var(--ant-color-text-secondary));
+}
+
+@media (max-width: 640px) {
+  .app-batch-bar {
+    width: calc(100vw - 24px);
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    border-radius: 18px;
+  }
+
+  .app-divider-soft {
+    display: none;
+  }
+
+  .app-batch-bar__summary,
+  .app-batch-bar__actions {
+    width: 100%;
+    justify-content: center;
+  }
+}

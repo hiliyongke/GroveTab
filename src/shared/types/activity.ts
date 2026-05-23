@@ -1,6 +1,5 @@
 /**
- * Activity Strip Type Definitions
- * 最近活动相关类型 (F-27)
+ * 最近活动相关类型定义 (F-27)
  */
 
 type ActivityType =

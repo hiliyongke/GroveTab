@@ -57,6 +57,7 @@ export type UrlAction = 'encode' | 'decode';
  *
  * @param input - 原始文本
  * @param action - 编码或解码
+ * @returns 转换结果对象（包含 output、meta、error 字段）
  */
 export function urlTransform(input: string, action: UrlAction): DevToolResult {
   if (!input) return { output: '', error: '输入为空' };
@@ -83,6 +84,10 @@ export type Base64Action = 'encode' | 'decode';
  *
  * 编码时先通过 TextEncoder 转为 Uint8Array 再 btoa；
  * 解码时先 atob 再通过 TextDecoder 还原。
+ *
+ * @param input - 原始文本
+ * @param action - 编码或解码
+ * @returns 转换结果对象（包含 output、meta、error 字段）
  */
 export function base64Transform(input: string, action: Base64Action): DevToolResult {
   if (!input) return { output: '', error: '输入为空' };
@@ -114,6 +119,10 @@ export type TimestampAction = 'toDatetime' | 'toTimestamp';
  * Unix 时间戳与日期时间互转
  *
  * 自动识别秒（10 位）和毫秒（13 位）时间戳。
+ *
+ * @param input - 时间戳数字或日期时间字符串
+ * @param action - 转换方向（toDatetime 或 toTimestamp）
+ * @returns 转换结果对象（包含 output、meta、error 字段）
  */
 export function timestampTransform(input: string, action: TimestampAction): DevToolResult {
   if (!input.trim()) return { output: '', error: '输入为空' };
@@ -174,6 +183,7 @@ const RADIX_MAP: Record<string, number> = {
  * @param input - 输入数字文本
  * @param fromRadix - 输入进制：'bin' | 'oct' | 'dec' | 'hex'
  * @param toRadix - 输出进制：'bin' | 'oct' | 'dec' | 'hex'
+ * @returns 转换结果对象（包含 output、meta、error 字段）
  */
 export function radixTransform(input: string, fromRadix: string, toRadix: string): DevToolResult {
   if (!input.trim()) return { output: '', error: '输入为空' };
@@ -203,6 +213,10 @@ export type RandomAction = 'uuid' | 'randomInt' | 'randomHex';
  *
  * UUID v4 使用 crypto.randomUUID（浏览器原生）；
  * 随机整数和十六进制使用 crypto.getRandomValues。
+ *
+ * @param action - 生成类型（'uuid' | 'randomInt' | 'randomHex'）
+ * @param length - 随机数长度（仅对 randomInt 和 randomHex 有效）
+ * @returns 生成结果对象（包含 output、meta、error 字段）
  */
 export function randomGenerate(action: RandomAction, length?: number): DevToolResult {
   try {
@@ -236,7 +250,14 @@ export function randomGenerate(action: RandomAction, length?: number): DevToolRe
 
 // ── 颜色值预览 ────────────────────────────────────────
 
-/** 解析颜色值 */
+/**
+ * 解析颜色值
+ *
+ * 支持 HEX、RGB/RGBA、HSL/HSLA 格式，并返回标准化输出和颜色预览值。
+ *
+ * @param input - 颜色值字符串
+ * @returns 解析结果对象（包含 output、meta、colorValue、error 字段）
+ */
 export function colorParse(input: string): DevToolResult {
   const trimmed = input.trim();
   if (!trimmed) return { output: '', error: '输入为空' };
@@ -298,7 +319,8 @@ export type HashAlgorithm = 'sha256' | 'sha1' | 'sha512';
  * 使用 Web Crypto API，支持 SHA-1 / SHA-256 / SHA-512。
  *
  * @param input - 原始文本
- * @param algorithm - 哈希算法
+ * @param algorithm - 哈希算法（'sha256' | 'sha1' | 'sha512'）
+ * @returns 包含十六进制哈希值和算法信息的 Promise<DevToolResult>
  */
 export async function hashDigest(input: string, algorithm: HashAlgorithm = 'sha256'): Promise<DevToolResult> {
   if (!input) return { output: '', error: '输入为空' };
@@ -320,9 +342,12 @@ export async function hashDigest(input: string, algorithm: HashAlgorithm = 'sha2
 /**
  * 正则表达式匹配测试
  *
+ * 支持全局匹配（g 标志）和单次匹配，返回所有匹配结果。
+ *
  * @param input - 待测试文本
  * @param pattern - 正则表达式字符串
  * @param flags - 正则标志（如 g、i、m）
+ * @returns 匹配结果对象（包含 output、meta、error 字段）
  */
 export function regexTest(input: string, pattern: string, flags: string): DevToolResult {
   if (!pattern.trim()) return { output: '', error: '正则表达式为空' };
@@ -370,6 +395,7 @@ interface DiffLine {
  *
  * @param left - 左侧文本
  * @param right - 右侧文本
+ * @returns 差异对比结果对象（包含 output、meta、error 字段）
  */
 export function textDiff(left: string, right: string): DevToolResult {
   const linesA = left.split('\n');
@@ -433,8 +459,12 @@ const HTML_ENTITIES: Array<[RegExp, string]> = [
 /**
  * HTML 实体编码或解码
  *
+ * 编码时替换 5 种特殊字符（& < > " '），
+ * 解码时使用 textarea 元素的 innerHTML 属性。
+ *
  * @param input - 原始文本
  * @param action - 编码或解码
+ * @returns 转换结果对象（包含 output、meta、error 字段）
  */
 export function htmlEntityTransform(input: string, action: HtmlEntityAction): DevToolResult {
   if (!input) return { output: '', error: '输入为空' };
@@ -448,9 +478,18 @@ export function htmlEntityTransform(input: string, action: HtmlEntityAction): De
         return { output: result };
       }
       case 'decode': {
-        const textarea = document.createElement('textarea');
-        textarea.innerHTML = input;
-        return { output: textarea.value };
+        // 使用正则替换解码 HTML 实体，避免 innerHTML 的 XSS 风险
+        const decoded = input
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'")
+          .replace(/&#x27;/g, "'")
+          .replace(/&#x2F;/g, '/')
+          .replace(/&#(\d+);/g, (_, code: string) => String.fromCharCode(Number(code)))
+          .replace(/&#x([0-9a-fA-F]+);/g, (_, hex: string) => String.fromCharCode(parseInt(hex, 16)));
+        return { output: decoded };
       }
     }
   } catch (e) {
@@ -461,7 +500,14 @@ export function htmlEntityTransform(input: string, action: HtmlEntityAction): De
 
 // ── JWT 解码 ──────────────────────────────────────────
 
-/** Base64URL 解码 */
+/**
+ * Base64URL 解码
+ *
+ * 将 Base64URL 编码（使用 `-` 和 `_`）转换为标准 Base64，然后解码。
+ *
+ * @param input - Base64URL 编码字符串
+ * @returns 解码后的字符串
+ */
 function decodeBase64Url(input: string): string {
   const normalized = input.replace(/-/g, '+').replace(/_/g, '/');
   const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
@@ -475,7 +521,8 @@ function decodeBase64Url(input: string): string {
  *
  * 仅做本地解析，不校验签名，适合快速查看 header / payload。
  *
- * @param input - JWT 字符串
+ * @param input - JWT 字符串（三段式，使用 . 分隔）
+ * @returns 解码结果对象（包含 output、meta、error 字段）
  */
 export function jwtDecode(input: string): DevToolResult {
   const token = input.trim();
@@ -507,8 +554,12 @@ export type UrlQueryAction = 'parse' | 'build';
 /**
  * URL Query 解析或构建
  *
+ * 解析时从 URL 或 query 字符串中提取参数；
+ * 构建时从 JSON 对象生成 query 字符串。
+ *
  * @param input - URL、query 字符串或 JSON 对象文本
  * @param action - 解析或构建
+ * @returns 转换结果对象（包含 output、meta、error 字段）
  */
 export function urlQueryTransform(input: string, action: UrlQueryAction): DevToolResult {
   if (!input.trim()) return { output: '', error: '输入为空' };
@@ -547,7 +598,14 @@ export function urlQueryTransform(input: string, action: UrlQueryAction): DevToo
 
 // ── 命名风格转换 ──────────────────────────────────────
 
-/** 拆分单词 */
+/**
+ * 拆分单词
+ *
+ * 处理驼峰、下划线、连字符等命名风格，拆分为单词数组。
+ *
+ * @param input - 待拆分的字符串
+ * @returns 单词数组（小写）
+ */
 function splitWords(input: string): string[] {
   return input
     .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
@@ -558,7 +616,12 @@ function splitWords(input: string): string[] {
     .map((word) => word.toLowerCase());
 }
 
-/** 首字母大写 */
+/**
+ * 首字母大写
+ *
+ * @param word - 待处理单词
+ * @returns 首字母大写后的单词
+ */
 function capitalize(word: string): string {
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
@@ -566,7 +629,10 @@ function capitalize(word: string): string {
 /**
  * 命名风格转换
  *
+ * 支持 6 种命名风格：camelCase、PascalCase、snake_case、kebab-case、CONSTANT_CASE、Title Case。
+ *
  * @param input - 原始命名文本
+ * @returns 包含所有命名风格 JSON 字符串
  */
 export function caseConvert(input: string): DevToolResult {
   const words = splitWords(input);
@@ -586,7 +652,16 @@ export function caseConvert(input: string): DevToolResult {
 
 // ── JSON 转 TypeScript ───────────────────────────────
 
-/** 推断 TS 类型 */
+/**
+ * 推断 TS 类型
+ *
+ * 递归推断 JSON 值的 TypeScript 类型，并生成 interface 定义。
+ *
+ * @param value - 待推断的 JSON 值
+ * @param name - 当前 interface 名称
+ * @param interfaces - interface 定义数组（会被修改）
+ * @returns TypeScript 类型字符串
+ */
 function inferTsType(value: unknown, name: string, interfaces: string[]): string {
   if (value === null) return 'null';
   if (Array.isArray(value)) {
@@ -618,13 +693,16 @@ function inferTsType(value: unknown, name: string, interfaces: string[]): string
 /**
  * JSON 生成 TypeScript interface
  *
+ * 递归推断类型，支持嵌套对象和数组。
+ *
  * @param input - JSON 文本
  * @param rootName - 根 interface 名称
+ * @returns 生成的 TypeScript interface 字符串
  */
 export function jsonToTypeScript(input: string, rootName = 'Root'): DevToolResult {
   if (!input.trim()) return { output: '', error: '输入为空' };
   try {
-    const parsed = JSON.parse(input);
+    const parsed: unknown = JSON.parse(input);
     const interfaces: string[] = [];
     inferTsType(parsed, rootName, interfaces);
     return { output: interfaces.reverse().join('\n\n') };
@@ -644,7 +722,14 @@ const HTTP_STATUS_MAP: Record<number, string> = {
   500: 'Internal Server Error', 501: 'Not Implemented', 502: 'Bad Gateway', 503: 'Service Unavailable', 504: 'Gateway Timeout',
 };
 
-/** 查询 HTTP 状态码 */
+/**
+ * 查询 HTTP 状态码
+ *
+ * 根据数字状态码返回对应的英文名称和分类（成功/重定向/客户端错误/服务端错误）。
+ *
+ * @param input - HTTP 状态码数字字符串
+ * @returns 查询结果对象（包含 output、meta、error 字段）
+ */
 export function httpStatusLookup(input: string): DevToolResult {
   const code = Number(input.trim());
   if (!Number.isInteger(code)) return { output: '', error: '请输入 HTTP 状态码数字' };
@@ -664,7 +749,15 @@ const MIME_MAP: Record<string, string> = {
   form: 'application/x-www-form-urlencoded', multipart: 'multipart/form-data',
 };
 
-/** 查询 MIME 类型或扩展名 */
+/**
+ * 查询 MIME 类型或扩展名
+ *
+ * 输入扩展名（如 "png"）返回 MIME 类型；
+ * 输入 MIME 类型（如 "image/png"）返回对应的扩展名列表。
+ *
+ * @param input - 扩展名或 MIME 类型字符串
+ * @returns 查询结果对象（包含 output、meta、error 字段）
+ */
 export function mimeLookup(input: string): DevToolResult {
   const key = input.trim().replace(/^\./, '').toLowerCase();
   if (!key) return { output: '', error: '输入为空' };
@@ -680,7 +773,15 @@ export function mimeLookup(input: string): DevToolResult {
 
 // ── CSS 单位转换 ──────────────────────────────────────
 
-/** CSS 单位转换 */
+/**
+ * CSS 单位转换
+ *
+ * 支持 px、rem、em 三种单位互转，需要指定基准字号。
+ *
+ * @param input - CSS 长度值（如 "16px"、"1rem"）
+ * @param baseFontSize - 基准字号（默认 16px）
+ * @returns 转换结果对象（包含 output、meta、error 字段）
+ */
 export function cssUnitConvert(input: string, baseFontSize = 16): DevToolResult {
   const match = /^(-?\d+(?:\.\d+)?)(px|rem|em)$/i.exec(input.trim());
   if (!match) return { output: '', error: '请输入形如 16px、1rem、1.5em 的值' };
@@ -698,7 +799,14 @@ export function cssUnitConvert(input: string, baseFontSize = 16): DevToolResult 
 
 // ── 文本统计 ──────────────────────────────────────────
 
-/** 文本统计 */
+/**
+ * 文本统计
+ *
+ * 统计字符数、单词数、行数、字节数。
+ *
+ * @param input - 待统计文本
+ * @returns 统计结果对象（包含 output、meta、error 字段）
+ */
 export function textStats(input: string): DevToolResult {
   const bytes = new TextEncoder().encode(input).length;
   const lines = input ? input.split('\n').length : 0;
@@ -712,16 +820,32 @@ export function textStats(input: string): DevToolResult {
 
 // ── Cron 表达式说明 ───────────────────────────────────
 
-/** Cron 字段说明 */
+/**
+ * Cron 字段说明
+ *
+ * 将 Cron 字段值转换为中文说明。
+ * 示例：星号 → 任意值；星号/5 → 步长5；1,2,3 → 枚举；1-5 → 范围
+ *
+ * @param value - Cron 字段值
+ * @param unit - 时间单位（分钟、小时、日期、月份、星期）
+ * @returns 中文说明字符串
+ */
 function describeCronField(value: string, unit: string): string {
   if (value === '*') return `每${unit}`;
-  if (value.startsWith('*/')) return `每 ${value.slice(2)} ${unit}`;
+  if (value.startsWith('*' + '/')) return `每 ${value.slice(2)} ${unit}`;
   if (value.includes(',')) return `${unit}为 ${value.split(',').join('、')}`;
   if (value.includes('-')) return `${unit}范围 ${value}`;
   return `${unit}为 ${value}`;
 }
 
-/** Cron 表达式说明（5 字段） */
+/**
+ * Cron 表达式说明（5 字段）
+ *
+ * 将分、时、日、月、周五个字段转换为中文说明。
+ *
+ * @param input - Cron 表达式字符串（5 个字段，空格分隔）
+ * @returns 说明结果对象（包含 output、meta、error 字段）
+ */
 export function cronDescribe(input: string): DevToolResult {
   const parts = input.trim().split(/\s+/);
   if (parts.length !== 5) return { output: '', error: '请输入 5 段 Cron 表达式：分 时 日 月 周' };
@@ -741,7 +865,14 @@ export function cronDescribe(input: string): DevToolResult {
 
 // ── URL 拆解器 ────────────────────────────────────────
 
-/** 拆解 URL 为各个组成部分 */
+/**
+ * 拆解 URL 为各个组成部分
+ *
+ * 解析 URL 并提取 href、protocol、host、hostname、port、pathname、search、hash、origin 等组成部分。
+ *
+ * @param input - URL 字符串
+ * @returns 拆解结果对象（包含 output、meta、error 字段）
+ */
 export function urlParse(input: string): DevToolResult {
   const trimmed = input.trim();
   if (!trimmed) return { output: '', error: '输入为空' };
@@ -766,7 +897,14 @@ export function urlParse(input: string): DevToolResult {
 
 // ── Curl 转 Fetch ─────────────────────────────────────
 
-/** 简易 Curl 转 Fetch */
+/**
+ * 简易 Curl 转 Fetch
+ *
+ * 解析 curl 命令中的 URL、method、headers、body，生成等效的 fetch 代码。
+ *
+ * @param input - curl 命令字符串
+ * @returns 转换结果对象（包含 output、meta、error 字段）
+ */
 export function curlToFetch(input: string): DevToolResult {
   const trimmed = input.trim();
   if (!trimmed) return { output: '', error: '输入为空' };
@@ -796,11 +934,19 @@ export function curlToFetch(input: string): DevToolResult {
 
 // ── JSON Path 查询 ────────────────────────────────────
 
-/** 简易 JSON Path 查询 */
+/**
+ * 简易 JSON Path 查询
+ *
+ * 支持点号路径访问（如 "data.users[0].name"）。
+ *
+ * @param input - JSON 文本
+ * @param path - JSON Path 路径字符串
+ * @returns 查询结果对象（包含 output、meta、error 字段）
+ */
 export function jsonPathQuery(input: string, path: string): DevToolResult {
   if (!input.trim() || !path.trim()) return { output: '', error: '输入为空' };
   try {
-    const data = JSON.parse(input);
+    const data: unknown = JSON.parse(input);
     const keys = path.replace(/^\$\.?/, '').split('.').filter(Boolean);
     let current: unknown = data;
     for (const key of keys) {
@@ -819,7 +965,12 @@ export function jsonPathQuery(input: string, path: string): DevToolResult {
 
 // ── YAML ↔ JSON ───────────────────────────────────────
 
-/** 简易 YAML 解析（支持对象、数组、基本类型） */
+/**
+ * 简易 YAML 解析（支持对象、数组、基本类型）
+ *
+ * @param text - YAML 文本字符串
+ * @returns 解析后的 JavaScript 值（对象、数组或基本类型）
+ */
 function parseYaml(text: string): unknown {
   const lines = text.split('\n');
   const root: Record<string, unknown> = {};
@@ -868,6 +1019,14 @@ function parseYaml(text: string): unknown {
   return root;
 }
 
+/**
+ * 解析 YAML 标量值
+ *
+ * 支持布尔、null、数字、带引号的字符串。
+ *
+ * @param value - 待解析的 YAML 标量字符串
+ * @returns 解析后的 JavaScript 值
+ */
 function parseYamlValue(value: string): unknown {
   if (value === 'true') return true;
   if (value === 'false') return false;
@@ -880,7 +1039,14 @@ function parseYamlValue(value: string): unknown {
   return value;
 }
 
-/** YAML 转 JSON */
+/**
+ * YAML 转 JSON
+ *
+ * 使用简易 YAML 解析器，支持对象、数组、基本类型。
+ *
+ * @param input - YAML 文本
+ * @returns 转换结果对象（包含 output、meta、error 字段）
+ */
 export function yamlToJson(input: string): DevToolResult {
   if (!input.trim()) return { output: '', error: '输入为空' };
   try {
@@ -892,11 +1058,18 @@ export function yamlToJson(input: string): DevToolResult {
   }
 }
 
-/** JSON 转 YAML */
+/**
+ * JSON 转 YAML
+ *
+ * 递归转换 JSON 对象为 YAML 格式字符串。
+ *
+ * @param input - JSON 文本
+ * @returns 转换结果对象（包含 output、meta、error 字段）
+ */
 export function jsonToYaml(input: string): DevToolResult {
   if (!input.trim()) return { output: '', error: '输入为空' };
   try {
-    const parsed = JSON.parse(input);
+    const parsed: unknown = JSON.parse(input);
     return { output: objectToYaml(parsed) };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
@@ -904,6 +1077,15 @@ export function jsonToYaml(input: string): DevToolResult {
   }
 }
 
+/**
+ * 将对象转换为 YAML 字符串
+ *
+ * 递归处理嵌套对象和数组。
+ *
+ * @param value - 待转换的值
+ * @param indent - 缩进级别
+ * @returns YAML 格式字符串
+ */
 function objectToYaml(value: unknown, indent = 0): string {
   const prefix = '  '.repeat(indent);
   if (value === null) return 'null';
@@ -927,7 +1109,14 @@ function objectToYaml(value: unknown, indent = 0): string {
 
 // ── CSV ↔ JSON ────────────────────────────────────────
 
-/** CSV 转 JSON */
+/**
+ * CSV 转 JSON
+ *
+ * 首行作为表头，后续行作为数据。
+ *
+ * @param input - CSV 文本（逗号分隔）
+ * @returns 转换结果对象（包含 output、meta、error 字段）
+ */
 export function csvToJson(input: string): DevToolResult {
   if (!input.trim()) return { output: '', error: '输入为空' };
   try {
@@ -945,7 +1134,14 @@ export function csvToJson(input: string): DevToolResult {
   }
 }
 
-/** JSON 转 CSV */
+/**
+ * JSON 转 CSV
+ *
+ * 将 JSON 对象数组转换为 CSV 格式，自动提取表头。
+ *
+ * @param input - JSON 文本（应为对象数组）
+ * @returns 转换结果对象（包含 output、meta、error 字段）
+ */
 export function jsonToCsv(input: string): DevToolResult {
   if (!input.trim()) return { output: '', error: '输入为空' };
   try {
@@ -962,7 +1158,14 @@ export function jsonToCsv(input: string): DevToolResult {
 
 // ── HTTP Header 解析 ──────────────────────────────────
 
-/** 解析 HTTP Header 字符串 */
+/**
+ * 解析 HTTP Header 字符串
+ *
+ * 按行解析 Key: Value 格式，返回 JSON 对象。
+ *
+ * @param input - HTTP Header 字符串
+ * @returns 解析结果对象（包含 output、meta、error 字段）
+ */
 export function httpHeaderParse(input: string): DevToolResult {
   if (!input.trim()) return { output: '', error: '输入为空' };
   try {
@@ -985,7 +1188,16 @@ export function httpHeaderParse(input: string): DevToolResult {
 
 // ── Basic Auth 编解码 ─────────────────────────────────
 
-/** Basic Auth 编码 */
+/**
+ * Basic Auth 编码或解码
+ *
+ * 编码格式：`username:password` → `Basic base64`
+ * 解码格式：`Basic base64` → `username:password`
+ *
+ * @param input - 原始文本（编码时为 `username:password`，解码时为 `Basic xxx`）
+ * @param action - 编码或解码
+ * @returns 转换结果对象（包含 output、meta、error 字段）
+ */
 export function basicAuth(input: string, action: 'encode' | 'decode'): DevToolResult {
   if (!input.trim()) return { output: '', error: '输入为空' };
   try {
@@ -1006,7 +1218,14 @@ export function basicAuth(input: string, action: 'encode' | 'decode'): DevToolRe
 
 // ── SQL 格式化 ────────────────────────────────────────
 
-/** 简易 SQL 格式化 */
+/**
+ * 简易 SQL 格式化
+ *
+ * 自动识别并换行关键字：SELECT、FROM、WHERE、JOIN、LEFT、RIGHT、INNER、OUTER、ON、GROUP、ORDER、BY、HAVING、LIMIT、OFFSET、INSERT、INTO、VALUES、UPDATE、SET、DELETE、CREATE、TABLE、ALTER、DROP、INDEX、UNION、ALL、AND、OR、NOT、IN、EXISTS、BETWEEN、LIKE、IS、NULL、AS、DISTINCT、CASE、WHEN、THEN、ELSE、END
+ *
+ * @param input - SQL 文本
+ * @returns 格式化结果对象（包含 output、meta、error 字段）
+ */
 export function sqlFormat(input: string): DevToolResult {
   if (!input.trim()) return { output: '', error: '输入为空' };
   const keywords = ['SELECT', 'FROM', 'WHERE', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER', 'ON', 'GROUP', 'ORDER', 'BY', 'HAVING', 'LIMIT', 'OFFSET', 'INSERT', 'INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE', 'CREATE', 'TABLE', 'ALTER', 'DROP', 'INDEX', 'UNION', 'ALL', 'AND', 'OR', 'NOT', 'IN', 'EXISTS', 'BETWEEN', 'LIKE', 'IS', 'NULL', 'AS', 'DISTINCT', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END'];
@@ -1030,7 +1249,15 @@ export function sqlFormat(input: string): DevToolResult {
 
 // ── 字符串转义 ────────────────────────────────────────
 
-/** 字符串转义工具 */
+/**
+ * 字符串转义工具
+ *
+ * 支持 4 种转义模式：js、json、regex、shell。
+ *
+ * @param input - 原始文本
+ * @param mode - 转义模式
+ * @returns 转义结果对象（包含 output、meta、error 字段）
+ */
 export function stringEscape(input: string, mode: 'js' | 'json' | 'regex' | 'shell'): DevToolResult {
   if (!input) return { output: '', error: '输入为空' };
   switch (mode) {

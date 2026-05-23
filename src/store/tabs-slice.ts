@@ -26,167 +26,103 @@
  */
 
 import { create } from 'zustand';
-import type { LiveTab, SwBroadcastMessage, WindowInfo, ClosedTabSnapshot } from '@/shared/types';
-import { queryAllTabs, getAllWindows, getCurrentWindow, activateTab, closeTab, closeTabs, getFaviconUrl, discardTab as chromeDiscardTab, queryTabGroups, type ChromeTabGroup } from '@/chrome';
+import type { LiveTab, SwBroadcastMessage, WindowInfo } from '@/shared/types';
+import { queryAllTabs, getAllWindows, getCurrentWindow, activateTab, closeTab, closeTabs, getFaviconUrl, queryTabGroups } from '@/chrome';
 import { extractHostname, shouldDisplayUrl, isSelfNewTabPage } from '@/chrome';
 import { feedback } from '@/shared/ui/feedback';
 import { translate } from '@/shared/i18n/core';
 import { swBroadcast } from '@/shared/utils/sw-broadcast';
 import { track } from '@/shared/utils/metrics';
+import {
+  buildTabGroupMap,
+  buildWindowMap,
+  discardTabsBatch,
+  patchTabDiscardedState,
+  toClosedTabSnapshot,
+  toLiveTab,
+  withTabGroupInfo,
+} from '@/features/tabs/services/tabs-service';
 import { useUndoStore } from './undo-slice';
 import { useSelectionStore } from './selection-slice';
 import { useSettingsStore } from './settings-slice';
 import { BRAND } from '@/shared/config/brand';
 
 interface TabsState {
-  /** All live tabs (filtered for display) */
+  /** 所有实时标签页列表（已过滤，用于展示） */
   tabs: LiveTab[];
-  /** Current window ID */
+  /** 当前窗口 ID */
   currentWindowId: number;
-  /** Window info map */
+  /** 窗口信息映射表（windowId → WindowInfo） */
   windows: Map<number, WindowInfo>;
-  /** Loading state */
+  /** 全局加载状态：true 时 UI 展示 Spin */
   loading: boolean;
-  /** Error message */
+  /** 错误信息：非 null 时表示最近一次操作失败 */
   error: string | null;
 
   // Actions
   /**
-   * 拉取所有 tabs。
+   * 拉取所有标签页。
    *
    * @param options.silent  设为 true 时不翻全局 `loading=true`，适合「局部操作完成后静默兜底刷新」的场景
    *                        （例如合并去重 / 关闭多个 tab 后，防止 SW broadcast 漏发）。默认 false，
    *                        保留首次加载展示 Spin 的行为。
    */
   loadAllTabs: (options?: { silent?: boolean }) => Promise<void>;
-  /** Handle SW broadcast message */
+  /** 处理 Service Worker 广播消息（tab 创建/更新/移除/激活/移动/丢弃/窗口聚焦变化） */
   handleBroadcast: (message: SwBroadcastMessage) => void;
-  /** Activate (jump to) a tab */
+  /** 激活（跳转至）指定标签页 */
   jumpToTab: (tabId: number, windowId: number) => Promise<void>;
-  /** Close a single tab (creates undo record) */
+  /** 关闭单个标签页（自动创建撤销记录） */
   closeSingleTab: (tabId: number) => Promise<void>;
-  /** Close multiple tabs (creates undo record) */
+  /** 关闭多个标签页（自动创建撤销记录） */
   closeMultipleTabs: (tabIds: number[]) => Promise<void>;
-  /** Close all tabs in a domain group */
+  /** 关闭指定域名分组内的所有标签页 */
   closeDomainGroup: (domain: string) => Promise<void>;
-  /** Close all non-pinned tabs (with confirmation if >20) */
+  /** 关闭所有非固定标签页（超过阈值时弹出确认） */
   closeAllNonPinned: () => Promise<void>;
   /** 丢弃（休眠）单个标签页，释放内存但保留位置 */
   discardTab: (tabId: number) => Promise<void>;
   /** 丢弃（休眠）多个标签页，统一反馈并只做一次状态同步 */
   discardMultipleTabs: (tabIds: number[]) => Promise<void>;
-  /** 丢弃（休眠）整个域名的标签页 */
+  /** 丢弃（休眠）整个域名分组下的所有标签页 */
   discardDomainGroup: (domain: string) => Promise<void>;
 }
 
-function tabToLiveTab(tab: chrome.tabs.Tab, currentWindowId: number): LiveTab | null {
-  if (tab.id == null) return null;
-  const url = tab.url ?? tab.pendingUrl ?? '';
-  if (isSelfNewTabPage(tab)) return null;
-  if (!shouldDisplayUrl(url)) return null;
-
-  /**
-   * favicon 策略：统一走扩展同源的 `_favicon/` 入口。
-   *
-   * Chrome 给的 `tab.favIconUrl` 很多时候是远程站点 URL，直接塞给 `<img>` 会导致：
-   *   - 站点离线 / 图标 404 时控制台打红 `net::ERR_*`
-   *   - 有些站点图标带 CORS 限制，也会污染控制台
-   *
-   * 改用 `chrome-extension://<id>/_favicon/?pageUrl=...` 后：
-   *   - 与 newtab 页同源，不会触发 CORS 报错
-   *   - Chrome 内部自己去抓远程图标并缓存，失败也只是返回空图，不污染控制台
-   *   - canvas 可以安全地读像素做取色
-   *
-   * 仅在扩展上下文有效；普通浏览器预览（无 chrome.runtime.id）退回原始值。
-   */
-  const extensionFavicon = getFaviconUrl(url);
-  const favIconUrl = extensionFavicon !== '' ? extensionFavicon : (tab.favIconUrl ?? '');
-
-  return {
-    id: tab.id,
-    url,
-    title: tab.title ?? url,
-    favIconUrl,
-    windowId: tab.windowId,
-    incognito: tab.incognito,
-    pinned: tab.pinned,
-    audible: tab.audible ?? false,
-    groupId: tab.groupId ?? -1,
-    lastAccessed: tab.lastAccessed ?? 0,
-    hostname: extractHostname(url),
-    isCurrentWindow: tab.windowId === currentWindowId,
-    discarded: tab.discarded ?? false,
-  };
-}
-
-function liveTabToSnapshot(tab: LiveTab): ClosedTabSnapshot {
-  return {
-    url: tab.url,
-    title: tab.title,
-    favIconUrl: tab.favIconUrl,
-    windowId: tab.windowId,
-    pinned: tab.pinned,
-  };
-}
-
-/** 构建窗口信息映射，避免按窗口反复 `filter` 全量标签。 */
-function buildWindowMap(allWindows: chrome.windows.Window[], allTabs: chrome.tabs.Tab[]): Map<number, WindowInfo> {
-  const tabsCountByWindowId = new Map<number, number>();
-  for (const tab of allTabs) {
-    tabsCountByWindowId.set(tab.windowId, (tabsCountByWindowId.get(tab.windowId) ?? 0) + 1);
-  }
-
-  const windowMap = new Map<number, WindowInfo>();
-  for (const win of allWindows) {
-    if (win.id == null) continue;
-    windowMap.set(win.id, {
-      id: win.id,
-      focused: win.focused,
-      type: win.type ?? 'normal',
-      incognito: win.incognito,
-      tabsCount: tabsCountByWindowId.get(win.id) ?? 0,
-    });
-  }
-  return windowMap;
-}
-
-/** 局部更新某个标签页的休眠状态。 */
-function patchTabDiscardedState(tabs: LiveTab[], tabId: number, discarded: boolean): LiveTab[] {
-  return tabs.map((tab) => (
-    tab.id === tabId ? { ...tab, discarded } : tab
-  ));
-}
-
-/** 批量调用 Chrome 的 discard，并保留逐项成功/失败信息。 */
-async function discardTabsBatch(tabIds: number[]): Promise<{ succeededIds: number[]; failedIds: number[] }> {
-  const results = await Promise.allSettled(tabIds.map((tabId) => chromeDiscardTab(tabId)));
-  const succeededIds: number[] = [];
-  const failedIds: number[] = [];
-
-  results.forEach((result, index) => {
-    const tabId = tabIds[index];
-    if (tabId === undefined) return;
-    if (result.status === 'fulfilled') {
-      succeededIds.push(tabId);
-    } else {
-      failedIds.push(tabId);
-    }
-  });
-
-  return { succeededIds, failedIds };
-}
-
+/**
+ * 获取关闭确认阈值
+ *
+ * 从 settings store 中读取用户配置的关闭确认阈值。
+ * 若配置无效（非数字、非有限数、≤0），返回默认值 20。
+ *
+ * @returns 关闭确认阈值（tab 数量），超过此值会弹出确认对话框
+ */
 function getCloseConfirmThreshold(): number {
   const value = useSettingsStore.getState().settings.closeConfirmThreshold;
   return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : 20;
 }
 
+/**
+ * 获取 chrome.windows.WINDOW_ID_NONE 的安全替代值
+ *
+ * 在扩展环境返回 chrome.windows.WINDOW_ID_NONE，
+ * 在非扩展环境（如测试、SSR）返回 -1 作为降级值。
+ *
+ * @returns 表示"无窗口"的 ID 值
+ */
 function getWindowIdNone(): number {
   return typeof chrome !== 'undefined' && chrome.windows !== undefined
     ? chrome.windows.WINDOW_ID_NONE
     : -1;
 }
 
+/**
+ * 获取初始当前窗口 ID
+ *
+ * 在扩展环境返回 chrome.windows.WINDOW_ID_CURRENT（让 Chrome 自行解析为实际窗口 ID），
+ * 在非扩展环境返回 -1 作为降级值。
+ *
+ * @returns 初始窗口 ID（扩展环境为 WINDOW_ID_CURRENT，否则为 -1）
+ */
 function getInitialCurrentWindowId(): number {
   return typeof chrome !== 'undefined' && chrome.windows !== undefined
     ? chrome.windows.WINDOW_ID_CURRENT
@@ -216,26 +152,13 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       ]);
 
       const currentWindowId = currentWindow.id ?? getInitialCurrentWindowId();
-
-      /** 构建 groupId → groupInfo 的快速查找表 */
-      const groupMap = new Map<number, ChromeTabGroup>();
-      for (const g of tabGroupsResult) {
-        groupMap.set(g.id, g);
-      }
+      const groupMap = buildTabGroupMap(tabGroupsResult);
 
       const liveTabs = allTabs
         .map((tab) => {
-          const liveTab = tabToLiveTab(tab, currentWindowId);
+          const liveTab = toLiveTab(tab, currentWindowId);
           if (liveTab === null) return null;
-          // 注入 Tab Group 信息
-          if (liveTab.groupId !== -1) {
-            const group = groupMap.get(liveTab.groupId);
-            if (group !== undefined) {
-              liveTab.groupTitle = group.title;
-              liveTab.groupColor = group.color;
-            }
-          }
-          return liveTab;
+          return withTabGroupInfo(liveTab, groupMap);
         })
         .filter(Boolean) as LiveTab[];
 
@@ -246,11 +169,9 @@ export const useTabsStore = create<TabsState>((set, get) => ({
         tabs: liveTabs,
         currentWindowId,
         windows: windowMap,
-        // 静默模式本来就没翻 loading，这里也不覆盖；非静默模式才落回 false
         ...(silent ? {} : { loading: false }),
       });
     } catch (err) {
-      // 首次加载失败需要用户感知；静默刷新失败只打日志，避免打扰
       if (!silent) {
         feedback.error(translate('tabs.loadFailed'), err);
       } else {
@@ -363,6 +284,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
    *   现在：Undo 仅作为「锦上添花」——失败只告警到 console，绝不阻塞真正的关闭。
    *
    * 错误处理：任何 chrome API 失败会 toast + 兜底刷新，UI 层不需要再包 try/catch。
+   * @param tabId
    */
   closeSingleTab: async (tabId) => {
     const { tabs } = get();
@@ -370,7 +292,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     if (tab === undefined) return;
 
     try {
-      const snapshots = [liveTabToSnapshot(tab)];
+      const snapshots = [toClosedTabSnapshot(tab)];
       // Undo 写入失败不阻塞关闭（见 closeSingleTab 注释）
       void useUndoStore
         .getState()
@@ -396,6 +318,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
    * 成功后会展示 "已关闭 N 个标签页" 的反馈；失败由 feedback 统一兜。
    * 调用方（如 DedupInfoBar）可以继续用 try/finally 控制自己的 busy 状态，
    * 但不需要再自己调用 message.error——已被 store 统一处理。
+   * @param tabIds
    */
   closeMultipleTabs: async (tabIds) => {
     const { tabs } = get();
@@ -403,7 +326,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     if (targets.length === 0) return;
 
     try {
-      const snapshots = targets.map(liveTabToSnapshot);
+      const snapshots = targets.map(toClosedTabSnapshot);
       void useUndoStore
         .getState()
         .addRecord(snapshots, `关闭 ${targets.length} 个标签页`)
@@ -452,7 +375,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     }
 
     try {
-      const snapshots = nonPinned.map(liveTabToSnapshot);
+      const snapshots = nonPinned.map(toClosedTabSnapshot);
       void useUndoStore
         .getState()
         .addRecord(snapshots, `关闭 ${domain} 的 ${nonPinned.length} 个标签页`)
@@ -495,7 +418,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     }
 
     try {
-      const snapshots = nonPinned.map(liveTabToSnapshot);
+      const snapshots = nonPinned.map(toClosedTabSnapshot);
       void useUndoStore
         .getState()
         .addRecord(snapshots, `关闭全部 ${nonPinned.length} 个非固定标签页`)

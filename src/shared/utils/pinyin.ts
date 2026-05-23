@@ -1,10 +1,17 @@
 /**
- * PinyinSearch — Enhance search with pinyin initial matching
+ * 拼音搜索增强 —— 支持拼音首字母匹配
+ *
+ * 允许用户输入拼音首字母（如 "bq"）来搜索中文内容（如 "标签"）。
  */
 
 import { pinyin } from 'pinyin-pro';
 
-/** Extract pinyin initials from a string (e.g. "标签" → "bq") */
+/**
+ * 提取字符串的拼音首字母（如 "标签" → "bq"）
+ *
+ * @param text 输入字符串
+ * @returns 拼音首字母串（无空格）
+ */
 function getPinyinInitials(text: string): string {
   try {
     return pinyin(text, { pattern: 'first', toneType: 'none' }).replace(/\s/g, '');
@@ -13,7 +20,18 @@ function getPinyinInitials(text: string): string {
   }
 }
 
-/** Check if a query matches text via pinyin initials */
+/**
+ * 判断查询字符串是否通过拼音首字母匹配目标文本
+ *
+ * 匹配策略（优先级从高到低）：
+ *   1. 直接包含（如 "标签" 包含 "标签"）
+ *   2. 拼音首字母匹配（如 "bq" 匹配 "标签"）
+ *   3. 全拼匹配（如 "biaoqian" 匹配 "标签"）
+ *
+ * @param text  目标文本（如标签页标题）
+ * @param query 查询字符串（支持中文或拼音）
+ * @returns 是否匹配
+ */
 export function pinyinMatch(text: string, query: string): boolean {
   const textLower = text.toLowerCase();
   const queryLower = query.toLowerCase();

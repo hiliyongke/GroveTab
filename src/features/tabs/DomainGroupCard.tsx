@@ -25,14 +25,31 @@ import {
   Moon,
 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { Reorder } from 'motion/react';
+import {
+  DndContext,
+  PointerSensor,
+  KeyboardSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  sortableKeyboardCoordinates,
+  arrayMove,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import type { DomainGroup } from '@/shared/utils/domain';
-import { useAccent } from '@/shared/hooks/useAccent';
-import { getFaviconUrl } from '@/features/quick-start/utils/siteUtils';
+import { useAccent } from '@/shared/hooks/use-accent';
+import { getFaviconUrl } from '@/features/quick-start/utils/site-utils';
 import type { SpeedDialSite } from '@/shared/types';
 import { useResolvedTheme } from '@/shared/hooks/use-resolved-theme';
 import { findAmbiguousTitleIds } from '@/shared/utils/url-display';
 import { cssVars } from '@/shared/utils/css-vars';
+import { useReducedMotionPreference } from '@/shared/hooks/use-reduced-motion';
 import { TabItem } from './TabItem';
 import { useTabsStore, useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
@@ -45,6 +62,14 @@ interface DomainGroupCardProps {
 
 /**
  * 域名分组卡片：头部（可折叠）+ 标签列表
+ *
+ * 渲染域名分组卡片，包含头部（可折叠）和标签列表。
+ * 支持关闭整组、休眠整组等操作。
+ *
+ * @param props - 组件属性
+ * @param props.group - 域名分组数据
+ * @param props.initialCollapsed - 初始是否折叠（可选，默认 false）
+ * @returns 域名分组卡片 JSX 元素
  */
 export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroupCardProps) {
   const [collapsed, setCollapsed] = useState(initialCollapsed);
@@ -181,12 +206,43 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
     return result;
   }, [group.tabs, orderOverride]);
 
+  /** 缓存 visibleTabIds 避免每次渲染创建新数组引用导致子组件重渲染 */
+  const visibleTabIds = useMemo(() => tabOrder.map((t) => t.id), [tabOrder]);
+
   /** 拖拽完成时只更新 ID 顺序，不直接操作完整 tab 对象 */
   const handleReorder = useCallback(
     (newOrder: typeof group.tabs) => {
       setOrderOverride(newOrder.map((t) => t.id));
     },
     [],
+  );
+
+  /** @dnd-kit 传感器：指针（5px 激活防误触）+ 键盘 */
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const reduced = useReducedMotionPreference();
+
+  /** @dnd-kit 拖拽结束：用 arrayMove 计算新顺序，再同步到 orderOverride */
+  const onDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
+
+      const oldIndex = tabOrder.findIndex((t) => t.id === active.id);
+      const newIndex = tabOrder.findIndex((t) => t.id === over.id);
+      if (oldIndex === -1 || newIndex === -1) return;
+
+      const newOrder = arrayMove(tabOrder, oldIndex, newIndex);
+      handleReorder(newOrder);
+    },
+    [tabOrder, handleReorder],
   );
 
   const cardStyle = useMemo<React.CSSProperties>(
@@ -302,36 +358,104 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
         />
       </Tooltip>
 
-      {/* 标签列表 — 使用 motion Reorder 实现分组内拖拽排序 */}
+      {/* 标签列表 — 使用 @dnd-kit 实现分组内拖拽排序 */}
       {!collapsed && (
         <div className={styles['app-domain-group-list']}>
-          <Reorder.Group
-            axis="y"
-            values={tabOrder}
-            onReorder={handleReorder}
-            className={styles['app-domain-group-sortable']}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={onDragEnd}
           >
-            {tabOrder.map((tab) => (
-              <Reorder.Item
-                key={tab.id}
-                value={tab}
-                className={styles['app-domain-group-sortable-item']}
-                whileDrag={{ scale: 1.02, boxShadow: '0 4px 12px rgba(0,0,0,0.12)', zIndex: 10, position: 'relative' as const }}
-              >
-                <TabItem
-                  tab={tab}
-                  onJump={(id, wid) => { void jumpToTab(id, wid); }}
-                  onClose={(id) => { void closeSingleTab(id); }}
-                  hideFavicon={!showItemFavicon}
-                  showUrlHint={ambiguousIds.has(tab.id)}
-                  selectable
-                  visibleTabIds={tabOrder.map((t) => t.id)}
-                />
-              </Reorder.Item>
-            ))}
-          </Reorder.Group>
+            <SortableContext
+              items={tabOrder.map((t) => t.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className={styles['app-domain-group-sortable']}>
+                {tabOrder.map((tab) => (
+                  <SortableDomainTabItem
+                    key={tab.id}
+                    tab={tab}
+                    onJump={(id, wid) => { void jumpToTab(id, wid); }}
+                    onClose={(id) => { void closeSingleTab(id); }}
+                    hideFavicon={!showItemFavicon}
+                    showUrlHint={ambiguousIds.has(tab.id)}
+                    selectable
+                    visibleTabIds={visibleTabIds}
+                    reduced={reduced}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         </div>
       )}
     </Card>
+  );
+}
+
+// ── 子组件：可拖拽排序的标签行 ──────────────────────────────────
+
+interface SortableDomainTabItemProps {
+  tab: Parameters<typeof TabItem>[0]['tab'];
+  onJump: (id: number, windowId: number) => void;
+  onClose: (id: number) => void;
+  hideFavicon: boolean;
+  showUrlHint: boolean;
+  selectable: boolean;
+  visibleTabIds: number[];
+  reduced: boolean;
+}
+
+/**
+ * SortableDomainTabItem — 域名分组内可拖拽排序的标签行
+ *
+ * 封装 @dnd-kit 的 useSortable hook，使标签行可在分组内拖拽重排。
+ * 拖拽时显示阴影 + 微提升 z-index，还原原 Reorder.Item 的 whileDrag 视觉。
+ */
+function SortableDomainTabItem({
+  tab,
+  onJump,
+  onClose,
+  hideFavicon,
+  showUrlHint,
+  selectable,
+  visibleTabIds,
+  reduced,
+}: SortableDomainTabItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: tab.id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition: reduced ? 'none' : transition,
+    zIndex: isDragging ? 10 : 'auto',
+    position: 'relative',
+    boxShadow: isDragging ? '0 4px 12px rgba(0,0,0,0.12)' : undefined,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      style={style}
+      className={styles['app-domain-group-sortable-item']}
+    >
+      <TabItem
+        tab={tab}
+        onJump={onJump}
+        onClose={onClose}
+        hideFavicon={hideFavicon}
+        showUrlHint={showUrlHint}
+        selectable={selectable}
+        visibleTabIds={visibleTabIds}
+      />
+    </div>
   );
 }

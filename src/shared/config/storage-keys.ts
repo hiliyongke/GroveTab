@@ -10,7 +10,12 @@ import type { StorageKey } from '@/shared/types';
 /** 当前品牌的存储键前缀。 */
 const STORAGE_PREFIX = BRAND.storagePrefix;
 
-/** 拼接当前品牌命名空间下的存储键。 */
+/**
+ * 拼接当前品牌命名空间下的存储键。
+ *
+ * @param suffix 键名后缀（如 'tabs'、'settings'）
+ * @returns 带品牌前缀的存储键
+ */
 function key(suffix: string): StorageKey {
   return `${STORAGE_PREFIX}${suffix}` as StorageKey;
 }
@@ -50,7 +55,14 @@ export const STORAGE_KEYS = Object.freeze({
   dailySnapshots: key('daily_snapshots'),
 });
 
-/** 判断是否属于当前应用命名空间的存储键。 */
+/**
+ * 判断是否属于当前应用命名空间的存储键
+ *
+ * 检查存储键是否以当前品牌的前缀开头。
+ *
+ * @param value - 存储键字符串
+ * @returns 如果属于当前应用命名空间则返回 true，否则返回 false
+ */
 export function isAppStorageKey(value: string): boolean {
   return value.startsWith(STORAGE_PREFIX);
 }

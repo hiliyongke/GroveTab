@@ -1,6 +1,5 @@
 /**
- * Search History Type Definitions
- * 搜索历史相关类型 (F-05b / F-12)
+ * 搜索历史相关类型定义 (F-05b / F-12)
  */
 
 export interface SearchHistoryEntry {

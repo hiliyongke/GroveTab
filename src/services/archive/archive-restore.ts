@@ -43,6 +43,10 @@ export interface RestoreOutcome {
  * - partial（由调用方先过滤 tabs，再传 urls 子集）
  *
  * > 30 Tab 分批恢复（10 / 批，100ms 间隔），减少 Chrome 限流与卡顿。
+ *
+ * @param sessionId 要恢复的会话 ID
+ * @param options 恢复选项（策略、进度回调、取消信号等）
+ * @returns 恢复结果（恢复数量、批次数、是否取消）
  */
 export async function restoreSession(
   sessionId: string,
@@ -91,7 +95,20 @@ export async function restoreSession(
   return batchCreateTabs(targetUrls, targetWindowId, batchSize, batchInterval, options, 0);
 }
 
-/** 分批创建标签页 */
+/**
+ * 分批创建标签页。
+ *
+ * 按 `batchSize` 拆分 URL 列表，批次间插入 `batchInterval` 延迟，
+ * 减少 Chrome 限流与 UI 卡顿。支持取消信号。
+ *
+ * @param urls 要创建的 URL 列表
+ * @param windowId 目标窗口 ID（可能未定义）
+ * @param batchSize 单批大小（默认 10）
+ * @param batchInterval 批间隔 ms（默认 100）
+ * @param options 恢复选项（含进度回调、取消信号）
+ * @param startDone 已完成数量（用于追加恢复场景）
+ * @returns 恢复结果（恢复数量、批次数、是否取消）
+ */
 async function batchCreateTabs(
   urls: string[],
   windowId: number | undefined,

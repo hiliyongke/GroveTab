@@ -1,3 +1,5 @@
+@import (reference) '@/styles/mixins.less';
+
 /**
  * AppearancePanel — 外观设置面板样式
  *
@@ -51,7 +53,7 @@
   border-color: var(--ant-color-border);
 }
 
-.appearance-preset-card.is-selected {
+.appearance-preset-card--selected {
   border: 2px solid var(--ant-color-primary);
   box-shadow: 0 0 0 1px var(--ant-color-primary);
 }
@@ -97,12 +99,12 @@
   font-size: 8px;
 }
 
-.appearance-mode-badge.is-dark {
+.appearance-mode-badge--dark {
   color: var(--ant-color-text-inverse, #fff);
   background: rgba(0, 0, 0, 0.5);
 }
 
-.appearance-mode-badge.is-light {
+.appearance-mode-badge--light {
   color: var(--ant-color-text, #333);
   background: rgba(255, 255, 255, 0.72);
 }
@@ -126,12 +128,12 @@
   color: var(--ant-color-text);
 }
 
-.appearance-preset-title.is-selected {
+.appearance-preset-title--selected {
   font-weight: 600;
   color: var(--ant-color-primary);
 }
 
-.appearance-preset-title:not(.is-selected) {
+.appearance-preset-title:not(.appearance-preset-title--selected) {
   font-weight: 500;
 }
 
@@ -150,7 +152,7 @@
   color: var(--ant-color-text-secondary);
 }
 
-.appearance-preset-label-only.is-selected {
+.appearance-preset-label-only--selected {
   font-weight: 600;
   color: var(--ant-color-primary);
 }

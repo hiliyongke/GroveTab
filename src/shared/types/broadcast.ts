@@ -1,6 +1,5 @@
 /**
- * Broadcast Message Type Definitions
- * Service Worker 广播消息相关类型
+ * Service Worker 广播消息相关类型定义
  */
 
 /** Broadcast message types from SW to new tab pages */
@@ -11,7 +10,8 @@ export type SwBroadcastType =
   | 'tab-activated'
   | 'tab-moved'
   | 'tab-discarded'
-  | 'window-focus-changed';
+  | 'window-focus-changed'
+  | 'stats-updated';
 
 export interface SwBroadcastMessage {
   type: SwBroadcastType;

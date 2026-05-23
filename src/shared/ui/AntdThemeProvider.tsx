@@ -12,8 +12,6 @@ import { useEffect, useMemo, useRef } from 'react';
 import { ConfigProvider, App as AntdApp } from 'antd';
 import zhCN from 'antd/locale/zh_CN';
 import enUS from 'antd/locale/en_US';
-import dayjs from 'dayjs';
-import 'dayjs/locale/zh-cn';
 import { useSettingsStore } from '@/store';
 import { useResolvedTheme } from '@/shared/hooks';
 import { bindFeedback, unbindFeedback } from './feedback';
@@ -21,8 +19,19 @@ import { getSkinPreset } from '@/shared/theme/skin-presets';
 import { buildAntdThemeConfig, buildAppThemeVars } from '@/shared/theme/theme-customization';
 import { LOCAL_CACHE_KEYS } from '@/shared/config/storage-keys';
 
+/** Antd App 容器基础样式：占满视口高度 */
 const ANT_APP_STYLE: React.CSSProperties = { minHeight: '100vh' };
 
+/**
+ * FeedbackBridge — 桥接 antd App 实例到非 React 层
+ *
+ * 设计：
+ *   - 通过 `AntdApp.useApp()` 获取 antd 的 message/notification/modal 实例
+ *   - 将实例写入模块级 Ref，供 `feedback.ts` 的 `bindFeedback` 使用
+ *   - 卸载时调用 `unbindFeedback` 避免引用已卸载的 React 树
+ *
+ * @returns null（不渲染任何 DOM）
+ */
 function FeedbackBridge() {
   const { message, notification, modal } = AntdApp.useApp();
   const apiRef = useRef({ message, notification, modal });
@@ -39,6 +48,19 @@ function FeedbackBridge() {
   return null;
 }
 
+/**
+ * AntdThemeProvider —— antd v6 主题桥接 + 皮肤系统
+ *
+ * 职责：
+ *   1. 解析当前明暗模式并同步到 `<html data-theme>`
+ *   2. 通过 ConfigProvider 注入 antd v6 官方主题配置
+ *   3. 注入业务层消费的 `--app-*` 语义变量
+ *   4. 挂载 antd App 容器，为 message/notification/modal 提供上下文
+ *
+ * @param props 组件属性
+ * @param props.children 子组件树
+ * @returns 包裹了 antd ConfigProvider 和 App 容器的子组件树
+ */
 export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
   const language = useSettingsStore((s) => s.settings.language);
   const loaded = useSettingsStore((s) => s.loaded);
@@ -77,10 +99,6 @@ export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
       document.documentElement.removeAttribute('data-texture-noise');
     }
   }, [skinPreset, loaded]);
-
-  useEffect(() => {
-    dayjs.locale(language === 'zh-CN' ? 'zh-cn' : 'en');
-  }, [language]);
 
   const appThemeVars = useMemo(
     () => buildAppThemeVars(skinPreset, mode === 'dark', layoutDensity, reducedMotion, skinCustom),

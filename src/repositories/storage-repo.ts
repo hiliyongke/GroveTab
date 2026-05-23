@@ -31,7 +31,7 @@ import type {
 // 所有新字段走"缺失即默认"策略，不需要破坏性迁移。
 const CURRENT_SCHEMA_VERSION = 3;
 
-const DEFAULT_SETTINGS: UserSettings = {
+export const DEFAULT_SETTINGS: UserSettings = {
   overrideNewTab: true,
   newtabPageMode: 'workspace',
   viewTabPosition: 'top',
@@ -90,10 +90,23 @@ const DEFAULT_SETTINGS: UserSettings = {
 
 // ── Generic CRUD ──────────────────────────────────────
 
+/**
+ * 从 chrome.storage.local 读取数据
+ *
+ * @param key - 存储键名
+ * @returns 存储的数据（未定义时为 undefined）
+ */
 export async function getData<T>(key: StorageKey): Promise<T | undefined> {
   return storageGet<T>(key);
 }
 
+/**
+ * 写入数据到 chrome.storage.local
+ *
+ * @param key - 存储键名
+ * @param value - 待存储的数据
+ * @returns 无返回值
+ */
 export async function setData<T>(key: StorageKey, value: T): Promise<void> {
   await storageSet(key, value);
   if (key !== STORAGE_KEYS.meta) {
@@ -104,6 +117,9 @@ export async function setData<T>(key: StorageKey, value: T): Promise<void> {
 /**
  * 删除指定 key 对应的数据。
  * 用于一键重置：清除设置 / Onboarding 标志 / 工厂重置遍历全部应用命名空间键。
+ *
+ * @param key - 存储键名
+ * @returns 无返回值
  */
 export async function removeData(key: string): Promise<void> {
   await storageRemove(key);
@@ -115,6 +131,8 @@ export async function removeData(key: string): Promise<void> {
 /**
  * 列出 chrome.storage.local 中的所有键。
  * 用于一键重置：遍历并删除所有应用命名空间键以恢复出厂状态。
+ *
+ * @returns 所有存储键名数组
  */
 export async function getAllDataKeys(): Promise<string[]> {
   return storageGetAllKeys();
@@ -122,6 +140,13 @@ export async function getAllDataKeys(): Promise<string[]> {
 
 // ── Settings ──────────────────────────────────────────
 
+/**
+ * 获取用户设置
+ *
+ * 若存储中无设置，返回默认设置。
+ *
+ * @returns 用户设置对象
+ */
 export async function getSettings(): Promise<UserSettings> {
   const settings = await getData<UserSettings>(STORAGE_KEYS.settings);
   if (settings === undefined) return { ...DEFAULT_SETTINGS };
@@ -138,6 +163,12 @@ export async function getSettings(): Promise<UserSettings> {
   return withDefaults(settings);
 }
 
+/**
+ * 合并用户设置与默认设置
+ *
+ * @param partial - 用户设置（部分）
+ * @returns 合并后的完整用户设置
+ */
 function withDefaults(partial: Partial<UserSettings>): UserSettings {
   const merged: UserSettings = { ...DEFAULT_SETTINGS, ...partial };
   // uiVisibility 是嵌套对象，需要逐项合并避免覆盖用户设置
@@ -148,6 +179,14 @@ function withDefaults(partial: Partial<UserSettings>): UserSettings {
   return merged;
 }
 
+/**
+ * 保存用户设置
+ *
+ * 合并传入的设置与当前设置，并持久化到存储。
+ *
+ * @param settings - 待保存的用户设置（部分）
+ * @returns 合并后的完整用户设置
+ */
 export async function saveSettings(settings: Partial<UserSettings>): Promise<UserSettings> {
   const current = await getSettings();
   const merged = withDefaults({ ...current, ...settings });
@@ -160,10 +199,23 @@ export async function saveSettings(settings: Partial<UserSettings>): Promise<Use
 
 // ── Meta ──────────────────────────────────────────────
 
+/**
+ * 获取存储元数据
+ *
+ * @returns 存储元数据（未定义时为 undefined）
+ */
 async function getMeta(): Promise<StorageMeta | undefined> {
   return getData<StorageMeta>(STORAGE_KEYS.meta);
 }
 
+/**
+ * 确保存储元数据存在
+ *
+ * 如果元数据不存在，创建一个新的；
+ * 如果 schema 版本过低，执行迁移。
+ *
+ * @returns 存储元数据对象
+ */
 async function ensureMeta(): Promise<StorageMeta> {
   let meta = await getMeta();
   if (meta === undefined) {
@@ -187,6 +239,10 @@ async function ensureMeta(): Promise<StorageMeta> {
  * 迁移执行器：按版本号顺序执行增量迁移脚本。
  * 当前 v1 → v2 为"空迁移"（字段缺失时默认值已在读取路径兜底），
  * 但保留显式升级钩子以便未来添加需要写操作的迁移。
+ *
+ * @param fromVersion - 当前 schema 版本号
+ * @param toVersion - 目标 schema 版本号
+ * @returns 无返回值
  */
 async function runMigrations(fromVersion: number, toVersion: number): Promise<void> {
   for (let v = fromVersion; v < toVersion; v++) {
@@ -200,6 +256,11 @@ async function runMigrations(fromVersion: number, toVersion: number): Promise<vo
   }
 }
 
+/**
+ * 更新元数据的 updatedAt 时间戳
+ *
+ * @returns 无返回值
+ */
 async function updateMetaTimestamp(): Promise<void> {
   const meta = await getMeta();
   if (meta !== undefined) {
@@ -210,11 +271,21 @@ async function updateMetaTimestamp(): Promise<void> {
 
 // ── Onboarding ────────────────────────────────────────
 
+/**
+ * 检查用户是否已完成 Onboarding
+ *
+ * @returns 是否已完成 Onboarding
+ */
 export async function hasCompletedOnboarding(): Promise<boolean> {
   const done = await getData<boolean>(STORAGE_KEYS.onboardingDone);
   return done ?? false;
 }
 
+/**
+ * 标记 Onboarding 已完成
+ *
+ * @returns 无返回值
+ */
 export async function markOnboardingDone(): Promise<void> {
   await setData(STORAGE_KEYS.onboardingDone, true);
 }
@@ -226,6 +297,8 @@ const MAX_RECENT_SEARCHES = 20;
 /**
  * 获取最近搜索词（带使用计数）。
  * 为兼容 v0 旧数据（纯字符串数组），读取时自动升级结构。
+ *
+ * @returns 最近搜索记录数组
  */
 export async function getSearchHistory(): Promise<SearchHistoryEntry[]> {
   const raw = (await getData<SearchHistoryEntry[] | string[]>(STORAGE_KEYS.searchHistory)) ?? [];
@@ -238,7 +311,9 @@ export async function getSearchHistory(): Promise<SearchHistoryEntry[]> {
   return raw as SearchHistoryEntry[];
 }
 
-/** 仅返回 query 字符串数组（用于旧 API 兼容）。 */
+/** 仅返回 query 字符串数组（用于旧 API 兼容）。
+ * @returns 最近搜索词字符串数组
+ */
 export async function getRecentSearches(): Promise<string[]> {
   return (await getSearchHistory()).map((e) => e.query);
 }
@@ -250,6 +325,9 @@ export async function getRecentSearches(): Promise<string[]> {
  *   - LRU 保留最近 20 条
  *   返回值为 `string[]`，便于与旧 API 及现有 UI 直接兼容；
  *   如需完整 SearchHistoryEntry 列表请调用 getSearchHistory()。
+ *
+ * @param query - 搜索词
+ * @returns 更新后的最近搜索词字符串数组
  */
 export async function pushRecentSearch(query: string): Promise<string[]> {
   const normalized = query.trim();
@@ -273,12 +351,27 @@ export async function pushRecentSearch(query: string): Promise<string[]> {
 const MAX_ACTIVITY = 20;
 const ACTIVITY_TTL_MS = 72 * 3600 * 1000;
 
+/**
+ * 获取最近活动记录
+ *
+ * 过滤掉超过 72 小时的活动记录。
+ *
+ * @returns 最近活动记录数组
+ */
 export async function getRecentActivity(): Promise<ActivityRecord[]> {
   const raw = (await getData<ActivityRecord[]>(STORAGE_KEYS.activity)) ?? [];
   const cutoff = Date.now() - ACTIVITY_TTL_MS;
   return raw.filter((r) => r.ts >= cutoff);
 }
 
+/**
+ * 添加一条活动记录
+ *
+ * 新记录插入数组头部，超过 MAX_ACTIVITY 时自动截断。
+ *
+ * @param record - 活动记录
+ * @returns 更新后的活动记录数组
+ */
 export async function pushActivity(record: ActivityRecord): Promise<ActivityRecord[]> {
   const existing = await getRecentActivity();
   const next = [record, ...existing].slice(0, MAX_ACTIVITY);
@@ -286,6 +379,11 @@ export async function pushActivity(record: ActivityRecord): Promise<ActivityReco
   return next;
 }
 
+/**
+ * 清空最近活动记录
+ *
+ * @returns 无返回值
+ */
 export async function clearActivity(): Promise<void> {
   await setData(STORAGE_KEYS.activity, []);
 }
@@ -294,41 +392,88 @@ export async function clearActivity(): Promise<void> {
 
 const MAX_WORKSPACES = 3;
 
+/**
+ * 获取所有工作区
+ *
+ * @returns 工作区数组
+ */
 export async function getWorkspaces(): Promise<Workspace[]> {
   return (await getData<Workspace[]>(STORAGE_KEYS.workspaces)) ?? [];
 }
 
+/**
+ * 保存工作区列表
+ *
+ * 限制最多保存 MAX_WORKSPACES 个。
+ *
+ * @param list - 工作区数组
+ * @returns 无返回值
+ */
 export async function saveWorkspaces(list: Workspace[]): Promise<void> {
   await setData(STORAGE_KEYS.workspaces, list.slice(0, MAX_WORKSPACES));
 }
 
 // ── Kanban (F-20) ──────────────────────────────────────
 
+/**
+ * 获取看板布局
+ *
+ * @returns 看板布局对象（未定义时为 undefined）
+ */
 export async function getKanbanLayout(): Promise<KanbanLayout | undefined> {
   return getData<KanbanLayout>(STORAGE_KEYS.kanban);
 }
 
+/**
+ * 保存看板布局
+ *
+ * @param layout - 看板布局对象
+ * @returns 无返回值
+ */
 export async function saveKanbanLayout(layout: KanbanLayout): Promise<void> {
   await setData(STORAGE_KEYS.kanban, layout);
 }
 
 // ── Stats (F-11) ───────────────────────────────────────
 
+/**
+ * 获取统计信息
+ *
+ * @returns 统计信息对象（未定义时为 undefined）
+ */
 export async function getStats(): Promise<StatsData | undefined> {
   return getData<StatsData>(STORAGE_KEYS.stats);
 }
 
+/**
+ * 保存统计信息
+ *
+ * @param stats - 统计信息对象
+ * @returns 无返回值
+ */
 export async function saveStats(stats: StatsData): Promise<void> {
   await setData(STORAGE_KEYS.stats, stats);
 }
 
 // ── OG Index (F-24) ────────────────────────────────────
 
+/**
+ * 获取 OG 数据
+ *
+ * @param url - 页面 URL
+ * @returns OG 数据（未缓存时为 undefined）
+ */
 export async function getOgEntry(url: string): Promise<OgEntry | undefined> {
   const index = (await getData<Record<string, OgEntry>>(STORAGE_KEYS.ogIndex)) ?? {};
   return index[url];
 }
 
+/**
+ * 保存 OG 数据
+ *
+ * @param entry - OG 数据对象
+ * @returns 无返回值
+ */
 export async function saveOgEntry(entry: OgEntry): Promise<void> {
   const index = (await getData<Record<string, OgEntry>>(STORAGE_KEYS.ogIndex)) ?? {};
   index[entry.url] = entry;
@@ -341,45 +486,83 @@ export async function saveOgEntry(entry: OgEntry): Promise<void> {
   await setData(STORAGE_KEYS.ogIndex, index);
 }
 
+/**
+ * 清空 OG 数据索引
+ *
+ * @returns 无返回值
+ */
 export async function clearOgIndex(): Promise<void> {
   await setData(STORAGE_KEYS.ogIndex, {});
 }
 
 // ── Auto Snapshot Meta (F-23) ──────────────────────────
 
+/**
+ * 获取自动快照元数据
+ *
+ * @returns 自动快照元数据（未定义时为 undefined）
+ */
 export async function getAutoSnapshotMeta(): Promise<AutoSnapshotMeta | undefined> {
   return getData<AutoSnapshotMeta>(STORAGE_KEYS.autoSnapshotMeta);
 }
 
+/**
+ * 保存自动快照元数据
+ *
+ * @param meta - 自动快照元数据对象
+ * @returns 无返回值
+ */
 export async function saveAutoSnapshotMeta(meta: AutoSnapshotMeta): Promise<void> {
   await setData(STORAGE_KEYS.autoSnapshotMeta, meta);
 }
 
 // ── Metrics (§17) ──────────────────────────────────────
 
+/**
+ * 获取指标事件列表
+ *
+ * @returns 指标事件数组
+ */
 export async function getMetrics(): Promise<MetricEvent[]> {
   return (await getData<MetricEvent[]>(STORAGE_KEYS.metrics)) ?? [];
 }
 
+/**
+ * 清空指标事件列表
+ *
+ * @returns 无返回值
+ */
 export async function clearMetrics(): Promise<void> {
   await setData(STORAGE_KEYS.metrics, []);
 }
 
 // ── Speed Dial / 常用站点 ──────────────────────────────
 
-/** 获取所有常用站点，按 order 升序排列 */
+/**
+ * 获取所有常用站点，按 order 升序排列
+ *
+ * @returns 常用站点数组
+ */
 export async function getSpeedDialSites(): Promise<SpeedDialSite[]> {
   const sites = (await getData<SpeedDialSite[]>(STORAGE_KEYS.speedDial)) ?? [];
   return sites.sort((a, b) => a.order - b.order);
 }
 
-/** 保存全部常用站点列表（不限制数量，内部函数） */
+/**
+ * 保存全部常用站点列表（不限制数量，内部函数）
+ * @param sites
+ */
 async function saveSpeedDialSites(sites: SpeedDialSite[]): Promise<void> {
   const sorted = [...sites].sort((a, b) => a.order - b.order);
   await setData(STORAGE_KEYS.speedDial, sorted);
 }
 
-/** 新增一个常用站点（不可变操作） */
+/**
+ * 新增一个常用站点（不可变操作）
+ *
+ * @param site - 常用站点对象
+ * @returns 更新后的常用站点数组
+ */
 export async function addSpeedDialSite(site: SpeedDialSite): Promise<SpeedDialSite[]> {
   const sites = await getSpeedDialSites();
   const newSites = [...sites, site];
@@ -387,7 +570,12 @@ export async function addSpeedDialSite(site: SpeedDialSite): Promise<SpeedDialSi
   return newSites;
 }
 
-/** 更新一个常用站点（不可变操作） */
+/**
+ * 更新一个常用站点（不可变操作）
+ *
+ * @param updated - 待更新的常用站点（必须包含 id）
+ * @returns 更新后的常用站点数组
+ */
 export async function updateSpeedDialSite(updated: Partial<SpeedDialSite> & { id: string }): Promise<SpeedDialSite[]> {
   const sites = await getSpeedDialSites();
   const idx = sites.findIndex((s) => s.id === updated.id);
@@ -404,7 +592,12 @@ export async function updateSpeedDialSite(updated: Partial<SpeedDialSite> & { id
   return sites;
 }
 
-/** 删除一个常用站点 */
+/**
+ * 删除一个常用站点
+ *
+ * @param id - 待删除的站点 ID
+ * @returns 删除后的常用站点数组
+ */
 export async function removeSpeedDialSite(id: string): Promise<SpeedDialSite[]> {
   const sites = await getSpeedDialSites();
   const filtered = sites.filter((s) => s.id !== id);
@@ -412,7 +605,12 @@ export async function removeSpeedDialSite(id: string): Promise<SpeedDialSite[]> 
   return filtered;
 }
 
-/** 重排常用站点（不可变操作） */
+/**
+ * 重排常用站点（不可变操作）
+ *
+ * @param reorderedIds - 重排后的 ID 数组
+ * @returns 重排后的常用站点数组
+ */
 export async function reorderSpeedDialSites(reorderedIds: string[]): Promise<SpeedDialSite[]> {
   const sites = await getSpeedDialSites();
   const siteMap = new Map(sites.map((s) => [s.id, s]));

@@ -685,12 +685,46 @@ const en: Record<string, string> = {
   'tabGroup.ungrouped': 'Ungrouped',
   'tabGroup.unnamed': 'Unnamed group',
   // Window management
-  'window.current': 'Current Window',
+'window.current': 'Current Window',
   'window.other': 'Other Window',
   'window.focused': 'Active',
   'window.mergeAll': 'Merge to current',
   'window.mergedAll': 'Merged {count} tabs to current window',
   'window.mergeFailed': 'Merge failed, please retry',
+  'window.closeWindow': 'Close window',
+  'window.closedWindow': 'Closed {count} tabs',
+  'window.closeFailed': 'Close window failed, please retry',
+  'window.tabMoved': 'Tab moved to target window',
+  'window.moveFailed': 'Move tab failed, please retry',
+  // Cross-window drag & group editing
+  'window.dragToOtherWindow': 'Drag to another window to move tab',
+  'window.dragCopyToOtherWindow': 'Hold Alt and drag to copy tab to target window',
+  'window.syncAfterReorder': 'Tab order synced to browser',
+  'window.syncFailed': 'Failed to sync tab order',
+  'window.groupTabs': 'Group tabs',
+  'window.groupCreated': 'Group "{name}" created',
+  'window.groupCreateFailed': 'Failed to create group, please retry',
+  'window.groupRename': 'Rename group',
+  'window.groupColor': 'Change group color',
+  'window.groupUngroup': 'Ungroup',
+  'window.groupUngrouped': 'Group removed',
+  'window.groupUngroupFailed': 'Failed to ungroup, please retry',
+  'window.groupMovedToWindow': 'Moved {count} tabs of group to target window',
+  'window.dragGroupToOtherWindow': 'Drag to another window to move entire group',
+
+  // ── Smart Sort ──
+  'window.smartSort': 'Smart Sort',
+  'window.smartSortByDomain': 'By Domain',
+  'window.smartSortByRecentAccess': 'By Recent Access',
+  'window.smartSortByAlphabetical': 'By Title (A→Z)',
+  'window.smartSortByType': 'By Tab Type',
+  'window.smartSortByDomainDesc': 'Group tabs by hostname, same-domain tabs adjacent',
+  'window.smartSortByRecentAccessDesc': 'Sort tabs by last accessed time descending, most recent first',
+  'window.smartSortByAlphabeticalDesc': 'Sort tabs by title in alphabetical order (A→Z)',
+  'window.smartSortByTypeDesc': 'Sort by tab type: Pinned → Grouped → Regular',
+  'window.smartSortGroup': 'Sort within Group',
+  'window.smartSortSuccess': 'Sorted {count} tabs by "{rule}"',
+  'window.smartSortGroupSuccess': 'Sorted {count} tabs within group by "{rule}"',
   // Bookmarks
   'bookmark.needPermission': 'Permission needed to access browser bookmarks',
   'bookmark.grantPermission': 'Grant bookmark access',
@@ -982,6 +1016,18 @@ const en: Record<string, string> = {
   'popup.closeTab': 'Close tab {title}',
 
   // ══════════════════════════════════════════════════
+  // Arc Sidebar
+  // ══════════════════════════════════════════════════
+  'arcSidebar.menu': 'Menu',
+  'arcSidebar.addSpace': 'Add space',
+  'arcSidebar.settings': 'Settings',
+  'arcSidebar.moreActions': 'More actions',
+  'arcSidebar.pinTab': 'Pin tab',
+  'arcSidebar.unpinTab': 'Unpin tab',
+  'arcSidebar.closeTab': 'Close tab',
+  'arcSidebar.commandBar': 'Command bar',
+
+  // ══════════════════════════════════════════════════
   // Settings panel section titles
   // ══════════════════════════════════════════════════
   'settings.sectionGeneral': 'General',
@@ -1099,5 +1145,9 @@ const en: Record<string, string> = {
     'history.undoFailed': 'Undo failed',
     'history.undoNotSupported': 'Undo handler not registered',
     'history.undone': 'Undone',
+
+    // ── Error ────────────────────────
+    'error.panelCrash': '{label} panel failed to load',
+    'error.retry': 'Retry',
 };
 export default en;

@@ -45,21 +45,54 @@ let sessionsCache: ArchivedSession[] = [];
 let sessionsInitialized = false;
 let sessionsListeners: Array<() => void> = [];
 
+/**
+ * 订阅归档列表变更
+ *
+ * 用于 useSyncExternalStore 注册监听函数。
+ *
+ * @param listener - 状态变更时的回调函数
+ * @returns 取消订阅的函数
+ */
 function subscribeSessions(listener: () => void) {
   sessionsListeners.push(listener);
   return () => {
     sessionsListeners = sessionsListeners.filter((l) => l !== listener);
   };
 }
+/**
+ * 获取当前归档列表快照
+ *
+ * 用于 useSyncExternalStore 读取当前状态。
+ *
+ * @returns 当前归档会话列表
+ */
 function getSessionsSnapshot() {
   return sessionsCache;
 }
+/**
+ * 获取归档列表初始化状态
+ *
+ * 用于 useSyncExternalStore 判断数据是否已加载。
+ *
+ * @returns 是否已初始化
+ */
 function getSessionsInitialized() {
   return sessionsInitialized;
 }
+/**
+ * 通知所有归档列表监听者
+ *
+ * 数据变更时调用，触发所有已注册的 listener 执行。
+ */
 function notifySessionsListeners() {
   sessionsListeners.forEach((l) => l());
 }
+/**
+ * 刷新归档列表
+ *
+ * 从存储中重新加载归档会话数据，并更新缓存。
+ * 完成后通知所有监听者。
+ */
 export async function refreshSessions() {
   sessionsCache = await getArchivedSessions();
   sessionsInitialized = true;
@@ -84,6 +117,20 @@ registerHistoryUndoHandler('archive_create', async (event) => {
   return true;
 });
 
+/**
+ * 归档会话内联视图
+ *
+ * 作为视图 Tab 之一嵌入主内容区，替代原有的 Modal 浮层。
+ * 复用 ArchivePanel 的全部业务逻辑，仅移除 Modal 外壳。
+ *
+ * 功能：
+ *   - 展示所有归档会话（支持搜索过滤）
+ *   - 恢复、删除、分享、重命名会话
+ *   - 合并多个会话
+ *   - 多选操作
+ *
+ * @returns 归档视图的 JSX 元素
+ */
 export function ArchiveView() {
   const sessions = useSyncExternalStore(subscribeSessions, getSessionsSnapshot);
   const initialized = useSyncExternalStore(subscribeSessions, getSessionsInitialized);
@@ -220,7 +267,11 @@ export function ArchiveView() {
     }
   };
 
-  /** 分享单个会话为 JSON */
+  /**
+   * 分享单个会话为 JSON
+   * @param id
+ * @returns {Promise<any>} Promise
+   */
   const handleShare = async (id: string) => {
     const payload = await exportSingleSession(id);
     if (payload === null) {
@@ -243,7 +294,11 @@ export function ArchiveView() {
     }
   };
 
-  /** 合并多个会话 */
+  /**
+   * 合并多个会话
+   * @param id
+ * @returns {void} 无返回值
+   */
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -266,7 +321,7 @@ export function ArchiveView() {
     cancelSelect();
   };
 
-  const handleOpenMerge = async (ids: string[]) => {
+  const handleOpenMerge = (ids: string[]) => {
     if (ids.length < 2) {
       feedback.warning(t('archive.mergeNeedTwo'));
       return;
@@ -389,17 +444,18 @@ export function ArchiveView() {
             totalCount={sessions.length}
             selectable={selectable}
             onToggleSelectMode={handleSelectModeChange}
-            onBatchRestore={async (ids) => {
+            onBatchRestore={(ids) => {
               for (const id of ids) {
-                await handleRestore(id);
+                void handleRestore(id);
               }
+              return Promise.resolve();
             }}
             onBatchDelete={async (ids) => {
               for (const id of ids) {
                 await handleDelete(id);
               }
             }}
-            onMergeSessions={handleOpenMerge}
+            onMergeSessions={(ids) => { handleOpenMerge(ids); return Promise.resolve(); }}
             onExportSessions={async (ids) => {
               for (const id of ids) {
                 await handleShare(id);
@@ -568,7 +624,7 @@ export function ArchiveView() {
             setRestoreDialogOpen(false);
             setRestoringSession(null);
           }}
-          onRestoreComplete={handleEnhancedRestoreComplete}
+          onRestoreComplete={(outcome) => { void handleEnhancedRestoreComplete(outcome); }}
         />
       )}
 

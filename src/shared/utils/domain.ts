@@ -13,17 +13,26 @@
 
 import { parse } from 'tldts';
 
+/**
+ * 域名解析结果
+ */
 interface DomainInfo {
   /** 完整主机名，如 docs.google.com */
   hostname: string;
   /** 注册域，如 google.com（无法解析时回退到 hostname） */
   registeredDomain: string;
-  /** 子域名部分，如 docs */
+  /** 子域名部分，如 docs（无则为 null） */
   subdomain: string | null;
 }
 
 /**
  * 解析 URL，拿到 hostname / 注册域 / 子域三元组
+ *
+ * 使用 tldts 库解析，能正确处理多级 TLD（如 .co.uk）。
+ * 解析失败返回空字符串。
+ *
+ * @param url 完整 URL 字符串
+ * @returns 域名信息对象
  */
 function getDomainInfo(url: string): DomainInfo {
   try {
@@ -45,7 +54,7 @@ function getDomainInfo(url: string): DomainInfo {
 }
 
 /**
- * 域名分组对象
+ * 域名分组对象（用于 UI 展示与聚合）
  */
 export interface DomainGroup {
   /** 分组键（hostname，显示与聚合都用它） */
@@ -54,7 +63,7 @@ export interface DomainGroup {
   colorKey: string;
   /** 该分组下的标签页 */
   tabs: Array<import('@/shared/types').LiveTab>;
-  /** 是否折叠 */
+  /** 是否折叠（由 UI 状态控制） */
   collapsed: boolean;
 }
 
@@ -63,10 +72,13 @@ import type { LiveTab } from '@/shared/types';
 /**
  * 按 hostname 聚合标签页
  *
- * 排序：
- *   1. tab 数量多的在前
+ * 排序规则：
+ *   1. 标签数量多的在前
  *   2. 数量相同时，同一注册域（家族）聚拢在一起
- *   3. 最后按分组内最近活跃时间
+ *   3. 最后按分组内最近活跃时间倒序
+ *
+ * @param tabs 实时标签数组
+ * @returns 排序后的域名分组数组
  */
 export function groupTabsByDomain(tabs: LiveTab[]): DomainGroup[] {
   /** key: hostname，value: { colorKey, tabs } */
@@ -107,8 +119,11 @@ export function groupTabsByDomain(tabs: LiveTab[]): DomainGroup[] {
 
 /**
  * 获取分组的第一张 favicon
- * 遍历分组中的 tab，返回第一个有 favIconUrl 的 tab 的 favIconUrl
- * @param tabs - 分组中的标签页列表
+ *
+ * 遍历分组中的 tab，返回第一个有 favIconUrl 的 tab 的 URL。
+ * 用于分组卡片的图标展示。
+ *
+ * @param tabs 分组中的标签页列表
  * @returns 第一个 favicon URL 或空字符串
  */
 export function getGroupFavicon(tabs: LiveTab[]): string {

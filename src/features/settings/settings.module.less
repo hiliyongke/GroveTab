@@ -1,3 +1,5 @@
+@import (reference) '@/styles/mixins.less';
+
 /**
  * SettingsPanel — 右侧抽屉式设置面板样式
  *
@@ -139,7 +141,7 @@
 }
 
 /* Switch 在 flex 列容器中会被 stretch 拉伸，强制左对齐保持原尺寸 */
-.settings-field > .ant-switch {
+.settings-field > :global(.ant-switch) {
   align-self: flex-start;
 }
 
@@ -273,7 +275,7 @@
   color: var(--ant-color-text);
 }
 
-.settings-keybinding-trigger.is-recording {
+.settings-keybinding-trigger--recording {
   border-color: var(--ant-color-primary);
   background: var(--ant-color-primary-bg);
   color: var(--ant-color-primary);
@@ -346,5 +348,13 @@
   .settings-keybinding-recorder {
     width: 100%;
     justify-content: space-between;
+  }
+}
+
+/* ── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .settings-nav__item,
+  .settings-content__header {
+    transition: none !important;
   }
 }

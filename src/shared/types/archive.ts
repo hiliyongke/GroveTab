@@ -1,18 +1,22 @@
 /**
- * Archive / Sessions Type Definitions
- * 归档与会话相关类型
+ * 归档与会话相关类型定义
  */
 
-/** An archived tab entry */
+/** 归档标签页条目 */
 export interface ArchivedTab {
+  /** 标签页 URL */
   url: string;
+  /** 标签页标题 */
   title: string;
+  /** favicon 图标 URL */
   favIconUrl: string;
+  /** 域名 */
   hostname: string;
+  /** 是否固定标签 */
   pinned: boolean;
 }
 
-/** An archived session (group of tabs saved at once) */
+/** 归档会话（一次保存的标签页组） */
 export interface ArchivedSession {
   id: string;
   name: string;
@@ -31,7 +35,7 @@ export interface ArchivedSession {
   source?: 'manual' | 'auto' | 'import' | 'kanban';
 }
 
-/** Auto Snapshot Meta (F-23) */
+/** 自动快照元数据 (F-23) */
 export interface AutoSnapshotMeta {
   /** 最后一次自动快照时间戳 */
   lastSnapshotAt: number;

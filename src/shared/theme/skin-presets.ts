@@ -1097,6 +1097,11 @@ export const SKIN_PRESETS: SkinPreset[] = [
 
 /**
  * 根据 ID 查找皮肤预设
+ *
+ * 如果找不到对应的皮肤 ID，回退到 glassmorphism（液态玻璃）预设。
+ *
+ * @param id - 皮肤 ID
+ * @returns 对应的皮肤预设配置对象
  */
 export function getSkinPreset(id: SkinPresetId): SkinPreset {
   const preset = SKIN_PRESETS.find((p) => p.id === id);

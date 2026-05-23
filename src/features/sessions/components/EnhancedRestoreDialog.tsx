@@ -15,6 +15,7 @@ import type { RestoreStrategy, RestoreOutcome } from '@/services/archive';
 import { restoreSession } from '@/services/archive';
 import { useT } from '@/shared/i18n';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
+import styles from '../styles/archive.module.less';
 
 interface EnhancedRestoreDialogProps {
   open: boolean;
@@ -25,6 +26,17 @@ interface EnhancedRestoreDialogProps {
   onRestoreComplete?: (outcome: RestoreOutcome) => void;
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.open
+ * @param root0.sessionId
+ * @param root0.sessionName
+ * @param root0.tabCount
+ * @param root0.onClose
+ * @param root0.onRestoreComplete
+ * @returns {void} 无返回值
+ */
 export function EnhancedRestoreDialog({
   open,
   sessionId,
@@ -130,7 +142,7 @@ export function EnhancedRestoreDialog({
   return (
     <Modal
       open={open}
-      rootClassName="app-archive-dialog app-archive-restore-dialog"
+      rootClassName={`${styles['app-archive-dialog']} ${styles['app-archive-restore-dialog']}`}
       title={t('archive.restoreTitle')}
       onCancel={handleClose}
       footer={[
@@ -142,7 +154,7 @@ export function EnhancedRestoreDialog({
             key="restore"
             type="primary"
             icon={<Play size={ICON_SIZE.MEDIUM} />}
-            onClick={handleRestore}
+            onClick={() => { void handleRestore(); }}
           >
             {t('archive.startRestore')}
           </Button>
@@ -171,20 +183,20 @@ export function EnhancedRestoreDialog({
       width={500}
       centered
     >
-      <Space direction="vertical" size="middle" className="app-archive-dialog__stack">
+      <Space direction="vertical" size="middle" className={styles['app-archive-dialog__stack']}>
         {/* 会话信息 */}
-        <div className="app-archive-dialog__session-summary">
-          <div className="app-archive-dialog__current-name">{sessionName}</div>
-          <div className="app-archive-dialog__label">{t('archive.tabCount', { count: tabCount })}</div>
+        <div className={styles['app-archive-dialog__session-summary']}>
+          <div className={styles['app-archive-dialog__current-name']}>{sessionName}</div>
+          <div className={styles['app-archive-dialog__label']}>{t('archive.tabCount', { count: tabCount })}</div>
         </div>
 
         {/* 恢复策略选择 */}
         {!isRestoring && !outcome && (
-          <div className="app-archive-dialog__section">
-            <div className="app-archive-dialog__strategy-label">{t('archive.restoreStrategy')}</div>
+          <div className={styles['app-archive-dialog__section']}>
+            <div className={styles['app-archive-dialog__strategy-label']}>{t('archive.restoreStrategy')}</div>
             <Radio.Group
               value={restoreStrategy}
-              onChange={(e) => setRestoreStrategy(e.target.value)}
+              onChange={(e) => setRestoreStrategy(e.target.value as RestoreStrategy)}
             >
               <Space direction="vertical">
                 <Radio value="new_window">
@@ -227,7 +239,7 @@ export function EnhancedRestoreDialog({
 
         {/* 策略说明 */}
         {!isRestoring && !outcome && (
-          <div className="app-archive-dialog__strategy-copy">
+          <div className={styles['app-archive-dialog__strategy-copy']}>
             {restoreStrategy === 'new_window' 
               ? t('archive.strategyNewWindowDesc')
               : t('archive.strategyCurrentWindowDesc')

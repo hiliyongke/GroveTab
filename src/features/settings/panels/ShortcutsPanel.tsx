@@ -17,6 +17,7 @@ import { useResolvedKeybindings } from '@/shared/hooks/use-keybinding';
 import type { KeybindingAction } from '@/shared/config/keybindings';
 import { Field } from '@/features/settings/components/Field';
 import { BRAND } from '@/shared/config/brand';
+import styles from '../settings.module.less';
 
 /** Chrome 全局快捷键（只读） */
 const GLOBAL_SHORTCUTS = [
@@ -26,7 +27,15 @@ const GLOBAL_SHORTCUTS = [
 ];
 
 /**
- * 快捷键录制器：用户按下组合键后自动识别并显示
+ * 快捷键录制器
+ *
+ * 用户按下组合键后自动识别并显示。
+ *
+ * @param props - 组件属性
+ * @param props.currentKeys - 当前已按下的键（用于显示）
+ * @param props.onRecord - 录制完成回调（返回标准化快捷键字符串）
+ * @param props.onReset - 重置录制回调
+ * @returns 快捷键录制器 JSX 元素
  */
 function KeybindingRecorder({
   currentKeys,
@@ -83,6 +92,14 @@ function KeybindingRecorder({
     };
   }, [recording, currentKeys, onRecord]);
 
+  /**
+   * 格式化快捷键显示文本
+   *
+   * 将快捷键字符串中的 Mod 替换为 ⌘/Ctrl，+ 替换为 + 。
+   *
+   * @param key - 快捷键字符串（如 "Mod+Shift+K"）
+   * @returns 格式化后的快捷键显示文本（如 "⌘/Ctrl + Shift + K"）
+   */
   const formatDisplay = (key: string) => {
     return key
       .replace(/Mod/g, '⌘/Ctrl')
@@ -90,7 +107,7 @@ function KeybindingRecorder({
   };
 
   return (
-    <div className="settings-keybinding-recorder">
+    <div className={styles['settings-keybinding-recorder']}>
       <button
         type="button"
         onClick={() => setRecording(true)}
@@ -98,23 +115,31 @@ function KeybindingRecorder({
           recording ? t('shortcuts.recording') : t('shortcuts.resetHint')
         }
         aria-pressed={recording}
-        className={`settings-keybinding-trigger${recording ? ' is-recording' : ''}`}
+        className={`${styles['settings-keybinding-trigger']}${recording ? ` ${styles['settings-keybinding-trigger--recording']}` : ''}`}
       >
         {recording ? t('shortcuts.recording') : formatDisplay(currentKeys)}
       </button>
       <Button
         type="text"
         size="small"
-icon={<RotateCcw size={ICON_SIZE.MEDIUM} />}
+        icon={<RotateCcw size={ICON_SIZE.MEDIUM} />}
         title={t('shortcuts.resetHint')}
         aria-label={t('shortcuts.resetHint')}
         onClick={onReset}
-        className="settings-keybinding-reset"
+        className={styles['settings-keybinding-reset']}
       />
     </div>
   );
 }
 
+/**
+ * 快捷键配置面板主组件
+ *
+ * 包含 Chrome 全局快捷键说明和页面内快捷键自定义。
+ * 支持快捷键录制、重置和冲突检测。
+ *
+ * @returns 快捷键配置面板 JSX 元素
+ */
 export function ShortcutsPanel() {
   const { t } = useT();
   const { message } = App.useApp();
@@ -153,12 +178,29 @@ export function ShortcutsPanel() {
     return dupByAction;
   })();
 
+  /**
+   * 处理快捷键录制完成
+   *
+   * 更新指定动作的快捷键绑定并保存设置。
+   *
+   * @param action - 快捷键动作标识
+   * @param keyStr - 录制的快捷键字符串
+   * @returns 无返回值
+   */
   const handleRecord = useCallback((action: KeybindingAction, keyStr: string) => {
     const updated = { ...customKeybindings, [action]: keyStr };
     void updateSettings({ customKeybindings: updated });
     message.success(t('shortcuts.saved'));
   }, [customKeybindings, updateSettings, message, t]);
 
+  /**
+   * 重置快捷键到默认状态
+   *
+   * 删除指定动作的自定义快捷键绑定，恢复默认设置。
+   *
+   * @param action - 快捷键动作标识
+   * @returns 无返回值
+   */
   const handleReset = useCallback((action: KeybindingAction) => {
     const updated = { ...customKeybindings };
     delete updated[action];
@@ -167,20 +209,20 @@ export function ShortcutsPanel() {
   }, [customKeybindings, updateSettings, message, t]);
 
   return (
-    <div className="settings-panel-stack">
+    <div className={styles['settings-panel-stack']}>
       {/* Chrome 全局快捷键（只读） */}
-      <section className="settings-section">
+      <section className={styles['settings-section']}>
         <Field label={t('settings.globalShortcuts')}>
         <Alert
           type="info"
           message={t('settings.shortcutsHint')}
           showIcon
-          className="settings-shortcuts-alert"
+          className={styles['settings-shortcuts-alert']}
         />
-        <div className="settings-card-list">
+        <div className={styles['settings-card-list']}>
           {GLOBAL_SHORTCUTS.map((item) => (
-            <div key={item.labelKey} className="settings-card-row">
-              <span className="settings-card-row__title">{t(item.labelKey, { brand: BRAND.name })}</span>
+            <div key={item.labelKey} className={styles['settings-card-row']}>
+              <span className={styles['settings-card-row__title']}>{t(item.labelKey, { brand: BRAND.name })}</span>
               <kbd className="app-kbd">{item.keys}</kbd>
             </div>
           ))}
@@ -189,20 +231,20 @@ export function ShortcutsPanel() {
       </section>
 
       {/* 页面内快捷键（可自定义） */}
-      <section className="settings-section">
+      <section className={styles['settings-section']}>
       <Field label={t('settings.localShortcuts')} hint={t('settings.localShortcutsHint')}>
-        <div className="settings-card-list">
+        <div className={styles['settings-card-list']}>
           {resolved.map((item) => (
-            <div key={item.action} className="settings-card-row">
-              <div className="settings-card-row__main">
-                <div className="settings-card-row__title">{t(item.label)}</div>
+            <div key={item.action} className={styles['settings-card-row']}>
+              <div className={styles['settings-card-row__main']}>
+                <div className={styles['settings-card-row__title']}>{t(item.label)}</div>
                   {item.hint && (
-                    <div className="settings-card-row__hint">
+                    <div className={styles['settings-card-row__hint']}>
                       {t(item.hint, { brand: BRAND.name })}
                     </div>
                   )}
                   {conflictMap.has(item.action) && (
-                    <div className="settings-warning-inline">
+                    <div className={styles['settings-warning-inline']}>
                       ⚠ {conflictMap.get(item.action)}
                     </div>
                   )}

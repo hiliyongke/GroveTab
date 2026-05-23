@@ -29,6 +29,15 @@ const UNDO_STORAGE_KEY = STORAGE_KEYS.undo;
 const DEFAULT_UNDO_TTL_MS = 5_000;
 const MAX_UNDO_RECORDS = 5;
 
+/**
+ * 获取撤销 Toast 的 TTL（毫秒）
+ *
+ * 从 settings store 中读取用户配置的撤销窗口时间（秒），
+ * 并 clamp 到 [3, 10] 秒范围，转换为毫秒返回。
+ * 若配置无效，返回默认的 5 秒。
+ *
+ * @returns 撤销 Toast 的 TTL（毫秒）
+ */
 function getUndoTtlMs(): number {
   const seconds = useSettingsStore.getState().settings.undoWindowSeconds;
   if (typeof seconds !== 'number' || !Number.isFinite(seconds)) return DEFAULT_UNDO_TTL_MS;
@@ -36,23 +45,32 @@ function getUndoTtlMs(): number {
 }
 
 interface UndoState {
+  /** 撤销记录列表（最多保留 MAX_UNDO_RECORDS 条） */
   records: UndoRecord[];
-  /** Active (most recent) undo record for toast display */
+  /** 当前活跃的撤销记录（用于 Toast 展示，TTL 后自动清除） */
   activeToast: UndoRecord | null;
 
-  /** Add an undo record and persist it */
+  // Actions
+  /**
+   * 添加一条撤销记录并持久化
+   *
+   * @param tabs 被关闭的标签页快照数组
+   * @param description 操作描述（用于 Toast 展示）
+   * @param extra 额外信息（归档会话 ID、子备注等）
+   * @returns 新创建的撤销记录
+   */
   addRecord: (
     tabs: ClosedTabSnapshot[],
     description: string,
     extra?: { archivedSessionId?: string; subNote?: string },
   ) => Promise<UndoRecord>;
-  /** Undo (restore) a record */
+  /** 撤销（恢复）指定记录对应的标签页 */
   undoRecord: (recordId: string) => Promise<void>;
-  /** Dismiss the active toast without undoing */
+  /** 关闭当前 Toast 但不执行撤销 */
   dismissToast: () => void;
-  /** Load records from storage */
+  /** 从 chrome.storage.local 加载撤销记录 */
   loadRecords: () => Promise<void>;
-  /** Clean expired records */
+  /** 清理已过期的撤销记录 */
   cleanExpired: () => Promise<void>;
 }
 

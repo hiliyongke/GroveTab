@@ -36,6 +36,7 @@ import { APP_RESOURCE_NAMES, STORAGE_KEYS, isAppStorageKey } from '@/shared/conf
 import type { SettingsProfile } from '@/shared/utils/profiles';
 import { getProfiles, createProfile, renameProfile, deleteProfile } from '@/shared/utils/profiles';
 import styles from './styles/data.module.less';
+import settingsStyles from '../settings.module.less';
 
 interface QuotaInfo {
   usedBytes: number;
@@ -46,6 +47,18 @@ interface QuotaInfo {
 
 const MAX_IMPORT_FILE_BYTES = 2 * 1024 * 1024;
 
+/**
+ * 数据管理面板
+ *
+ * 包含：
+ *   - 配置预设（保存/加载/切换/删除）
+ *   - 存储配额可视化
+ *   - 导出归档 JSON
+ *   - 导入归档 JSON
+ *   - 清空所有归档
+ *
+ * @returns 数据管理面板 JSX 元素
+ */
 export function DataPanel() {
   const { t } = useT();
   const { modal, message } = App.useApp();
@@ -66,6 +79,13 @@ export function DataPanel() {
     void getProfiles().then(setProfiles);
   }, []);
 
+  /**
+   * 创建新的设置配置预设
+   *
+   * 将当前设置保存为新的配置预设。
+   *
+   * @returns 无返回值
+   */
   const handleCreateProfile = useCallback(async () => {
     if (!profileName.trim()) return;
     await createProfile(profileName.trim(), settings);
@@ -75,11 +95,25 @@ export function DataPanel() {
     message.success(t('settings.profileCreated'));
   }, [profileName, settings, message, t]);
 
+  /**
+   * 应用选中的设置配置预设
+   *
+   * 将选中的配置预设应用到当前设置。
+   *
+   * @param profile - 要应用的设置配置预设
+   * @returns 无返回值
+   */
   const handleApplyProfile = useCallback((profile: SettingsProfile) => {
     void updateSettings(profile.settings);
     message.success(t('settings.profileApplied', { name: profile.name }));
   }, [updateSettings, message, t]);
 
+  /**
+   * 删除指定的设置配置预设
+   *
+   * @param id - 要删除的配置预设 ID
+   * @returns 无返回值
+   */
   const handleDeleteProfile = useCallback(async (id: string) => {
     await deleteProfile(id);
     const updated = await getProfiles();
@@ -87,6 +121,12 @@ export function DataPanel() {
     message.success(t('settings.profileDeleted'));
   }, [message, t]);
 
+  /**
+   * 重命名指定的设置配置预设
+   *
+   * @param id - 要重命名的配置预设 ID
+   * @returns 无返回值
+   */
   const handleRenameProfile = useCallback(async (id: string) => {
     if (!editingName.trim()) return;
     await renameProfile(id, editingName.trim());
@@ -97,6 +137,13 @@ export function DataPanel() {
     message.success(t('settings.profileRenamed'));
   }, [editingName, message, t]);
 
+  /**
+   * 导出当前设置和归档会话
+   *
+   * 将当前设置和归档会话导出为 JSON 文件。
+   *
+   * @returns 无返回值
+   */
   const handleExport = async () => {
     const sessions = await getArchivedSessions();
     const sessionPayload = exportSessionsJSON(sessions);
@@ -114,6 +161,14 @@ export function DataPanel() {
     message.success(t('settings.exportDone'));
   };
 
+  /**
+   * 导入设置和归档会话
+   *
+   * 从 JSON 文件导入设置和归档会话数据。
+   *
+   * @param e - 文件上传变更事件
+   * @returns 无返回值
+   */
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file == null) return;
@@ -152,6 +207,13 @@ export function DataPanel() {
     if (fileInputRef.current !== null) fileInputRef.current.value = '';
   };
 
+  /**
+   * 清空所有归档会话
+   *
+   * 弹出确认对话框，确认后清空所有归档会话数据。
+   *
+   * @returns 无返回值
+   */
   const handleClearAll = () => {
     modal.confirm({
       title: t('settings.clearAll'),
@@ -171,8 +233,8 @@ export function DataPanel() {
   };
 
   return (
-    <div className={styles['data-panel settings-panel-stack']}>
-      <section className="settings-section">
+    <div className={`${styles['data-panel']} ${settingsStyles['settings-panel-stack']}`}>
+      <section className={settingsStyles['settings-section']}>
         <Field label={t('settings.profiles')} hint={t('settings.profilesHint')}>
         <div className={styles['data-panel__profile-create']}>
           <Input
@@ -255,14 +317,14 @@ export function DataPanel() {
       </section>
 
       {quotaInfo !== null && (
-        <section className="settings-section">
+        <section className={settingsStyles['settings-section']}>
           <div className={styles['data-panel__quota']}>
           <div className={styles['data-panel__quota-header']}>
             <span className={styles['data-panel__quota-label']}>
               <HardDrive size={ICON_SIZE.MEDIUM} className={styles['data-panel__quota-icon']} />
               {t('settings.storage')}
             </span>
-            <span className={`data-panel__quota-meta${quotaInfo.isWarning ? ' is-warning' : ''}`}>
+            <span className={`${styles['data-panel__quota-meta']}${quotaInfo.isWarning ? ` ${styles['data-panel__quota-meta--warning']}` : ''}`}>
               {formatBytes(quotaInfo.usedBytes)} / {formatBytes(quotaInfo.totalBytes)}
             </span>
           </div>
@@ -284,7 +346,7 @@ export function DataPanel() {
         </section>
       )}
 
-      <section className="settings-section">
+      <section className={settingsStyles['settings-section']}>
         <div className={styles['data-panel__actions']}>
         <Button block icon={<Download size={ICON_SIZE.MEDIUM} />} onClick={() => { void handleExport(); }}>
           {t('settings.export')}
@@ -305,8 +367,8 @@ export function DataPanel() {
       </div>
       </section>
 
-      <section className="settings-section">
-        <Button block danger icon={<Trash2 size={ICON_SIZE.MEDIUM} />} onClick={handleClearAll}>
+      <section className={settingsStyles['settings-section']}>
+        <Button block danger icon={<Trash2 size={ICON_SIZE.MEDIUM} />} onClick={() => { handleClearAll(); }}>
         {t('settings.clearAll')}
       </Button>
 
@@ -315,14 +377,16 @@ export function DataPanel() {
       <Popconfirm
         title={t('settings.resetSettingsConfirm')}
         description={t('settings.resetSettingsDesc')}
-        onConfirm={async () => {
-          try {
-            await resetSettings();
-            message.success(t('settings.resetSettingsDone'));
-          } catch (err) {
-            console.error('[DataPanel] resetSettings failed:', err);
-            message.error(t('settings.resetSettingsFailed'));
-          }
+        onConfirm={() => {
+          void (async () => {
+            try {
+              await resetSettings();
+              message.success(t('settings.resetSettingsDone'));
+            } catch (err) {
+              console.error('[DataPanel] resetSettings failed:', err);
+              message.error(t('settings.resetSettingsFailed'));
+            }
+          })();
         }}
       >
         <Button block icon={<RotateCcw size={ICON_SIZE.MEDIUM} />}>
@@ -332,13 +396,15 @@ export function DataPanel() {
 
       <Popconfirm
         title={t('settings.replayOnboardingConfirm')}
-        onConfirm={async () => {
-          try {
-            await removeData(STORAGE_KEYS.onboardingDone);
-            message.success(t('settings.replayOnboardingDone'));
-          } catch (err) {
-            console.error('[DataPanel] replayOnboarding failed:', err);
-          }
+        onConfirm={() => {
+          void (async () => {
+            try {
+              await removeData(STORAGE_KEYS.onboardingDone);
+              message.success(t('settings.replayOnboardingDone'));
+            } catch (err) {
+              console.error('[DataPanel] replayOnboarding failed:', err);
+            }
+          })();
         }}
       >
         <Button block icon={<Sparkles size={ICON_SIZE.MEDIUM} />}>
@@ -391,7 +457,7 @@ export function DataPanel() {
               } catch (err) {
                 console.error('[DataPanel] factoryReset failed:', err);
                 message.error(t('settings.factoryResetMustType'));
-                return Promise.reject(err);
+                return Promise.reject(err instanceof Error ? err : new Error(String(err)));
               }
               return undefined;
             },

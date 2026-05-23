@@ -63,6 +63,9 @@ export type KeybindingMap = Partial<Record<KeybindingAction, string>>;
  *   - 'Mod+k'：Mod 代表 Cmd（macOS）或 Ctrl（其他）
  *   - 'Escape'：单键
  *   - 'Mod+Shift+s'：多修饰键
+ *
+ * @param key - 快捷键字符串（如 'Mod+k'、'Escape'）
+ * @returns 返回匹配函数，接收 KeyboardEvent 并返回是否匹配
  */
 export function parseKeybinding(key: string): (e: KeyboardEvent) => boolean {
   const parts = key.split('+').map((p) => p.trim().toLowerCase());
@@ -85,6 +88,10 @@ export function parseKeybinding(key: string): (e: KeyboardEvent) => boolean {
 
 /**
  * 获取某动作的解析后快捷键（用户自定义优先，否则用默认值）
+ *
+ * @param def - 快捷键定义对象
+ * @param custom - 用户自定义快捷键映射
+ * @returns 解析后的快捷键字符串
  */
 export function getResolvedKey(def: KeybindingDef, custom: KeybindingMap): string {
   return custom[def.action] ?? def.defaultKey;

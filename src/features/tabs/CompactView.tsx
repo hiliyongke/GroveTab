@@ -13,7 +13,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { useTabsStore } from '@/store';
 import { TabItem } from './TabItem';
 import { CONFIG } from '@/shared/config';
-import styles from './styles/views.module.less';
+import styles from './CompactView.module.less';
 
 const ROW_HEIGHT = CONFIG.ui.rowHeight;
 /** 容器最大高度（留给 Header + Hero + pb 的空间） */
@@ -21,6 +21,14 @@ const VIEWPORT_RESERVE = CONFIG.ui.viewportReserve;
 
 /**
  * 紧凑视图：虚拟化列表
+ *
+ * 设计：
+ *   - 按 lastAccessed 降序；一屏可见 ≥20 条
+ *   - 使用 TabItem 统一渲染行，支持多选、右键菜单等交互
+ *   - 使用虚拟滚动，支持 500+ Tab 不掉帧
+ *   - 容器高度用 `min(100vh - 240px, tabs * 36)`，短列表不撑开，长列表滚动
+ *
+ * @returns 紧凑视图 JSX 元素
  */
 export function CompactView() {
   const tabs = useTabsStore((s) => s.tabs);

@@ -29,6 +29,10 @@ export interface DuplicateBookmarkGroup {
 
 /**
  * 扫描所有书签，按 normalizeUrl 分组，返回 >1 个成员的组。
+ *
+ * @param roots - 书签树根节点数组
+ * @param strictness - 去重严格度
+ * @returns 重复书签分组数组
  */
 export function findDuplicateBookmarks(
   roots: BookmarkNode[],
@@ -54,6 +58,9 @@ export function findDuplicateBookmarks(
 /**
  * 合并重复组：默认保留每组**第一个**，删除其余。
  * 返回删除成功的条数。
+ *
+ * @param groups - 重复书签分组数组
+ * @returns 删除成功的条数
  */
 export async function mergeDuplicateBookmarks(groups: DuplicateBookmarkGroup[]): Promise<number> {
   let removed = 0;
@@ -88,6 +95,9 @@ const HEALTH_CONCURRENCY = 5;
  *   - 仅检查 http/https
  *   - 使用 `no-cors` 模式的 GET 请求（HEAD 有些站点禁用）
  *   - 响应 opaque 也视为可达（只要 fetch 没 reject）
+ *
+ * @param b - 书签节点
+ * @returns 健康检查结果对象
  */
 async function checkOne(b: BookmarkNode): Promise<BookmarkHealth> {
   const url = b.url ?? '';
@@ -118,8 +128,9 @@ async function checkOne(b: BookmarkNode): Promise<BookmarkHealth> {
 /**
  * 批量健康检查（需 `<all_urls>` permission 才能对任意域发 GET）。
  *
- * @param bookmarks  要检查的书签列表（已扁平化）
- * @param onProgress 每完成一条回调一次，用于驱动进度条
+ * @param bookmarks - 要检查的书签列表（已扁平化）
+ * @param onProgress - 每完成一条回调一次，用于驱动进度条
+ * @returns 健康检查结果数组
  */
 export async function checkBookmarkHealth(
   bookmarks: BookmarkNode[],
@@ -151,7 +162,9 @@ export async function checkBookmarkHealth(
 
 /**
  * 批量删除检测为 dead/timeout 的书签。
- * 返回实际删除的条数。
+ *
+ * @param results - 健康检查结果数组
+ * @returns 实际删除的条数
  */
 export async function removeDeadBookmarks(results: BookmarkHealth[]): Promise<number> {
   let removed = 0;
@@ -181,6 +194,9 @@ const MIN_CLUSTER_SIZE = 3;
 /**
  * 按域名聚类书签。只返回数量 >= MIN_CLUSTER_SIZE 的簇——
  * 小簇整理价值低，强制归类反而造成文件夹过多。
+ *
+ * @param roots - 书签树根节点数组
+ * @returns 域名聚类结果数组
  */
 export function clusterBookmarksByDomain(roots: BookmarkNode[]): DomainCluster[] {
   const all = flattenBookmarks(roots).filter((b) => (b.url ?? '') !== '');
@@ -205,8 +221,8 @@ export function clusterBookmarksByDomain(roots: BookmarkNode[]): DomainCluster[]
 /**
  * 把一个域名簇内的书签整理到新建的"by-domain/<domain>"文件夹下。
  *
- * @param cluster    域名聚类
- * @param parentId   新文件夹创建在此父节点下（通常是"其他书签" = "2"）
+ * @param cluster - 域名聚类对象
+ * @param parentId - 新文件夹创建在此父节点下（通常是"其他书签" = "2"）
  * @returns 新建的文件夹 ID；失败则返回 null
  */
 export async function organizeClusterIntoFolder(
@@ -241,10 +257,21 @@ export interface EmptyFolder {
   size: number;
 }
 
+/**
+ * 查找所有为空的文件夹
+ *
+ * @param roots - 书签树根节点数组
+ * @returns 空文件夹数组
+ */
 export function findEmptyFolders(roots: BookmarkNode[]): EmptyFolder[] {
   const result: EmptyFolder[] = [];
 
-  /** 递归判断：当前子树是否完全没有 url；同时统计含的文件夹数 */
+  /**
+   * 递归判断：当前子树是否完全没有 url；同时统计含的文件夹数
+   * @param node - 当前书签节点
+   * @param isTopLevel - 是否为顶层根节点
+   * @returns {object} 返回是否空及文件夹数量
+   */
   function walk(node: BookmarkNode, isTopLevel: boolean): { empty: boolean; folderCount: number } {
     if (node.url !== undefined) {
       // 叶子书签：非空
@@ -267,7 +294,12 @@ export function findEmptyFolders(roots: BookmarkNode[]): EmptyFolder[] {
     return { empty: allEmpty, folderCount };
   }
 
-  /** 第二轮：只采集"最顶层"的空文件夹（父节点不空） */
+  /**
+   * 第二轮：只采集"最顶层"的空文件夹（父节点不空）
+   * @param node - 当前书签节点
+   * @param isTopLevel - 是否为顶层根节点
+   * @returns {void}
+   */
   function collect(node: BookmarkNode, isTopLevel: boolean) {
     if (node.url !== undefined) return;
     const r = walk(node, isTopLevel);
@@ -285,10 +317,17 @@ export function findEmptyFolders(roots: BookmarkNode[]): EmptyFolder[] {
 /**
  * 批量删除空文件夹。注意 chrome.bookmarks.remove 只允许删空节点，
  * 这里的 EmptyFolder 子树本就全是空文件夹，所以会按"自下而上"的顺序删。
+ * @param targets - 待删除的空文件夹列表
+ * @returns {Promise<number>} 返回实际删除的空文件夹数量
  */
 export async function removeEmptyFolders(targets: EmptyFolder[]): Promise<number> {
   let removed = 0;
   // 先深度递归删每个子树，保证从叶到根
+  /**
+   * 递归删除空文件夹子树
+   * @param node - 当前文件夹节点
+   * @returns {Promise<void>} 递归删除空文件夹子树
+   */
   async function rmTree(node: BookmarkNode): Promise<void> {
     for (const c of node.children ?? []) {
       await rmTree(c);
@@ -317,12 +356,22 @@ export interface BookmarkOverview {
   maxDepth: number;
 }
 
+/**
+ * 收集书签总览统计信息
+ * @param roots - 书签树根节点数组
+ * @returns {BookmarkOverview} 返回书签总览统计信息
+ */
 export function collectBookmarkOverview(roots: BookmarkNode[]): BookmarkOverview {
   let total = 0;
   let folders = 0;
   let maxDepth = 0;
   const domains = new Set<string>();
 
+  /**
+   *
+   * @param node
+   * @param depth
+   */
   function walk(node: BookmarkNode, depth: number) {
     if (depth > maxDepth) maxDepth = depth;
     if (node.url !== undefined) {

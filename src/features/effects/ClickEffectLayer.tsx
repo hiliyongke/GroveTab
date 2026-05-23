@@ -41,13 +41,22 @@ interface Particle {
 
 const MAX_PARTICLES = 150;
 
-/** 从色环取一个鲜亮颜色（彩纸用） */
+/** 从色环取一个鲜亮颜色（彩纸用）
+ * @returns {string} 返回随机鲜亮颜色值
+ */
 function pickConfettiColor(): string {
   const palette = ['#ff6b6b', '#ffd93d', '#6bcB77', '#4d96ff', '#c74dff', '#ff8fab'];
   return palette[Math.floor(Math.random() * palette.length)] ?? '#ff6b6b';
 }
 
-/** 根据动效类型在 (x,y) 生成一批粒子 */
+/**
+ * 根据动效类型在 (x,y) 生成一批粒子
+ * @param type - 动效类型
+ * @param x - 点击 x 坐标
+ * @param y - 点击 y 坐标
+ * @param brand - 主题色
+ * @returns {Particle[]} 返回生成的粒子数组
+ */
 function spawn(type: Exclude<ClickEffectType, 'off'>, x: number, y: number, brand: string): Particle[] {
   const out: Particle[] = [];
   switch (type) {
@@ -119,7 +128,13 @@ function spawn(type: Exclude<ClickEffectType, 'off'>, x: number, y: number, bran
   return out;
 }
 
-/** 单粒子绘制（按类型切换渲染方式） */
+/**
+ * 单粒子绘制（按类型切换渲染方式）
+ * @param ctx - Canvas 2D 上下文
+ * @param p - 粒子对象
+ * @param type - 动效类型
+ * @returns {void}
+ */
 function drawParticle(
   ctx: CanvasRenderingContext2D,
   p: Particle,
@@ -177,6 +192,11 @@ function drawParticle(
   }
 }
 
+/**
+ * 点击动效图层组件
+ *
+ * @returns {JSX.Element | null} 返回动效图层 JSX 元素或 null
+ */
 export function ClickEffectLayer() {
   const effect = useSettingsStore((s) => s.settings.clickEffect) ?? 'off';
   const reducedMotion = useSettingsStore((s) => s.settings.reducedMotion) ?? 'auto';

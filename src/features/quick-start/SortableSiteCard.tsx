@@ -16,6 +16,18 @@ interface SortableSiteCardProps {
   onDelete: (id: string) => void;
 }
 
+/**
+ * 可拖拽排序的站点卡片
+ *
+ * 职责：通过 useSortable 使卡片可拖拽，并渲染 SiteCard。
+ * 拖拽手柄的 listeners 只绑定在手柄元素上，避免误触。
+ *
+ * @param root0 - 组件属性
+ * @param root0.site - 站点对象
+ * @param root0.onEdit - 编辑回调
+ * @param root0.onDelete - 删除回调
+ * @returns {JSX.Element} 返回可拖拽卡片 JSX 元素
+ */
 export function SortableSiteCard({ site, onEdit, onDelete }: SortableSiteCardProps) {
   const {
     attributes,

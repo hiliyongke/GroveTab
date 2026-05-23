@@ -101,6 +101,16 @@ const PRESET_HOT_KEYWORDS: Record<Locale, string[]> = {
 const MAX_HOT_ITEMS = 8;
 const TRENDING_BOARD_PRIORITY = ['weibo', 'baidu', 'toutiao', 'zhihu', 'bilihot'];
 
+/**
+ * 标准化搜索引擎 URL
+ *
+ * 确保 URL 包含协议头和 {query} 占位符。
+ * 如果 URL 没有协议头，自动添加 https://。
+ * 如果 URL 不包含 {query}，自动在末尾添加 ?q={query} 或 &q={query}。
+ *
+ * @param url - 原始搜索引擎 URL
+ * @returns 标准化后的 URL（包含 {query} 占位符）
+ */
 export function normalizeSearchUrl(url: string): string {
   const trimmed = url.trim();
   if (trimmed === '') return '';
@@ -108,6 +118,17 @@ export function normalizeSearchUrl(url: string): string {
   return withProtocol.includes('{query}') ? withProtocol : `${withProtocol}${withProtocol.includes('?') ? '&' : '?'}q={query}`;
 }
 
+/**
+ * 创建自定义搜索引擎配置对象
+ *
+ * 根据用户输入的标签、搜索 URL 和图标 URL 生成标准化的自定义搜索引擎配置。
+ * 会自动生成唯一的 ID（包含 slug 和时间戳）。
+ *
+ * @param label - 搜索引擎显示名称
+ * @param searchUrl - 搜索引擎 URL（会自动标准化）
+ * @param iconUrl - 可选的品牌图标 URL
+ * @returns 自定义搜索引擎配置对象
+ */
 export function createCustomSearchEngine(label: string, searchUrl: string, iconUrl?: string): CustomSearchEngine {
   const normalizedLabel = label.trim();
   const normalizedUrl = normalizeSearchUrl(searchUrl);
@@ -126,6 +147,15 @@ export function createCustomSearchEngine(label: string, searchUrl: string, iconU
   };
 }
 
+/**
+ * 获取所有搜索引擎选项列表（内置 + 自定义）
+ *
+ * 将内置搜索引擎和用户自定义搜索引擎合并，返回统一的选项列表。
+ * 自定义引擎会转换为 SearchEngineOption 格式。
+ *
+ * @param customEngines - 用户自定义搜索引擎数组
+ * @returns 所有搜索引擎选项列表
+ */
 export function getAllSearchEngineOptions(customEngines: CustomSearchEngine[] = []): SearchEngineOption[] {
   const customOptions = customEngines
     .filter((item) => item.label.trim() !== '' && item.searchUrl.trim() !== '')
@@ -140,6 +170,16 @@ export function getAllSearchEngineOptions(customEngines: CustomSearchEngine[] = 
   return [...SEARCH_ENGINE_OPTIONS, ...customOptions];
 }
 
+/**
+ * 标准化已启用的搜索引擎 ID 列表
+ *
+ * 过滤掉无效的搜索引擎 ID，确保返回的列表都是当前可用的引擎。
+ * 如果输入为空或过滤后为空，返回默认的内置搜索引擎 ID 列表。
+ *
+ * @param engineIds - 用户设置的已启用搜索引擎 ID 列表（可能未定义）
+ * @param customEngines - 用户自定义搜索引擎数组
+ * @returns 标准化后的搜索引擎 ID 列表
+ */
 export function normalizeEnabledSearchEngines(
   engineIds: SearchEngineId[] | undefined,
   customEngines: CustomSearchEngine[] = [],
@@ -160,6 +200,9 @@ export function normalizeEnabledSearchEngines(
  *   - 近 30 天：+1
  *   - 超过 30 天：0
  * 保证"刚刚搜过"的比"搜过很多次但很久没搜"的优先级高。
+ *
+ * @param entries 搜索历史记录数组
+ * @returns 热词字符串数组（最多 MAX_HOT_ITEMS 条）
  */
 function rankHistoryAsHot(entries: SearchHistoryEntry[]): string[] {
   const now = Date.now();
@@ -177,7 +220,13 @@ function rankHistoryAsHot(entries: SearchHistoryEntry[]): string[] {
 }
 
 /**
- * 获取指定引擎的配置。
+ * 获取指定搜索引擎的配置对象
+ *
+ * 根据引擎 ID 查找对应的配置，如果找不到则返回默认的第一个内置引擎。
+ *
+ * @param engineId - 搜索引擎 ID
+ * @param customEngines - 用户自定义搜索引擎数组
+ * @returns 搜索引擎配置对象
  */
 export function getSearchEngineOption(
   engineId: SearchEngineId,
@@ -187,12 +236,29 @@ export function getSearchEngineOption(
 }
 
 /**
- * 构造网页搜索 URL。
+ * 构造网页搜索 URL
+ *
+ * 根据指定的搜索引擎 ID 和查询关键词，构造完整的搜索 URL。
+ * 会自动对查询关键词进行 URL 编码。
+ *
+ * @param engineId - 搜索引擎 ID
+ * @param query - 用户搜索关键词
+ * @param customEngines - 用户自定义搜索引擎数组
+ * @returns 完整的搜索 URL
  */
 export function buildSearchUrl(engineId: SearchEngineId, query: string, customEngines: CustomSearchEngine[] = []): string {
   return getSearchEngineOption(engineId, customEngines).searchUrl.replace('{query}', encodeURIComponent(query.trim()));
 }
 
+/**
+ * 从热榜缓存中解析出热词列表
+ *
+ * 按优先级排序各个热榜来源（微博 > 百度 > 头条 > 知乎 > B站），
+ * 去重后返回前 N 条热词。
+ *
+ * @param cache - 热榜缓存对象（可能未定义）
+ * @returns 热词字符串数组（最多 MAX_HOT_ITEMS 条）
+ */
 export function resolveTrendingKeywords(cache: TrendingCache | undefined): string[] {
   if (!cache) return [];
   const boards = Object.values(cache.boards);
@@ -217,10 +283,17 @@ export function resolveTrendingKeywords(cache: TrendingCache | undefined): strin
 
 /**
  * 新版：按 source 获取热词。
+ *
  *   - preset：直接返回预设列表
  *   - local：基于 history 聚合；本地历史为空时返回空数组，不展示写死热词
  *   - trending：使用全网热榜缓存
  *   - off：返回空数组
+ *
+ * @param source 热词来源（'off' | 'local' | 'preset' | 'trending'）
+ * @param locale 当前语言
+ * @param history 搜索历史记录数组
+ * @param trendingCache 热榜缓存对象
+ * @returns 热词字符串数组
  */
 export function resolveHotKeywords(
   source: HotKeywordSource,

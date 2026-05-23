@@ -11,6 +11,7 @@ import { useT } from '@/shared/i18n';
 import { useKeybinding } from '@/shared/hooks/use-keybinding';
 import { AntdThemeProvider } from '@/shared/ui/AntdThemeProvider';
 import { ErrorBoundary } from '@/shared/ui/ErrorBoundary';
+import { PanelErrorBoundary } from '@/shared/ui/PanelErrorBoundary';
 import { UndoToast } from '@/shared/ui/UndoToast';
 import { I18nProvider } from '@/shared/i18n';
 import { BatchActionBar } from '@/features/tabs/BatchActionBar';
@@ -22,56 +23,45 @@ import { AppHeader } from '@/features/workspace/AppHeader';
 import { HeroBar } from '@/features/workspace/HeroBar';
 import { ViewSidebar } from '@/features/workspace/ViewSidebar';
 import { ViewBottomBar } from '@/features/workspace/ViewBottomBar';
-import { DomainGroupView } from '@/features/tabs/DomainGroupView';
+import { isValidViewMode } from '@/features/workspace/view-catalog';
 import { track } from '@/shared/utils/metrics';
 import { resolveGradient } from '@/shared/theme/gradient-presets';
 import { cssVars } from '@/shared/utils/css-vars';
-import type { NewtabPageMode } from '@/shared/types';
-import { VALID_VIEWS, type ViewMode } from '@/shared/config/views';
-import { registerViews } from '@/shared/config/view-registry';
+import type { NewtabPageMode, ViewMode } from '@/shared/types';
 import { findDuplicates } from '@/shared/utils/dedupe';
 import { detectIdleTabs } from '@/shared/utils/idle-detect';
 
+ 
 const TrendingPage = lazy(() => import('@/features/trending/TrendingPage').then((m) => ({ default: m.TrendingPage })));
+ 
 const DeveloperToolsPage = lazy(() => import('@/features/developer-tools/DeveloperToolsPage').then((m) => ({ default: m.DeveloperToolsPage })));
 
-/** 懒加载非默认视图——直接导入文件而非 barrel，确保每个视图独立拆 chunk */
-const TimelineView = lazy(() => import('@/features/tabs/TimelineView').then((m) => ({ default: m.TimelineView })));
-const CompactView = lazy(() => import('@/features/tabs/CompactView').then((m) => ({ default: m.CompactView })));
-const GridView = lazy(() => import('@/features/tabs/GridView').then((m) => ({ default: m.GridView })));
-const FrequencyView = lazy(() => import('@/features/tabs/FrequencyView').then((m) => ({ default: m.FrequencyView })));
-const TabGroupView = lazy(() => import('@/features/tabs/TabGroupView').then((m) => ({ default: m.TabGroupView })));
-const WindowView = lazy(() => import('@/features/tabs/WindowView').then((m) => ({ default: m.WindowView })));
-const BookmarkView = lazy(() => import('@/features/tabs/BookmarkView').then((m) => ({ default: m.BookmarkView })));
-const KanbanView = lazy(() => import('@/features/tabs/KanbanView').then((m) => ({ default: m.KanbanView })));
-const ArchiveView = lazy(() => import('@/features/sessions/ArchiveView').then((m) => ({ default: m.ArchiveView })));
-
+ 
 const SearchBox = lazy(() => import('@/features/search/SearchBox').then((m) => ({ default: m.SearchBox })));
+ 
 const SettingsPanel = lazy(() => import('@/features/settings/SettingsPanel').then((m) => ({ default: m.SettingsPanel })));
+ 
 const HistoryPanel = lazy(() => import('@/features/history/HistoryPanel').then((m) => ({ default: m.HistoryPanel })));
 /** 点击动效 Canvas 图层，默认 off 时不拉取 chunk */
+ 
 const ClickEffectLayer = lazy(() => import('@/features/effects/ClickEffectLayer').then((m) => ({ default: m.ClickEffectLayer })));
 /** 视频背景层，zIndex:-1；默认 none 时不拉取 chunk */
+ 
 const VideoBackground = lazy(() => import('@/features/effects/VideoBackground').then((m) => ({ default: m.VideoBackground })));
-
-/** 注册所有视图到 ViewRegistry —— 新增视图只需在此添加一条 */
-registerViews([
-  { id: 'domain', component: DomainGroupView, order: 1 },
-  { id: 'compact', component: CompactView, order: 2 },
-  { id: 'timeline', component: TimelineView, order: 3 },
-  { id: 'tabgroup', component: TabGroupView, order: 4 },
-  { id: 'window', component: WindowView, order: 5 },
-  { id: 'kanban', component: KanbanView, order: 6 },
-  { id: 'bookmarks', component: BookmarkView, order: 7 },
-  { id: 'frequency', component: FrequencyView, order: 8 },
-  { id: 'grid', component: GridView, order: 9 },
-  { id: 'archive', component: ArchiveView, order: 10 },
-]);
 
 const { Content } = Layout;
 const { Text } = Typography;
 
 
+/**
+ * AppContent —— 新标签页主内容组件
+ *
+ * 组合所有功能模块（搜索、设置、历史、整理建议等），
+ * 通过 useAppInitialization 管理初始化状态，
+ * 根据设置渲染不同的页面模式（workspace/trending/devtools）。
+ *
+ * @returns 新标签页主界面 JSX
+ */
 function AppContent() {
   const [initialSettingsTab, setInitialSettingsTab] = useState<'appearance' | 'about'>('appearance');
   const [openSettingsFromHash, setOpenSettingsFromHash] = useState(false);
@@ -171,7 +161,7 @@ function AppContent() {
   const showHeroTitle = uiVisibility?.heroTitle !== false;
   const showHeroSlogan = uiVisibility?.heroSlogan !== false;
   const showHeroSearch = uiVisibility?.heroSearch !== false;
-  const viewMode: ViewMode = VALID_VIEWS.includes(defaultView) ? defaultView : 'domain';
+  const viewMode: ViewMode = isValidViewMode(defaultView as string) ? defaultView : 'domain';
   const layoutBackground = resolveGradient(gradientPreset, resolvedDark, customGradient);
 
   /** searchFromHash 触发搜索框显示 */
@@ -208,6 +198,8 @@ function AppContent() {
     window.addEventListener('keydown', handler);
     /** 同时响应来自 sw 的「operation:open-history」广播（可选接入），
      *  如果以后要进一步接管 chrome.commands。
+     * @param msg
+     * @param msg.type
      */
     const onMessage = (msg: { type?: string }) => {
       if (msg.type === 'open-history') {
@@ -485,14 +477,28 @@ function AppContent() {
 
       <Suspense fallback={null}>
         <SearchBox open={showSearch} onOpenChange={setShowSearch} onOpenHistory={handleOpenHistory} />
-        <SettingsPanel open={showSettings} onOpenChange={(open: boolean) => { if (!open) setShowSettings(false); }} defaultActiveTab={initialSettingsTab} />
-        <InsightsPanel open={showInsights} onClose={() => setShowInsights(false)} />
-        <HistoryPanel open={showHistory} onClose={() => setShowHistory(false)} />
+        <PanelErrorBoundary label="Settings">
+          <SettingsPanel open={showSettings} onOpenChange={(open: boolean) => { if (!open) setShowSettings(false); }} defaultActiveTab={initialSettingsTab} />
+        </PanelErrorBoundary>
+        <PanelErrorBoundary label="Insights">
+          <InsightsPanel open={showInsights} onClose={() => setShowInsights(false)} />
+        </PanelErrorBoundary>
+        <PanelErrorBoundary label="History">
+          <HistoryPanel open={showHistory} onClose={() => setShowHistory(false)} />
+        </PanelErrorBoundary>
       </Suspense>
     </Layout>
   );
 }
 
+/**
+ * App —— 新标签页根组件
+ *
+ * 包裹 I18nProvider 与 AntdThemeProvider，
+ * 渲染 VideoBackground、AppContent 与 ClickEffectLayer。
+ *
+ * @returns 新标签页根节点 JSX
+ */
 function App() {
   return (
     <I18nProvider>

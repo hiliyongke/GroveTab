@@ -1,0 +1,968 @@
+/* ============================================================
+   Bookmark Tree View — 横向组织架构图
+   ------------------------------------------------------------
+   - 根节点在左，子节点向右逐级展开
+   - 父子节点之间用 SVG 贝塞尔曲线连接
+   - 文件夹节点为药丸形按钮，叶子节点为带 favicon 的卡片
+   ============================================================ */
+.app-bm-tree {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  overflow: auto;
+  padding: 8px 4px 24px;
+  /* 自定义滚动条 */
+  scrollbar-width: thin;
+}
+
+.app-bm-tree::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.app-bm-tree::-webkit-scrollbar-track {
+  background: transparent;
+}
+.app-bm-tree::-webkit-scrollbar-thumb {
+  background: var(--ant-color-fill-secondary);
+  border-radius: 4px;
+}
+.app-bm-tree::-webkit-scrollbar-thumb:hover {
+  background: var(--ant-color-fill);
+}
+
+.app-bm-tree__canvas {
+  display: inline-block;
+  min-width: 100%;
+  padding: 8px 24px 8px 8px;
+}
+
+/* 顶层根节点：所有顶层文件夹纵向排列 */
+.app-bm-tree__roots {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+/* 文件夹包裹层：自身 + 子级（横向布局） */
+.app-bm-tree__folder-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+  position: relative;
+}
+
+/* 文件夹节点（药丸形按钮） */
+.app-bm-tree__folder {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  min-width: 180px;
+  max-width: 240px;
+  border: 1px solid var(--ant-color-border-secondary);
+  border-radius: 12px;
+  background: var(--ant-color-bg-container);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: all var(--ant-motion-duration-mid);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.app-bm-tree__folder:hover {
+  border-color: var(--ant-color-primary);
+  background: var(--ant-color-primary-bg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.app-bm-tree__folder.is-expanded {
+  border-color: var(--ant-color-primary);
+  background: linear-gradient(135deg, var(--ant-color-primary-bg), var(--ant-color-primary-bg-hover));
+}
+
+.app-bm-tree__folder.is-empty {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.app-bm-tree__folder.is-empty:hover {
+  border-color: var(--ant-color-border-secondary);
+  background: var(--ant-color-bg-container);
+  transform: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.app-bm-tree__folder-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: var(--ant-color-primary-bg);
+  color: var(--ant-color-primary);
+}
+
+.app-bm-tree__folder.is-expanded .app-bm-tree__folder-icon {
+  background: var(--ant-color-primary);
+  color: #fff;
+}
+
+.app-bm-tree__folder-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.app-bm-tree__folder-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ant-color-text);
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-bm-tree__folder-meta {
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--ant-color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.app-bm-tree__folder-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.app-bm-tree__folder-stat.is-muted {
+  color: var(--ant-color-text-quaternary);
+}
+
+.app-bm-tree__folder-chevron {
+  color: var(--ant-color-text-tertiary);
+  flex-shrink: 0;
+  transition: transform var(--ant-motion-duration-mid);
+}
+
+.app-bm-tree__folder-chevron.is-expanded {
+  transform: rotate(90deg);
+  color: var(--ant-color-primary);
+}
+
+/* 子节点列：纵向排列，左侧留出连线区域 */
+.app-bm-tree__children {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  position: relative;
+  padding-left: 56px;
+}
+
+/* SVG 连线层：覆盖在 padding 区域，从父节点右边到子节点左边 */
+.app-bm-tree__connector {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 56px;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.app-bm-tree__connector-path {
+  fill: none;
+  stroke: var(--ant-color-border);
+  stroke-width: 1.5;
+  opacity: 0.7;
+}
+
+.app-bm-tree__folder-wrap:hover > .app-bm-tree__children > .app-bm-tree__connector .app-bm-tree__connector-path {
+  stroke: var(--ant-color-primary);
+  opacity: 0.9;
+}
+
+.app-bm-tree__children-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+/* 叶子节点：书签卡片 */
+.app-bm-tree__leaf {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px 8px 14px;
+  min-width: 220px;
+  max-width: 280px;
+  border: 1px solid var(--ant-color-border-secondary);
+  border-radius: 10px;
+  background: var(--ant-color-bg-container);
+  cursor: pointer;
+  outline: none;
+  transition: all var(--ant-motion-duration-mid);
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.app-bm-tree__leaf:hover {
+  border-color: var(--app-bm-accent, var(--ant-color-primary));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.app-bm-tree__leaf:focus-visible {
+  border-color: var(--app-bm-accent, var(--ant-color-primary));
+  box-shadow: 0 0 0 2px var(--ant-color-primary-bg);
+}
+
+.app-bm-tree__leaf-bar {
+  display: none;
+}
+
+.app-bm-tree__leaf-favicon {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.app-bm-tree__leaf-favicon-fallback {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.app-bm-tree__leaf-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.app-bm-tree__leaf-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ant-color-text);
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+.app-bm-tree__leaf-host {
+  font-size: 11px;
+  color: var(--ant-color-text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+/* 暗色主题下的微调 */
+@media (prefers-color-scheme: dark) {
+  .app-bm-tree__folder,
+  .app-bm-tree__leaf {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  .app-bm-tree__folder:hover,
+  .app-bm-tree__leaf:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* ============================================================
+   Vertical（组织架构图）模式 — 仅覆盖差异部分
+   ------------------------------------------------------------
+   - 根节点在上，子节点向下展开
+   - 同级节点横向铺开
+   - 连线由 CSS 伪元素绘制（不依赖 SVG，不会错位）
+   ============================================================ */
+
+/* 画布在垂直模式下水平居中、底部更多呼吸 */
+.app-bm-tree.is-vertical {
+  text-align: center;
+}
+
+.app-bm-tree.is-vertical .app-bm-tree__canvas {
+  display: inline-block;
+  text-align: left;
+  padding: 28px 40px 40px;
+}
+
+/* 根节点群：横向并排，水平居中 */
+.app-bm-tree.is-vertical .app-bm-tree__roots {
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 56px;
+}
+
+/* 文件夹包裹层：自身在上，children 在下 */
+.app-bm-tree.is-vertical .app-bm-tree__folder-wrap {
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* ── 节点：垂直模式下整体收紧 ── */
+.app-bm-tree.is-vertical .app-bm-tree__folder {
+  align-self: center;
+  min-width: 168px;
+  max-width: 220px;
+  padding: 8px 12px 12px 10px;
+  position: relative;
+}
+
+/* 根节点（depth=0）强化 */
+.app-bm-tree.is-vertical .app-bm-tree__folder-wrap[data-depth="0"] > .app-bm-tree__folder {
+  min-width: 188px;
+  max-width: 240px;
+  padding: 10px 14px 12px 12px;
+  border-color: var(--ant-color-primary-border);
+  background: linear-gradient(180deg, var(--ant-color-primary-bg), var(--ant-color-bg-container));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.app-bm-tree.is-vertical .app-bm-tree__folder-wrap[data-depth="0"] > .app-bm-tree__folder::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ant-color-primary);
+  box-shadow: 0 0 0 3px var(--ant-color-bg-container);
+  z-index: 3;
+}
+
+/* 叶子节点：垂直模式下宽度收紧 */
+.app-bm-tree.is-vertical .app-bm-tree__leaf {
+  min-width: 176px;
+  max-width: 216px;
+  padding: 8px 12px 8px 12px;
+}
+
+/* ── chevron 居中浮动到节点底部 ── */
+.app-bm-tree.is-vertical .app-bm-tree__folder-chevron {
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  transform: translateX(-50%) rotate(0deg);
+  background: var(--ant-color-bg-container);
+  border: 1px solid var(--ant-color-border-secondary);
+  border-radius: 999px;
+  width: 18px;
+  height: 18px;
+  padding: 1px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  color: var(--ant-color-text-tertiary);
+}
+
+.app-bm-tree.is-vertical .app-bm-tree__folder-chevron.is-expanded {
+  transform: translateX(-50%) rotate(180deg);
+  border-color: var(--ant-color-primary);
+  color: var(--ant-color-primary);
+}
+
+/* ─────────────────────────────────────────────────
+   连线层（纯 CSS 伪元素）
+   ----------------------------------------------------------
+   1) __children::before              父→横梁的"竖向主干"
+   2) 每个子节点（folder-wrap/leaf）::before  节点上方的"短下垂分支"
+   3) 每个子节点（folder-wrap/leaf）::after   节点上方的"半段横梁"
+      · 首节点：从自身中心 → 右外侧 14px（gap 的一半）
+      · 末节点：从左外侧 14px → 自身中心
+      · 中间节点：从左外侧 14px → 右外侧 14px
+      多段半横梁拼接 = 完整横梁，且天然终止于首末节点中心，
+      无需任何"纯色遮罩"，从根本上避免在液态亚克力等带壁纸/网格的
+      画布上出现"多余细线"。
+   ───────────────────────────────────────────────── */
+
+/* 子节点容器：垂直模式下顶部留出连线区，但不再用 SVG */
+.app-bm-tree.is-vertical .app-bm-tree__children {
+  flex-direction: column;
+  padding-left: 0;
+  padding-top: 36px; /* 主干 + 横梁所占高度 */
+  align-items: stretch;
+  position: relative;
+}
+
+/* 1) 主干竖线：从父底部正中下垂到横梁 */
+.app-bm-tree.is-vertical .app-bm-tree__children::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1.5px;
+  height: 22px;
+  background: var(--ant-color-border);
+  border-radius: 1px;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+/* SVG 在垂直模式下隐藏（保留 DOM 也无妨，这里直接 display:none 双保险） */
+.app-bm-tree.is-vertical .app-bm-tree__connector {
+  display: none;
+}
+
+/* 子节点行：横向并排、顶部对齐、间距充裕 */
+.app-bm-tree.is-vertical .app-bm-tree__children-col {
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 28px;
+  position: relative;
+}
+
+/* 2) 每个子节点头顶的下垂短分支
+   作用对象：直接子级 folder-wrap 或 leaf */
+.app-bm-tree.is-vertical .app-bm-tree__children-col > .app-bm-tree__folder-wrap::before,
+.app-bm-tree.is-vertical .app-bm-tree__children-col > .app-bm-tree__leaf::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  width: 1.5px;
+  height: 14px;
+  background: var(--ant-color-border);
+  border-radius: 1px;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+/* 3) 每个子节点头顶的"半段横梁"：用 ::after 在 top:-14px 处拼出整条横梁。
+      gap 是 28px，所以每段向 gap 一侧外延 14px（gap 的一半）即可与相邻节点的
+      半段无缝对接。横梁两端天然终止于首节点中心和末节点中心。 */
+.app-bm-tree.is-vertical .app-bm-tree__children-col > .app-bm-tree__folder-wrap::after,
+.app-bm-tree.is-vertical .app-bm-tree__children-col > .app-bm-tree__leaf::after {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: -14px;
+  right: -14px;
+  height: 1.5px;
+  background: var(--ant-color-border);
+  border-radius: 1px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* 首节点：左半段不画（从自身中心起向右） */
+.app-bm-tree.is-vertical .app-bm-tree__children-col > *:first-child::after {
+  left: 50%;
+}
+
+/* 末节点：右半段不画（向左到自身中心止） */
+.app-bm-tree.is-vertical .app-bm-tree__children-col > *:last-child::after {
+  right: 50%;
+}
+
+/* 单子节点时不需要横梁，主干直接对接下垂分支 */
+.app-bm-tree.is-vertical .app-bm-tree__children-col.is-single > *::after {
+  display: none;
+}
+
+/* 叶子在垂直模式下需要 position:relative 才能放伪元素 */
+.app-bm-tree.is-vertical .app-bm-tree__leaf {
+  position: relative;
+}
+
+/* 让叶子节点在 row 排列下不被拉伸 */
+.app-bm-tree.is-vertical .app-bm-tree__children-col > .app-bm-tree__leaf {
+  align-self: flex-start;
+}
+
+/* hover 高亮当前子树的连线（主干 + 下垂分支 + 拼接横梁） */
+.app-bm-tree.is-vertical .app-bm-tree__folder-wrap:hover > .app-bm-tree__children::before,
+.app-bm-tree.is-vertical .app-bm-tree__folder-wrap:hover > .app-bm-tree__children > .app-bm-tree__children-col > .app-bm-tree__folder-wrap::before,
+.app-bm-tree.is-vertical .app-bm-tree__folder-wrap:hover > .app-bm-tree__children > .app-bm-tree__children-col > .app-bm-tree__leaf::before,
+.app-bm-tree.is-vertical .app-bm-tree__folder-wrap:hover > .app-bm-tree__children > .app-bm-tree__children-col > .app-bm-tree__folder-wrap::after,
+.app-bm-tree.is-vertical .app-bm-tree__folder-wrap:hover > .app-bm-tree__children > .app-bm-tree__children-col > .app-bm-tree__leaf::after {
+  background: var(--ant-color-primary);
+  opacity: 0.85;
+}
+
+/* 文件夹元信息：在窄节点下保持紧凑 */
+.app-bm-tree.is-vertical .app-bm-tree__folder-meta {
+  gap: 6px;
+  font-size: 10.5px;
+}
+
+/* 暗色主题 */
+@media (prefers-color-scheme: dark) {
+  .app-bm-tree.is-vertical .app-bm-tree__folder-wrap[data-depth="0"] > .app-bm-tree__folder {
+    background: linear-gradient(180deg,
+      color-mix(in srgb, var(--ant-color-primary) 18%, transparent),
+      var(--ant-color-bg-container));
+  }
+  .app-bm-tree.is-vertical .app-bm-tree__folder-chevron {
+    background: var(--ant-color-bg-elevated);
+  }
+  /* 暗色下连线适当提亮一点，避免在深色画布上太弱 */
+  .app-bm-tree.is-vertical .app-bm-tree__children::before,
+  .app-bm-tree.is-vertical .app-bm-tree__children-col > .app-bm-tree__folder-wrap::before,
+  .app-bm-tree.is-vertical .app-bm-tree__children-col > .app-bm-tree__leaf::before,
+  .app-bm-tree.is-vertical .app-bm-tree__children-col > .app-bm-tree__folder-wrap::after,
+  .app-bm-tree.is-vertical .app-bm-tree__children-col > .app-bm-tree__leaf::after {
+    background: var(--ant-color-border-secondary, var(--ant-color-border));
+  }
+}
+
+/* ============================================================
+   PanZoom — 树状视图的缩放/拖拽画布
+   ------------------------------------------------------------
+   - 视口（viewport）：占满父容器，裁剪溢出，承接滚轮/拖拽事件
+   - 内容（content）：通过 transform: translate + scale 进行变换
+   - 工具栏（toolbar）：右下角悬浮，不随内容缩放
+   ============================================================ */
+
+/* 启用 PanZoom 后，.app-bm-tree 自身不再滚动，由 viewport 接管 */
+.app-bm-tree {
+  overflow: hidden;
+  padding: 0;
+  position: relative;
+}
+
+.app-bm-tree__panzoom {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  flex: 1 1 auto;
+  /* 父级 .app-bm-tree 的 min-height 已重置为 0，
+     这里也用 min-height: 0 解锁 flex 收缩，确保 panzoom 不会比父级更高，
+     底部 14px 处的工具栏不会被父级的 overflow:hidden 裁掉。 */
+  min-height: 0;
+  align-self: stretch;
+  overflow: hidden;
+  cursor: grab;
+  /* 棋盘式细网格背景，强化"画布"感 */
+  background-image:
+    radial-gradient(circle at 1px 1px,
+      color-mix(in srgb, var(--ant-color-text) 6%, transparent) 1px,
+      transparent 1.5px);
+  background-size: 22px 22px;
+  background-position: 0 0;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.app-bm-tree__panzoom.is-dragging {
+  cursor: grabbing;
+}
+
+/* 拖拽时禁止内部元素响应交互，避免拖拽误触 hover/click */
+.app-bm-tree__panzoom.is-dragging .app-bm-tree__panzoom-content {
+  pointer-events: none;
+}
+
+.app-bm-tree__panzoom-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+  /* 让内容按自身尺寸生长，溢出由 viewport 裁剪 */
+  display: inline-block;
+}
+
+/* 节点上 cursor 恢复 pointer，避免显示 grab */
+.app-bm-tree__panzoom .app-bm-tree__folder,
+.app-bm-tree__panzoom .app-bm-tree__leaf {
+  cursor: pointer;
+}
+
+/* ── 工具栏（右下角悬浮 pill） ── */
+.app-bm-tree__panzoom-toolbar {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  background: var(--ant-color-bg-elevated, var(--ant-color-bg-container));
+  border: 1px solid var(--ant-color-border-secondary);
+  border-radius: 999px;
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.06);
+  cursor: default;
+  user-select: none;
+  backdrop-filter: var(--app-glass-filter);
+  -webkit-backdrop-filter: var(--app-glass-filter);
+}
+
+.app-bm-tree__panzoom-btn {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ant-color-text-secondary);
+  cursor: pointer;
+  transition: all var(--ant-motion-duration-fast);
+  padding: 0;
+}
+
+.app-bm-tree__panzoom-btn:hover:not(:disabled) {
+  background: var(--ant-color-fill-secondary);
+  color: var(--ant-color-primary);
+}
+
+.app-bm-tree__panzoom-btn:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.app-bm-tree__panzoom-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.app-bm-tree__panzoom-percent {
+  min-width: 46px;
+  height: 28px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ant-color-text);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background var(--ant-motion-duration-fast);
+}
+
+.app-bm-tree__panzoom-percent:hover {
+  background: var(--ant-color-fill-secondary);
+}
+
+.app-bm-tree__panzoom-divider {
+  width: 1px;
+  height: 20px;
+  margin: 0 4px;
+  background: var(--ant-color-border-secondary);
+}
+
+@media (prefers-color-scheme: dark) {
+  .app-bm-tree__panzoom {
+    background-image:
+      radial-gradient(circle at 1px 1px,
+        color-mix(in srgb, var(--ant-color-text) 10%, transparent) 1px,
+        transparent 1.5px);
+  }
+  .app-bm-tree__panzoom-toolbar {
+    box-shadow:
+      0 6px 20px rgba(0, 0, 0, 0.45),
+      0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* ============================================================
+   Vertical（架构图）模式 — 紧凑方形卡片
+   ------------------------------------------------------------
+   仅在 orgchart 模式下应用：
+   - 文件夹节点改为正方形「磁贴」：图标在上、标题居中、统计居底
+   - 叶子（书签）节点改为正方形：favicon 居中显眼，标题 2 行省略
+   ============================================================ */
+
+/* ── 文件夹：方形磁贴 ── */
+.app-bm-tree.is-vertical .app-bm-tree__folder {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 108px;
+  min-width: 108px;
+  max-width: 108px;
+  height: 108px;
+  padding: 10px 8px 8px;
+  text-align: center;
+}
+
+/* 根节点稍大一些 */
+.app-bm-tree.is-vertical .app-bm-tree__folder-wrap[data-depth="0"] > .app-bm-tree__folder {
+  width: 124px;
+  min-width: 124px;
+  max-width: 124px;
+  height: 124px;
+  padding: 12px 10px 10px;
+}
+
+/* 文件夹图标徽章紧凑 */
+.app-bm-tree.is-vertical .app-bm-tree__folder-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+}
+
+.app-bm-tree.is-vertical .app-bm-tree__folder-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.app-bm-tree.is-vertical .app-bm-tree__folder-text {
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.app-bm-tree.is-vertical .app-bm-tree__folder-title {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.25;
+  font-size: 11.5px;
+  word-break: break-word;
+}
+
+.app-bm-tree.is-vertical .app-bm-tree__folder-meta {
+  justify-content: center;
+  font-size: 10px;
+  gap: 4px;
+}
+
+/* 折叠箭头：补偿方形卡片底部空间 */
+.app-bm-tree.is-vertical .app-bm-tree__folder-chevron {
+  bottom: -9px;
+}
+
+/* ── 叶子：方形书签卡片 ── */
+.app-bm-tree.is-vertical .app-bm-tree__leaf {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  width: 108px;
+  min-width: 108px;
+  max-width: 108px;
+  height: 108px;
+  padding: 12px 8px 8px;
+  text-align: center;
+  border-radius: 10px;
+}
+
+/* favicon 紧凑居中靠上 */
+.app-bm-tree.is-vertical .app-bm-tree__leaf-favicon,
+.app-bm-tree.is-vertical .app-bm-tree__leaf-favicon-fallback {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.app-bm-tree.is-vertical .app-bm-tree__leaf-main {
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  gap: 2px;
+}
+
+.app-bm-tree.is-vertical .app-bm-tree__leaf-title {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.2;
+  font-size: 11.5px;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+/* hostname 默认隐藏，开启 "显示域名" 时通过 .show-host 修饰类常驻显示 */
+.app-bm-tree.is-vertical .app-bm-tree__leaf-host {
+  display: none;
+  font-size: 9.5px;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ant-color-text-tertiary);
+}
+
+.app-bm-tree.is-vertical.show-host .app-bm-tree__leaf-host {
+  display: block;
+}
+
+/* 左侧装饰条改为顶部上沿色带（更适合方形卡片） */
+.app-bm-tree.is-vertical .app-bm-tree__leaf-bar {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: auto;
+  width: auto;
+  height: 3px;
+  border-radius: 12px 12px 0 0;
+}
+
+/* 同级 gap 收紧（方形卡片更小） */
+.app-bm-tree.is-vertical .app-bm-tree__children-col {
+  gap: 14px;
+}
+
+.app-bm-tree.is-vertical .app-bm-tree__roots {
+  gap: 28px;
+}
+
+/* ============================================================
+   PanZoom 平滑过渡：编程式 panTo / fit / reset 时启用
+   ============================================================ */
+.app-bm-tree__panzoom.is-animating .app-bm-tree__panzoom-content {
+  transition: transform 240ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* 工具栏：开关型按钮 active 态（如"显示域名"开启） */
+.app-bm-tree__panzoom-btn.is-active {
+  background: var(--ant-color-primary-bg);
+  color: var(--ant-color-primary);
+}
+.app-bm-tree__panzoom-btn.is-active:hover:not(:disabled) {
+  background: var(--ant-color-primary-bg-hover, var(--ant-color-primary-bg));
+  color: var(--ant-color-primary);
+}
+
+/* ============================================================
+   叶子卡片自定义 hover 气泡 tooltip
+   ------------------------------------------------------------
+   - 替代浏览器原生 title 提示，更精致、响应更快
+   - 显示完整标题 + 完整 URL（hostname 着色加粗）
+   ============================================================ */
+.app-bm-tree__tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  transform: translateX(-50%) translateY(4px);
+  min-width: 180px;
+  max-width: 320px;
+  padding: 8px 10px 9px;
+  border-radius: 8px;
+  background: var(--ant-color-bg-elevated, var(--ant-color-bg-container));
+  border: 1px solid var(--ant-color-border-secondary);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.06);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 160ms ease-out,
+    transform 160ms ease-out,
+    visibility 0s linear 160ms;
+  z-index: 50;
+  text-align: left;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: normal;
+  word-break: break-all;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.app-bm-tree__leaf:hover .app-bm-tree__tooltip,
+.app-bm-tree__leaf:focus-visible .app-bm-tree__tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+  transition-delay: 200ms, 200ms, 0s;
+}
+
+.app-bm-tree__tooltip-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ant-color-text);
+  margin-bottom: 3px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.app-bm-tree__tooltip-url {
+  font-size: 11px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: var(--ant-color-text-tertiary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.app-bm-tree__tooltip-host {
+  color: var(--app-bm-accent, var(--ant-color-primary));
+  font-weight: 600;
+}
+
+.app-bm-tree__tooltip-path {
+  color: var(--ant-color-text-tertiary);
+}
+
+/* 气泡下方的小箭头 */
+.app-bm-tree__tooltip-arrow {
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  transform: translateX(-50%) rotate(45deg);
+  width: 8px;
+  height: 8px;
+  background: var(--ant-color-bg-elevated, var(--ant-color-bg-container));
+  border-right: 1px solid var(--ant-color-border-secondary);
+  border-bottom: 1px solid var(--ant-color-border-secondary);
+}
+
+/* 当卡片靠近视口顶部时，气泡翻到下方（用 :has 兼容现代浏览器；不支持则正常显示在上方） */
+@supports selector(:has(*)) {
+  /* 默认上方，无需特殊处理；如需自动翻转可在 JS 中切类名 */
+}
+
+/* 拖拽时禁用 tooltip，避免视觉干扰 */
+.app-bm-tree__panzoom.is-dragging .app-bm-tree__tooltip {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}

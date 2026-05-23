@@ -1,0 +1,250 @@
+/* ==========================================================================
+   通用 Mixins —— 供各 .module.less 复用
+   ========================================================================== */
+
+// ── 文本截断 ─────────────────────────────────────
+
+// 单行文本截断
+.text-truncate() {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// 多行文本截断（webkit-line-clamp）
+.text-truncate-lines(@lines: 2) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: @lines;
+}
+
+// ── Flex 布局 ─────────────────────────────────────
+
+// Flex 行 + 垂直居中
+.flex-row-center(@gap: 0) {
+  display: flex;
+  align-items: center;
+  gap: @gap;
+}
+
+// Flex 行 + 两端对齐 + 垂直居中
+.flex-row-between(@gap: 0) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: @gap;
+}
+
+// Flex 列
+.flex-column(@gap: 0) {
+  display: flex;
+  flex-direction: column;
+  gap: @gap;
+}
+
+// Flex 自适应子项（防止内容撑开父容器）
+.flex-shrink-item() {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+// ── 卡片/面板 ─────────────────────────────────────
+
+// 带边框的面板基础样式
+.panel-bordered(@padding: 12px) {
+  border: 1px solid var(--ant-color-border-secondary);
+  border-radius: var(--ant-border-radius-lg);
+  background: var(--ant-color-bg-container);
+  padding: @padding;
+}
+
+// ── 滚动条美化 ─────────────────────────────────────
+
+// Webkit 滚动条统一样式
+.scrollbar-thin() {
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--ant-scrollbar-thumb-bg, var(--ant-color-fill));
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--ant-scrollbar-thumb-bg-hover, var(--ant-color-fill-secondary));
+  }
+}
+
+// ── 通用过渡 ─────────────────────────────────────
+
+// 标准悬停过渡
+.transition-hover(@prop: background-color, @duration: 120ms) {
+  transition: @prop @duration;
+}
+
+// ── 空状态 ─────────────────────────────────────
+
+// 空状态居中
+.empty-state() {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 0;
+  color: var(--ant-color-text-tertiary);
+}
+
+// ── z-index ─────────────────────────────────────
+
+// 固定层级（悬浮层）
+.z-fixed() {
+  position: fixed;
+  z-index: 1000;
+}
+
+// ── 引用共享变量体系（间距、圆角、动效等） ─────────────────────────────────────
+@import (reference) "@/shared/styles/_variables.less";
+
+// ── 高级视觉 Mixins（原 shared/styles/_mixins.less） ─────────────────────────
+
+// 卡片 hover 上浮效果
+.card-lift(@lift: @app-card-lift-distance, @duration: @app-motion-duration) {
+  transition:
+    transform @duration cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow @duration ease,
+    border-color @duration ease;
+
+  &:hover,
+  &:focus-within {
+    transform: translateY(calc(-1 * @lift));
+    box-shadow: var(--app-shadow-card-hover);
+    border-color: var(--app-hover-border, var(--ant-color-border));
+  }
+}
+
+// 行级 hover 效果
+.row-hover(@bg-color: var(--ant-color-fill-tertiary), @duration: @app-motion-duration-fast) {
+  transition: background-color @duration ease;
+
+  &:hover,
+  &:focus-within {
+    background-color: @bg-color;
+  }
+}
+
+// Hover 显隐效果
+.hover-reveal(@duration: @app-motion-duration-fast) {
+  opacity: 0;
+  transition: opacity @duration ease;
+
+  .app-hover-reveal-host:hover &,
+  .app-hover-reveal-host:focus-within &,
+  &.is-visible {
+    opacity: 1;
+  }
+}
+
+// 身份色条 hover 加粗
+.accent-bar-hover(@hover-width: 3px, @duration: @app-motion-duration-fast) {
+  &.app-accent-bar--left {
+    transition: width @duration ease;
+  }
+  .app-card-interactive:hover &.app-accent-bar--left,
+  .app-card-interactive:focus-within &.app-accent-bar--left {
+    width: @hover-width;
+  }
+
+  &.app-accent-bar--top {
+    transition: height @duration ease;
+  }
+  .app-card-interactive:hover &.app-accent-bar--top,
+  .app-card-interactive:focus-within &.app-accent-bar--top {
+    height: @hover-width;
+  }
+}
+
+// 时间线分段标题 hover 文本提亮
+.timeline-header-hover(@color: var(--ant-color-text-secondary), @color-hover: var(--ant-color-text)) {
+  color: @color;
+  transition: color @app-motion-duration-fast ease;
+
+  &:hover,
+  &:focus-visible {
+    color: @color-hover;
+  }
+}
+
+// 键帽样式（显示快捷键）
+.kbd-style() {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: @app-space-1 @app-space-2;
+  min-width: 20px;
+  height: 20px;
+  font-family: @app-font-family-code;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--ant-color-text-tertiary);
+  background: var(--ant-color-fill-quaternary);
+  border: 1px solid var(--ant-color-border-secondary);
+  border-radius: @app-radius-sm;
+  white-space: nowrap;
+}
+
+// 浮层容器（批量栏、命令面板、菜单等共用）
+.surface-elevated() {
+  .glass-effect();
+  background: var(--app-surface-elevated-bg);
+  border: 1px solid var(--ant-color-border-secondary);
+  box-shadow: var(--app-shadow-floating);
+  border-radius: var(--app-floating-radius);
+}
+
+// 软分隔线
+.divider-soft(@direction: vertical) when (@direction = vertical) {
+  width: 1px;
+  height: 20px;
+  background: var(--ant-color-border-secondary);
+  flex-shrink: 0;
+}
+.divider-soft(@direction: horizontal) when (@direction = horizontal) {
+  width: 100%;
+  height: 1px;
+  background: var(--ant-color-border-secondary);
+}
+
+// ── 提取的高频组件模式 ─────────────────────────────────────
+
+// 固定宽高 + 居中（favicon、badge 用）
+.icon-container(@size: 16px) {
+  width: @size;
+  height: @size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+// 元信息截断（tab title、bookmark title 等）
+.meta-truncate() {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+// 基础卡片容器
+.card-base() {
+  border: 1px solid var(--ant-color-border-secondary);
+  border-radius: var(--ant-border-radius-lg);
+  background: var(--ant-color-bg-container);
+  overflow: hidden;
+}

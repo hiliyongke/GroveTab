@@ -28,6 +28,9 @@ export interface ArchiveOperationResult {
  * 3. 再关闭真实标签页
  *
  * 即使关闭阶段失败，也保证归档快照已经可恢复。
+ *
+ * @param tabs 待归档的标签页数组
+ * @returns 归档结果（含快照、归档数量、实际关闭数量）
  */
 async function archiveTabs(tabs: chrome.tabs.Tab[]): Promise<ArchiveOperationResult> {
   const toArchive = tabs.filter(isArchivableTab);
@@ -62,17 +65,28 @@ async function archiveTabs(tabs: chrome.tabs.Tab[]): Promise<ArchiveOperationRes
   };
 }
 
-/** 归档所有可归档标签页。 */
+/** 归档所有可归档标签页。
+ *
+ * @returns 归档结果（含快照、归档数量、实际关闭数量）
+ */
 export async function archiveAllTabs(): Promise<ArchiveOperationResult> {
   return archiveTabs(await queryAllTabs());
 }
 
-/** 归档当前窗口的可归档标签页。 */
+/** 归档当前窗口的可归档标签页。
+ *
+ * @returns 归档结果（含快照、归档数量、实际关闭数量）
+ */
 export async function archiveCurrentWindowTabs(): Promise<ArchiveOperationResult> {
   return archiveTabs(await queryTabs({ currentWindow: true }));
 }
 
-/** 归档指定 ID 的标签页。 */
+/**
+ * 归档指定 ID 的标签页。
+ *
+ * @param tabIds 要归档的标签页 ID 数组
+ * @returns 归档结果（含快照、归档数量、实际关闭数量）
+ */
 export async function archiveSelectedTabs(tabIds: number[]): Promise<ArchiveOperationResult> {
   const targetIds = new Set(tabIds);
   const allTabs = await queryAllTabs();

@@ -59,6 +59,10 @@ export type IconRole =
  * 根据角色返回图标颜色（hex）。
  *
  * 所有颜色都从 antd token 派生，深浅主题自动适配。
+ *
+ * @param role - 图标语义角色
+ * @param token - antd 全局设计令牌
+ * @returns 颜色十六进制字符串
  */
 export function iconColor(role: IconRole, token: GlobalToken): string {
   const map: Record<IconRole, string> = {
@@ -107,6 +111,7 @@ export function iconColor(role: IconRole, token: GlobalToken): string {
  * @param role 图标角色
  * @param token antd 全局设计令牌
  * @param opacity 透明度 0~1，默认 0.15
+ * @returns 带透明度的 CSS color-mix 表达式
  */
 export function iconColorAlpha(role: IconRole, token: GlobalToken, opacity = 0.15): string {
   const color = iconColor(role, token);

@@ -1,9 +1,20 @@
 import { useMemo } from 'react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
-import { VIEW_CONFIGS, type ViewMode } from '@/shared/config/views';
+import { WORKSPACE_VIEW_CONFIGS } from '@/features/workspace/view-catalog';
+import type { ViewMode } from '@/shared/types';
 
-/** 视图侧边栏（left/right 模式），垂直排列视图图标 + 标签 */
+/**
+ * 视图侧边栏
+ *
+ * 垂直排列视图图标 + 标签，支持左侧或右侧显示。
+ *
+ * @param props - 组件属性
+ * @param props.viewMode - 当前视图模式
+ * @param props.onViewChange - 视图切换回调
+ * @param props.position - 侧边栏位置（'left' | 'right'）
+ * @returns {void} 无返回值
+ */
 export function ViewSidebar({
   viewMode,
   onViewChange,
@@ -18,7 +29,7 @@ export function ViewSidebar({
   /** 视图侧边栏导航项，缓存以避免每次渲染重建 JSX */
   const viewSidebarItems = useMemo(
     () =>
-      VIEW_CONFIGS.map((v) => ({
+      WORKSPACE_VIEW_CONFIGS.map((v) => ({
         id: v.id,
         Icon: v.Icon,
         label: t(v.labelKey),

@@ -13,6 +13,17 @@ interface FieldProps {
   children: React.ReactNode;
 }
 
+/**
+ * 表单字段包装组件
+ *
+ * 统一渲染设置项的 label、控件和提示文本。
+ *
+ * @param props - 组件属性
+ * @param props.label - 字段标签
+ * @param props.hint - 提示文本（可选）
+ * @param props.children - 表单控件
+ * @returns 表单字段包装组件 JSX 元素
+ */
 export function Field({ label, hint, children }: FieldProps) {
   return (
     <div className="settings-field">

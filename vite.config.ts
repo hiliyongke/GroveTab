@@ -18,6 +18,17 @@ const BUILD_BRAND = {
   },
 } as const;
 
+/**
+ * 从多语言字段对象中选取当前语言的字段值
+ *
+ * 优先匹配当前 locale，未找到则回退到 fallback（默认 'en'），
+ * 若仍不存在则取字段对象的第一个值。
+ *
+ * @param field 多语言字段对象（如 { 'zh-CN': '...', 'en': '...' }）
+ * @param locale 当前语言标识
+ * @param fallback 回退语言标识，默认 'en'
+ * @returns 匹配到的字段值
+ */
 function pickLocaleField<T>(field: Record<string, T>, locale: string, fallback = 'en'): T {
   if (field[locale] !== undefined) return field[locale];
   if (field[fallback] !== undefined) return field[fallback];
@@ -34,6 +45,15 @@ interface Manifest {
   [key: string]: unknown;
 }
 
+/**
+ * 将构建时品牌配置写入多语言 messages.json
+ *
+ * 遍历 zh_CN 和 en 两种语言，
+ * 更新 appName、appDescription、context_save_all 等字段，
+ * 使构建产物的多语言文案与 BUILD_BRAND 保持同步。
+ *
+ * @returns 无返回值（同步写入文件）
+ */
 function writeBrandLocales() {
   const localeMap = [
     { dir: 'zh_CN', locale: 'zh-CN' },
@@ -59,6 +79,17 @@ function writeBrandLocales() {
   }
 }
 
+/**
+ * Vite 插件：Chrome 扩展构建后处理
+ *
+ * 在 build 完成后执行：
+ *   - 修正 manifest.json 中的路径（service_worker、newtab、popup）
+ *   - 修正 icons 路径（移除 public/ 前缀）
+ *   - 写入多语言 messages.json（品牌名称、描述等）
+ *   - 生成 newtab/popup 的 HTML 入口文件并注入所有 CSS
+ *
+ * @returns Vite 插件对象
+ */
 function chromeExtensionPlugin() {
   return {
     name: 'chrome-extension',
@@ -157,6 +188,7 @@ export default defineConfig({
         // 产出一个完全自包含、无任何 import 的 dist/sw.js。
         newtab: resolve(__dirname, 'src/pages/newtab/main.tsx'),
         popup: resolve(__dirname, 'src/pages/popup/main.tsx'),
+        sidebar: resolve(__dirname, 'src/pages/sidebar/main.tsx'),
       },
       output: {
         entryFileNames: '[name].js',

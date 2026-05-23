@@ -20,14 +20,18 @@ import type { SpeedDialSite } from '@/shared/types';
 import styles from './QuickStartLayer.module.less';
 import { SpeedDialAddModal } from './SpeedDialAddModal';
 import { SortableSiteCard } from './SortableSiteCard';
-import { useSpeedDialSortable } from './hooks/useSpeedDialSortable';
-import { useSiteGroups } from './hooks/useSiteGroups';
-import { useAccent } from '@/shared/hooks/useAccent';
-import { getHostname, getFaviconUrl } from './utils/siteUtils';
+import { useSpeedDialSortable } from './hooks/use-speed-dial-sortable';
+import { useSiteGroups } from './hooks/use-site-groups';
+import { useAccent } from '@/shared/hooks/use-accent';
+import { getHostname, getFaviconUrl } from './utils/site-utils';
 
 /**
  * 分组头部组件
  * 根据分组内第一个站点的 favicon 提取主色，自适应左边框与背景色
+ * @param root0 - 组件属性
+ * @param root0.groupName - 分组名称
+ * @param root0.firstSite - 分组内第一个站点
+ * @returns {JSX.Element} 返回分组头部 JSX 元素
  */
 function GroupHeader({ groupName, firstSite }: { groupName: string; firstSite: SpeedDialSite }) {
   const faviconUrl = useMemo(() => getFaviconUrl(firstSite), [firstSite]);
@@ -52,6 +56,47 @@ interface SpeedDialGridProps {
   sites: readonly SpeedDialSite[];
 }
 
+/**
+ * 新增按钮卡片 — 声明在组件外部避免 React Compiler "Cannot create components during render" 错误
+ * @param root0 - 组件属性
+ * @param root0.onClick - 点击回调
+ * @returns {JSX.Element} 返回新增按钮卡片 JSX 元素
+ */
+function AddCard({ onClick }: { onClick: () => void }) {
+  const { t } = useT();
+  return (
+    <Card
+      className={`${styles['app-card-interactive']} ${styles['app-speed-dial-card']} ${styles['app-speed-dial-card--add']}`}
+      classNames={{ body: styles['app-speed-dial-card__body'] }}
+      onClick={onClick}
+    >
+      <div className={styles['app-speed-dial-add-preview']}>
+        <Plus size={28} className={styles['app-speed-dial-add-icon']} />
+      </div>
+      <div className={styles['app-speed-dial-add-content']}>
+        <span className={styles['app-speed-dial-add-label']}>
+          {t('quickStart.addSite')}
+        </span>
+        <span className={styles['app-speed-dial-add-hint']} aria-hidden="true">
+          placeholder
+        </span>
+      </div>
+    </Card>
+  );
+}
+
+/**
+ * 常用站点网格（主组件）
+ *
+ * 职责：
+ *   - 组装 useSpeedDialSortable / useSiteGroups hooks
+ *   - 渲染 DndContext + SortableContext
+ *   - 渲染空状态 / 分组网格 / 新增按钮
+ *
+ * @param root0 - 组件属性
+ * @param root0.sites - 站点列表
+ * @returns {JSX.Element} 返回常用站点网格 JSX 元素
+ */
 export function SpeedDialGrid({ sites }: SpeedDialGridProps) {
   const { t } = useT();
   const removeSite = useSpeedDialStore((s) => s.removeSite);
@@ -126,28 +171,11 @@ export function SpeedDialGrid({ sites }: SpeedDialGridProps) {
     ungroupedLabel: t('quickStart.ungrouped'),
   });
 
-  /** 新增按钮卡片 */
-  const AddCard = () => (
-    <Card
-      className={`${styles['app-card-interactive']} ${styles['app-speed-dial-card']} ${styles['app-speed-dial-card--add']}`}
-      classNames={{ body: styles['app-speed-dial-card__body'] }}
-      onClick={handleAddClick}
-    >
-      <div className={styles['app-speed-dial-add-preview']}>
-        <Plus size={28} className={styles['app-speed-dial-add-icon']} />
-      </div>
-      <div className={styles['app-speed-dial-add-content']}>
-        <span className={styles['app-speed-dial-add-label']}>
-          {t('quickStart.addSite')}
-        </span>
-        <span className={styles['app-speed-dial-add-hint']} aria-hidden="true">
-          placeholder
-        </span>
-      </div>
-    </Card>
-  );
-
-  /** 渲染一组卡片 */
+  /**
+   * 渲染一组卡片
+   * @param siteList - 站点列表
+   * @returns {JSX.Element} 返回卡片列表 JSX 元素
+   */
   const renderCards = (siteList: readonly SpeedDialSite[]) => (
     <>
       {siteList.map((site) => (
@@ -205,7 +233,7 @@ export function SpeedDialGrid({ sites }: SpeedDialGridProps) {
           {/* 添加按钮：与网格同级，使用 display:contents 让所有卡片共享同一网格 */}
           {showAddButton && (
             <div className={styles['speed-dial-add-cell']}>
-              <AddCard />
+              <AddCard onClick={handleAddClick} />
             </div>
           )}
 

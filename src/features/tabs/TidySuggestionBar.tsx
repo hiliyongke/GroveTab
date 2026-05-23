@@ -35,6 +35,22 @@ interface TidySuggestionBarProps {
   expandSignal?: number;
 }
 
+/**
+ * 智能整理建议栏
+ *
+ * 整合原 DedupInfoBar + 闲置检测，统一呈现"你的标签可以整理"的提示。
+ *
+ * 设计：
+ *   - 同时检测"重复标签"和"闲置标签"
+ *   - 用 antd Alert（type="info"）展示总体建议
+ *   - 展开后分为两个区域：重复分组 + 闲置列表
+ *   - 每个区域有独立操作按钮（合并/关闭/休眠）
+ *   - 一键整理：合并所有重复 + 休眠所有闲置
+ *
+ * @param props - 组件属性
+ * @param props.expandSignal - 展开信号（变化时会自动展开）
+ * @returns 智能整理建议栏 JSX 元素
+ */
 export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) {
   const tabs = useTabsStore((s) => s.tabs);
   const closeMultipleTabs = useTabsStore((s) => s.closeMultipleTabs);

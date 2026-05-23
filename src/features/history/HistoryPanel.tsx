@@ -15,7 +15,6 @@
 
 import {
   useState,
-  useEffect,
   useMemo,
   useCallback,
   type CSSProperties,
@@ -53,30 +52,18 @@ import {
 } from 'lucide-react';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
-import { feedback } from '@/shared/ui/feedback';
 import { createTab } from '@/chrome';
-import {
-  getClosedTabs,
-  getClosedWindows,
-  getHistoryEvents,
-  deleteClosedTab,
-  deleteClosedWindow,
-  deleteHistoryEvent,
-  clearAllNativeHistory,
-  getDailySnapshots,
-  diffSnapshots,
-  snapshotDateKey,
-  markHistoryEventUndone,
-} from '@/repositories';
-import { hasHistoryUndoHandler, undoHistoryEvent } from '@/services/history/undo-bus';
 import type {
   ClosedTabRecord,
   ClosedWindowRecord,
-  DailySnapshot,
   HistoryEvent,
   HistoryEventType,
   SnapshotDiff,
 } from '@/shared/types';
+import { useHistoryData } from './hooks/use-history-data';
+import { useHistoryActions } from './hooks/use-history-actions';
+import { bucketize, TIME_GROUPS } from './utils/time-bucket';
+import { eventDescription } from './utils/event-description';
 import styles from './HistoryPanel.module.less';
 
 interface HistoryPanelProps {
@@ -86,26 +73,9 @@ interface HistoryPanelProps {
 
 type FilterMode = 'all' | 'tabs' | 'search' | 'archive';
 
-/** "时间分组"对应的展示顺序与标签 key */
-const TIME_GROUPS: Array<{ id: 'today' | 'yesterday' | 'thisWeek' | 'earlier'; labelKey: string }> = [
-  { id: 'today', labelKey: 'history.groupToday' },
-  { id: 'yesterday', labelKey: 'history.groupYesterday' },
-  { id: 'thisWeek', labelKey: 'history.groupThisWeek' },
-  { id: 'earlier', labelKey: 'history.groupEarlier' },
-];
-
-function bucketize(ts: number): typeof TIME_GROUPS[number]['id'] {
-  const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  const yesterdayStart = todayStart - 24 * 3600 * 1000;
-  const thisWeekStart = todayStart - 6 * 24 * 3600 * 1000;
-  if (ts >= todayStart) return 'today';
-  if (ts >= yesterdayStart) return 'yesterday';
-  if (ts >= thisWeekStart) return 'thisWeek';
-  return 'earlier';
-}
-
-/** 相对时间描述：刚刚 / N 分钟前 / N 小时前 / N 天前 */
+/** 相对时间描述：刚刚 / N 分钟前 / N 小时前 / N 天前
+ * @returns {(ts: number) => string} 返回格式化相对时间字符串的函数
+ */
 function useRelativeTime() {
   const { t } = useT();
   return useCallback((ts: number): string => {
@@ -120,7 +90,11 @@ function useRelativeTime() {
   }, [t]);
 }
 
-/** 历史事件类型图标映射 */
+/**
+ * 历史事件类型图标映射
+ * @param type - 历史事件类型
+ * @returns {ReactNode} 返回对应的图标组件
+ */
 function eventIcon(type: HistoryEventType): ReactNode {
   const size = ICON_SIZE.SMALL;
   switch (type) {
@@ -139,7 +113,11 @@ function eventIcon(type: HistoryEventType): ReactNode {
   }
 }
 
-/** 把事件类型分类成 filter 桶 */
+/**
+ * 把事件类型分类成 filter 桶
+ * @param type - 历史事件类型
+ * @returns {FilterMode} 返回事件对应的过滤模式
+ */
 function eventBucket(type: HistoryEventType): FilterMode {
   if (type === 'search_query' || type === 'search_engine_open') return 'search';
   if (type === 'archive_create' || type === 'archive_restore' || type === 'snapshot_create') return 'archive';
@@ -153,6 +131,10 @@ function eventBucket(type: HistoryEventType): FilterMode {
  *   - 顶部一行总数：今天 N（昨天 M，±delta）
  *   - 两列芯片：左列「新开始访问」、右列「不再活跃」，最多各显示 5 个
  *   - 没有变化时显示一个友好的「同昨天一致」提示
+ * @param root0 - 组件属性
+ * @param root0.diff - 快照对比数据
+ * @param root0.t - i18n 翻译函数
+ * @returns {ReactNode} 返回快照对比卡片 JSX 元素
  */
 function SnapshotDiffCard({
   diff,
@@ -237,6 +219,14 @@ function SnapshotDiffCard({
   );
 }
 
+/**
+ * 历史记录面板主组件
+ *
+ * @param root0 - 组件属性
+ * @param root0.open - 是否打开面板
+ * @param root0.onClose - 关闭面板回调
+ * @returns {JSX.Element} 返回历史面板 JSX 元素
+ */
 export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
   const { t } = useT();
   const { token } = theme.useToken();
@@ -245,50 +235,26 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
   const [activeTab, setActiveTab] = useState<'closed' | 'timeline'>('closed');
   const [keyword, setKeyword] = useState('');
   const [filterMode, setFilterMode] = useState<FilterMode>('all');
-  const [closedTabs, setClosedTabs] = useState<ClosedTabRecord[]>([]);
-  const [closedWindows, setClosedWindows] = useState<ClosedWindowRecord[]>([]);
-  const [events, setEvents] = useState<HistoryEvent[]>([]);
-  const [snapshots, setSnapshots] = useState<DailySnapshot[]>([]);
-  const [loading, setLoading] = useState(false);
 
-  /**
-   * 「昨天 → 今天」 diff：运行时计算，不落盘。
-   * 不仅看「昨天 + 今天」，也允许「今天 vs 最近一次有记录的那天」：连着几天没启动也能提供变化感。
-   */
-  const snapshotDiff = useMemo<SnapshotDiff | null>(() => {
-    if (snapshots.length < 2) return null;
-    const todayKey = snapshotDateKey();
-    const today = snapshots.find((s) => s.dateKey === todayKey) ?? snapshots[snapshots.length - 1];
-    if (today === undefined) return null;
-    const others = snapshots.filter((s) => s.dateKey !== today.dateKey);
-    if (others.length === 0) return null;
-    // 取与 today 最接近的一天作为对照组
-    const yesterday = others.reduce((prev: DailySnapshot, cur: DailySnapshot) => (cur.dateKey > prev.dateKey ? cur : prev));
-    return diffSnapshots(yesterday, today);
-  }, [snapshots]);
+  // ── 数据加载 ──────────────────────────────────
+  const {
+    closedTabs,
+    closedWindows,
+    events,
+    snapshotDiff,
+    loading,
+    refresh,
+  } = useHistoryData(open);
 
-  /** 拉取数据 —— 打开面板时执行；后续也会被「恢复/删除/清空」操作主动 refresh */
-  const refresh = useCallback(async () => {
-    setLoading(true);
-    try {
-      const [tabs, windows, evts, snaps] = await Promise.all([
-        getClosedTabs(),
-        getClosedWindows(),
-        getHistoryEvents(),
-        getDailySnapshots(),
-      ]);
-      setClosedTabs(tabs);
-      setClosedWindows(windows);
-      setEvents(evts);
-      setSnapshots(snaps);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (open) void refresh();
-  }, [open, refresh]);
+  // ── 操作处理 ─────────────────────────────────
+  const {
+    handleRestoreOne,
+    handleDeleteClosed,
+    handleRestoreWindow,
+    handleDeleteEvent,
+    handleUndoEvent,
+    handleClearAll,
+  } = useHistoryActions({ refresh, closedTabs });
 
   /** 关键词过滤的最近关闭 */
   const filteredClosedTabs = useMemo(() => {
@@ -340,82 +306,6 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
     }
     return map;
   }, [filteredEvents]);
-
-  // ── 操作处理 ─────────────────────────────────
-
-  const handleRestoreOne = useCallback(async (rec: ClosedTabRecord) => {
-    try {
-      await createTab({ url: rec.url, active: true, pinned: rec.pinned });
-      await deleteClosedTab(rec.id);
-      feedback.success(t('history.restored'));
-      void refresh();
-    } catch (err) {
-      feedback.error(t('history.restored'), err);
-    }
-  }, [refresh, t]);
-
-  const handleDeleteClosed = useCallback(async (rec: ClosedTabRecord) => {
-    await deleteClosedTab(rec.id);
-    void refresh();
-  }, [refresh]);
-
-  const handleRestoreWindow = useCallback(async (win: ClosedWindowRecord) => {
-    // 找到 win.tabIds 对应的 closed tabs，依次重开
-    const targets = closedTabs.filter((c) => win.tabIds.includes(c.id));
-    if (targets.length === 0) {
-      feedback.warning(t('history.emptyClosed'));
-      return;
-    }
-    let success = 0;
-    for (const c of targets) {
-      try {
-        await createTab({ url: c.url, active: false, pinned: c.pinned });
-        await deleteClosedTab(c.id);
-        success += 1;
-      } catch {
-        /* 单个失败不打断整体 */
-      }
-    }
-    await deleteClosedWindow(win.id);
-    feedback.success(t('history.restoredCount', { count: success }));
-    void refresh();
-  }, [closedTabs, refresh, t]);
-
-  const handleDeleteEvent = useCallback(async (id: string) => {
-    await deleteHistoryEvent(id);
-    void refresh();
-  }, [refresh]);
-
-  /**
-   * 「撤销」一条事件：
-   *   1. 如果未注册该 type 的 handler→ 警告并提示（不会滩错 toast）
-   *   2. handler 报错 / 返回 false → toast 失败
-   *   3. 成功之后仅将事件标记为 undone，保留在时间线作为足迹
-   */
-  const handleUndoEvent = useCallback(async (e: HistoryEvent) => {
-    if (!hasHistoryUndoHandler(e.type)) {
-      feedback.warning(t('history.undoNotSupported'));
-      return;
-    }
-    try {
-      const ok = await undoHistoryEvent(e);
-      if (!ok) {
-        feedback.warning(t('history.undoFailed'));
-        return;
-      }
-      await markHistoryEventUndone(e.id);
-      feedback.success(t('history.undoSuccess'));
-      void refresh();
-    } catch (err) {
-      feedback.error(t('history.undoFailed'), err);
-    }
-  }, [refresh, t]);
-
-  const handleClearAll = useCallback(async () => {
-    await clearAllNativeHistory();
-    feedback.success(t('history.cleared'));
-    void refresh();
-  }, [refresh, t]);
 
   // ── 渲染 ────────────────────────────────────
 
@@ -482,7 +372,11 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
     </li>
   );
 
-  /** 整窗快照卡片（显示在最近关闭列表顶部） */
+  /**
+   * 整窗快照卡片（显示在最近关闭列表顶部）
+   * @param win - 整窗关闭记录
+   * @returns {JSX.Element} 返回整窗快照卡片 JSX 元素
+   */
   const renderClosedWindow = (win: ClosedWindowRecord) => (
     <li key={`win-${win.id}`} className={styles['history-window-card']}>
       <div className={styles['history-window-card-head']}>
@@ -502,34 +396,10 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
     </li>
   );
 
-  /** 一条事件的描述文本（不同 type 不同模板） */
-  const eventDescription = (e: HistoryEvent): string => {
-    switch (e.type) {
-      case 'tab_opened': return t('history.eventTabOpened');
-      case 'tab_closed': return t('history.eventTabClosed');
-      case 'window_closed':
-        return t('history.eventWindowClosed', { count: typeof e.extra?.tabCount === 'number' ? e.extra.tabCount : 0 });
-      case 'tab_pinned': return t('history.eventTabPinned');
-      case 'tab_tagged': return t('history.eventTabTagged');
-      case 'archive_create': return t('history.eventArchiveCreate');
-      case 'archive_restore': return t('history.eventArchiveRestore');
-      case 'snapshot_create': return t('history.eventSnapshotCreate');
-      case 'search_query':
-        return t('history.eventSearchQuery', { query: typeof e.extra?.query === 'string' ? e.extra.query : '' });
-      case 'search_engine_open':
-        return t('history.eventSearchEngineOpen', {
-          query: typeof e.extra?.query === 'string' ? e.extra.query : '',
-          engine: typeof e.extra?.engine === 'string' ? e.extra.engine : '',
-        });
-      case 'workspace_switch': return t('history.eventWorkspaceSwitch');
-      default: return '';
-    }
-  };
-
   const renderEvent = (e: HistoryEvent) => {
     const isUndone = e.extra?.undone === true;
     return (
-      <li key={e.id} className={`history-event${isUndone ? ' is-undone' : ''}`}>
+      <li key={e.id} className={`${styles['history-event']}${isUndone ? ` ${styles['is-undone']}` : ''}`}>
         <span className={styles['history-event-icon']}>{eventIcon(e.type)}</span>
         <div
           className={styles['history-event-main']}
@@ -540,7 +410,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
           }}
         >
           <div className={styles['history-event-line']}>
-            <span className={styles['history-event-action']}>{eventDescription(e)}</span>
+            <span className={styles['history-event-action']}>{eventDescription(e, t)}</span>
             {e.title !== undefined && e.title !== '' && (
               <span className={styles['history-event-target']} title={e.url}>{e.title}</span>
             )}
@@ -596,13 +466,13 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
       )}
       extra={headerExtra}
       classNames={{
-        mask: 'history-drawer__mask',
-        header: 'history-drawer__header',
-        title: 'history-drawer__title',
-        body: 'history-panel-body',
-        section: 'history-drawer__section',
+        mask: styles['history-drawer__mask'],
+        header: styles['history-drawer__header'],
+        title: styles['history-drawer__title'],
+        body: styles['history-panel-body'],
+        section: styles['history-drawer__section'],
       }}
-      rootClassName="history-panel-root"
+      rootClassName={styles['history-panel-root']}
     >
       <div className={styles['history-panel-shell']} style={drawerVars}>
         <div className={styles['history-panel-toolbar']}>

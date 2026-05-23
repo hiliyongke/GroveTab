@@ -21,19 +21,21 @@ import {
 } from '@/repositories';
 
 interface SpeedDialState {
-  /** 常用站点列表，按 order 升序 */
+  /** 常用站点列表，按 order 升序排列 */
   sites: readonly SpeedDialSite[];
-  /** 是否已从 storage 加载 */
+  /** 是否已从 storage 完成加载 */
   loaded: boolean;
-  /** 从 storage 加载站点列表 */
+
+  // Actions
+  /** 从 chrome.storage.local 加载常用站点列表 */
   loadSites: () => Promise<void>;
-  /** 新增站点 */
+  /** 新增一个常用站点（自动持久化） */
   addSite: (site: SpeedDialSite) => Promise<void>;
-  /** 更新站点 */
+  /** 更新常用站点（根据 id 部分更新） */
   updateSite: (partial: Partial<SpeedDialSite> & { id: string }) => Promise<void>;
-  /** 删除站点 */
+  /** 根据 id 删除常用站点 */
   removeSite: (id: string) => Promise<void>;
-  /** 拖拽重排 */
+  /** 根据传入的有序 id 列表重排站点顺序 */
   reorderSites: (reorderedIds: string[]) => Promise<void>;
 }
 

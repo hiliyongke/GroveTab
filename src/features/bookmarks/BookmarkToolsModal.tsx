@@ -56,7 +56,13 @@ interface BookmarkToolsModalProps {
 /** 工具箱左侧导航的能力 key */
 type ToolKey = 'overview' | 'dedupe' | 'health' | 'organize' | 'empty';
 
-/** 通用 favicon 图标，附域名首字母兜底 */
+/**
+ * 通用 favicon 图标，附域名首字母兜底
+ * @param root0 - 组件属性
+ * @param root0.url - 书签 URL
+ * @param root0.size - 图标尺寸
+ * @returns {JSX.Element} 返回 favicon 图标 JSX 元素
+ */
 function SiteIcon({ url, size = 18 }: { url: string; size?: number }) {
   const fav = getFaviconUrl(url);
   const [err, setErr] = useState(false);
@@ -81,7 +87,15 @@ function SiteIcon({ url, size = 18 }: { url: string; size?: number }) {
   );
 }
 
-/** 顶部统计卡片 */
+/**
+ * 顶部统计卡片
+ * @param root0 - 组件属性
+ * @param root0.icon - 图标
+ * @param root0.label - 标签
+ * @param root0.value - 数值
+ * @param root0.accent - 强调样式
+ * @returns {JSX.Element} 返回统计卡片 JSX 元素
+ */
 function StatCard({ icon, label, value, accent }: {
   icon: React.ReactNode; label: string; value: number | string; accent?: 'primary' | 'success' | 'warning' | 'info';
 }) {
@@ -96,6 +110,14 @@ function StatCard({ icon, label, value, accent }: {
   );
 }
 
+/**
+ * 书签工具箱主模态框
+ * @param root0 - 组件属性
+ * @param root0.open - 是否打开
+ * @param root0.onClose - 关闭回调
+ * @param root0.onMutated - 数据变更回调
+ * @returns {JSX.Element} 返回书签工具箱模态框 JSX 元素
+ */
 export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsModalProps) {
   const { t } = useT();
   const dedupStrictness = useSettingsStore((s) => s.settings.dedupStrictness) ?? 'loose';
@@ -148,6 +170,10 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
   const [healthFilter, setHealthFilter] = useState<'all' | 'dead' | 'timeout' | 'ok'>('dead');
 
   const checkHealth = useCallback(async () => {
+    if (typeof chrome === 'undefined' || !chrome.permissions?.request) {
+      feedback.error(t('bookmark.tools.healthNeedPermission'));
+      return;
+    }
     const granted = await chrome.permissions.request({ origins: ['<all_urls>'] });
     setHealthPermission(granted);
     if (!granted) {

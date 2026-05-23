@@ -1,10 +1,12 @@
+@import (reference) '@/styles/mixins.less';
+
 /* =====================================================================
    Bookmark Tools v2 — 左侧导航 + 右侧详情，Mac 系统设置风格
    命名空间：.bm-tools__*
    ===================================================================== */
 
 /* ── Modal 标题区 ───────────────────────────────────────── */
-.bm-tools__modal .ant-modal-body {
+.bm-tools__modal :global(.ant-modal-body) {
   padding-top: 12px;
 }
 

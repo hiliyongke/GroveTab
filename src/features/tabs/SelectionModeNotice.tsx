@@ -8,7 +8,7 @@
 import { Button, Card, Space } from 'antd';
 import type { LiveTab } from '@/shared/types';
 import { useT } from '@/shared/i18n';
-import styles from './styles/views.module.less';
+import styles from './SelectionModeNotice.module.less';
 
 interface SelectionModeNoticeProps {
   selectedTabs: LiveTab[];
@@ -17,6 +17,19 @@ interface SelectionModeNoticeProps {
   onExitSelectionMode: () => void;
 }
 
+/**
+ * 多选模式提示条
+ *
+ * 功能：显示当前已选标签页的数量/域名/窗口统计，并提供「全选 / 清空 / 退出」操作。
+ * 历史来源：从早期 WorkspaceOverview 组件中拆分独立。
+ *
+ * @param props - 组件属性
+ * @param props.selectedTabs - 已选中的标签页列表
+ * @param props.onSelectAll - 全选回调
+ * @param props.onClearSelection - 清空选择回调
+ * @param props.onExitSelectionMode - 退出多选模式回调
+ * @returns 多选模式提示条 JSX 元素
+ */
 export function SelectionModeNotice({
   selectedTabs,
   onSelectAll,

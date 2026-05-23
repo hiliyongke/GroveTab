@@ -11,15 +11,23 @@ import { STORAGE_KEYS } from '@/shared/config/storage-keys';
 
 const METRICS_KEY = STORAGE_KEYS.metrics;
 
+/** 使用统计指标 */
 export interface Metrics {
+  /** 新标签页打开次数 */
   newtabOpens: number;
+  /** 归档创建次数 */
   archivesCreated: number;
+  /** 标签关闭次数 */
   tabsClosed: number;
+  /** 搜索执行次数 */
   searchesPerformed: number;
+  /** 首次使用时间戳 */
   firstUsedAt: number;
+  /** 最后使用时间戳 */
   lastUsedAt: number;
 }
 
+/** 默认指标初始值 */
 const DEFAULT_METRICS: Metrics = {
   newtabOpens: 0,
   archivesCreated: 0,
@@ -29,12 +37,22 @@ const DEFAULT_METRICS: Metrics = {
   lastUsedAt: 0,
 };
 
+/**
+ * 读取当前累加计数器数据
+ *
+ * @returns 指标数据对象（缺失时返回默认值）
+ */
 async function getCounters(): Promise<Metrics> {
   return (await getData<Metrics>(STORAGE_KEYS.metricCounters)) ?? { ...DEFAULT_METRICS };
 }
 
 /**
- * 旧版累加计数器（保持兼容）。
+ * 旧版累加计数器（保持兼容）
+ *
+ * 同时写入事件流，便于 InsightsPanel 展示。
+ *
+ * @param key       指标键名
+ * @param increment 增量（默认 1）
  */
 export async function recordMetric(
   key: keyof Metrics,
@@ -61,6 +79,9 @@ const MAX_EVENTS = 2000;
 /**
  * 事件型埋点（v1.0 封板新增）：按时间追加，最多 2000 条（保留最近）。
  * 所有数据本地存储，绝不上传。
+ *
+ * @param event - 事件名称
+ * @param payload - 事件负载数据（可选）
  */
 export async function track(event: string, payload?: Record<string, unknown>): Promise<void> {
   try {
@@ -74,7 +95,10 @@ export async function track(event: string, payload?: Record<string, unknown>): P
 }
 
 /**
- * FCP 采样：在页面就绪时调用一次（首次调用生效），写入 perf_fcp 事件。
+ * FCP（首次内容绘制）采样
+ *
+ * 在页面就绪时调用一次，通过 PerformanceObserver 捕获 FCP 指标，
+ * 写入 perf_fcp 事件到本地指标流。
  */
 export function recordFcpOnce(): void {
   if (typeof window === 'undefined' || typeof PerformanceObserver === 'undefined') return;
@@ -95,8 +119,10 @@ export function recordFcpOnce(): void {
 }
 
 /**
- * FPS 采样：按 10s 窗口统计 p50 / p95，写入 perf_fps_sample 事件。
- * 仅采样一次（避免持续增加 CPU 开销）。
+ * FPS 采样：按 10s 窗口统计 p50 / p95
+ *
+ * 通过 requestAnimationFrame 采样 10 秒，计算帧率分位数，
+ * 写入 perf_fps_sample 事件。仅采样一次，避免持续 CPU 开销。
  */
 export function recordFpsSampleOnce(): void {
   if (typeof window === 'undefined' || typeof requestAnimationFrame === 'undefined') return;
@@ -105,6 +131,10 @@ export function recordFpsSampleOnce(): void {
   const start = last;
   let stopped = false;
 
+  /**
+   * 逐帧回调：采集帧间隔，10 秒后统计 p50/p95
+   * @param now 当前帧时间戳
+   */
   function frame(now: number) {
     if (stopped) return;
     frameTimes.push(now - last);

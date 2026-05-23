@@ -39,6 +39,23 @@ export interface BatchOperationsMenuProps {
   onClearAll: () => Promise<void>;
 }
 
+/**
+ * 批量操作菜单组件
+ *
+ * 提供多选模式和批量操作功能，支持恢复、删除、合并、导出等操作。
+ *
+ * @param props - 组件属性
+ * @param props.selectedIds - 选中的会话ID集合
+ * @param props.totalCount - 总会话数量
+ * @param props.selectable - 是否处于选择模式
+ * @param props.onToggleSelectMode - 切换选择模式
+ * @param props.onBatchRestore - 批量恢复选中的会话
+ * @param props.onBatchDelete - 批量删除选中的会话
+ * @param props.onMergeSessions - 合并选中的会话
+ * @param props.onExportSessions - 导出选中的会话
+ * @param props.onClearAll - 清空所有会话
+ * @returns 批量操作菜单的 JSX 元素
+ */
 export function BatchOperationsMenu({
   selectedIds,
   totalCount,

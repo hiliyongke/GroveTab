@@ -41,7 +41,11 @@ interface FeedbackApi {
  */
 let holder: (React.RefObject<FeedbackApi> | FeedbackApi | null) = null;
 
-/** 从 holder 中解析出实际的 FeedbackApi 实例 */
+/**
+ * 从 holder 中解析出实际的 FeedbackApi 实例
+ *
+ * @returns FeedbackApi 实例；未绑定时返回 null
+ */
 function resolveApi(): FeedbackApi | null {
   if (holder === null) return null;
   if ('current' in holder) return holder.current;
@@ -49,10 +53,13 @@ function resolveApi(): FeedbackApi | null {
 }
 
 /**
- * React 层注入 antd 反馈实例（应在 App 根组件的 useEffect 中调用一次）
+ * React 层注入 antd 反馈实例
  *
+ * 应在 App 根组件的 useEffect 中调用一次。
  * 支持直接传入 FeedbackApi 或 React.RefObject<FeedbackApi>（推荐后者，
  * 避免因 antd 内部引用不稳定导致 useEffect 反复触发）。
+ *
+ * @param instance - antd 反馈实例或 Ref 对象
  */
 export function bindFeedback(instance: React.RefObject<FeedbackApi> | FeedbackApi): void {
   holder = instance;

@@ -19,12 +19,18 @@
 import { create } from 'zustand';
 import type { StatsData } from '@/shared/types';
 import { getStats } from '@/repositories';
+import { toDayStrUTC } from '@/shared/utils/date';
 
 interface StatsState {
+  /** 统计数据（从 SW StatsCollector 加载，为 null 时表示未加载或加载失败） */
   data: StatsData | null;
+  /** 是否已从 storage 完成首次加载 */
   loaded: boolean;
   /** 数据损坏 / 缺失时为 true，UI 提示"数据重建中" */
   isFallback: boolean;
+
+  // Actions
+  /** 从 chrome.storage.local 加载统计数据 */
   loadStats: () => Promise<void>;
   /** 基于 daily 聚合计算某 URL 最近 N 天的合计激活次数 */
   getCountRecent: (url: string, days?: number) => number;
@@ -56,7 +62,7 @@ export const useStatsStore = create<StatsState>((set, get) => ({
   getCountRecent: (url, days = DEFAULT_DAYS) => {
     const { data } = get();
     if (!data) return 0;
-    const cutoff = toDayStr(new Date(Date.now() - days * 86400_000));
+    const cutoff = toDayStrUTC(new Date(Date.now() - days * 86400_000));
     let total = 0;
     for (const record of data.daily) {
       if (record.day >= cutoff) {
@@ -69,7 +75,7 @@ export const useStatsStore = create<StatsState>((set, get) => ({
   getTopUrls: (days = DEFAULT_DAYS, limit = 30) => {
     const { data } = get();
     if (!data) return [];
-    const cutoff = toDayStr(new Date(Date.now() - days * 86400_000));
+    const cutoff = toDayStrUTC(new Date(Date.now() - days * 86400_000));
     const totals = new Map<string, number>();
     for (const record of data.daily) {
       if (record.day < cutoff) continue;
@@ -84,16 +90,20 @@ export const useStatsStore = create<StatsState>((set, get) => ({
   },
 }));
 
+/**
+ * 校验 StatsData 数据完整性
+ *
+ * 检查从 chrome.storage.local 读取的统计数据是否有效：
+ *   - 不能为 undefined
+ *   - daily 必须是数组
+ *   - lastFlushAt 必须是数字
+ *
+ * @param data 待校验的统计数据
+ * @returns 数据有效返回 true，否则返回 false
+ */
 function isValidStatsData(data: StatsData | undefined): data is StatsData {
   if (data === undefined) return false;
   if (!Array.isArray(data.daily)) return false;
   if (typeof data.lastFlushAt !== 'number') return false;
   return true;
-}
-
-function toDayStr(d: Date): string {
-  const yyyy = d.getUTCFullYear();
-  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const dd = String(d.getUTCDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
 }

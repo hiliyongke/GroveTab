@@ -52,10 +52,28 @@ const TOUR_STEPS: TourStep[] = [
   { icon: <Keyboard size={ICON_SIZE.XXLARGE} />, titleKey: 'onboarding.tour.shortcutsTitle', descKey: 'onboarding.tour.shortcutsDesc' },
 ];
 
+/**
+ * 合并 CSS 类名
+ *
+ * 过滤掉 falsy 值（false、undefined、空字符串），用空格连接。
+ *
+ * @param vars - CSS 类名列表
+ * @returns 合并后的类名字符串
+ */
 function cssVars(vars: Record<string, string>): CSSProperties {
   return vars;
 }
 
+/**
+ * 首次访问双模式引导卡片
+ *
+ * 渲染「接管新标签页」或「仅工具栏按钮」的选择界面，
+ * 并在用户选择后驱动后续的新手 Tour。
+ *
+ * @param props - 组件属性
+ * @param props.onDismiss - 关闭引导的回调
+ * @returns 引导卡片的 JSX 元素
+ */
 export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
   const [phase, setPhase] = useState<Phase>('welcome');
   const [stepIndex, setStepIndex] = useState(0);

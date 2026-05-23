@@ -51,6 +51,9 @@ const pending = new Map<string, Promise<Accent | null>>();
  * 扩展自身的 `chrome-extension://<id>/_favicon/...` 与 newtab 页同源 → true。
  * 远程站点的 favicon（https://example.com/favicon.ico）→ false。
  * data: / blob: 也视为同源（canvas 可安全读取）。
+ *
+ * @param url - 待判断的 URL 字符串
+ * @returns 同源返回 true，否则返回 false
  */
 function isSameOriginUrl(url: string): boolean {
   try {
@@ -65,6 +68,11 @@ function isSameOriginUrl(url: string): boolean {
 
 /**
  * 把 RGB → HSL 的饱和度（仅需 S，用于过滤灰色）
+ *
+ * @param r - 红色分量（0-255）
+ * @param g - 绿色分量（0-255）
+ * @param b - 蓝色分量（0-255）
+ * @returns 饱和度（0-1）
  */
 function saturation(r: number, g: number, b: number): number {
   const max = Math.max(r, g, b);
@@ -78,6 +86,8 @@ function saturation(r: number, g: number, b: number): number {
 
 /**
  * 从 canvas 像素数据中提取主色
+ *
+ * @param imageData - canvas 的 ImageData 对象
  * @returns [r, g, b] 或 null（全是灰/透明像素）
  */
 function extractDominantColor(imageData: ImageData): [number, number, number] | null {
@@ -124,6 +134,11 @@ function extractDominantColor(imageData: ImageData): [number, number, number] | 
 
 /**
  * 把 RGB 转到 HSL，返回 [h(0-360), s(0-1), l(0-1)]
+ *
+ * @param r - 红色分量（0-255）
+ * @param g - 绿色分量（0-255）
+ * @param b - 蓝色分量（0-255）
+ * @returns [h, s, l] 元组
  */
 function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
   const rn = r / 255;
@@ -153,6 +168,11 @@ function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
 
 /**
  * HSL → RGB 三元组
+ *
+ * @param h - 色相（0-360）
+ * @param s - 饱和度（0-1）
+ * @param l - 亮度（0-1）
+ * @returns [r, g, b] 元组（0-255）
  */
 function hslToRgb(h: number, s: number, l: number): [number, number, number] {
   const hue2rgb = (p: number, q: number, t: number) => {
@@ -194,12 +214,18 @@ function hslToRgb(h: number, s: number, l: number): [number, number, number] {
  * - soft：浅色主题用 18% 透明的 barLight，柔和地衬托 favicon 徽章
  * - text：与 bar 同值（文字场景少，保留字段）
  *
- * @param h 基础色相（0-360）
- * @param lShift 明度偏移（可选，范围 -0.06 ~ +0.06）——同色相下的明度微抖动，
+ * @param h - 基础色相（0-360）
+ * @param lShift - 明度偏移（可选，范围 -0.06 ~ +0.06）——同色相下的明度微抖动，
  *   用于批次内区分同一色相的不同分组。由 useGroupAccents 基于 colorKey 稳定生成。
+ * @returns 包含多种变体的 Accent 对象
  */
 export function buildAccentFromHue(h: number, lShift = 0): Accent {
-  /** rgb 辅助：给定 s/l 返回 hex */
+  /**
+   * rgb 辅助：给定 s/l 返回 hex
+   * @param s - 饱和度（0-1）
+   * @param l - 亮度（0-1）
+   * @returns hex 颜色字符串（如 "#ff5500"）
+   */
   const toHex = (s: number, l: number) => {
     const clampedL = Math.max(0.35, Math.min(0.85, l + lShift));
     const [r, g, b] = hslToRgb(h, s, clampedL);
@@ -231,6 +257,9 @@ export function buildAccentFromHue(h: number, lShift = 0): Accent {
  *   由调用方用 `stringToAccent` 哈希色兜底——视觉上只是撞色，控制台保持干净。
  *
  * 失败场景：跨源 / 非图像 / 纯灰图标 / 加载超时 → resolve(null)
+ *
+ * @param url - favicon 的 URL 字符串
+ * @returns Promise 解析为 Accent 对象或 null（失败）
  */
 export function getAccentFromFavicon(url: string): Promise<Accent | null> {
   if (!url) return Promise.resolve(null);
@@ -310,6 +339,9 @@ export function getAccentFromFavicon(url: string): Promise<Accent | null> {
 
 /**
  * 同步读取已缓存的 Accent（未算完返回 undefined）
+ *
+ * @param url - favicon 的 URL 字符串
+ * @returns 已缓存的 Accent；未缓存返回 undefined；计算失败返回 null
  */
 export function peekFaviconAccent(url: string): Accent | null | undefined {
   if (!url) return null;

@@ -16,17 +16,28 @@ import { translateWithLocale, type Locale } from './core';
 /** 类型 re-export：不影响 fast-refresh 规则 */
 export type { Locale };
 
-/** I18n Context 值 */
+/** I18nContext 注入值 */
 interface I18nContextValue {
+  /** 当前语言 */
   locale: Locale;
+  /** 翻译函数：传入 key 和可选占位符，返回翻译文本 */
   t: (key: string, params?: Record<string, string | number>) => string;
+  /** 切换语言 */
   setLocale: (locale: Locale) => void;
 }
 
+/** I18n Context 实例，供 Provider 和 useT 使用 */
 const I18nContext = createContext<I18nContextValue | null>(null);
 
 /**
  * I18nProvider —— 将当前语言与 `t` 函数注入 React 树
+ *
+ * 从 settings store 读取语言设置，派生 locale 和 t 函数，
+ * 通过 Context 提供给所有子组件。首次加载时根据浏览器语言自动推断。
+ *
+ * @param children 子组件
+ * @param children.children
+ * @returns 包裹了 I18nContext.Provider 的子组件树
  */
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const settingsLocale = useSettingsStore((s) => s.settings.language);
@@ -69,7 +80,12 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** 组件内获取 `t` / `locale` / `setLocale` */
+/**
+ * 组件内获取 `t` / `locale` / `setLocale`
+ *
+ * @returns I18n 上下文，包含 locale、t 翻译函数和 setLocale
+ * @throws 若在未包裹 I18nProvider 的组件中使用，抛出 Error
+ */
 export function useT() {
   const ctx = useContext(I18nContext);
   if (!ctx) throw new Error('useT must be used within I18nProvider');

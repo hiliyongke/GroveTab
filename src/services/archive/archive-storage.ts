@@ -26,6 +26,9 @@ let useIDB = false;
  * 初始化归档存储路由。
  *
  * 在应用启动时调用，检测是否需要降级并建立路由。
+ * 检测结果写入运行时缓存 `useIDB`，避免每次读写都重复检测。
+ *
+ * @returns 无返回值
  */
 export async function initArchiveStorage(): Promise<void> {
   const hasIDB = await hasIDBData();
@@ -37,7 +40,13 @@ export async function initArchiveStorage(): Promise<void> {
   useIDB = await hasIDBData();
 }
 
-/** 获取全部归档会话（自动路由到 IDB 或 chrome.storage.local）。 */
+/** 获取全部归档会话（自动路由到 IDB 或 chrome.storage.local）。
+ *
+ * 读取前会检测是否需要降级到 IndexedDB，
+ * 若已降级则透明路由到 IDB 读取。
+ *
+ * @returns 归档会话数组（按写入顺序，最新的在前面）
+ */
 export async function getArchivedSessions(): Promise<ArchivedSession[]> {
   if (useIDB) {
     return getSessionsFromIDB();
@@ -56,7 +65,14 @@ export async function getArchivedSessions(): Promise<ArchivedSession[]> {
   return sessions;
 }
 
-/** 保存归档会话（自动路由）。 */
+/**
+ * 保存归档会话（自动路由）。
+ *
+ * 根据当前路由模式，写入 chrome.storage.local 或 IndexedDB。
+ *
+ * @param sessions 完整的归档会话列表（会整体覆盖）
+ * @returns 无返回值
+ */
 export async function saveSessions(sessions: ArchivedSession[]): Promise<void> {
   if (useIDB) {
     return saveSessionsToIDB(sessions);
@@ -64,7 +80,14 @@ export async function saveSessions(sessions: ArchivedSession[]): Promise<void> {
   await setData(SESSIONS_KEY, sessions);
 }
 
-/** 将会话插入到列表头部并持久化。 */
+/**
+ * 将会话插入到列表头部并持久化。
+ *
+ * 新会话插入到列表头部（最新优先），然后整体保存。
+ *
+ * @param session 要插入的归档会话
+ * @returns 无返回值
+ */
 export async function prependSession(session: ArchivedSession): Promise<void> {
   const sessions = await getArchivedSessions();
   sessions.unshift(session);

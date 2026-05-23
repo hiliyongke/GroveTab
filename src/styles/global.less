@@ -1,0 +1,25 @@
+/* ==========================================================================
+   全局样式 —— 全局效果层样式（原 effects.module.less）
+   这些样式被组件直接通过 className 引用，不通过 CSS Modules
+   ========================================================================== */
+
+.app-video-background {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: -1;
+  pointer-events: none;
+  background: transparent;
+}
+
+.app-click-effect-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 50;
+}

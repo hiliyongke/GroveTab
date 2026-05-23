@@ -1,22 +1,17 @@
+@import (reference) "@/styles/mixins.less";
+
 .archive-view {
   display: block;
 }
 
 .app-archive-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  .flex-row-center(12px);
   margin-bottom: 16px;
   padding: 0 4px;
 }
 
 .app-archive-header__badge {
-  width: 32px;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  .icon-container(32px);
   border-radius: var(--ant-border-radius);
   background: var(--ant-color-primary-bg);
   color: var(--ant-color-primary);
@@ -27,8 +22,7 @@
 }
 
 .app-archive-header__title {
-  flex: 1;
-  min-width: 0;
+  .meta-truncate();
   color: var(--ant-color-text);
   font-size: 16px;
   font-weight: 600;
@@ -69,10 +63,9 @@
 }
 
 .app-archive-loading__content {
-  display: inline-flex;
-  flex-direction: column;
+  .flex-column(10px);
   align-items: center;
-  gap: 10px;
+  display: inline-flex;
 }
 
 .app-archive-loading__copy {
@@ -87,8 +80,21 @@
   transition: outline-color 200ms ease;
 }
 
-.app-archive-session-shell.is-highlighted {
+/* 状态类（独立，供 TSX 单独引用） */
+.is-highlighted {
   outline-color: var(--ant-color-primary);
+}
+
+.is-expanded {
+  transform: rotate(90deg);
+}
+
+.is-matched {
+  background: var(--ant-color-primary-bg);
+}
+
+.is-invalid {
+  color: var(--ant-color-error);
 }
 
 .app-archive-item {
@@ -99,9 +105,7 @@
 
 .app-archive-item__main {
   width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  .flex-row-center(12px);
   cursor: pointer;
 }
 
@@ -109,40 +113,26 @@
   transition: transform 0.2s ease;
 }
 
-.app-archive-item__toggle-icon.is-expanded {
-  transform: rotate(90deg);
-}
-
 .app-archive-item__icon {
-  width: 36px;
-  height: 36px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  .icon-container(36px);
   border-radius: var(--ant-border-radius);
   background: var(--ant-color-fill-secondary);
   color: var(--ant-color-text-tertiary);
 }
 
 .app-archive-item__content {
-  flex: 1;
-  min-width: 0;
+  .meta-truncate();
 }
 
 .app-archive-item__name {
-  overflow: hidden;
+  .text-truncate();
   color: var(--ant-color-text);
   font-size: 13.5px;
   font-weight: 500;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .app-archive-item__meta {
-  display: flex;
-  align-items: center;
-  gap: 0;
+  .flex-row-center(0);
   margin-top: 2px;
   color: var(--ant-color-text-tertiary);
   font-size: 11.5px;
@@ -183,22 +173,14 @@
 
 .app-archive-item__tab-row {
   --app-row-hover-bg: var(--ant-color-fill-secondary);
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  .flex-row-center(10px);
   padding: 6px 8px;
   border-radius: var(--ant-border-radius-sm);
 }
 
-.app-archive-item__tab-row.is-matched {
-  background: var(--ant-color-primary-bg);
-}
-
 .app-archive-item__tab-favicon,
 .app-archive-item__tab-favicon-placeholder {
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
+  .icon-container(14px);
 }
 
 .app-archive-item__tab-favicon {
@@ -206,15 +188,12 @@
 }
 
 .app-archive-item__tab-content {
-  flex: 1;
-  min-width: 0;
+  .meta-truncate();
 }
 
 .app-archive-item__tab-title,
 .app-archive-item__tab-subtitle {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  .text-truncate();
 }
 
 .app-archive-item__tab-title {
@@ -289,9 +268,8 @@
 }
 
 .app-archive-dialog__tag-label {
+  .flex-row-center(4px);
   display: inline-flex;
-  align-items: center;
-  gap: 4px;
 }
 
 .app-archive-dialog__tag {
@@ -314,14 +292,8 @@
   line-height: 1.4;
 }
 
-.app-archive-dialog__preview-value.is-invalid {
-  color: var(--ant-color-error);
-}
-
 .app-archive-dialog__session-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  .flex-column(4px);
 }
 
 .app-archive-dialog__strategy-label {

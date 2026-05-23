@@ -28,6 +28,7 @@ import { feedback } from '@/shared/ui/feedback';
 import { Field } from '@/features/settings/components/Field';
 import { clearAllNativeHistory } from '@/repositories';
 import type { UserSettings } from '@/shared/types';
+import styles from '../settings.module.less';
 
 interface PrivacyPanelProps {
   settings: UserSettings;
@@ -43,6 +44,17 @@ const TTL_OPTIONS: Array<{ value: number; labelKey: string }> = [
   { value: 0, labelKey: 'privacy.ttlForever' },
 ];
 
+/**
+ * 隐私/历史设置面板
+ *
+ * 控制历史记录的开关、保留时长、URL 黑名单。
+ * 危险操作（清空/恢复默认）走 Popconfirm 二次确认。
+ *
+ * @param props - 组件属性
+ * @param props.settings - 当前用户设置
+ * @param props.updateSettings - 更新设置回调
+ * @returns 隐私/历史设置面板 JSX 元素
+ */
 export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
   const { t } = useT();
   const [clearing, setClearing] = useState(false);
@@ -54,6 +66,14 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
   const ttlHours = settings.historyClosedTabsTtlHours ?? 168;
   const blocklist = settings.historyUrlBlocklist ?? [];
 
+  /**
+   * 清空所有原生历史记录
+   *
+   * 显示加载状态，清空完成后显示成功提示。
+   * 失败时使用 feedback 显示错误信息。
+   *
+   * @returns 无返回值
+   */
   const handleClearAll = async () => {
     setClearing(true);
     try {
@@ -70,11 +90,11 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
   const disabled = !enabled;
 
   return (
-    <div className="settings-panel-stack">
+    <div className={styles['settings-panel-stack']}>
       {/* ── 主开关 ───────────────────────────────────── */}
-      <section className="settings-section">
-        <h3 className="settings-section__title">{t('privacy.sectionMaster')}</h3>
-        <div className="settings-section__body">
+      <section className={styles['settings-section']}>
+        <h3 className={styles['settings-section__title']}>{t('privacy.sectionMaster')}</h3>
+        <div className={styles['settings-section__body']}>
           <Field
             label={t('privacy.enableHistory')}
             hint={t('privacy.enableHistoryHint')}
@@ -98,9 +118,9 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
       </section>
 
       {/* ── 容量与过期 ────────────────────────────────── */}
-      <section className="settings-section" style={{ opacity: disabled ? 0.55 : 1 }}>
-        <h3 className="settings-section__title">{t('privacy.sectionCapacity')}</h3>
-        <div className="settings-section__body">
+      <section className={styles['settings-section']} style={{ opacity: disabled ? 0.55 : 1 }}>
+        <h3 className={styles['settings-section__title']}>{t('privacy.sectionCapacity')}</h3>
+        <div className={styles['settings-section__body']}>
           <Field
             label={t('privacy.maxClosedTabs')}
             hint={t('privacy.maxClosedTabsHint', { value: maxClosed })}
@@ -150,9 +170,9 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
       </section>
 
       {/* ── URL 黑名单 ────────────────────────────────── */}
-      <section className="settings-section" style={{ opacity: disabled ? 0.55 : 1 }}>
-        <h3 className="settings-section__title">{t('privacy.sectionBlocklist')}</h3>
-        <div className="settings-section__body">
+      <section className={styles['settings-section']} style={{ opacity: disabled ? 0.55 : 1 }}>
+        <h3 className={styles['settings-section__title']}>{t('privacy.sectionBlocklist')}</h3>
+        <div className={styles['settings-section__body']}>
           <Field
             label={t('privacy.urlBlocklist')}
             hint={t('privacy.urlBlocklistHint')}
@@ -178,9 +198,9 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
       </section>
 
       {/* ── 危险区 ────────────────────────────────────── */}
-      <section className="settings-section">
-        <h3 className="settings-section__title">{t('privacy.sectionDanger')}</h3>
-        <div className="settings-section__body">
+      <section className={styles['settings-section']}>
+        <h3 className={styles['settings-section__title']}>{t('privacy.sectionDanger')}</h3>
+        <div className={styles['settings-section__body']}>
           <Field
             label={t('privacy.clearAll')}
             hint={t('privacy.clearAllHint')}

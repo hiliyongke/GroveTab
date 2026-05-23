@@ -28,6 +28,7 @@ import {
   snapshotDateKey,
 } from '@/repositories';
 import type { StatsData, StatsRecord } from '@/shared/types';
+import { toDayStrUTC } from '@/shared/utils/date';
 import { BRAND } from '@/shared/config/brand';
 import { CONFIG } from '@/shared/config';
 import { APP_INTERNAL_IDS, STORAGE_KEYS } from '@/shared/config/storage-keys';
@@ -61,6 +62,15 @@ const tabSnapshots = new Map<number, TabSnapshot>();
 /** 记录「本次被成套关闭」的窗口： windowId -> closedTab 记录 id 集 */
 const windowCloseBuffer = new Map<number, string[]>();
 
+/**
+ * 为标签页创建内存快照
+ *
+ * 在 tabs.onRemoved 触发时，tab 已被删除，无法获取 url/title。
+ * 因此在 onCreated/onUpdated 中维护此快照，onRemoved 时从快照读取并写入「最近关闭」列表。
+ *
+ * @param tab Chrome 标签页对象
+ * @returns 无返回值
+ */
 function snapshotTab(tab: chrome.tabs.Tab): void {
   if (tab.id === undefined) return;
   tabSnapshots.set(tab.id, {
@@ -135,6 +145,15 @@ chrome.runtime.onStartup.addListener(() => { void maybeCaptureDailySnapshot(); }
  * 事件（isWindowClosing=true），收集完后起一个“整窗快照”便于一键恢复。
  */
 const windowCloseFlushTimers = new Map<number, ReturnType<typeof setTimeout>>();
+/**
+ * 延迟刷新窗口关闭缓冲
+ *
+ * 在窗口被整体关闭后，延迟一段时间（800ms）后将该窗口下的 closedTab
+ * 记录打包成一个 ClosedWindowRecord 快照，便于一键恢复。
+ *
+ * @param windowId 窗口 ID
+ * @returns 无返回值
+ */
 function scheduleWindowCloseFlush(windowId: number): void {
   const existing = windowCloseFlushTimers.get(windowId);
   if (existing !== undefined) clearTimeout(existing);
@@ -185,6 +204,14 @@ const statsMem: InMemoryCounts = {
 const STATS_FLUSH_INTERVAL_MS = CONFIG.performance.statsFlushIntervalMs;
 const STATS_RETAIN_DAYS = CONFIG.performance.statsRetainDays;
 
+/**
+ * 规范化 URL 作为统计键
+ *
+ * 移除 hash 部分，并去除末尾的斜杠，确保同一 URL 的不同写法被聚合。
+ *
+ * @param url 原始 URL 字符串
+ * @returns 规范化后的 URL 字符串
+ */
 function urlKey(url: string): string {
   try {
     const u = new URL(url);
@@ -195,14 +222,15 @@ function urlKey(url: string): string {
   }
 }
 
-function todayStr(): string {
-  const d = new Date();
-  const yyyy = d.getUTCFullYear();
-  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const dd = String(d.getUTCDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
-}
-
+/**
+ * 增加指定 URL 的激活计数
+ *
+ * 在内存中累加该 URL 的激活次数，并标记 dirty 状态。
+ * 定期通过 flushStats 落盘到 storage。
+ *
+ * @param url 标签页 URL
+ * @returns 无返回值
+ */
 function incrementStats(url: string): void {
   if (url === '') return;
   const key = urlKey(url);
@@ -210,13 +238,23 @@ function incrementStats(url: string): void {
   statsMem.dirty = true;
 }
 
+/**
+ * 将内存中的统计数据落盘到 storage
+ *
+ * 按 URL × day 聚合写入 stats.daily。
+ * 仅当 dirty=true 且距离上次 flush 超过指定间隔时才执行（force=true 时忽略间隔）。
+ * 自动清理超过保留天数的旧数据。
+ *
+ * @param force 是否强制落盘（忽略时间间隔）
+ * @returns 无返回值（异步操作）
+ */
 async function flushStats(force = false): Promise<void> {
   if (!statsMem.dirty) return;
   if (!force && Date.now() - statsMem.lastFlushAt < STATS_FLUSH_INTERVAL_MS) return;
   const snapshot = new Map(statsMem.byUrl);
   try {
     const existing: StatsData = (await getStats()) ?? { daily: [], lastFlushAt: 0 };
-    const today = todayStr();
+    const today = toDayStrUTC();
     let dayRecord = existing.daily.find((r) => r.day === today);
     if (dayRecord === undefined) {
       dayRecord = { day: today, counts: {} };
@@ -236,6 +274,8 @@ async function flushStats(force = false): Promise<void> {
     statsMem.byUrl.clear();
     statsMem.dirty = false;
     statsMem.lastFlushAt = Date.now();
+    // 通知所有新标签页统计数据已更新
+    swBroadcast('stats-updated', {});
   } catch (err) {
     console.warn(`${SW_LOG_TAG} flushStats failed`, err);
     for (const [url, count] of snapshot.entries()) {
@@ -391,6 +431,11 @@ chrome.runtime.onInstalled.addListener(() => {
     title: chrome.i18n.getMessage('context_save_all') || `Save all tabs to ${BRAND.name}`,
     contexts: ['action'],
   });
+
+  // Initialize sidePanel - Arc style sidebar
+  if (chrome.sidePanel) {
+    void chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+  }
 });
 
 chrome.contextMenus.onClicked.addListener((info) => {
@@ -443,6 +488,33 @@ chrome.commands.onCommand.addListener((command) => {
         console.error(`${SW_LOG_TAG} Open history failed:`, err);
       }
     }
+
+    // Arc-style sidebar toggle
+    if (command === 'toggle-arc-sidebar') {
+      try {
+        if (chrome.sidePanel) {
+          // Simple toggle - open the sidePanel
+          const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+          if (tab?.windowId) {
+            await chrome.sidePanel.open({ windowId: tab.windowId });
+          }
+        }
+      } catch (err) {
+        console.error(`${SW_LOG_TAG} Toggle Arc sidebar failed:`, err);
+      }
+    }
+
+    // Command bar (opens sidePanel if not open)
+    if (command === 'open-command-bar') {
+      try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab?.windowId && chrome.sidePanel) {
+          await chrome.sidePanel.open({ windowId: tab.windowId });
+        }
+      } catch (err) {
+        console.error(`${SW_LOG_TAG} Open command bar failed:`, err);
+      }
+    }
   })();
 });
 // ── Alarms ────────────────────────────────────────────
@@ -451,6 +523,15 @@ void chrome.alarms.create(APP_INTERNAL_IDS.statsHeartbeatAlarm, { periodInMinute
 void chrome.alarms.create(APP_INTERNAL_IDS.autoSnapshotAlarm, { periodInMinutes: 60 });
 void chrome.alarms.create(APP_INTERNAL_IDS.trendingRefreshAlarm, { periodInMinutes: 30 });
 
+/**
+ * 按配置频率自动创建标签页快照
+ *
+ * 根据 autoSnapshotFrequency 设置（6h/12h/24h/off），
+ * 检查距离上次快照是否超过设定间隔，
+ * 若满足条件且当前焦点窗口有 ≥10 个非固定标签页，则创建自动快照。
+ *
+ * @returns 无返回值（异步操作）
+ */
 async function autoSnapshotIfNeeded(): Promise<void> {
   try {
     const settings = await getSettings();
@@ -493,6 +574,15 @@ async function autoSnapshotIfNeeded(): Promise<void> {
 }
 
 // 检测 tab discarded 状态变化（用于跨窗口同步）
+/**
+ * 检测标签页 discarded 状态变化并广播
+ *
+ * 遍历所有标签页，比较当前 discarded 状态与缓存，
+ * 若发生变化则通过 swBroadcast 广播 tab-discarded 事件。
+ * 由每分钟的 heartbeat alarm 触发。
+ *
+ * @returns 无返回值（异步操作）
+ */
 async function checkDiscardedTabs(): Promise<void> {
   try {
     const tabs = await chrome.tabs.query({});
@@ -546,6 +636,16 @@ const OG_CONCURRENCY = CONFIG.performance.ogConcurrency;
 const OG_TIMEOUT_MS = CONFIG.performance.ogTimeoutMs;
 const OG_MAX_BYTES = CONFIG.performance.ogMaxBytes;
 
+/**
+ * 尝试抓取网页的 Open Graph 描述信息
+ *
+ * 当 enableOgFetch=true 且已授权 <all_urls> 时触发。
+ * 仅当 OG 缓存不存在或已过期（7天）时才重新抓取。
+ * 使用 fetch 获取页面 HTML，通过正则解析 og:description 或 meta description。
+ *
+ * @param url 待抓取的网页 URL
+ * @returns 无返回值（异步操作，结果写入 storage）
+ */
 async function maybeFetchOg(url: string): Promise<void> {
   try {
     const settings = await getSettings();
@@ -608,6 +708,8 @@ async function maybeFetchOg(url: string): Promise<void> {
  *
  * 仅当存在缓存（说明用户使用过热榜功能）时才刷新，
  * 避免从未用过热榜的用户产生不必要的网络请求。
+ *
+ * @returns 无返回值（异步操作）
  */
 async function refreshTrendingCache(): Promise<void> {
   try {

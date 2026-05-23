@@ -16,12 +16,17 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, cre
 import { ChevronRight, ChevronDown, Folder, FolderOpen, ZoomIn, ZoomOut, Maximize2, RotateCcw, Eye, EyeOff } from 'lucide-react';
 import type { BookmarkNode } from '@/chrome/bookmarks';
 import { getFaviconUrl } from '@/chrome';
-import { useAccent } from '@/shared/hooks/useAccent';
+import { useAccent } from '@/shared/hooks/use-accent';
 import { ICON_SIZE } from '@/shared/utils/icon-size';
 import { useT } from '@/shared/i18n';
-import './styles/bookmark-tree.less';
+import styles from './styles/bookmark-tree.module.less';
 
-/** 从 URL 提取 hostname */
+/**
+ * 从 URL 提取 hostname
+ *
+ * @param url - 待提取的 URL
+ * @returns hostname 或原始 URL（解析失败时）
+ */
 function getHostname(url: string): string {
   try {
     return new URL(url).hostname;
@@ -30,7 +35,13 @@ function getHostname(url: string): string {
   }
 }
 
-/** 取首字母作为 favicon 回退 */
+/**
+ * 取首字母作为 favicon 回退
+ *
+ * @param title - 书签标题
+ * @param url - 书签 URL
+ * @returns 首字母大写
+ */
 function getFallbackLetter(title: string, url: string): string {
   if (title) return title.charAt(0).toUpperCase();
   try {
@@ -40,7 +51,12 @@ function getFallbackLetter(title: string, url: string): string {
   }
 }
 
-/** 递归统计书签数 */
+/**
+ * 递归统计
+ *
+ * @param nodes - 书签节点数组
+ * @returns 书签总数（非文件夹节点）
+ */
 function countBookmarks(nodes: BookmarkNode[] | undefined): number {
   if (!nodes) return 0;
   return nodes.reduce((sum, n) => {
@@ -55,6 +71,13 @@ export type TreeOrientation = 'horizontal' | 'vertical';
 /** 偏好：是否在卡片中常驻显示 hostname（持久化到 localStorage） */
 const SHOW_HOST_KEY = 'app:bookmark-tree:showHost';
 
+/**
+ * 读取是否显示 hostname 的偏好设置
+ *
+ * 从 localStorage 读取用户偏好（键：'app:bookmark-tree:showHost'）。
+ *
+ * @returns 是否显示 hostname
+ */
 function readShowHost(): boolean {
   try {
     return localStorage.getItem(SHOW_HOST_KEY) === '1';
@@ -63,6 +86,14 @@ function readShowHost(): boolean {
   }
 }
 
+/**
+ * 写入是否显示 hostname 的偏好设置
+ *
+ * 将用户偏好持久化到 localStorage（键：'app:bookmark-tree:showHost'）。
+ *
+ * @param v - 是否显示 hostname
+ * @returns void
+ */
 function writeShowHost(v: boolean) {
   try {
     localStorage.setItem(SHOW_HOST_KEY, v ? '1' : '0');
@@ -78,7 +109,17 @@ const ShowHostContext = createContext<boolean>(false);
 type CenterFn = (el: HTMLElement) => void;
 const CenterOnExpandContext = createContext<CenterFn | null>(null);
 
-/** 叶子节点（书签卡片） */
+/**
+ * 叶子节点（书签卡片）
+ *
+ * 渲染单个书签节点，包含 favicon、标题和 URL 提示。
+ * 点击后在新标签页中打开书签。
+ *
+ * @param props - 组件属性
+ * @param props.node - 书签节点
+ * @param props.onOpen - 打开书签回调
+ * @returns 叶子节点 JSX 元素
+ */
 function TreeLeafNode({
   node,
   onOpen,
@@ -97,7 +138,7 @@ function TreeLeafNode({
 
   return (
     <div
-      className="app-bm-tree__leaf"
+      className={`app-bm-tree__leaf ${styles['app-bm-tree__leaf']}`}
       style={{ '--app-bm-accent': accent.bar } as React.CSSProperties}
       onClick={() => url && onOpen(url)}
       role="button"
@@ -105,35 +146,35 @@ function TreeLeafNode({
       onKeyDown={(e) => { if (e.key === 'Enter' && url) onOpen(url); }}
       data-url={url}
     >
-      <span className="app-bm-tree__leaf-bar" />
+      <span className={styles['app-bm-tree__leaf-bar']} />
       {faviconUrl && !faviconError ? (
         <img
           src={faviconUrl}
           alt=""
-          className="app-bm-tree__leaf-favicon"
+          className={styles['app-bm-tree__leaf-favicon']}
           onError={() => setFaviconError(true)}
         />
       ) : (
         <span
-          className="app-bm-tree__leaf-favicon-fallback"
+          className={styles['app-bm-tree__leaf-favicon-fallback']}
           style={{ background: accent.soft, color: accent.text }}
         >
           {getFallbackLetter(node.title ?? '', url)}
         </span>
       )}
-      <div className="app-bm-tree__leaf-main">
-        <div className="app-bm-tree__leaf-title">{titleText}</div>
-        {showHost && <div className="app-bm-tree__leaf-host">{hostname}</div>}
+      <div className={styles['app-bm-tree__leaf-main']}>
+        <div className={styles['app-bm-tree__leaf-title']}>{titleText}</div>
+        {showHost && <div className={styles['app-bm-tree__leaf-host']}>{hostname}</div>}
       </div>
 
       {/* 自定义 hover 气泡：显示标题 + 完整 URL（hostname 加粗高亮） */}
-      <div className="app-bm-tree__tooltip" role="tooltip">
-        <div className="app-bm-tree__tooltip-title">{titleText}</div>
-        <div className="app-bm-tree__tooltip-url">
-          <span className="app-bm-tree__tooltip-host">{hostname}</span>
-          <span className="app-bm-tree__tooltip-path">{url.replace(/^https?:\/\/[^/]+/i, '') || '/'}</span>
+      <div className={styles['app-bm-tree__tooltip']} role="tooltip">
+        <div className={styles['app-bm-tree__tooltip-title']}>{titleText}</div>
+        <div className={styles['app-bm-tree__tooltip-url']}>
+          <span className={styles['app-bm-tree__tooltip-host']}>{hostname}</span>
+          <span className={styles['app-bm-tree__tooltip-path']}>{url.replace(/^https?:\/\/[^/]+/i, '') || '/'}</span>
         </div>
-        <div className="app-bm-tree__tooltip-arrow" aria-hidden="true" />
+        <div className={styles['app-bm-tree__tooltip-arrow']} aria-hidden="true" />
       </div>
     </div>
   );
@@ -141,8 +182,19 @@ function TreeLeafNode({
 
 /**
  * 文件夹节点（可折叠/展开）
+ *
+ * 渲染文件夹节点，支持展开/折叠子节点。
  * - horizontal：自身在左，children 在右
  * - vertical  ：自身在上，children 在下
+ *
+ * @param props - 组件属性
+ * @param props.folder - 文件夹节点
+ * @param props.onOpenBookmark - 打开书签回调
+ * @param props.resolveTitle - 解析标题函数
+ * @param props.defaultExpanded - 默认是否展开
+ * @param props.depth - 嵌套深度
+ * @param props.orientation - 布局方向
+ * @returns 文件夹节点 JSX 元素
  */
 function TreeFolderNode({
   folder,
@@ -193,47 +245,46 @@ function TreeFolderNode({
   }, [isEmpty, centerOnExpand]);
 
   return (
-    <div className="app-bm-tree__folder-wrap" data-depth={depth}>
+    <div className={styles['app-bm-tree__folder-wrap']} data-depth={depth}>
       <button
         ref={folderBtnRef}
         type="button"
-        className={`app-bm-tree__folder${expanded ? ' is-expanded' : ''}${isEmpty ? ' is-empty' : ''}`}
+        className={`app-bm-tree__folder ${styles['app-bm-tree__folder']}${expanded ? ` ${styles['is-expanded']}` : ''}${isEmpty ? ` ${styles['is-empty']}` : ''}`}
         onClick={handleToggle}
         aria-expanded={expanded}
         title={title}
       >
-        <span className="app-bm-tree__folder-icon">
+        <span className={styles['app-bm-tree__folder-icon']}>
           {expanded ? <FolderOpen size={ICON_SIZE.SMALL} /> : <Folder size={ICON_SIZE.SMALL} />}
         </span>
-        <span className="app-bm-tree__folder-text">
-          <span className="app-bm-tree__folder-title">{title}</span>
-          <span className="app-bm-tree__folder-meta">
-            {folderCount > 0 && <span className="app-bm-tree__folder-stat">📁 {folderCount}</span>}
-            {linkCount > 0 && <span className="app-bm-tree__folder-stat">🔗 {linkCount}</span>}
-            {isEmpty && <span className="app-bm-tree__folder-stat is-muted">空</span>}
+        <span className={styles['app-bm-tree__folder-text']}>
+          <span className={styles['app-bm-tree__folder-title']}>{title}</span>
+          <span className={styles['app-bm-tree__folder-meta']}>
+            {folderCount > 0 && <span className={styles['app-bm-tree__folder-stat']}>📁 {folderCount}</span>}
+            {linkCount > 0 && <span className={styles['app-bm-tree__folder-stat']}>🔗 {linkCount}</span>}
+            {isEmpty && <span className={`${styles['app-bm-tree__folder-stat']} ${styles['is-muted']}`}>空</span>}
           </span>
         </span>
         {!isEmpty && (
-          (orientation === 'horizontal' ? (
+          orientation === 'horizontal' ? (
             <ChevronRight
               size={ICON_SIZE.SMALL}
-              className={`app-bm-tree__folder-chevron${expanded ? ' is-expanded' : ''}`}
+              className={`${styles['app-bm-tree__folder-chevron']}${expanded ? ` ${styles['is-expanded']}` : ''}`}
             />
           ) : (
             <ChevronDown
               size={ICON_SIZE.SMALL}
-              className={`app-bm-tree__folder-chevron is-vertical${expanded ? ' is-expanded' : ''}`}
+              className={`${styles['app-bm-tree__folder-chevron']} ${styles['is-vertical']}${expanded ? ` ${styles['is-expanded']}` : ''}`}
             />
-          ))
+          )
         )}
       </button>
-
       {expanded && !isEmpty && (
-        <div className="app-bm-tree__children" role="group">
+        <div className={styles['app-bm-tree__children']} role="group">
           {/* 横向（脑图）模式：仍用 SVG 贝塞尔曲线；垂直（组织架构图）模式：用纯 CSS 伪元素绘制直角连线，永不错位 */}
           {orientation === 'horizontal' && (
             <svg
-              className="app-bm-tree__connector"
+              className={styles['app-bm-tree__connector']}
               preserveAspectRatio="none"
               viewBox="0 0 100 100"
               aria-hidden="true"
@@ -245,7 +296,7 @@ function TreeFolderNode({
                 return (
                   <path
                     key={idx}
-                    className="app-bm-tree__connector-path"
+                    className={styles['app-bm-tree__connector-path']}
                     d={d}
                     vectorEffect="non-scaling-stroke"
                   />
@@ -255,7 +306,7 @@ function TreeFolderNode({
           )}
 
           <div
-            className={`app-bm-tree__children-col${orderedChildren.length === 1 ? ' is-single' : ''}`}
+            className={`${styles['app-bm-tree__children-col']}${orderedChildren.length === 1 ? ` ${styles['is-single']}` : ''}`}
           >
             {orderedChildren.map((child) =>
               child.url ? (
@@ -495,7 +546,7 @@ const PanZoom = forwardRef<PanZoomHandle, {
   return (
     <div
       ref={viewportRef}
-      className={`app-bm-tree__panzoom${isDragging ? ' is-dragging' : ''}${isAnimating ? ' is-animating' : ''}`}
+      className={`${styles['app-bm-tree__panzoom']}${isDragging ? ` ${styles['is-dragging']}` : ''}${isAnimating ? ` ${styles['is-animating']}` : ''}`}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
       // onWheel 仍保留作为类型占位，真正绑定在 useEffect 中（非 passive）
@@ -503,14 +554,14 @@ const PanZoom = forwardRef<PanZoomHandle, {
     >
       <div
         ref={contentRef}
-        className="app-bm-tree__panzoom-content"
+        className={styles['app-bm-tree__panzoom-content']}
         style={{ transform: `translate(${tx}px, ${ty}px) scale(${scale})` }}
       >
         {children}
       </div>
 
       <div
-        className="app-bm-tree__panzoom-toolbar"
+        className={`app-bm-tree__panzoom-toolbar ${styles['app-bm-tree__panzoom-toolbar']}`}
         role="toolbar"
         aria-label={t('bookmark.tree.zoomToolbar')}
         onMouseDown={(e) => e.stopPropagation()}
@@ -518,7 +569,7 @@ const PanZoom = forwardRef<PanZoomHandle, {
       >
         <button
           type="button"
-          className="app-bm-tree__panzoom-btn"
+          className={styles['app-bm-tree__panzoom-btn']}
           onClick={() => {
             const vp = viewportRef.current;
             if (!vp) return;
@@ -533,7 +584,7 @@ const PanZoom = forwardRef<PanZoomHandle, {
         </button>
         <button
           type="button"
-          className="app-bm-tree__panzoom-percent"
+          className={styles['app-bm-tree__panzoom-percent']}
           onClick={reset}
           title={t('bookmark.tree.resetZoom')}
           aria-label={t('bookmark.tree.resetZoom')}
@@ -542,7 +593,7 @@ const PanZoom = forwardRef<PanZoomHandle, {
         </button>
         <button
           type="button"
-          className="app-bm-tree__panzoom-btn"
+          className={styles['app-bm-tree__panzoom-btn']}
           onClick={() => {
             const vp = viewportRef.current;
             if (!vp) return;
@@ -555,10 +606,10 @@ const PanZoom = forwardRef<PanZoomHandle, {
         >
           <ZoomIn size={ICON_SIZE.SMALL} />
         </button>
-        <span className="app-bm-tree__panzoom-divider" aria-hidden="true" />
+        <span className={styles['app-bm-tree__panzoom-divider']} aria-hidden="true" />
         <button
           type="button"
-          className="app-bm-tree__panzoom-btn"
+          className={styles['app-bm-tree__panzoom-btn']}
           onClick={fit}
           title={t('bookmark.tree.fitScreen')}
           aria-label={t('bookmark.tree.fitScreen')}
@@ -567,7 +618,7 @@ const PanZoom = forwardRef<PanZoomHandle, {
         </button>
         <button
           type="button"
-          className="app-bm-tree__panzoom-btn"
+          className={styles['app-bm-tree__panzoom-btn']}
           onClick={reset}
           title={t('bookmark.tree.resetZoom')}
           aria-label={t('bookmark.tree.resetZoom')}
@@ -576,7 +627,7 @@ const PanZoom = forwardRef<PanZoomHandle, {
         </button>
         {extraToolbar && (
           <>
-            <span className="app-bm-tree__panzoom-divider" aria-hidden="true" />
+            <span className={styles['app-bm-tree__panzoom-divider']} aria-hidden="true" />
             {extraToolbar}
           </>
         )}
@@ -587,8 +638,17 @@ const PanZoom = forwardRef<PanZoomHandle, {
 
 /**
  * 主组件：书签树
+ *
+ * 按文件夹层级展示书签，支持脑图和组织架构图两种布局。
  * - orientation='horizontal'：脑图风格，根在左，子节点向右展开
  * - orientation='vertical'  ：组织架构图风格，根在上，子节点向下展开
+ *
+ * @param props - 组件属性
+ * @param props.topSections - 顶层文件夹节点数组
+ * @param props.onOpenBookmark - 打开书签回调
+ * @param props.resolveTitle - 解析标题函数
+ * @param props.orientation - 布局方向（可选，默认 'horizontal'）
+ * @returns 书签树视图 JSX 元素
  */
 export function BookmarkTreeView({
   topSections,
@@ -621,7 +681,7 @@ export function BookmarkTreeView({
   const extraToolbar = (
     <button
       type="button"
-      className={`app-bm-tree__panzoom-btn${showHost ? ' is-active' : ''}`}
+      className={`${styles['app-bm-tree__panzoom-btn']}${showHost ? ` ${styles['is-active']}` : ''}`}
       onClick={toggleShowHost}
       title={showHost ? t('bookmark.tree.hideHost') : t('bookmark.tree.showHost')}
       aria-label={showHost ? t('bookmark.tree.hideHost') : t('bookmark.tree.showHost')}
@@ -632,12 +692,12 @@ export function BookmarkTreeView({
   );
 
   return (
-    <div className={`app-bm-tree is-${orientation}${showHost ? ' show-host' : ''}`}>
+    <div className={`app-bm-tree ${styles['app-bm-tree']} ${styles[`is-${orientation}`]}${showHost ? ` ${styles['show-host']}` : ''}`}>
       <ShowHostContext.Provider value={showHost}>
         <CenterOnExpandContext.Provider value={centerOnExpand}>
-        <PanZoom ref={panZoomRef} extraToolbar={extraToolbar} orientation={orientation}>
-            <div className="app-bm-tree__canvas">
-              <div className="app-bm-tree__roots">
+          <PanZoom ref={panZoomRef} extraToolbar={extraToolbar} orientation={orientation}>
+            <div className={styles['app-bm-tree__canvas']}>
+              <div className={styles['app-bm-tree__roots']}>
                 {topSections.map((section, idx) => (
                   <TreeFolderNode
                     key={section.id}

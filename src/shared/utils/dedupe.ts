@@ -14,7 +14,15 @@ export type DedupStrictness = 'strict' | 'loose' | 'off';
 /** Tracking parameters to strip for loose dedup */
 const TRACKING_PARAMS = /^(utm_\w+|fbclid|gclid|mc_eid|mc_cid|ref|source)$/i;
 
-/** Normalize a URL for dedup comparison based on strictness */
+/**
+ * 为去重比较规范化 URL
+ *
+ * 根据严格度策略，移除 hash 和跟踪参数。
+ *
+ * @param url - 原始 URL
+ * @param strictness - 严格度策略
+ * @returns 规范化后的 URL 字符串
+ */
 export function normalizeUrl(url: string, strictness: DedupStrictness): string {
   if (strictness === 'strict') {
     return url;
@@ -45,9 +53,13 @@ export interface DupGroup {
 }
 
 /**
- * Find duplicate tab groups.
+ * 查找重复标签页组
+ *
+ * 根据严格度策略，对标签页 URL 去重后找出重复组。
+ *
  * @param tabs 实时标签数组
  * @param strictness 三档严格度，默认 'loose'（向前兼容）
+ * @returns 重复标签组数组
  */
 export function findDuplicates(tabs: LiveTab[], strictness: DedupStrictness = 'loose'): DupGroup[] {
   if (strictness === 'off') return [];

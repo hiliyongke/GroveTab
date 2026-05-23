@@ -38,12 +38,31 @@ interface SettingsPanelProps {
 
 /** Tab 配置项 */
 interface TabConfig {
+  /** Tab 唯一标识 */
   key: string;
+  /** Tab 图标（Lucide 图标组件） */
   icon: React.ReactNode;
+  /** 国际化翻译 key */
   labelKey: string;
+  /** Tab 对应的 React 组件 */
   component: React.ReactNode;
 }
 
+/**
+ * 设置面板组件
+ *
+ * 布局：
+ *   - 右侧抽屉（带毛玻璃遮罩）
+ *   - 左侧图标导航栏 + 右侧内容区（可滚动）
+ *
+ * 支持受控激活 Tab（defaultActiveTab），便于从外部 hash（#about）直接切到指定 Tab。
+ *
+ * @param props - 组件属性
+ * @param props.open - 是否打开抽屉
+ * @param props.onOpenChange - 打开状态变更回调
+ * @param props.defaultActiveTab - 初始激活的 Tab（可选，默认 'appearance'）
+ * @returns 设置面板 JSX 元素
+ */
 export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearance' }: SettingsPanelProps) {
   const settings = useSettingsStore((s) => s.settings);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
@@ -55,6 +74,13 @@ export function SettingsPanel({ open, onOpenChange, defaultActiveTab = 'appearan
     setActiveTab(defaultActiveTab);
   }, [defaultActiveTab]);
 
+  /**
+   * 处理设置面板关闭
+   *
+   * 调用 onOpenChange 回调，将打开状态设置为 false。
+   *
+   * @returns 无返回值
+   */
   const handleClose = useCallback(() => {
     onOpenChange(false);
   }, [onOpenChange]);

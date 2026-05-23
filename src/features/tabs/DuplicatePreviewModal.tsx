@@ -18,7 +18,7 @@ import type { DupGroup } from '@/shared/utils/dedupe';
 import { useTabsStore, useMetadataStore } from '@/store';
 import { nanoid } from 'nanoid';
 import { useT } from '@/shared/i18n';
-import styles from './styles/views.module.less';
+import styles from './DuplicatePreviewModal.module.less';
 
 const { Text } = Typography;
 
@@ -28,7 +28,12 @@ interface DuplicatePreviewModalProps {
   onClose: () => void;
 }
 
-/** 选择最旧（lastAccessed 最小；若相同取 id 最小）作为默认保留项 */
+/**
+ * 选择最旧（lastAccessed 最小；若相同取 id 最小）作为默认保留项
+ *
+ * @param group - 重复标签组
+ * @returns 默认保留的标签 ID
+ */
 function pickDefaultKeeper(group: DupGroup): number {
   const sorted = [...group.tabs].sort(
     (a, b) => (a.lastAccessed || 0) - (b.lastAccessed || 0) || a.id - b.id,
@@ -36,6 +41,13 @@ function pickDefaultKeeper(group: DupGroup): number {
   return sorted[0]?.id ?? group.tabs[0]?.id ?? -1;
 }
 
+/**
+ * 格式化时间戳为本地化字符串
+ *
+ * @param ts - 时间戳（毫秒）
+ * @param locale - 语言区域
+ * @returns 格式化后的日期时间字符串
+ */
 function formatOpenedAt(ts: number, locale: string): string {
   if (!ts) return '—';
   try {
@@ -50,6 +62,22 @@ function formatOpenedAt(ts: number, locale: string): string {
   }
 }
 
+/**
+ * 重复标签预览合并模态框
+ *
+ * 功能：
+ *   · 按重复分组展示所有组
+ *   · 每组内列出全部重复 Tab（title + url + 窗口 + 打开时间）
+ *   · 默认勾选"最旧一条"作为保留项
+ *   · 支持"全不勾选" / "全部勾选最旧" 快捷操作
+ *   · 点击"合并"：批量关闭未勾选 Tab，单条 Undo + Toast
+ *
+ * @param props - 组件属性
+ * @param props.open - 是否打开模态框
+ * @param props.dupGroups - 重复标签组列表
+ * @param props.onClose - 关闭回调
+ * @returns 重复标签预览合并模态框 JSX 元素
+ */
 export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePreviewModalProps) {
   const { t, locale: currentLocale } = useT();
   const { token } = theme.useToken();
@@ -91,10 +119,22 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
     return { closeCount: close, keepCount: keep };
   }, [effectiveGroups, keepers]);
 
+  /**
+   * 更新指定重复组的保留标签 ID
+   *
+   * @param canonicalUrl - 重复组的规范 URL
+   * @param tabId - 要保留的标签 ID
+   * @returns 无返回值
+   */
   const handleKeeperChange = useCallback((canonicalUrl: string, tabId: number) => {
     setKeepers((prev) => ({ ...prev, [canonicalUrl]: tabId }));
   }, []);
 
+  /**
+   * 为所有重复组设置默认保留项（最旧的标签）
+   *
+   * @returns 无返回值
+   */
   const handleKeepAllOldest = useCallback(() => {
     const next: Record<string, number> = {};
     for (const group of effectiveGroups) {
@@ -103,10 +143,23 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
     setKeepers(next);
   }, [effectiveGroups]);
 
+  /**
+   * 清除所有重复组的保留选择
+   *
+   * @returns 无返回值
+   */
   const handleKeepNone = useCallback(() => {
     setKeepers({});
   }, []);
 
+  /**
+   * 执行重复标签合并
+   *
+   * 关闭所有未勾选的重复标签，保留选中的标签。
+   * 合并后显示成功提示，并记录活动。
+   *
+   * @returns 无返回值
+   */
   const handleMerge = useCallback(async () => {
     if (busy) return;
     const toClose: number[] = [];
@@ -207,6 +260,21 @@ interface GroupSectionProps {
   locale: string;
 }
 
+/**
+ * 重复标签组区块组件
+ *
+ * 渲染单个重复标签组的预览，包含组名、待关闭数量和标签列表。
+ * 支持选择保留项。
+ *
+ * @param props - 组件属性
+ * @param props.group - 重复标签组
+ * @param props.keeperId - 当前保留的标签 ID
+ * @param props.onChange - 保留项变更回调
+ * @param props.token - antd 主题 token（未使用）
+ * @param props.t - 国际化翻译函数
+ * @param props.locale - 当前语言区域
+ * @returns 重复标签组区块 JSX 元素
+ */
 function GroupSection({ group, keeperId, onChange, token: _token, t, locale }: GroupSectionProps) {
   const closeCount = keeperId === undefined ? group.tabs.length : group.tabs.length - 1;
   return (
@@ -223,7 +291,7 @@ function GroupSection({ group, keeperId, onChange, token: _token, t, locale }: G
         {group.tabs.map((tab: LiveTab) => (
           <label
             key={tab.id}
-            className={`${styles['app-duplicate-option']}${keeperId === tab.id ? ' is-selected' : ''}`}
+            className={`${styles['app-duplicate-option']}${keeperId === tab.id ? ` ${styles['is-selected']}` : ''}`}
           >
             <input
               type="radio"

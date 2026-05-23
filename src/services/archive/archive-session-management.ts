@@ -11,14 +11,23 @@ import { APP_RESOURCE_NAMES } from '@/shared/config/storage-keys';
 import { getArchivedSessions, saveSessions } from './archive-storage';
 import { buildDefaultSessionName, canonicalUrlKey, isArchivableTab, toArchivedTab } from './archive-utils';
 
-/** 删除一个归档会话。 */
+/**
+ * 删除一个归档会话。
+ *
+ * @param sessionId 要删除的会话 ID
+ */
 export async function deleteSession(sessionId: string): Promise<void> {
   const sessions = await getArchivedSessions();
   const filtered = sessions.filter((session) => session.id !== sessionId);
   await saveSessions(filtered);
 }
 
-/** 重命名一个归档会话。 */
+/**
+ * 重命名一个归档会话。
+ *
+ * @param sessionId 要重命名的会话 ID
+ * @param newName 新名称
+ */
 export async function renameSession(sessionId: string, newName: string): Promise<void> {
   const sessions = await getArchivedSessions();
   const session = sessions.find((item) => item.id === sessionId);
@@ -35,6 +44,10 @@ export async function renameSession(sessionId: string, newName: string): Promise
  *   · URL 按"忽略 #hash + utm/fbclid/gclid"去重
  *   · 创建新会话替代源会话（源会话全部删除）
  *   · 返回新会话供 Undo 记录
+ *
+ * @param sessionIds 要合并的会话 ID 数组（至少 2 个）
+ * @param newName 合并后的新会话名称
+ * @returns 合并后的新会话对象
  */
 export async function mergeSessions(sessionIds: string[], newName: string): Promise<ArchivedSession> {
   const sessions = await getArchivedSessions();
@@ -68,7 +81,11 @@ export async function mergeSessions(sessionIds: string[], newName: string): Prom
 
 /**
  * 导出单个会话为可下载的 JSON 对象（F-14 分享）。
+ *
  * 调用方负责触发浏览器下载。
+ *
+ * @param sessionId 要导出的会话 ID
+ * @returns 包含文件名和 JSON 内容的对象；会话不存在则返回 null
  */
 export async function exportSingleSession(sessionId: string): Promise<{ filename: string; content: string } | null> {
   const sessions = await getArchivedSessions();
@@ -88,7 +105,12 @@ export async function exportSingleSession(sessionId: string): Promise<{ filename
 
 /**
  * 创建隐藏的自动快照会话（F-23）。
+ *
  * 调用方传入已经过滤好的 tabs（通常是当前窗口的非 pin/非隐私 Tab）。
+ * 快照按 FIFO 上限自动清理最老的隐藏会话。
+ *
+ * @param tabs 当前窗口的标签页数组（已过滤）
+ * @returns 创建后的快照会话；无有效标签页则返回 null
  */
 export async function createAutoSnapshot(tabs: chrome.tabs.Tab[]): Promise<ArchivedSession | null> {
   const toArchive = tabs.filter(isArchivableTab);
