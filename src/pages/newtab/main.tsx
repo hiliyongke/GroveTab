@@ -11,10 +11,9 @@
  *   - 样式导入集中管理，确保全局样式优先加载
  */
 
-import { createRoot } from 'react-dom/client';
-import App from './App';
-import './index.less';
-import './styles/app-shell.less';
-import '@/styles/global.less';
+import { createRoot } from "react-dom/client";
+import App from "./App";
+import "./styles/app-shell.less";
+import "@/styles/global.less";
 
-createRoot(document.getElementById('root')!).render(<App />);
+createRoot(document.getElementById("root")!).render(<App />);

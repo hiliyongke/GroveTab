@@ -10,13 +10,13 @@
  *   - 使用 StrictMode 进行开发环境检查
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import '../newtab/index.less';
-import './styles/index.less';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import "@/styles/global.less";
+import "./styles/index.less";
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
