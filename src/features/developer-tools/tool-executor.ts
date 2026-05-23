@@ -92,7 +92,7 @@ export async function executeTool(
     case 'json-format':
       return jsonTransform(input, params.jsonAction ?? 'format');
     case 'json-to-ts':
-      return jsonToTypeScript(input, params.rootName || 'Root');
+      return jsonToTypeScript(input, params.rootName ?? 'Root');
     case 'json-path':
       return jsonPathQuery(input, params.regexPattern ?? '');
     case 'yaml-json':

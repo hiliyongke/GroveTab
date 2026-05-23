@@ -414,6 +414,7 @@ const ArcSidebarContent: React.FC = () => {
  * @param root0.onActivate - 激活回调
  * @param root0.onClose - 关闭回调
  * @param root0.onTogglePin - 切换固定回调
+ * @param root0.t - i18n 翻译函数
  * @returns {JSX.Element} 返回标签页行 JSX 元素
  */
 function ArcTabItem({

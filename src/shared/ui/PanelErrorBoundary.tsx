@@ -46,7 +46,8 @@ class PanelErrorBoundaryInner extends Component<Props & { t: (key: string, param
   /**
    * 捕获错误并记录日志
    * @param error - 捕获到的错误
-   * @param info - 组件堆栈信息
+   * @param info - 错误信息对象
+   * @param info.componentStack - 组件调用堆栈
    */
   override componentDidCatch(error: Error, info: { componentStack: string }): void {
     console.error(`${BRAND.logTag} PanelErrorBoundary (${this.props.label})`, error);
@@ -60,6 +61,7 @@ class PanelErrorBoundaryInner extends Component<Props & { t: (key: string, param
     this.setState({ hasError: false, error: null });
   };
 
+  /** 渲染错误提示或子组件 */
   override render(): ReactNode {
     if (this.state.hasError) {
       return (

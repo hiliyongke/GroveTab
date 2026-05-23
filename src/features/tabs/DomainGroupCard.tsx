@@ -411,6 +411,15 @@ interface SortableDomainTabItemProps {
  *
  * 封装 @dnd-kit 的 useSortable hook，使标签行可在分组内拖拽重排。
  * 拖拽时显示阴影 + 微提升 z-index，还原原 Reorder.Item 的 whileDrag 视觉。
+ * @param root0 - 组件属性
+ * @param root0.tab - 标签页对象
+ * @param root0.onJump - 跳转回调
+ * @param root0.onClose - 关闭回调
+ * @param root0.hideFavicon - 是否隐藏图标
+ * @param root0.showUrlHint - 是否显示 URL 提示
+ * @param root0.selectable - 是否可选中
+ * @param root0.visibleTabIds - 可见标签 ID 列表
+ * @param root0.reduced - 是否减少动效
  */
 function SortableDomainTabItem({
   tab,

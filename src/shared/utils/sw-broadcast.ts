@@ -21,9 +21,7 @@ let _channel: BroadcastChannel | null = null;
  * @returns BroadcastChannel 实例
  */
 function getChannel(): BroadcastChannel {
-  if (!_channel) {
-    _channel = new BroadcastChannel(CHANNEL_NAME);
-  }
+  _channel ??= new BroadcastChannel(CHANNEL_NAME);
   return _channel;
 }
 
