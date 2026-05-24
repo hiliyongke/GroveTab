@@ -21,7 +21,8 @@ import type { DraggableAttributes } from "@dnd-kit/core";
 interface SiteCardProps {
   site: SpeedDialSite;
   /** 拖拽手柄的 listeners（由 SortableSiteCard 传入） */
-  dragListeners?: Record<string, (...args: unknown[]) => void>;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+  dragListeners?: Record<string, Function>;
   /** 拖拽手柄的 attributes（由 SortableSiteCard 传入） */
   dragAttributes?: DraggableAttributes;
   /** 是否正在拖拽中（用于降低透明度） */
