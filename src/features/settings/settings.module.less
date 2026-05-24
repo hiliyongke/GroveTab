@@ -141,18 +141,18 @@
 }
 
 /* ── Field 字段通用样式 ── */
-.settings-field {
+:global(.settings-field) {
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 8px;
 }
 
 /* Switch 在 flex 列容器中会被 stretch 拉伸，强制左对齐保持原尺寸 */
-.settings-field > .ant-switch {
+:global(.settings-field > .ant-switch) {
   align-self: flex-start;
 }
 
-.settings-field__label {
+:global(.settings-field__label) {
   display: block;
   font-size: 12px;
   font-weight: 600;
@@ -160,35 +160,39 @@
   letter-spacing: 0.02em;
 }
 
-.settings-field__hint {
+:global(.settings-field__hint) {
   margin: 0;
   font-size: 11.5px;
   color: var(--ant-color-text-tertiary);
   line-height: 1.55;
 }
 
-.settings-panel-stack {
+:global(.settings-panel-stack) {
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 28px;
   width: 100%;
 }
 
-.settings-panel-stack--compact {
+:global(.settings-panel-stack--compact) {
   gap: 20px;
 }
 
-.settings-panel-stack--regular {
+:global(.settings-panel-stack--regular) {
   gap: 24px;
 }
 
-.settings-section {
+:global(.settings-section) {
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 14px;
 }
 
-.settings-section__title {
+:global(.settings-section.is-disabled) {
+  opacity: 0.55;
+}
+
+:global(.settings-section__title) {
   margin: 0;
   font-size: 13px;
   font-weight: 600;
@@ -196,31 +200,58 @@
   color: var(--ant-color-text);
 }
 
-.settings-section__body {
+:global(.settings-section__body) {
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
+  gap: 16px;
 }
 
-.settings-control-full {
+:global(.settings-control-full) {
   width: 100%;
+  min-width: 0;
 }
 
-.settings-checkbox-group {
+:global(.settings-control-full.ant-space-compact) {
+  display: flex;
+}
+
+:global(.settings-control-full.ant-space-compact > *) {
+  min-width: 0;
+}
+
+:global(.settings-field .ant-segmented),
+:global(.settings-field .ant-select),
+:global(.settings-field .ant-input),
+:global(.settings-field .ant-input-number),
+:global(.settings-field .ant-slider) {
+  max-width: 100%;
+}
+
+:global(.settings-field .ant-segmented) {
+  min-width: 0;
+}
+
+:global(.settings-field .ant-segmented-item-label) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:global(.settings-checkbox-group) {
   display: grid;
   gap: 8px;
 }
 
-.settings-checkbox-group > label {
+:global(.settings-checkbox-group > label) {
   margin-inline-end: 0;
 }
 
-.settings-card-list {
+:global(.settings-card-list) {
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 10px;
 }
 
-.settings-card-row {
+:global(.settings-card-row) {
   display: flex; /* antd 组件内部微调整 */
   align-items: center;
   justify-content: space-between;
@@ -231,40 +262,42 @@
   border: 1px solid var(--ant-color-border-secondary);
 }
 
-.settings-card-row__main {
+:global(.settings-card-row__main) {
   flex: 1;
   min-width: 0;
 }
 
-.settings-card-row__title {
+:global(.settings-card-row__title) {
   font-size: 13px;
   font-weight: 500;
   color: var(--ant-color-text);
+  overflow-wrap: anywhere;
 }
 
-.settings-card-row__hint {
+:global(.settings-card-row__hint) {
   margin-top: 2px;
   font-size: 11px;
   color: var(--ant-color-text-tertiary);
 }
 
-.settings-shortcuts-alert {
+:global(.settings-shortcuts-alert) {
   margin-bottom: 16px;
   font-size: 12px;
 }
 
-.settings-keybinding-recorder {
+:global(.settings-keybinding-recorder) {
   display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
 }
 
-.settings-keybinding-trigger {
+:global(.settings-keybinding-trigger) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 80px;
+  max-width: 180px;
   padding: 4px 10px;
   font-size: 12px;
   font-family: inherit;
@@ -274,40 +307,49 @@
   color: var(--ant-color-text-secondary);
   cursor: pointer;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   transition: all 160ms ease;
 }
 
-.settings-keybinding-trigger:hover {
+:global(.settings-keybinding-trigger:hover) {
   border-color: var(--ant-color-border-secondary);
   color: var(--ant-color-text);
 }
 
-.settings-keybinding-trigger.is-recording {
+:global(.settings-keybinding-trigger.is-recording) {
   border-color: var(--ant-color-primary);
   background: var(--ant-color-primary-bg);
   color: var(--ant-color-primary);
 }
 
-.settings-keybinding-trigger:focus-visible {
+:global(.settings-keybinding-trigger:focus-visible) {
   outline: 2px solid var(--ant-color-primary);
   outline-offset: 1px;
 }
 
-.settings-keybinding-trigger:active {
+:global(.settings-keybinding-trigger:active) {
   background: var(--ant-color-fill-tertiary);
 }
 
-.settings-keybinding-reset {
+:global(.settings-keybinding-reset) {
   color: var(--ant-color-text-tertiary);
 }
 
-.settings-warning-inline {
+:global(.settings-warning-inline) {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   margin-top: 4px;
   font-size: 11px;
   color: var(--ant-color-error-text);
+}
+
+:global(.settings-card-row .app-kbd) {
+  flex-shrink: 0;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ── 内容区宽度自适应 ── */
@@ -356,13 +398,34 @@
     padding: 16px 20px 28px;
   }
 
-  .settings-card-row {
+  :global(.settings-card-row) {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  .settings-keybinding-recorder {
+  :global(.settings-keybinding-recorder) {
     width: 100%;
     justify-content: space-between;
+  }
+
+  :global(.settings-keybinding-trigger) {
+    flex: 1;
+    max-width: none;
+  }
+
+  :global(.settings-card-row .app-kbd) {
+    max-width: 100%;
+  }
+
+  :global(.settings-control-full.ant-space-compact) {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  :global(.settings-control-full.ant-space-compact .ant-input),
+  :global(.settings-control-full.ant-space-compact .ant-btn) {
+    width: 100%;
+    border-radius: var(--ant-border-radius) !important;
   }
 }

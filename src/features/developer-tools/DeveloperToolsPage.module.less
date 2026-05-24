@@ -7,7 +7,6 @@
 .devtools-page {
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
-  gap: 12px;
   padding: var(--app-space-5) 0 var(--app-space-2);
   flex: 1;
   min-height: 0;
@@ -23,29 +22,35 @@
   overflow: hidden;
   flex: 1;
   display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
+  flex-direction: row;
   min-height: 0;
 }
 
-/* ===== Hero：标题 + 统计行 ===== */
-.devtools-hero {
-  display: flex; /* antd 组件内部微调整 */
+/* ===== Left Sidebar ===== */
+.devtools-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--app-hairline);
+  background: color-mix(in srgb, var(--ant-color-bg-layout) 30%, transparent);
+}
+
+.devtools-sidebar-header {
+  padding: 16px 16px 12px;
+  display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 18px 12px;
-  border-bottom: 1px solid var(--app-hairline);
 }
 
 .devtools-brand {
-  display: flex; /* antd 组件内部微调整 */
+  display: flex;
   align-items: center;
-  gap: 9px;
-  min-width: 0;
+  gap: 8px;
 }
 
 .devtools-logo {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -56,281 +61,195 @@
 }
 
 .devtools-title {
-  margin: 0;
-  font-size: 16px;
+  margin: 0 !important;
+  font-size: 15px !important;
   line-height: 1.2;
 }
 
-.devtools-tag {
-  margin: 0;
-  flex-shrink: 0;
+.devtools-sidebar-search {
+  padding: 0 16px 12px;
 }
 
-.devtools-subtitle {
-  margin-top: 4px;
-  color: var(--ant-color-text-secondary);
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.devtools-stats {
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-  gap: 6px;
-  margin-left: auto;
-  flex-shrink: 0;
-}
-
-.devtools-stat-pill {
-  font-size: 11px;
-  color: var(--ant-color-text-secondary);
-  background: color-mix(in srgb, var(--ant-color-bg-container) 85%, transparent);
-  border: 1px solid var(--app-hairline);
-  border-radius: var(--app-radius-circle);
-  padding: var(--app-space-1) var(--app-space-2);
-  white-space: nowrap;
-}
-
-/* ===== Toolbar：分类 + 搜索 ===== */
-.devtools-toolbar {
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-  gap: 10px;
-  padding: 10px 18px;
-  border-bottom: 1px solid var(--app-hairline);
-}
-
-.devtools-segmented {
-  min-width: 0;
+.devtools-sidebar-menu {
   flex: 1;
-  overflow: auto;
-}
-
-.devtools-search {
-  width: min(260px, 26vw);
-  flex-shrink: 0;
-}
-
-/* ===== Workbench：左右双栏（Flexbox 方案）===== */
-.devtools-workbench {
-  display: flex; /* antd 组件内部微调整 */
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
-/* ===== 左侧：列表区（固定宽度，独立滚动）===== */
-.devtools-list-pane {
-  width: 380px;
-  flex-shrink: 0;
-  padding: 14px;
-  border-right: 1px solid var(--app-hairline);
   overflow-y: auto;
-  min-height: 0;
-  overflow-anchor: none;
+  padding: 0 8px 12px;
 }
 
-.devtools-section {
-  margin-bottom: 12px;
+.devtools-sidebar-group {
+  margin-bottom: 16px;
 }
 
-.devtools-section-head {
-  display: flex; /* antd 组件内部微调整 */
+.devtools-sidebar-group-title {
+  display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 8px;
-}
-
-.devtools-section-icon--fav {
-  color: var(--ant-color-warning);
-}
-
-.devtools-section-title {
-  font-weight: 600;
+  padding: 0 8px;
+  margin-bottom: 6px;
   font-size: 12px;
-  color: var(--ant-color-text-secondary);
+  font-weight: 600;
+  color: var(--ant-color-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
 
-/* ===== 工具卡片：紧凑横排 ===== */
-.devtools-grid {
-  display: flex; /* antd 组件内部微调整 */
+.devtools-sidebar-group-icon-fav {
+  color: var(--ant-color-warning);
+}
+
+.devtools-sidebar-group-list {
+  display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 2px;
 }
 
-.devtools-card {
-  width: 100%;
-  display: flex; /* antd 组件内部微调整 */
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px 12px;
-  border: 1px solid var(--app-hairline);
-  border-radius: var(--app-card-radius, 12px);
-  background: color-mix(in srgb, var(--ant-color-bg-container) 82%, transparent);
-  color: inherit;
-  text-align: left;
+.devtools-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--app-radius-md);
   cursor: pointer;
-  transition:
-    border-color 0.16s ease,
-    background 0.16s ease,
-    box-shadow 0.16s ease;
+  color: var(--ant-color-text-secondary);
+  transition: all 0.15s ease;
 }
 
-.devtools-card:hover,
-.devtools-card:focus-visible {
-  border-color: color-mix(in srgb, var(--ant-color-primary) 30%, var(--app-hairline));
-  background: color-mix(in srgb, var(--ant-color-primary-bg) 65%, var(--ant-color-bg-container));
-  box-shadow: var(--app-shadow-card-hover, var(--app-shadow-card));
-  outline: none;
+.devtools-sidebar-item:hover {
+  background: color-mix(in srgb, var(--ant-color-text) 4%, transparent);
+  color: var(--ant-color-text);
 }
 
-.devtools-card.is-selected {
-  border-color: var(--ant-color-primary);
-  background: color-mix(in srgb, var(--ant-color-primary-bg) 72%, var(--ant-color-bg-container));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ant-color-primary) 18%, transparent);
+.devtools-sidebar-item.is-active {
+  background: var(--ant-color-primary-bg);
+  color: var(--ant-color-primary);
+  font-weight: 500;
 }
 
-.devtools-card-head {
-  display: flex; /* antd 组件内部微调整 */
-  align-items: flex-start;
-  gap: 10px;
-  min-width: 0;
+.devtools-sidebar-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+}
+
+.devtools-sidebar-item.is-active .devtools-sidebar-item-icon {
+  opacity: 1;
+}
+
+.devtools-sidebar-item-title {
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
 }
 
-.devtools-card-icon {
-  width: 30px;
-  height: 30px;
+.devtools-sidebar-item-fav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition: color 0.15s ease;
+}
+
+.devtools-sidebar-item:hover .devtools-sidebar-item-fav {
+  color: var(--ant-color-text-quaternary);
+}
+
+.devtools-sidebar-item-fav:hover {
+  color: var(--ant-color-error) !important;
+}
+
+.devtools-sidebar-item-fav.is-active {
+  color: var(--ant-color-error);
+}
+
+.devtools-sidebar-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--app-hairline);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--ant-color-text-tertiary);
+  font-size: 11px;
+  background: color-mix(in srgb, var(--ant-color-bg-layout) 50%, transparent);
+}
+
+/* ===== Right Main Content ===== */
+.devtools-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--ant-color-bg-container);
+}
+
+.devtools-main-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--app-hairline);
+}
+
+.devtools-main-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.devtools-main-icon {
+  width: 36px;
+  height: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--app-radius-md);
   background: var(--ant-color-primary-bg);
   color: var(--ant-color-primary);
-  flex-shrink: 0;
 }
 
-.devtools-card-body {
-  min-width: 0;
-  flex: 1;
+.devtools-main-title {
+  margin: 0 !important;
+  font-size: 18px !important;
 }
 
-.devtools-card-title {
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.25;
+.devtools-tag-local {
+  margin: 0;
 }
 
-.devtools-card-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+.devtools-main-fav-btn {
   margin-left: auto;
-  flex-shrink: 0;
-}
-
-.devtools-local-badge {
-  padding: var(--app-space-1) var(--app-space-1);
-  border-radius: var(--app-radius-circle);
-  background: var(--ant-color-success-bg);
-  color: var(--ant-color-success);
-  font-size: 9px;
-  font-weight: 600;
-  line-height: 15px;
-  white-space: nowrap;
-}
-
-.devtools-fav-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   border-radius: var(--app-radius-sm);
   color: var(--ant-color-text-tertiary);
   cursor: pointer;
-  transition:
-    color 0.15s ease,
-    background 0.15s ease;
+  transition: all 0.15s ease;
 }
 
-.devtools-fav-btn:hover {
+.devtools-main-fav-btn:hover {
   color: var(--ant-color-error);
   background: var(--ant-color-error-bg);
 }
 
-.devtools-fav-btn.is-active {
+.devtools-main-fav-btn.is-active {
   color: var(--ant-color-error);
 }
 
-.devtools-card-desc {
-  margin-top: 3px;
+.devtools-main-desc {
   color: var(--ant-color-text-secondary);
-  font-size: 11px;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
-/* ===== 右侧：工作台面板（flex:1 撑满，独立滚动）===== */
-.devtools-panel-pane {
+.devtools-main-body {
   flex: 1;
-  min-width: 0;
-  padding: 14px;
-  background: color-mix(in srgb, var(--ant-color-bg-layout) 38%, transparent);
   overflow-y: auto;
-  min-height: 0;
-}
-
-.devtools-panel-card {
-  border: 1px solid var(--app-hairline);
-  border-radius: var(--app-radius-lg);
-  background: var(--app-glass-bg);
-  box-shadow: var(--app-shadow-card);
-  overflow: hidden;
-}
-
-.devtools-panel-head {
-  padding: 14px 16px 10px;
-  border-bottom: 1px solid var(--app-hairline);
-}
-
-.devtools-panel-title {
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-  gap: 9px;
-  min-width: 0;
-}
-
-.devtools-panel-icon {
-  color: var(--ant-color-primary);
-  flex-shrink: 0;
-}
-
-.devtools-panel-heading {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.3;
-  min-width: 0;
-}
-
-.devtools-panel-desc {
-  margin-top: 6px;
-  color: var(--ant-color-text-secondary);
-  font-size: 11.5px;
-  line-height: 1.45;
-}
-
-.devtools-panel-body {
-  padding: 14px 16px 16px;
+  padding: 24px;
 }
 
 /* ===== 工具表单通用 ===== */
@@ -476,65 +395,31 @@
   grid-column: 1 / -1;
 }
 
-/* ===== 隐私提示 ===== */
-.devtools-privacy {
-  display: flex; /* antd 组件内部微调整 */
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 0 2px;
-  color: var(--ant-color-text-tertiary);
-  font-size: 11px;
-}
-
 /* ===== 响应式 ===== */
 @media (max-width: 860px) {
-  .devtools-workbench {
+  .devtools-shell {
     flex-direction: column;
   }
 
-  .devtools-list-pane {
+  .devtools-sidebar {
     width: 100%;
     border-right: 0;
     border-bottom: 1px solid var(--app-hairline);
     max-height: 40vh;
   }
 
-  .devtools-panel-pane {
+  .devtools-main {
     min-height: 60vh;
-  }
-
-  .devtools-panel-card {
-    position: static;
-  }
-
-  .devtools-search {
-    width: 100%;
-  }
-
-  .devtools-toolbar {
-    flex-direction: column;
-    align-items: stretch;
   }
 }
 
 @media (max-width: 540px) {
-  .devtools-hero {
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 12px 14px 10px;
+  .devtools-main-header {
+    padding: 16px;
   }
 
-  .devtools-stats {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .devtools-toolbar,
-  .devtools-list-pane,
-  .devtools-panel-pane {
-    padding-left: 12px;
-    padding-right: 12px;
+  .devtools-main-body {
+    padding: 16px;
   }
 
   .devtools-two-col {

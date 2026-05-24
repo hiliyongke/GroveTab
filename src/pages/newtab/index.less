@@ -25,20 +25,21 @@ body,
   height: 100%;
   margin: 0;
   padding: 0;
+  /* 主应用严格按可视区高度铺满，不允许出现页面级滚动条；
+     滚动条只允许出现在内容区容器（.app-content-shell）。 */
+  overflow: hidden;
 }
 
 /*
- * ─── 抗抖动：预留滚动条槽位 ─────────────────────────────────
+ * ─── 抗抖动：内容区预留滚动条槽位 ─────────────────────────────
  *
- * Chrome 94+/Firefox 97+ 支持 `scrollbar-gutter: stable`，即使内容还没溢出
- * 也为滚动条预留空间；从而在动态增删内容（如搜索结果展开、BookmarkView
- * 在 Tree/List 之间切换）导致滚动条出现/消失时，**整页宽度保持恒定**，
- * 用户视角下不会再出现"内容向左挤一下"的抖动。
- *
- * 不用 `overflow-y: scroll`（会强制显示空滚动条），也不用 JS 测量
- * 滚动条宽度再设 padding-right（会拉长首屏）。这是最现代、零成本的方案。
+ * 主应用整体不滚动（html/body/#root 已 overflow:hidden），真正的滚动
+ * 发生在内容区容器 .app-content-shell。为避免内容切换（如 BookmarkView
+ * 在 Tree/List 之间切换）导致内容区滚动条出现/消失而引发"内容向左挤一下"
+ * 的抖动，在内容区容器上启用 scrollbar-gutter: stable，预留滚动条槽位，
+ * 让宽度保持恒定。
  */
-html {
+.app-content-shell {
   scrollbar-gutter: stable;
 }
 

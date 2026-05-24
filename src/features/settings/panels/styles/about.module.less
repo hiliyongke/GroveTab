@@ -81,22 +81,11 @@
   display: flex; /* antd 组件内部微调整 */
   align-items: flex-start;
   gap: 10px;
+  min-width: 0;
   padding: 10px;
   border: 1px solid var(--ant-color-border-secondary);
   border-radius: var(--app-radius-md);
   background: var(--ant-color-fill-quaternary);
-}
-
-.about-panel__feature-icon {
-  width: 30px;
-  height: 30px;
-  flex-shrink: 0;
-  border-radius: var(--app-radius-sm);
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-  justify-content: center;
-  background: color-mix(in srgb, var(--about-feature-color) 12%, transparent);
-  color: var(--about-feature);
 }
 
 .about-panel__feature-copy {
@@ -115,6 +104,18 @@
   color: var(--ant-color-text-tertiary);
   font-size: 10.5px;
   line-height: 1.5;
+}
+
+.about-panel__feature-icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: var(--app-radius-sm);
+  display: flex; /* antd 组件内部微调整 */
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--about-feature-color) 12%, transparent);
+  color: var(--about-feature-color);
 }
 
 .about-panel__tips-list {
@@ -141,14 +142,26 @@
   gap: 8px;
 }
 
+.about-panel__support-actions > button {
+  flex: 1 1 140px;
+}
+
 .about-panel__support-copy {
   margin-top: 4px;
   color: var(--ant-color-text-tertiary);
   font-size: 11px;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 520px) {
   .about-panel__feature-grid {
     grid-template-columns: 1fr;
+  }
+
+  .about-panel__support-actions {
+    flex-direction: column;
+  }
+
+  .about-panel__support-actions > button {
+    width: 100%;
   }
 }

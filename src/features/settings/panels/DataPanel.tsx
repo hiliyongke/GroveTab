@@ -9,8 +9,19 @@
  *   - 清空所有归档
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { Button, Space, Progress, Alert, App, Input, Popconfirm, Empty, Divider, Upload } from 'antd';
+import { useState, useEffect, useCallback } from "react";
+import {
+  Button,
+  Space,
+  Progress,
+  Alert,
+  App,
+  Input,
+  Popconfirm,
+  Empty,
+  Divider,
+  Upload,
+} from "antd";
 import {
   Download,
   Upload as UploadIcon,
@@ -22,20 +33,20 @@ import {
   RotateCcw,
   AlertTriangle,
   Sparkles,
-} from 'lucide-react';
+} from "lucide-react";
 
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { useT } from '@/shared/i18n';
-import { useSettingsStore } from '@/store';
-import { exportSessionsJSON, downloadFile, parseImportJSON } from '@/shared/utils/import-export';
-import { getArchivedSessions, saveSessions } from '@/services';
-import { getQuotaStatus, formatBytes } from '@/shared/utils/quota';
-import { Field } from '@/features/settings/components/Field';
-import { getAllDataKeys, removeData } from '@/repositories/storage-repo';
-import { APP_RESOURCE_NAMES, STORAGE_KEYS, isAppStorageKey } from '@/shared/config/storage-keys';
-import type { SettingsProfile } from '@/shared/utils/profiles';
-import { getProfiles, createProfile, renameProfile, deleteProfile } from '@/shared/utils/profiles';
-import styles from './styles/data.module.less';
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useT } from "@/shared/i18n";
+import { useSettingsStore } from "@/store";
+import { exportSessionsJSON, downloadFile, parseImportJSON } from "@/shared/utils/import-export";
+import { getArchivedSessions, saveSessions } from "@/services";
+import { getQuotaStatus, formatBytes } from "@/shared/utils/quota";
+import { Field } from "@/features/settings/components/Field";
+import { getAllDataKeys, removeData } from "@/repositories/storage-repo";
+import { APP_RESOURCE_NAMES, STORAGE_KEYS, isAppStorageKey } from "@/shared/config/storage-keys";
+import type { SettingsProfile } from "@/shared/utils/profiles";
+import { getProfiles, createProfile, renameProfile, deleteProfile } from "@/shared/utils/profiles";
+import styles from "./styles/data.module.less";
 
 interface QuotaInfo {
   usedBytes: number;
@@ -56,9 +67,9 @@ export function DataPanel() {
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [quotaInfo, setQuotaInfo] = useState<QuotaInfo | null>(null);
   const [profiles, setProfiles] = useState<SettingsProfile[]>([]);
-  const [profileName, setProfileName] = useState('');
+  const [profileName, setProfileName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingName, setEditingName] = useState('');
+  const [editingName, setEditingName] = useState("");
 
   useEffect(() => {
     void getQuotaStatus().then(setQuotaInfo);
@@ -68,33 +79,42 @@ export function DataPanel() {
   const handleCreateProfile = useCallback(async () => {
     if (!profileName.trim()) return;
     await createProfile(profileName.trim(), settings);
-    setProfileName('');
+    setProfileName("");
     const updated = await getProfiles();
     setProfiles(updated);
-    message.success(t('settings.profileCreated'));
+    message.success(t("settings.profileCreated"));
   }, [profileName, settings, message, t]);
 
-  const handleApplyProfile = useCallback((profile: SettingsProfile) => {
-    void updateSettings(profile.settings);
-    message.success(t('settings.profileApplied', { name: profile.name }));
-  }, [updateSettings, message, t]);
+  const handleApplyProfile = useCallback(
+    (profile: SettingsProfile) => {
+      void updateSettings(profile.settings);
+      message.success(t("settings.profileApplied", { name: profile.name }));
+    },
+    [updateSettings, message, t],
+  );
 
-  const handleDeleteProfile = useCallback(async (id: string) => {
-    await deleteProfile(id);
-    const updated = await getProfiles();
-    setProfiles(updated);
-    message.success(t('settings.profileDeleted'));
-  }, [message, t]);
+  const handleDeleteProfile = useCallback(
+    async (id: string) => {
+      await deleteProfile(id);
+      const updated = await getProfiles();
+      setProfiles(updated);
+      message.success(t("settings.profileDeleted"));
+    },
+    [message, t],
+  );
 
-  const handleRenameProfile = useCallback(async (id: string) => {
-    if (!editingName.trim()) return;
-    await renameProfile(id, editingName.trim());
-    setEditingId(null);
-    setEditingName('');
-    const updated = await getProfiles();
-    setProfiles(updated);
-    message.success(t('settings.profileRenamed'));
-  }, [editingName, message, t]);
+  const handleRenameProfile = useCallback(
+    async (id: string) => {
+      if (!editingName.trim()) return;
+      await renameProfile(id, editingName.trim());
+      setEditingId(null);
+      setEditingName("");
+      const updated = await getProfiles();
+      setProfiles(updated);
+      message.success(t("settings.profileRenamed"));
+    },
+    [editingName, message, t],
+  );
 
   const handleExport = async () => {
     const sessions = await getArchivedSessions();
@@ -110,12 +130,12 @@ export function DataPanel() {
       JSON.stringify(bundle, null, 2),
       `${APP_RESOURCE_NAMES.backupFilePrefix}-${new Date().toISOString().slice(0, 10)}.json`,
     );
-    message.success(t('settings.exportDone'));
+    message.success(t("settings.exportDone"));
   };
 
   const handleImport = async (file: File) => {
     if (file.size > MAX_IMPORT_FILE_BYTES) {
-      setImportStatus(t('settings.importTooLarge', { size: '2 MB' }));
+      setImportStatus(t("settings.importTooLarge", { size: "2 MB" }));
       return;
     }
 
@@ -135,266 +155,292 @@ export function DataPanel() {
 
     const { sessions, errors } = parseImportJSON(importText);
     if (errors.length > 0) {
-      setImportStatus(t('settings.importError', { count: errors.length }));
+      setImportStatus(t("settings.importError", { count: errors.length }));
       return;
     }
     const existing = await getArchivedSessions();
     const existingIds = new Set(existing.map((session) => session.id));
     const newSessions = sessions.filter((session) => !existingIds.has(session.id));
     await saveSessions([...newSessions, ...existing]);
-    setImportStatus(t('settings.importDone', { count: newSessions.length }));
+    setImportStatus(t("settings.importDone", { count: newSessions.length }));
   };
 
   const handleClearAll = () => {
     modal.confirm({
-      title: t('settings.clearAll'),
-      content: t('settings.confirmClear'),
+      title: t("settings.clearAll"),
+      content: t("settings.confirmClear"),
       okButtonProps: { danger: true },
-      okText: t('settings.clearAll'),
-      cancelText: t('context.cancel'),
+      okText: t("settings.clearAll"),
+      cancelText: t("context.cancel"),
       onOk: async () => {
         try {
           await saveSessions([]);
-          message.success(t('settings.clearAll'));
+          message.success(t("settings.clearAll"));
         } catch (err) {
-          console.error('[DataPanel] clearAll failed:', err);
+          console.error("[DataPanel] clearAll failed:", err);
         }
       },
     });
   };
 
   return (
-    <div className={styles['data-panel settings-panel-stack']}>
+    <div className={`${styles["data-panel"]} settings-panel-stack`}>
       <section className="settings-section">
-        <Field label={t('settings.profiles')} hint={t('settings.profilesHint')}>
-        <div className={styles['data-panel__profile-create']}>
-          <Input
-            size="small"
-            placeholder={t('settings.profileNamePlaceholder')}
-            value={profileName}
-            onChange={(e) => setProfileName(e.target.value)}
-            onPressEnter={() => { void handleCreateProfile(); }}
-            className={styles['data-panel__profile-input']}
-          />
-          <Button
-            size="small"
-            type="primary"
-            icon={<Save size={ICON_SIZE.MEDIUM} />}
-            disabled={!profileName.trim()}
-            onClick={() => { void handleCreateProfile(); }}
-          >
-            {t('settings.profileSave')}
-          </Button>
-        </div>
-        {profiles.length === 0 ? (
-          <Empty
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description={t('settings.noProfiles')}
-            className={styles['data-panel__empty']}
-          />
-        ) : (
-          <div className={styles['data-panel__profile-list']}>
-            {profiles.map((profile) => (
-              <div key={profile.id} className={styles['data-panel__profile-card']}>
-                {editingId === profile.id ? (
-                  <Input
-                    size="small"
-                    value={editingName}
-                    onChange={(e) => setEditingName(e.target.value)}
-                    onPressEnter={() => { void handleRenameProfile(profile.id); }}
-                    onBlur={() => { void handleRenameProfile(profile.id); }}
-                    className={styles['data-panel__profile-edit-input']}
-                    autoFocus
-                  />
-                ) : (
-                  <span className={styles['data-panel__profile-name']}>{profile.name}</span>
-                )}
-                <Space size={4}>
-                  <Button
-                    type="text"
-                    size="small"
-                    icon={<ArrowLeftRight size={ICON_SIZE.MEDIUM} />}
-                    title={t('settings.profileApply')}
-                    onClick={() => { void handleApplyProfile(profile); }}
-                  />
-                  <Button
-                    type="text"
-                    size="small"
-                    icon={<Pencil size={ICON_SIZE.MEDIUM} />}
-                    title={t('settings.profileRename')}
-                    onClick={() => { setEditingId(profile.id); setEditingName(profile.name); }}
-                  />
-                  <Popconfirm
-                    title={t('settings.profileDeleteConfirm')}
-                    onConfirm={() => { void handleDeleteProfile(profile.id); }}
-                    okText={t('settings.profileDelete')}
-                    cancelText={t('context.cancel')}
-                    okButtonProps={{ danger: true }}
-                  >
+        <Field label={t("settings.profiles")} hint={t("settings.profilesHint")}>
+          <div className={styles["data-panel__profile-create"]}>
+            <Input
+              size="small"
+              placeholder={t("settings.profileNamePlaceholder")}
+              value={profileName}
+              onChange={(e) => setProfileName(e.target.value)}
+              onPressEnter={() => {
+                void handleCreateProfile();
+              }}
+              onKeyDown={undefined}
+              className={styles["data-panel__profile-input"]}
+            />
+            <Button
+              size="small"
+              type="primary"
+              icon={<Save size={ICON_SIZE.MEDIUM} />}
+              disabled={!profileName.trim()}
+              onClick={() => {
+                void handleCreateProfile();
+              }}
+            >
+              {t("settings.profileSave")}
+            </Button>
+          </div>
+          {profiles.length === 0 ? (
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description={t("settings.noProfiles")}
+              className={styles["data-panel__empty"]}
+            />
+          ) : (
+            <div className={styles["data-panel__profile-list"]}>
+              {profiles.map((profile) => (
+                <div key={profile.id} className={styles["data-panel__profile-card"]}>
+                  {editingId === profile.id ? (
+                    <Input
+                      size="small"
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                      onPressEnter={() => {
+                        void handleRenameProfile(profile.id);
+                      }}
+                      onBlur={() => {
+                        void handleRenameProfile(profile.id);
+                      }}
+                      className={styles["data-panel__profile-edit-input"]}
+                      autoFocus
+                    />
+                  ) : (
+                    <span className={styles["data-panel__profile-name"]}>{profile.name}</span>
+                  )}
+                  <Space size={4}>
                     <Button
                       type="text"
                       size="small"
-                      danger
-                      icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
-                      title={t('settings.profileDelete')}
+                      icon={<ArrowLeftRight size={ICON_SIZE.MEDIUM} />}
+                      title={t("settings.profileApply")}
+                      onClick={() => {
+                        void handleApplyProfile(profile);
+                      }}
                     />
-                  </Popconfirm>
-                </Space>
-              </div>
-            ))}
-          </div>
-        )}
-      </Field>
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<Pencil size={ICON_SIZE.MEDIUM} />}
+                      title={t("settings.profileRename")}
+                      onClick={() => {
+                        setEditingId(profile.id);
+                        setEditingName(profile.name);
+                      }}
+                    />
+                    <Popconfirm
+                      title={t("settings.profileDeleteConfirm")}
+                      onConfirm={() => {
+                        void handleDeleteProfile(profile.id);
+                      }}
+                      okText={t("settings.profileDelete")}
+                      cancelText={t("context.cancel")}
+                      okButtonProps={{ danger: true }}
+                    >
+                      <Button
+                        type="text"
+                        size="small"
+                        danger
+                        icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
+                        title={t("settings.profileDelete")}
+                      />
+                    </Popconfirm>
+                  </Space>
+                </div>
+              ))}
+            </div>
+          )}
+        </Field>
       </section>
 
       {quotaInfo !== null && (
         <section className="settings-section">
-          <div className={styles['data-panel__quota']}>
-          <div className={styles['data-panel__quota-header']}>
-            <span className={styles['data-panel__quota-label']}>
-              <HardDrive size={ICON_SIZE.MEDIUM} className={styles['data-panel__quota-icon']} />
-              {t('settings.storage')}
-            </span>
-            <span className={`data-panel__quota-meta${quotaInfo.isWarning ? ' is-warning' : ''}`}>
-              {formatBytes(quotaInfo.usedBytes)} / {formatBytes(quotaInfo.totalBytes)}
-            </span>
-          </div>
-          <Progress
-            percent={Math.round(quotaInfo.percentage)}
-            size="small"
-            status={quotaInfo.isWarning ? 'exception' : 'normal'}
-            showInfo={false}
-          />
-          {quotaInfo.isWarning && (
-            <Alert
-              type="error"
-              showIcon
-              description={t('settings.quotaWarning')}
-              className={styles['data-panel__quota-alert']}
+          <div className={styles["data-panel__quota"]}>
+            <div className={styles["data-panel__quota-header"]}>
+              <span className={styles["data-panel__quota-label"]}>
+                <HardDrive size={ICON_SIZE.MEDIUM} className={styles["data-panel__quota-icon"]} />
+                {t("settings.storage")}
+              </span>
+              <span
+                className={`${styles["data-panel__quota-meta"]}${quotaInfo.isWarning ? ` ${styles["is-warning"]}` : ""}`}
+              >
+                {formatBytes(quotaInfo.usedBytes)} / {formatBytes(quotaInfo.totalBytes)}
+              </span>
+            </div>
+            <Progress
+              percent={Math.round(quotaInfo.percentage)}
+              size="small"
+              status={quotaInfo.isWarning ? "exception" : "normal"}
+              showInfo={false}
             />
-          )}
-        </div>
+            {quotaInfo.isWarning && (
+              <Alert
+                type="error"
+                showIcon
+                description={t("settings.quotaWarning")}
+                className={styles["data-panel__quota-alert"]}
+              />
+            )}
+          </div>
         </section>
       )}
 
       <section className="settings-section">
-        <div className={styles['data-panel__actions']}>
-        <Button block icon={<Download size={ICON_SIZE.MEDIUM} />} onClick={() => { void handleExport(); }}>
-          {t('settings.export')}
-        </Button>
-        <Upload
-          accept=".json"
-          showUploadList={false}
-          beforeUpload={(file) => {
-            void handleImport(file as File);
-            return false; // 阻止实际上传
-          }}
-        >
-          <Button block icon={<UploadIcon size={ICON_SIZE.MEDIUM} />}>
-            {t('settings.import')}
+        <div className={styles["data-panel__actions"]}>
+          <Button
+            block
+            icon={<Download size={ICON_SIZE.MEDIUM} />}
+            onClick={() => {
+              void handleExport();
+            }}
+          >
+            {t("settings.export")}
           </Button>
-        </Upload>
-        {importStatus !== null && (
-          <div className={styles['data-panel__import-status']}>{importStatus}</div>
-        )}
-      </div>
+          <Upload
+            accept=".json"
+            showUploadList={false}
+            beforeUpload={(file) => {
+              void handleImport(file as File);
+              return false; // 阻止实际上传
+            }}
+          >
+            <Button block icon={<UploadIcon size={ICON_SIZE.MEDIUM} />}>
+              {t("settings.import")}
+            </Button>
+          </Upload>
+          {importStatus !== null && (
+            <div className={styles["data-panel__import-status"]}>{importStatus}</div>
+          )}
+        </div>
       </section>
 
       <section className="settings-section">
         <Button block danger icon={<Trash2 size={ICON_SIZE.MEDIUM} />} onClick={handleClearAll}>
-        {t('settings.clearAll')}
-      </Button>
-
-      <Divider className={styles['data-panel__divider']}>{t('settings.dangerZone')}</Divider>
-
-      <Popconfirm
-        title={t('settings.resetSettingsConfirm')}
-        description={t('settings.resetSettingsDesc')}
-        onConfirm={async () => {
-          try {
-            await resetSettings();
-            message.success(t('settings.resetSettingsDone'));
-          } catch (err) {
-            console.error('[DataPanel] resetSettings failed:', err);
-            message.error(t('settings.resetSettingsFailed'));
-          }
-        }}
-      >
-        <Button block icon={<RotateCcw size={ICON_SIZE.MEDIUM} />}>
-          {t('settings.resetSettings')}
+          {t("settings.clearAll")}
         </Button>
-      </Popconfirm>
 
-      <Popconfirm
-        title={t('settings.replayOnboardingConfirm')}
-        onConfirm={async () => {
-          try {
-            await removeData(STORAGE_KEYS.onboardingDone);
-            message.success(t('settings.replayOnboardingDone'));
-          } catch (err) {
-            console.error('[DataPanel] replayOnboarding failed:', err);
-          }
-        }}
-      >
-        <Button block icon={<Sparkles size={ICON_SIZE.MEDIUM} />}>
-          {t('settings.replayOnboarding')}
-        </Button>
-      </Popconfirm>
+        <Divider className={styles["data-panel__divider"]}>{t("settings.dangerZone")}</Divider>
 
-      <Button
-        block
-        danger
-        icon={<AlertTriangle size={ICON_SIZE.MEDIUM} />}
-        onClick={() => {
-          let confirmText = '';
-          modal.confirm({
-            title: t('settings.factoryResetTitle'),
-            content: (
-              <div className={styles['data-panel__factory-confirm']}>
-                <Alert
-                  type="error"
-                  showIcon
-                  message={t('settings.factoryResetWarning')}
-                />
-                <div className={styles['data-panel__factory-copy']}>{t('settings.factoryResetTypeHint')}</div>
-                <Input
-                  placeholder="RESET"
-                  onChange={(e) => {
-                    confirmText = e.target.value;
-                  }}
-                />
-              </div>
-            ),
-            okText: t('settings.factoryResetConfirm'),
-            okButtonProps: { danger: true },
-            cancelText: t('settings.cancel'),
-            onOk: async () => {
-              if (confirmText.trim().toUpperCase() !== 'RESET') {
-                message.error(t('settings.factoryResetMustType'));
-                return Promise.reject(new Error('must type RESET'));
-              }
+        <Popconfirm
+          title={t("settings.resetSettingsConfirm")}
+          description={t("settings.resetSettingsDesc")}
+          onConfirm={() => {
+            void (async () => {
               try {
-                const keys = await getAllDataKeys();
-                for (const key of keys) {
-                  if (isAppStorageKey(key)) {
-                    await removeData(key);
-                  }
-                }
                 await resetSettings();
-                message.success(t('settings.factoryResetDone'));
-                setTimeout(() => window.location.reload(), 400);
+                message.success(t("settings.resetSettingsDone"));
               } catch (err) {
-                console.error('[DataPanel] factoryReset failed:', err);
-                message.error(t('settings.factoryResetMustType'));
-                return Promise.reject(err);
+                console.error("[DataPanel] resetSettings failed:", err);
+                message.error(t("settings.resetSettingsFailed"));
               }
-              return undefined;
-            },
-          });
-        }}
-      >
-        {t('settings.factoryReset')}
-      </Button>
+            })();
+          }}
+        >
+          <Button block icon={<RotateCcw size={ICON_SIZE.MEDIUM} />}>
+            {t("settings.resetSettings")}
+          </Button>
+        </Popconfirm>
+
+        <Popconfirm
+          title={t("settings.replayOnboardingConfirm")}
+          onConfirm={() => {
+            void (async () => {
+              try {
+                await removeData(STORAGE_KEYS.onboardingDone);
+                message.success(t("settings.replayOnboardingDone"));
+              } catch (err) {
+                console.error("[DataPanel] replayOnboarding failed:", err);
+              }
+            })();
+          }}
+        >
+          <Button block icon={<Sparkles size={ICON_SIZE.MEDIUM} />}>
+            {t("settings.replayOnboarding")}
+          </Button>
+        </Popconfirm>
+
+        <Button
+          block
+          danger
+          icon={<AlertTriangle size={ICON_SIZE.MEDIUM} />}
+          onClick={() => {
+            let confirmText = "";
+            modal.confirm({
+              title: t("settings.factoryResetTitle"),
+              content: (
+                <div className={styles["data-panel__factory-confirm"]}>
+                  <Alert type="error" showIcon message={t("settings.factoryResetWarning")} />
+                  <div className={styles["data-panel__factory-copy"]}>
+                    {t("settings.factoryResetTypeHint")}
+                  </div>
+                  <Input
+                    placeholder="RESET"
+                    onChange={(e) => {
+                      confirmText = e.target.value;
+                    }}
+                  />
+                </div>
+              ),
+              okText: t("settings.factoryResetConfirm"),
+              okButtonProps: { danger: true },
+              cancelText: t("settings.cancel"),
+              onOk: async () => {
+                if (confirmText.trim().toUpperCase() !== "RESET") {
+                  message.error(t("settings.factoryResetMustType"));
+                  return Promise.reject(new Error("must type RESET"));
+                }
+                try {
+                  const keys = await getAllDataKeys();
+                  for (const key of keys) {
+                    if (isAppStorageKey(key)) {
+                      await removeData(key);
+                    }
+                  }
+                  await resetSettings();
+                  message.success(t("settings.factoryResetDone"));
+                  setTimeout(() => window.location.reload(), 400);
+                } catch (err) {
+                  console.error("[DataPanel] factoryReset failed:", err);
+                  message.error(t("settings.factoryResetMustType"));
+                  return Promise.reject(err instanceof Error ? err : new Error(String(err)));
+                }
+                return undefined;
+              },
+            });
+          }}
+        >
+          {t("settings.factoryReset")}
+        </Button>
       </section>
     </div>
   );

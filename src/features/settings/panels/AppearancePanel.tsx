@@ -53,7 +53,7 @@ const MAX_VIDEO_BACKGROUND_FILE_BYTES = 50 * 1024 * 1024;
 
 function ModeBadge({ mode }: { mode: "light" | "dark" }) {
   return (
-    <span className={`appearance-mode-badge is-${mode}`}>
+    <span className={`${styles["appearance-mode-badge"]} ${styles[`is-${mode}`]}`}>
       {mode === "dark" ? <Moon size={ICON_SIZE.XS} /> : <Sun size={ICON_SIZE.XS} />}
     </span>
   );
@@ -131,12 +131,17 @@ function PresetCard({
   return (
     <Button
       htmlType="button"
+      title={description ? `${label} · ${description}` : label}
       onClick={onClick}
-      className={`appearance-preset-card${selected ? " is-selected" : ""}`}
+      className={`${styles["appearance-preset-card"]}${selected ? ` ${styles["is-selected"]}` : ""}`}
     >
       {preview}
       <div className={styles["appearance-preset-meta"]}>
-        <div className={`appearance-preset-title${selected ? " is-selected" : ""}`}>{label}</div>
+        <div
+          className={`${styles["appearance-preset-title"]}${selected ? ` ${styles["is-selected"]}` : ""}`}
+        >
+          {label}
+        </div>
         {description && (
           <div className={styles["appearance-preset-description"]}>{description}</div>
         )}
@@ -278,7 +283,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
   );
 
   return (
-    <div className="settings-panel-stack appearance-panel">
+    <div className={`settings-panel-stack ${styles["appearance-panel"]}`}>
       {/* ── 皮肤预设选择器 ── */}
       <section className="settings-section">
         <Field label={t("skin.title")} hint={t("skin.hint")}>
@@ -474,7 +479,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                     void updateSettings({ gradientPreset: preset.id });
                     if (preset.id === "custom") setShowGradientEditor(true);
                   }}
-                  className={`appearance-preset-card${isSelected ? " is-selected" : ""}`}
+                  className={`${styles["appearance-preset-card"]}${isSelected ? ` ${styles["is-selected"]}` : ""}`}
                 >
                   <div
                     className={`${styles["appearance-preset-preview"]} ${styles["appearance-preset-preview--gradient"]} ${styles["appearance-preview-editable"]}`}
@@ -489,7 +494,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                     )}
                   </div>
                   <div
-                    className={`appearance-preset-label-only${isSelected ? " is-selected" : ""}`}
+                    className={`${styles["appearance-preset-label-only"]}${isSelected ? ` ${styles["is-selected"]}` : ""}`}
                   >
                     {t(preset.labelKey)}
                   </div>
@@ -517,7 +522,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
               </div>
 
               <div
-                className={`appearance-editor-preview${showGradientEditor ? "" : " is-collapsed"}`}
+                className={`${styles["appearance-editor-preview"]}${showGradientEditor ? "" : ` ${styles["is-collapsed"]}`}`}
                 style={customPreviewStyle}
               />
 
@@ -738,7 +743,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                     value={
                       isDark
                         ? (settings.backgroundOverlay?.colorDark ?? "rgba(0,0,0,0.6)")
-                        : (settings.backgroundOverlay?.color ?? "rgba(0,0,0,0,0.35)")
+                        : (settings.backgroundOverlay?.color ?? "rgba(0,0,0,0.35)")
                     }
                     onChangeComplete={(color) => {
                       const hex = color.toHexString();
@@ -746,7 +751,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                         hex,
                         isDark
                           ? parseAlpha(settings.backgroundOverlay?.colorDark ?? "rgba(0,0,0,0.6)")
-                          : parseAlpha(settings.backgroundOverlay?.color ?? "rgba(0,0,0,0,0.35)"),
+                          : parseAlpha(settings.backgroundOverlay?.color ?? "rgba(0,0,0,0.35)"),
                       );
                       if (isDark) {
                         updateBgOverlay({ colorDark: rgba });

@@ -10,7 +10,7 @@
  */
 
 import { useCallback, useMemo, useState } from "react";
-import { Empty, Input, Segmented, Tag, Typography } from "antd";
+import { Empty, Input, Tag, Typography } from "antd";
 import {
   Braces,
   Clock,
@@ -31,9 +31,9 @@ import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
 import { loadStringArray, saveStringArray } from "@/shared/utils/storage-array";
 import type { DevToolCategory, DevToolDefinition } from "./tool-registry";
-import { DEV_TOOLS, getToolsByCategory, searchTools } from "./tool-registry";
+import { DEV_TOOLS, searchTools } from "./tool-registry";
 import styles from "./DeveloperToolsPage.module.less";
-import { ToolCard, TOOL_ICONS } from "./components/ToolCard";
+import { TOOL_ICONS } from "./components/ToolCard";
 import { ToolPanel } from "./components/ToolPanel";
 
 const { Title } = Typography;
@@ -41,16 +41,16 @@ const { Title } = Typography;
 const STORAGE_KEY_FAV = "devtools:favorites";
 
 const CATEGORY_ICONS: Record<DevToolCategory, React.ReactNode> = {
-  data: <Braces size={ICON_SIZE.DEFAULT} />,
-  encoding: <Link size={ICON_SIZE.DEFAULT} />,
-  time: <Clock size={ICON_SIZE.DEFAULT} />,
-  crypto: <Shield size={ICON_SIZE.DEFAULT} />,
-  number: <Hash size={ICON_SIZE.DEFAULT} />,
-  generator: <Dices size={ICON_SIZE.DEFAULT} />,
-  color: <Palette size={ICON_SIZE.DEFAULT} />,
-  frontend: <Code2 size={ICON_SIZE.DEFAULT} />,
-  backend: <Server size={ICON_SIZE.DEFAULT} />,
-  network: <Globe2 size={ICON_SIZE.DEFAULT} />,
+  data: <Braces size={14} />,
+  encoding: <Link size={14} />,
+  time: <Clock size={14} />,
+  crypto: <Shield size={14} />,
+  number: <Hash size={14} />,
+  generator: <Dices size={14} />,
+  color: <Palette size={14} />,
+  frontend: <Code2 size={14} />,
+  backend: <Server size={14} />,
+  network: <Globe2 size={14} />,
 };
 
 const CATEGORY_LABEL_KEYS: Record<DevToolCategory, string> = {
@@ -70,57 +70,19 @@ const CATEGORY_LABEL_KEYS: Record<DevToolCategory, string> = {
  * 开发工具栏主页面
  *
  * 列表组织：
- *   - 顶部：收藏区（仅当无搜索 / category=all 时展示）
- *   - 主体：根据分类与搜索过滤后的工具列表
- *   - 收藏区与主列表共用同一份 React 渲染逻辑，避免手动 DOM 操作引发的状态错位
+ *   - 左侧：侧边栏导航（搜索 + 按分类分组的工具列表）
+ *   - 右侧：工具工作台
  */
 export function DeveloperToolsPage() {
   const { t } = useT();
-  const [category, setCategory] = useState<DevToolCategory | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedToolId, setSelectedToolId] = useState(DEV_TOOLS[0]?.id ?? "json-format");
   const [favorites, setFavorites] = useState<string[]>(() => loadStringArray(STORAGE_KEY_FAV));
 
-  const categoryCounts = useMemo(
-    () =>
-      DEV_TOOLS.reduce<Record<string, number>>((acc, tool) => {
-        acc[tool.category] = (acc[tool.category] ?? 0) + 1;
-        return acc;
-      }, {}),
-    [],
-  );
-
-  const categoryOptions = useMemo(
-    () => [
-      {
-        value: "all" as const,
-        label: (
-          <span className={styles["devtools-category-label"]}>
-            <Wrench size={ICON_SIZE.DEFAULT} />
-            {t("devtools.catAll")} · {DEV_TOOLS.length}
-          </span>
-        ),
-      },
-      ...Object.entries(CATEGORY_LABEL_KEYS).map(([cat, key]) => ({
-        value: cat as DevToolCategory,
-        label: (
-          <span className={styles["devtools-category-label"]}>
-            {CATEGORY_ICONS[cat as DevToolCategory]}
-            {t(key)} · {categoryCounts[cat] ?? 0}
-          </span>
-        ),
-      })),
-    ],
-    [categoryCounts, t],
-  );
-
   const filteredTools = useMemo(() => {
-    const byCategory = getToolsByCategory(category);
-    if (!searchQuery.trim()) return byCategory;
-    return searchTools(searchQuery).filter(
-      (tool) => category === "all" || tool.category === category,
-    );
-  }, [category, searchQuery]);
+    if (!searchQuery.trim()) return DEV_TOOLS;
+    return searchTools(searchQuery);
+  }, [searchQuery]);
 
   const selectedTool = useMemo(
     () => DEV_TOOLS.find((tool) => tool.id === selectedToolId) ?? DEV_TOOLS[0]!,
@@ -151,14 +113,12 @@ export function DeveloperToolsPage() {
     });
   }, []);
 
-  /** 收藏区是否展示：无搜索时即可展示，分类筛选时也允许展示（仅显示该分类下的收藏） */
   const favoriteTools = useMemo(() => {
     if (favorites.length === 0) return [];
     const lookup = new Map(DEV_TOOLS.map((tool) => [tool.id, tool]));
     return favorites
       .map((id) => lookup.get(id))
       .filter((tool): tool is DevToolDefinition => Boolean(tool))
-      .filter((tool) => category === "all" || tool.category === category)
       .filter((tool) => {
         if (!searchQuery.trim()) return true;
         const q = searchQuery.trim().toLowerCase();
@@ -169,110 +129,106 @@ export function DeveloperToolsPage() {
           (texts?.desc.toLowerCase().includes(q) ?? false)
         );
       });
-  }, [favorites, category, searchQuery, toolTexts]);
+  }, [favorites, searchQuery, toolTexts]);
 
-  /** 主列表中需要隐藏（已在收藏区展示）的工具 id */
   const hiddenIds = useMemo(() => new Set(favoriteTools.map((tool) => tool.id)), [favoriteTools]);
+
+  const groupedTools = useMemo(() => {
+    const groups: Array<{ category: string; label: React.ReactNode; tools: DevToolDefinition[] }> =
+      [];
+
+    if (favoriteTools.length > 0) {
+      groups.push({
+        category: "favorites",
+        label: (
+          <span className={styles["devtools-sidebar-group-title"]}>
+            <Star size={12} className={styles["devtools-sidebar-group-icon-fav"]} />
+            {t("devtools.favorites")}
+          </span>
+        ),
+        tools: favoriteTools,
+      });
+    }
+
+    const categories = Object.keys(CATEGORY_LABEL_KEYS) as DevToolCategory[];
+    categories.forEach((cat) => {
+      const toolsInCat = filteredTools.filter((t) => t.category === cat && !hiddenIds.has(t.id));
+      if (toolsInCat.length > 0) {
+        groups.push({
+          category: cat,
+          label: (
+            <span className={styles["devtools-sidebar-group-title"]}>
+              {CATEGORY_ICONS[cat]}
+              {t(CATEGORY_LABEL_KEYS[cat])}
+            </span>
+          ),
+          tools: toolsInCat,
+        });
+      }
+    });
+
+    return groups;
+  }, [filteredTools, favoriteTools, hiddenIds, t]);
 
   return (
     <section className={styles["devtools-page"]}>
       <div className={styles["devtools-shell"]}>
-        <header className={styles["devtools-hero"]}>
-          <div className={styles["devtools-title-row"]}>
+        <aside className={styles["devtools-sidebar"]}>
+          <div className={styles["devtools-sidebar-header"]}>
             <div className={styles["devtools-brand"]}>
               <span className={styles["devtools-logo"]}>
                 <Wrench size={ICON_SIZE.LARGE} />
               </span>
-              <Title level={4} className={styles["devtools-title"]}>
+              <Title level={5} className={styles["devtools-title"]}>
                 {t("devtools.title")}
               </Title>
-              <Tag
-                color="green"
-                className={`${styles["devtools-tag"]} ${styles["devtools-tag--local"]}`}
-              >
-                {t("devtools.localOnly")}
-              </Tag>
-            </div>
-            <div className={styles["devtools-stats"]}>
-              <span className={styles["devtools-stat-pill"]}>{DEV_TOOLS.length} tools</span>
-              <span className={styles["devtools-stat-pill"]}>
-                {Object.keys(categoryCounts).length} categories
-              </span>
-              <span className={styles["devtools-stat-pill"]}>100% local</span>
             </div>
           </div>
-          <div className={styles["devtools-subtitle"]}>{t("devtools.subtitle")}</div>
-        </header>
 
-        <div className={styles["devtools-toolbar"]}>
-          <Segmented
-            value={category}
-            onChange={(value) => setCategory(value)}
-            options={categoryOptions}
-            size="small"
-            className={styles["devtools-segmented"]}
-          />
-          <Input
-            prefix={<Search size={14} />}
-            placeholder={t("devtools.searchPlaceholder")}
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            allowClear
-            size="small"
-            className={styles["devtools-search"]}
-          />
-        </div>
+          <div className={styles["devtools-sidebar-search"]}>
+            <Input
+              prefix={<Search size={14} />}
+              placeholder={t("devtools.searchPlaceholder")}
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              allowClear
+              size="small"
+            />
+          </div>
 
-        <div className={styles["devtools-workbench"]}>
-          <div className={styles["devtools-list-pane"]}>
-            {favoriteTools.length > 0 && (
-              <div className={styles["devtools-section"]}>
-                <div className={styles["devtools-section-head"]}>
-                  <Star
-                    size={14}
-                    className={`${styles["devtools-section-icon"]} ${styles["devtools-section-icon--fav"]}`}
-                  />
-                  <strong className={styles["devtools-section-title"]}>
-                    {t("devtools.favorites")}
-                  </strong>
+          <div className={styles["devtools-sidebar-menu"]}>
+            {groupedTools.length > 0 ? (
+              groupedTools.map((group) => (
+                <div key={group.category} className={styles["devtools-sidebar-group"]}>
+                  {group.label}
+                  <div className={styles["devtools-sidebar-group-list"]}>
+                    {group.tools.map((tool) => (
+                      <div
+                        key={tool.id}
+                        className={`${styles["devtools-sidebar-item"]} ${selectedToolId === tool.id ? styles["is-active"] : ""}`}
+                        onClick={() => handleSelectTool(tool.id)}
+                      >
+                        <span className={styles["devtools-sidebar-item-icon"]}>
+                          {TOOL_ICONS[tool.id] ?? <Wrench size={14} />}
+                        </span>
+                        <span className={styles["devtools-sidebar-item-title"]}>
+                          {toolTexts[tool.id]?.title ?? tool.titleKey}
+                        </span>
+                        <span
+                          className={`${styles["devtools-sidebar-item-fav"]} ${favorites.includes(tool.id) ? styles["is-active"] : ""}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleFavorite(tool.id);
+                          }}
+                        >
+                          <Heart size={12} />
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className={styles["devtools-grid"]}>
-                  {favoriteTools.map((tool) => (
-                    <ToolCard
-                      key={`fav-${tool.id}`}
-                      tool={tool}
-                      title={toolTexts[tool.id]?.title ?? tool.titleKey}
-                      description={toolTexts[tool.id]?.desc ?? tool.descriptionKey}
-                      selected={selectedToolId === tool.id}
-                      favorited
-                      onClick={() => handleSelectTool(tool.id)}
-                      onToggleFavorite={(e) => {
-                        e.stopPropagation();
-                        handleToggleFavorite(tool.id);
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-            {filteredTools
-              .filter((tool) => !hiddenIds.has(tool.id))
-              .map((tool) => (
-                <ToolCard
-                  key={tool.id}
-                  tool={tool}
-                  title={toolTexts[tool.id]?.title ?? tool.titleKey}
-                  description={toolTexts[tool.id]?.desc ?? tool.descriptionKey}
-                  selected={selectedToolId === tool.id}
-                  favorited={favorites.includes(tool.id)}
-                  onClick={() => handleSelectTool(tool.id)}
-                  onToggleFavorite={(e) => {
-                    e.stopPropagation();
-                    handleToggleFavorite(tool.id);
-                  }}
-                />
-              ))}
-            {filteredTools.length === 0 && (
+              ))
+            ) : (
               <Empty
                 description={t("devtools.searchPlaceholder")}
                 className={styles["devtools-empty-state"]}
@@ -280,41 +236,40 @@ export function DeveloperToolsPage() {
             )}
           </div>
 
-          <aside className={styles["devtools-panel-pane"]}>
-            <div className={styles["devtools-panel-card"]}>
-              <div className={styles["devtools-panel-head"]}>
-                <div className={styles["devtools-panel-title"]}>
-                  <span className={styles["devtools-panel-icon"]}>
-                    {TOOL_ICONS[selectedTool.id] ?? <Wrench size={ICON_SIZE.LARGE} />}
-                  </span>
-                  <Title level={5} className={styles["devtools-panel-heading"]}>
-                    {toolTexts[selectedTool.id]?.title ?? selectedTool.titleKey}
-                  </Title>
-                  <span
-                    className={`devtools-fav-btn${favorites.includes(selectedTool.id) ? " is-active" : ""}`}
-                    onClick={() => handleToggleFavorite(selectedTool.id)}
-                    role="button"
-                    tabIndex={0}
-                    aria-label="收藏"
-                  >
-                    <Heart size={14} />
-                  </span>
-                </div>
-                <div className={styles["devtools-panel-desc"]}>
-                  {toolTexts[selectedTool.id]?.desc ?? selectedTool.descriptionKey}
-                </div>
-              </div>
-              <div className={styles["devtools-panel-body"]}>
-                <ToolPanel tool={selectedTool} onUse={() => handleSelectTool(selectedTool.id)} />
-              </div>
-            </div>
-          </aside>
-        </div>
-      </div>
+          <div className={styles["devtools-sidebar-footer"]}>
+            <Shield size={12} />
+            <span>{t("devtools.privacyNote")}</span>
+          </div>
+        </aside>
 
-      <div className={styles["devtools-privacy"]}>
-        <Shield size={12} />
-        <span>{t("devtools.privacyNote")}</span>
+        <main className={styles["devtools-main"]}>
+          <div className={styles["devtools-main-header"]}>
+            <div className={styles["devtools-main-title-row"]}>
+              <span className={styles["devtools-main-icon"]}>
+                {TOOL_ICONS[selectedTool.id] ?? <Wrench size={ICON_SIZE.LARGE} />}
+              </span>
+              <Title level={4} className={styles["devtools-main-title"]}>
+                {toolTexts[selectedTool.id]?.title ?? selectedTool.titleKey}
+              </Title>
+              <Tag color="green" className={styles["devtools-tag-local"]}>
+                {t("devtools.localOnly")}
+              </Tag>
+              <span
+                className={`${styles["devtools-main-fav-btn"]} ${favorites.includes(selectedTool.id) ? styles["is-active"] : ""}`}
+                onClick={() => handleToggleFavorite(selectedTool.id)}
+              >
+                <Heart size={16} />
+              </span>
+            </div>
+            <div className={styles["devtools-main-desc"]}>
+              {toolTexts[selectedTool.id]?.desc ?? selectedTool.descriptionKey}
+            </div>
+          </div>
+
+          <div className={styles["devtools-main-body"]}>
+            <ToolPanel tool={selectedTool} onUse={() => handleSelectTool(selectedTool.id)} />
+          </div>
+        </main>
       </div>
     </section>
   );

@@ -1,9 +1,9 @@
 /* PrivacyPanel — 隐私设置面板内联样式迁移 */
 
-/* Select 宽度：100% + 最大 280px */
+/* Select 宽度：100% + 最大 320px */
 .privacy-select-wide {
   width: 100%;
-  max-width: 280px;
+  max-width: 320px;
 }
 
 /* Select 宽度：100% */
@@ -11,7 +11,21 @@
   width: 100%;
 }
 
-/* 禁用状态 opacity */
-:global(.settings-section.is-disabled) {
-  opacity: 0.55;
+:global(.settings-section__body .ant-space) {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 520px) {
+  .privacy-select-wide {
+    max-width: none;
+  }
+
+  :global(.settings-section__body .ant-space),
+  :global(.settings-section__body .ant-space-item) {
+    width: 100%;
+  }
+
+  :global(.settings-section__body .ant-space .ant-btn) {
+    width: 100%;
+  }
 }
