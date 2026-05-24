@@ -5,26 +5,25 @@
  * 拖拽由父组件 SortableSiteCard 通过 useSortable 注入。
  */
 
-import styles from './QuickStartLayer.module.less';
-import { useCallback, useMemo, useState } from 'react';
-import { Card, Dropdown } from 'antd';
-import type { MenuProps } from 'antd';
-import { GripVertical, Pencil, Trash2, ExternalLink, MoreHorizontal } from 'lucide-react';
-import { cssVars } from '@/shared/utils/css-vars';
-import { useT } from '@/shared/i18n';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { useAccent } from '@/shared/hooks/useAccent';
-import type { SpeedDialSite } from '@/shared/types';
-import { getHostname, getInitial, getFaviconUrl } from './utils/siteUtils';
+import styles from "./QuickStartLayer.module.less";
+import { useCallback, useMemo, useState } from "react";
+import { Card, Dropdown } from "antd";
+import type { MenuProps } from "antd";
+import { GripVertical, Pencil, Trash2, ExternalLink, MoreHorizontal } from "lucide-react";
+import { cssVars } from "@/shared/utils/css-vars";
+import { useT } from "@/shared/i18n";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useAccent } from "@/shared/hooks/useAccent";
+import type { SpeedDialSite } from "@/shared/types";
+import { getHostname, getInitial, getFaviconUrl } from "./utils/siteUtils";
+import type { DraggableAttributes } from "@dnd-kit/core";
 
 interface SiteCardProps {
   site: SpeedDialSite;
   /** 拖拽手柄的 listeners（由 SortableSiteCard 传入） */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  dragListeners?: any;
+  dragListeners?: Record<string, (...args: unknown[]) => void>;
   /** 拖拽手柄的 attributes（由 SortableSiteCard 传入） */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  dragAttributes?: any;
+  dragAttributes?: DraggableAttributes;
   /** 是否正在拖拽中（用于降低透明度） */
   isDragging?: boolean;
   /** 打开编辑弹窗 */
@@ -53,37 +52,37 @@ export function SiteCard({
 
   /** 打开网站 */
   const openSite = useCallback(() => {
-    if (typeof chrome !== 'undefined' && chrome.tabs) {
+    if (typeof chrome !== "undefined" && chrome.tabs) {
       void chrome.tabs.create({ url: site.url });
     } else {
-      window.open(site.url, '_blank');
+      window.open(site.url, "_blank");
     }
   }, [site.url]);
 
   /** Dropdown 菜单项 */
-  const menuItems: MenuProps['items'] = [
+  const menuItems: MenuProps["items"] = [
     {
-      key: 'open',
+      key: "open",
       icon: <ExternalLink size={ICON_SIZE.SMALL} />,
-      label: t('quickStart.openInNewTab'),
+      label: t("quickStart.openInNewTab"),
       onClick: ({ domEvent }) => {
         domEvent.stopPropagation();
         openSite();
       },
     },
     {
-      key: 'edit',
+      key: "edit",
       icon: <Pencil size={ICON_SIZE.SMALL} />,
-      label: t('quickStart.edit'),
+      label: t("quickStart.edit"),
       onClick: ({ domEvent }) => {
         domEvent.stopPropagation();
         onEdit(site);
       },
     },
     {
-      key: 'delete',
+      key: "delete",
       icon: <Trash2 size={ICON_SIZE.SMALL} />,
-      label: t('quickStart.remove'),
+      label: t("quickStart.remove"),
       danger: true,
       onClick: ({ domEvent }) => {
         domEvent.stopPropagation();
@@ -93,29 +92,22 @@ export function SiteCard({
   ];
 
   const cardStyle: React.CSSProperties = cssVars({
-    '--speed-dial-card-accent': color,
-    '--speed-dial-card-opacity': isDragging ? '0.4' : '1',
+    "--speed-dial-card-accent": color,
+    "--speed-dial-card-opacity": isDragging ? "0.4" : "1",
   });
 
   return (
     <Card
-      className={`${styles['app-card-interactive']} ${styles['app-speed-dial-card']}`}
-      classNames={{ body: 'app-speed-dial-card__body' }}
+      className={`${styles["app-card-interactive"]} ${styles["app-speed-dial-card"]}`}
+      classNames={{ body: "app-speed-dial-card__body" }}
       style={cardStyle}
     >
       {/* 缩略图区 —— 16:10，favicon 主色渐变 */}
-      <div
-        className={styles['app-speed-dial-preview']}
-        onClick={openSite}
-      >
+      <div className={styles["app-speed-dial-preview"]} onClick={openSite}>
         {/* 拖拽手柄 —— 只有绑定了 dragListeners 时才可拖拽 */}
         {dragListeners && (
-          <div
-            {...dragListeners}
-            {...dragAttributes}
-            className={styles['speed-dial-drag-handle']}
-          >
-            <GripVertical size={ICON_SIZE.SMALL} className={styles['speed-dial-drag-icon']} />
+          <div {...dragListeners} {...dragAttributes} className={styles["speed-dial-drag-handle"]}>
+            <GripVertical size={ICON_SIZE.SMALL} className={styles["speed-dial-drag-icon"]} />
           </div>
         )}
 
@@ -124,27 +116,22 @@ export function SiteCard({
           <img
             src={faviconUrl}
             alt=""
-            className={styles['app-speed-dial-favicon']}
+            className={styles["app-speed-dial-favicon"]}
             onError={() => setFaviconError(true)}
           />
         ) : (
-          <span className={styles['app-speed-dial-fallback']}>
-            {getInitial(hostname)}
-          </span>
+          <span className={styles["app-speed-dial-fallback"]}>{getInitial(hostname)}</span>
         )}
 
         {/* 「更多」按钮 —— 右上角绝对定位，Dropdown portal 到 body 避免裁切 */}
-        <div className={styles['speed-dial-more-container']}>
+        <div className={styles["speed-dial-more-container"]}>
           <Dropdown
             menu={{ items: menuItems }}
-            trigger={['hover']}
+            trigger={["hover"]}
             placement="bottomRight"
             getPopupContainer={() => document.body}
           >
-            <span
-              className={styles['speed-dial-more-btn']}
-              onClick={(e) => e.stopPropagation()}
-            >
+            <span className={styles["speed-dial-more-btn"]} onClick={(e) => e.stopPropagation()}>
               <MoreHorizontal size={ICON_SIZE.SMALL} />
             </span>
           </Dropdown>
@@ -152,20 +139,11 @@ export function SiteCard({
       </div>
 
       {/* 底部信息区 */}
-      <div
-        className={styles['app-speed-dial-content']}
-        onClick={openSite}
-      >
-        <span
-          className={styles['app-speed-dial-title']}
-          title={site.title || hostname}
-        >
+      <div className={styles["app-speed-dial-content"]} onClick={openSite}>
+        <span className={styles["app-speed-dial-title"]} title={site.title || hostname}>
           {site.title || hostname}
         </span>
-        <span
-          className={styles['app-speed-dial-hostname']}
-          title={hostname}
-        >
+        <span className={styles["app-speed-dial-hostname"]} title={hostname}>
           {hostname}
         </span>
       </div>

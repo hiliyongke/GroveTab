@@ -51,7 +51,9 @@
   text-align: left;
   font-size: 13px;
   color: var(--ant-color-text-secondary);
-  transition: background-color .15s, color .15s;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
 }
 
 .bm-tools__nav-item:hover {
@@ -224,14 +226,17 @@
   border: 1px solid var(--ant-color-border-secondary);
   cursor: pointer;
   text-align: left;
-  transition: transform .15s, border-color .15s, box-shadow .15s;
+  transition:
+    transform 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s;
   color: var(--ant-color-text);
 }
 
 .bm-tools__quick:hover {
   transform: translateY(-1px);
   border-color: var(--ant-color-primary);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, .06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .bm-tools__quick-text {
@@ -281,7 +286,7 @@
   border-radius: 10px;
   overflow: hidden;
   background: var(--ant-color-bg-container);
-  transition: border-color .15s;
+  transition: border-color 0.15s;
 }
 
 .bm-tools__group.is-checked {
@@ -335,7 +340,7 @@
   gap: 10px;
   padding: 9px 12px;
   background: transparent;
-  transition: background-color .15s;
+  transition: background-color 0.15s;
 }
 
 .bm-tools__row:hover {
@@ -415,10 +420,21 @@
   background: currentColor;
 }
 
-.bm-tools__chip.is-success { color: var(--ant-color-success); background: var(--ant-color-success-bg); }
-.bm-tools__chip.is-danger  { color: var(--ant-color-error);   background: var(--ant-color-error-bg); }
-.bm-tools__chip.is-warning { color: var(--ant-color-warning); background: var(--ant-color-warning-bg); }
-.bm-tools__chip.is-muted   { color: var(--ant-color-text-tertiary); }
+.bm-tools__chip.is-success {
+  color: var(--ant-color-success);
+  background: var(--ant-color-success-bg);
+}
+.bm-tools__chip.is-danger {
+  color: var(--ant-color-error);
+  background: var(--ant-color-error-bg);
+}
+.bm-tools__chip.is-warning {
+  color: var(--ant-color-warning);
+  background: var(--ant-color-warning-bg);
+}
+.bm-tools__chip.is-muted {
+  color: var(--ant-color-text-tertiary);
+}
 
 /* 进度条 */
 .bm-tools__progress {
@@ -458,4 +474,10 @@
   .bm-tools__quick-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* 无边框 Tag（替代 antd v6 弃用的 bordered prop） */
+.bm-tools__tag--no-border {
+  border: none;
+  background: transparent;
 }

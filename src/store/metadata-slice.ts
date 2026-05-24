@@ -13,8 +13,8 @@
  *   - WorkspaceSwitcher：消费 workspaces
  */
 
-import { create } from 'zustand';
-import type { ActivityRecord, Workspace } from '@/shared/types';
+import { create } from "zustand";
+import type { ActivityRecord, Workspace } from "@/shared/types";
 import {
   getData,
   setData,
@@ -24,8 +24,9 @@ import {
   getWorkspaces,
   saveWorkspaces,
   appendHistoryEvent,
-} from '@/repositories';
-import { STORAGE_KEYS } from '@/shared/config/storage-keys';
+} from "@/repositories";
+import { STORAGE_KEYS } from "@/shared/config/storage-keys";
+import { normalizeMetadataKey as normalizeKey } from "@/shared/utils/metadata-key";
 
 const TAGS_KEY = STORAGE_KEYS.tags;
 const NOTES_KEY = STORAGE_KEYS.notes;
@@ -102,7 +103,7 @@ export const useMetadataStore = create<MetadataState>((set, get) => ({
       await setData(TAGS_KEY, tags);
       // 同步写一条 undoable 的「tab_tagged」事件，让「插件历史」有入口可反悔
       void appendHistoryEvent({
-        type: 'tab_tagged',
+        type: "tab_tagged",
         url,
         title: tag,
         extra: { tag },
@@ -125,7 +126,7 @@ export const useMetadataStore = create<MetadataState>((set, get) => ({
   setNote: async (url, note) => {
     const notes = { ...get().notes };
     const key = normalizeKey(url);
-    if (note.trim() !== '') {
+    if (note.trim() !== "") {
       notes[key] = note.trim();
     } else {
       delete notes[key];
@@ -156,7 +157,7 @@ export const useMetadataStore = create<MetadataState>((set, get) => ({
 
   isPinned: (url) => get().pinnedUrls.has(normalizeKey(url)),
   getTags: (url) => get().tags[normalizeKey(url)] ?? EMPTY_TAGS,
-  getNote: (url) => get().notes[normalizeKey(url)] ?? '',
+  getNote: (url) => get().notes[normalizeKey(url)] ?? "",
 
   // ── v1.0 封板新增：Activity Strip / Workspace ──
 
@@ -198,14 +199,3 @@ export const useMetadataStore = create<MetadataState>((set, get) => ({
     set({ workspaces: next.length > 0 ? next : EMPTY_WORKSPACES });
   },
 }));
-
-/** Normalize URL for consistent keying (strip hash + trailing slash) */
-function normalizeKey(url: string): string {
-  try {
-    const parsed = new URL(url);
-    parsed.hash = '';
-    return parsed.toString().replace(/\/+$/, '');
-  } catch {
-    return url;
-  }
-}

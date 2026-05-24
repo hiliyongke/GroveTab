@@ -11,15 +11,15 @@
  * 输入：外部传入 dupGroups + onClose 回调。
  */
 
-import { useEffect, useMemo, useState, useCallback } from 'react';
-import { App, Button, Modal, Radio, Space, Tag, Typography, theme } from 'antd';
-import type { RadioChangeEvent } from 'antd/es/radio/interface';
-import type { LiveTab } from '@/shared/types';
-import type { DupGroup } from '@/shared/utils/dedupe';
-import { useTabsStore, useMetadataStore } from '@/store';
-import { nanoid } from 'nanoid';
-import { useT } from '@/shared/i18n';
-import styles from './styles/views.module.less';
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { App, Button, Modal, Radio, Space, Tag, Typography, theme } from "antd";
+import type { RadioChangeEvent } from "antd/es/radio/interface";
+import type { LiveTab } from "@/shared/types";
+import type { DupGroup } from "@/shared/utils/dedupe";
+import { useTabsStore, useMetadataStore } from "@/store";
+import { nanoid } from "nanoid";
+import { useT } from "@/shared/i18n";
+import styles from "./styles/views.module.less";
 
 const { Text } = Typography;
 
@@ -38,16 +38,16 @@ function pickDefaultKeeper(group: DupGroup): number {
 }
 
 function formatOpenedAt(ts: number, locale: string): string {
-  if (!ts) return '—';
+  if (!ts) return "—";
   try {
     return new Date(ts).toLocaleString(locale, {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   } catch {
-    return '—';
+    return "—";
   }
 }
 
@@ -64,10 +64,7 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
   const [busy, setBusy] = useState(false);
 
   // 按 canonicalUrl 过滤掉组内只剩 1 条的（需求 6.7：自动从 Modal 中移除零项组）
-  const effectiveGroups = useMemo(
-    () => dupGroups.filter((g) => g.tabs.length >= 2),
-    [dupGroups],
-  );
+  const effectiveGroups = useMemo(() => dupGroups.filter((g) => g.tabs.length >= 2), [dupGroups]);
 
   // 初始化默认保留项
   useEffect(() => {
@@ -125,46 +122,56 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
     try {
       await closeMultipleTabs(toClose);
       await loadAllTabs();
-      message.success(t('dedup.mergedToast', { count: toClose.length }));
+      message.success(t("dedup.mergedToast", { count: toClose.length }));
       await pushActivity({
         id: nanoid(6),
-        type: 'dedup_merge',
+        type: "dedup_merge",
         ts: Date.now(),
-        summary: t('activity.dedupMerged', { count: toClose.length }),
+        summary: t("activity.dedupMerged", { count: toClose.length }),
       });
       onClose();
     } catch (err) {
-      console.warn('[DuplicatePreviewModal] merge failed', err);
-      message.error(t('dedup.mergedFailed'));
+      console.warn("[DuplicatePreviewModal] merge failed", err);
+      message.error(t("dedup.mergedFailed"));
     } finally {
       setBusy(false);
     }
-  }, [busy, effectiveGroups, keepers, closeMultipleTabs, loadAllTabs, message, onClose, pushActivity, t]);
+  }, [
+    busy,
+    effectiveGroups,
+    keepers,
+    closeMultipleTabs,
+    loadAllTabs,
+    message,
+    onClose,
+    pushActivity,
+    t,
+  ]);
 
   return (
     <Modal
       open={open}
-      title={t('dedup.previewTitle')}
+      title={t("dedup.previewTitle")}
       width={720}
       onCancel={onClose}
       centered
       destroyOnHidden
       footer={
-        <div className={styles['app-duplicate-footer']}>
+        <div className={styles["app-duplicate-footer"]}>
           <Space>
             <Button size="small" onClick={handleKeepAllOldest}>
-              {t('dedup.keepOldest')}
+              {t("dedup.keepOldest")}
             </Button>
             <Button size="small" onClick={handleKeepNone}>
-              {t('dedup.keepNone')}
+              {t("dedup.keepNone")}
             </Button>
           </Space>
           <Space>
-            <Text type="secondary" className={styles['app-duplicate-summary']}>
-              {t('dedup.mergeSummary', { close: closeCount, keep: keepCount })}
+            <Text type="secondary" className={styles["app-duplicate-summary"]}>
+              {t("dedup.mergeSummary", { close: closeCount, keep: keepCount })}
             </Text>
             <Button onClick={onClose} disabled={busy}>
-              {t('dedup.ignoreOnce')}
+              {t("dedup.ignoreOnce")}
             </Button>
             <Button
               type="primary"
@@ -172,15 +179,15 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
               loading={busy}
               disabled={closeCount === 0}
             >
-              {t('dedup.mergeNow')}
+              {t("dedup.mergeNow")}
             </Button>
           </Space>
         </div>
       }
     >
-      <div className={styles['app-duplicate-groups']}>
+      <div className={styles["app-duplicate-groups"]}>
         {effectiveGroups.length === 0 ? (
-          <Text type="secondary">{t('dedup.emptyPreview')}</Text>
+          <Text type="secondary">{t("dedup.emptyPreview")}</Text>
         ) : (
           effectiveGroups.map((group) => (
             <GroupSection
@@ -203,62 +210,63 @@ interface GroupSectionProps {
   group: DupGroup;
   keeperId: number | undefined;
   onChange: (tabId: number) => void;
-  token: ReturnType<typeof theme.useToken>['token'];
+  token: ReturnType<typeof theme.useToken>["token"];
   t: (key: string, params?: Record<string, string | number>) => string;
   locale: string;
 }
 
 function GroupSection({ group, keeperId, onChange, token: _token, t, locale }: GroupSectionProps) {
   const closeCount = keeperId === undefined ? group.tabs.length : group.tabs.length - 1;
-  const [radioValue, setRadioValue] = useState<string>(keeperId?.toString() ?? '');
+  const [radioValue, setRadioValue] = useState<string>(keeperId?.toString() ?? "");
 
   useEffect(() => {
-    setRadioValue(keeperId?.toString() ?? '');
+    setRadioValue(keeperId?.toString() ?? "");
   }, [keeperId]);
 
   const handleChange = (e: RadioChangeEvent) => {
-    const val = e.target.value;
+    const raw = (e.target as HTMLInputElement).value;
+    const val = typeof raw === "number" ? String(raw) : String(raw ?? "");
     setRadioValue(val);
     onChange(parseInt(val, 10));
   };
 
   return (
-    <div className={styles['app-duplicate-group']}>
-      <div className={styles['app-duplicate-group__header']}>
-        <Text strong className={styles['app-duplicate-group__title']}>
+    <div className={styles["app-duplicate-group"]}>
+      <div className={styles["app-duplicate-group__header"]}>
+        <Text strong className={styles["app-duplicate-group__title"]}>
           {group.canonicalUrl}
         </Text>
-        <Tag color="gold" className={styles['app-duplicate-group__tag']}>
-          {t('dedup.willClose', { count: closeCount })}
+        <Tag color="gold" className={styles["app-duplicate-group__tag"]}>
+          {t("dedup.willClose", { count: closeCount })}
         </Tag>
       </div>
       <Radio.Group
         value={radioValue}
         onChange={handleChange}
-        className={styles['app-duplicate-group__list']}
+        className={styles["app-duplicate-group__list"]}
       >
         {group.tabs.map((tab: LiveTab) => (
           <Radio
             key={tab.id}
             value={tab.id.toString()}
-            className={`${styles['app-duplicate-option']}${keeperId === tab.id ? ` ${styles['is-selected']}` : ''}`}
+            className={`${styles["app-duplicate-option"]}${keeperId === tab.id ? ` ${styles["is-selected"]}` : ""}`}
           >
-            {tab.favIconUrl !== '' && (
-              <img src={tab.favIconUrl} alt="" className={styles['app-duplicate-option__favicon']} />
+            {tab.favIconUrl !== "" && (
+              <img
+                src={tab.favIconUrl}
+                alt=""
+                className={styles["app-duplicate-option__favicon"]}
+              />
             )}
-            <div className={styles['app-duplicate-option__content']}>
-              <span className={styles['app-duplicate-option__title']}>
-                {tab.title}
-              </span>
-              <span className={styles['app-duplicate-option__url']}>
-                {tab.url}
-              </span>
+            <div className={styles["app-duplicate-option__content"]}>
+              <span className={styles["app-duplicate-option__title"]}>{tab.title}</span>
+              <span className={styles["app-duplicate-option__url"]}>{tab.url}</span>
             </div>
-            <div className={styles['app-duplicate-option__aside']}>
-              <Text type="secondary" className={styles['app-duplicate-option__meta']}>
-                {t('dedup.windowLabel', { id: tab.windowId })}
+            <div className={styles["app-duplicate-option__aside"]}>
+              <Text type="secondary" className={styles["app-duplicate-option__meta"]}>
+                {t("dedup.windowLabel", { id: tab.windowId })}
               </Text>
-              <Text type="secondary" className={styles['app-duplicate-option__meta']}>
+              <Text type="secondary" className={styles["app-duplicate-option__meta"]}>
                 {formatOpenedAt(tab.lastAccessed, locale)}
               </Text>
             </div>

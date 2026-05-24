@@ -26,7 +26,6 @@
     "verbatimModuleSyntax": false,
 
     /* 路径别名（TS 6.x 已移除 baseUrl，统一使用相对路径） */
-    "ignoreDeprecations": "6.0",
     "paths": {
       "@/*": ["./src/*"],
       "@pages/*": ["./src/pages/*"],

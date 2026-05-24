@@ -8,32 +8,11 @@
  * 4. 保持键盘优先与轻量界面，确保输入响应足够快。
  */
 
-import {
-  useState,
-  useMemo,
-  useRef,
-  useCallback,
-  useEffect,
-  type CSSProperties,
-  type ReactNode,
-} from "react";
-import { Modal, Input, theme, Tag, Popover, Button } from "antd";
+import { useState, useMemo, useRef, useCallback, useEffect, type ReactNode } from "react";
+import { Modal, Input, theme, Popover, Button } from "antd";
 import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
 import type { InputRef } from "antd";
-import {
-  LayoutGrid,
-  Clock,
-  CornerDownLeft,
-  Flame,
-  Globe,
-  Link,
-  Search,
-  Unlock,
-  Check,
-  ChevronDown,
-  History,
-  RotateCcw,
-} from "lucide-react";
+import { Search, Check, ChevronDown, History } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import type { LiveTab, SearchEngineId, SearchScopeField, TrendingCache } from "@/shared/types";
 import type { CustomSearchEngine } from "@/shared/types/settings";
@@ -66,7 +45,10 @@ import {
   type SearchEngineOption,
   type HotKeywordSource,
 } from "@/shared/config/search-engines";
-import { iconColor, iconColorAlpha, type IconRole } from "@/shared/utils/icon-colors";
+import { iconColor } from "@/shared/utils/icon-colors";
+import { normalizeMetadataKey } from "@/shared/utils/metadata-key";
+import { SearchResultItem } from "./components/SearchResultItem";
+import type { UniversalSearchItem, SearchSection } from "./types";
 import styles from "./SearchBox.module.less";
 
 const DEFAULT_SEARCH_SCOPE: SearchScopeField[] = ["title", "hostname", "url"];
@@ -91,147 +73,12 @@ interface SearchSettingsSnapshot {
   searchCustomEngines?: CustomSearchEngine[];
 }
 
-type SuggestionSource = "recent" | "hot";
-
-type UniversalSearchItem =
-  | {
-      id: string;
-      type: "tab";
-      title: string;
-      subtitle: string;
-      tab: LiveTab;
-      badge?: string;
-      matchedTags?: string[];
-    }
-  | {
-      id: string;
-      type: "history";
-      title: string;
-      subtitle: string;
-      entry: HistorySearchEntry;
-    }
-  | {
-      id: string;
-      type: "closed";
-      title: string;
-      subtitle: string;
-      record: ClosedTabRecord;
-    }
-  | {
-      id: string;
-      type: "suggestion";
-      title: string;
-      subtitle: string;
-      keyword: string;
-      source: SuggestionSource;
-    }
-  | {
-      id: string;
-      type: "web";
-      title: string;
-      subtitle: string;
-      query: string;
-      engineId: SearchEngineId;
-    }
-  | {
-      id: string;
-      type: "permission";
-      title: string;
-      subtitle: string;
-    }
-  | {
-      /** 快捷动作，如「打开历史面板」，取代于临时仅有一个 commandId 但保留可扩展能力 */
-      id: string;
-      type: "command";
-      title: string;
-      subtitle: string;
-      commandId: "open-history";
-    };
-
-interface SearchSection {
-  key: string;
-  title: string;
-  items: UniversalSearchItem[];
-}
-
-function cx(...classNames: Array<string | false | undefined>) {
-  return classNames.filter(Boolean).join(" ");
-}
-
-function cssVars(vars: Record<string, string>): CSSProperties {
-  return vars;
-}
-
-/** Normalize URL exactly like metadata-slice so search can resolve tab tags reliably. */
-function normalizeMetadataKey(url: string): string {
-  try {
-    const parsed = new URL(url);
-    parsed.hash = "";
-    return parsed.toString().replace(/\/+$/, "");
-  } catch {
-    return url;
-  }
-}
-
 function normalizeSearchText(text: string): string {
   return text.trim().toLowerCase();
 }
 
-/**
- * 小键盘提示胶囊。
- */
 function Kbd({ children }: { children: ReactNode }) {
   return <span className={styles["search-box-kbd"]}>{children}</span>;
-}
-
-/**
- * 对文本中的命中片段做高亮。
- * @param keyPrefix - 唯一前缀，用于生成稳定的 React key
- */
-function renderHighlightedText(text: string, query: string, keyPrefix: string): ReactNode {
-  const normalizedQuery = query.trim();
-  if (normalizedQuery === "" || text === "") return text;
-
-  const escaped = normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const matcher = new RegExp(`(${escaped})`, "ig");
-  const parts = text.split(matcher);
-
-  return parts.map((part, index) => {
-    const matched =
-      part.localeCompare(normalizedQuery, undefined, { sensitivity: "accent" }) === 0 ||
-      part.toLowerCase() === normalizedQuery.toLowerCase();
-
-    return matched ? (
-      <mark key={`${keyPrefix}-${index}`} className={styles["search-box-highlight"]}>
-        {part}
-      </mark>
-    ) : (
-      part
-    );
-  });
-}
-
-function getItemIconMeta(item: UniversalSearchItem): { icon: ReactNode; iconRole: IconRole } {
-  switch (item.type) {
-    case "tab":
-      return { icon: <LayoutGrid size={ICON_SIZE.TINY} />, iconRole: "tab" };
-    case "history":
-      return { icon: <Link size={ICON_SIZE.TINY} />, iconRole: "history" };
-    case "closed":
-      return { icon: <RotateCcw size={ICON_SIZE.TINY} />, iconRole: "history" };
-    case "command":
-      return { icon: <History size={ICON_SIZE.TINY} />, iconRole: "history" };
-    case "web":
-      return { icon: <Globe size={ICON_SIZE.TINY} />, iconRole: "web" };
-    case "permission":
-      return { icon: <Unlock size={ICON_SIZE.TINY} />, iconRole: "permission" };
-    case "suggestion":
-      return item.source === "hot"
-        ? { icon: <Flame size={ICON_SIZE.TINY} />, iconRole: "hot" }
-        : { icon: <Clock size={ICON_SIZE.TINY} />, iconRole: "recent" };
-    default:
-      return { icon: <Search size={ICON_SIZE.TINY} />, iconRole: "search" };
-  }
 }
 
 /**
@@ -311,7 +158,7 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
 
   const rootVars = useMemo(
     () =>
-      cssVars({
+      ({
         "--searchbox-border": token.colorBorderSecondary,
         "--searchbox-text": token.colorText,
         "--searchbox-text-secondary": token.colorTextSecondary,
@@ -323,7 +170,7 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
         "--searchbox-radius": `${token.borderRadiusLG}px`,
         "--searchbox-transition": token.motionDurationFast,
         "--searchbox-search-icon": iconColor("search", token),
-      }),
+      }) as React.CSSProperties,
     [token],
   );
 
@@ -1213,7 +1060,7 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
             trigger="click"
             placement="bottomLeft"
             arrow={false}
-            overlayClassName={styles["search-box-engine-popover"]}
+            classNames={{ root: styles["search-box-engine-popover"] }}
             content={
               <ul
                 className={styles["search-box-engine-menu"]}
@@ -1228,11 +1075,8 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
                       key={option.id}
                       role="option"
                       aria-selected={active}
-                      className={cx(
-                        styles["search-box-engine-menu-item"],
-                        active && styles["is-active"],
-                      )}
-                      style={cssVars({ "--searchbox-engine-color": option.color })}
+                      className={`${styles["search-box-engine-menu-item"]} ${active ? styles["is-active"] : ""}`}
+                      style={{ "--searchbox-engine-color": option.color } as React.CSSProperties}
                       onClick={() => {
                         setCurrentEngine(option.id);
                         setEnginePopoverOpen(false);
@@ -1270,11 +1114,10 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
           >
             <Button
               type="text"
-              className={cx(
-                styles["search-box-engine-trigger"],
-                enginePopoverOpen && styles["is-open"],
-              )}
-              style={cssVars({ "--searchbox-engine-color": currentEngineOption.color })}
+              className={`${styles["search-box-engine-trigger"]} ${enginePopoverOpen ? styles["is-open"] : ""}`}
+              style={
+                { "--searchbox-engine-color": currentEngineOption.color } as React.CSSProperties
+              }
               aria-haspopup="listbox"
               aria-expanded={enginePopoverOpen}
               aria-label={t("search.engineSwitcher")}
@@ -1367,94 +1210,17 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
                       {section.items.map((item, offset) => {
                         const itemIndex = startIndex + offset;
                         const active = itemIndex === activeIndex;
-                        const { icon, iconRole } = getItemIconMeta(item);
-                        const titleNode = renderHighlightedText(
-                          item.title,
-                          normalizedQuery,
-                          item.id + "-title",
-                        );
-                        const subtitleNode = renderHighlightedText(
-                          item.subtitle,
-                          normalizedQuery,
-                          item.id + "-subtitle",
-                        );
-                        const itemVars = cssVars({
-                          "--searchbox-item-icon-bg": iconColorAlpha(
-                            iconRole,
-                            token,
-                            active ? 0.2 : 0.1,
-                          ),
-                          "--searchbox-item-icon-color": iconColor(iconRole, token),
-                        });
 
                         return (
-                          <li
+                          <SearchResultItem
                             key={item.id}
-                            role="option"
-                            aria-selected={active}
-                            onMouseEnter={() => setActiveIndex(itemIndex)}
-                            onClick={() => handleActivate(item)}
-                            className={cx(styles["search-box-item"], active && styles["is-active"])}
-                            style={itemVars}
-                          >
-                            {item.type === "tab" && item.tab.favIconUrl !== "" ? (
-                              <img
-                                src={item.tab.favIconUrl}
-                                alt=""
-                                className={styles["search-box-item-favicon"]}
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).style.display = "none";
-                                }}
-                              />
-                            ) : (
-                              <span className={styles["search-box-item-icon"]}>{icon}</span>
-                            )}
-                            <div className={styles["search-box-item-main"]}>
-                              <div className={styles["search-box-item-head"]}>
-                                <div className={styles["search-box-item-title"]}>{titleNode}</div>
-                                {item.type === "tab" && item.badge !== undefined && (
-                                  <Tag className={styles["search-box-tag"]}>{item.badge}</Tag>
-                                )}
-                                {item.type === "tab" &&
-                                  item.matchedTags !== undefined &&
-                                  item.matchedTags.length > 0 && (
-                                    <span
-                                      className={styles["search-box-tag-list"]}
-                                      aria-label={t("search.matchedTags")}
-                                    >
-                                      {item.matchedTags.slice(0, 3).map((tag) => (
-                                        <Tag
-                                          key={tag}
-                                          className={styles["search-box-tag"]}
-                                          color="blue"
-                                        >
-                                          {tag}
-                                        </Tag>
-                                      ))}
-                                    </span>
-                                  )}
-                                {item.type === "suggestion" && (
-                                  <Tag
-                                    className={styles["search-box-tag"]}
-                                    color={item.source === "hot" ? "gold" : "default"}
-                                  >
-                                    {item.source === "hot"
-                                      ? t("search.sourceHot")
-                                      : t("search.sourceRecent")}
-                                  </Tag>
-                                )}
-                              </div>
-                              <div className={styles["search-box-item-subtitle"]}>
-                                {subtitleNode}
-                              </div>
-                            </div>
-                            {active && (
-                              <CornerDownLeft
-                                size={ICON_SIZE.SMALL}
-                                className={styles["search-box-enter-icon"]}
-                              />
-                            )}
-                          </li>
+                            item={item}
+                            index={itemIndex}
+                            active={active}
+                            normalizedQuery={normalizedQuery}
+                            onActivate={handleActivate}
+                            onMouseEnter={(index) => setActiveIndex(index)}
+                          />
                         );
                       })}
                     </ul>

@@ -10,10 +10,10 @@
  * 保障可撤销与安全性（对书签的破坏性写操作必须显式二次确认）。
  */
 
-import type { BookmarkNode } from '@/chrome/bookmarks';
-import { flattenBookmarks, removeBookmark, moveBookmark, createBookmark } from '@/chrome/bookmarks';
-import { normalizeUrl } from '@/shared/utils/dedupe';
-import { extractHostname } from '@/chrome/utils';
+import type { BookmarkNode } from "@/chrome/bookmarks";
+import { flattenBookmarks, removeBookmark, moveBookmark, createBookmark } from "@/chrome/bookmarks";
+import { normalizeUrl } from "@/shared/utils/dedupe";
+import { extractHostname } from "@/chrome/utils";
 
 // ═══════════════════════════════════════════════════════════
 // 1. 去重
@@ -32,10 +32,10 @@ export interface DuplicateBookmarkGroup {
  */
 export function findDuplicateBookmarks(
   roots: BookmarkNode[],
-  strictness: 'strict' | 'loose' | 'off' = 'loose',
+  strictness: "strict" | "loose" | "off" = "loose",
 ): DuplicateBookmarkGroup[] {
-  if (strictness === 'off') return [];
-  const all = flattenBookmarks(roots).filter((b) => (b.url ?? '') !== '');
+  if (strictness === "off") return [];
+  const all = flattenBookmarks(roots).filter((b) => (b.url ?? "") !== "");
   const groups = new Map<string, BookmarkNode[]>();
   for (const b of all) {
     const url = b.url!;
@@ -76,7 +76,7 @@ export async function mergeDuplicateBookmarks(groups: DuplicateBookmarkGroup[]):
 export interface BookmarkHealth {
   bookmark: BookmarkNode;
   /** 'ok' 可达 / 'dead' 404/500/连接失败 / 'timeout' 超时 / 'skipped' 非 http(s) */
-  status: 'ok' | 'dead' | 'timeout' | 'skipped';
+  status: "ok" | "dead" | "timeout" | "skipped";
   httpStatus?: number;
 }
 
@@ -90,28 +90,28 @@ const HEALTH_CONCURRENCY = 5;
  *   - 响应 opaque 也视为可达（只要 fetch 没 reject）
  */
 async function checkOne(b: BookmarkNode): Promise<BookmarkHealth> {
-  const url = b.url ?? '';
+  const url = b.url ?? "";
   if (!/^https?:\/\//.test(url)) {
-    return { bookmark: b, status: 'skipped' };
+    return { bookmark: b, status: "skipped" };
   }
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), HEALTH_TIMEOUT_MS);
   try {
     const resp = await fetch(url, {
-      method: 'GET',
-      mode: 'no-cors',
+      method: "GET",
+      mode: "no-cors",
       signal: controller.signal,
-      redirect: 'follow',
+      redirect: "follow",
     });
     clearTimeout(timer);
     // no-cors 模式 status 始终 0；认为"能联通"就是 ok
-    return { bookmark: b, status: 'ok', httpStatus: resp.status };
+    return { bookmark: b, status: "ok", httpStatus: resp.status };
   } catch (err) {
     clearTimeout(timer);
-    if (err instanceof Error && err.name === 'AbortError') {
-      return { bookmark: b, status: 'timeout' };
+    if (err instanceof Error && err.name === "AbortError") {
+      return { bookmark: b, status: "timeout" };
     }
-    return { bookmark: b, status: 'dead' };
+    return { bookmark: b, status: "dead" };
   }
 }
 
@@ -156,7 +156,7 @@ export async function checkBookmarkHealth(
 export async function removeDeadBookmarks(results: BookmarkHealth[]): Promise<number> {
   let removed = 0;
   for (const r of results) {
-    if (r.status === 'dead' || r.status === 'timeout') {
+    if (r.status === "dead" || r.status === "timeout") {
       const ok = await removeBookmark(r.bookmark.id);
       if (ok) removed += 1;
     }
@@ -183,11 +183,11 @@ const MIN_CLUSTER_SIZE = 3;
  * 小簇整理价值低，强制归类反而造成文件夹过多。
  */
 export function clusterBookmarksByDomain(roots: BookmarkNode[]): DomainCluster[] {
-  const all = flattenBookmarks(roots).filter((b) => (b.url ?? '') !== '');
+  const all = flattenBookmarks(roots).filter((b) => (b.url ?? "") !== "");
   const map = new Map<string, BookmarkNode[]>();
   for (const b of all) {
     const host = extractHostname(b.url!);
-    if (host === '') continue;
+    if (host === "") continue;
     const arr = map.get(host);
     if (arr !== undefined) arr.push(b);
     else map.set(host, [b]);
@@ -315,6 +315,10 @@ export interface BookmarkOverview {
   domains: number;
   /** 最大深度（根 = 0） */
   maxDepth: number;
+  /** 空文件夹数 */
+  emptyFolders: number;
+  /** 重复书签组数 */
+  duplicates: number;
 }
 
 export function collectBookmarkOverview(roots: BookmarkNode[]): BookmarkOverview {
@@ -322,18 +326,40 @@ export function collectBookmarkOverview(roots: BookmarkNode[]): BookmarkOverview
   let folders = 0;
   let maxDepth = 0;
   const domains = new Set<string>();
+  let emptyFolders = 0;
+  let duplicates = 0;
 
   function walk(node: BookmarkNode, depth: number) {
     if (depth > maxDepth) maxDepth = depth;
     if (node.url !== undefined) {
       total += 1;
       const host = extractHostname(node.url);
-      if (host !== '') domains.add(host);
+      if (host !== "") domains.add(host);
       return;
     }
+    const children = node.children ?? [];
+    if (children.length === 0 && node.id !== "0" && node.id !== "1") {
+      emptyFolders += 1;
+    }
     folders += 1;
-    for (const c of node.children ?? []) walk(c, depth + 1);
+    for (const c of children) walk(c, depth + 1);
   }
   for (const r of roots) walk(r, 0);
-  return { total, folders, domains: domains.size, maxDepth };
+
+  // 计算重复书签数
+  const allBookmarks: BookmarkNode[] = [];
+  function collectAll(node: BookmarkNode) {
+    if (node.url !== undefined) allBookmarks.push(node);
+    for (const c of node.children ?? []) collectAll(c);
+  }
+  for (const r of roots) collectAll(r);
+
+  const urlMap = new Map<string, number>();
+  for (const bm of allBookmarks) {
+    const key = bm.url!.toLowerCase();
+    urlMap.set(key, (urlMap.get(key) ?? 0) + 1);
+  }
+  duplicates = Array.from(urlMap.values()).filter((count) => count > 1).length;
+
+  return { total, folders, domains: domains.size, maxDepth, emptyFolders, duplicates };
 }

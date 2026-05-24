@@ -177,10 +177,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
         </Paragraph>
 
         <Space wrap size={12} className={styles["onboarding-card__features"]}>
-          <Tag
-            color="processing"
-            className={styles["onboarding-card__feature-tag"]}
-          >
+          <Tag color="processing" className={styles["onboarding-card__feature-tag"]}>
             {t("onboarding.featureSearch")}
           </Tag>
           <Tag color="gold" className={styles["onboarding-card__feature-tag"]}>
@@ -232,7 +229,6 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
       onCancel={() => void finish()}
       footer={null}
       closable={false}
-      maskClosable={false}
       classNames={{ body: styles["onboarding-tour-modal__body"] }}
     >
       <div className={styles["onboarding-tour"]} style={tourVars}>
@@ -276,11 +272,10 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
               <Button
                 size="small"
                 type="primary"
-                icon={<ArrowRight size={ICON_SIZE.DEFAULT} />}
-                iconPosition="end"
                 onClick={() => setStepIndex((idx) => Math.min(idx + 1, TOUR_STEPS.length - 1))}
               >
                 {t("onboarding.tour.next")}
+                <ArrowRight size={ICON_SIZE.DEFAULT} style={{ marginLeft: 6 }} />
               </Button>
             ) : (
               <Button
