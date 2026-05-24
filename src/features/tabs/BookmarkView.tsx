@@ -10,7 +10,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Input, Button, Tag, Spin, Tooltip, Segmented, Typography } from "antd";
+import { Input, Button, Tag, Spin, Tooltip, Segmented, Typography, Space, Image } from "antd";
 import {
   BookOpen,
   Search,
@@ -49,7 +49,7 @@ function cx(...classNames: Array<string | false | undefined>) {
   return classNames.filter(Boolean).join(" ");
 }
 
-/** 视图模式：列表 / 脈图（横向）/ 架构图（垂直） */
+/** 视图模式：列表 / 脉图（横向）/ 架构图（垂直） */
 type BookmarkLayout = "list" | "mindmap" | "orgchart";
 
 /** 从 URL 提取 hostname 做展示和取色键 */
@@ -130,41 +130,43 @@ function BookmarkRow({
   const titleText = node.title || hostname;
 
   return (
-    <div
+    <Space.Compact
       className={styles["app-bookmark-row"]}
-      style={{ "--app-bm-accent": accent.bar } as React.CSSProperties}
+      data-accent={accent.bar}
       onClick={handleClick}
       role="button"
       tabIndex={0}
       onKeyDown={handleKeyDown}
       title={`${titleText}\n${url}`}
     >
-      <span className={styles["app-bookmark-row__bar"]} />
+      <Typography.Text className={styles["app-bookmark-row__bar"]} />
       {faviconUrl && !faviconError ? (
-        <img
+        <Image
           src={faviconUrl}
           alt=""
+          preview={false}
           className={styles["app-bookmark-row__favicon"]}
           onError={() => setFaviconError(true)}
         />
       ) : (
-        <span
+        <Typography.Text
           className={styles["app-bookmark-row__favicon-fallback"]}
-          style={{ background: accent.soft, color: accent.text }}
+          data-bg={accent.soft}
+          data-color={accent.text}
         >
           {getFallbackLetter(node.title ?? "", url)}
-        </span>
+        </Typography.Text>
       )}
-      <div className={styles["app-bookmark-row__main"]}>
-        <div className={styles["app-bookmark-row__title"]}>
+      <Space direction="vertical" size={0} className={styles["app-bookmark-row__main"]}>
+        <Typography.Text className={styles["app-bookmark-row__title"]}>
           {highlight ? highlight(titleText) : titleText}
-        </div>
-        <div className={styles["app-bookmark-row__hostname"]}>
+        </Typography.Text>
+        <Typography.Text className={styles["app-bookmark-row__hostname"]}>
           {highlight ? highlight(hostname) : hostname}
-        </div>
-      </div>
+        </Typography.Text>
+      </Space>
       <ExternalLink size={ICON_SIZE.SMALL} className={styles["app-bookmark-row__action"]} />
-    </div>
+    </Space.Compact>
   );
 }
 
@@ -192,29 +194,33 @@ function SubFolderGroup({
   const title = resolveTitle(folder);
 
   return (
-    <div
+    <Space
+      direction="vertical"
+      size={0}
       className={styles["app-bookmark-subgroup"]}
-      style={{ "--app-bm-depth": depth } as React.CSSProperties}
+      data-depth={depth}
     >
-        <Button
-          type="text"
-          className={styles["app-bookmark-subgroup__head"]}
-          onClick={() => setCollapsed((c) => !c)}
-          aria-expanded={!collapsed}
-        >
-          <ChevronDown
-            size={ICON_SIZE.SMALL}
-            className={cx(
-              styles["app-bookmark-subgroup__chevron"],
-              collapsed && styles["is-collapsed"],
-            )}
-          />
-          <Folder size={ICON_SIZE.SMALL} className={styles["app-bookmark-subgroup__icon"]} />
-          <span className={styles["app-bookmark-subgroup__title"]}>{title}</span>
-          <span className={styles["app-bookmark-subgroup__count"]}>{total}</span>
-        </Button>
+      <Button
+        type="text"
+        className={styles["app-bookmark-subgroup__head"]}
+        onClick={() => setCollapsed((c) => !c)}
+        aria-expanded={!collapsed}
+      >
+        <ChevronDown
+          size={ICON_SIZE.SMALL}
+          className={cx(
+            styles["app-bookmark-subgroup__chevron"],
+            collapsed && styles["is-collapsed"],
+          )}
+        />
+        <Folder size={ICON_SIZE.SMALL} className={styles["app-bookmark-subgroup__icon"]} />
+        <Typography.Text className={styles["app-bookmark-subgroup__title"]}>
+          {title}
+        </Typography.Text>
+        <Tag className={styles["app-bookmark-subgroup__count"]}>{total}</Tag>
+      </Button>
       {!collapsed && (
-        <div className={styles["app-bookmark-subgroup__body"]}>
+        <Space direction="vertical" size={0} className={styles["app-bookmark-subgroup__body"]}>
           {bookmarks.map((bm) => (
             <BookmarkRow key={bm.id} node={bm} onOpen={onOpenBookmark} />
           ))}
@@ -227,9 +233,9 @@ function SubFolderGroup({
               resolveTitle={resolveTitle}
             />
           ))}
-        </div>
+        </Space>
       )}
-    </div>
+    </Space>
   );
 }
 
@@ -258,7 +264,7 @@ function TopFolderSection({
   const title = resolveTitle(folder);
 
   return (
-    <section className={styles["app-bookmark-section"]}>
+    <Space direction="vertical" size={0} className={styles["app-bookmark-section"]}>
       <Button
         type="text"
         className={styles["app-bookmark-section__head"]}
@@ -272,24 +278,22 @@ function TopFolderSection({
             collapsed && styles["is-collapsed"],
           )}
         />
-        <span className={styles["app-bookmark-section__badge"]}>
+        <Typography.Text className={styles["app-bookmark-section__badge"]}>
           <BookmarkIcon size={14} />
-        </span>
+        </Typography.Text>
         <Typography.Title level={3} className={styles["app-bookmark-section__title"]}>
           {title}
         </Typography.Title>
-        <Tag className={styles["app-bookmark-section__count"]}>
-          {total}
-        </Tag>
+        <Tag className={styles["app-bookmark-section__count"]}>{total}</Tag>
       </Button>
       {!collapsed && (
-        <div className={styles["app-bookmark-section__body"]}>
+        <Space direction="vertical" size={0} className={styles["app-bookmark-section__body"]}>
           {bookmarks.length > 0 && (
-            <div className={styles["app-bookmark-section__rows"]}>
+            <Space direction="vertical" size={0} className={styles["app-bookmark-section__rows"]}>
               {bookmarks.map((bm) => (
                 <BookmarkRow key={bm.id} node={bm} onOpen={onOpenBookmark} />
               ))}
-            </div>
+            </Space>
           )}
           {subFolders.map((sf) => (
             <SubFolderGroup
@@ -300,9 +304,9 @@ function TopFolderSection({
               resolveTitle={resolveTitle}
             />
           ))}
-        </div>
+        </Space>
       )}
-    </section>
+    </Space>
   );
 }
 
@@ -418,11 +422,11 @@ export function BookmarkView() {
       const parts = text.split(new RegExp(`(${escaped})`, "ig"));
       return parts.map((part, i) =>
         part.toLowerCase() === q.toLowerCase() ? (
-          <mark key={i} className={styles["app-bookmark-highlight"]}>
+          <Typography.Text key={i} className={styles["app-bookmark-highlight"]}>
             {part}
-          </mark>
+          </Typography.Text>
         ) : (
-          <span key={i}>{part}</span>
+          <Typography.Text key={i}>{part}</Typography.Text>
         ),
       );
     };
@@ -436,15 +440,15 @@ export function BookmarkView() {
 
   if (checking) {
     return (
-      <div className={styles["app-bookmark-loading-wrap"]}>
+      <Space className={styles["app-bookmark-loading-wrap"]} align="center">
         <Spin />
-      </div>
+      </Space>
     );
   }
 
   if (!hasPermission) {
     return (
-      <div className={styles["app-bookmark-empty"]}>
+      <Space className={styles["app-bookmark-empty"]} align="center">
         <FeatureEmptyState
           title={t("bookmark.needPermission")}
           icon={<BookOpen size={24} className={styles["app-bookmark-empty-icon"]} />}
@@ -458,24 +462,22 @@ export function BookmarkView() {
           ]}
           hints={[t("bookmark.hint1"), t("bookmark.hint2")]}
         />
-      </div>
+      </Space>
     );
   }
 
   return (
-    <div className={styles["app-bookmark-shell"]}>
+    <Space direction="vertical" size={0} className={styles["app-bookmark-shell"]}>
       {/* 顶部头：标题 + 统计 + 工具按钮 */}
-      <header className={styles["app-bookmark-header"]}>
-        <div className={styles["app-bookmark-header__title"]}>
+      <Space className={styles["app-bookmark-header"]}>
+        <Space className={styles["app-bookmark-header__title"]}>
           <BookOpen size={ICON_SIZE.MEDIUM} className={styles["app-bookmark-header__icon"]} />
-          <span>{t("bookmark.title")}</span>
+          <Typography.Text>{t("bookmark.title")}</Typography.Text>
           {totalBookmarks > 0 && (
-            <Tag className={styles["app-bookmark-header__count"]}>
-              {totalBookmarks}
-            </Tag>
+            <Tag className={styles["app-bookmark-header__count"]}>{totalBookmarks}</Tag>
           )}
-        </div>
-        <div className={styles["app-bookmark-header__actions"]}>
+        </Space>
+        <Space className={styles["app-bookmark-header__actions"]}>
           <Segmented
             size="small"
             value={layout}
@@ -527,11 +529,11 @@ export function BookmarkView() {
               {t("bookmark.tools.entry")}
             </Button>
           </Tooltip>
-        </div>
-      </header>
+        </Space>
+      </Space>
 
       {/* 搜索栏 */}
-      <div className={styles["app-bookmark-search-wrap"]}>
+      <Space className={styles["app-bookmark-search-wrap"]}>
         <Input
           prefix={<Search size={ICON_SIZE.MEDIUM} className={styles["app-bookmark-search-icon"]} />}
           placeholder={t("bookmark.searchPlaceholder")}
@@ -543,30 +545,30 @@ export function BookmarkView() {
           size="large"
           className={styles["app-bookmark-search"]}
         />
-      </div>
+      </Space>
 
       {/* 结果区 */}
-      <div className={styles["app-bookmark-result"]}>
+      <Space direction="vertical" size={0} className={styles["app-bookmark-result"]}>
         {searchQuery ? (
           searching ? (
-            <div className={styles["app-bookmark-loading-wrap"]}>
+            <Space className={styles["app-bookmark-loading-wrap"]} align="center">
               <Spin />
-            </div>
+            </Space>
           ) : searchResults.length === 0 ? (
-            <div className={styles["app-bookmark-result-empty"]}>
+            <Space className={styles["app-bookmark-result-empty"]} align="center">
               <FeatureEmptyState
                 title={t("bookmark.noResults")}
                 size="small"
                 icon={<Search size={20} />}
                 hints={[t("bookmark.searchHint1"), t("bookmark.searchHint2")]}
               />
-            </div>
+            </Space>
           ) : (
-            <div className={styles["app-bookmark-search-results"]}>
-              <div className={styles["app-bookmark-search-meta"]}>
+            <Space direction="vertical" size={0} className={styles["app-bookmark-search-results"]}>
+              <Typography.Text className={styles["app-bookmark-search-meta"]}>
                 {t("bookmark.searchCount", { count: searchResults.length })}
-              </div>
-              <div className={styles["app-bookmark-search-list"]}>
+              </Typography.Text>
+              <Space direction="vertical" size={0} className={styles["app-bookmark-search-list"]}>
                 {searchResults.map((item) => (
                   <BookmarkRow
                     key={item.id}
@@ -575,18 +577,18 @@ export function BookmarkView() {
                     highlight={buildHighlight(searchQuery)}
                   />
                 ))}
-              </div>
-            </div>
+              </Space>
+            </Space>
           )
         ) : topSections.length === 0 ? (
-          <div className={styles["app-bookmark-result-empty"]}>
+          <Space className={styles["app-bookmark-result-empty"]} align="center">
             <FeatureEmptyState
               title={t("bookmark.emptyTitle")}
               icon={<BookOpen size={20} />}
               size="small"
               hints={[t("bookmark.hint1"), t("bookmark.hint2")]}
             />
-          </div>
+          </Space>
         ) : layout === "mindmap" ? (
           <BookmarkTreeView
             topSections={topSections}
@@ -602,7 +604,7 @@ export function BookmarkView() {
             orientation="vertical"
           />
         ) : (
-          <div className={styles["app-bookmark-sections"]}>
+          <Space direction="vertical" size={0} className={styles["app-bookmark-sections"]}>
             {topSections.map((section, idx) => (
               <TopFolderSection
                 key={section.id}
@@ -612,9 +614,9 @@ export function BookmarkView() {
                 resolveTitle={resolveTitle}
               />
             ))}
-          </div>
+          </Space>
         )}
-      </div>
+      </Space>
 
       <BookmarkToolsModal
         open={toolsOpen}
@@ -623,6 +625,6 @@ export function BookmarkView() {
           void getBookmarkTree().then(setBookmarks);
         }}
       />
-    </div>
+    </Space>
   );
 }

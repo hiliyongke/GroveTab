@@ -300,8 +300,8 @@ export function WindowCard({
       }
       header={
         <>
-          <button
-            type="button"
+          <Button
+            type="text"
             className={`app-row-hover ${styles["app-window-card-header"]}`}
             aria-expanded={!collapsed}
             onClick={toggleCollapse}
@@ -351,8 +351,7 @@ export function WindowCard({
                 {t("window.incognito")}
               </Tag>
             )}
-          </button>
-
+          </Button>
           <Dropdown menu={{ items: menuItems }} trigger={["click"]} placement="bottomRight">
             <Tooltip title={t("common.more")}>
               <Button
@@ -369,8 +368,8 @@ export function WindowCard({
       }
       ghostDropZone={
         showGhostDropZone ? (
-          <button
-            type="button"
+          <Button
+            type="text"
             className={styles["app-window-ghost-dropzone"]}
             onClick={handleCreateGroupFromUngrouped}
             disabled={ungroupedTabs.length === 0}
@@ -379,7 +378,7 @@ export function WindowCard({
             {ungroupedTabs.length > 0
               ? t("windowGroup.createFromUngrouped")
               : t("windowDrag.dropHere")}
-          </button>
+          </Button>
         ) : undefined
       }
     >

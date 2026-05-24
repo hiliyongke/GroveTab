@@ -5,10 +5,10 @@
  * 历史来源：从早期 WorkspaceOverview 组件中拆分独立。
  */
 
-import { Button, Card, Space } from 'antd';
-import type { LiveTab } from '@/shared/types';
-import { useT } from '@/shared/i18n';
-import styles from './styles/views.module.less';
+import { Button, Card, Space, Flex } from "antd";
+import type { LiveTab } from "@/shared/types";
+import { useT } from "@/shared/i18n";
+import styles from "./styles/views.module.less";
 
 interface SelectionModeNoticeProps {
   selectedTabs: LiveTab[];
@@ -32,40 +32,36 @@ export function SelectionModeNotice({
   return (
     <Card
       size="small"
-      className={styles['app-selection-notice']}
-      classNames={{ body: styles['app-selection-notice__body'] }}
+      className={styles["app-selection-notice"]}
+      classNames={{ body: styles["app-selection-notice__body"] }}
     >
-      <div className={styles['app-selection-notice__body']}>
-        <div className={styles['app-selection-notice__summary']}>
-<div className={styles['app-selection-notice__title']}>
-            {t('selection.title')}
-          </div>
-          <div className={styles['app-selection-notice__meta']}>
+      <Flex className={styles["app-selection-notice__body"]}>
+        <Flex vertical className={styles["app-selection-notice__summary"]}>
+          <Flex className={styles["app-selection-notice__title"]}>{t("selection.title")}</Flex>
+          <Flex className={styles["app-selection-notice__meta"]}>
             {selectedCount > 0
-              ? t('selection.summary', {
+              ? t("selection.summary", {
                   count: selectedCount,
                   domains: selectedDomainCount,
                   windows: selectedWindowCount,
-              })
-              : t('selection.empty')}
-          </div>
-<div className={styles['app-selection-notice__hint']}>
-            {t('selection.hint')}
-          </div>
-        </div>
+                })
+              : t("selection.empty")}
+          </Flex>
+          <Flex className={styles["app-selection-notice__hint"]}>{t("selection.hint")}</Flex>
+        </Flex>
 
         <Space size={6} wrap>
           <Button size="small" onClick={onSelectAll}>
-            {t('selection.selectAll')}
+            {t("selection.selectAll")}
           </Button>
           <Button size="small" onClick={onClearSelection} disabled={selectedCount === 0}>
-            {t('selection.clear')}
+            {t("selection.clear")}
           </Button>
           <Button size="small" type="text" onClick={onExitSelectionMode}>
-            {t('selection.exit')}
+            {t("selection.exit")}
           </Button>
         </Space>
-      </div>
+      </Flex>
     </Card>
   );
 }

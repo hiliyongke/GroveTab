@@ -8,12 +8,14 @@
  *   - 容器高度用 `min(100vh - 240px, tabs * 36)`，短列表不撑开，长列表滚动
  */
 
-import { useMemo, useRef } from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { useTabsStore } from '@/store';
-import { TabItem } from './TabItem';
-import { CONFIG } from '@/shared/config';
-import styles from './styles/views.module.less';
+import { useMemo, useRef } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { Flex } from "antd";
+import { cssVars } from "@/shared/utils/css-vars";
+import { useTabsStore } from "@/store";
+import { TabItem } from "./TabItem";
+import { CONFIG } from "@/shared/config";
+import styles from "./styles/views.module.less";
 
 const ROW_HEIGHT = CONFIG.ui.rowHeight;
 /** 容器最大高度（留给 Header + Hero + pb 的空间） */
@@ -29,7 +31,7 @@ export function CompactView() {
 
   const sortedTabs = useMemo(
     () => [...tabs].sort((a, b) => b.lastAccessed - a.lastAccessed),
-    [tabs]
+    [tabs],
   );
 
   /** 当前视图内所有可见 tab ID 列表（供 Shift 范围选） */
@@ -47,19 +49,15 @@ export function CompactView() {
 
   /** 短列表不撑满视口；长列表按视口高度滚动 */
   const containerMaxHeight = `min(calc(100vh - ${VIEWPORT_RESERVE}px), ${sortedTabs.length * ROW_HEIGHT + 8}px)`;
-  const containerStyle: React.CSSProperties = {
-    maxHeight: containerMaxHeight,
-    minHeight: Math.min(sortedTabs.length, 6) * ROW_HEIGHT,
-  };
+  const containerStyle: React.CSSProperties = cssVars({
+    "--app-compact-max-height": containerMaxHeight,
+    "--app-compact-min-height": `${Math.min(sortedTabs.length, 6) * ROW_HEIGHT}px`,
+  });
   const spacerStyle = { height: virtualizer.getTotalSize() };
 
   return (
-    <div
-      ref={parentRef}
-      className={styles['app-compact-view']}
-      style={containerStyle}
-    >
-      <div className={styles['app-compact-view-spacer']} style={spacerStyle}>
+    <Flex ref={parentRef} vertical className={styles["app-compact-view"]} style={containerStyle}>
+      <Flex className={styles["app-compact-view-spacer"]} style={spacerStyle}>
         {virtualizer.getVirtualItems().map((virtualRow) => {
           const tab = sortedTabs[virtualRow.index];
           if (!tab) return null;
@@ -69,23 +67,23 @@ export function CompactView() {
           };
 
           return (
-            <div
-              key={tab.id}
-              className={styles['app-compact-view-item']}
-              style={itemStyle}
-            >
+            <Flex key={tab.id} className={styles["app-compact-view-item"]} style={itemStyle}>
               <TabItem
                 tab={tab}
-                onJump={(id, wid) => { void jumpToTab(id, wid); }}
-                onClose={(id) => { void closeSingleTab(id); }}
+                onJump={(id, wid) => {
+                  void jumpToTab(id, wid);
+                }}
+                onClose={(id) => {
+                  void closeSingleTab(id);
+                }}
                 showHostname
                 selectable
                 visibleTabIds={visibleTabIds}
               />
-            </div>
+            </Flex>
           );
         })}
-      </div>
-    </div>
+      </Flex>
+    </Flex>
   );
 }

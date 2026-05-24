@@ -169,9 +169,9 @@ export function SessionCard({
             session.tabs.map((tab, idx) => {
               const isMatched = matchedTabIndexes?.has(idx) ?? false;
               return (
-                <button
+                <Button
                   key={`${session.id}-tab-${idx}`}
-                  type="button"
+                  type="text"
                   className={`${styles["archive-card__tab-row"]}${isMatched ? " " + styles["is-matched"] : ""}`}
                   onClick={() => onOpenSingle(tab)}
                   title={tab.title || tab.url}
@@ -198,7 +198,7 @@ export function SessionCard({
                       {highlightText(tab.hostname || tab.url)}
                     </span>
                   </span>
-                </button>
+                </Button>
               );
             })
           )}

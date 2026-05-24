@@ -210,9 +210,9 @@ export function TabGroupSection({
   const colorPicker = (
     <div className={styles["app-window-group-color-grid"]}>
       {TAB_GROUP_COLORS.map((item) => (
-        <button
+        <Button
           key={item}
-          type="button"
+          type="text"
           className={`${styles["app-window-group-color"]} ${item === color ? styles["is-active"] : ""}`}
           style={cssVars({ "--app-window-group-color": COLOR_HEX[item] })}
           aria-label={t(`windowGroup.color.${item}`)}
@@ -286,8 +286,8 @@ export function TabGroupSection({
       })}
     >
       <div className={styles["app-window-group-header"]}>
-        <button
-          type="button"
+        <Button
+          type="text"
           className={styles["app-window-group-trigger"]}
           aria-expanded={!collapsed}
           onClick={handleToggleCollapsed}
@@ -317,7 +317,7 @@ export function TabGroupSection({
             <span className={styles["app-window-group-title"]}>{title}</span>
           )}
           <Tag className={styles["app-window-group-count"]}>{tabs.length}</Tag>
-        </button>
+        </Button>
 
         <Dropdown menu={{ items: menuItems }} trigger={["click"]} placement="bottomRight">
           <Tooltip title={t("common.more")}>

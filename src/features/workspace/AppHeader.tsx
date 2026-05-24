@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { Layout, Space, Button, Tooltip, Tag } from "antd";
+import { Layout, Space, Button, Tooltip, Tag, Flex } from "antd";
 import { Search, Settings, Sun, Moon, SunMoon, Globe, BarChart3, History } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useSettingsStore } from "@/store";
@@ -79,7 +79,7 @@ export function AppHeader({
   return (
     <Header className={`app-header-shell${compactSearchVisible ? " is-scrolled" : ""}`}>
       {/* 左侧：小 logo + 状态摘要 */}
-      <div className="app-header-left">
+      <Flex align="center" gap={8} className="app-header-left">
         <img src="/icons/logo.png" alt={BRAND.name} className="app-header-logo" />
         {/* 状态徽标 */}
         <Tag
@@ -111,7 +111,7 @@ export function AppHeader({
             </>
           )}
         </span>
-      </div>
+      </Flex>
 
       {/*
         中部吸附搜索触发器
@@ -119,7 +119,7 @@ export function AppHeader({
         · flex:1 占满中间空间
         · Hero 搜索框在视野内时隐藏，滚出后渐显
       */}
-      <div className="app-header-center">
+      <Flex flex="1 1 520px" justify="center" className="app-header-center">
         <Button
           type="text"
           onClick={onOpenSearch}
@@ -135,7 +135,7 @@ export function AppHeader({
             ⌘K
           </span>
         </Button>
-      </div>
+      </Flex>
 
       <Space size={6} className="app-header-actions">
         {pageMode !== "workspace" && (

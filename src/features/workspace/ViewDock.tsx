@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Button } from "antd";
+import { Button, Flex } from "antd";
 
 import { VIEW_CONFIGS, type ViewMode } from "@/shared/config/views";
 import { useT } from "@/shared/i18n";
@@ -38,7 +38,14 @@ export function ViewDock({ viewMode, onViewChange, orientation, placement }: Vie
       className={`app-view-dock app-view-dock--${placement} app-view-dock--${orientation}`}
       aria-label="View switcher"
     >
-      <div className="app-view-dock__list" role="tablist" aria-orientation={orientation}>
+      <Flex
+        className="app-view-dock__list"
+        role="tablist"
+        aria-orientation={orientation}
+        vertical={orientation === "vertical"}
+        align={orientation === "vertical" ? "stretch" : "center"}
+        gap={4}
+      >
         {items.map((item) => {
           const isActive = viewMode === item.id;
           return (
@@ -56,7 +63,7 @@ export function ViewDock({ viewMode, onViewChange, orientation, placement }: Vie
             </Button>
           );
         })}
-      </div>
+      </Flex>
     </nav>
   );
 }

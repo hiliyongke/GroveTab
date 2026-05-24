@@ -12,7 +12,7 @@
  */
 
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { App, Button, Modal, Radio, Space, Tag, Typography, theme } from "antd";
+import { App, Button, Modal, Radio, Space, Tag, Typography, theme, Flex, Image } from "antd";
 import type { RadioChangeEvent } from "antd/es/radio/interface";
 import type { LiveTab } from "@/shared/types";
 import type { DupGroup } from "@/shared/utils/dedupe";
@@ -157,7 +157,7 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
       centered
       destroyOnHidden
       footer={
-        <div className={styles["app-duplicate-footer"]}>
+        <Flex justify="space-between" align="center" className={styles["app-duplicate-footer"]}>
           <Space>
             <Button size="small" onClick={handleKeepAllOldest}>
               {t("dedup.keepOldest")}
@@ -182,10 +182,10 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
               {t("dedup.mergeNow")}
             </Button>
           </Space>
-        </div>
+        </Flex>
       }
     >
-      <div className={styles["app-duplicate-groups"]}>
+      <Flex vertical className={styles["app-duplicate-groups"]}>
         {effectiveGroups.length === 0 ? (
           <Text type="secondary">{t("dedup.emptyPreview")}</Text>
         ) : (
@@ -201,7 +201,7 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
             />
           ))
         )}
-      </div>
+      </Flex>
     </Modal>
   );
 }
@@ -231,15 +231,19 @@ function GroupSection({ group, keeperId, onChange, token: _token, t, locale }: G
   };
 
   return (
-    <div className={styles["app-duplicate-group"]}>
-      <div className={styles["app-duplicate-group__header"]}>
+    <Flex vertical className={styles["app-duplicate-group"]}>
+      <Flex
+        className={styles["app-duplicate-group__header"]}
+        align="center"
+        justify="space-between"
+      >
         <Text strong className={styles["app-duplicate-group__title"]}>
           {group.canonicalUrl}
         </Text>
         <Tag color="gold" className={styles["app-duplicate-group__tag"]}>
           {t("dedup.willClose", { count: closeCount })}
         </Tag>
-      </div>
+      </Flex>
       <Radio.Group
         value={radioValue}
         onChange={handleChange}
@@ -252,27 +256,32 @@ function GroupSection({ group, keeperId, onChange, token: _token, t, locale }: G
             className={`${styles["app-duplicate-option"]}${keeperId === tab.id ? ` ${styles["is-selected"]}` : ""}`}
           >
             {tab.favIconUrl !== "" && (
-              <img
+              <Image
                 src={tab.favIconUrl}
                 alt=""
+                preview={false}
                 className={styles["app-duplicate-option__favicon"]}
               />
             )}
-            <div className={styles["app-duplicate-option__content"]}>
-              <span className={styles["app-duplicate-option__title"]}>{tab.title}</span>
-              <span className={styles["app-duplicate-option__url"]}>{tab.url}</span>
-            </div>
-            <div className={styles["app-duplicate-option__aside"]}>
+            <Flex vertical className={styles["app-duplicate-option__content"]}>
+              <Typography.Text className={styles["app-duplicate-option__title"]}>
+                {tab.title}
+              </Typography.Text>
+              <Typography.Text className={styles["app-duplicate-option__url"]}>
+                {tab.url}
+              </Typography.Text>
+            </Flex>
+            <Flex vertical className={styles["app-duplicate-option__aside"]}>
               <Text type="secondary" className={styles["app-duplicate-option__meta"]}>
                 {t("dedup.windowLabel", { id: tab.windowId })}
               </Text>
               <Text type="secondary" className={styles["app-duplicate-option__meta"]}>
                 {formatOpenedAt(tab.lastAccessed, locale)}
               </Text>
-            </div>
+            </Flex>
           </Radio>
         ))}
       </Radio.Group>
-    </div>
+    </Flex>
   );
 }

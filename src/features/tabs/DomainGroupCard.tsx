@@ -180,8 +180,7 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
             onClick={toggleCollapse}
             aria-expanded={!collapsed}
             aria-label={collapsed ? t("tabs.expand") : t("tabs.collapse")}
-            className={`app-row-hover ${styles["app-domain-group-header"]}`}
-            style={{ flex: 1, minWidth: 0 }}
+            className={`app-row-hover app-domain-group-header-btn ${styles["app-domain-group-header"]}`}
           >
             <ChevronDown
               size={ICON_SIZE.TINY}

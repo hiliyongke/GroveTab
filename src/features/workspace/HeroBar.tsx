@@ -1,12 +1,12 @@
-import { useMemo, type RefObject } from 'react';
-import { Input, Segmented } from 'antd';
-import { Search } from 'lucide-react';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { useT } from '@/shared/i18n';
-import { getBrandDisplayName, getBrandSlogan } from '@/shared/config/brand';
-import { BRAND } from '@/shared/config/brand';
-import { VIEW_CONFIGS, type ViewMode } from '@/shared/config/views';
-import type { ViewTabPosition } from '@/shared/types';
+import { useMemo, type RefObject } from "react";
+import { Input, Segmented, Flex } from "antd";
+import { Search } from "lucide-react";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useT } from "@/shared/i18n";
+import { getBrandDisplayName, getBrandSlogan } from "@/shared/config/brand";
+import { BRAND } from "@/shared/config/brand";
+import { VIEW_CONFIGS, type ViewMode } from "@/shared/config/views";
+import type { ViewTabPosition } from "@/shared/types";
 
 /**
  * Hero 区：品牌 Logo + 搜索框 + 视图切换
@@ -46,7 +46,7 @@ export function HeroBar({
   const brandName = getBrandDisplayName(locale);
   const brandSlogan = getBrandSlogan(locale);
   const shouldShowBrandRow = showLogo || showTitle;
-  const shouldShowSlogan = showSlogan && brandSlogan !== '';
+  const shouldShowSlogan = showSlogan && brandSlogan !== "";
 
   /**
    * Segmented 视图切换 options。
@@ -70,36 +70,20 @@ export function HeroBar({
   );
 
   return (
-    <section className="app-hero">
+    <Flex vertical align="center" gap={16} className="app-hero">
       {/* 品牌 Logo —— 居中展示，参考微软新标签页
           所有内容通过 BRAND 配置层读取，切换品牌预设即可整站换装 */}
       {(shouldShowBrandRow || shouldShowSlogan) && (
-        <div
-          className="app-hero-brand"
-        >
+        <Flex vertical align="center" gap={6} className="app-hero-brand">
           {shouldShowBrandRow && (
-            <div className="app-hero-brand-row">
-              {showLogo && (
-                <img
-                  src="/icons/logo.png"
-                  alt={BRAND.name}
-                  className="app-hero-logo"
-                />
-              )}
-              {showTitle && (
-                <span className="app-hero-title">
-                  {brandName}
-                </span>
-              )}
-            </div>
+            <Flex align="center" gap={10} className="app-hero-brand-row">
+              {showLogo && <img src="/icons/logo.png" alt={BRAND.name} className="app-hero-logo" />}
+              {showTitle && <span className="app-hero-title">{brandName}</span>}
+            </Flex>
           )}
           {/* Slogan —— 低调次级展示，字号控制在 12px，避免喧宾夺主 */}
-          {shouldShowSlogan && (
-            <span className="app-hero-slogan">
-              {brandSlogan}
-            </span>
-          )}
-        </div>
+          {shouldShowSlogan && <span className="app-hero-slogan">{brandSlogan}</span>}
+        </Flex>
       )}
 
       {/* 搜索框 —— 超宽居中，大圆角 + 品牌辉光
@@ -111,8 +95,13 @@ export function HeroBar({
             className="app-hero-search"
             size="large"
             readOnly
-            placeholder={t('search.placeholder')}
-            prefix={<Search size={ICON_SIZE.XXL} className="app-icon app-icon--search app-hero-search-icon" />}
+            placeholder={t("search.placeholder")}
+            prefix={
+              <Search
+                size={ICON_SIZE.XXL}
+                className="app-icon app-icon--search app-hero-search-icon"
+              />
+            }
             suffix={<span className="app-kbd">⌘K</span>}
             onFocus={(e) => {
               e.currentTarget.blur();
@@ -124,16 +113,16 @@ export function HeroBar({
       )}
 
       {/* 视图切换 —— 仅在 top 模式下渲染到 HeroBar，left/right 模式由侧边栏接管 */}
-      {showViewSwitcher && viewTabPosition === 'top' && (
+      {showViewSwitcher && viewTabPosition === "top" && (
         <Segmented<ViewMode>
           value={viewMode}
           onChange={(v: ViewMode) => onViewChange(v)}
           options={viewSegmentedOptions}
           size="middle"
           className="app-view-switcher"
-          classNames={{ item: 'app-view-switcher__item' }}
+          classNames={{ item: "app-view-switcher__item" }}
         />
       )}
-    </section>
+    </Flex>
   );
 }

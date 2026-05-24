@@ -18,17 +18,16 @@
  *   `fine` 归一化为 `hour` 保持向后兼容。
  */
 
-import { useMemo, useState } from 'react';
-import { Timeline, Button, theme } from 'antd';
-import { ChevronDown } from 'lucide-react';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { useTabsStore, useSettingsStore } from '@/store';
-import { useT } from '@/shared/i18n';
-import { findAmbiguousTitleIds } from '@/shared/utils/url-display';
-import { cssVars } from '@/shared/utils/css-vars';
-import { TabItem } from './TabItem';
-import type { LiveTab } from '@/shared/types';
-import styles from './styles/views.module.less';
+import { useMemo, useState } from "react";
+import { Timeline, Button, theme } from "antd";
+import { ChevronDown } from "lucide-react";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useTabsStore, useSettingsStore } from "@/store";
+import { useT } from "@/shared/i18n";
+import { findAmbiguousTitleIds } from "@/shared/utils/url-display";
+import { TabItem } from "./TabItem";
+import type { LiveTab } from "@/shared/types";
+import styles from "./styles/views.module.less";
 
 /** 翻译函数类型（与 useT 返回的 t 对齐） */
 type TFn = (key: string, vars?: Record<string, string | number>) => string;
@@ -45,8 +44,8 @@ interface TimeSegment {
  */
 function formatHM(ts: number): string {
   const d = new Date(ts);
-  const h = d.getHours().toString().padStart(2, '0');
-  const m = d.getMinutes().toString().padStart(2, '0');
+  const h = d.getHours().toString().padStart(2, "0");
+  const m = d.getMinutes().toString().padStart(2, "0");
   return `${h}:${m}`;
 }
 
@@ -57,7 +56,7 @@ function formatHM(ts: number): string {
  *   - 多条：返回 "HH:mm – HH:mm"
  */
 function formatSegmentRange(tabs: LiveTab[]): string {
-  if (tabs.length === 0) return '';
+  if (tabs.length === 0) return "";
   let min = Infinity;
   let max = -Infinity;
   for (const t of tabs) {
@@ -66,7 +65,7 @@ function formatSegmentRange(tabs: LiveTab[]): string {
     if (ts < min) min = ts;
     if (ts > max) max = ts;
   }
-  if (!isFinite(min)) return '';
+  if (!isFinite(min)) return "";
   const start = formatHM(min);
   const end = formatHM(max);
   return start === end ? start : `${start} – ${end}`;
@@ -92,11 +91,7 @@ function formatSegmentRange(tabs: LiveTab[]): string {
  * @param dayPrefix  桶名前缀（跨天时传 "昨天 "）
  * @param keyPrefix  段 key 前缀，避免今天/昨天冲突
  */
-function bucketByHour(
-  tabs: LiveTab[],
-  dayPrefix: string,
-  keyPrefix: string,
-): TimeSegment[] {
+function bucketByHour(tabs: LiveTab[], dayPrefix: string, keyPrefix: string): TimeSegment[] {
   /** hour(0-23) → 桶数据 */
   const map = new Map<number, TimeSegment>();
 
@@ -105,8 +100,8 @@ function bucketByHour(
     if (!ts) continue;
     const hour = new Date(ts).getHours();
     if (!map.has(hour)) {
-      const hh = hour.toString().padStart(2, '0');
-      const nextHh = ((hour + 1) % 24).toString().padStart(2, '0');
+      const hh = hour.toString().padStart(2, "0");
+      const nextHh = ((hour + 1) % 24).toString().padStart(2, "0");
       const bucketLabel = `${hh}:00–${nextHh}:00`;
       map.set(hour, {
         key: `${keyPrefix}-h${hour}`,
@@ -123,9 +118,7 @@ function bucketByHour(
   }
 
   // 桶级按小时倒序（23 → 0）
-  return [...map.entries()]
-    .sort((a, b) => b[0] - a[0])
-    .map(([, seg]) => seg);
+  return [...map.entries()].sort((a, b) => b[0] - a[0]).map(([, seg]) => seg);
 }
 
 /**
@@ -145,8 +138,8 @@ function extractJustNow(tabs: LiveTab[], t: TFn): [TimeSegment | null, LiveTab[]
   recent.sort((a, b) => (b.lastAccessed || 0) - (a.lastAccessed || 0));
   return [
     {
-      key: 'today-justNow',
-      label: t('timeline.justNow'),
+      key: "today-justNow",
+      label: t("timeline.justNow"),
       tabs: recent,
     },
     rest,
@@ -164,11 +157,7 @@ function extractJustNow(tabs: LiveTab[], t: TFn): [TimeSegment | null, LiveTab[]
  * @param granularity 粒度档位（day/hour）
  * @param t           i18n 翻译函数
  */
-function getTimeSegments(
-  tabs: LiveTab[],
-  granularity: 'day' | 'hour',
-  t: TFn,
-): TimeSegment[] {
+function getTimeSegments(tabs: LiveTab[], granularity: "day" | "hour", t: TFn): TimeSegment[] {
   const todayStart = new Date().setHours(0, 0, 0, 0);
   const yesterdayStart = todayStart - 86400000;
   const weekStart = todayStart - 6 * 86400000;
@@ -188,17 +177,16 @@ function getTimeSegments(
   }
 
   /** 段内按访问时间倒序的工具函数 */
-  const byAccessDesc = (a: LiveTab, b: LiveTab) =>
-    (b.lastAccessed || 0) - (a.lastAccessed || 0);
+  const byAccessDesc = (a: LiveTab, b: LiveTab) => (b.lastAccessed || 0) - (a.lastAccessed || 0);
 
   const segments: TimeSegment[] = [];
 
   // —— 今天 ——
-  if (granularity === 'day') {
+  if (granularity === "day") {
     if (todayTabs.length > 0) {
       segments.push({
-        key: 'today',
-        label: t('timeline.today'),
+        key: "today",
+        label: t("timeline.today"),
         tabs: [...todayTabs].sort(byAccessDesc),
       });
     }
@@ -206,19 +194,17 @@ function getTimeSegments(
     // hour：今天按整点小时桶倒序，且抽出「刚刚」置顶
     const [justNow, restToday] = extractJustNow(todayTabs, t);
     if (justNow) segments.push(justNow);
-    segments.push(...bucketByHour(restToday, '', 'today'));
+    segments.push(...bucketByHour(restToday, "", "today"));
   }
 
   // —— 昨天 ——
-  if (granularity === 'hour') {
+  if (granularity === "hour") {
     // hour 档下：昨天也按整点小时桶倒序，前缀带「昨天 」
-    segments.push(
-      ...bucketByHour(yesterdayTabs, `${t('timeline.yesterdayPrefix')} `, 'yesterday'),
-    );
+    segments.push(...bucketByHour(yesterdayTabs, `${t("timeline.yesterdayPrefix")} `, "yesterday"));
   } else if (yesterdayTabs.length > 0) {
     segments.push({
-      key: 'yesterday',
-      label: t('timeline.yesterday'),
+      key: "yesterday",
+      label: t("timeline.yesterday"),
       tabs: [...yesterdayTabs].sort(byAccessDesc),
     });
   }
@@ -226,15 +212,15 @@ function getTimeSegments(
   // —— 本周 / 更早 ——（始终按天汇总，段内按访问时间倒序）
   if (weekTabs.length > 0) {
     segments.push({
-      key: 'week',
-      label: t('timeline.thisWeek'),
+      key: "week",
+      label: t("timeline.thisWeek"),
       tabs: [...weekTabs].sort(byAccessDesc),
     });
   }
   if (olderTabs.length > 0) {
     segments.push({
-      key: 'older',
-      label: t('timeline.older'),
+      key: "older",
+      label: t("timeline.older"),
       tabs: [...olderTabs].sort(byAccessDesc),
     });
   }
@@ -258,36 +244,19 @@ function SegmentHeader({
   collapsed: boolean;
   onToggle: () => void;
 }) {
-  const { token } = theme.useToken();
-
   return (
     <Button
       type="text"
       onClick={onToggle}
       aria-expanded={!collapsed}
-      className={`${styles['app-timeline-segment-header']} ${styles['app-timeline-segment-trigger']}`}
-      style={
-        {
-          transition: `color ${token.motionDurationFast}`,
-          ...cssVars({
-            '--app-color': token.colorTextSecondary,
-            '--app-color-hover': token.colorText,
-          }),
-        }
-      }
+      className={`${styles["app-timeline-segment-header"]} ${styles["app-timeline-segment-trigger"]}`}
     >
       <span>{label}</span>
-      {rangeText && (
-        <span className={styles['app-timeline-segment-range']}>
-          {rangeText}
-        </span>
-      )}
-      <span className={styles['app-timeline-segment-count']}>
-        {count}
-      </span>
+      {rangeText && <span className={styles["app-timeline-segment-range"]}>{rangeText}</span>}
+      <span className={styles["app-timeline-segment-count"]}>{count}</span>
       <ChevronDown
         size={ICON_SIZE.MICRO}
-        className={`${styles['app-timeline-segment-chevron']}${collapsed ? ` ${styles['is-collapsed']}` : ''}`}
+        className={`${styles["app-timeline-segment-chevron"]}${collapsed ? ` ${styles["is-collapsed"]}` : ""}`}
       />
     </Button>
   );
@@ -315,8 +284,10 @@ function SegmentContent({
   const rangeText = showExactTime ? formatSegmentRange(segment.tabs) : undefined;
 
   return (
-      <div className={`${styles['app-timeline-segment']}${collapsed ? ` ${styles['is-collapsed']}` : ''}`}>
-      <div className={styles['app-timeline-segment__header']}>
+    <div
+      className={`${styles["app-timeline-segment"]}${collapsed ? ` ${styles["is-collapsed"]}` : ""}`}
+    >
+      <div className={styles["app-timeline-segment__header"]}>
         <SegmentHeader
           label={segment.label}
           rangeText={rangeText}
@@ -327,20 +298,24 @@ function SegmentContent({
       </div>
 
       {!collapsed && (
-      <div className={styles['app-timeline-segment-list']}>
+        <div className={styles["app-timeline-segment-list"]}>
           {segment.tabs.map((tab) => (
             <TabItem
               key={tab.id}
               tab={tab}
-              onJump={(id, wid) => { void jumpToTab(id, wid); }}
-              onClose={(id) => { void closeSingleTab(id); }}
+              onJump={(id, wid) => {
+                void jumpToTab(id, wid);
+              }}
+              onClose={(id) => {
+                void closeSingleTab(id);
+              }}
               showHostname
               showUrlHint={ambiguousIds.has(tab.id)}
               selectable
               visibleTabIds={segmentTabIds}
               trailing={
                 showExactTime && tab.lastAccessed ? (
-        <span className={styles['app-timeline-segment-time']}>
+                  <span className={styles["app-timeline-segment-time"]}>
                     {formatHM(tab.lastAccessed)}
                   </span>
                 ) : null
@@ -364,21 +339,13 @@ export function TimelineView() {
    * 历史配置里可能存有已废弃的 `'fine'`，此处统一向 `'hour'` 归一化，
    * 避免旧数据进入 `getTimeSegments` 的 day/hour 二选一分支时类型收窄失败。
    */
-  const rawGranularity = useSettingsStore(
-    (s) => s.settings.timelineGranularity ?? 'day',
-  );
-  const granularity: 'day' | 'hour' =
-    rawGranularity === 'day' ? 'day' : 'hour';
-  const showExactTime = useSettingsStore(
-    (s) => s.settings.timelineShowExactTime ?? false,
-  );
+  const rawGranularity = useSettingsStore((s) => s.settings.timelineGranularity ?? "day");
+  const granularity: "day" | "hour" = rawGranularity === "day" ? "day" : "hour";
+  const showExactTime = useSettingsStore((s) => s.settings.timelineShowExactTime ?? false);
   const { t } = useT();
   const { token } = theme.useToken();
 
-  const segments = useMemo(
-    () => getTimeSegments(tabs, granularity, t),
-    [tabs, granularity, t],
-  );
+  const segments = useMemo(() => getTimeSegments(tabs, granularity, t), [tabs, granularity, t]);
 
   if (tabs.length === 0) return null;
 
@@ -402,7 +369,7 @@ export function TimelineView() {
   }));
 
   return (
-    <div className={styles['app-timeline-view']}>
+    <div className={styles["app-timeline-view"]}>
       <Timeline items={items} />
     </div>
   );

@@ -59,6 +59,63 @@ export default tseslint.config(
       '@typescript-eslint/no-inferrable-types': 'warn',
       '@typescript-eslint/prefer-for-of': 'warn',
       '@typescript-eslint/prefer-function-type': 'warn',
+
+      /* ========================================================================
+       * UI 规范拦截规则 —— 防止在重构期间产生新的不规范代码
+       *
+       * 1. 禁止使用原生 <button>，必须使用 Antd <Button>
+       * 2. 禁止使用原生 <h1>~<h6>、<p>，必须使用 <Typography.Title> / <Typography.Text> / <Typography.Paragraph>
+       * 3. 禁止使用原生 <input>，必须使用 Antd <Input> / <InputNumber> 等
+       * 4. 禁止在 JSX 元素上使用内联 style={{...}}，应使用 CSS Modules 或 Antd Token
+       * ======================================================================== */
+      'no-restricted-syntax': [
+        'error',
+        // 拦截原生 <button> 标签
+        {
+          selector: "JSXElement[openingElement.name.name='button']",
+          message: '禁止使用原生 <button>，请使用 Antd <Button> 组件',
+        },
+        // 拦截原生 <h1>~<h6> 标签
+        {
+          selector: "JSXElement[openingElement.name.name='h1']",
+          message: '禁止使用原生 <h1>，请使用 <Typography.Title level={1}>',
+        },
+        {
+          selector: "JSXElement[openingElement.name.name='h2']",
+          message: '禁止使用原生 <h2>，请使用 <Typography.Title level={2}>',
+        },
+        {
+          selector: "JSXElement[openingElement.name.name='h3']",
+          message: '禁止使用原生 <h3>，请使用 <Typography.Title level={3}>',
+        },
+        {
+          selector: "JSXElement[openingElement.name.name='h4']",
+          message: '禁止使用原生 <h4>，请使用 <Typography.Title level={4}>',
+        },
+        {
+          selector: "JSXElement[openingElement.name.name='h5']",
+          message: '禁止使用原生 <h5>，请使用 <Typography.Title level={5}>',
+        },
+        {
+          selector: "JSXElement[openingElement.name.name='h6']",
+          message: '禁止使用原生 <h6>，请使用 <Typography.Title>',
+        },
+        // 拦截原生 <p> 标签
+        {
+          selector: "JSXElement[openingElement.name.name='p']",
+          message: '禁止使用原生 <p>，请使用 <Typography.Paragraph> 或 <Typography.Text>',
+        },
+        // 拦截原生 <input> 标签
+        {
+          selector: "JSXElement[openingElement.name.name='input']",
+          message: '禁止使用原生 <input>，请使用 Antd <Input> / <InputNumber> / <Checkbox> 等组件',
+        },
+        // 拦截内联 style={{...}} 对象字面量（放行 style={变量} / style={cssVars(...)} 等动态样式）
+        {
+          selector: 'JSXAttribute[name.name="style"] > JSXExpressionContainer > ObjectExpression.properties',
+          message: '禁止使用内联 style={{...}} 对象字面量，请使用 CSS Modules (className={styles.xxx}) 或 Antd Design Token',
+        },
+      ],
     },
   },
 );

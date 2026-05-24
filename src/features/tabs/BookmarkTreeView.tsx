@@ -41,7 +41,7 @@ import { getFaviconUrl } from "@/chrome";
 import { useAccent } from "@/shared/hooks/useAccent";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
-import { Button, Divider } from "antd";
+import { Button, Divider, Flex, Image, Typography } from "antd";
 import styles from "./styles/bookmark-tree.module.less";
 
 /** 从 URL 提取 hostname */
@@ -113,9 +113,9 @@ function TreeLeafNode({ node, onOpen }: { node: BookmarkNode; onOpen: (url: stri
   const titleText = node.title || hostname;
 
   return (
-    <div
+    <Flex
       className={styles.leaf}
-      style={{ "--app-bm-accent": accent.bar } as React.CSSProperties}
+      data-accent={accent.bar}
       onClick={() => url && onOpen(url)}
       role="button"
       tabIndex={0}
@@ -126,35 +126,39 @@ function TreeLeafNode({ node, onOpen }: { node: BookmarkNode; onOpen: (url: stri
     >
       <span className={styles.leafBar} />
       {faviconUrl && !faviconError ? (
-        <img
+        <Image
           src={faviconUrl}
           alt=""
+          preview={false}
           className={styles.leafFavicon}
           onError={() => setFaviconError(true)}
         />
       ) : (
-        <span
+        <Typography.Text
           className={styles.leafFaviconFallback}
-          style={{ background: accent.soft, color: accent.text }}
+          data-accent-bg={accent.soft}
+          data-accent-text={accent.text}
         >
           {getFallbackLetter(node.title ?? "", url)}
-        </span>
+        </Typography.Text>
       )}
-      <div className={styles.leafMain}>
-        <div className={styles.leafTitle}>{titleText}</div>
-        {showHost && <div className={styles.leafHost}>{hostname}</div>}
-      </div>
+      <Flex vertical className={styles.leafMain}>
+        <Flex className={styles.leafTitle}>{titleText}</Flex>
+        {showHost && <Flex className={styles.leafHost}>{hostname}</Flex>}
+      </Flex>
 
       {/* 自定义 hover 气泡：显示标题 + 完整 URL（hostname 加粗高亮） */}
-      <div className={styles.tooltip} role="tooltip">
-        <div className={styles.tooltipTitle}>{titleText}</div>
-        <div className={styles.tooltipUrl}>
-          <span className={styles.tooltipHost}>{hostname}</span>
-          <span className={styles.tooltipPath}>{url.replace(/^https?:\/\/[^/]+/i, "") || "/"}</span>
-        </div>
+      <Flex vertical className={styles.tooltip} role="tooltip">
+        <Flex className={styles.tooltipTitle}>{titleText}</Flex>
+        <Flex className={styles.tooltipUrl}>
+          <Typography.Text className={styles.tooltipHost}>{hostname}</Typography.Text>
+          <Typography.Text className={styles.tooltipPath}>
+            {url.replace(/^https?:\/\/[^/]+/i, "") || "/"}
+          </Typography.Text>
+        </Flex>
         <div className={styles.tooltipArrow} aria-hidden="true" />
-      </div>
-    </div>
+      </Flex>
+    </Flex>
   );
 }
 
@@ -249,7 +253,7 @@ function TreeFolderNode({
       </Button>
 
       {expanded && !isEmpty && (
-        <div className={styles.children} role="group">
+        <Flex className={styles.children} role="group">
           {/* 横向（脑图）模式：仍用 SVG 贝塞尔曲线；垂直（组织架构图）模式：用纯 CSS 伪元素绘制直角连线，永不错位 */}
           {orientation === "horizontal" && (
             <svg
@@ -274,7 +278,7 @@ function TreeFolderNode({
             </svg>
           )}
 
-          <div
+          <Flex
             className={`${styles.childrenCol}${orderedChildren.length === 1 ? ` ${styles.childrenColIsSingle}` : ""}`}
           >
             {orderedChildren.map((child) =>
@@ -292,8 +296,8 @@ function TreeFolderNode({
                 />
               ),
             )}
-          </div>
-        </div>
+          </Flex>
+        </Flex>
       )}
     </div>
   );
@@ -493,7 +497,7 @@ const PanZoom = forwardRef<
     });
     ro.observe(vp);
     return () => ro.disconnect();
-  }, [tryInitialPosition]);
+  }, [fit]);
 
   const handleDoubleClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -539,7 +543,9 @@ const PanZoom = forwardRef<
       <div
         ref={contentRef}
         className="app-bm-tree__panzoom-content"
-        style={{ transform: `translate(${tx}px, ${ty}px) scale(${scale})` }}
+        data-tx={tx}
+        data-ty={ty}
+        data-scale={scale}
       >
         {children}
       </div>

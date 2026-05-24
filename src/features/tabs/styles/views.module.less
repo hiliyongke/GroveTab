@@ -632,6 +632,8 @@
 }
 
 .app-compact-view {
+  max-height: var(--app-compact-max-height);
+  min-height: var(--app-compact-min-height);
   overflow-y: auto;
   padding-right: 4px;
 }
@@ -1548,6 +1550,10 @@
   background: var(--app-tab-context-tag-bg);
   color: #fff;
   font-size: 11px;
+}
+
+.app-tab-context-menu__tag[data-tag-color] {
+  background: attr(data-tag-color);
   line-height: 18px;
 }
 

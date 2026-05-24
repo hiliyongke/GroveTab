@@ -7,6 +7,7 @@
 
 import { useMemo } from "react";
 import { Inbox, Sun, CalendarDays, CalendarRange, Clock, Sparkles } from "lucide-react";
+import { Button } from "antd";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import type { ArchivedSession } from "@/shared/types";
 import { useT } from "@/shared/i18n";
@@ -75,9 +76,9 @@ export function ArchiveSidebar({ sessions, activeFilter, onSelectFilter }: Archi
           {FILTERS.map((filter) => {
             const isActive = activeFilter === filter.id;
             return (
-              <button
+              <Button
                 key={filter.id}
-                type="button"
+                type="text"
                 className={`${styles["archive-sidebar__item"]}${isActive ? " " + styles["is-active"] : ""}`}
                 onClick={() => onSelectFilter(filter.id)}
               >
@@ -86,7 +87,7 @@ export function ArchiveSidebar({ sessions, activeFilter, onSelectFilter }: Archi
                 </span>
                 <span className={styles["archive-sidebar__item-label"]}>{t(filter.labelKey)}</span>
                 <span className={styles["archive-sidebar__item-count"]}>{counts[filter.id]}</span>
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -95,8 +96,8 @@ export function ArchiveSidebar({ sessions, activeFilter, onSelectFilter }: Archi
       <div className={styles["archive-sidebar__group"]}>
         <div className={styles["archive-sidebar__group-title"]}>{t("archive.filter.special")}</div>
         <div className={styles["archive-sidebar__list"]}>
-          <button
-            type="button"
+          <Button
+            type="text"
             className={`${styles["archive-sidebar__item"]}${activeFilter === "auto" ? " " + styles["is-active"] : ""}`}
             onClick={() => onSelectFilter("auto")}
           >
@@ -107,7 +108,7 @@ export function ArchiveSidebar({ sessions, activeFilter, onSelectFilter }: Archi
               {t("archive.filter.autoSnapshots")}
             </span>
             <span className={styles["archive-sidebar__item-count"]}>{counts.auto}</span>
-          </button>
+          </Button>
         </div>
       </div>
     </aside>

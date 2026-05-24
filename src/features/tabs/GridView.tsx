@@ -19,7 +19,7 @@
  */
 
 import { useMemo, useState } from "react";
-import { Button, Card, Popover, theme } from "antd";
+import { Button, Card, Popover, theme, Image, Typography, Space } from "antd";
 import { Volume2, X } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useTabsStore, useSettingsStore } from "@/store";
@@ -94,7 +94,7 @@ export function GridView() {
   };
 
   return (
-    <div className={styles["app-grid-view"]} style={wrapperStyle}>
+    <Space className={styles["app-grid-view"]} style={wrapperStyle}>
       {groups.map((group) => (
         <GridCard
           key={group.domain}
@@ -114,7 +114,7 @@ export function GridView() {
           expandTrigger={expandTrigger}
         />
       ))}
-    </div>
+    </Space>
   );
 }
 
@@ -181,41 +181,42 @@ function GridCard({
       onClick={handleCardClick}
       className={`app-card-interactive ${styles["app-grid-card"]}`}
       classNames={{ body: styles["app-grid-card__body"] }}
-      style={{
-        borderRadius: token.borderRadiusLG,
-        ...cssVars({
-          "--app-hover-border": token.colorPrimaryBorder,
-          "--app-grid-card-accent": color,
-        }),
-      }}
+      data-border-radius={token.borderRadiusLG}
+      data-hover-border={token.colorPrimaryBorder}
+      data-card-accent={color}
     >
       {/* 缩略图区 —— 16:10 宽高比 */}
-      <div className={styles["app-grid-card-preview"]}>
+      <Space className={styles["app-grid-card-preview"]}>
         {first?.favIconUrl && !faviconError ? (
-          <img
+          <Image
             src={first.favIconUrl}
             alt=""
+            preview={false}
             className={styles["app-grid-card-favicon"]}
             onError={() => setFaviconError(true)}
           />
         ) : (
-          <span className={styles["app-grid-card-fallback"]}>{domain.charAt(0).toUpperCase()}</span>
+          <Typography.Text className={styles["app-grid-card-fallback"]}>
+            {domain.charAt(0).toUpperCase()}
+          </Typography.Text>
         )}
 
         {/* 多 tab 角标：数字，右上角 */}
-        {isMulti && <span className={styles["app-grid-card-count"]}>{tabs.length}</span>}
-      </div>
+        {isMulti && (
+          <Typography.Text className={styles["app-grid-card-count"]}>{tabs.length}</Typography.Text>
+        )}
+      </Space>
 
       {/* 底部信息区 */}
-      <div className={styles["app-grid-card-content"]}>
-        <div className={styles["app-grid-card-meta"]}>
-          <span className={styles["app-grid-card-domain"]}>{domain}</span>
+      <Space direction="vertical" size={0} className={styles["app-grid-card-content"]}>
+        <Space className={styles["app-grid-card-meta"]}>
+          <Typography.Text className={styles["app-grid-card-domain"]}>{domain}</Typography.Text>
           {hasAudible && (
             <Volume2 size={ICON_SIZE.SMALL} className={styles["app-grid-card-audible"]} />
           )}
-        </div>
-        <span className={styles["app-grid-card-copy"]}>{countLabel}</span>
-      </div>
+        </Space>
+        <Typography.Text className={styles["app-grid-card-copy"]}>{countLabel}</Typography.Text>
+      </Space>
     </Card>
   );
 
@@ -309,32 +310,38 @@ function DomainTabsPanel({
   });
 
   return (
-    <div className={styles["app-grid-popover"]} style={popoverStyle}>
+    <Space
+      direction="vertical"
+      size={0}
+      className={styles["app-grid-popover"]}
+      style={popoverStyle}
+    >
       {/* Header —— 色条 + favicon + 域名 + 计数 + 关闭 */}
-      <div className={styles["app-grid-popover__header"]}>
+      <Space className={styles["app-grid-popover__header"]}>
         {/* 左侧身份色条 */}
-        <span aria-hidden className={styles["app-grid-popover__accent"]} />
+        <Typography.Text aria-hidden className={styles["app-grid-popover__accent"]} />
         {/* favicon */}
         {hasFavicon && !faviconFailed ? (
-          <img
+          <Image
             src={faviconSrc}
             alt=""
+            preview={false}
             className={styles["app-grid-popover__favicon"]}
             onError={() => setFaviconFailed(true)}
           />
         ) : (
-          <span aria-hidden className={styles["app-grid-popover__fallback"]}>
+          <Typography.Text aria-hidden className={styles["app-grid-popover__fallback"]}>
             {domain.charAt(0).toUpperCase()}
-          </span>
+          </Typography.Text>
         )}
         {/* 域名 —— 允许省略 */}
-        <span title={domain} className={styles["app-grid-popover__title"]}>
+        <Typography.Text title={domain} className={styles["app-grid-popover__title"]}>
           {domain}
-        </span>
+        </Typography.Text>
         {/* 计数 —— secondary tone，tabular */}
-        <span className={styles["app-grid-popover__count"]}>
+        <Typography.Text className={styles["app-grid-popover__count"]}>
           {t("header.tabCount", { count: tabs.length })}
-        </span>
+        </Typography.Text>
         {/* 关闭按钮 —— antd Button（键盘可达 + ant 原生样式） */}
         <Button
           type="text"
@@ -344,10 +351,10 @@ function DomainTabsPanel({
           icon={<X size={ICON_SIZE.MEDIUM} />}
           className={styles["app-grid-popover__close"]}
         />
-      </div>
+      </Space>
 
       {/* 列表区 */}
-      <div className={styles["app-grid-popover__list"]}>
+      <Space direction="vertical" size={0} className={styles["app-grid-popover__list"]}>
         {tabs.map((tab) => (
           <TabItem
             key={tab.id}
@@ -357,7 +364,7 @@ function DomainTabsPanel({
             showUrlHint={ambiguousIds.has(tab.id)}
           />
         ))}
-      </div>
-    </div>
+      </Space>
+    </Space>
   );
 }

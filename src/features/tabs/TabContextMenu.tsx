@@ -10,25 +10,18 @@
  *   - ESC 关闭
  */
 
-import { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import {
-  Pin,
-  Tag as TagIcon,
-  MessageSquare,
-  Moon,
-  MoveHorizontal,
-  Star,
-} from 'lucide-react';
-import { cssVars } from '@/shared/utils/css-vars';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { Button, Input, Tag, Divider, Card, theme } from 'antd';
-import { useMetadataStore, useTabsStore, useSpeedDialStore } from '@/store';
-import { useT } from '@/shared/i18n';
-import { stringToColor } from '@/shared/utils/color';
-import { splitTabToSide } from '@/chrome';
-import { Z } from '@/shared/config/z-index';
-import { CONFIG } from '@/shared/config';
-import styles from './styles/views.module.less';
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { Pin, Tag as TagIcon, MessageSquare, Moon, MoveHorizontal, Star } from "lucide-react";
+import { cssVars } from "@/shared/utils/css-vars";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { Button, Input, Tag, Divider, Card, theme, Flex } from "antd";
+import { useMetadataStore, useTabsStore, useSpeedDialStore } from "@/store";
+import { useT } from "@/shared/i18n";
+import { stringToColor } from "@/shared/utils/color";
+import { splitTabToSide } from "@/chrome";
+import { Z } from "@/shared/config/z-index";
+import { CONFIG } from "@/shared/config";
+import styles from "./styles/views.module.less";
 
 interface TabContextMenuProps {
   x: number;
@@ -50,11 +43,19 @@ function normalizeUrl(url: string): string {
   try {
     const u = new URL(url);
     // 去掉常见跟踪参数
-    const dropParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'fbclid', 'gclid'];
+    const dropParams = [
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "utm_term",
+      "utm_content",
+      "fbclid",
+      "gclid",
+    ];
     dropParams.forEach((p) => u.searchParams.delete(p));
     // 去掉 hash
-    u.hash = '';
-    return u.host + u.pathname.replace(/\/+$/, '') + u.search;
+    u.hash = "";
+    return u.host + u.pathname.replace(/\/+$/, "") + u.search;
   } catch {
     return url;
   }
@@ -63,7 +64,15 @@ function normalizeUrl(url: string): string {
 /**
  * 标签右键上下文菜单
  */
-export function TabContextMenu({ x, y, url, title, favIconUrl, tabId, onClose }: TabContextMenuProps) {
+export function TabContextMenu({
+  x,
+  y,
+  url,
+  title,
+  favIconUrl,
+  tabId,
+  onClose,
+}: TabContextMenuProps) {
   const { t } = useT();
   const { token } = theme.useToken();
   const addTag = useMetadataStore((s) => s.addTag);
@@ -79,7 +88,7 @@ export function TabContextMenu({ x, y, url, title, favIconUrl, tabId, onClose }:
 
   const [showTagInput, setShowTagInput] = useState(false);
   const [showNoteInput, setShowNoteInput] = useState(false);
-  const [tagValue, setTagValue] = useState('');
+  const [tagValue, setTagValue] = useState("");
   const [noteValue, setNoteValue] = useState(note);
   const [position, setPosition] = useState({ left: x, top: y });
 
@@ -93,13 +102,13 @@ export function TabContextMenu({ x, y, url, title, favIconUrl, tabId, onClose }:
       }
     };
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === "Escape") onClose();
     };
-    document.addEventListener('mousedown', handleMouse);
-    document.addEventListener('keydown', handleKey);
+    document.addEventListener("mousedown", handleMouse);
+    document.addEventListener("keydown", handleKey);
     return () => {
-      document.removeEventListener('mousedown', handleMouse);
-      document.removeEventListener('keydown', handleKey);
+      document.removeEventListener("mousedown", handleMouse);
+      document.removeEventListener("keydown", handleKey);
     };
   }, [onClose]);
 
@@ -119,7 +128,7 @@ export function TabContextMenu({ x, y, url, title, favIconUrl, tabId, onClose }:
     const v = tagValue.trim();
     if (v) {
       void addTag(url, v);
-      setTagValue('');
+      setTagValue("");
       setShowTagInput(false);
     }
   };
@@ -134,25 +143,25 @@ export function TabContextMenu({ x, y, url, title, favIconUrl, tabId, onClose }:
     left: position.left,
     top: position.top,
     ...cssVars({
-      '--app-tab-context-width': `${MENU_WIDTH}px`,
-      '--app-tab-context-z': String(Z.contextMenu),
-      '--app-tab-context-radius': `${token.borderRadiusLG}px`,
-      '--app-tab-context-shadow': token.boxShadow,
+      "--app-tab-context-width": `${MENU_WIDTH}px`,
+      "--app-tab-context-z": String(Z.contextMenu),
+      "--app-tab-context-radius": `${token.borderRadiusLG}px`,
+      "--app-tab-context-shadow": token.boxShadow,
     }),
   };
 
   return (
-    <div
+    <Flex
       ref={menuRef}
       role="menu"
       onClick={(e) => e.stopPropagation()}
-      className={styles['app-tab-context-menu']}
+      className={styles["app-tab-context-menu"]}
       style={menuStyle}
     >
       <Card
         size="small"
-        classNames={{ body: styles['app-tab-context-menu__body'] }}
-        className={styles['app-tab-context-menu__card']}
+        classNames={{ body: styles["app-tab-context-menu__body"] }}
+        className={styles["app-tab-context-menu__card"]}
       >
         {/* Pin / Unpin */}
         <Button
@@ -163,9 +172,9 @@ export function TabContextMenu({ x, y, url, title, favIconUrl, tabId, onClose }:
             void togglePin(url);
             onClose();
           }}
-className={styles['app-tab-context-menu__button']}
+          className={styles["app-tab-context-menu__button"]}
         >
-          {pinned ? t('context.unpin') : t('context.pin')}
+          {pinned ? t("context.unpin") : t("context.pin")}
         </Button>
 
         {/* 休眠标签页 */}
@@ -184,9 +193,9 @@ className={styles['app-tab-context-menu__button']}
                 }
               })();
             }}
-className={styles['app-tab-context-menu__button']}
+            className={styles["app-tab-context-menu__button"]}
           >
-            {t('tabs.discard')}
+            {t("tabs.discard")}
           </Button>
         )}
 
@@ -206,9 +215,9 @@ className={styles['app-tab-context-menu__button']}
                 }
               })();
             }}
-className={styles['app-tab-context-menu__button']}
+            className={styles["app-tab-context-menu__button"]}
           >
-            {t('context.splitScreen')}
+            {t("context.splitScreen")}
           </Button>
         )}
 
@@ -231,13 +240,13 @@ className={styles['app-tab-context-menu__button']}
                 onClose();
               })();
             }}
-className={styles['app-tab-context-menu__button']}
+            className={styles["app-tab-context-menu__button"]}
           >
-            {t('context.addToQuickStart')}
+            {t("context.addToQuickStart")}
           </Button>
         )}
 
-        <Divider className={styles['app-tab-context-menu__divider']} />
+        <Divider className={styles["app-tab-context-menu__divider"]} />
 
         {/* Add Tag */}
         <Button
@@ -245,40 +254,34 @@ className={styles['app-tab-context-menu__button']}
           block
           icon={<TagIcon size={ICON_SIZE.MEDIUM} />}
           onClick={() => setShowTagInput(true)}
-className={styles['app-tab-context-menu__button']}
+          className={styles["app-tab-context-menu__button"]}
         >
-          {t('context.addTag')}
+          {t("context.addTag")}
         </Button>
 
         {/* 已有 tags */}
         {tags.length > 0 && (
-          <div className={styles['app-tab-context-menu__tag-list']}>
-            {tags.map((tag) => {
-              const tagStyle: React.CSSProperties = cssVars({
-                '--app-tab-context-tag-bg': stringToColor(tag),
-              });
-
-              return (
-                <Tag
-                  key={tag}
-                  closable
-                  onClose={(e) => {
-                    e.preventDefault();
-                    void removeTag(url, tag);
-                  }}
-                  className={styles['app-tab-context-menu__tag']}
-                  style={tagStyle}
-                >
-                  {tag}
-                </Tag>
-              );
-            })}
-          </div>
+          <Flex wrap="wrap" gap="small" className={styles["app-tab-context-menu__tag-list"]}>
+            {tags.map((tag) => (
+              <Tag
+                key={tag}
+                closable
+                onClose={(e) => {
+                  e.preventDefault();
+                  void removeTag(url, tag);
+                }}
+                className={styles["app-tab-context-menu__tag"]}
+                data-tag-color={stringToColor(tag)}
+              >
+                {tag}
+              </Tag>
+            ))}
+          </Flex>
         )}
 
         {/* Tag 输入 */}
         {showTagInput && (
-          <div className={styles['app-tab-context-menu__tag-input']}>
+          <Flex gap="small" className={styles["app-tab-context-menu__tag-input"]}>
             <Input
               size="small"
               autoFocus
@@ -286,20 +289,20 @@ className={styles['app-tab-context-menu__button']}
               onChange={(e) => setTagValue(e.target.value)}
               onPressEnter={handleAddTag}
               onKeyDown={(e) => {
-                if (e.key === 'Escape') {
+                if (e.key === "Escape") {
                   e.stopPropagation();
                   setShowTagInput(false);
                 }
               }}
-              placeholder={t('context.tagPlaceholder')}
+              placeholder={t("context.tagPlaceholder")}
             />
             <Button type="primary" size="small" onClick={handleAddTag}>
-              {t('context.save')}
+              {t("context.save")}
             </Button>
-          </div>
+          </Flex>
         )}
 
-        <Divider className={styles['app-tab-context-menu__divider']} />
+        <Divider className={styles["app-tab-context-menu__divider"]} />
 
         {/* Note */}
         <Button
@@ -310,32 +313,36 @@ className={styles['app-tab-context-menu__button']}
             setShowNoteInput(true);
             setNoteValue(note);
           }}
-className={styles['app-tab-context-menu__button']}
+          className={styles["app-tab-context-menu__button"]}
         >
-          {note ? t('context.editNote') : t('context.addNote')}
+          {note ? t("context.editNote") : t("context.addNote")}
         </Button>
 
         {showNoteInput && (
-          <div className={styles['app-tab-context-menu__note']}>
+          <Flex vertical gap="small" className={styles["app-tab-context-menu__note"]}>
             <Input.TextArea
               autoFocus
               value={noteValue}
               onChange={(e) => setNoteValue(e.target.value)}
-              placeholder={t('context.notePlaceholder')}
+              placeholder={t("context.notePlaceholder")}
               rows={3}
-              className={styles['app-tab-context-menu__note-field']}
+              className={styles["app-tab-context-menu__note-field"]}
             />
-            <div className={styles['app-tab-context-menu__note-actions']}>
+            <Flex
+              justify="flex-end"
+              gap="small"
+              className={styles["app-tab-context-menu__note-actions"]}
+            >
               <Button size="small" onClick={() => setShowNoteInput(false)}>
-                {t('context.cancel')}
+                {t("context.cancel")}
               </Button>
               <Button type="primary" size="small" onClick={handleSaveNote}>
-                {t('context.save')}
+                {t("context.save")}
               </Button>
-            </div>
-          </div>
+            </Flex>
+          </Flex>
         )}
       </Card>
-    </div>
+    </Flex>
   );
 }

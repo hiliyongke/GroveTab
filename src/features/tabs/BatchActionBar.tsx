@@ -9,7 +9,19 @@
  */
 
 import { useCallback, useMemo } from "react";
-import { Button, Badge, Tooltip, Popconfirm, Divider, theme, Modal, Input, Select } from "antd";
+import {
+  Button,
+  Badge,
+  Tooltip,
+  Popconfirm,
+  Divider,
+  theme,
+  Modal,
+  Input,
+  Select,
+  Flex,
+  Typography,
+} from "antd";
 import {
   X,
   Moon,
@@ -70,7 +82,7 @@ export function BatchActionBar() {
         groupId: tab.groupId,
         windowId: tab.windowId,
         incognito: tab.incognito,
-        title: tab.groupTitle?.trim() || t("windowGroup.untitled"),
+        title: tab.groupTitle?.trim() ?? t("windowGroup.untitled"),
       }));
   }, [tabs, t]);
 
@@ -244,7 +256,7 @@ export function BatchActionBar() {
         <Select
           autoFocus
           defaultValue={targetGroupId}
-          style={{ width: "100%" }}
+          className={styles["app-batch-bar__select"]}
           options={existingGroups.map((group) => ({
             value: group.groupId,
             label: `${group.title} · ${t("window.otherWithId", { id: group.windowId })}`,
@@ -298,24 +310,28 @@ export function BatchActionBar() {
   });
 
   return (
-    <div
+    <Flex
       className={`${styles["app-batch-bar"]} app-surface-elevated`}
       role="toolbar"
       aria-label={t("selection.title")}
       style={batchBarStyle}
+      align="center"
+      justify="space-between"
     >
       {/* 计数标签组：图标 + 选中数 */}
-      <div className={styles["app-batch-bar__summary"]}>
+      <Flex align="center" gap="small" className={styles["app-batch-bar__summary"]}>
         <Badge count={count} size="small" color={token.colorPrimary} offset={[0, 0]}>
           <Pointer size={ICON_SIZE.LARGE} className={styles["app-batch-bar__pointer"]} />
         </Badge>
-        <span className={styles["app-batch-bar__summary-copy"]}>{t("selection.title")}</span>
-      </div>
+        <Typography.Text className={styles["app-batch-bar__summary-copy"]}>
+          {t("selection.title")}
+        </Typography.Text>
+      </Flex>
 
       <Divider type="vertical" className={styles["app-divider-soft"]} aria-hidden />
 
       {/* 操作组：危险→中性→主要，视觉权重递增 */}
-      <div className={styles["app-batch-bar__actions"]}>
+      <Flex align="center" gap="small" className={styles["app-batch-bar__actions"]}>
         <Tooltip title={t("batch.close")} placement="top">
           <Popconfirm
             title={t("batch.closeConfirm", { count })}
@@ -414,9 +430,9 @@ export function BatchActionBar() {
             </Button>
           </Popconfirm>
         </Tooltip>
-      </div>
+      </Flex>
 
-      <div className={styles["app-divider-soft"]} aria-hidden />
+      <Flex className={styles["app-divider-soft"]} aria-hidden />
 
       <Tooltip title={t("batch.cancel")} placement="top">
         <Button
@@ -429,6 +445,6 @@ export function BatchActionBar() {
           aria-label={t("batch.cancel")}
         />
       </Tooltip>
-    </div>
+    </Flex>
   );
 }

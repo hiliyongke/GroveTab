@@ -31,10 +31,8 @@
 }
 
 .app-header-left {
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-  gap: 8px;
   flex-shrink: 0;
+  /* Antd Flex 通过 props 提供 display: flex, align-items: center, gap */
 }
 
 .app-header-logo {
@@ -139,11 +137,9 @@
 
 /* ── 顶栏中部（搜索触发器 + 品牌） ── */
 .app-header-center {
-  flex: 1 1 520px;
   min-width: 280px;
-  display: flex; /* antd 组件内部微调整 */
-  justify-content: center;
   padding-inline: 18px;
+  /* Antd Flex 通过 props 提供 flex, justify-content */
 }
 
 .app-header-search-trigger {
@@ -262,24 +258,16 @@
 
 /* ── Hero 区 ── */
 .app-hero {
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
+  /* Antd Flex 通过 props 提供 flex-direction: column, align-items: center, gap: 16px */
   padding: 36px 0 var(--app-space-5);
 }
 
 .app-hero-brand {
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
+  /* Antd Flex 通过 props 提供 flex-direction: column, align-items: center, gap: 6px */
 }
 
 .app-hero-brand-row {
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-  gap: 10px;
+  /* Antd Flex 通过 props 提供 align-items: center, gap: 10px */
 }
 
 .app-hero-logo {
@@ -339,9 +327,8 @@
 
 /* ─── 主体区包裹层（侧边栏 + 内容并排） ──────────────────────── */
 .app-main-body {
-  display: flex; /* antd 组件内部微调整 */
-  flex: 1;
-  min-height: 0;
+  /* Antd Flex 通过 props 提供 flex: 1 和 min-height: 0 */
+  overflow: hidden;
 }
 
 /* ─── 视图导航 Rail / Bottom Bar（left/right/bottom 共用） ──────────────────────── */
@@ -392,9 +379,7 @@
 }
 
 .app-view-dock__list {
-  display: inline-flex; /* antd 组件内部微调整 */
-  align-items: center;
-  gap: 4px;
+  /* Antd Flex 通过 props 提供 display: inline-flex, align-items: center, gap */
   padding: 6px;
   border-radius: 18px;
   background: color-mix(in srgb, var(--ant-color-bg-container) 88%, transparent);
@@ -422,15 +407,14 @@
 .app-view-dock__item {
   all: unset;
   box-sizing: border-box;
-  display: inline-flex; /* antd 组件内部微调整 */
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  /* Antd Button 通过 props 提供 display: inline-flex, align-items: center, justify-content: center, gap 行为 */
   min-height: 38px;
   min-width: 38px;
   width: auto;
   flex: 0 0 auto;
   padding: 0 12px;
+  border: 0 !important;
+  box-shadow: none !important;
   border-radius: 14px;
   color: var(--ant-color-text-secondary);
   cursor: pointer;
@@ -444,6 +428,18 @@
 .app-view-dock__item:hover {
   color: var(--ant-color-text);
   background: color-mix(in srgb, var(--ant-color-fill-quaternary) 92%, transparent);
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.app-view-dock__item:active {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.app-view-dock__item:focus {
+  border: 0 !important;
+  box-shadow: none !important;
 }
 
 .app-view-dock__item:focus-visible {
@@ -460,7 +456,7 @@
     var(--ant-color-bg-container)
   );
   box-shadow: inset 0 0 0 1px
-    color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 16%, transparent);
+    color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 16%, transparent) !important;
 }
 
 .app-view-dock__label {
@@ -685,9 +681,7 @@
 .app-page-loading,
 .app-suspense-fallback,
 .app-workspace-loading {
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-  justify-content: center;
+  /* Antd Flex 通过 props 提供 display: flex, align-items: center, justify-content: center */
 }
 
 .app-page-loading {
@@ -697,10 +691,7 @@
 .app-page-loading-inner,
 .app-workspace-loading-inner,
 .app-empty-state-content {
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
+  /* Antd Flex 通过 props 提供 display: flex, flex-direction: column, align-items: center, gap */
 }
 
 /* ─── 布局外壳 ── */
@@ -708,8 +699,7 @@
   height: 100vh;
   overflow: hidden;
   position: relative;
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
+  /* Antd Layout 通过 props 提供 display: flex, flex-direction: column */
 }
 
 .app-background-overlay {
@@ -722,16 +712,39 @@
   -webkit-backdrop-filter: var(--app-background-overlay-filter, none);
 }
 
+.app-background-overlay-dimmer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: #000;
+  opacity: var(--app-background-overlay-opacity, 0);
+  transition: opacity 0.1s ease-out;
+}
+
+/* 全屏加载状态 */
+.app-loading-screen {
+  min-height: 100vh;
+}
+
+/* 页面内容 suspense fallback */
+.app-suspense-fallback-wrap {
+  padding: 40px 0;
+}
+
+/* FloatButton 定位 */
+.app-back-top-override {
+  right: 32px !important;
+  bottom: 32px !important;
+}
+
 .app-content-shell {
   width: 100%;
   margin: 0 auto;
   padding: 0 32px 64px;
   position: relative;
   z-index: 1;
-  flex: 1;
-  min-height: 0;
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
+  /* Antd Flex 通过 props 提供 flex: 1, min-height: 0, flex-direction: column */
   overflow-y: auto;
   overflow-x: hidden;
 }

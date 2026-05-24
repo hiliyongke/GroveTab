@@ -8,7 +8,7 @@ import {
   Suspense,
   type CSSProperties,
 } from "react";
-import { Layout, Spin, Typography, FloatButton } from "antd";
+import { Layout, Spin, Typography, FloatButton, Flex } from "antd";
 import { useTabsStore, useSettingsStore, useSelectionStore } from "@/store";
 import { useShallow } from "zustand/shallow";
 import { useSwBroadcast, useResolvedTheme, useAppInitialization } from "@/shared/hooks";
@@ -430,12 +430,12 @@ function AppContent() {
 
   if (!checked) {
     return (
-      <div className="app-page-loading">
-        <div className="app-page-loading-inner">
+      <Flex align="center" justify="center" style={{ minHeight: "100vh" }}>
+        <Flex vertical align="center" gap={12}>
           <Spin />
           <Text type="secondary">{t("tabs.loading")}</Text>
-        </div>
-      </div>
+        </Flex>
+      </Flex>
     );
   }
 
@@ -483,7 +483,7 @@ function AppContent() {
       )}
 
       {/* 主体区：侧边栏 + 内容 */}
-      <div className="app-main-body">
+      <Flex flex={1} style={{ minHeight: 0 }}>
         {pageMode === "workspace" && showViewSwitcher && viewTabPosition === "left" && (
           <ViewSidebar viewMode={viewMode} onViewChange={handleViewChange} position="left" />
         )}
@@ -528,9 +528,9 @@ function AppContent() {
           {pageMode === "trending" && (
             <Suspense
               fallback={
-                <div className="app-suspense-fallback">
+                <Flex align="center" justify="center" style={{ padding: "40px 0" }}>
                   <Spin />
-                </div>
+                </Flex>
               }
             >
               <TrendingPage />
@@ -539,9 +539,9 @@ function AppContent() {
           {pageMode === "devtools" && (
             <Suspense
               fallback={
-                <div className="app-suspense-fallback">
+                <Flex align="center" justify="center" style={{ padding: "40px 0" }}>
                   <Spin />
-                </div>
+                </Flex>
               }
             >
               <DeveloperToolsPage />
@@ -564,7 +564,7 @@ function AppContent() {
         {pageMode === "workspace" && showViewSwitcher && viewTabPosition === "right" && (
           <ViewSidebar viewMode={viewMode} onViewChange={handleViewChange} position="right" />
         )}
-      </div>
+      </Flex>
 
       {pageMode === "workspace" && showViewSwitcher && viewTabPosition === "bottom" && (
         <ViewBottomBar viewMode={viewMode} onViewChange={handleViewChange} />
