@@ -1,5 +1,17 @@
 import { useMemo, useState } from "react";
-import { Button, Dropdown, Input, Modal, Popover, Tag, Tooltip, theme } from "antd";
+import {
+  Button,
+  Dropdown,
+  Input,
+  Modal,
+  Popover,
+  Tag,
+  Tooltip,
+  Typography,
+  theme,
+  Space,
+  List,
+} from "antd";
 import type { MenuProps } from "antd";
 import {
   ChevronDown,
@@ -208,7 +220,7 @@ export function TabGroupSection({
   };
 
   const colorPicker = (
-    <div className={styles["app-window-group-color-grid"]}>
+    <Space wrap className={styles["app-window-group-color-grid"]}>
       {TAB_GROUP_COLORS.map((item) => (
         <Button
           key={item}
@@ -219,7 +231,7 @@ export function TabGroupSection({
           onClick={() => handleColorChange(item)}
         />
       ))}
-    </div>
+    </Space>
   );
 
   const menuItems: MenuProps["items"] = [
@@ -285,7 +297,7 @@ export function TabGroupSection({
         "--app-window-group-border": `color-mix(in srgb, ${colorValue} 34%, ${token.colorBorderSecondary})`,
       })}
     >
-      <div className={styles["app-window-group-header"]}>
+      <Space className={styles["app-window-group-header"]}>
         <Button
           type="text"
           className={styles["app-window-group-trigger"]}
@@ -297,7 +309,7 @@ export function TabGroupSection({
             className={`${styles["app-window-group-chevron"]}${collapsed ? ` ${styles["is-collapsed"]}` : ""}`}
             size={ICON_SIZE.TINY}
           />
-          <span className={styles["app-window-group-dot"]} />
+          <Typography.Text className={styles["app-window-group-dot"]} />
           {renaming ? (
             <Input
               size="small"
@@ -314,7 +326,7 @@ export function TabGroupSection({
               className={styles["app-window-group-title-input"]}
             />
           ) : (
-            <span className={styles["app-window-group-title"]}>{title}</span>
+            <Typography.Text className={styles["app-window-group-title"]}>{title}</Typography.Text>
           )}
           <Tag className={styles["app-window-group-count"]}>{tabs.length}</Tag>
         </Button>
@@ -331,10 +343,10 @@ export function TabGroupSection({
             />
           </Tooltip>
         </Dropdown>
-      </div>
+      </Space>
 
       {!collapsed && (
-        <div className={styles["app-window-group-list"]}>
+        <List className={styles["app-window-group-list"]}>
           {tabs.map((tab) => (
             <DraggableTab
               key={tab.id}
@@ -344,7 +356,7 @@ export function TabGroupSection({
               visibleTabIds={visibleTabIds}
             />
           ))}
-        </div>
+        </List>
       )}
     </DroppableZone>
   );

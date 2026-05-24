@@ -5,6 +5,7 @@
  */
 
 import { useState } from "react";
+import { Image } from "antd";
 import { getFaviconUrl } from "@/chrome";
 
 interface SiteIconProps {
@@ -29,12 +30,14 @@ export function SiteIcon({ url, size = 18, className }: SiteIconProps) {
 
   if (fav && !err) {
     return (
-      <img
+      <Image
         src={fav}
         alt=""
         className={className}
         style={{ width: size, height: size, flexShrink: 0 }}
         onError={() => setErr(true)}
+        preview={false}
+        fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
       />
     );
   }

@@ -9,7 +9,7 @@
  */
 
 import { useState, useMemo, useRef, useCallback, useEffect, type ReactNode } from "react";
-import { Modal, Input, theme, Popover, Button } from "antd";
+import { Modal, Input, theme, Popover, Button, Image } from "antd";
 import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
 import type { InputRef } from "antd";
 import { Search, Check, ChevronDown, History } from "lucide-react";
@@ -1085,7 +1085,14 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
                     >
                       <span className={styles["search-box-engine-logo"]} aria-hidden="true">
                         {option.iconUrl ? (
-                          <img src={option.iconUrl} alt="" />
+                          <Image
+                            src={option.iconUrl}
+                            alt=""
+                            preview={false}
+                            fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+                            width={16}
+                            height={16}
+                          />
                         ) : (
                           option.label.slice(0, 1)
                         )}
@@ -1125,7 +1132,14 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
             >
               <span className={styles["search-box-engine-logo"]} aria-hidden="true">
                 {currentEngineOption.iconUrl ? (
-                  <img src={currentEngineOption.iconUrl} alt="" />
+                  <Image
+                    src={currentEngineOption.iconUrl}
+                    alt=""
+                    preview={false}
+                    fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+                    width={16}
+                    height={16}
+                  />
                 ) : (
                   currentEngineOption.label.slice(0, 1)
                 )}
@@ -1206,7 +1220,7 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
                         {section.items.length}
                       </span>
                     </div>
-                    <ul role="listbox" className={styles["search-box-list"]}>
+                    <div role="listbox" className={styles["search-box-list"]}>
                       {section.items.map((item, offset) => {
                         const itemIndex = startIndex + offset;
                         const active = itemIndex === activeIndex;
@@ -1223,7 +1237,7 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
                           />
                         );
                       })}
-                    </ul>
+                    </div>
                   </section>
                 );
               })}

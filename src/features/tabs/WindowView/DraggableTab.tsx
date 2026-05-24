@@ -1,3 +1,4 @@
+import { Space } from "antd";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 
@@ -25,7 +26,7 @@ export function DraggableTab({ tab, visibleTabIds, onJump, onClose }: DraggableT
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <Space ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <TabItem
         tab={tab}
         onJump={onJump}
@@ -34,6 +35,6 @@ export function DraggableTab({ tab, visibleTabIds, onJump, onClose }: DraggableT
         selectable
         visibleTabIds={visibleTabIds}
       />
-    </div>
+    </Space>
   );
 }

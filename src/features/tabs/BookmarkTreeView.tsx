@@ -41,7 +41,7 @@ import { getFaviconUrl } from "@/chrome";
 import { useAccent } from "@/shared/hooks/useAccent";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
-import { Button, Divider, Flex, Image, Typography } from "antd";
+import { Button, Divider, Flex, Typography } from "antd";
 import styles from "./styles/bookmark-tree.module.less";
 
 /** 从 URL 提取 hostname */
@@ -124,12 +124,13 @@ function TreeLeafNode({ node, onOpen }: { node: BookmarkNode; onOpen: (url: stri
       }}
       data-url={url}
     >
-      <span className={styles.leafBar} />
+      <Typography.Text className={styles.leafBar} aria-hidden="true" />
       {faviconUrl && !faviconError ? (
-        <Image
+        <img
           src={faviconUrl}
           alt=""
-          preview={false}
+          width={20}
+          height={20}
           className={styles.leafFavicon}
           onError={() => setFaviconError(true)}
         />
@@ -156,7 +157,7 @@ function TreeLeafNode({ node, onOpen }: { node: BookmarkNode; onOpen: (url: stri
             {url.replace(/^https?:\/\/[^/]+/i, "") || "/"}
           </Typography.Text>
         </Flex>
-        <div className={styles.tooltipArrow} aria-hidden="true" />
+        <Flex className={styles.tooltipArrow} aria-hidden="true" />
       </Flex>
     </Flex>
   );
@@ -216,7 +217,7 @@ function TreeFolderNode({
   }, [isEmpty, centerOnExpand]);
 
   return (
-    <div className={styles.folderWrap} data-depth={depth}>
+    <Flex className={styles.folderWrap} data-depth={depth}>
       <Button
         ref={folderBtnRef}
         type="text"
@@ -225,19 +226,25 @@ function TreeFolderNode({
         aria-expanded={expanded}
         title={title}
       >
-        <span className={styles.folderIcon}>
+        <Flex align="center" justify="center" className={styles.folderIcon}>
           {expanded ? <FolderOpen size={ICON_SIZE.SMALL} /> : <Folder size={ICON_SIZE.SMALL} />}
-        </span>
-        <span className={styles.folderText}>
-          <span className={styles.folderTitle}>{title}</span>
-          <span className={styles.folderMeta}>
-            {folderCount > 0 && <span className={`${styles.folderStat}`}>📁 {folderCount}</span>}
-            {linkCount > 0 && <span className={`${styles.folderStat}`}>🔗 {linkCount}</span>}
-            {isEmpty && (
-              <span className={`${styles.folderStat} ${styles.folderStatIsMuted}`}>空</span>
+        </Flex>
+        <Flex vertical className={styles.folderText}>
+          <Typography.Text className={styles.folderTitle}>{title}</Typography.Text>
+          <Flex className={styles.folderMeta}>
+            {folderCount > 0 && (
+              <Typography.Text className={`${styles.folderStat}`}>📁 {folderCount}</Typography.Text>
             )}
-          </span>
-        </span>
+            {linkCount > 0 && (
+              <Typography.Text className={`${styles.folderStat}`}>🔗 {linkCount}</Typography.Text>
+            )}
+            {isEmpty && (
+              <Typography.Text className={`${styles.folderStat} ${styles.folderStatIsMuted}`}>
+                空
+              </Typography.Text>
+            )}
+          </Flex>
+        </Flex>
         {!isEmpty &&
           (orientation === "horizontal" ? (
             <ChevronRight
@@ -299,7 +306,7 @@ function TreeFolderNode({
           </Flex>
         </Flex>
       )}
-    </div>
+    </Flex>
   );
 }
 
@@ -626,7 +633,7 @@ const PanZoom = forwardRef<
         </Button>
         {extraToolbar && (
           <>
-            <span className="app-bm-tree__panzoom-divider" aria-hidden="true" />
+            <Divider type="vertical" className="app-bm-tree__panzoom-divider" aria-hidden="true" />
             {extraToolbar}
           </>
         )}
@@ -682,12 +689,12 @@ export function BookmarkTreeView({
   );
 
   return (
-    <div className={`${styles.wrap} is-${orientation}${showHost ? " show-host" : ""}`}>
+    <Flex vertical className={`${styles.wrap} is-${orientation}${showHost ? " show-host" : ""}`}>
       <ShowHostContext.Provider value={showHost}>
         <CenterOnExpandContext.Provider value={centerOnExpand}>
           <PanZoom ref={panZoomRef} extraToolbar={extraToolbar} orientation={orientation}>
-            <div className={styles.canvas}>
-              <div className={styles.roots}>
+            <Flex vertical className={styles.canvas}>
+              <Flex vertical className={styles.roots}>
                 {topSections.map((section, idx) => (
                   <TreeFolderNode
                     key={section.id}
@@ -699,11 +706,11 @@ export function BookmarkTreeView({
                     orientation={orientation}
                   />
                 ))}
-              </div>
-            </div>
+              </Flex>
+            </Flex>
           </PanZoom>
         </CenterOnExpandContext.Provider>
       </ShowHostContext.Provider>
-    </div>
+    </Flex>
   );
 }

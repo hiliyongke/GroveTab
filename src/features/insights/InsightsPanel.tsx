@@ -10,22 +10,17 @@
  * 仅使用纯 SVG，不引入 echarts / chart.js，控制包体增量 ≤ 15 KB。
  */
 
-import { useEffect, useMemo, useState } from 'react';
-import { Modal, Button, Card, Row, Col, Typography, theme, Popconfirm, Skeleton } from 'antd';
-import type { MetricEvent, StatsData } from '@/shared/types';
-import { BarChart3 } from 'lucide-react';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { cssVars } from '@/shared/utils/css-vars';
-import {
-  getMetrics,
-  clearMetrics,
-  getStats,
-  saveStats,
-} from '@/repositories';
-import { useT } from '@/shared/i18n';
-import { feedback } from '@/shared/ui/feedback';
-import { FeatureEmptyState } from '@/shared/ui/FeatureEmptyState';
-import styles from './insights.module.less';
+import { useEffect, useMemo, useState } from "react";
+import { Modal, Button, Card, Row, Col, Typography, theme, Popconfirm, Skeleton, Flex } from "antd";
+import type { MetricEvent, StatsData } from "@/shared/types";
+import { BarChart3 } from "lucide-react";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { cssVars } from "@/shared/utils/css-vars";
+import { getMetrics, clearMetrics, getStats, saveStats } from "@/repositories";
+import { useT } from "@/shared/i18n";
+import { feedback } from "@/shared/ui/feedback";
+import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
+import styles from "./insights.module.less";
 
 const { Text, Title } = Typography;
 
@@ -34,7 +29,7 @@ const { Text, Title } = Typography;
  * 避免 Top 5 中出现两条 label 相同但 event 不同的重复项。
  */
 function normalizeEvent(event: string): string {
-  if (event === 'newtabOpens') return 'newtab_open';
+  if (event === "newtabOpens") return "newtab_open";
   return event;
 }
 
@@ -59,14 +54,14 @@ interface InsightsPanelProps {
 function isValidStatsData(data: StatsData | undefined | null): data is StatsData {
   if (data == null) return false;
   if (!Array.isArray(data.daily)) return false;
-  if (typeof data.lastFlushAt !== 'number') return false;
+  if (typeof data.lastFlushAt !== "number") return false;
   return true;
 }
 
 function toLocalDayKey(date: Date): string {
   const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  const dd = String(date.getDate()).padStart(2, '0');
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
   return `${yyyy}-${mm}-${dd}`;
 }
 
@@ -111,7 +106,7 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
     }
     for (const ev of metrics) {
       const norm = normalizeEvent(ev.event);
-      if (norm !== 'newtab_open') continue;
+      if (norm !== "newtab_open") continue;
       const key = toLocalDayKey(new Date(ev.ts));
       if (map.has(key)) map.set(key, (map.get(key) ?? 0) + 1);
     }
@@ -139,11 +134,11 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
     }
     // 来源2：metrics 中的 tab 事件（补充 stats 未覆盖的操作，如关闭/跳转）
     for (const ev of metrics) {
-      if (!ev.event.startsWith('tab_') && ev.event !== 'search_web') continue;
+      if (!ev.event.startsWith("tab_") && ev.event !== "search_web") continue;
       const payload = ev.payload ?? {};
       // 尝试从 hostname 字段取域名
-      const hostname = typeof payload.hostname === 'string' ? payload.hostname : '';
-      if (hostname !== '') {
+      const hostname = typeof payload.hostname === "string" ? payload.hostname : "";
+      if (hostname !== "") {
         counts.set(hostname, (counts.get(hostname) ?? 0) + 1);
       }
     }
@@ -170,8 +165,8 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
   const archiveStats = useMemo(() => {
     let totalTabs = 0;
     for (const ev of metrics) {
-      if (ev.event === 'archive' || ev.event === 'archive_create') {
-        const count = typeof ev.payload?.count === 'number' ? ev.payload.count : 0;
+      if (ev.event === "archive" || ev.event === "archive_create") {
+        const count = typeof ev.payload?.count === "number" ? ev.payload.count : 0;
         totalTabs += count;
       }
     }
@@ -179,9 +174,7 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
   }, [metrics]);
 
   /** 是否所有数据源都为空：冷启动用户统一展示 empty state */
-  const isAllEmpty = !loading
-    && metrics.length === 0
-    && (stats?.daily?.length ?? 0) === 0;
+  const isAllEmpty = !loading && metrics.length === 0 && (stats?.daily?.length ?? 0) === 0;
 
   /** 近 7 天是否全部为 0 */
   const dailyAllZero = dailyOpens.every((d) => d.count === 0);
@@ -196,10 +189,10 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
       await saveStats({ daily: [], lastFlushAt: Date.now() });
       setMetrics([]);
       setStats(null);
-      feedback.success(t('insights.cleared'));
+      feedback.success(t("insights.cleared"));
     } catch (err) {
-      console.warn('[insights] clear failed', err);
-      feedback.error(t('insights.clearFailed'));
+      console.warn("[insights] clear failed", err);
+      feedback.error(t("insights.clearFailed"));
     }
   };
 
@@ -209,31 +202,31 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
       onCancel={onClose}
       footer={null}
       width="min(760px, calc(100vw - 24px))"
-      title={t('insights.title')}
+      title={t("insights.title")}
       centered
       destroyOnHidden
     >
-      <div className={styles['insights-panel']}>
+      <Flex vertical className={styles["insights-panel"]}>
         {loading ? (
-          <div className={styles['insights-loading']}>
+          <Flex vertical className={styles["insights-loading"]}>
             <Skeleton active paragraph={{ rows: 6 }} />
-          </div>
+          </Flex>
         ) : isAllEmpty ? (
           <FeatureEmptyState
-            title={t('insights.empty')}
+            title={t("insights.empty")}
             icon={<BarChart3 size={ICON_SIZE.LARGE} />}
-            hints={[t('insights.emptyHint1'), t('insights.emptyHint2')]}
+            hints={[t("insights.emptyHint1"), t("insights.emptyHint2")]}
           />
         ) : (
           <Row gutter={[12, 12]}>
             <Col xs={24} md={12}>
-              <Card size="small" title={t('insights.dailyOpens')}>
+              <Card size="small" title={t("insights.dailyOpens")}>
                 {dailyAllZero ? (
                   <FeatureEmptyState
-                    title={t('insights.dailyEmpty')}
+                    title={t("insights.dailyEmpty")}
                     icon={<BarChart3 size={ICON_SIZE.LARGE} />}
                     size="small"
-                    hints={[t('insights.emptyHint1')]}
+                    hints={[t("insights.emptyHint1")]}
                   />
                 ) : (
                   <LineChart
@@ -245,67 +238,80 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
               </Card>
             </Col>
             <Col xs={24} md={12}>
-              <Card size="small" title={t('insights.topDomains')}>
+              <Card size="small" title={t("insights.topDomains")}>
                 {topDomains.length === 0 ? (
                   <FeatureEmptyState
-                    title={t('insights.empty')}
+                    title={t("insights.empty")}
                     icon={<BarChart3 size={ICON_SIZE.LARGE} />}
                     size="small"
-                    hints={[t('insights.emptyHint1'), t('insights.emptyHint2')]}
+                    hints={[t("insights.emptyHint1"), t("insights.emptyHint2")]}
                   />
                 ) : (
-                  <BarList items={topDomains.map((d) => ({ label: d.host, value: d.count }))} color={token.colorPrimary} />
+                  <BarList
+                    items={topDomains.map((d) => ({ label: d.host, value: d.count }))}
+                    color={token.colorPrimary}
+                  />
                 )}
               </Card>
             </Col>
             <Col xs={24} md={12}>
-              <Card size="small" title={t('insights.archiveStat')}>
+              <Card size="small" title={t("insights.archiveStat")}>
                 {archiveStats.totalTabs === 0 ? (
                   <FeatureEmptyState
-                    title={t('insights.archiveEmpty')}
+                    title={t("insights.archiveEmpty")}
                     icon={<BarChart3 size={ICON_SIZE.LARGE} />}
                     size="small"
-                    hints={[t('insights.emptyHint1')]}
+                    hints={[t("insights.emptyHint1")]}
                   />
                 ) : (
                   <>
-                    <Title level={3} className={styles['insights-archive-stat']}>{archiveStats.totalTabs}</Title>
-                    <Text type="secondary">{t('insights.archiveDesc', { mb: archiveStats.savedMemMB })}</Text>
+                    <Title level={3} className={styles["insights-archive-stat"]}>
+                      {archiveStats.totalTabs}
+                    </Title>
+                    <Text type="secondary">
+                      {t("insights.archiveDesc", { mb: archiveStats.savedMemMB })}
+                    </Text>
                   </>
                 )}
               </Card>
             </Col>
             <Col xs={24} md={12}>
-              <Card size="small" title={t('insights.topActions')}>
+              <Card size="small" title={t("insights.topActions")}>
                 {topActions.length === 0 ? (
                   <FeatureEmptyState
-                    title={t('insights.empty')}
+                    title={t("insights.empty")}
                     icon={<BarChart3 size={ICON_SIZE.LARGE} />}
                     size="small"
-                    hints={[t('insights.emptyHint1'), t('insights.emptyHint2')]}
+                    hints={[t("insights.emptyHint1"), t("insights.emptyHint2")]}
                   />
                 ) : (
-                  <BarList items={topActions.map((a) => ({ label: getEventLabel(a.event, t), value: a.count }))} color={token.colorPrimary} />
+                  <BarList
+                    items={topActions.map((a) => ({
+                      label: getEventLabel(a.event, t),
+                      value: a.count,
+                    }))}
+                    color={token.colorPrimary}
+                  />
                 )}
               </Card>
             </Col>
           </Row>
         )}
 
-        <div className={styles['insights-footer']}>
+        <Flex className={styles["insights-footer"]}>
           <Popconfirm
-            title={t('insights.clearConfirm')}
+            title={t("insights.clearConfirm")}
             onConfirm={() => void handleClearAll()}
-            okText={t('archive.delete')}
-            cancelText={t('archive.cancel')}
+            okText={t("archive.delete")}
+            cancelText={t("archive.cancel")}
             disabled={loading || isAllEmpty}
           >
             <Button danger size="small" disabled={loading || isAllEmpty}>
-              {t('insights.clearAll')}
+              {t("insights.clearAll")}
             </Button>
           </Popconfirm>
-        </div>
-      </div>
+        </Flex>
+      </Flex>
     </Modal>
   );
 }
@@ -320,13 +326,13 @@ function LineChart({ data, labels, color }: { data: number[]; labels: string[]; 
   const points = data
     .map((v, i) => {
       const x = padding + i * step;
-      const y = height - padding - ((v / max) * (height - padding * 2));
+      const y = height - padding - (v / max) * (height - padding * 2);
       return `${x},${y}`;
     })
-    .join(' ');
+    .join(" ");
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className={styles['insights-line-chart']}>
+    <svg viewBox={`0 0 ${width} ${height}`} className={styles["insights-line-chart"]}>
       <polyline
         fill="none"
         stroke={color}
@@ -337,7 +343,7 @@ function LineChart({ data, labels, color }: { data: number[]; labels: string[]; 
       />
       {data.map((v, i) => {
         const x = padding + i * step;
-        const y = height - padding - ((v / max) * (height - padding * 2));
+        const y = height - padding - (v / max) * (height - padding * 2);
         return <circle key={i} cx={x} cy={y} r={2.5} fill={color} />;
       })}
       {labels.map((label, i) => (
@@ -358,31 +364,35 @@ function LineChart({ data, labels, color }: { data: number[]; labels: string[]; 
 }
 
 /** 条形列表（轻量柱状） */
-function BarList({ items, color }: { items: Array<{ label: string; value: number }>; color: string }) {
+function BarList({
+  items,
+  color,
+}: {
+  items: Array<{ label: string; value: number }>;
+  color: string;
+}) {
   const { token } = theme.useToken();
   const max = Math.max(1, ...items.map((i) => i.value));
   return (
-    <div className={styles['insights-bar-list']}>
+    <Flex vertical className={styles["insights-bar-list"]}>
       {items.map((it) => {
         const w = Math.round((it.value / max) * 100);
         const trackStyle: React.CSSProperties = cssVars({
-          '--insights-track-bg': token.colorFillTertiary,
-          '--insights-bar-fill': color,
-          '--insights-bar-width': `${w}%`,
+          "--insights-track-bg": token.colorFillTertiary,
+          "--insights-bar-fill": color,
+          "--insights-bar-width": `${w}%`,
         });
 
         return (
-          <div key={it.label} className={styles['insights-bar-row']}>
-            <span className={styles['insights-bar-label']}>
-              {it.label}
-            </span>
-            <div className={styles['insights-bar-track']} style={trackStyle}>
-              <div className={styles['insights-bar-fill']} />
+          <Flex key={it.label} className={styles["insights-bar-row"]}>
+            <Typography.Text className={styles["insights-bar-label"]}>{it.label}</Typography.Text>
+            <div className={styles["insights-bar-track"]} style={trackStyle}>
+              <div className={styles["insights-bar-fill"]} />
             </div>
-            <span className={styles['insights-bar-value']}>{it.value}</span>
-          </div>
+            <Typography.Text className={styles["insights-bar-value"]}>{it.value}</Typography.Text>
+          </Flex>
         );
       })}
-    </div>
+    </Flex>
   );
 }

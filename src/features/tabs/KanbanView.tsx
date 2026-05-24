@@ -1,17 +1,7 @@
 /* eslint-disable react-hooks/refs */
 
 import { useEffect, useMemo, useState } from "react";
-import {
-  Button,
-  Card,
-  Input,
-  Popconfirm,
-  theme,
-  App as AntApp,
-  Image,
-  Typography,
-  Space,
-} from "antd";
+import { Button, Card, Input, Popconfirm, theme, App as AntApp, Typography, Space } from "antd";
 import { Plus, Trash2, Save, PenLine, X, GripVertical } from "lucide-react";
 import { cssVars } from "@/shared/utils/css-vars";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
@@ -311,13 +301,15 @@ function TabSourceItem({ card, reduced }: { card: KanbanCard; reduced: boolean }
       style={sourceItemStyle}
     >
       {card.favIconUrl !== undefined && card.favIconUrl !== "" && (
-        <Image
+        <img
           src={card.favIconUrl}
           alt=""
-          preview={false}
           width={12}
           height={12}
           className={styles["app-kanban-card__favicon"]}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).style.display = "none";
+          }}
         />
       )}
       <Typography.Text className={styles["app-kanban-card__title"]} title={card.title}>
@@ -502,13 +494,15 @@ function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: S
       tabIndex={0}
     >
       {card.favIconUrl !== undefined && card.favIconUrl !== "" && (
-        <Image
+        <img
           src={card.favIconUrl}
           alt=""
-          preview={false}
           width={12}
           height={12}
           className={styles["app-kanban-card__favicon"]}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).style.display = "none";
+          }}
         />
       )}
       <Typography.Text
@@ -591,13 +585,15 @@ function DragPreview({ active }: { active: ActiveDrag }) {
   return (
     <Space className={styles["app-kanban-overlay"]}>
       {card?.favIconUrl !== undefined && card.favIconUrl !== "" && (
-        <Image
-          src={card.favIconUrl}
+        <img
+          src={card?.favIconUrl}
           alt=""
-          preview={false}
           width={12}
           height={12}
           className={styles["app-kanban-card__favicon"]}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).style.display = "none";
+          }}
         />
       )}
       <Typography.Text className={styles["app-kanban-card__title"]}>

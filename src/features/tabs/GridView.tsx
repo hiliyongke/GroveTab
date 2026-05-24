@@ -19,7 +19,7 @@
  */
 
 import { useMemo, useState } from "react";
-import { Button, Card, Popover, theme, Image, Typography, Space } from "antd";
+import { Button, Card, Popover, theme, Typography, Space } from "antd";
 import { Volume2, X } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useTabsStore, useSettingsStore } from "@/store";
@@ -188,10 +188,11 @@ function GridCard({
       {/* 缩略图区 —— 16:10 宽高比 */}
       <Space className={styles["app-grid-card-preview"]}>
         {first?.favIconUrl && !faviconError ? (
-          <Image
+          <img
             src={first.favIconUrl}
             alt=""
-            preview={false}
+            width={36}
+            height={36}
             className={styles["app-grid-card-favicon"]}
             onError={() => setFaviconError(true)}
           />
@@ -322,10 +323,11 @@ function DomainTabsPanel({
         <Typography.Text aria-hidden className={styles["app-grid-popover__accent"]} />
         {/* favicon */}
         {hasFavicon && !faviconFailed ? (
-          <Image
+          <img
             src={faviconSrc}
             alt=""
-            preview={false}
+            width={16}
+            height={16}
             className={styles["app-grid-popover__favicon"]}
             onError={() => setFaviconFailed(true)}
           />

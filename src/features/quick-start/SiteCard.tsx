@@ -7,7 +7,7 @@
 
 import styles from "./QuickStartLayer.module.less";
 import { useCallback, useMemo, useState } from "react";
-import { Card, Dropdown } from "antd";
+import { Card, Dropdown, Image } from "antd";
 import type { MenuProps } from "antd";
 import { GripVertical, Pencil, Trash2, ExternalLink, MoreHorizontal } from "lucide-react";
 import { cssVars } from "@/shared/utils/css-vars";
@@ -119,11 +119,13 @@ export function SiteCard({
         {/* favicon */}
         <div className={styles["speed-dial-list-item__favicon"]}>
           {faviconUrl && !faviconError ? (
-            <img
+            <Image
               src={faviconUrl}
               alt=""
               className={styles["speed-dial-list-item__favicon-img"]}
               onError={() => setFaviconError(true)}
+              preview={false}
+              fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
             />
           ) : (
             <span className={styles["speed-dial-list-item__fallback"]}>{getInitial(hostname)}</span>
@@ -180,11 +182,13 @@ export function SiteCard({
 
         {/* favicon 或首字母 */}
         {faviconUrl && !faviconError ? (
-          <img
+          <Image
             src={faviconUrl}
             alt=""
             className={styles["app-speed-dial-favicon"]}
             onError={() => setFaviconError(true)}
+            preview={false}
+            fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
           />
         ) : (
           <span className={styles["app-speed-dial-fallback"]}>{getInitial(hostname)}</span>

@@ -12,7 +12,7 @@
 
 import { useState, useCallback, useMemo } from "react";
 import type { LiveTab } from "@/shared/types";
-import { Button, Tag, Tooltip, Checkbox, theme, Flex, Image, Typography } from "antd";
+import { Button, Tag, Tooltip, Checkbox, theme, Flex, Typography } from "antd";
 import { Globe, Volume2, Pin, MessageSquare, X, Pointer, Star } from "lucide-react";
 import { cssVars } from "@/shared/utils/css-vars";
 import { useT } from "@/shared/i18n";
@@ -236,10 +236,11 @@ export function TabItem({
         {/* Favicon（可通过 hideFavicon 整体隐藏，行内元素间距由父级 gap 负责） */}
         {!hideFavicon &&
           (tab.favIconUrl && !faviconError ? (
-            <Image
+            <img
               src={tab.favIconUrl}
               alt=""
-              preview={false}
+              width={16}
+              height={16}
               className={styles["app-tab-item-favicon"]}
               onError={() => setFaviconError(true)}
             />

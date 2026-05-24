@@ -10,7 +10,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Input, Button, Tag, Spin, Tooltip, Segmented, Typography, Space, Image } from "antd";
+import { Input, Button, Tag, Spin, Tooltip, Segmented, Typography, Space } from "antd";
 import {
   BookOpen,
   Search,
@@ -141,10 +141,11 @@ function BookmarkRow({
     >
       <Typography.Text className={styles["app-bookmark-row__bar"]} />
       {faviconUrl && !faviconError ? (
-        <Image
+        <img
           src={faviconUrl}
           alt=""
-          preview={false}
+          width={18}
+          height={18}
           className={styles["app-bookmark-row__favicon"]}
           onError={() => setFaviconError(true)}
         />

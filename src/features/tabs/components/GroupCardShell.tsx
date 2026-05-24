@@ -1,4 +1,4 @@
-import { Card } from "antd";
+import { Card, Flex, Typography } from "antd";
 import type { CSSProperties, ReactNode } from "react";
 
 import styles from "../styles/items.module.less";
@@ -46,11 +46,13 @@ export function GroupCardShell({
       style={style}
     >
       {accentBarPosition === "left" && (
-        <div aria-hidden className={styles["app-accent-bar--left"]} />
+        <Typography.Text aria-hidden className={styles["app-accent-bar--left"]} />
       )}
-      {accentBarPosition === "top" && <div aria-hidden className={styles["app-accent-bar--top"]} />}
+      {accentBarPosition === "top" && (
+        <Typography.Text aria-hidden className={styles["app-accent-bar--top"]} />
+      )}
 
-      <div className={styles["app-domain-group-header-wrap"]}>{header}</div>
+      <Flex className={styles["app-domain-group-header-wrap"]}>{header}</Flex>
 
       {collapsed ? collapsedSummary : children}
       {!collapsed && ghostDropZone}

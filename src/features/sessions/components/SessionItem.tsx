@@ -7,27 +7,18 @@
  *   - 重命名输入态
  */
 
-
-import {
-  Undo2,
-  Trash2,
-  ChevronRight,
-  Link,
-  Pencil,
-  Save,
-  Share2,
-} from 'lucide-react';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { Button, List, Tooltip, Popconfirm, Checkbox } from 'antd';
-import { format } from 'date-fns';
-import { zhCN, enUS } from 'date-fns/locale';
-import type { ArchivedSession, ArchivedTab } from '@/shared/types';
-import { useT } from '@/shared/i18n';
+import { Undo2, Trash2, ChevronRight, Link, Pencil, Save, Share2 } from "lucide-react";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { Button, List, Tooltip, Popconfirm, Checkbox, Image } from "antd";
+import { format } from "date-fns";
+import { zhCN, enUS } from "date-fns/locale";
+import type { ArchivedSession, ArchivedTab } from "@/shared/types";
+import { useT } from "@/shared/i18n";
 
 interface SessionItemProps {
   session: ArchivedSession;
   isExpanded: boolean;
-  locale: 'zh-CN' | 'en';
+  locale: "zh-CN" | "en";
   onToggleExpand: () => void;
   onRestore: (id: string) => void;
   onDelete: (id: string) => void;
@@ -84,7 +75,8 @@ export function SessionItem({
 
   /** 搜索时标签页排序：匹配的排前面 */
   const sortedTabs = (() => {
-    if (!matchedTabIndexes || matchedTabIndexes.size === 0) return session.tabs.map((tab, idx) => ({ tab, originalIdx: idx }));
+    if (!matchedTabIndexes || matchedTabIndexes.size === 0)
+      return session.tabs.map((tab, idx) => ({ tab, originalIdx: idx }));
     const matched: Array<{ tab: ArchivedTab; originalIdx: number }> = [];
     const unmatched: Array<{ tab: ArchivedTab; originalIdx: number }> = [];
     session.tabs.forEach((tab, idx) => {
@@ -101,14 +93,14 @@ export function SessionItem({
     <List.Item className="app-archive-item">
       {/* 主行 */}
       <div className="app-archive-item__main" onClick={onToggleExpand}>
-        <Tooltip title={isExpanded ? t('archive.collapse') : t('archive.expand')}>
+        <Tooltip title={isExpanded ? t("archive.collapse") : t("archive.expand")}>
           <Button
             type="text"
             size="small"
             icon={
               <ChevronRight
                 size={ICON_SIZE.TINY}
-                className={`app-archive-item__toggle-icon${isExpanded ? ' is-expanded' : ''}`}
+                className={`app-archive-item__toggle-icon${isExpanded ? " is-expanded" : ""}`}
               />
             }
             onClick={(e) => {
@@ -125,10 +117,10 @@ export function SessionItem({
         <div className="app-archive-item__content">
           <div className="app-archive-item__name">{highlightText(session.name)}</div>
           <div className="app-archive-item__meta">
-            {t('archive.tabCount', { count: session.tabCount })}
+            {t("archive.tabCount", { count: session.tabCount })}
             <span className="app-archive-item__meta-divider">·</span>
-            {format(session.createdAt, 'MMM d, HH:mm', {
-              locale: locale === 'zh-CN' ? zhCN : enUS,
+            {format(session.createdAt, "MMM d, HH:mm", {
+              locale: locale === "zh-CN" ? zhCN : enUS,
             })}
           </div>
         </div>
@@ -142,17 +134,17 @@ export function SessionItem({
                 e.stopPropagation();
                 onToggleSelect?.(session.id);
               }}
-              aria-label={t('archive.selectToggle')}
+              aria-label={t("archive.selectToggle")}
             />
           )}
-          <Tooltip title={t('archive.restore')}>
+          <Tooltip title={t("archive.restore")}>
             <Button
               type="text"
               icon={<Undo2 size={ICON_SIZE.MEDIUM} />}
               onClick={() => onRestore(session.id)}
             />
           </Tooltip>
-          <Tooltip title={t('archive.rename')}>
+          <Tooltip title={t("archive.rename")}>
             <Button
               type="text"
               icon={<Pencil size={ICON_SIZE.MEDIUM} />}
@@ -160,7 +152,7 @@ export function SessionItem({
             />
           </Tooltip>
           {onShare !== undefined && (
-            <Tooltip title={t('archive.share')}>
+            <Tooltip title={t("archive.share")}>
               <Button
                 type="text"
                 icon={<Share2 size={ICON_SIZE.MEDIUM} />}
@@ -169,19 +161,15 @@ export function SessionItem({
             </Tooltip>
           )}
           <Popconfirm
-            title={t('archive.deleteConfirmTitle')}
-            description={t('archive.deleteConfirmDesc')}
+            title={t("archive.deleteConfirmTitle")}
+            description={t("archive.deleteConfirmDesc")}
             onConfirm={() => onDelete(session.id)}
-            okText={t('archive.deleteConfirmOk')}
-            cancelText={t('archive.deleteConfirmCancel')}
+            okText={t("archive.deleteConfirmOk")}
+            cancelText={t("archive.deleteConfirmCancel")}
             okButtonProps={{ danger: true }}
           >
-            <Tooltip title={t('archive.delete')}>
-              <Button
-                type="text"
-                danger
-                icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
-              />
+            <Tooltip title={t("archive.delete")}>
+              <Button type="text" danger icon={<Trash2 size={ICON_SIZE.MEDIUM} />} />
             </Tooltip>
           </Popconfirm>
         </div>
@@ -191,25 +179,27 @@ export function SessionItem({
       {isExpanded && (
         <div className="app-archive-item__details">
           {session.tabs.length === 0 ? (
-            <div className="app-archive-item__empty">{t('archive.empty')}</div>
+            <div className="app-archive-item__empty">{t("archive.empty")}</div>
           ) : (
             sortedTabs.map(({ tab, originalIdx }) => {
               const isMatched = matchedTabIndexes?.has(originalIdx) ?? false;
               return (
                 <div
                   key={`${session.id}-${originalIdx}`}
-                  className={`app-row-hover app-archive-item__tab-row${isMatched ? ' is-matched' : ''}`}
+                  className={`app-row-hover app-archive-item__tab-row${isMatched ? " is-matched" : ""}`}
                 >
                   {tab.favIconUrl ? (
-                    <img
+                    <Image
                       src={tab.favIconUrl}
                       alt=""
                       width={14}
                       height={14}
                       className="app-archive-item__tab-favicon"
                       onError={(e) => {
-                        (e.currentTarget).style.visibility = 'hidden';
+                        e.currentTarget.style.visibility = "hidden";
                       }}
+                      preview={false}
+                      fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
                     />
                   ) : (
                     <div className="app-archive-item__tab-favicon-placeholder" />
@@ -224,7 +214,7 @@ export function SessionItem({
                     </div>
                   </div>
 
-                  <Tooltip title={t('archive.openTab')}>
+                  <Tooltip title={t("archive.openTab")}>
                     <Button
                       type="text"
                       size="small"

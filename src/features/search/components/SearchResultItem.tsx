@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import { Tag, theme } from "antd";
+import { Tag, theme, Image } from "antd";
 import {
   LayoutGrid,
   Clock,
@@ -91,13 +91,17 @@ export function SearchResultItem({
       style={itemVars}
     >
       {item.type === "tab" && item.tab.favIconUrl !== "" ? (
-        <img
+        <Image
           src={item.tab.favIconUrl}
           alt=""
           className={styles["search-box-item-favicon"]}
+          fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+          preview={false}
           onError={(e) => {
             (e.target as HTMLImageElement).style.display = "none";
           }}
+          width={14}
+          height={14}
         />
       ) : (
         <span className={styles["search-box-item-icon"]}>{icon}</span>

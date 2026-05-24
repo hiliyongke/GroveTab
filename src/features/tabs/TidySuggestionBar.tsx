@@ -11,23 +11,17 @@
  *   - 一键整理：合并所有重复 + 休眠所有闲置
  */
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
-import { Alert, App, Button, Card, List, Space, Tooltip, Tag } from 'antd';
-import {
-  ChevronDown,
-  X,
-  Merge,
-  Moon,
-  Zap,
-} from 'lucide-react';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { useTabsStore, useSettingsStore } from '@/store';
-import { findDuplicates, type DupGroup } from '@/shared/utils/dedupe';
-import { detectIdleTabs, formatIdleTime, type IdleTabInfo } from '@/shared/utils/idle-detect';
-import { DuplicatePreviewModal } from './DuplicatePreviewModal';
-import { useT } from '@/shared/i18n';
-import { LOCAL_CACHE_KEYS } from '@/shared/config/storage-keys';
-import styles from './styles/tidy-suggestion.module.less';
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { Alert, App, Button, Card, List, Space, Tag, Tooltip, Typography, Flex } from "antd";
+import { ChevronDown, X, Merge, Moon, Zap } from "lucide-react";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useTabsStore, useSettingsStore } from "@/store";
+import { findDuplicates, type DupGroup } from "@/shared/utils/dedupe";
+import { detectIdleTabs, formatIdleTime, type IdleTabInfo } from "@/shared/utils/idle-detect";
+import { DuplicatePreviewModal } from "./DuplicatePreviewModal";
+import { useT } from "@/shared/i18n";
+import { LOCAL_CACHE_KEYS } from "@/shared/config/storage-keys";
+import styles from "./styles/tidy-suggestion.module.less";
 
 const DISMISSED_KEY = LOCAL_CACHE_KEYS.tidyDismissed;
 
@@ -41,21 +35,24 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
   const discardMultipleTabs = useTabsStore((s) => s.discardMultipleTabs);
   const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
   const [expanded, setExpanded] = useState(false);
-  const [dismissed, setDismissed] = useState(() => sessionStorage.getItem(DISMISSED_KEY) === '1');
+  const [dismissed, setDismissed] = useState(() => sessionStorage.getItem(DISMISSED_KEY) === "1");
   const [busy, setBusy] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const { t } = useT();
   const { message } = App.useApp();
 
-  const dedupStrictness = useSettingsStore((s) => s.settings.dedupStrictness ?? 'loose');
+  const dedupStrictness = useSettingsStore((s) => s.settings.dedupStrictness ?? "loose");
   const idleThresholdMinutes = useSettingsStore((s) => s.settings.idleThresholdMinutes ?? 1440);
 
   const dupGroups = useMemo(() => findDuplicates(tabs, dedupStrictness), [tabs, dedupStrictness]);
-  const idleTabs = useMemo(() => detectIdleTabs(tabs, idleThresholdMinutes), [tabs, idleThresholdMinutes]);
+  const idleTabs = useMemo(
+    () => detectIdleTabs(tabs, idleThresholdMinutes),
+    [tabs, idleThresholdMinutes],
+  );
 
   const totalDupTabs = dupGroups.reduce((sum, group) => sum + group.tabs.length - 1, 0);
-  const staleCount = idleTabs.filter((item) => item.level === 'stale').length;
-  const idleOnlyCount = idleTabs.filter((item) => item.level === 'idle').length;
+  const staleCount = idleTabs.filter((item) => item.level === "stale").length;
+  const idleOnlyCount = idleTabs.filter((item) => item.level === "idle").length;
   const hasSuggestions = dupGroups.length > 0 || idleTabs.length > 0;
 
   useEffect(() => {
@@ -70,50 +67,59 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
     };
   }, [expandSignal, hasSuggestions]);
 
-  const runAction = useCallback(async (action: () => Promise<void>, successMsg: string) => {
-    if (busy) return;
-    setBusy(true);
-    try {
-      await action();
-      await loadAllTabs({ silent: true });
-      message.success(successMsg);
-    } catch {
-      // store 已 toast
-    } finally {
-      setBusy(false);
-    }
-  }, [busy, loadAllTabs, message]);
+  const runAction = useCallback(
+    async (action: () => Promise<void>, successMsg: string) => {
+      if (busy) return;
+      setBusy(true);
+      try {
+        await action();
+        await loadAllTabs({ silent: true });
+        message.success(successMsg);
+      } catch {
+        // store 已 toast
+      } finally {
+        setBusy(false);
+      }
+    },
+    [busy, loadAllTabs, message],
+  );
 
-  const handleMergeGroup = useCallback((group: DupGroup) => {
-    const toClose = group.tabs.slice(1).map((tab) => tab.id);
-    void runAction(
-      () => closeMultipleTabs(toClose),
-      t('dedup.mergedOne', { count: toClose.length }),
-    );
-  }, [closeMultipleTabs, runAction, t]);
+  const handleMergeGroup = useCallback(
+    (group: DupGroup) => {
+      const toClose = group.tabs.slice(1).map((tab) => tab.id);
+      void runAction(
+        () => closeMultipleTabs(toClose),
+        t("dedup.mergedOne", { count: toClose.length }),
+      );
+    },
+    [closeMultipleTabs, runAction, t],
+  );
 
   const handleMergeAll = useCallback(() => {
     const toClose = dupGroups.flatMap((group) => group.tabs.slice(1).map((tab) => tab.id));
     void runAction(
       () => closeMultipleTabs(toClose),
-      t('dedup.mergedAll', { count: toClose.length }),
+      t("dedup.mergedAll", { count: toClose.length }),
     );
   }, [closeMultipleTabs, dupGroups, runAction, t]);
 
-  const handleDiscardIdle = useCallback(async (items: IdleTabInfo[]) => {
-    if (busy) return;
-    setBusy(true);
-    try {
-      const ids = items.map((item) => item.tab.id);
-      await discardMultipleTabs(ids);
-      await loadAllTabs({ silent: true });
-      message.success(t('tidy.discardedIdle', { count: ids.length }));
-    } catch {
-      // store 已 toast
-    } finally {
-      setBusy(false);
-    }
-  }, [busy, discardMultipleTabs, loadAllTabs, message, t]);
+  const handleDiscardIdle = useCallback(
+    async (items: IdleTabInfo[]) => {
+      if (busy) return;
+      setBusy(true);
+      try {
+        const ids = items.map((item) => item.tab.id);
+        await discardMultipleTabs(ids);
+        await loadAllTabs({ silent: true });
+        message.success(t("tidy.discardedIdle", { count: ids.length }));
+      } catch {
+        // store 已 toast
+      } finally {
+        setBusy(false);
+      }
+    },
+    [busy, discardMultipleTabs, loadAllTabs, message, t],
+  );
 
   const handleTidyAll = useCallback(async () => {
     if (busy) return;
@@ -144,7 +150,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
     await loadAllTabs({ silent: true });
     setBusy(false);
     if (mergedCount > 0 || discardedCount > 0) {
-      message.success(t('tidy.tidyAllDone', { merged: mergedCount, discarded: discardedCount }));
+      message.success(t("tidy.tidyAllDone", { merged: mergedCount, discarded: discardedCount }));
     }
   }, [busy, closeMultipleTabs, discardMultipleTabs, dupGroups, idleTabs, loadAllTabs, message, t]);
 
@@ -152,93 +158,113 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
 
   const summaryParts: string[] = [];
   if (totalDupTabs > 0) {
-    summaryParts.push(t('tidy.dupSummary', { count: dupGroups.length, tabs: totalDupTabs }));
+    summaryParts.push(t("tidy.dupSummary", { count: dupGroups.length, tabs: totalDupTabs }));
   }
   if (staleCount > 0) {
-    summaryParts.push(t('tidy.staleSummary', { count: staleCount }));
+    summaryParts.push(t("tidy.staleSummary", { count: staleCount }));
   } else if (idleOnlyCount > 0) {
-    summaryParts.push(t('tidy.idleSummary', { count: idleOnlyCount }));
+    summaryParts.push(t("tidy.idleSummary", { count: idleOnlyCount }));
   }
 
   return (
-    <div className={`${styles['tidy-suggestion']}${expanded ? ` ${styles['is-expanded']}` : ''}`}>
+    <Card
+      className={`${styles["tidy-suggestion"]}${expanded ? ` ${styles["is-expanded"]}` : ""}`}
+      size="small"
+    >
       <Alert
         type="info"
         showIcon
-        icon={<Zap size={ICON_SIZE.MEDIUM} className={styles['tidy-suggestion__alert-icon']} />}
-        message={(
-          <div className={styles['tidy-suggestion__summary']}>
-            <span className={styles['tidy-suggestion__summary-text']}>
-              {summaryParts.join('；')}
-            </span>
-            <Space size={4} className={styles['tidy-suggestion__summary-actions']}>
-              <Button size="small" loading={busy} onClick={() => { void handleTidyAll(); }} className={styles['tidy-suggestion__solid-action']}>
-                {t('tidy.tidyAll')}
+        icon={<Zap size={ICON_SIZE.MEDIUM} className={styles["tidy-suggestion__alert-icon"]} />}
+        message={
+          <Flex className={styles["tidy-suggestion__summary"]}>
+            <Typography.Text className={styles["tidy-suggestion__summary-text"]}>
+              {summaryParts.join("；")}
+            </Typography.Text>
+            <Space size={4} className={styles["tidy-suggestion__summary-actions"]}>
+              <Button
+                size="small"
+                loading={busy}
+                onClick={() => {
+                  void handleTidyAll();
+                }}
+                className={styles["tidy-suggestion__solid-action"]}
+              >
+                {t("tidy.tidyAll")}
               </Button>
-              <Tooltip title={expanded ? t('tabs.collapse') : t('tabs.expand')}>
+              <Tooltip title={expanded ? t("tabs.collapse") : t("tabs.expand")}>
                 <Button
                   type="text"
                   size="small"
-                  icon={<ChevronDown size={ICON_SIZE.SMALL} className={styles['tidy-suggestion__chevron']} />}
+                  icon={
+                    <ChevronDown
+                      size={ICON_SIZE.SMALL}
+                      className={styles["tidy-suggestion__chevron"]}
+                    />
+                  }
                   onClick={() => setExpanded(!expanded)}
                 />
               </Tooltip>
-              <Tooltip title={t('dedup.dismiss')}>
+              <Tooltip title={t("dedup.dismiss")}>
                 <Button
                   type="text"
                   size="small"
-                  icon={<X size={ICON_SIZE.SMALL} className={styles['tidy-suggestion__dismiss-icon']} />}
+                  icon={
+                    <X size={ICON_SIZE.SMALL} className={styles["tidy-suggestion__dismiss-icon"]} />
+                  }
                   onClick={() => {
-                    sessionStorage.setItem(DISMISSED_KEY, '1');
+                    sessionStorage.setItem(DISMISSED_KEY, "1");
                     setDismissed(true);
                   }}
                 />
               </Tooltip>
             </Space>
-          </div>
-        )}
-        className={styles['tidy-suggestion__alert']}
+          </Flex>
+        }
+        className={styles["tidy-suggestion__alert"]}
       />
 
       {expanded && (
         <Card
-          className={`${styles['tidy-suggestion__panel']} app-accordion-panel`}
+          className={`${styles["tidy-suggestion__panel"]} app-accordion-panel`}
           size="small"
-          classNames={{ body: styles['tidy-suggestion__panel-body'] }}
+          classNames={{ body: styles["tidy-suggestion__panel-body"] }}
         >
           {dupGroups.length > 0 && (
             <>
-              <div className={styles['tidy-suggestion__section-header']}>
-                <Merge size={ICON_SIZE.DEFAULT} className={`${styles['tidy-suggestion__section-icon']} ${styles['tidy-suggestion__section-icon--dup']}`} />
-                <span className={styles['tidy-suggestion__section-title']}>
-                  {t('tidy.dupSection')}
-                </span>
+              <Flex className={styles["tidy-suggestion__section-header"]}>
+                <Merge
+                  size={ICON_SIZE.DEFAULT}
+                  className={`${styles["tidy-suggestion__section-icon"]} ${styles["tidy-suggestion__section-icon--dup"]}`}
+                />
+                <Typography.Text className={styles["tidy-suggestion__section-title"]}>
+                  {t("tidy.dupSection")}
+                </Typography.Text>
                 <Button
                   size="small"
                   type="link"
                   onClick={() => setPreviewOpen(true)}
-                  className={styles['tidy-suggestion__link-action']}
+                  className={styles["tidy-suggestion__link-action"]}
                 >
-                  {t('dedup.preview')}
+                  {t("dedup.preview")}
                 </Button>
                 <Button
                   size="small"
                   type="link"
                   loading={busy}
                   onClick={handleMergeAll}
-                  className={styles['tidy-suggestion__link-action']}
+                  className={styles["tidy-suggestion__link-action"]}
                 >
-                  {t('dedup.mergeAll')}
+                  {t("dedup.mergeAll")}
                 </Button>
-              </div>
+              </Flex>
               <List
                 size="small"
                 dataSource={dupGroups}
-                className={styles['tidy-suggestion__list']}
+                className={styles["tidy-suggestion__list"]}
                 renderItem={(group) => (
                   <List.Item
                     key={group.canonicalUrl}
-                    className={styles['tidy-suggestion__list-item']}
+                    className={styles["tidy-suggestion__list-item"]}
                     actions={[
                       <Button
                         key="merge"
@@ -246,13 +272,21 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                         loading={busy}
                         onClick={() => handleMergeGroup(group)}
                       >
-                        {t('dedup.merge')}
+                        {t("dedup.merge")}
                       </Button>,
                     ]}
                   >
                     <List.Item.Meta
-                      title={<span className={styles['tidy-suggestion__item-title']}>{group.tabs[0]?.title ?? group.canonicalUrl}</span>}
-                      description={<span className={styles['tidy-suggestion__item-desc']}>{group.tabs.length}x</span>}
+                      title={
+                        <Typography.Text className={styles["tidy-suggestion__item-title"]}>
+                          {group.tabs[0]?.title ?? group.canonicalUrl}
+                        </Typography.Text>
+                      }
+                      description={
+                        <Typography.Text className={styles["tidy-suggestion__item-desc"]}>
+                          {group.tabs.length}x
+                        </Typography.Text>
+                      }
                     />
                   </List.Item>
                 )}
@@ -262,42 +296,62 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
 
           {idleTabs.length > 0 && (
             <>
-              <div className={`${styles['tidy-suggestion__section-header']}${dupGroups.length > 0 ? ` ${styles['has-offset']}` : ''}`}>
-                <Moon size={ICON_SIZE.DEFAULT} className={`${styles['tidy-suggestion__section-icon']} ${styles['tidy-suggestion__section-icon--idle']}`} />
-                <span className={styles['tidy-suggestion__section-title']}>
-                  {t('tidy.idleSection')}
-                </span>
+              <Flex
+                className={`${styles["tidy-suggestion__section-header"]}${dupGroups.length > 0 ? ` ${styles["has-offset"]}` : ""}`}
+              >
+                <Moon
+                  size={ICON_SIZE.DEFAULT}
+                  className={`${styles["tidy-suggestion__section-icon"]} ${styles["tidy-suggestion__section-icon--idle"]}`}
+                />
+                <Typography.Text className={styles["tidy-suggestion__section-title"]}>
+                  {t("tidy.idleSection")}
+                </Typography.Text>
                 <Button
                   size="small"
                   type="link"
                   loading={busy}
-                  onClick={() => { void handleDiscardIdle(idleTabs); }}
-                  className={styles['tidy-suggestion__link-action']}
+                  onClick={() => {
+                    void handleDiscardIdle(idleTabs);
+                  }}
+                  className={styles["tidy-suggestion__link-action"]}
                 >
-                  {t('tidy.discardAllIdle')}
+                  {t("tidy.discardAllIdle")}
                 </Button>
-              </div>
+              </Flex>
               <List
                 size="small"
                 dataSource={idleTabs}
-                className={styles['tidy-suggestion__list']}
+                className={styles["tidy-suggestion__list"]}
                 renderItem={(item) => (
                   <List.Item
                     key={item.tab.id}
-                    className={styles['tidy-suggestion__list-item']}
+                    className={styles["tidy-suggestion__list-item"]}
                     actions={[
-                      <Tag key="level" color={item.level === 'stale' ? 'volcano' : 'default'} className={styles['tidy-suggestion__level-tag']}>
-                        {item.level === 'stale' ? t('tidy.stale') : t('tidy.idle')}
+                      <Tag
+                        key="level"
+                        color={item.level === "stale" ? "volcano" : "default"}
+                        className={styles["tidy-suggestion__level-tag"]}
+                      >
+                        {item.level === "stale" ? t("tidy.stale") : t("tidy.idle")}
                       </Tag>,
                     ]}
                   >
                     <List.Item.Meta
-                      title={<span className={styles['tidy-suggestion__item-title']}>{item.tab.title}</span>}
-                      description={<span className={styles['tidy-suggestion__item-desc']}>{t('tidy.lastAccessed', { time: formatIdleTime(item.hoursSinceAccess) })}</span>}
+                      title={
+                        <Typography.Text className={styles["tidy-suggestion__item-title"]}>
+                          {item.tab.title}
+                        </Typography.Text>
+                      }
+                      description={
+                        <Typography.Text className={styles["tidy-suggestion__item-desc"]}>
+                          {t("tidy.lastAccessed", { time: formatIdleTime(item.hoursSinceAccess) })}
+                        </Typography.Text>
+                      }
                     />
                   </List.Item>
                 )}
-              />            </>
+              />{" "}
+            </>
           )}
         </Card>
       )}
@@ -307,6 +361,6 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
         dupGroups={dupGroups}
         onClose={() => setPreviewOpen(false)}
       />
-    </div>
+    </Card>
   );
 }

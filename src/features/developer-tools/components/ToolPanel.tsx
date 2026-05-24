@@ -780,7 +780,7 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
 
       {isDualInput ? (
         <div className={styles["devtools-two-col"]}>
-          <label>
+          <div className={styles["devtools-field"]}>
             <span className={styles["devtools-field-label"]}>{t("devtools.leftText")}</span>
             <Input.TextArea
               value={input}
@@ -788,8 +788,8 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
               rows={7}
               placeholder="第一段文本"
             />
-          </label>
-          <label>
+          </div>
+          <div className={styles["devtools-field"]}>
             <span className={styles["devtools-field-label"]}>{t("devtools.rightText")}</span>
             <Input.TextArea
               value={input2}
@@ -797,11 +797,11 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
               rows={7}
               placeholder="第二段文本"
             />
-          </label>
+          </div>
         </div>
       ) : (
         tool.id !== "random-gen" && (
-          <label>
+          <div className={styles["devtools-field"]}>
             <span className={styles["devtools-field-label"]}>{t("devtools.input")}</span>
             <Input.TextArea
               value={input}
@@ -810,7 +810,7 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
               placeholder={placeholder}
               className={isMonospace ? "devtools-input-mono" : undefined}
             />
-          </label>
+          </div>
         )
       )}
 

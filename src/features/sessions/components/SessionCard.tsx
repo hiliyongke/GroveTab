@@ -13,7 +13,7 @@
 import { useMemo } from "react";
 import { Undo2, Trash2, Pencil, Share2, ChevronDown, Sparkles } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
-import { Button, Tooltip, Popconfirm, Checkbox, Tag } from "antd";
+import { Button, Tooltip, Popconfirm, Checkbox, Tag, Image } from "antd";
 import { format, formatDistanceToNow } from "date-fns";
 import { zhCN, enUS } from "date-fns/locale";
 import type { ArchivedSession, ArchivedTab } from "@/shared/types";
@@ -129,12 +129,14 @@ export function SessionCard({
             title={tab.title || tab.url}
           >
             {tab.favIconUrl ? (
-              <img
+              <Image
                 src={tab.favIconUrl}
                 alt=""
                 onError={(e) => {
                   e.currentTarget.style.visibility = "hidden";
                 }}
+                preview={false}
+                fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
               />
             ) : (
               <span className={styles["archive-card__favicon-fallback"]}>
@@ -177,7 +179,7 @@ export function SessionCard({
                   title={tab.title || tab.url}
                 >
                   {tab.favIconUrl ? (
-                    <img
+                    <Image
                       src={tab.favIconUrl}
                       alt=""
                       width={14}
@@ -186,6 +188,8 @@ export function SessionCard({
                       onError={(e) => {
                         e.currentTarget.style.visibility = "hidden";
                       }}
+                      preview={false}
+                      fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
                     />
                   ) : (
                     <span className={styles["archive-card__tab-favicon-placeholder"]} />

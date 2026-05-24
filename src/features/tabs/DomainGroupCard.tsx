@@ -17,7 +17,7 @@
  */
 
 import { useCallback, useMemo, useState } from "react";
-import { Tag, Button, Tooltip, theme } from "antd";
+import { Tag, Button, Tooltip, theme, Typography, Flex, Space } from "antd";
 import { ChevronDown, X, Globe, Moon } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { Reorder } from "motion/react";
@@ -197,6 +197,8 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
                 <img
                   src={faviconUrl}
                   alt=""
+                  width={20}
+                  height={20}
                   className={styles["app-domain-group-badge-favicon"]}
                   onError={() => setFaviconError(true)}
                 />
@@ -204,14 +206,15 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
                 <Globe size={ICON_SIZE.SMALL} className={styles["app-domain-group-badge-icon"]} />
               )}
             </div>
-
-            <span className={styles["app-domain-group-title"]}>{group.domain}</span>
+            <Typography.Text className={styles["app-domain-group-title"]}>
+              {group.domain}
+            </Typography.Text>
 
             <Tag className={styles["app-domain-group-count"]}>{group.tabs.length}</Tag>
           </Button>
 
           {/* 操作按钮组：flex 排列，不再绝对定位 */}
-          <div className={styles["app-domain-group-actions"]}>
+          <Flex className={styles["app-domain-group-actions"]}>
             {/* 休眠整组——释放内存但保留标签页位置 */}
             <Tooltip title={t("tabs.discardGroup")}>
               <Button
@@ -246,12 +249,17 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
                 className={`app-hover-reveal ${styles["app-domain-group-action"]}${closing ? ` ${styles["is-visible"]}` : ""}`}
               />
             </Tooltip>
-          </div>
+          </Flex>
         </>
       }
     >
       {/* 标签列表 — 使用 motion Reorder 实现分组内拖拽排序 */}
-      <div className={styles["app-domain-group-list"]}>
+      <Space
+        size={4}
+        direction="vertical"
+        className={styles["app-domain-group-list"]}
+        style={{ display: "flex" }}
+      >
         <Reorder.Group
           axis="y"
           values={tabOrder}
@@ -286,7 +294,7 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
             </Reorder.Item>
           ))}
         </Reorder.Group>
-      </div>
+      </Space>
     </GroupCardShell>
   );
 }

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Button, Dropdown, Input, Modal, Tag, Tooltip, theme } from "antd";
+import { Button, Dropdown, Input, Modal, Tag, Tooltip, theme, Typography, Flex, List } from "antd";
 import type { MenuProps } from "antd";
 import {
   ChevronDown,
@@ -294,9 +294,9 @@ export function WindowCard({
       accentBarPosition={accentBarPosition}
       collapsed={collapsed}
       collapsedSummary={
-        <div className={styles["app-window-card-summary"]}>
+        <Typography.Text className={styles["app-window-card-summary"]}>
           {t("window.summary", { count: tabs.length, groups: groupCount })}
-        </div>
+        </Typography.Text>
       }
       header={
         <>
@@ -310,10 +310,10 @@ export function WindowCard({
               className={`${styles["app-window-card-chevron"]}${collapsed ? ` ${styles["is-collapsed"]}` : ""}`}
               size={ICON_SIZE.TINY}
             />
-            <span className={styles["app-window-card-badge"]}>
+            <Typography.Text className={styles["app-window-card-badge"]}>
               {isIncognito ? <Shield size={ICON_SIZE.SMALL} /> : <Monitor size={ICON_SIZE.SMALL} />}
-            </span>
-            <span className={styles["app-window-card-title-wrap"]}>
+            </Typography.Text>
+            <Flex vertical className={styles["app-window-card-title-wrap"]}>
               {aliasEditing ? (
                 <Input
                   size="small"
@@ -327,12 +327,14 @@ export function WindowCard({
                   className={styles["app-window-card-alias-input"]}
                 />
               ) : (
-                <span className={styles["app-window-card-title"]}>{title}</span>
+                <Typography.Text className={styles["app-window-card-title"]}>
+                  {title}
+                </Typography.Text>
               )}
-              <span className={styles["app-window-card-meta"]}>
+              <Typography.Text className={styles["app-window-card-meta"]}>
                 {t("window.summary", { count: tabs.length, groups: groupCount })}
-              </span>
-            </span>
+              </Typography.Text>
+            </Flex>
             {isCurrent && (
               <Tag color="blue" className={styles["app-window-card-tag"]}>
                 {t("window.current")}
@@ -407,12 +409,12 @@ export function WindowCard({
               data={{ kind: "ungrouped", windowId, incognito: isIncognito }}
               className={styles["app-window-ungrouped-section"]}
             >
-              <div className={styles["app-window-ungrouped-header"]}>
+              <Flex className={styles["app-window-ungrouped-header"]}>
                 <Layers size={ICON_SIZE.SMALL} />
-                <span>{t("windowGroup.ungroupedTabs")}</span>
+                <Typography.Text>{t("windowGroup.ungroupedTabs")}</Typography.Text>
                 <Tag className={styles["app-window-group-count"]}>{ungroupedTabs.length}</Tag>
-              </div>
-              <div className={styles["app-window-group-list"]}>
+              </Flex>
+              <List className={styles["app-window-group-list"]}>
                 {ungroupedTabs.map((tab) => (
                   <DraggableTab
                     key={tab.id}
@@ -422,7 +424,7 @@ export function WindowCard({
                     visibleTabIds={visibleTabIds}
                   />
                 ))}
-              </div>
+              </List>
             </DroppableZone>
           )}
         </DroppableZone>

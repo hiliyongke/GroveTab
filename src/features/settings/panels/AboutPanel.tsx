@@ -17,7 +17,7 @@
  *   2) Popup 底部"关于"链接：打开新 Tab，URL hash #about，App 监听后自动打开设置面板并切到 about Tab
  */
 
-import { Button, Divider } from "antd";
+import { Button, Divider, List } from "antd";
 import { cssVars } from "@/shared/utils/css-vars";
 import {
   Package,
@@ -141,12 +141,13 @@ export function AboutPanel() {
             <Sparkles size={ICON_SIZE.MEDIUM} />
             {t("about.tipsTitle")}
           </div>
-          <ul className={styles["about-panel__tips-list"]}>
-            <li>{t("about.tip1")}</li>
-            <li>{t("about.tip2")}</li>
-            <li>{t("about.tip3")}</li>
-            <li>{t("about.tip4")}</li>
-          </ul>
+          <List
+            className={styles["about-panel__tips-list"]}
+            dataSource={[t("about.tip1"), t("about.tip2"), t("about.tip3"), t("about.tip4")]}
+            renderItem={(item) => (
+              <List.Item style={{ padding: "4px 0", borderBottom: "none" }}>{item}</List.Item>
+            )}
+          />
         </div>
       </section>
 
