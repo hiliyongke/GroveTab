@@ -1,5 +1,5 @@
-import { Button, Drawer, Typography } from "antd";
-import { useCallback } from "react";
+import { Drawer, Menu, Typography } from "antd";
+import { useCallback, useMemo } from "react";
 
 import { useT } from "@/shared/i18n";
 import type { SettingsTabKey } from "../settings-tab-keys";
@@ -23,6 +23,15 @@ export function SettingsShell({
 }: SettingsShellProps) {
   const { t } = useT();
   const activeItem = tabs.find((tab) => tab.key === activeTab) ?? tabs[0];
+  const menuItems = useMemo(
+    () =>
+      tabs.map((tab) => ({
+        key: tab.key,
+        icon: <span className={styles["settings-nav__icon"]}>{tab.icon}</span>,
+        label: <span className={styles["settings-nav__label"]}>{t(tab.labelKey)}</span>,
+      })),
+    [tabs, t],
+  );
 
   const handleClose = useCallback(() => {
     onOpenChange(false);
@@ -46,23 +55,14 @@ export function SettingsShell({
     >
       <div className={styles["settings-shell"]}>
         <nav className={styles["settings-nav"]} aria-label={t("settings.title")}>
-          <div className={styles["settings-nav__list"]}>
-            {tabs.map((tab) => {
-              const selected = activeTab === tab.key;
-              return (
-                <Button
-                  key={tab.key}
-                  type="text"
-                  aria-current={selected ? "page" : undefined}
-                  className={`${styles["settings-nav__item"]}${selected ? ` ${styles["is-active"]}` : ""}`}
-                  onClick={() => onActiveTabChange(tab.key)}
-                >
-                  <span className={styles["settings-nav__icon"]}>{tab.icon}</span>
-                  <span className={styles["settings-nav__label"]}>{t(tab.labelKey)}</span>
-                </Button>
-              );
-            })}
-          </div>
+          <Menu
+            mode="inline"
+            selectedKeys={[activeTab]}
+            items={menuItems}
+            inlineIndent={12}
+            className={styles["settings-nav__menu"]}
+            onClick={({ key }) => onActiveTabChange(key as SettingsTabKey)}
+          />
         </nav>
 
         <main className={styles["settings-content"]}>

@@ -311,17 +311,64 @@ export interface UserSettings {
   /** 常用站点是否启用分组显示，默认 false（平铺模式） */
   speedDialGroupEnabled?: boolean;
 
+  /**
+   * 常用站点布局模式。
+   *   - 'grid'：网格卡片视图（默认）
+   *   - 'list'：紧凑列表视图（站点多时省空间）
+   */
+  quickStartLayoutMode?: "grid" | "list";
+
+  /** 是否显示浮动添加按钮（FAB），默认 false */
+  quickStartFabAddButton?: boolean;
+
+  /**
+   * auto 档位阈值配置（站点数量边界）。
+   *   - lgThreshold：站点数 ≤ 此值时使用 lg（默认 6）
+   *   - mdThreshold：站点数 ≤ 此值时使用 md（默认 14）
+   *   - 超过 mdThreshold 则使用 sm
+   */
+  quickStartAutoThresholds?: { lgThreshold?: number; mdThreshold?: number };
+
+  /** 分组是否可折叠，默认 true（点击组头折叠/展开） */
+  quickStartGroupCollapsible?: boolean;
+
+  /** 分组折叠状态持久化：组名 → 是否折叠 */
+  quickStartGroupCollapsed?: Record<string, boolean>;
+
   /** 常用站点是否显示「添加站点」按钮，默认 true */
   showAddSiteButton?: boolean;
 
   /**
-   * 常用站点卡片尺寸（v1.4）。
+   * 常用站点卡片尺寸档位（v1.3）。
    *   - 'sm'   ：紧凑（站点多时使用，单卡 ~120px）
    *   - 'md'   ：默认（单卡 ~160px，与 v1.3 行为一致）
    *   - 'lg'   ：宽松（站点少时使用，单卡 ~200px）
    *   - 'auto' ：根据站点数量自动适配（≤6 用 lg，7-14 用 md，>14 用 sm）
    */
   quickStartCardSize?: "sm" | "md" | "lg" | "auto";
+
+  /**
+   * 常用站点卡片精确宽度（px）。
+   * 设置后覆盖 quickStartCardSize 的默认宽度，实现连续微调。
+   * 范围：80–280，步长 8。设为 undefined 则跟随 quickStartCardSize 预设。
+   */
+  quickStartCardExactWidth?: number;
+
+  /**
+   * 常用站点网格间距（px）。
+   * 范围：4–24，步长 4，默认 12。
+   * 影响卡片之间的水平与垂直间距。
+   */
+  quickStartGridGap?: number;
+
+  /**
+   * 网格视图卡片尺寸档位（v1.4）。
+   *   - 'sm'   ：紧凑（标签页多时使用，单卡 ~160px）
+   *   - 'md'   ：默认（单卡 ~200px，与 v1.3 行为一致）
+   *   - 'lg'   ：宽松（标签页少时使用，单卡 ~240px）
+   *   - 'auto' ：根据标签页数量自动适配（≤10 用 lg，11-30 用 md，>30 用 sm）
+   */
+  gridCardSize?: "sm" | "md" | "lg" | "auto";
 
   /**
    * 全局点击动效（v1.2）。

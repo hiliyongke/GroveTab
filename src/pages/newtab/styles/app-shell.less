@@ -13,10 +13,21 @@
   align-items: center;
   height: var(--app-header-height);
   padding: 0 20px;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    backdrop-filter 0.3s ease;
+}
+
+.app-header-shell.is-scrolled {
   background: var(--app-glass-bg);
   border-bottom: 1px solid var(--app-hairline);
   backdrop-filter: var(--app-glass-filter);
   -webkit-backdrop-filter: var(--app-glass-filter);
+  box-shadow: 0 4px 24px -8px color-mix(in srgb, var(--ant-color-text) 12%, transparent);
 }
 
 .app-header-left {
@@ -333,62 +344,142 @@
   min-height: 0;
 }
 
-/* ─── 视图侧边栏（left/right 模式） ──────────────────────── */
-.app-view-sidebar {
-  width: 180px;
-  flex-shrink: 0;
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
-  justify-content: center;
-  border-right: 1px solid var(--ant-color-border-secondary);
-  background: color-mix(in srgb, var(--ant-color-bg-layout) 88%, transparent);
-  padding: var(--app-space-3) var(--app-space-2);
-  overflow: hidden;
+/* ─── 视图导航 Rail / Bottom Bar（left/right/bottom 共用） ──────────────────────── */
+.app-view-dock {
+  position: relative;
+  z-index: 2;
 }
 
-.app-view-sidebar--right {
-  border-right: none;
-  border-left: 1px solid var(--ant-color-border-secondary);
-}
-
-.app-view-sidebar__list {
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
-  gap: 2px;
-  width: 100%;
-}
-
-.app-view-sidebar__item {
-  all: unset;
-  box-sizing: border-box;
+.app-view-dock--left,
+.app-view-dock--right {
+  flex: 0 0 auto;
   display: flex; /* antd 组件内部微调整 */
   align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 8px 12px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 160ms ease;
-  border-radius: var(--ant-border-radius-lg);
+  justify-content: center;
+  padding: 20px 12px;
+}
+
+.app-view-dock--left {
+  padding-left: 18px;
+}
+
+.app-view-dock--right {
+  padding-right: 18px;
+}
+
+.app-view-dock--bottom {
+  position: sticky;
+  bottom: 0;
+  z-index: 12;
+  display: flex; /* antd 组件内部微调整 */
+  justify-content: center;
+  padding: 10px 20px calc(12px + env(safe-area-inset-bottom, 0px));
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-top: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 72%, transparent);
+  background: color-mix(in srgb, var(--ant-color-bg-elevated) 96%, transparent);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  /* 抗闪白：预创建合成层 + 隔离重绘 + GPU 加速 */
+  will-change: transform;
+  contain: paint;
+  transform: translateZ(0);
+  scrollbar-width: none;
+}
+
+.app-view-dock--bottom::-webkit-scrollbar {
+  display: none;
+}
+
+.app-view-dock__list {
+  display: inline-flex; /* antd 组件内部微调整 */
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--ant-color-bg-container) 88%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 78%, transparent);
+  box-shadow:
+    0 8px 24px color-mix(in srgb, var(--ant-color-text) 8%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 16%, transparent);
+}
+
+.app-view-dock--vertical .app-view-dock__list {
+  width: fit-content;
+  max-width: min(100%, 220px);
+  flex-direction: column;
+  align-items: stretch;
+  border-radius: 20px;
+}
+
+.app-view-dock--horizontal .app-view-dock__list {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: max-content;
+  max-width: none;
+}
+
+.app-view-dock__item {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex; /* antd 组件内部微调整 */
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  min-width: 38px;
+  width: auto;
+  flex: 0 0 auto;
+  padding: 0 12px;
+  border-radius: 14px;
   color: var(--ant-color-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
 }
 
-.app-view-sidebar__item:hover {
-  background: var(--ant-color-fill-quaternary);
+.app-view-dock__item:hover {
   color: var(--ant-color-text);
+  background: color-mix(in srgb, var(--ant-color-fill-quaternary) 92%, transparent);
 }
 
-.app-view-sidebar__item.is-active {
-  background: var(--ant-color-primary-bg);
-  color: var(--ant-color-primary);
+.app-view-dock__item:focus-visible {
+  outline: 2px solid
+    color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 50%, #fff);
+  outline-offset: 2px;
+}
+
+.app-view-dock__item.is-active {
+  color: var(--app-color-primary, var(--ant-color-primary));
+  background: color-mix(
+    in srgb,
+    var(--app-color-primary, var(--ant-color-primary)) 12%,
+    var(--ant-color-bg-container)
+  );
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 16%, transparent);
+}
+
+.app-view-dock__label {
+  font-size: 13px;
   font-weight: 600;
-}
-
-.app-view-sidebar__label {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.app-view-dock--bottom .app-view-dock__label {
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.app-view-dock--vertical .app-view-dock__item {
+  width: auto;
+  justify-content: flex-start;
+  min-width: 0;
 }
 
 /* ─── Workspace 切换器 ── */
@@ -430,93 +521,39 @@
   color: var(--ant-color-text-tertiary);
 }
 
-/* ─── 响应式：小屏侧边栏收缩为仅图标 ── */
 @media (max-width: 768px) {
-  .app-view-sidebar {
-    width: 52px;
+  .app-view-dock--left,
+  .app-view-dock--right {
+    padding-inline: 8px;
   }
 
-  .app-view-sidebar__label {
-    display: none;
+  .app-view-dock--bottom {
+    justify-content: flex-start;
+    padding-inline: 12px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
   }
 
-  .app-view-sidebar__item {
+  .app-view-dock__list {
+    padding: 6px;
+    gap: 4px;
+    border-radius: 18px;
+  }
+
+  .app-view-dock--vertical .app-view-dock__list {
+    max-width: 100%;
+    align-items: center;
+  }
+
+  .app-view-dock--vertical .app-view-dock__item,
+  .app-view-dock--horizontal .app-view-dock__item {
+    min-width: 40px;
+    padding: 0 10px;
     justify-content: center;
-    padding: 8px;
-  }
-}
-
-/* ─── 视图底部固定栏（bottom 模式） ──────────────────────── */
-.app-view-bottom {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 20;
-  display: flex; /* antd 组件内部微调整 */
-  justify-content: center;
-  padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
-  background: var(--app-glass-bg);
-  border-top: 1px solid var(--app-hairline);
-  backdrop-filter: var(--app-glass-filter);
-  -webkit-backdrop-filter: var(--app-glass-filter);
-  pointer-events: auto;
-}
-
-.app-view-bottom__list {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  max-width: 100%;
-  overflow: hidden;
-}
-
-.app-view-bottom__item {
-  all: unset;
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 160ms ease;
-  border-radius: var(--ant-border-radius-lg);
-  color: var(--ant-color-text-secondary);
-  white-space: nowrap;
-}
-
-.app-view-bottom__item:hover {
-  background: var(--ant-color-fill-quaternary);
-  color: var(--ant-color-text);
-}
-
-.app-view-bottom__item.is-active {
-  background: var(--ant-color-primary-bg);
-  color: var(--app-color-primary, var(--ant-color-primary));
-  font-weight: 600;
-}
-
-.app-view-bottom__label {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* 小屏：底栏隐藏文字、缩窄按钮 */
-@media (max-width: 768px) {
-  .app-view-bottom {
-    padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
   }
 
-  .app-view-bottom__label {
+  .app-view-dock--left .app-view-dock__label,
+  .app-view-dock--right .app-view-dock__label {
     display: none;
-  }
-
-  .app-view-bottom__item {
-    padding: 8px 10px;
-    gap: 0;
   }
 }
 
@@ -583,7 +620,7 @@
   height: 44px;
   border: 3px solid color-mix(in srgb, #000 4%, transparent);
   border-radius: var(--app-radius-md);
-  background: #fafafc;
+  background: var(--app-bg-container);
   box-shadow: none;
   font-size: 15px;
   letter-spacing: -0.01em;
@@ -699,8 +736,16 @@
   overflow-x: hidden;
 }
 
+.app-layout-shell--view-bottom .app-content-shell {
+  padding-bottom: 108px;
+}
+
 .app-content-shell--bounded {
   max-width: var(--app-content-max-width);
+}
+
+.app-content-shell--no-scroll {
+  overflow: hidden;
 }
 
 /* 书签树状视图画布模式：关闭外层滚动 + 去除底部 padding */

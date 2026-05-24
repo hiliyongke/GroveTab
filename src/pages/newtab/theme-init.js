@@ -19,6 +19,12 @@
     return null;
   }
 
+  /**
+   * 应用主题到 DOM
+   * ⚠️ 同步约定：以下背景色值必须与 background-colors.less 中的 --app-bg-layout 变量保持一致
+   *   明色：var(--ant-color-bg-layout) → #f5f5f5
+   *   暗色：var(--ant-color-bg-layout) → #141414
+   */
   function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     document.documentElement.style.backgroundColor = theme === 'dark' ? '#141414' : '#f5f5f5';

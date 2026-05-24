@@ -212,7 +212,7 @@
 
 .app-window-ungrouped-section {
   border-style: dashed;
-  background: var(--ant-color-fill-quaternary);
+  background: var(--app-bg-surface);
 }
 
 .app-window-ungrouped-header {
@@ -252,7 +252,7 @@
   min-height: 34px;
   border: 1px dashed var(--ant-color-border);
   border-radius: var(--app-radius-md);
-  background: var(--ant-color-fill-quaternary);
+  background: var(--app-bg-surface);
   color: var(--ant-color-text-tertiary);
   cursor: pointer;
   font-size: 12px;
@@ -357,19 +357,20 @@
 
 .app-grid-view {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  /* 卡片最小宽度由 --grid-card-min-width 控制（默认 200px，对应 'md' 档） */
+  grid-template-columns: repeat(auto-fill, minmax(var(--grid-card-min-width, 200px), 1fr));
   gap: 12px;
 }
 
 @media (min-width: 1024px) {
   .app-grid-view {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(var(--grid-card-min-width, 220px), 1fr));
   }
 }
 
 @media (min-width: 1440px) {
   .app-grid-view {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(var(--grid-card-min-width, 240px), 1fr));
   }
 }
 
@@ -996,6 +997,9 @@
   outline: none;
   transition: background var(--ant-motion-duration-mid);
   min-height: 36px;
+  /* 抗闪白：预创建合成层 + 隔离重绘范围 */
+  will-change: background;
+  contain: layout style paint;
 }
 
 .app-bookmark-row:hover {
@@ -1074,16 +1078,19 @@
   flex-shrink: 0;
   color: var(--ant-color-text-quaternary);
   opacity: 0;
-  transform: translateX(-4px);
+  /* 使用 translate3d 强制 GPU 合成，避免合成层切换闪烁 */
+  transform: translate3d(-4px, 0, 0);
   transition:
     opacity var(--ant-motion-duration-mid),
     transform var(--ant-motion-duration-mid);
+  /* 抗闪白：预创建合成层 */
+  will-change: transform, opacity;
 }
 
 .app-bookmark-row:hover .app-bookmark-row__action,
 .app-bookmark-row:focus-visible .app-bookmark-row__action {
   opacity: 1;
-  transform: translateX(0);
+  transform: translate3d(0, 0, 0);
   color: var(--ant-color-text-tertiary);
 }
 

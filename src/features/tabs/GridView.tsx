@@ -45,9 +45,42 @@ export function GridView() {
    * 喜欢「快速预览」的用户。
    */
   const expandTrigger = useSettingsStore((s) => s.settings.gridExpandTrigger ?? "click");
+  /**
+   * 网格卡片尺寸档位（v1.4 新增）。
+   *   - 'sm'   ：紧凑（标签页多时使用，单卡 ~160px）
+   *   - 'md'   ：默认（单卡 ~200px，与 v1.3 行为一致）
+   *   - 'lg'   ：宽松（标签页少时使用，单卡 ~240px）
+   *   - 'auto' ：根据标签页数量自动适配（≤10 用 lg，11-30 用 md，>30 用 sm）
+   */
+  const cardSize = useSettingsStore((s) => s.settings.gridCardSize ?? "md");
   const { t } = useT();
 
   const groups = useMemo(() => groupTabsByDomain(tabs), [tabs]);
+
+  /**
+   * 根据卡片尺寸档位计算实际的卡片最小宽度。
+   *   - sm / md / lg：固定档位
+   *   - auto：根据标签页数量自动适配
+   */
+  const cardMinWidth = useMemo(() => {
+    // 自动适配逻辑：根据标签页总数决定卡片大小
+    if (cardSize === "auto") {
+      const totalTabs = tabs.length;
+      if (totalTabs <= 10) return "240px"; // 标签页少时使用大卡片
+      if (totalTabs <= 30) return "200px"; // 中等数量使用默认卡片
+      return "160px"; // 标签页多时使用紧凑卡片
+    }
+
+    // 固定档位映射
+    const SIZE_MAP = { sm: "160px", md: "200px", lg: "240px" } as const;
+    return SIZE_MAP[cardSize] ?? SIZE_MAP.md;
+  }, [cardSize, tabs.length]);
+
+  /** 顶层 wrapper 上注入 --grid-card-min-width CSS 变量 */
+  const wrapperStyle = useMemo(
+    () => cssVars({ "--grid-card-min-width": cardMinWidth }),
+    [cardMinWidth],
+  );
 
   /** 当前打开 Popover 的域名（null 代表全部关闭）——同时至多一个浮层 */
   const [activeDomain, setActiveDomain] = useState<string | null>(null);
@@ -61,7 +94,7 @@ export function GridView() {
   };
 
   return (
-    <div className={styles["app-grid-view"]}>
+    <div className={styles["app-grid-view"]} style={wrapperStyle}>
       {groups.map((group) => (
         <GridCard
           key={group.domain}

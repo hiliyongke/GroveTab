@@ -31,11 +31,11 @@
 
 .appearance-grid .appearance-preset-card:hover {
   transform: none;
-  background: var(--ant-color-fill-quaternary);
+  background: var(--app-bg-hover);
 }
 
 .appearance-grid .appearance-preset-card.is-selected {
-  background: color-mix(in srgb, var(--ant-color-primary) 7%, var(--ant-color-bg-container));
+  background: var(--app-bg-selected);
 }
 
 .appearance-grid .appearance-preset-meta {
@@ -85,11 +85,11 @@
 
 .appearance-gradient-grid .appearance-preset-card:hover {
   transform: none;
-  background: var(--ant-color-fill-quaternary);
+  background: var(--app-bg-hover);
 }
 
 .appearance-gradient-grid .appearance-preset-card.is-selected {
-  background: color-mix(in srgb, var(--ant-color-primary) 7%, var(--ant-color-bg-container));
+  background: var(--app-bg-selected);
 }
 
 .appearance-gradient-grid .appearance-preset-preview--gradient {
@@ -144,7 +144,10 @@
   cursor: pointer;
   border-radius: var(--app-radius-md);
   border: 1px solid var(--ant-color-border-secondary);
-  background: var(--ant-color-bg-container);
+  background: var(--app-card-bg);
+  /* 抗闪白：预创建合成层 + 隔离重绘范围 */
+  will-change: transform;
+  contain: layout style paint;
   transition:
     border-color 160ms ease,
     box-shadow 160ms ease,
@@ -153,7 +156,8 @@
 
 .appearance-preset-card:hover {
   border-color: var(--ant-color-border);
-  transform: translateY(-1px);
+  /* 使用 translate3d 强制 GPU 合成，避免合成层切换闪烁 */
+  transform: translate3d(0, -1px, 0);
 }
 
 .appearance-preset-card.is-selected {
@@ -219,7 +223,7 @@
 .appearance-preset-meta {
   min-width: 0;
   padding: 6px 8px 7px;
-  background: var(--ant-color-bg-container);
+  background: var(--app-card-bg);
   text-align: center;
 }
 
@@ -256,7 +260,7 @@
   padding: 6px 8px;
   font-size: 10.5px;
   text-align: center;
-  background: var(--ant-color-bg-container);
+  background: var(--app-card-bg);
   color: var(--ant-color-text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -351,7 +355,7 @@
 .appearance-editor-shell,
 .appearance-visibility-row {
   border-radius: var(--app-radius-md);
-  background: var(--ant-color-fill-quaternary);
+  background: var(--app-bg-surface);
 }
 
 .appearance-custom-box {
@@ -360,7 +364,7 @@
   gap: 14px;
   padding: 14px;
   border: 1px solid var(--ant-color-border-secondary);
-  background: color-mix(in srgb, var(--ant-color-fill-quaternary) 72%, transparent);
+  background: var(--app-bg-surface-subtle);
 }
 
 .appearance-slider-group {
@@ -405,13 +409,13 @@
   gap: 8px;
   padding: 6px 8px;
   border-radius: var(--ant-border-radius-sm);
-  background: var(--ant-color-bg-container);
+  background: var(--app-card-bg);
 }
 
 .appearance-editor-stop-dark {
   margin-bottom: 4px;
   padding: 4px 8px;
-  background: var(--ant-color-bg-elevated);
+  background: var(--app-bg-surface);
 }
 
 .appearance-editor-slider {
@@ -448,7 +452,7 @@
   padding: 5px 8px;
   border: 1px solid var(--ant-color-border-secondary);
   border-radius: var(--app-radius-sm);
-  background: var(--ant-color-bg-container);
+  background: var(--app-card-bg);
   transition:
     border-color 160ms ease,
     background 160ms ease;
@@ -456,7 +460,7 @@
 
 .appearance-overlay-row:hover {
   border-color: var(--ant-color-border);
-  background: var(--ant-color-fill-quaternary);
+  background: var(--app-bg-hover);
 }
 
 .appearance-overlay-row .appearance-color-label {

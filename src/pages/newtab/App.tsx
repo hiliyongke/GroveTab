@@ -8,7 +8,7 @@ import {
   Suspense,
   type CSSProperties,
 } from "react";
-import { Layout, Spin, Typography } from "antd";
+import { Layout, Spin, Typography, FloatButton } from "antd";
 import { useTabsStore, useSettingsStore, useSelectionStore } from "@/store";
 import { useShallow } from "zustand/shallow";
 import { useSwBroadcast, useResolvedTheme, useAppInitialization } from "@/shared/hooks";
@@ -146,6 +146,9 @@ function AppContent() {
   const tidySectionRef = useRef<HTMLDivElement>(null);
   /** initRunId —— 初始化失败时递增此值，触发 useEffect 重新执行 */
   const [initRunId, setInitRunId] = useState(0);
+
+  /** 滚动进度，用于背景联动等视差效果 */
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   const {
     checked,
@@ -393,20 +396,28 @@ function AppContent() {
   }, [layoutBackground, backgroundImage]);
 
   const overlayBlur = Math.min(Math.max(backgroundOverlay?.blur ?? 0, 0), 12);
-  const overlayStyle = useMemo<CSSProperties | undefined>(
-    () =>
-      backgroundOverlay?.enabled
-        ? cssVars({
-            "--app-background-overlay-bg": resolvedDark
-              ? backgroundOverlay.colorDark
-              : backgroundOverlay.color,
-            "--app-background-overlay-filter": overlayBlur > 0 ? `blur(${overlayBlur}px)` : "none",
-          })
-        : undefined,
-    [backgroundOverlay, resolvedDark, overlayBlur],
-  );
-  const contentShellClassName =
-    contentMaxWidth > 0 ? "app-content-shell app-content-shell--bounded" : "app-content-shell";
+  const overlayStyle = useMemo<CSSProperties | undefined>(() => {
+    if (!backgroundOverlay?.enabled) return undefined;
+
+    // 滚动时增加额外的模糊和变暗效果
+    const dynamicBlur = overlayBlur + scrollProgress * 8;
+    const dynamicOpacity = Math.min(0.8, scrollProgress * 0.4);
+
+    return cssVars({
+      "--app-background-overlay-bg": resolvedDark
+        ? backgroundOverlay.colorDark
+        : backgroundOverlay.color,
+      "--app-background-overlay-filter": dynamicBlur > 0 ? `blur(${dynamicBlur}px)` : "none",
+      "--app-background-overlay-opacity": `${dynamicOpacity}`,
+    });
+  }, [backgroundOverlay, resolvedDark, overlayBlur, scrollProgress]);
+  const contentShellClassName = [
+    "app-content-shell",
+    contentMaxWidth > 0 ? "app-content-shell--bounded" : "",
+    pageMode === "devtools" ? "app-content-shell--no-scroll" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
   const contentShellStyle = useMemo<CSSProperties | undefined>(
     () =>
       contentMaxWidth > 0
@@ -435,7 +446,22 @@ function AppContent() {
     >
       {/* 背景遮罩层：当 backgroundOverlay.enabled 时渲染 */}
       {backgroundOverlay?.enabled && (
-        <div className="app-background-overlay" style={overlayStyle} />
+        <>
+          <div className="app-background-overlay" style={overlayStyle} />
+          {/* 滚动时叠加的动态暗化层 */}
+          <div
+            className="app-background-overlay-dimmer"
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 0,
+              pointerEvents: "none",
+              background: resolvedDark ? "#000" : "#000",
+              opacity: `var(--app-background-overlay-opacity, 0)`,
+              transition: "opacity 0.1s ease-out",
+            }}
+          />
+        </>
       )}
 
       {uiVisibility?.header !== false && (
@@ -462,7 +488,17 @@ function AppContent() {
           <ViewSidebar viewMode={viewMode} onViewChange={handleViewChange} position="left" />
         )}
 
-        <Content data-app-content className={contentShellClassName} style={contentShellStyle}>
+        <Content
+          data-app-content
+          className={contentShellClassName}
+          style={contentShellStyle}
+          onScroll={(e) => {
+            const target = e.currentTarget as HTMLElement;
+            // 计算滚动进度 0 ~ 1 (向下滚动 300px 达到最大效果)
+            const progress = Math.min(1, Math.max(0, target.scrollTop / 300));
+            setScrollProgress(progress);
+          }}
+        >
           {pageMode === "workspace" && showHeroBar && (
             <HeroBar
               viewMode={viewMode}
@@ -533,6 +569,12 @@ function AppContent() {
       {pageMode === "workspace" && showViewSwitcher && viewTabPosition === "bottom" && (
         <ViewBottomBar viewMode={viewMode} onViewChange={handleViewChange} />
       )}
+
+      <FloatButton.BackTop
+        target={() => document.querySelector(".app-content-shell") as HTMLElement}
+        visibilityHeight={400}
+        style={{ right: 32, bottom: 32 }}
+      />
 
       <UndoToast />
 

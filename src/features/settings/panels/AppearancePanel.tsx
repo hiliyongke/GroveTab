@@ -1036,6 +1036,41 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                   checked={settings.showAddSiteButton ?? true}
                   onChange={(v) => void updateSettings({ showAddSiteButton: v })}
                 />
+                {settings.speedDialGroupEnabled && (
+                  <VisibilityRow
+                    label={t("quickStart.groupCollapsible")}
+                    hint={t("quickStart.groupCollapsibleHint")}
+                    checked={settings.quickStartGroupCollapsible ?? true}
+                    onChange={(v) => void updateSettings({ quickStartGroupCollapsible: v })}
+                  />
+                )}
+                <VisibilityRow
+                  label={t("quickStart.fabAddButton")}
+                  hint={t("quickStart.fabAddButtonHint")}
+                  checked={settings.quickStartFabAddButton ?? false}
+                  onChange={(v) => void updateSettings({ quickStartFabAddButton: v })}
+                />
+                {/* 布局模式：grid / list */}
+                <div className={styles["appearance-visibility-row"]}>
+                  <div>
+                    <div className={styles["appearance-visibility-title"]}>
+                      {t("quickStart.layoutMode")}
+                    </div>
+                    <div className={styles["appearance-visibility-hint"]}>
+                      {t("quickStart.layoutModeHint")}
+                    </div>
+                  </div>
+                  <Select
+                    size="small"
+                    className={styles["appearance-quickstart-select"]}
+                    value={settings.quickStartLayoutMode ?? "grid"}
+                    onChange={(v) => void updateSettings({ quickStartLayoutMode: v })}
+                    options={[
+                      { value: "grid", label: t("quickStart.layoutModeGrid") },
+                      { value: "list", label: t("quickStart.layoutModeList") },
+                    ]}
+                  />
+                </div>
                 {/* 卡片尺寸：sm / md / lg / auto，便于适应不同站点数量与屏幕宽度 */}
                 <div className={styles["appearance-visibility-row"]}>
                   <div>
@@ -1056,6 +1091,93 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                       { value: "md", label: t("quickStart.cardSizeMd") },
                       { value: "lg", label: t("quickStart.cardSizeLg") },
                       { value: "auto", label: t("quickStart.cardSizeAuto") },
+                    ]}
+                  />
+                </div>
+                {/* 卡片精确宽度：在预设档位基础上微调 */}
+                <SliderField
+                  label={t("quickStart.cardExactWidth")}
+                  value={settings.quickStartCardExactWidth ?? 0}
+                  min={80}
+                  max={280}
+                  step={8}
+                  hint={t("quickStart.cardExactWidthHint")}
+                  onChange={(value) => {
+                    void updateSettings({
+                      quickStartCardExactWidth: value === 0 ? undefined : value,
+                    });
+                  }}
+                />
+                {/* 网格间距：控制卡片之间的水平与垂直间距 */}
+                <SliderField
+                  label={t("quickStart.gridGap")}
+                  value={settings.quickStartGridGap ?? 12}
+                  min={4}
+                  max={24}
+                  step={4}
+                  suffix="px"
+                  hint={t("quickStart.gridGapHint")}
+                  onChange={(value) => {
+                    void updateSettings({ quickStartGridGap: value });
+                  }}
+                />
+                {/* auto 档位阈值配置（仅 auto 模式下显示） */}
+                {(settings.quickStartCardSize ?? "md") === "auto" && (
+                  <>
+                    <SliderField
+                      label={t("quickStart.autoLgThreshold")}
+                      value={settings.quickStartAutoThresholds?.lgThreshold ?? 6}
+                      min={1}
+                      max={30}
+                      step={1}
+                      hint={t("quickStart.autoLgThresholdHint")}
+                      onChange={(value) => {
+                        void updateSettings({
+                          quickStartAutoThresholds: {
+                            ...settings.quickStartAutoThresholds,
+                            lgThreshold: value,
+                          },
+                        });
+                      }}
+                    />
+                    <SliderField
+                      label={t("quickStart.autoMdThreshold")}
+                      value={settings.quickStartAutoThresholds?.mdThreshold ?? 14}
+                      min={1}
+                      max={50}
+                      step={1}
+                      hint={t("quickStart.autoMdThresholdHint")}
+                      onChange={(value) => {
+                        void updateSettings({
+                          quickStartAutoThresholds: {
+                            ...settings.quickStartAutoThresholds,
+                            mdThreshold: value,
+                          },
+                        });
+                      }}
+                    />
+                  </>
+                )}
+                {/* 网格视图卡片尺寸：sm / md / lg / auto，便于适应不同标签页数量与屏幕宽度 */}
+                <div className={styles["appearance-visibility-row"]}>
+                  <div>
+                    <div className={styles["appearance-visibility-title"]}>
+                      {t("grid.cardSize")}
+                    </div>
+                    <div className={styles["appearance-visibility-hint"]}>
+                      {t("grid.cardSizeHint")}
+                    </div>
+                  </div>
+                  <Select
+                    size="small"
+                    className={styles["appearance-quickstart-select"]}
+                    value={settings.gridCardSize ?? "md"}
+                    onChange={(v) => void updateSettings({ gridCardSize: v })}
+                    options={[
+                      { value: "sm", label: t("grid.cardSizeSm") },
+                      { value: "md", label: t("grid.cardSizeMd") },
+                      { value: "lg", label: t("grid.cardSizeLg") },
+                      { value: "auto", label: t("grid.cardSizeAuto") },
                     ]}
                   />
                 </div>

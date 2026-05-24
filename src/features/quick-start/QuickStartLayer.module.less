@@ -65,7 +65,7 @@
   display: grid;
   /* 卡片最小宽度由 --speed-dial-card-min-width 控制（默认 152px，对应 'md' 档） */
   grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 152px), 1fr));
-  gap: 12px;
+  gap: var(--speed-dial-grid-gap, 12px);
   align-items: start;
 }
 
@@ -123,13 +123,176 @@
   transition:
     background 120ms ease,
     border-left-color 120ms ease;
+  cursor: default;
+}
+
+/* 可折叠时，分组头部变为可点击 */
+.speed-dial-group-header[role="button"] {
+  cursor: pointer;
+  user-select: none;
+}
+
+.speed-dial-group-header[role="button"]:hover {
+  background: color-mix(
+    in srgb,
+    var(--speed-dial-group-accent, var(--ant-color-primary)) 10%,
+    var(--ant-color-bg-container)
+  );
+}
+
+/* ── 分组折叠图标 ── */
+.speed-dial-group-collapse-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ant-color-text-tertiary);
+  flex-shrink: 0;
+  transition: color 120ms ease;
+}
+
+.speed-dial-group-header:hover .speed-dial-group-collapse-icon {
+  color: var(--ant-color-text-secondary);
+}
+
+/* ── 浮动添加按钮（FAB） ── */
+.speed-dial-fab {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  /* 抗闪白：预创建合成层 + 隔离重绘范围 */
+  will-change: transform;
+  contain: layout style paint;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.speed-dial-fab:hover {
+  transform: scale3d(1.08, 1.08, 1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.speed-dial-fab:active {
+  transform: scale3d(0.95, 0.95, 1);
+}
+
+/* ── 列表视图 ── */
+
+/* 列表容器（非分组模式） */
+.speed-dial-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--speed-dial-grid-gap, 12px);
+}
+
+/* 列表容器（分组模式） */
+.speed-dial-group-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--speed-dial-grid-gap, 12px);
+}
+
+/* 列表条目 */
+.speed-dial-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--app-radius-sm);
+  border: 1px solid var(--ant-color-border-secondary);
+  background: var(--ant-color-bg-container);
+  transition:
+    background 120ms ease,
+    border-color 120ms ease;
+  cursor: pointer;
+  opacity: var(--speed-dial-card-opacity, 1);
+}
+
+.speed-dial-list-item:hover {
+  border-color: var(--ant-color-border);
+  background: var(--ant-color-bg-layout);
+}
+
+/* 列表条目 — 拖拽手柄 */
+.speed-dial-list-item__drag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  color: var(--ant-color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.speed-dial-list-item__drag:active {
+  cursor: grabbing;
+}
+
+/* 列表条目 — favicon */
+.speed-dial-list-item__favicon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--ant-color-fill-quaternary);
+}
+
+.speed-dial-list-item__favicon-img {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+}
+
+.speed-dial-list-item__fallback {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ant-color-text-secondary);
+}
+
+/* 列表条目 — 标题和域名 */
+.speed-dial-list-item__info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.speed-dial-list-item__title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ant-color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.speed-dial-list-item__hostname {
+  font-size: 10px;
+  color: var(--ant-color-text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 列表条目 — 操作菜单 */
+.speed-dial-list-item__actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 /* ── 分组内网格 ── */
 .speed-dial-group-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 152px), 1fr));
-  gap: 12px;
+  gap: var(--speed-dial-grid-gap, 12px);
 }
 
 @media (min-width: 768px) {
@@ -229,7 +392,10 @@
   background: color-mix(in srgb, #000 4%, transparent);
   color: var(--ant-color-text-tertiary);
   opacity: 0;
-  transform: scale(0.9);
+  /* 抗闪白：预创建合成层 + 隔离重绘范围 + GPU 加速 */
+  will-change: transform, opacity;
+  contain: layout style paint;
+  transform: scale3d(0.9, 0.9, 1);
   transition:
     opacity 160ms ease,
     transform 160ms ease,
@@ -240,7 +406,7 @@
 
 .app-speed-dial-card:hover .speed-dial-more-btn {
   opacity: 1;
-  transform: scale(1);
+  transform: scale3d(1, 1, 1);
 }
 
 .speed-dial-more-btn:hover {

@@ -149,6 +149,9 @@
   cursor: default;
   transition: background-color 0.15s ease;
   min-height: 48px;
+  /* 抗闪白：预创建合成层 + 隔离重绘范围 */
+  will-change: background-color;
+  contain: layout style paint;
 }
 
 .history-item:hover,

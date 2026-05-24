@@ -99,24 +99,24 @@ h6 {
 
 /* ─── 自定义滚动条（webkit）──────────────────────── */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 0px; /* 隐藏垂直滚动条，打造沉浸式体验 */
+  height: 0px;
+  display: none;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--ant-color-border-secondary);
+  background: transparent;
   border-radius: var(--app-radius-xs);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--ant-color-border);
+  background: transparent;
 }
 
 /* ─── Firefox 滚动条 ─────────────────────────────── */
 * {
-  scrollbar-width: thin;
-  scrollbar-color: var(--ant-color-border-secondary) transparent;
+  scrollbar-width: none; /* Firefox 隐藏滚动条 */
 }
 
 /* ─── favicon 占位块（无图时的字母色块） ──────────── */

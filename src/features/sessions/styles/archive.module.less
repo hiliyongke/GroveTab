@@ -193,6 +193,9 @@
   background: var(--ant-color-bg-container);
   border: 1px solid var(--app-hairline);
   cursor: pointer;
+  /* 预创建合成层 + 隔离重绘，防止 hover 时合成层重建导致相邻元素抖动 */
+  will-change: transform;
+  contain: layout style paint;
   transition:
     transform 180ms ease,
     box-shadow 180ms ease,
@@ -308,9 +311,14 @@
   gap: 10px;
   position: sticky;
   top: 0;
-  z-index: 1;
-  padding: 6px 4px;
-  background: var(--ant-color-bg-layout);
+  z-index: 10;
+  padding: 10px 12px;
+  margin: 0 -8px;
+  border-radius: var(--app-radius-md);
+  background: color-mix(in srgb, var(--ant-color-bg-layout) 75%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--app-hairline) 50%, transparent);
 }
 
 .archive-time-group__title {
@@ -340,6 +348,9 @@
   border-radius: var(--app-radius-lg);
   background: var(--ant-color-bg-container);
   border: 1px solid var(--app-hairline);
+  /* 预创建合成层 + 隔离重绘，防止 hover 时合成层重建导致相邻元素抖动 */
+  will-change: transform;
+  contain: layout style paint;
   transition:
     transform 180ms ease,
     box-shadow 180ms ease,
@@ -479,6 +490,8 @@
   padding: 6px 8px;
   border-radius: var(--app-radius-sm);
   cursor: pointer;
+  /* 隔离重绘范围，防止 hover 背景色变化导致相邻元素重绘 */
+  contain: layout style paint;
   transition: background 140ms ease;
 }
 

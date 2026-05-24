@@ -226,6 +226,9 @@
   border: 1px solid var(--ant-color-border-secondary);
   cursor: pointer;
   text-align: left;
+  /* 抗闪白：预创建合成层 + 隔离重绘范围 + GPU 加速 */
+  will-change: transform;
+  contain: layout style paint;
   transition:
     transform 0.15s,
     border-color 0.15s,
@@ -234,7 +237,7 @@
 }
 
 .bm-tools__quick:hover {
-  transform: translateY(-1px);
+  transform: translate3d(0, -1px, 0);
   border-color: var(--ant-color-primary);
   box-shadow: 0 4px 12px color-mix(in srgb, #000 6%, transparent);
 }

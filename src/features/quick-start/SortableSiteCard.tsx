@@ -5,31 +5,33 @@
  * 拖拽手柄的 listeners 只绑定在手柄元素上，避免误触。
  */
 
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import type { SpeedDialSite } from '@/shared/types';
-import { SiteCard } from './SiteCard';
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import type { SpeedDialSite } from "@/shared/types";
+import { SiteCard } from "./SiteCard";
 
 interface SortableSiteCardProps {
   site: SpeedDialSite;
   onEdit: (site: SpeedDialSite) => void;
   onDelete: (id: string) => void;
+  /** 渲染变体：'card'（网格卡片）或 'list'（紧凑列表） */
+  variant?: "card" | "list";
 }
 
-export function SortableSiteCard({ site, onEdit, onDelete }: SortableSiteCardProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: site.id });
+export function SortableSiteCard({
+  site,
+  onEdit,
+  onDelete,
+  variant = "card",
+}: SortableSiteCardProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: site.id,
+  });
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
-    zIndex: isDragging ? 999 : 'auto',
+    zIndex: isDragging ? 999 : "auto",
   };
 
   return (
@@ -42,6 +44,7 @@ export function SortableSiteCard({ site, onEdit, onDelete }: SortableSiteCardPro
         isDragging={isDragging}
         onEdit={onEdit}
         onDelete={onDelete}
+        variant={variant}
       />
     </div>
   );

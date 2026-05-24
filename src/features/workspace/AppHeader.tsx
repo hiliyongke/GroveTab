@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { Layout, Space, Button, Tooltip, Tag } from "antd";
-import { Search, Settings, Sun, Moon, Monitor, Globe, BarChart3, History } from "lucide-react";
+import { Search, Settings, Sun, Moon, SunMoon, Globe, BarChart3, History } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useSettingsStore } from "@/store";
 import { useT } from "@/shared/i18n";
@@ -65,11 +65,11 @@ export function AppHeader({
    * 主题图标：三态分别用差异化强烈的图形，避免「点了看不出变化」
    *   - light  → 太阳 ☀
    *   - dark   → 月亮 🌙
-   *   - system → 显示器 🖥
+   *   - system → 日月同辉 ☀🌙
    */
   const themeIcon =
     theme === "system" ? (
-      <Monitor key="sys" size={ICON_SIZE.MEDIUM} className="app-icon app-icon--theme" />
+      <SunMoon key="sys" size={ICON_SIZE.MEDIUM} className="app-icon app-icon--theme" />
     ) : theme === "dark" ? (
       <Moon key="dark" size={ICON_SIZE.MEDIUM} className="app-icon app-icon--theme" />
     ) : (
@@ -77,7 +77,7 @@ export function AppHeader({
     );
 
   return (
-    <Header className="app-header-shell">
+    <Header className={`app-header-shell${compactSearchVisible ? " is-scrolled" : ""}`}>
       {/* 左侧：小 logo + 状态摘要 */}
       <div className="app-header-left">
         <img src="/icons/logo.png" alt={BRAND.name} className="app-header-logo" />

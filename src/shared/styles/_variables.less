@@ -23,18 +23,17 @@
 @density-scale: 1;
 
 /* ── 语义间距（基础值，编译时常量） ── */
-@app-space-1: ceil(@spacing-unit * @density-scale);       /* 4px  → 4px  (default) */
-@app-space-2: ceil(@spacing-unit * 2 * @density-scale);   /* 8px  → 8px  */
-@app-space-3: ceil(@spacing-unit * 3 * @density-scale);   /* 12px → 12px */
-@app-space-4: ceil(@spacing-unit * 4 * @density-scale);   /* 16px → 16px */
-@app-space-5: ceil(@spacing-unit * 6 * @density-scale);   /* 24px → 24px */
-@app-space-6: ceil(@spacing-unit * 8 * @density-scale);   /* 32px → 32px */
+@app-space-1: ceil(@spacing-unit * @density-scale); /* 4px  → 4px  (default) */
+@app-space-2: ceil(@spacing-unit * 2 * @density-scale); /* 8px  → 8px  */
+@app-space-3: ceil(@spacing-unit * 3 * @density-scale); /* 12px → 12px */
+@app-space-4: ceil(@spacing-unit * 4 * @density-scale); /* 16px → 16px */
+@app-space-5: ceil(@spacing-unit * 6 * @density-scale); /* 24px → 24px */
+@app-space-6: ceil(@spacing-unit * 8 * @density-scale); /* 32px → 32px */
 
 /* ── 卡片间距 ── */
-@app-card-gap: ceil(16px * @density-scale);     /* 16px */
+@app-card-gap: ceil(16px * @density-scale); /* 16px */
 @app-card-padding: ceil(16px * @density-scale); /* 16px */
-@app-section-gap: ceil(24px * @density-scale);  /* 24px */
-
+@app-section-gap: ceil(24px * @density-scale); /* 24px */
 
 /* ═══════════════════════════════════════════════════════
  * 字体体系
@@ -44,9 +43,8 @@
 @app-font-size: 14px;
 
 /** 等宽字体栈 */
-@app-font-family-code: 'SF Mono', 'Fira Code', 'Fira Mono',
-  'Roboto Mono', 'Noto Sans Mono SC', ui-monospace, monospace;
-
+@app-font-family-code: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", "Noto Sans Mono SC",
+  ui-monospace, monospace;
 
 /* ═══════════════════════════════════════════════════════
  * 圆角体系
@@ -59,7 +57,6 @@
 @app-radius-lg: 8px;
 @app-radius-pill: 980px;
 @app-radius-circle: 50%;
-
 
 /* ═══════════════════════════════════════════════════════
  * 卡片交互
@@ -74,7 +71,6 @@
 /** hover 上浮距离 */
 @app-card-lift-distance: 2px;
 
-
 /* ═══════════════════════════════════════════════════════
  * 动效时长
  * ═══════════════════════════════════════════════════════ */
@@ -83,7 +79,6 @@
 @app-motion-duration-slow: 0.3s;
 @app-motion-duration-mid: 0.18s;
 @app-motion-duration-fast: 0.1s;
-
 
 /* ═══════════════════════════════════════════════════════
  * 毛玻璃默认参数
@@ -95,7 +90,6 @@
 /** 默认毛玻璃饱和度（%） */
 @app-glass-saturate: 180;
 
-
 /* ═══════════════════════════════════════════════════════
  * 纹理默认参数
  * ═══════════════════════════════════════════════════════ */
@@ -106,6 +100,160 @@
 /** 网格线默认透明度 */
 @app-texture-grid-opacity: 0.03;
 
+/* ═══════════════════════════════════════════════════════
+ * 组件高度
+ * ═══════════════════════════════════════════════════════ */
+
+/** 搜索框高度 */
+@app-search-height: 44px;
+
+/** 头部导航栏高度 */
+@app-header-height: 48px;
+
+/* ═══════════════════════════════════════════════════════
+ * 背景色CSS变量定义（运行时动态值）
+ * ═══════════════════════════════════════════════════════ */
+
+/**
+ * 背景色统一性设计系统 - CSS变量定义
+ *
+ * 基于背景色设计系统规范，提供统一的背景色变量体系
+ * 所有组件必须使用这些变量来确保背景色的一致性
+ */
+
+/* 基础背景色层级体系 */
+--app-bg-layout: var(--ant-color-bg-layout);
+--app-bg-container: var(--ant-color-bg-container);
+--app-bg-elevated: var(--ant-color-bg-elevated);
+--app-bg-surface: var(--ant-color-fill-quaternary);
+
+/* 交互状态背景色 */
+--app-bg-hover: color-mix(
+  in srgb,
+  var(--app-color-primary, var(--ant-color-primary)) 8%,
+  transparent
+);
+--app-bg-active: color-mix(
+  in srgb,
+  var(--app-color-primary, var(--ant-color-primary)) 12%,
+  transparent
+);
+--app-bg-selected: color-mix(
+  in srgb,
+  var(--app-color-primary, var(--ant-color-primary)) 16%,
+  transparent
+);
+--app-bg-disabled: var(--ant-color-fill-quaternary);
+
+/* 特殊用途背景色 */
+--app-bg-glass: color-mix(in srgb, var(--app-bg-elevated) 85%, transparent);
+--app-bg-mask: color-mix(in srgb, #000 45%, transparent);
+--app-bg-error: var(--ant-color-error-bg);
+--app-bg-warning: var(--ant-color-warning-bg);
+--app-bg-success: var(--ant-color-success-bg);
+--app-bg-info: var(--ant-color-info-bg);
+
+/* 组件特定背景色 */
+--app-settings-nav-bg: color-mix(in srgb, var(--app-bg-elevated) 72%, transparent);
+--app-settings-content-bg: var(--app-bg-container);
+--app-newtab-card-bg: var(--app-bg-elevated);
+--app-modal-bg: var(--app-bg-glass);
+--app-modal-mask-bg: var(--app-bg-mask);
+
+/**
+ * 背景色使用说明：
+ * 1. 在组件中直接使用CSS变量：background-color: var(--app-bg-container);
+ * 2. 避免硬编码色值，确保背景色统一性
+ * 3. 支持明暗主题自动适配
+ */
+
+/* ═══════════════════════════════════════════════════════
+ * 间距体系（4px 基础单位，支持密度缩放）
+ * ═══════════════════════════════════════════════════════ */
+
+/** 间距基数（与 CSS --app-spacing-unit 对应） */
+@spacing-unit: 4px;
+
+/** 密度缩放系数（与 CSS --app-density-scale 对应） */
+@density-scale: 1;
+
+/* ── 语义间距（基础值，编译时常量） ── */
+@app-space-1: ceil(@spacing-unit * @density-scale); /* 4px  → 4px  (default) */
+@app-space-2: ceil(@spacing-unit * 2 * @density-scale); /* 8px  → 8px  */
+@app-space-3: ceil(@spacing-unit * 3 * @density-scale); /* 12px → 12px */
+@app-space-4: ceil(@spacing-unit * 4 * @density-scale); /* 16px → 16px */
+@app-space-5: ceil(@spacing-unit * 6 * @density-scale); /* 24px → 24px */
+@app-space-6: ceil(@spacing-unit * 8 * @density-scale); /* 32px → 32px */
+
+/* ── 卡片间距 ── */
+@app-card-gap: ceil(16px * @density-scale); /* 16px */
+@app-card-padding: ceil(16px * @density-scale); /* 16px */
+@app-section-gap: ceil(24px * @density-scale); /* 24px */
+
+/* ═══════════════════════════════════════════════════════
+ * 字体体系
+ * ═══════════════════════════════════════════════════════ */
+
+/** 基础正文字号 */
+@app-font-size: 14px;
+
+/** 等宽字体栈 */
+@app-font-family-code: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", "Noto Sans Mono SC",
+  ui-monospace, monospace;
+
+/* ═══════════════════════════════════════════════════════
+ * 圆角体系
+ * ═══════════════════════════════════════════════════════ */
+
+/** 基础圆角尺寸（编译时常量，具体值由皮肤决定） */
+@app-radius-xs: 2px;
+@app-radius-sm: 4px;
+@app-radius-md: 6px;
+@app-radius-lg: 8px;
+@app-radius-pill: 980px;
+@app-radius-circle: 50%;
+
+/* ═══════════════════════════════════════════════════════
+ * 卡片交互
+ * ═══════════════════════════════════════════════════════ */
+
+/** 卡片默认边框宽度 */
+@app-card-border-width: 1px;
+
+/** hover 边框宽度 */
+@app-card-hover-border-width: 1px;
+
+/** hover 上浮距离 */
+@app-card-lift-distance: 2px;
+
+/* ═══════════════════════════════════════════════════════
+ * 动效时长
+ * ═══════════════════════════════════════════════════════ */
+
+@app-motion-duration: 0.2s;
+@app-motion-duration-slow: 0.3s;
+@app-motion-duration-mid: 0.18s;
+@app-motion-duration-fast: 0.1s;
+
+/* ═══════════════════════════════════════════════════════
+ * 毛玻璃默认参数
+ * ═══════════════════════════════════════════════════════ */
+
+/** 默认毛玻璃模糊值（px） */
+@app-glass-blur: 20px;
+
+/** 默认毛玻璃饱和度（%） */
+@app-glass-saturate: 180;
+
+/* ═══════════════════════════════════════════════════════
+ * 纹理默认参数
+ * ═══════════════════════════════════════════════════════ */
+
+/** 噪点纹理默认透明度 */
+@app-texture-noise-opacity: 0.03;
+
+/** 网格线默认透明度 */
+@app-texture-grid-opacity: 0.03;
 
 /* ═══════════════════════════════════════════════════════
  * 组件高度
