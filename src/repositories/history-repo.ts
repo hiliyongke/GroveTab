@@ -24,6 +24,8 @@ import type {
   UserSettings,
 } from "@/shared/types";
 
+export { snapshotDateKey } from "@/shared/utils/date";
+
 // ── 容量与过滤策略 ─────────────────────────
 
 /** HistoryEvent 默认最大保留条数（足够支撑「今天 / 昨天 / 本周」浏览） */
@@ -328,17 +330,7 @@ async function clearClosedWindows(): Promise<void> {
 /** 默认保留多少天的快照（FIFO 截断；超出按日期最早淘汰） */
 const MAX_DAILY_SNAPSHOTS = 14;
 
-/**
- * 把一个时间戳格式化为 `YYYY-MM-DD`（按用户本地时区）。
- * 这里不引外部依赖，避免 SW 的额外开销。
- */
-export function snapshotDateKey(ts: number = Date.now()): string {
-  const d = new Date(ts);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
+import { snapshotDateKey } from "@/shared/utils/date";
 
 /** 读取所有快照（按 dateKey 升序：旧 → 新） */
 export async function getDailySnapshots(): Promise<DailySnapshot[]> {

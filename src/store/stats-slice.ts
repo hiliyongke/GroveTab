@@ -16,9 +16,10 @@
  *   3. 数据缺失或损坏时回退为空，FrequencyView 自行回退到 lastAccessed 近似
  */
 
-import { create } from 'zustand';
-import type { StatsData } from '@/shared/types';
-import { getStats } from '@/repositories';
+import { create } from "zustand";
+import type { StatsData } from "@/shared/types";
+import { getStats } from "@/repositories";
+import { toDayStr } from "@/shared/utils/date";
 
 interface StatsState {
   data: StatsData | null;
@@ -48,7 +49,7 @@ export const useStatsStore = create<StatsState>((set, get) => ({
       }
       set({ data, loaded: true, isFallback: false });
     } catch (err) {
-      console.warn('[stats] loadStats failed:', err);
+      console.warn("[stats] loadStats failed:", err);
       set({ data: null, loaded: true, isFallback: true });
     }
   },
@@ -87,13 +88,6 @@ export const useStatsStore = create<StatsState>((set, get) => ({
 function isValidStatsData(data: StatsData | undefined): data is StatsData {
   if (data === undefined) return false;
   if (!Array.isArray(data.daily)) return false;
-  if (typeof data.lastFlushAt !== 'number') return false;
+  if (typeof data.lastFlushAt !== "number") return false;
   return true;
-}
-
-function toDayStr(d: Date): string {
-  const yyyy = d.getUTCFullYear();
-  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const dd = String(d.getUTCDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
 }

@@ -10,9 +10,9 @@
  * 6. 自动快照 —— 按 autoSnapshotFrequency 周期性静默归档（F-23）
  */
 
-import { swBroadcast } from '@/shared/utils/sw-broadcast';
-import { archiveCurrentWindowTabs } from './archive-handler';
-import { createAutoSnapshot } from '@/services/archive';
+import { swBroadcast } from "@/shared/utils/sw-broadcast";
+import { archiveCurrentWindowTabs } from "./archive-handler";
+import { createAutoSnapshot } from "@/services/archive";
 import {
   getSettings,
   getStats,
@@ -26,11 +26,11 @@ import {
   upsertDailySnapshot,
   getTodaySnapshot,
   snapshotDateKey,
-} from '@/repositories';
-import type { StatsData, StatsRecord } from '@/shared/types';
-import { BRAND } from '@/shared/config/brand';
-import { CONFIG } from '@/shared/config';
-import { APP_INTERNAL_IDS, STORAGE_KEYS } from '@/shared/config/storage-keys';
+} from "@/repositories";
+import type { StatsData, StatsRecord } from "@/shared/types";
+import { BRAND } from "@/shared/config/brand";
+import { CONFIG } from "@/shared/config";
+import { APP_INTERNAL_IDS, STORAGE_KEYS } from "@/shared/config/storage-keys";
 
 /** 统一日志前缀：SW 内所有 console.log/warn/error 都走 SW_LOG_TAG */
 const SW_LOG_TAG = `${BRAND.logTag} SW`;
@@ -65,9 +65,9 @@ function snapshotTab(tab: chrome.tabs.Tab): void {
   if (tab.id === undefined) return;
   tabSnapshots.set(tab.id, {
     id: tab.id,
-    url: tab.url ?? tab.pendingUrl ?? '',
-    title: tab.title ?? '',
-    favIconUrl: tab.favIconUrl ?? '',
+    url: tab.url ?? tab.pendingUrl ?? "",
+    title: tab.title ?? "",
+    favIconUrl: tab.favIconUrl ?? "",
     windowId: tab.windowId,
     pinned: tab.pinned ?? false,
     incognito: tab.incognito ?? false,
@@ -103,15 +103,15 @@ async function maybeCaptureDailySnapshot(): Promise<void> {
     for (const t of tabs) {
       // 与 historyEvents 同步策略：忽略 chrome:// 等内置页和隐身窗口
       if (t.incognito) continue;
-      const url = t.url ?? t.pendingUrl ?? '';
+      const url = t.url ?? t.pendingUrl ?? "";
       if (isUrlIgnored(url)) continue;
-      let host = '';
+      let host = "";
       try {
         host = new URL(url).hostname;
       } catch {
         continue;
       }
-      if (host === '') continue;
+      if (host === "") continue;
       counter.set(host, (counter.get(host) ?? 0) + 1);
     }
     const hosts = [...counter.entries()].sort((a, b) => b[1] - a[1]);
@@ -127,7 +127,9 @@ async function maybeCaptureDailySnapshot(): Promise<void> {
 }
 // 启动即尝试一次（同一天有则跳过）
 void maybeCaptureDailySnapshot();
-chrome.runtime.onStartup.addListener(() => { void maybeCaptureDailySnapshot(); });
+chrome.runtime.onStartup.addListener(() => {
+  void maybeCaptureDailySnapshot();
+});
 
 /**
  * 在指定窗口被整体关闭后的一个宏任务周期里，把该窗口下累积的 closedTab
@@ -149,10 +151,10 @@ function scheduleWindowCloseFlush(windowId: number): void {
           windowId,
           tabIds: ids,
           tabCount: ids.length,
-          preview: '',
+          preview: "",
         });
         await appendHistoryEvent({
-          type: 'window_closed',
+          type: "window_closed",
           windowId,
           extra: { tabCount: ids.length },
         });
@@ -188,23 +190,17 @@ const STATS_RETAIN_DAYS = CONFIG.performance.statsRetainDays;
 function urlKey(url: string): string {
   try {
     const u = new URL(url);
-    u.hash = '';
-    return u.toString().replace(/\/+$/, '');
+    u.hash = "";
+    return u.toString().replace(/\/+$/, "");
   } catch {
     return url;
   }
 }
 
-function todayStr(): string {
-  const d = new Date();
-  const yyyy = d.getUTCFullYear();
-  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-  const dd = String(d.getUTCDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
-}
+import { todayStr } from "@/shared/utils/date";
 
 function incrementStats(url: string): void {
-  if (url === '') return;
+  if (url === "") return;
   const key = urlKey(url);
   statsMem.byUrl.set(key, (statsMem.byUrl.get(key) ?? 0) + 1);
   statsMem.dirty = true;
@@ -227,9 +223,9 @@ async function flushStats(force = false): Promise<void> {
     }
     // 保留最近 30 天
     const cutoff = new Date(Date.now() - STATS_RETAIN_DAYS * 86400_000);
-    const cutoffStr = `${cutoff.getUTCFullYear()}-${String(cutoff.getUTCMonth() + 1).padStart(2, '0')}-${String(
+    const cutoffStr = `${cutoff.getUTCFullYear()}-${String(cutoff.getUTCMonth() + 1).padStart(2, "0")}-${String(
       cutoff.getUTCDate(),
-    ).padStart(2, '0')}`;
+    ).padStart(2, "0")}`;
     existing.daily = existing.daily.filter((r: StatsRecord) => r.day >= cutoffStr);
     existing.lastFlushAt = Date.now();
     await saveStats(existing);
@@ -251,21 +247,21 @@ chrome.tabs.onCreated.addListener((tab) => {
   // 维护快照
   snapshotTab(tab);
   // 记录“打开新标签页”事件（仅当 url 有意义时）
-  const url = tab.url ?? tab.pendingUrl ?? '';
-  if (url !== '' && !isUrlIgnored(url)) {
+  const url = tab.url ?? tab.pendingUrl ?? "";
+  if (url !== "" && !isUrlIgnored(url)) {
     void appendHistoryEvent({
-      type: 'tab_opened',
+      type: "tab_opened",
       url,
-      title: tab.title ?? '',
-      favIconUrl: tab.favIconUrl ?? '',
+      title: tab.title ?? "",
+      favIconUrl: tab.favIconUrl ?? "",
       windowId: tab.windowId,
       incognito: tab.incognito,
     });
   }
-  swBroadcast('tab-created', {
+  swBroadcast("tab-created", {
     id: tab.id,
-    url: tab.url ?? tab.pendingUrl ?? '',
-    title: tab.title ?? '',
+    url: tab.url ?? tab.pendingUrl ?? "",
+    title: tab.title ?? "",
     windowId: tab.windowId,
     pinned: tab.pinned,
     incognito: tab.incognito,
@@ -277,12 +273,17 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   snapshotTab(tab);
 
   // 仅广播有意义的变更
-  if (changeInfo.url || changeInfo.title || changeInfo.favIconUrl || changeInfo.status === 'complete') {
-    swBroadcast('tab-updated', {
+  if (
+    changeInfo.url ||
+    changeInfo.title ||
+    changeInfo.favIconUrl ||
+    changeInfo.status === "complete"
+  ) {
+    swBroadcast("tab-updated", {
       id: tabId,
-      url: tab.url ?? '',
-      title: tab.title ?? '',
-      favIconUrl: tab.favIconUrl ?? '',
+      url: tab.url ?? "",
+      title: tab.title ?? "",
+      favIconUrl: tab.favIconUrl ?? "",
       windowId: tab.windowId,
       status: changeInfo.status,
     });
@@ -293,11 +294,11 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   const prev = cachedTabDiscardedState.get(tabId);
   if (prev !== discarded) {
     cachedTabDiscardedState.set(tabId, discarded);
-    swBroadcast('tab-discarded', { id: tabId, discarded, windowId: tab.windowId });
+    swBroadcast("tab-discarded", { id: tabId, discarded, windowId: tab.windowId });
   }
 
   // OG description 抓取（F-24，enableOgFetch=true 且授权 <all_urls> 时触发）
-  if (changeInfo.status === 'complete' && tab.url !== undefined && /^https?:\/\//.test(tab.url)) {
+  if (changeInfo.status === "complete" && tab.url !== undefined && /^https?:\/\//.test(tab.url)) {
     void maybeFetchOg(tab.url);
   }
 });
@@ -311,7 +312,7 @@ chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
       try {
         const tabs = await pushClosedTab({
           url: snap.url,
-          title: snap.title === '' ? snap.url : snap.title,
+          title: snap.title === "" ? snap.url : snap.title,
           favIconUrl: snap.favIconUrl,
           windowId: snap.windowId,
           fromWindowClose: removeInfo.isWindowClosing,
@@ -319,7 +320,7 @@ chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
           incognito: snap.incognito,
         });
         await appendHistoryEvent({
-          type: 'tab_closed',
+          type: "tab_closed",
           url: snap.url,
           title: snap.title,
           favIconUrl: snap.favIconUrl,
@@ -329,8 +330,8 @@ chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
         });
         // 收集到 windowCloseBuffer、稍后起一个「整窗快照」
         if (removeInfo.isWindowClosing) {
-          const newId = tabs[0]?.id ?? '';
-          if (newId !== '') {
+          const newId = tabs[0]?.id ?? "";
+          if (newId !== "") {
             const arr = windowCloseBuffer.get(snap.windowId) ?? [];
             arr.push(newId);
             windowCloseBuffer.set(snap.windowId, arr);
@@ -343,7 +344,7 @@ chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
     })();
   }
 
-  swBroadcast('tab-removed', {
+  swBroadcast("tab-removed", {
     id: tabId,
     windowId: removeInfo.windowId,
     isWindowClosing: removeInfo.isWindowClosing,
@@ -351,7 +352,7 @@ chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
 });
 
 chrome.tabs.onActivated.addListener((activeInfo) => {
-  swBroadcast('tab-activated', {
+  swBroadcast("tab-activated", {
     id: activeInfo.tabId,
     windowId: activeInfo.windowId,
   });
@@ -359,8 +360,8 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
   void (async () => {
     try {
       const tab = await chrome.tabs.get(activeInfo.tabId);
-      const url = tab.url ?? tab.pendingUrl ?? '';
-      if (url !== '') incrementStats(url);
+      const url = tab.url ?? tab.pendingUrl ?? "";
+      if (url !== "") incrementStats(url);
       void flushStats(false);
     } catch {
       // ignore
@@ -369,7 +370,7 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
 });
 
 chrome.tabs.onMoved.addListener((tabId, moveInfo) => {
-  swBroadcast('tab-moved', {
+  swBroadcast("tab-moved", {
     id: tabId,
     windowId: moveInfo.windowId,
     fromIndex: moveInfo.fromIndex,
@@ -380,22 +381,22 @@ chrome.tabs.onMoved.addListener((tabId, moveInfo) => {
 // ── Window Event Listeners ────────────────────────────
 
 chrome.windows.onFocusChanged.addListener((windowId) => {
-  swBroadcast('window-focus-changed', { windowId });
+  swBroadcast("window-focus-changed", { windowId });
 });
 
 // ── Context Menu ──────────────────────────────────────
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
-    id: 'app-save-all',
-    title: chrome.i18n.getMessage('context_save_all') || `Save all tabs to ${BRAND.name}`,
-    contexts: ['action'],
+    id: "app-save-all",
+    title: chrome.i18n.getMessage("context_save_all") || `Save all tabs to ${BRAND.name}`,
+    contexts: ["action"],
   });
 });
 
 chrome.contextMenus.onClicked.addListener((info) => {
   void (async () => {
-    if (info.menuItemId === 'app-save-all') {
+    if (info.menuItemId === "app-save-all") {
       try {
         await archiveCurrentWindowTabs();
       } catch (err) {
@@ -411,14 +412,14 @@ chrome.commands.onCommand.addListener((command) => {
   void (async () => {
     if (command === APP_INTERNAL_IDS.openWorkspaceCommand) {
       try {
-        const url = chrome.runtime.getURL('src/pages/newtab/index.html');
+        const url = chrome.runtime.getURL("src/pages/newtab/index.html");
         await chrome.tabs.create({ url });
       } catch (err) {
         console.error(`${SW_LOG_TAG} Open ${BRAND.name} failed:`, err);
       }
     }
 
-    if (command === 'save-all-tabs') {
+    if (command === "save-all-tabs") {
       try {
         await archiveCurrentWindowTabs();
       } catch (err) {
@@ -426,18 +427,18 @@ chrome.commands.onCommand.addListener((command) => {
       }
     }
 
-    if (command === 'toggle-search') {
+    if (command === "toggle-search") {
       try {
-        const url = chrome.runtime.getURL('src/pages/newtab/index.html#search');
+        const url = chrome.runtime.getURL("src/pages/newtab/index.html#search");
         await chrome.tabs.create({ url });
       } catch (err) {
         console.error(`${SW_LOG_TAG} Toggle search failed:`, err);
       }
     }
 
-    if (command === 'open-history') {
+    if (command === "open-history") {
       try {
-        const url = chrome.runtime.getURL('src/pages/newtab/index.html#history');
+        const url = chrome.runtime.getURL("src/pages/newtab/index.html#history");
         await chrome.tabs.create({ url });
       } catch (err) {
         console.error(`${SW_LOG_TAG} Open history failed:`, err);
@@ -454,17 +455,17 @@ void chrome.alarms.create(APP_INTERNAL_IDS.trendingRefreshAlarm, { periodInMinut
 async function autoSnapshotIfNeeded(): Promise<void> {
   try {
     const settings = await getSettings();
-    const freq = settings.autoSnapshotFrequency ?? '12h';
-    if (freq === 'off') return;
+    const freq = settings.autoSnapshotFrequency ?? "12h";
+    if (freq === "off") return;
 
     // 解析频率为毫秒
     const freqMs = (() => {
       switch (freq) {
-        case '6h':
+        case "6h":
           return 6 * 3600 * 1000;
-        case '12h':
+        case "12h":
           return 12 * 3600 * 1000;
-        case '24h':
+        case "24h":
           return 24 * 3600 * 1000;
         default:
           return 12 * 3600 * 1000;
@@ -501,7 +502,7 @@ async function checkDiscardedTabs(): Promise<void> {
       const prev = cachedTabDiscardedState.get(tab.id);
       const curr = tab.discarded ?? false;
       if (prev !== undefined && prev !== curr) {
-        swBroadcast('tab-discarded', { id: tab.id, discarded: curr, windowId: tab.windowId });
+        swBroadcast("tab-discarded", { id: tab.id, discarded: curr, windowId: tab.windowId });
       }
       cachedTabDiscardedState.set(tab.id, curr);
     }
@@ -523,11 +524,11 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 // ── Lifecycle ─────────────────────────────────────────
 
-self.addEventListener('install', () => {
+self.addEventListener("install", () => {
   console.log(`${SW_LOG_TAG} Installed`);
 });
 
-self.addEventListener('activate', () => {
+self.addEventListener("activate", () => {
   console.log(`${SW_LOG_TAG} Activated`);
 });
 
@@ -552,12 +553,12 @@ async function maybeFetchOg(url: string): Promise<void> {
     if (settings.enableOgFetch !== true) return;
 
     // 从 session storage 读取当前并发数
-    const result = await chrome.storage.session.get('ogInFlight');
-    const currentInFlight = (typeof result.ogInFlight === 'number' ? result.ogInFlight : 0) ?? 0;
+    const result = await chrome.storage.session.get("ogInFlight");
+    const currentInFlight = (typeof result.ogInFlight === "number" ? result.ogInFlight : 0) ?? 0;
     if (currentInFlight >= OG_CONCURRENCY) return;
 
     // 已存在则跳过
-    const { getOgEntry, saveOgEntry } = await import('@/repositories');
+    const { getOgEntry, saveOgEntry } = await import("@/repositories");
     const existing = await getOgEntry(url);
     if (existing !== undefined && Date.now() - existing.fetchedAt < 7 * 86400_000) return;
 
@@ -567,7 +568,7 @@ async function maybeFetchOg(url: string): Promise<void> {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), OG_TIMEOUT_MS);
       const resp = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         headers: { Range: `bytes=0-${OG_MAX_BYTES - 1}` },
         signal: controller.signal,
       });
@@ -576,15 +577,19 @@ async function maybeFetchOg(url: string): Promise<void> {
       const text = await resp.text();
 
       // 解析 meta description（避免 DOMParser 在 SW 不可用，这里用 regex）
-      const ogMatch = /<meta[^>]+property\s*=\s*['"]og:description['"][^>]*content\s*=\s*['"]([^'"]*)['"]/i.exec(text);
-      const descMatch = /<meta[^>]+name\s*=\s*['"]description['"][^>]*content\s*=\s*['"]([^'"]*)['"]/i.exec(text);
+      const ogMatch =
+        /<meta[^>]+property\s*=\s*['"]og:description['"][^>]*content\s*=\s*['"]([^'"]*)['"]/i.exec(
+          text,
+        );
+      const descMatch =
+        /<meta[^>]+name\s*=\s*['"]description['"][^>]*content\s*=\s*['"]([^'"]*)['"]/i.exec(text);
       const titleMatch = /<title>([^<]*)<\/title>/i.exec(text);
-      const description = (ogMatch?.[1] ?? descMatch?.[1] ?? '').slice(0, 500);
-      if (description === '') return;
+      const description = (ogMatch?.[1] ?? descMatch?.[1] ?? "").slice(0, 500);
+      if (description === "") return;
 
       await saveOgEntry({
         url,
-        title: titleMatch?.[1]?.slice(0, 200) ?? '',
+        title: titleMatch?.[1]?.slice(0, 200) ?? "",
         description,
         fetchedAt: Date.now(),
       });
@@ -592,8 +597,8 @@ async function maybeFetchOg(url: string): Promise<void> {
       // 静默失败
     } finally {
       // 减少并发计数
-      const updated = await chrome.storage.session.get('ogInFlight');
-      const updatedValue = (typeof updated.ogInFlight === 'number' ? updated.ogInFlight : 0) ?? 0;
+      const updated = await chrome.storage.session.get("ogInFlight");
+      const updatedValue = (typeof updated.ogInFlight === "number" ? updated.ogInFlight : 0) ?? 0;
       await chrome.storage.session.set({ ogInFlight: Math.max(0, updatedValue - 1) });
     }
   } catch {
@@ -611,10 +616,10 @@ async function maybeFetchOg(url: string): Promise<void> {
  */
 async function refreshTrendingCache(): Promise<void> {
   try {
-    const { storageGet, storageSet } = await import('@/chrome');
+    const { storageGet, storageSet } = await import("@/chrome");
     const cache = await storageGet<Record<string, unknown>>(STORAGE_KEYS.trendingCache);
     // 无缓存 → 用户从未用过热榜，跳过
-    if (!cache?.boards || typeof cache.boards !== 'object') return;
+    if (!cache?.boards || typeof cache.boards !== "object") return;
 
     const boards = cache.boards as Record<string, Record<string, unknown>>;
     const boardIds = Object.keys(boards);
@@ -623,7 +628,7 @@ async function refreshTrendingCache(): Promise<void> {
     // 使用小尘API刷新每个已缓存的平台
     const FETCH_TIMEOUT_MS = 6000;
     const MAX_ITEMS = 20;
-    const API_BASE = 'https://api.xcvts.cn/api/hotlist';
+    const API_BASE = "https://api.xcvts.cn/api/hotlist";
 
     for (const boardId of boardIds) {
       try {
@@ -635,7 +640,7 @@ async function refreshTrendingCache(): Promise<void> {
         clearTimeout(timer);
 
         if (!resp.ok) continue;
-        const json = await resp.json() as {
+        const json = (await resp.json()) as {
           success?: boolean;
           data?: Array<Record<string, unknown>>;
           title?: string;
@@ -646,29 +651,32 @@ async function refreshTrendingCache(): Promise<void> {
         if (json.success !== true || !Array.isArray(json.data)) continue;
         if (json.data.length === 0) continue;
 
-        const items = json.data.slice(0, MAX_ITEMS).map((raw) => ({
-          id: String(raw.index ?? raw.id ?? ''),
-          title: String(raw.title ?? ''),
-          desc: raw.desc ? String(raw.desc) : undefined,
-          pic: raw.pics ? String(raw.pics) : undefined,
-          hot: typeof raw.hot === 'number' ? raw.hot : undefined,
-          hotLabel: typeof raw.hot === 'string' ? raw.hot : undefined,
-          url: String(raw.url ?? ''),
-          mobileUrl: raw.mobilUrl ? String(raw.mobilUrl) : undefined,
-        })).filter((item: { title: string }) => item.title !== '');
+        const items = json.data
+          .slice(0, MAX_ITEMS)
+          .map((raw) => ({
+            id: String(raw.index ?? raw.id ?? ""),
+            title: String(raw.title ?? ""),
+            desc: raw.desc ? String(raw.desc) : undefined,
+            pic: raw.pics ? String(raw.pics) : undefined,
+            hot: typeof raw.hot === "number" ? raw.hot : undefined,
+            hotLabel: typeof raw.hot === "string" ? raw.hot : undefined,
+            url: String(raw.url ?? ""),
+            mobileUrl: raw.mobilUrl ? String(raw.mobilUrl) : undefined,
+          }))
+          .filter((item: { title: string }) => item.title !== "");
 
         (cache.boards as Record<string, unknown>)[boardId] = {
           ...(boards[boardId] ?? {}),
           items,
           updateTime: json.update_time,
-          from: 'xcvts',
+          from: "xcvts",
         };
       } catch {
         // 单平台刷新失败不影响其他
       }
     }
 
-    (cache).lastRefreshAt = Date.now();
+    cache.lastRefreshAt = Date.now();
     await storageSet(STORAGE_KEYS.trendingCache, cache);
   } catch (err) {
     console.warn(`${SW_LOG_TAG} trending cache refresh failed`, err);
