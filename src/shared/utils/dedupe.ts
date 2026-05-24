@@ -5,39 +5,15 @@
  *   - 'strict'：URL 完全匹配
  *   - 'loose'（默认）：忽略 #hash + utm_* / fbclid / gclid
  *   - 'off'：禁用重复检测，返回空数组
+ *
+ * URL 归一化逻辑委托给 @/shared/utils/url 中的统一实现。
  */
 
-import type { LiveTab } from '@/shared/types';
-
-export type DedupStrictness = 'strict' | 'loose' | 'off';
-
-/** Tracking parameters to strip for loose dedup */
-const TRACKING_PARAMS = /^(utm_\w+|fbclid|gclid|mc_eid|mc_cid|ref|source)$/i;
-
-/** Normalize a URL for dedup comparison based on strictness */
-export function normalizeUrl(url: string, strictness: DedupStrictness): string {
-  if (strictness === 'strict') {
-    return url;
-  }
-  try {
-    const parsed = new URL(url);
-    // 移除哈希
-    parsed.hash = '';
-    // 移除跟踪参数
-    const params = new URLSearchParams();
-    for (const [key, value] of parsed.searchParams.entries()) {
-      if (!TRACKING_PARAMS.test(key)) {
-        params.set(key, value);
-      }
-    }
-    parsed.search = params.toString();
-    // 排序参数以保持一致性
-    parsed.searchParams.sort();
-    return parsed.toString().replace(/\/+$/, ''); // 移除末尾斜杠
-  } catch {
-    return url;
-  }
-}
+import type { LiveTab } from "@/shared/types";
+import type { DedupStrictness } from "@/shared/utils/url";
+import { normalizeUrl } from "@/shared/utils/url";
+export type { DedupStrictness } from "@/shared/utils/url";
+export { normalizeUrl } from "@/shared/utils/url";
 
 export interface DupGroup {
   canonicalUrl: string;
@@ -49,8 +25,8 @@ export interface DupGroup {
  * @param tabs 实时标签数组
  * @param strictness 三档严格度，默认 'loose'（向前兼容）
  */
-export function findDuplicates(tabs: LiveTab[], strictness: DedupStrictness = 'loose'): DupGroup[] {
-  if (strictness === 'off') return [];
+export function findDuplicates(tabs: LiveTab[], strictness: DedupStrictness = "loose"): DupGroup[] {
+  if (strictness === "off") return [];
 
   const urlMap = new Map<string, LiveTab[]>();
 
@@ -65,5 +41,3 @@ export function findDuplicates(tabs: LiveTab[], strictness: DedupStrictness = 'l
     .filter(([, groupTabs]) => groupTabs.length > 1)
     .map(([canonicalUrl, groupTabs]) => ({ canonicalUrl, tabs: groupTabs }));
 }
-
-

@@ -106,13 +106,7 @@ export function isUrlIgnored(url: string | undefined): boolean {
   return IGNORED_URL_PREFIXES.some((prefix) => lower.startsWith(prefix));
 }
 
-function safeHostname(url: string): string {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return "";
-  }
-}
+import { extractHostname } from "@/shared/utils/url";
 
 function genId(): string {
   // crypto.randomUUID 在 SW 与现代浏览器均可用；fallback 兜底
@@ -161,7 +155,7 @@ export async function appendHistoryEvent(
   if (!limits.enabled || !limits.recordEvents) {
     return getHistoryEvents();
   }
-  const hostname = partial.hostname ?? (partial.url ? safeHostname(partial.url) : "");
+  const hostname = partial.hostname ?? (partial.url ? extractHostname(partial.url) : "");
   if (hostname !== "" && isHostnameBlocked(hostname, limits.blocklist)) {
     return getHistoryEvents();
   }
@@ -249,7 +243,7 @@ export async function pushClosedTab(
 
   const limits = await loadLimits();
   if (!limits.enabled) return getClosedTabs();
-  const hostname = partial.hostname ?? safeHostname(partial.url);
+  const hostname = partial.hostname ?? extractHostname(partial.url ?? "");
   if (hostname !== "" && isHostnameBlocked(hostname, limits.blocklist)) {
     return getClosedTabs();
   }

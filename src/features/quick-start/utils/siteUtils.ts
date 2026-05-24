@@ -4,25 +4,27 @@
  * 从 URL 提取域名、获取 favicon URL 等纯函数。
  */
 
-import type { SpeedDialSite } from '@/shared/types';
+import type { SpeedDialSite } from "@/shared/types";
+
+import { extractHostname } from "@/shared/utils/url";
 
 /**
  * 从 URL 提取域名，失败返回原始 URL
  */
 export function getHostname(url: string): string {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return url;
-  }
+  const hostname = extractHostname(url);
+  return hostname || url;
 }
 
 /**
  * 取域名首字母（去掉 www. 前缀）
  */
 export function getInitial(hostname: string): string {
-  const ch = hostname.replace(/^www\./, '').charAt(0).toUpperCase();
-  return ch || '?';
+  const ch = hostname
+    .replace(/^www\./, "")
+    .charAt(0)
+    .toUpperCase();
+  return ch || "?";
 }
 
 /**
@@ -30,7 +32,7 @@ export function getInitial(hostname: string): string {
  * 代理 URL 对内网站通常会 404，不能作为已保存的有效 favicon 使用。
  */
 function isGoogleFaviconProxy(url: string): boolean {
-  return url.includes('google.com/s2/favicons') || url.includes('gstatic.com/faviconV2');
+  return url.includes("google.com/s2/favicons") || url.includes("gstatic.com/faviconV2");
 }
 
 /**
@@ -40,13 +42,13 @@ function isGoogleFaviconProxy(url: string): boolean {
 function shouldAvoidExternalFaviconProxy(hostname: string): boolean {
   const lower = hostname.toLowerCase();
   if (
-    lower === 'localhost' ||
-    lower === 'woa.com' ||
-    lower === 'oa.com' ||
-    lower.endsWith('.local') ||
-    lower.endsWith('.woa.com') ||
-    lower.endsWith('.oa.com') ||
-    !lower.includes('.')
+    lower === "localhost" ||
+    lower === "woa.com" ||
+    lower === "oa.com" ||
+    lower.endsWith(".local") ||
+    lower.endsWith(".woa.com") ||
+    lower.endsWith(".oa.com") ||
+    !lower.includes(".")
   ) {
     return true;
   }
