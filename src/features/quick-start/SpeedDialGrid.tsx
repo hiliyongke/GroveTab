@@ -174,38 +174,62 @@ export function SpeedDialGrid({ sites }: SpeedDialGridProps) {
         <div className={styles["speed-dial-grid-wrapper"]} style={wrapperStyle}>
           {/* 分组模式 */}
           {groupEnabled ? (
-            grouped.map(({ groupName, sites: groupSites }) => (
+            grouped.map(({ groupName, sites: groupSites }, index) => (
               <div key={groupName || "ungrouped"} className={styles["speed-dial-group"]}>
                 {groupName && groupSites[0] && (
                   <GroupHeader groupName={groupName} firstSite={groupSites[0]} />
                 )}
-                <div className={styles["speed-dial-group-grid"]}>{renderCards(groupSites)}</div>
+                <div className={styles["speed-dial-group-grid"]}>
+                  {renderCards(groupSites)}
+                  {/* 添加按钮：放在最后一个分组的网格内，与其他卡片共享同一行 */}
+                  {showAddButton && index === grouped.length - 1 && (
+                    <div className={styles["speed-dial-add-cell"]}>
+                      <Card
+                        className={`app-card-interactive ${styles["app-speed-dial-card"]} ${styles["app-speed-dial-card--add"]}`}
+                        classNames={{ body: styles["app-speed-dial-card__body"] }}
+                        onClick={handleAddClick}
+                      >
+                        <div className={styles["app-speed-dial-add-preview"]}>
+                          <Plus size={28} className={styles["app-speed-dial-add-icon"]} />
+                        </div>
+                        <div className={styles["app-speed-dial-add-content"]}>
+                          <span className={styles["app-speed-dial-add-label"]}>
+                            {t("quickStart.addSite")}
+                          </span>
+                          <span className={styles["app-speed-dial-add-hint"]} aria-hidden="true">
+                            placeholder
+                          </span>
+                        </div>
+                      </Card>
+                    </div>
+                  )}
+                </div>
               </div>
             ))
           ) : (
-            <div className={styles["speed-dial-grid"]}>{renderCards(sites)}</div>
-          )}
-
-          {/* 添加按钮：与网格同级，使用 display:contents 让所有卡片共享同一网格 */}
-          {showAddButton && (
-            <div className={styles["speed-dial-add-cell"]}>
-              <Card
-                className={`app-card-interactive ${styles["app-speed-dial-card"]} ${styles["app-speed-dial-card--add"]}`}
-                classNames={{ body: styles["app-speed-dial-card__body"] }}
-                onClick={handleAddClick}
-              >
-                <div className={styles["app-speed-dial-add-preview"]}>
-                  <Plus size={28} className={styles["app-speed-dial-add-icon"]} />
+            <div className={styles["speed-dial-grid"]}>
+              {renderCards(sites)}
+              {showAddButton && (
+                <div className={styles["speed-dial-add-cell"]}>
+                  <Card
+                    className={`app-card-interactive ${styles["app-speed-dial-card"]} ${styles["app-speed-dial-card--add"]}`}
+                    classNames={{ body: styles["app-speed-dial-card__body"] }}
+                    onClick={handleAddClick}
+                  >
+                    <div className={styles["app-speed-dial-add-preview"]}>
+                      <Plus size={28} className={styles["app-speed-dial-add-icon"]} />
+                    </div>
+                    <div className={styles["app-speed-dial-add-content"]}>
+                      <span className={styles["app-speed-dial-add-label"]}>
+                        {t("quickStart.addSite")}
+                      </span>
+                      <span className={styles["app-speed-dial-add-hint"]} aria-hidden="true">
+                        placeholder
+                      </span>
+                    </div>
+                  </Card>
                 </div>
-                <div className={styles["app-speed-dial-add-content"]}>
-                  <span className={styles["app-speed-dial-add-label"]}>
-                    {t("quickStart.addSite")}
-                  </span>
-                  <span className={styles["app-speed-dial-add-hint"]} aria-hidden="true">
-                    placeholder
-                  </span>
-                </div>
-              </Card>
+              )}
             </div>
           )}
 
