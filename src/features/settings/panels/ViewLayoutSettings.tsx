@@ -11,13 +11,15 @@
  * 7. 网格视图展开触发方式（点击 / 悬停）
  */
 
-import { useMemo } from 'react';
-import { Select, Segmented, Switch } from 'antd';
+import { useMemo } from "react";
+import { Select, Segmented, Switch } from "antd";
 
-import type { NewtabPageMode, UserSettings, ViewTabPosition } from '@/shared/types';
-import { useT } from '@/shared/i18n';
-import { VIEW_CONFIGS } from '@/shared/config/views';
-import { Field } from '@/features/settings/components/Field';
+import type { NewtabPageMode, UserSettings, ViewTabPosition } from "@/shared/types";
+
+type WindowCardDefaultCollapsed = "current-only" | "all-expanded" | "all-collapsed";
+import { useT } from "@/shared/i18n";
+import { VIEW_CONFIGS } from "@/shared/config/views";
+import { Field } from "@/features/settings/components/Field";
 
 interface ViewLayoutSettingsProps {
   settings: UserSettings;
@@ -47,20 +49,20 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
 
   return (
     <div className="settings-panel-stack settings-panel-stack--regular">
-      <Field label={t('settings.defaultPageMode')} hint={t('settings.defaultPageModeHint')}>
+      <Field label={t("settings.defaultPageMode")} hint={t("settings.defaultPageModeHint")}>
         <Segmented
           block
-          value={settings.newtabPageMode ?? 'workspace'}
+          value={settings.newtabPageMode ?? "workspace"}
           onChange={(value) => handleSetting({ newtabPageMode: value as NewtabPageMode })}
           options={[
-            { value: 'workspace', label: t('pageMode.workspace') },
-            { value: 'trending', label: t('pageMode.trending') },
-            { value: 'devtools', label: t('pageMode.devtools') },
+            { value: "workspace", label: t("pageMode.workspace") },
+            { value: "trending", label: t("pageMode.trending") },
+            { value: "devtools", label: t("pageMode.devtools") },
           ]}
         />
       </Field>
 
-      <Field label={t('settings.defaultView')}>
+      <Field label={t("settings.defaultView")}>
         <Select
           value={settings.defaultView}
           onChange={(value) => handleSetting({ defaultView: value })}
@@ -69,50 +71,127 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
         />
       </Field>
 
-      <Field
-        label={t('settings.viewTabPosition')}
-        hint={t('settings.viewTabPositionHint')}
-      >
+      <Field label={t("settings.viewTabPosition")} hint={t("settings.viewTabPositionHint")}>
         <Segmented
           block
-          value={settings.viewTabPosition ?? 'top'}
+          value={settings.viewTabPosition ?? "top"}
           onChange={(value) => handleSetting({ viewTabPosition: value as ViewTabPosition })}
           options={[
-            { value: 'top', label: t('settings.viewTabPositionTop') },
-            { value: 'bottom', label: t('settings.viewTabPositionBottom') },
-            { value: 'left', label: t('settings.viewTabPositionLeft') },
-            { value: 'right', label: t('settings.viewTabPositionRight') },
+            { value: "top", label: t("settings.viewTabPositionTop") },
+            { value: "bottom", label: t("settings.viewTabPositionBottom") },
+            { value: "left", label: t("settings.viewTabPositionLeft") },
+            { value: "right", label: t("settings.viewTabPositionRight") },
           ]}
         />
       </Field>
 
-      <Field
-        label={t('settings.domainGroupColumns')}
-        hint={t('settings.domainGroupColumnsHint')}
-      >
+      <Field label={t("settings.domainGroupColumns")} hint={t("settings.domainGroupColumnsHint")}>
         <Segmented
           block
-          value={String(settings.domainGroupColumns ?? 'auto')}
+          value={String(settings.domainGroupColumns ?? "auto")}
           onChange={(value) =>
             handleSetting({
-              domainGroupColumns: value === 'auto' ? 'auto' : (Number(value) as 1 | 2 | 3 | 4 | 5 | 6),
+              domainGroupColumns:
+                value === "auto" ? "auto" : (Number(value) as 1 | 2 | 3 | 4 | 5 | 6),
             })
           }
           options={[
-            { value: 'auto', label: t('settings.columnsAuto') },
-            { value: '1', label: '1' },
-            { value: '2', label: '2' },
-            { value: '3', label: '3' },
-            { value: '4', label: '4' },
-            { value: '5', label: '5' },
-            { value: '6', label: '6' },
+            { value: "auto", label: t("settings.columnsAuto") },
+            { value: "1", label: "1" },
+            { value: "2", label: "2" },
+            { value: "3", label: "3" },
+            { value: "4", label: "4" },
+            { value: "5", label: "5" },
+            { value: "6", label: "6" },
+          ]}
+        />
+      </Field>
+
+      <Field label={t("settings.windowCardColumns")} hint={t("settings.windowCardColumnsHint")}>
+        <Segmented
+          block
+          value={String(settings.windowCardColumns ?? "auto")}
+          onChange={(value) =>
+            handleSetting({
+              windowCardColumns:
+                value === "auto" ? "auto" : (Number(value) as 1 | 2 | 3 | 4 | 5 | 6),
+            })
+          }
+          options={[
+            { value: "auto", label: t("settings.columnsAuto") },
+            { value: "1", label: "1" },
+            { value: "2", label: "2" },
+            { value: "3", label: "3" },
+            { value: "4", label: "4" },
+            { value: "5", label: "5" },
+            { value: "6", label: "6" },
           ]}
         />
       </Field>
 
       <Field
-        label={t('settings.domainGroupShowItemFavicon')}
-        hint={t('settings.domainGroupShowItemFaviconHint')}
+        label={t("settings.windowCardDefaultCollapsed")}
+        hint={t("settings.windowCardDefaultCollapsedHint")}
+      >
+        <Segmented
+          block
+          value={settings.windowCardDefaultCollapsed ?? "current-only"}
+          onChange={(value) =>
+            handleSetting({
+              windowCardDefaultCollapsed: value as WindowCardDefaultCollapsed,
+            })
+          }
+          options={[
+            { value: "current-only", label: t("settings.windowCardCurrentOnly") },
+            { value: "all-expanded", label: t("settings.windowCardAllExpanded") },
+            { value: "all-collapsed", label: t("settings.windowCardAllCollapsed") },
+          ]}
+        />
+      </Field>
+
+      <Field
+        label={t("settings.windowCardShowGroupSection")}
+        hint={t("settings.windowCardShowGroupSectionHint")}
+      >
+        <Switch
+          checked={settings.windowCardShowGroupSection ?? true}
+          onChange={(value) => handleSetting({ windowCardShowGroupSection: value })}
+        />
+      </Field>
+
+      <Field
+        label={t("settings.windowCardShowGhostDropZone")}
+        hint={t("settings.windowCardShowGhostDropZoneHint")}
+      >
+        <Switch
+          checked={settings.windowCardShowGhostDropZone ?? true}
+          onChange={(value) => handleSetting({ windowCardShowGhostDropZone: value })}
+        />
+      </Field>
+
+      <Field
+        label={t("settings.windowCardAccentBarPosition")}
+        hint={t("settings.windowCardAccentBarPositionHint")}
+      >
+        <Segmented
+          block
+          value={settings.windowCardAccentBarPosition ?? "left"}
+          onChange={(value) =>
+            handleSetting({
+              windowCardAccentBarPosition: value as "left" | "top" | "none",
+            })
+          }
+          options={[
+            { value: "left", label: t("settings.accentBarLeft") },
+            { value: "top", label: t("settings.accentBarTop") },
+            { value: "none", label: t("settings.accentBarNone") },
+          ]}
+        />
+      </Field>
+
+      <Field
+        label={t("settings.domainGroupShowItemFavicon")}
+        hint={t("settings.domainGroupShowItemFaviconHint")}
       >
         <Switch
           checked={settings.domainGroupShowItemFavicon ?? true}
@@ -121,81 +200,75 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
       </Field>
 
       <Field
-        label={t('settings.domainGroupAccentBarPosition')}
-        hint={t('settings.domainGroupAccentBarPositionHint')}
+        label={t("settings.domainGroupAccentBarPosition")}
+        hint={t("settings.domainGroupAccentBarPositionHint")}
       >
         <Segmented
           block
-          value={settings.domainGroupAccentBarPosition ?? 'left'}
+          value={settings.domainGroupAccentBarPosition ?? "left"}
           onChange={(value) =>
             handleSetting({
-              domainGroupAccentBarPosition: value as 'left' | 'top' | 'none',
+              domainGroupAccentBarPosition: value as "left" | "top" | "none",
             })
           }
           options={[
-            { value: 'left', label: t('settings.accentBarLeft') },
-            { value: 'top', label: t('settings.accentBarTop') },
-            { value: 'none', label: t('settings.accentBarNone') },
+            { value: "left", label: t("settings.accentBarLeft") },
+            { value: "top", label: t("settings.accentBarTop") },
+            { value: "none", label: t("settings.accentBarNone") },
           ]}
         />
       </Field>
 
       <Field
-        label={t('settings.domainGroupCardRadius')}
-        hint={t('settings.domainGroupCardRadiusHint')}
+        label={t("settings.domainGroupCardRadius")}
+        hint={t("settings.domainGroupCardRadiusHint")}
       >
         <Segmented
           block
-          value={settings.domainGroupCardRadius ?? 'default'}
+          value={settings.domainGroupCardRadius ?? "default"}
           onChange={(value) =>
             handleSetting({
-              domainGroupCardRadius: value as 'none' | 'small' | 'default' | 'large',
+              domainGroupCardRadius: value as "none" | "small" | "default" | "large",
             })
           }
           options={[
-            { value: 'none', label: t('settings.cardRadiusNone') },
-            { value: 'small', label: t('settings.cardRadiusSmall') },
-            { value: 'default', label: t('settings.cardRadiusDefault') },
-            { value: 'large', label: t('settings.cardRadiusLarge') },
+            { value: "none", label: t("settings.cardRadiusNone") },
+            { value: "small", label: t("settings.cardRadiusSmall") },
+            { value: "default", label: t("settings.cardRadiusDefault") },
+            { value: "large", label: t("settings.cardRadiusLarge") },
           ]}
         />
       </Field>
 
-      <Field
-        label={t('settings.domainGroupSortBy')}
-        hint={t('settings.domainGroupSortByHint')}
-      >
+      <Field label={t("settings.domainGroupSortBy")} hint={t("settings.domainGroupSortByHint")}>
         <Segmented
           block
-          value={settings.domainGroupSortBy ?? 'tabCount'}
+          value={settings.domainGroupSortBy ?? "tabCount"}
           onChange={(value) =>
             handleSetting({
-              domainGroupSortBy: value as 'tabCount' | 'alphabetical' | 'recentAccess',
+              domainGroupSortBy: value as "tabCount" | "alphabetical" | "recentAccess",
             })
           }
           options={[
-            { value: 'tabCount', label: t('settings.sortByTabCount') },
-            { value: 'alphabetical', label: t('settings.sortByAlphabetical') },
-            { value: 'recentAccess', label: t('settings.sortByRecentAccess') },
+            { value: "tabCount", label: t("settings.sortByTabCount") },
+            { value: "alphabetical", label: t("settings.sortByAlphabetical") },
+            { value: "recentAccess", label: t("settings.sortByRecentAccess") },
           ]}
         />
       </Field>
 
-      <Field
-        label={t('settings.gridExpandTrigger')}
-        hint={t('settings.gridExpandTriggerHint')}
-      >
+      <Field label={t("settings.gridExpandTrigger")} hint={t("settings.gridExpandTriggerHint")}>
         <Segmented
           block
-          value={settings.gridExpandTrigger ?? 'click'}
+          value={settings.gridExpandTrigger ?? "click"}
           onChange={(value) =>
             handleSetting({
-              gridExpandTrigger: value as 'click' | 'hover',
+              gridExpandTrigger: value as "click" | "hover",
             })
           }
           options={[
-            { value: 'click', label: t('settings.gridExpandTriggerClick') },
-            { value: 'hover', label: t('settings.gridExpandTriggerHover') },
+            { value: "click", label: t("settings.gridExpandTriggerClick") },
+            { value: "hover", label: t("settings.gridExpandTriggerHover") },
           ]}
         />
       </Field>

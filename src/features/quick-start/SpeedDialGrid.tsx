@@ -50,15 +50,18 @@ function GroupHeader({ groupName, firstSite }: { groupName: string; firstSite: S
 
 interface SpeedDialGridProps {
   sites: readonly SpeedDialSite[];
+  /** 外部传入的「新增站点」回调；若不传则组件内部自行管理弹窗 */
+  onAdd?: () => void;
 }
 
-export function SpeedDialGrid({ sites }: SpeedDialGridProps) {
+export function SpeedDialGrid({ sites, onAdd }: SpeedDialGridProps) {
   const { t } = useT();
   const removeSite = useSpeedDialStore((s) => s.removeSite);
   const groupEnabled = useSettingsStore((s) => s.settings.speedDialGroupEnabled ?? false);
   const showAddButton = useSettingsStore((s) => s.settings.showAddSiteButton ?? true);
   const cardSize = useSettingsStore((s) => s.settings.quickStartCardSize ?? "md");
-  const [addModalOpen, setAddModalOpen] = useState(false);
+  // 仅在没有外部 onAdd 时，组件内部管理弹窗状态（向后兼容）
+  const [internalAddModalOpen, setInternalAddModalOpen] = useState(false);
   const [editingSite, setEditingSite] = useState<SpeedDialSite | null>(null);
 
   /**
@@ -89,18 +92,22 @@ export function SpeedDialGrid({ sites }: SpeedDialGridProps) {
   /** 打开编辑弹窗 */
   const handleEdit = useCallback((site: SpeedDialSite) => {
     setEditingSite(site);
-    setAddModalOpen(true);
+    setInternalAddModalOpen(true);
   }, []);
 
-  /** 打开新增弹窗 */
+  /** 实际触发新增的回调：优先使用外部 onAdd，否则内部弹窗 */
   const handleAddClick = useCallback(() => {
-    setEditingSite(null);
-    setAddModalOpen(true);
-  }, []);
+    if (onAdd) {
+      onAdd();
+    } else {
+      setEditingSite(null);
+      setInternalAddModalOpen(true);
+    }
+  }, [onAdd]);
 
-  /** 关闭弹窗 */
+  /** 关闭内部弹窗 */
   const handleModalClose = useCallback(() => {
-    setAddModalOpen(false);
+    setInternalAddModalOpen(false);
     setEditingSite(null);
   }, []);
 
@@ -158,12 +165,14 @@ export function SpeedDialGrid({ sites }: SpeedDialGridProps) {
             {t("quickStart.addSite")}
           </Button>
         </div>
-        <SpeedDialAddModal
-          open={addModalOpen}
-          onClose={handleModalClose}
-          editingSite={editingSite}
-          existingGroups={existingGroups}
-        />
+        {!onAdd && (
+          <SpeedDialAddModal
+            open={internalAddModalOpen}
+            onClose={handleModalClose}
+            editingSite={editingSite}
+            existingGroups={existingGroups}
+          />
+        )}
       </div>
     );
   }
@@ -182,7 +191,7 @@ export function SpeedDialGrid({ sites }: SpeedDialGridProps) {
                 <div className={styles["speed-dial-group-grid"]}>
                   {renderCards(groupSites)}
                   {/* 添加按钮：放在最后一个分组的网格内，与其他卡片共享同一行 */}
-                  {showAddButton && index === grouped.length - 1 && (
+                  {showAddButton && !onAdd && index === grouped.length - 1 && (
                     <div className={styles["speed-dial-add-cell"]}>
                       <Card
                         className={`app-card-interactive ${styles["app-speed-dial-card"]} ${styles["app-speed-dial-card--add"]}`}
@@ -209,7 +218,7 @@ export function SpeedDialGrid({ sites }: SpeedDialGridProps) {
           ) : (
             <div className={styles["speed-dial-grid"]}>
               {renderCards(sites)}
-              {showAddButton && (
+              {showAddButton && !onAdd && (
                 <div className={styles["speed-dial-add-cell"]}>
                   <Card
                     className={`app-card-interactive ${styles["app-speed-dial-card"]} ${styles["app-speed-dial-card--add"]}`}
@@ -233,12 +242,14 @@ export function SpeedDialGrid({ sites }: SpeedDialGridProps) {
             </div>
           )}
 
-          <SpeedDialAddModal
-            open={addModalOpen}
-            onClose={handleModalClose}
-            editingSite={editingSite}
-            existingGroups={existingGroups}
-          />
+          {!onAdd && (
+            <SpeedDialAddModal
+              open={internalAddModalOpen}
+              onClose={handleModalClose}
+              editingSite={editingSite}
+              existingGroups={existingGroups}
+            />
+          )}
         </div>
       </SortableContext>
     </DndContext>

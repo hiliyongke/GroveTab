@@ -42,6 +42,12 @@ const DEFAULT_SETTINGS: UserSettings = {
   showIncognito: false,
   language: "zh-CN",
   domainGroupColumns: "auto",
+  windowCardColumns: "auto",
+  windowCardDefaultCollapsed: "current-only",
+  windowCardShowGroupSection: true,
+  windowCardShowGhostDropZone: true,
+  windowCardAccentBarPosition: "left",
+  windowCardOrder: [],
   domainGroupShowItemFavicon: true,
   domainGroupAccentBarPosition: "left",
   domainGroupCardRadius: "default",
@@ -300,6 +306,16 @@ export async function getWorkspaces(): Promise<Workspace[]> {
 
 export async function saveWorkspaces(list: Workspace[]): Promise<void> {
   await setData(STORAGE_KEYS.workspaces, list.slice(0, MAX_WORKSPACES));
+}
+
+// ── Window Aliases ────────────────────────────────────
+
+export async function getWindowAliases(): Promise<Record<number, string>> {
+  return (await getData<Record<number, string>>(STORAGE_KEYS.windowAliases)) ?? {};
+}
+
+export async function saveWindowAliases(aliases: Record<number, string>): Promise<void> {
+  await setData(STORAGE_KEYS.windowAliases, aliases);
 }
 
 // ── Kanban (F-20) ──────────────────────────────────────

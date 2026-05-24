@@ -23,6 +23,8 @@ import {
   clearActivity as repoClearActivity,
   getWorkspaces,
   saveWorkspaces,
+  getWindowAliases,
+  saveWindowAliases,
   appendHistoryEvent,
 } from "@/repositories";
 import { STORAGE_KEYS } from "@/shared/config/storage-keys";
@@ -50,6 +52,8 @@ interface MetadataState {
   recentActivity: readonly ActivityRecord[];
   /** 用户自定义工作区（最多 3 个） */
   workspaces: readonly Workspace[];
+  /** 窗口自定义别名，仅影响 UI 展示；key 为 Chrome windowId。 */
+  windowAliases: Record<number, string>;
 
   loadMetadata: () => Promise<void>;
   addTag: (url: string, tag: string) => Promise<void>;
@@ -67,6 +71,8 @@ interface MetadataState {
   setWorkspaces: (list: Workspace[]) => Promise<void>;
   upsertWorkspace: (workspace: Workspace) => Promise<void>;
   removeWorkspace: (id: string) => Promise<void>;
+  setWindowAlias: (windowId: number, alias: string) => Promise<void>;
+  gcWindowAliases: (activeWindowIds: readonly number[]) => Promise<void>;
 }
 
 export const useMetadataStore = create<MetadataState>((set, get) => ({
@@ -75,14 +81,16 @@ export const useMetadataStore = create<MetadataState>((set, get) => ({
   pinnedUrls: new Set<string>(),
   recentActivity: EMPTY_ACTIVITY,
   workspaces: EMPTY_WORKSPACES,
+  windowAliases: {},
 
   loadMetadata: async () => {
-    const [tags, notes, pins, activity, workspaces] = await Promise.all([
+    const [tags, notes, pins, activity, workspaces, windowAliases] = await Promise.all([
       getData<Record<string, string[]>>(TAGS_KEY),
       getData<Record<string, string>>(NOTES_KEY),
       getData<string[]>(PINS_KEY),
       getRecentActivity(),
       getWorkspaces(),
+      getWindowAliases(),
     ]);
     set({
       tags: tags ?? {},
@@ -90,6 +98,7 @@ export const useMetadataStore = create<MetadataState>((set, get) => ({
       pinnedUrls: new Set(pins ?? []),
       recentActivity: activity.length > 0 ? activity : EMPTY_ACTIVITY,
       workspaces: workspaces.length > 0 ? workspaces : EMPTY_WORKSPACES,
+      windowAliases,
     });
   },
 
@@ -197,5 +206,28 @@ export const useMetadataStore = create<MetadataState>((set, get) => ({
     const next = get().workspaces.filter((w) => w.id !== id);
     await saveWorkspaces([...next]);
     set({ workspaces: next.length > 0 ? next : EMPTY_WORKSPACES });
+  },
+
+  setWindowAlias: async (windowId, alias) => {
+    const trimmed = alias.trim();
+    const windowAliases = { ...get().windowAliases };
+    if (trimmed === "") {
+      delete windowAliases[windowId];
+    } else {
+      windowAliases[windowId] = trimmed;
+    }
+    set({ windowAliases });
+    await saveWindowAliases(windowAliases);
+  },
+
+  gcWindowAliases: async (activeWindowIds) => {
+    const active = new Set(activeWindowIds);
+    const entries = Object.entries(get().windowAliases).filter(([windowId]) =>
+      active.has(Number(windowId)),
+    );
+    const next = Object.fromEntries(entries) as Record<number, string>;
+    if (entries.length === Object.keys(get().windowAliases).length) return;
+    set({ windowAliases: next });
+    await saveWindowAliases(next);
   },
 }));

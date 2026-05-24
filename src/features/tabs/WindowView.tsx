@@ -13,150 +13,271 @@
  *   - 标签列表可展开/折叠
  */
 
-import { useMemo, useCallback, useState } from 'react';
-import { Tag, Button, Collapse, Empty } from 'antd';
+import { useMemo } from "react";
+import { Empty } from "antd";
 import {
-  Merge,
-} from 'lucide-react';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { useTabsStore } from '@/store';
-import { TabItem } from './TabItem';
-import { useT } from '@/shared/i18n';
-import { feedback } from '@/shared/ui/feedback';
-import { translate } from '@/shared/i18n/core';
-import { moveTabs } from '@/chrome';
-import styles from './styles/views.module.less';
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  closestCorners,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
 
-/**
- * 多窗口管理视图
- */
+import type { LiveTab } from "@/shared/types";
+import { cssVars } from "@/shared/utils/css-vars";
+import { moveTabs } from "@/chrome/tabs";
+import { groupTabs, ungroupTabs } from "@/chrome/tabGroups";
+import { swBroadcast } from "@/shared/utils/sw-broadcast";
+import { feedback } from "@/shared/ui/feedback";
+import { useTabsStore, useSettingsStore } from "@/store";
+import { useT } from "@/shared/i18n";
+import { WindowCard } from "./WindowView/WindowCard";
+import { SortableWindowCard } from "./WindowView/SortableWindowCard";
+import type { WindowDragData, WindowDropData } from "./WindowView/dragTypes";
+import domainStyles from "./styles/items.module.less";
+import styles from "./styles/views.module.less";
+
+type WindowCardDefaultCollapsed = "current-only" | "all-expanded" | "all-collapsed";
+
+function normalizeWindowCardOrder(value: unknown): number[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is number => typeof item === "number")
+    : [];
+}
+
+function normalizeDefaultCollapsed(value: unknown): WindowCardDefaultCollapsed {
+  return value === "all-expanded" || value === "all-collapsed" || value === "current-only"
+    ? value
+    : "current-only";
+}
+
+function groupTabsByWindow(tabs: LiveTab[]): Map<number, LiveTab[]> {
+  const map = new Map<number, LiveTab[]>();
+  for (const tab of tabs) {
+    const list = map.get(tab.windowId) ?? [];
+    list.push(tab);
+    map.set(tab.windowId, list);
+  }
+  return map;
+}
+
+function getColumnVars(forcedColumns: number | null): React.CSSProperties {
+  if (forcedColumns && forcedColumns >= 1 && forcedColumns <= 6) {
+    return cssVars({ "--app-domain-column-count": String(forcedColumns) });
+  }
+
+  return cssVars({ "--app-domain-column-width": "360px" });
+}
+
+function shouldCollapseWindow(
+  strategy: "current-only" | "all-expanded" | "all-collapsed",
+  windowId: number,
+  currentWindowId: number,
+): boolean {
+  switch (strategy) {
+    case "all-expanded":
+      return false;
+    case "all-collapsed":
+      return true;
+    case "current-only":
+    default:
+      return windowId !== currentWindowId;
+  }
+}
+
 export function WindowView() {
   const tabs = useTabsStore((s) => s.tabs);
   const windows = useTabsStore((s) => s.windows);
   const currentWindowId = useTabsStore((s) => s.currentWindowId);
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
   const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
+  const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
+  const updateSettings = useSettingsStore((s) => s.updateSettings);
+  // 订阅原始字段（保持引用稳定，避免 selector 每次返回新数组导致 React 无限重渲染 / error #185）
+  const rawWindowCardOrder = useSettingsStore((s) => s.settings.windowCardOrder);
+  const rawDefaultCollapsed = useSettingsStore((s) => s.settings.windowCardDefaultCollapsed);
+  const rawWindowCardColumns = useSettingsStore((s) => s.settings.windowCardColumns);
+  const windowCardOrder = useMemo(
+    () => normalizeWindowCardOrder(rawWindowCardOrder),
+    [rawWindowCardOrder],
+  );
+  const defaultCollapsed = useMemo(
+    () => normalizeDefaultCollapsed(rawDefaultCollapsed),
+    [rawDefaultCollapsed],
+  );
+  const forcedColumns = useMemo<number | null>(() => {
+    return typeof rawWindowCardColumns === "number" &&
+      rawWindowCardColumns >= 1 &&
+      rawWindowCardColumns <= 6
+      ? rawWindowCardColumns
+      : null;
+  }, [rawWindowCardColumns]);
   const { t } = useT();
-  const [busy, setBusy] = useState(false);
 
-  /** 按窗口分组 */
-  const windowGroups = useMemo(() => {
-    const map = new Map<number, typeof tabs>();
-    for (const tab of tabs) {
-      const list = map.get(tab.windowId) || [];
-      list.push(tab);
-      map.set(tab.windowId, list);
-    }
-    return map;
-  }, [tabs]);
+  const windowGroups = useMemo(() => groupTabsByWindow(tabs), [tabs]);
+  const visibleTabIds = useMemo(() => tabs.map((tab) => tab.id), [tabs]);
 
-  /** 所有窗口 ID，当前窗口排最前 */
   const sortedWindowIds = useMemo(() => {
-    const ids = Array.from(windowGroups.keys());
-    ids.sort((a, b) => {
+    const orderIndex = new Map(windowCardOrder.map((id, index) => [id, index]));
+    return [...windowGroups.keys()].sort((a, b) => {
       if (a === currentWindowId) return -1;
       if (b === currentWindowId) return 1;
-      return b - a;
-    });
-    return ids;
-  }, [windowGroups, currentWindowId]);
 
-  /** 合并所有窗口到当前窗口 */
-  const handleMergeAll = useCallback(async () => {
-    if (busy) return;
-    setBusy(true);
+      const aOrder = orderIndex.get(a);
+      const bOrder = orderIndex.get(b);
+      if (aOrder !== undefined && bOrder !== undefined) return aOrder - bOrder;
+      if (aOrder !== undefined) return -1;
+      if (bOrder !== undefined) return 1;
+
+      const aFocused = windows.get(a)?.focused ?? false;
+      const bFocused = windows.get(b)?.focused ?? false;
+      if (aFocused && !bFocused) return -1;
+      if (!aFocused && bFocused) return 1;
+
+      return a - b;
+    });
+  }, [currentWindowId, windowCardOrder, windowGroups, windows]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const dragData = event.active.data.current as WindowDragData | undefined;
+    if (!dragData || !event.over) return;
+
+    if (dragData.kind === "window-card") {
+      const activeWindowId = Number(String(event.active.id).replace("window-sort:", ""));
+      const overWindowId = Number(String(event.over.id).replace("window-sort:", ""));
+      if (
+        !Number.isFinite(activeWindowId) ||
+        !Number.isFinite(overWindowId) ||
+        activeWindowId === overWindowId
+      )
+        return;
+      const oldIndex = sortedWindowIds.indexOf(activeWindowId);
+      const newIndex = sortedWindowIds.indexOf(overWindowId);
+      if (oldIndex === -1 || newIndex === -1) return;
+      const nextOrder = arrayMove(sortedWindowIds, oldIndex, newIndex);
+      await updateSettings({ windowCardOrder: nextOrder });
+      swBroadcast("window-card-order-changed", { windowCardOrder: nextOrder });
+      return;
+    }
+
+    const dropData = event.over.data.current as WindowDropData | undefined;
+    if (!dropData || dragData.kind !== "tab") return;
+
+    const { tab } = dragData;
+    if (tab.incognito !== dropData.incognito) {
+      feedback.warning(t("windowDrag.incognitoBlocked"));
+      return;
+    }
+
     try {
-      const otherTabIds = tabs
-        .filter((tab) => tab.windowId !== currentWindowId)
-        .map((tab) => tab.id);
-      if (otherTabIds.length === 0) {
-        setBusy(false);
+      if (dropData.kind === "group") {
+        if (tab.windowId !== dropData.windowId) {
+          await moveTabs([tab.id], dropData.windowId, -1);
+        }
+        await groupTabs({ tabIds: tab.id, groupId: dropData.groupId });
+        swBroadcast("tab-grouped", {
+          id: tab.id,
+          windowId: dropData.windowId,
+          groupId: dropData.groupId,
+        });
+        void loadAllTabs({ silent: true });
         return;
       }
-      // 使用 chrome.tabs.move 批量移动
-      // 逐批移动（避免一次性移动太多标签导致超时）
-      const BATCH = 10;
-      for (let i = 0; i < otherTabIds.length; i += BATCH) {
-        const batch = otherTabIds.slice(i, i + BATCH);
-        await moveTabs(batch, currentWindowId, -1);
-      }
-      feedback.success(translate('window.mergedAll', { count: otherTabIds.length }));
-      // 刷新
-      void useTabsStore.getState().loadAllTabs({ silent: true });
-    } catch (err) {
-      feedback.error(translate('window.mergeFailed'), err);
-    } finally {
-      setBusy(false);
-    }
-  }, [busy, tabs, currentWindowId]);
 
-  /** 所有标签 ID 列表（用于多选） */
-  const allTabIds = tabs.map((t) => t.id);
+      if (dropData.kind === "ungrouped") {
+        if (tab.windowId !== dropData.windowId) {
+          await moveTabs([tab.id], dropData.windowId, -1);
+        }
+        if (tab.groupId !== -1) {
+          await ungroupTabs(tab.id);
+          swBroadcast("tab-ungrouped", {
+            id: tab.id,
+            windowId: dropData.windowId,
+            previousGroupId: tab.groupId,
+          });
+        } else {
+          swBroadcast("tab-moved", { id: tab.id, windowId: dropData.windowId });
+        }
+        void loadAllTabs({ silent: true });
+        return;
+      }
+
+      if (dropData.kind === "window" && tab.windowId !== dropData.windowId) {
+        await moveTabs([tab.id], dropData.windowId, -1);
+        swBroadcast("tab-moved", { id: tab.id, windowId: dropData.windowId });
+        void loadAllTabs({ silent: true });
+      }
+    } catch (err) {
+      feedback.error(t("windowDrag.failed"), err);
+      void loadAllTabs({ silent: true });
+    }
+  };
 
   if (tabs.length === 0) {
-    return <Empty description={t('tabs.empty')} className={styles['app-window-empty']} />;
+    return <Empty description={t("tabs.empty")} className={styles["app-window-empty"]} />;
   }
 
   return (
-    <div>
-      {/* 多窗口操作栏 */}
-      {sortedWindowIds.length > 1 && (
-        <div className={styles['app-window-toolbar']}>
-          <Button
-            type="primary"
-            icon={<Merge size={ICON_SIZE.MEDIUM} />}
-            loading={busy}
-            onClick={() => { void handleMergeAll(); }}
-          >
-            {t('window.mergeAll')}
-          </Button>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCorners}
+      onDragEnd={(event) => {
+        void handleDragEnd(event);
+      }}
+    >
+      <SortableContext
+        items={sortedWindowIds.map((id) => `window-sort:${id}`)}
+        strategy={rectSortingStrategy}
+      >
+        <div
+          className={`${domainStyles["app-domain-masonry"]}${forcedColumns !== null ? ` ${domainStyles["is-fixed-columns"]}` : ""}`}
+          style={getColumnVars(forcedColumns)}
+        >
+          {sortedWindowIds.map((windowId) => {
+            const windowTabs = windowGroups.get(windowId) ?? [];
+            return (
+              <SortableWindowCard key={windowId} windowId={windowId}>
+                <WindowCard
+                  windowId={windowId}
+                  tabs={windowTabs}
+                  windowInfo={windows.get(windowId)}
+                  currentWindowId={currentWindowId}
+                  initialCollapsed={shouldCollapseWindow(
+                    defaultCollapsed,
+                    windowId,
+                    currentWindowId,
+                  )}
+                  visibleTabIds={visibleTabIds}
+                  onJump={(tabId, targetWindowId) => {
+                    void jumpToTab(tabId, targetWindowId);
+                  }}
+                  onCloseTab={(tabId) => {
+                    void closeSingleTab(tabId);
+                  }}
+                  onRefresh={() => {
+                    void loadAllTabs({ silent: true });
+                  }}
+                />
+              </SortableWindowCard>
+            );
+          })}
         </div>
-      )}
-
-      <Collapse
-        defaultActiveKey={sortedWindowIds.map(String)}
-        ghost
-        items={sortedWindowIds.map((windowId) => {
-          const windowTabs = windowGroups.get(windowId) || [];
-          const windowInfo = windows.get(windowId);
-          const isCurrent = windowId === currentWindowId;
-          const isFocused = windowInfo?.focused ?? false;
-
-          return {
-            key: String(windowId),
-            label: (
-              <div className={styles['app-window-panel-label']}>
-                <span className={styles['app-window-panel-title']}>
-                  {isCurrent ? t('window.current') : t('window.other')}
-                </span>
-                {isFocused && (
-                  <Tag color="green" className={`${styles['app-window-panel-tag']} ${styles['app-window-panel-tag--focused']}`}>
-                    {t('window.focused')}
-                  </Tag>
-                )}
-                <Tag className={styles['app-window-panel-tag']}>
-                  {windowTabs.length}
-                </Tag>
-              </div>
-            ),
-            children: (
-              <div className={styles['app-window-panel-body']}>
-                {windowTabs.map((tab) => (
-                  <TabItem
-                    key={tab.id}
-                    tab={tab}
-                    onJump={(id, wid) => { void jumpToTab(id, wid); }}
-                    onClose={(id) => { void closeSingleTab(id); }}
-                    showHostname
-                    selectable
-                    visibleTabIds={allTabIds}
-                  />
-                ))}
-              </div>
-            ),
-          };
-        })}
-      />
-    </div>
+      </SortableContext>
+    </DndContext>
   );
 }

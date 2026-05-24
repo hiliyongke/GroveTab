@@ -128,6 +128,18 @@ export interface UserSettings {
   language: "zh-CN" | "en";
   /** 域名分组视图的列数；'auto' 表示由容器宽度自动决定（默认），1–6 为手动锁定 */
   domainGroupColumns?: "auto" | 1 | 2 | 3 | 4 | 5 | 6;
+  /** 窗口视图卡片列数；'auto' 表示按 360px 列宽自适应，1–6 为手动锁定。 */
+  windowCardColumns?: "auto" | 1 | 2 | 3 | 4 | 5 | 6;
+  /** 窗口视图默认折叠策略。 */
+  windowCardDefaultCollapsed?: "current-only" | "all-expanded" | "all-collapsed";
+  /** 窗口卡片内是否展示 Chrome 原生 Tab Group 子区块。 */
+  windowCardShowGroupSection?: boolean;
+  /** 是否展示窗口/分组末尾的幽灵拖拽落点。 */
+  windowCardShowGhostDropZone?: boolean;
+  /** 窗口卡片身份色条位置，与域名分组卡片保持一致。 */
+  windowCardAccentBarPosition?: "left" | "top" | "none";
+  /** 用户自定义的窗口卡片 UI 排序，仅影响 NewTab 内展示，不改变 Chrome 窗口顺序。 */
+  windowCardOrder?: number[];
   /**
    * 时间轴分组粒度：
    *   - 'day' ：今天/昨天/本周/更早（默认，简洁）

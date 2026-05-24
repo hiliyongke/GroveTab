@@ -10,10 +10,10 @@
  *   - AppWorkspace：读取 settings（pageMode, contentMaxWidth 等 UI 配置）
  */
 
-import { create } from 'zustand';
-import type { UserSettings } from '@/shared/types';
-import { getSettings, saveSettings, removeData } from '@/repositories';
-import { STORAGE_KEYS } from '@/shared/config/storage-keys';
+import { create } from "zustand";
+import type { UserSettings } from "@/shared/types";
+import { getSettings, saveSettings, removeData } from "@/repositories";
+import { STORAGE_KEYS } from "@/shared/config/storage-keys";
 
 interface SettingsState {
   settings: UserSettings;
@@ -27,43 +27,53 @@ interface SettingsState {
 let settingsWriteQueue: Promise<unknown> = Promise.resolve();
 
 /** 合并设置内存快照，避免嵌套设置被浅合并误覆盖。 */
-function mergeSettingsForStore(current: UserSettings, partial: Partial<UserSettings>): UserSettings {
+function mergeSettingsForStore(
+  current: UserSettings,
+  partial: Partial<UserSettings>,
+): UserSettings {
   return {
     ...current,
     ...partial,
-    uiVisibility: partial.uiVisibility === undefined
-      ? current.uiVisibility
-      : { ...current.uiVisibility, ...partial.uiVisibility },
+    uiVisibility:
+      partial.uiVisibility === undefined
+        ? current.uiVisibility
+        : { ...current.uiVisibility, ...partial.uiVisibility },
   };
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
   settings: {
     overrideNewTab: true,
-    newtabPageMode: 'workspace',
-    viewTabPosition: 'top',
-    defaultView: 'domain',
-    theme: 'system',
-    gradientPreset: 'default',
-    skinPreset: 'glassmorphism',
+    newtabPageMode: "workspace",
+    viewTabPosition: "top",
+    defaultView: "domain",
+    theme: "system",
+    gradientPreset: "default",
+    skinPreset: "glassmorphism",
     showIncognito: false,
-    language: 'zh-CN',
-    domainGroupColumns: 'auto',
-    timelineGranularity: 'day',
+    language: "zh-CN",
+    domainGroupColumns: "auto",
+    windowCardColumns: "auto",
+    windowCardDefaultCollapsed: "current-only",
+    windowCardShowGroupSection: true,
+    windowCardShowGhostDropZone: true,
+    windowCardAccentBarPosition: "left",
+    windowCardOrder: [],
+    timelineGranularity: "day",
     timelineShowExactTime: false,
-    searchScope: ['title', 'hostname', 'url'],
+    searchScope: ["title", "hostname", "url"],
     searchEnablePinyin: true,
-    searchSortBy: 'relevance',
-    searchDefaultEngine: 'google',
-    searchEnabledEngines: ['google', 'bing', 'baidu', 'duckduckgo'],
+    searchSortBy: "relevance",
+    searchDefaultEngine: "google",
+    searchEnabledEngines: ["google", "bing", "baidu", "duckduckgo"],
     searchCustomEngines: [],
     searchAutoFallbackToWeb: true,
     searchUseHistorySuggestions: true,
     searchUseHotSuggestions: true,
-    hotSuggestionSource: 'trending',
-    layoutDensity: 'default',
+    hotSuggestionSource: "trending",
+    layoutDensity: "default",
     contentMaxWidth: 0,
-    reducedMotion: 'auto',
+    reducedMotion: "auto",
     uiVisibility: {
       header: true,
       heroLogo: true,
@@ -75,11 +85,11 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       quickStart: true,
     },
     // v1.0 封板新增默认值
-    dedupStrictness: 'loose',
+    dedupStrictness: "loose",
     idleThresholdMinutes: 1440,
     undoWindowSeconds: 5,
     closeConfirmThreshold: 20,
-    autoSnapshotFrequency: '12h',
+    autoSnapshotFrequency: "12h",
     enableOgFetch: false,
     speedDialGroupEnabled: false,
     // v1.4 插件原生历史记录默认值
@@ -121,7 +131,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       const persisted = await writeTask;
       set({ settings: persisted, loaded: true });
     } catch (err) {
-      console.error('[settings] saveSettings failed:', err);
+      console.error("[settings] saveSettings failed:", err);
     }
   },
 

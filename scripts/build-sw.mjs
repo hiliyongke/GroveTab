@@ -19,6 +19,7 @@
 import { build } from 'esbuild';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readdir, readFile, writeFile } from 'node:fs/promises';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
@@ -53,3 +54,31 @@ await build({
 });
 
 console.log('[build-sw] dist/sw.js bundled (standalone, no chunk imports)');
+
+const assetsDir = resolve(ROOT, 'dist/assets');
+const popupHtmlFile = resolve(ROOT, 'dist/src/pages/popup/index.html');
+const newtabHtmlFile = resolve(ROOT, 'dist/src/pages/newtab/index.html');
+const cssFiles = (await readdir(assetsDir)).filter((file) => file.endsWith('.css')).sort();
+const popupCssLinks = cssFiles
+  .filter((file) => file.startsWith('popup-'))
+  .map((file) => `<link rel="stylesheet" href="/assets/${file}" />`)
+  .join('\n    ');
+
+const popupHtml = await readFile(popupHtmlFile, 'utf-8');
+const normalizedPopupHtml = popupHtml.replace(
+  /<head>[\s\S]*?<\/head>/,
+  `<head><meta charset="UTF-8" /><title>GroveTab Popup</title>${popupCssLinks}</head>`,
+);
+await writeFile(popupHtmlFile, normalizedPopupHtml);
+console.log('[build-sw] popup HTML CSS links normalized');
+
+// 反向保险：newtab HTML 不应加载任何 popup-*.css，避免 popup 的尺寸约束样式污染整个新标签页
+const newtabHtml = await readFile(newtabHtmlFile, 'utf-8');
+const normalizedNewtabHtml = newtabHtml.replace(
+  /\s*<link\s+rel="stylesheet"[^>]*href="[^"]*\/popup-[^"]*\.css"[^>]*\/?>(\s*)/g,
+  '$1',
+);
+if (normalizedNewtabHtml !== newtabHtml) {
+  await writeFile(newtabHtmlFile, normalizedNewtabHtml);
+  console.log('[build-sw] newtab HTML stripped popup-*.css links');
+}

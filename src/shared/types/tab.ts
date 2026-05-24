@@ -1,3 +1,5 @@
+import type { ChromeTabGroupColor } from "@/chrome/tabGroups";
+
 /**
  * Tab & Window Type Definitions
  * 浏览器标签页与窗口相关类型
@@ -22,11 +24,13 @@ export interface LiveTab {
   /** Chrome 原生 Tab Group 标题（仅当 groupId !== -1 时有值） */
   groupTitle?: string;
   /** Chrome 原生 Tab Group 颜色（仅当 groupId !== -1 时有值） */
-  groupColor?: string;
+  groupColor?: ChromeTabGroupColor;
+  /** Chrome 原生 Tab Group 是否折叠（仅当 groupId !== -1 时有值） */
+  groupCollapsed?: boolean;
 }
 
 /** Special URL classification */
-export type SpecialUrlType = 'chrome' | 'file' | 'about' | 'devtools' | 'edge' | 'normal';
+export type SpecialUrlType = "chrome" | "file" | "about" | "devtools" | "edge" | "normal";
 
 /** Window information */
 export interface WindowInfo {

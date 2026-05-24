@@ -1,6 +1,7 @@
 /**
  * Chrome API barrel export
  */
-export * from './tabs';
-export * from './history';
-export * from './utils';
+export * from "./tabs";
+export * from "./tabGroups";
+export * from "./history";
+export * from "./utils";

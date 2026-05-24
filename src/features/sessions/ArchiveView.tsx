@@ -1,14 +1,21 @@
 /**
- * ArchiveView — 归档会话内联视图
+ * ArchiveView — 归档会话内联视图（v2: dashboard）
  *
- * 作为视图 Tab 之一嵌入主内容区，替代原有的 Modal 浮层。
- * 复用 ArchivePanel 的全部业务逻辑，仅移除 Modal 外壳。
+ * 布局：
+ *   archive-shell
+ *     ├ ArchiveSidebar  ← 左侧时间筛选 + 自动快照分区
+ *     └ archive-main
+ *         ├ ArchiveStats  ← 顶部 KPI 4 卡
+ *         ├ Toolbar      ← 搜索 + 排序 + 多选 + 归档当前
+ *         └ TimeGroups   ← 按时段分组的 SessionCard 网格
+ *
+ * 业务逻辑保留：搜索 / 批量选择 / 合并 / 恢复 / 重命名 / 分享 / 归档当前。
  */
 
 import { useState, useSyncExternalStore, useEffect, useMemo } from "react";
-import { Plus, Save, Info, Inbox } from "lucide-react";
+import { Plus, Save, Inbox, ArrowDownUp } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
-import { Alert, Button, List, Spin, Input, Modal, Space, Typography } from "antd";
+import { Button, Spin, Input, Modal, Typography, Select, Empty } from "antd";
 import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
 import type { ArchivedSession } from "@/shared/types";
 import {
@@ -27,7 +34,9 @@ import { useTabsStore, useUndoStore, useMetadataStore, useSettingsStore } from "
 import { feedback } from "@/shared/ui/feedback";
 import { appendHistoryEvent } from "@/repositories";
 import { registerHistoryUndoHandler } from "@/services/history/undo-bus";
-import { SessionItem } from "./components/SessionItem";
+import { SessionCard } from "./components/SessionCard";
+import { ArchiveStats, type ArchiveFilterId } from "./components/ArchiveStats";
+import { ArchiveSidebar } from "./components/ArchiveSidebar";
 import { BatchOperationsMenu } from "./components/BatchOperationsMenu";
 import { EnhancedRestoreDialog } from "./components/EnhancedRestoreDialog";
 import { EnhancedRenameDialog } from "./components/EnhancedRenameDialog";
@@ -61,16 +70,8 @@ async function refreshSessions() {
   notifySessionsListeners();
 }
 
-// 模块加载时初始化
 void refreshSessions();
 
-/**
- * 模块加载时一次性注册「archive_create」与「archive_restore」事件的「撤销处理器」。
- * - archive_create.撤销 = 删除该归档会话（仅此，请勿尝试復原原 tab，避免与已存在的 useUndoStore 冲突）
- * - archive_restore 未提供：恢复后再「反恢复」语义不明，暂不接
- *
- * 这里在模块作用域调用一次即可：ArchiveView 是 lazy chunk，在面板首次打开时一定会被加载。
- */
 registerHistoryUndoHandler("archive_create", async (event) => {
   const sessionId = (event.undoContext as { sessionId?: string } | undefined)?.sessionId;
   if (sessionId === undefined || sessionId === "") return false;
@@ -79,40 +80,67 @@ registerHistoryUndoHandler("archive_create", async (event) => {
   return true;
 });
 
+/** Sidebar 选中的扩展过滤标识，比 ArchiveFilterId 多一个 earlier。 */
+type ArchiveScopeId = ArchiveFilterId | "earlier";
+
+/** 排序模式 */
+type SortMode = "newest" | "oldest" | "largest" | "name";
+
+/** 时段分组 key，用于渲染分段标题。 */
+type TimeBucket = "today" | "yesterday" | "thisWeek" | "thisMonth" | "earlier";
+
+interface BucketEntry {
+  key: TimeBucket;
+  labelKey: string;
+  sessions: ArchivedSession[];
+}
+
+function bucketOf(
+  ts: number,
+  refs: { today: number; yesterday: number; weekStart: number; monthStart: number },
+): TimeBucket {
+  if (ts >= refs.today) return "today";
+  if (ts >= refs.yesterday) return "yesterday";
+  if (ts >= refs.weekStart) return "thisWeek";
+  if (ts >= refs.monthStart) return "thisMonth";
+  return "earlier";
+}
+
 export function ArchiveView() {
   const sessions = useSyncExternalStore(subscribeSessions, getSessionsSnapshot);
   const initialized = useSyncExternalStore(subscribeSessions, getSessionsInitialized);
   const loading = !initialized;
   const [archivingCurrent, setArchivingCurrent] = useState(false);
-  /** 多选模式 */
+  /** 多选 */
   const [selectable, setSelectable] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  /** 高亮会话（由 UndoToast 等跳转触发） */
+  /** 高亮（外部跳转） */
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const [mergeOpen, setMergeOpen] = useState(false);
   const [mergeName, setMergeName] = useState("");
-  /** 增强恢复对话框状态 */
+  /** 增强对话框 */
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
   const [restoringSession, setRestoringSession] = useState<ArchivedSession | null>(null);
-  /** 增强重命名对话框状态 */
   const [renamingDialogOpen, setRenamingDialogOpen] = useState(false);
   const [renamingSession, setRenamingSession] = useState<ArchivedSession | null>(null);
-  /** 折叠展开状态 */
+  /** 卡片展开状态（详情 tab 列表） */
   const [expandedSessions, setExpandedSessions] = useState<Set<string>>(new Set());
-  /** 搜索过滤状态 */
+  /** 搜索 */
   const [searchQuery, setSearchQuery] = useState("");
+  /** 当前分类 */
+  const [scope, setScope] = useState<ArchiveScopeId>("all");
+  /** 排序 */
+  const [sortMode, setSortMode] = useState<SortMode>("newest");
+
   const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
   const tabCount = useTabsStore((s) => s.tabs.length);
   const { t, locale } = useT();
 
-  /** 视图首次挂载时刷新数据 */
   useEffect(() => {
     void refreshSessions();
   }, []);
 
-  /**
-   * 监听 app:highlight-session 自定义事件
-   */
+  /** 跳转高亮事件 */
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent<{ sessionId?: string }>).detail;
@@ -125,7 +153,7 @@ export function ArchiveView() {
     return () => window.removeEventListener(APP_EVENTS.highlightSession, handler);
   }, []);
 
-  /** 拼音匹配函数（懒加载） */
+  /** 拼音匹配 */
   const enablePinyin = useSettingsStore((s) => s.settings.searchEnablePinyin ?? true);
   const [pinyinMatchFn, setPinyinMatchFn] = useState<
     ((text: string, query: string) => boolean) | null
@@ -139,22 +167,20 @@ export function ArchiveView() {
     })();
   }, [enablePinyin, pinyinMatchFn]);
 
-  /** 搜索过滤逻辑：使用 useMemo 同步计算，避免 useEffect 延迟一帧 */
+  /** 搜索过滤 */
   const isSearching = searchQuery.trim().length > 0;
-  const { filteredSessions, matchedTabIndexes } = useMemo(() => {
+  const { searchFiltered, matchedTabIndexes } = useMemo(() => {
     if (!isSearching) {
-      return { filteredSessions: sessions, matchedTabIndexes: new Map<string, Set<number>>() };
+      return { searchFiltered: sessions, matchedTabIndexes: new Map<string, Set<number>>() };
     }
     const query = searchQuery.toLowerCase().trim();
     const result: ArchivedSession[] = [];
     const matched = new Map<string, Set<number>>();
     for (const session of sessions) {
       const matchedIdxs = new Set<number>();
-      // 会话名匹配
       const nameMatch =
         session.name.toLowerCase().includes(query) ||
         (enablePinyin && pinyinMatchFn?.(session.name, query));
-      // 标签页匹配
       for (let i = 0; i < session.tabs.length; i++) {
         const tab = session.tabs[i];
         if (!tab) continue;
@@ -171,20 +197,101 @@ export function ArchiveView() {
         matched.set(session.id, matchedIdxs);
       }
     }
-    return { filteredSessions: result, matchedTabIndexes: matched };
+    return { searchFiltered: result, matchedTabIndexes: matched };
   }, [sessions, isSearching, searchQuery, enablePinyin, pinyinMatchFn]);
 
-  /** 搜索时自动展开匹配的会话 */
-  useEffect(() => {
-    if (!isSearching) return;
-    const newExpanded = new Set<string>();
-    for (const session of filteredSessions) {
-      if (matchedTabIndexes.has(session.id)) {
-        newExpanded.add(session.id);
+  /** 按 sidebar scope 二次筛选 */
+  const scopeFiltered = useMemo(() => {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const startOfWeek = startOfToday - 6 * 24 * 60 * 60 * 1000;
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+
+    return searchFiltered.filter((s) => {
+      const isAuto = s.source === "auto" || s.hidden === true;
+      if (scope === "auto") return isAuto;
+      if (isAuto) return false; // 普通 scope 不展示 auto
+      if (scope === "all") return true;
+      if (scope === "today") return s.createdAt >= startOfToday;
+      if (scope === "week") return s.createdAt >= startOfWeek;
+      if (scope === "month") return s.createdAt >= startOfMonth;
+      if (scope === "earlier") return s.createdAt < startOfMonth;
+      return true;
+    });
+  }, [searchFiltered, scope]);
+
+  /** 排序 */
+  const sortedSessions = useMemo(() => {
+    const arr = [...scopeFiltered];
+    arr.sort((a, b) => {
+      switch (sortMode) {
+        case "oldest":
+          return a.createdAt - b.createdAt;
+        case "largest":
+          return b.tabCount - a.tabCount;
+        case "name":
+          return a.name.localeCompare(b.name);
+        case "newest":
+        default:
+          return b.createdAt - a.createdAt;
+      }
+    });
+    return arr;
+  }, [scopeFiltered, sortMode]);
+
+  /** 时段分组（仅 newest/oldest 排序时分组；按数量/名称排序时不分段，避免割裂） */
+  const buckets = useMemo<BucketEntry[]>(() => {
+    if (sortMode === "largest" || sortMode === "name") {
+      return [
+        {
+          key: "today",
+          labelKey:
+            sortMode === "largest" ? "archive.toolbar.sortLargest" : "archive.toolbar.sortName",
+          sessions: sortedSessions,
+        },
+      ];
+    }
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const refs = {
+      today,
+      yesterday: today - 24 * 60 * 60 * 1000,
+      weekStart: today - 6 * 24 * 60 * 60 * 1000,
+      monthStart: new Date(now.getFullYear(), now.getMonth(), 1).getTime(),
+    };
+    const map = new Map<TimeBucket, ArchivedSession[]>();
+    for (const s of sortedSessions) {
+      const key = bucketOf(s.createdAt, refs);
+      const list = map.get(key);
+      if (list) list.push(s);
+      else map.set(key, [s]);
+    }
+    const order: Array<{ key: TimeBucket; labelKey: string }> = [
+      { key: "today", labelKey: "archive.timeGroup.today" },
+      { key: "yesterday", labelKey: "archive.timeGroup.yesterday" },
+      { key: "thisWeek", labelKey: "archive.timeGroup.thisWeek" },
+      { key: "thisMonth", labelKey: "archive.timeGroup.thisMonth" },
+      { key: "earlier", labelKey: "archive.timeGroup.earlier" },
+    ];
+    const out: BucketEntry[] = [];
+    for (const o of order) {
+      const list = map.get(o.key);
+      if (list && list.length > 0) {
+        out.push({ key: o.key, labelKey: o.labelKey, sessions: list });
       }
     }
-    setExpandedSessions(newExpanded);
-  }, [isSearching, filteredSessions, matchedTabIndexes]);
+    return out;
+  }, [sortedSessions, sortMode]);
+
+  /** 搜索时自动展开命中卡片 */
+  useEffect(() => {
+    if (!isSearching) return;
+    const next = new Set<string>();
+    for (const s of sortedSessions) {
+      if (matchedTabIndexes.has(s.id)) next.add(s.id);
+    }
+    setExpandedSessions(next);
+  }, [isSearching, sortedSessions, matchedTabIndexes]);
 
   const handleRestore = (id: string) => {
     const session = sessions.find((s) => s.id === id);
@@ -219,7 +326,6 @@ export function ArchiveView() {
     }
   };
 
-  /** 分享单个会话为 JSON */
   const handleShare = async (id: string) => {
     const payload = await exportSingleSession(id);
     if (payload === null) {
@@ -242,7 +348,6 @@ export function ArchiveView() {
     }
   };
 
-  /** 合并多个会话 */
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -319,7 +424,6 @@ export function ArchiveView() {
       const result = await archiveAllTabs();
       void track("archive_create", { count: result.archivedCount });
       const { archivedCount, closedCount, session } = result;
-      // 同步记录到「插件历史」时间线，带上足够的 undo 上下文
       void appendHistoryEvent({
         type: "archive_create",
         title: session.name,
@@ -366,186 +470,189 @@ export function ArchiveView() {
     }
   };
 
-  /** 全部展开/折叠 */
-  const expandAll = () => {
-    const allIds = new Set(sessions.map((session) => session.id));
-    setExpandedSessions(allIds);
+  /** Stats 卡片 → 同步切 sidebar scope */
+  const handleSelectStatsFilter = (filter: ArchiveFilterId) => {
+    setScope(filter);
   };
 
-  const collapseAll = () => {
-    setExpandedSessions(new Set());
+  const handleToggleCardExpand = (id: string) => {
+    setExpandedSessions((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
+
+  const totalAfterFilter = sortedSessions.length;
 
   return (
     <div className={styles["archive-view"]}>
-      {/* 标题栏 */}
       <div className={styles["app-archive-header"]}>
         <div className={styles["app-archive-header__badge"]}>
           <Save size={ICON_SIZE.LARGE} className={styles["app-archive-header__icon"]} />
         </div>
-        <span className={styles["app-archive-header__title"]}>{t("archive.title")}</span>
-        <Space size={4}>
-          <BatchOperationsMenu
-            selectedIds={selectedIds}
-            totalCount={sessions.length}
-            selectable={selectable}
-            onToggleSelectMode={handleSelectModeChange}
-            onBatchRestore={(ids) => {
-              for (const id of ids) {
-                handleRestore(id);
-              }
-            }}
-            onBatchDelete={async (ids) => {
-              for (const id of ids) {
-                await handleDelete(id);
-              }
-            }}
-            onMergeSessions={handleOpenMerge}
-            onExportSessions={async (ids) => {
-              for (const id of ids) {
-                await handleShare(id);
-              }
-            }}
-            onClearAll={async () => {
-              for (const session of sessions) {
-                await handleDelete(session.id);
-              }
-            }}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div className={styles["app-archive-header__title"]}>{t("archive.title")}</div>
+          <div className={styles["app-archive-header__subtitle"]}>{t("archive.description")}</div>
+        </div>
+      </div>
+
+      <div className={styles["archive-shell"]}>
+        <ArchiveSidebar sessions={sessions} activeFilter={scope} onSelectFilter={setScope} />
+
+        <div className={styles["archive-main"]}>
+          <ArchiveStats
+            sessions={sessions}
+            activeFilter={scope === "earlier" ? "all" : scope}
+            onSelectFilter={handleSelectStatsFilter}
           />
-          <Button
-            type="primary"
-            icon={<Plus size={ICON_SIZE.MEDIUM} />}
-            loading={archivingCurrent}
-            disabled={tabCount === 0}
-            onClick={() => {
-              void handleArchiveCurrent();
-            }}
-            title={t("header.tabCount", { count: tabCount })}
-          >
-            {t("header.archive")}
-          </Button>
-        </Space>
-      </div>
 
-      <Alert
-        type="info"
-        showIcon
-        icon={<Info size={ICON_SIZE.MEDIUM} />}
-        description={t("archive.description")}
-        className={styles["app-archive-alert"]}
-      />
+          <div className={styles["archive-toolbar"]}>
+            <Input.Search
+              className={styles["archive-toolbar__search"]}
+              placeholder={t("archive.searchPlaceholder")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              allowClear
+            />
 
-      {/* 搜索过滤 */}
-      <div className={styles["app-archive-search"]}>
-        <Input.Search
-          className={styles["app-archive-search__input"]}
-          placeholder={t("archive.searchPlaceholder")}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          allowClear
-        />
-      </div>
+            <Select
+              className={styles["archive-toolbar__sort"]}
+              value={sortMode}
+              onChange={(value: SortMode) => setSortMode(value)}
+              suffixIcon={<ArrowDownUp size={ICON_SIZE.TINY} />}
+              options={[
+                { value: "newest", label: t("archive.toolbar.sortNewest") },
+                { value: "oldest", label: t("archive.toolbar.sortOldest") },
+                { value: "largest", label: t("archive.toolbar.sortLargest") },
+                { value: "name", label: t("archive.toolbar.sortName") },
+              ]}
+              style={{ width: 140 }}
+              size="middle"
+            />
 
-      {/* 搜索结果统计 */}
-      {searchQuery.trim() && (
-        <div className={styles["app-archive-search-result"]}>
-          {t("archive.searchResults", {
-            count: filteredSessions.length,
-            total: sessions.length,
-          })}
-        </div>
-      )}
+            <span className={styles["archive-toolbar__spacer"]} />
 
-      {/* 全部展开/折叠 */}
-      {filteredSessions.length > 0 && (
-        <div className={styles["app-archive-expand-actions"]}>
-          <Button
-            size="small"
-            type="text"
-            onClick={expandAll}
-            disabled={expandedSessions.size === filteredSessions.length}
-          >
-            {t("archive.expandAll")}
-          </Button>
-          <Button
-            size="small"
-            type="text"
-            onClick={collapseAll}
-            disabled={expandedSessions.size === 0}
-          >
-            {t("archive.collapseAll")}
-          </Button>
-        </div>
-      )}
+            {isSearching && (
+              <span className={styles["archive-search-result"]}>
+                {t("archive.searchResults", {
+                  count: totalAfterFilter,
+                  total: sessions.length,
+                })}
+              </span>
+            )}
 
-      {loading ? (
-        <div className={styles["app-archive-loading"]}>
-          <div className={styles["app-archive-loading__content"]}>
-            <Spin />
-            <span className={styles["app-archive-loading__copy"]}>{t("archive.loading")}</span>
-          </div>
-        </div>
-      ) : filteredSessions.length === 0 ? (
-        <FeatureEmptyState
-          title={t("archive.empty")}
-          description={t("archive.emptyHint")}
-          icon={<Inbox size={ICON_SIZE.HERO} />}
-          hints={[t("archive.emptyHint1"), t("archive.emptyHint2"), t("archive.emptyHint3")]}
-          actions={[
-            {
-              text: t("archive.archiveCurrentWindow"),
-              onClick: () => void archiveAllTabs(),
-              type: "primary",
-            },
-          ]}
-        />
-      ) : (
-        <List
-          dataSource={filteredSessions}
-          renderItem={(session) => (
-            <div
-              className={`${styles["app-archive-session-shell"]}${highlightId === session.id ? " " + styles["is-highlighted"] : ""}`}
-            >
-              <SessionItem
-                session={session}
-                isExpanded={expandedSessions.has(session.id)}
-                locale={locale}
-                onToggleExpand={() => {
-                  setExpandedSessions((prev) => {
-                    const newSet = new Set(prev);
-                    if (newSet.has(session.id)) {
-                      newSet.delete(session.id);
-                    } else {
-                      newSet.add(session.id);
-                    }
-                    return newSet;
-                  });
-                }}
-                onRestore={(id) => {
-                  void handleRestore(id);
-                }}
-                onDelete={(id) => {
-                  void handleDelete(id);
-                }}
-                onStartRenaming={startRenaming}
-                onOpenSingle={(tab) => {
-                  void handleOpenSingle(tab);
-                }}
-                onShare={(id) => {
-                  void handleShare(id);
-                }}
+            <div className={styles["archive-toolbar__primary-actions"]}>
+              <BatchOperationsMenu
+                selectedIds={selectedIds}
+                totalCount={sessions.length}
                 selectable={selectable}
-                selected={selectedIds.has(session.id)}
-                onToggleSelect={toggleSelect}
-                highlightQuery={isSearching ? searchQuery : undefined}
-                matchedTabIndexes={matchedTabIndexes.get(session.id)}
+                onToggleSelectMode={handleSelectModeChange}
+                onBatchRestore={(ids) => {
+                  for (const id of ids) handleRestore(id);
+                }}
+                onBatchDelete={async (ids) => {
+                  for (const id of ids) await handleDelete(id);
+                }}
+                onMergeSessions={handleOpenMerge}
+                onExportSessions={async (ids) => {
+                  for (const id of ids) await handleShare(id);
+                }}
+                onClearAll={async () => {
+                  for (const session of sessions) await handleDelete(session.id);
+                }}
               />
+              <Button
+                type="primary"
+                icon={<Plus size={ICON_SIZE.MEDIUM} />}
+                loading={archivingCurrent}
+                disabled={tabCount === 0}
+                onClick={() => {
+                  void handleArchiveCurrent();
+                }}
+                title={t("header.tabCount", { count: tabCount })}
+              >
+                {t("header.archive")}
+              </Button>
             </div>
-          )}
-        />
-      )}
+          </div>
 
-      {/* 合并会话 Modal */}
+          {loading ? (
+            <div className={styles["app-archive-loading"]}>
+              <div className={styles["app-archive-loading__content"]}>
+                <Spin />
+                <span className={styles["app-archive-loading__copy"]}>{t("archive.loading")}</span>
+              </div>
+            </div>
+          ) : totalAfterFilter === 0 ? (
+            sessions.length === 0 ? (
+              <FeatureEmptyState
+                title={t("archive.empty")}
+                description={t("archive.emptyHint")}
+                icon={<Inbox size={ICON_SIZE.HERO} />}
+                hints={[t("archive.emptyHint1"), t("archive.emptyHint2"), t("archive.emptyHint3")]}
+                actions={[
+                  {
+                    text: t("archive.archiveCurrentWindow"),
+                    onClick: () => {
+                      void handleArchiveCurrent();
+                    },
+                    type: "primary",
+                  },
+                ]}
+              />
+            ) : (
+              <Empty description={t("archive.empty")} />
+            )
+          ) : (
+            buckets.map((bucket) => (
+              <section key={bucket.key} className={styles["archive-time-group"]}>
+                {sortMode !== "largest" && sortMode !== "name" && (
+                  <header className={styles["archive-time-group__header"]}>
+                    <span className={styles["archive-time-group__title"]}>
+                      {t(bucket.labelKey)}
+                    </span>
+                    <span className={styles["archive-time-group__count"]}>
+                      {bucket.sessions.length}
+                    </span>
+                  </header>
+                )}
+                <div className={styles["archive-card-grid"]}>
+                  {bucket.sessions.map((session) => (
+                    <SessionCard
+                      key={session.id}
+                      session={session}
+                      locale={locale}
+                      highlighted={highlightId === session.id}
+                      onRestore={handleRestore}
+                      onDelete={(id) => {
+                        void handleDelete(id);
+                      }}
+                      onStartRenaming={startRenaming}
+                      onShare={(id) => {
+                        void handleShare(id);
+                      }}
+                      onOpenSingle={(tab) => {
+                        void handleOpenSingle(tab);
+                      }}
+                      selectable={selectable}
+                      selected={selectedIds.has(session.id)}
+                      onToggleSelect={toggleSelect}
+                      highlightQuery={isSearching ? searchQuery : undefined}
+                      matchedTabIndexes={matchedTabIndexes.get(session.id)}
+                      expanded={expandedSessions.has(session.id)}
+                      onToggleExpand={handleToggleCardExpand}
+                    />
+                  ))}
+                </div>
+              </section>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* 合并 Modal */}
       <Modal
         open={mergeOpen}
         rootClassName={styles["app-archive-merge-modal"]}
@@ -566,7 +673,7 @@ export function ArchiveView() {
         />
       </Modal>
 
-      {/* 增强恢复对话框 */}
+      {/* 恢复对话框 */}
       {restoringSession && (
         <EnhancedRestoreDialog
           open={restoreDialogOpen}
@@ -581,7 +688,7 @@ export function ArchiveView() {
         />
       )}
 
-      {/* 增强重命名对话框 */}
+      {/* 重命名对话框 */}
       {renamingSession && (
         <EnhancedRenameDialog
           open={renamingDialogOpen}

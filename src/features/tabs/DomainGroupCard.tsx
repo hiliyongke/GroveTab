@@ -16,8 +16,8 @@
  *   - 子项 favicon 显示可通过设置 `domainGroupShowItemFavicon` 切换
  */
 
-import { useState, useCallback, useMemo } from "react";
-import { Card, Tag, Button, Tooltip, theme } from "antd";
+import { useCallback, useMemo, useState } from "react";
+import { Tag, Button, Tooltip, theme } from "antd";
 import { ChevronDown, X, Globe, Moon } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { Reorder } from "motion/react";
@@ -29,6 +29,9 @@ import { useResolvedTheme } from "@/shared/hooks/use-resolved-theme";
 import { findAmbiguousTitleIds } from "@/shared/utils/url-display";
 import { cssVars } from "@/shared/utils/css-vars";
 import { TabItem } from "./TabItem";
+import { GroupCardShell } from "./components/GroupCardShell";
+import { useCardCollapse } from "./hooks/useCardCollapse";
+import { useCardReorder } from "./hooks/useCardReorder";
 import { useTabsStore, useSettingsStore } from "@/store";
 import { useT } from "@/shared/i18n";
 import styles from "./styles/items.module.less";
@@ -42,16 +45,11 @@ interface DomainGroupCardProps {
  * 域名分组卡片：头部（可折叠）+ 标签列表
  */
 export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroupCardProps) {
-  const [collapsed, setCollapsed] = useState(initialCollapsed);
+  const { collapsed, toggleCollapse } = useCardCollapse({ initialCollapsed });
   const [faviconError, setFaviconError] = useState(false);
   /** 关闭整个分组的 in-flight 标记，防止重复点击 + 驱动 Button loading */
   const [closing, setClosing] = useState(false);
-  /**
-   * 用户手动拖拽后的标签 ID 顺序。
-   * null 表示未拖拽过，此时 tabOrder 直接等于 group.tabs。
-   * 用 ID 而非完整对象存储，避免 group.tabs 更新（关闭/新增）时产生 stale state。
-   */
-  const [orderOverride, setOrderOverride] = useState<number[] | null>(null);
+  const { orderedItems: tabOrder, handleReorder } = useCardReorder(group.tabs);
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
   const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
   const closeDomainGroup = useTabsStore((s) => s.closeDomainGroup);
@@ -87,10 +85,6 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
         return token.borderRadiusLG;
     }
   }, [radiusPreset, token.borderRadiusLG]);
-
-  const toggleCollapse = useCallback(() => {
-    setCollapsed((prev) => !prev);
-  }, []);
 
   /**
    * 关闭整组处理：
@@ -142,38 +136,6 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
   /** 同组内 title 重复的 tab id 集合 —— 驱动 URL 消歧行的显示 */
   const ambiguousIds = useMemo(() => findAmbiguousTitleIds(group.tabs), [group.tabs]);
 
-  /**
-   * 派生 tabOrder：优先按 orderOverride 中的 ID 顺序排，
-   * 再追加 group.tabs 中未在 orderOverride 里出现的（新增标签）。
-   * 已删除的标签 ID 会在 freshMap.get(id) 时自然过滤掉。
-   * 此值在渲染期通过 useMemo 计算，不触发 setState，符合 React 19 纪律。
-   */
-  const tabOrder = useMemo(() => {
-    if (!orderOverride) return group.tabs;
-
-    const freshMap = new Map(group.tabs.map((t) => [t.id, t]));
-    const result: typeof group.tabs = [];
-
-    for (const id of orderOverride) {
-      const tab = freshMap.get(id);
-      if (tab) {
-        result.push(tab);
-        freshMap.delete(id);
-      }
-    }
-
-    for (const tab of group.tabs) {
-      if (freshMap.has(tab.id)) result.push(tab);
-    }
-
-    return result;
-  }, [group.tabs, orderOverride]);
-
-  /** 拖拽完成时只更新 ID 顺序，不直接操作完整 tab 对象 */
-  const handleReorder = useCallback((newOrder: typeof group.tabs) => {
-    setOrderOverride(newOrder.map((t) => t.id));
-  }, []);
-
   const cardStyle = useMemo<React.CSSProperties>(
     () => ({
       borderRadius: cardRadius || 12,
@@ -206,139 +168,126 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
   );
 
   return (
-    <Card
-      size="small"
-      className={`app-card-interactive app-hover-reveal-host ${styles["app-domain-group-card"]}`}
-      classNames={{ body: styles["app-domain-group-card__body"] }}
+    <GroupCardShell
       style={cardStyle}
-    >
-      {/*
-        身份色条 —— 位置依用户偏好渲染：
-          - left：贴整卡左边缘的 2px 竖条（hover 3px）
-          - top ：贴卡片顶部的 2px 横条（hover 3px）
-          - none：不渲染
-        色条始终使用依主题挑好的 barLight/barDark 纯实色，无渐变、无霓虹。
-        无障碍：aria-hidden，不参与语义。
-      */}
-      {barPosition === "left" && <div aria-hidden className={styles["app-accent-bar--left"]} />}
-      {barPosition === "top" && <div aria-hidden className={styles["app-accent-bar--top"]} />}
-      {/* 头部整体包裹：flex 布局，操作按钮不再绝对定位 */}
-      <div className={styles["app-domain-group-header-wrap"]}>
-        {/* 分组头部 —— 可点击展开/折叠，flex:1 占满剩余空间 */}
-        <Button
-          type="text"
-          onClick={toggleCollapse}
-          aria-expanded={!collapsed}
-          aria-label={collapsed ? t("tabs.expand") : t("tabs.collapse")}
-          className={`app-row-hover ${styles["app-domain-group-header"]}`}
-          style={{ flex: 1, minWidth: 0 }}
-        >
-          <ChevronDown
-            size={ICON_SIZE.TINY}
-            className={`${styles["app-domain-group-chevron"]}${collapsed ? ` ${styles["is-collapsed"]}` : ""}`}
-          />
+      accentBarPosition={barPosition}
+      collapsed={collapsed}
+      header={
+        <>
+          {/* 分组头部 —— 可点击展开/折叠，flex:1 占满剩余空间 */}
+          <Button
+            type="text"
+            onClick={toggleCollapse}
+            aria-expanded={!collapsed}
+            aria-label={collapsed ? t("tabs.expand") : t("tabs.collapse")}
+            className={`app-row-hover ${styles["app-domain-group-header"]}`}
+            style={{ flex: 1, minWidth: 0 }}
+          >
+            <ChevronDown
+              size={ICON_SIZE.TINY}
+              className={`${styles["app-domain-group-chevron"]}${collapsed ? ` ${styles["is-collapsed"]}` : ""}`}
+            />
 
-          {/*
+            {/*
             域名徽章：26×26 圆角方块，底色是 accent.soft（极低透明主色）
             内部要么嵌 favicon，要么在占位图标。把"色彩=身份"的语义集中在这块小徽章里，
             多卡并排时视觉协同——左边条 + 徽章 是同色系，一眼就能把"这是什么网站"传达出去。
           */}
-          <div className={styles["app-domain-group-badge"]}>
-            {faviconUrl && !faviconError ? (
-              <img
-                src={faviconUrl}
-                alt=""
-                className={styles["app-domain-group-badge-favicon"]}
-                onError={() => setFaviconError(true)}
-              />
-            ) : (
-              <Globe size={ICON_SIZE.SMALL} className={styles["app-domain-group-badge-icon"]} />
-            )}
-          </div>
-
-          <span className={styles["app-domain-group-title"]}>{group.domain}</span>
-
-          <Tag className={styles["app-domain-group-count"]}>{group.tabs.length}</Tag>
-        </Button>
-
-        {/* 操作按钮组：flex 排列，不再绝对定位 */}
-        <div className={styles["app-domain-group-actions"]}>
-          {/* 休眠整组——释放内存但保留标签页位置 */}
-          <Tooltip title={t("tabs.discardGroup")}>
-            <Button
-              type="text"
-              size="small"
-              icon={<Moon size={ICON_SIZE.SMALL} />}
-              onClick={(e) => {
-                e.stopPropagation();
-                void discardDomainGroup(group.domain).catch(() => {
-                  /* store 已 toast */
-                });
-              }}
-              aria-label={t("tabs.discardGroup")}
-              className={`app-hover-reveal ${styles["app-domain-group-action"]}`}
-            />
-          </Tooltip>
-
-          {/* 关闭整个域名 */}
-          <Tooltip title={t("tabs.closeDomain")}>
-            <Button
-              type="text"
-              size="small"
-              danger
-              loading={closing}
-              disabled={closing}
-              icon={closing ? undefined : <X size={ICON_SIZE.SMALL} />}
-              onClick={(e: React.MouseEvent) => {
-                void handleCloseAll(e);
-              }}
-              aria-label={t("tabs.closeDomain")}
-              // closing 时强制显示（is-visible），其余情况由 hover/focus 驱动
-              className={`app-hover-reveal ${styles["app-domain-group-action"]}${closing ? ` ${styles["is-visible"]}` : ""}`}
-            />
-          </Tooltip>
-        </div>
-      </div>
-
-      {/* 标签列表 — 使用 motion Reorder 实现分组内拖拽排序 */}
-      {!collapsed && (
-        <div className={styles["app-domain-group-list"]}>
-          <Reorder.Group
-            axis="y"
-            values={tabOrder}
-            onReorder={handleReorder}
-            className={styles["app-domain-group-sortable"]}
-          >
-            {tabOrder.map((tab) => (
-              <Reorder.Item
-                key={tab.id}
-                value={tab}
-                className={styles["app-domain-group-sortable-item"]}
-                whileDrag={{
-                  scale: 1.02,
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
-                  zIndex: 10,
-                  position: "relative" as const,
-                }}
-              >
-                <TabItem
-                  tab={tab}
-                  onJump={(id, wid) => {
-                    void jumpToTab(id, wid);
-                  }}
-                  onClose={(id) => {
-                    void closeSingleTab(id);
-                  }}
-                  hideFavicon={!showItemFavicon}
-                  showUrlHint={ambiguousIds.has(tab.id)}
-                  selectable
-                  visibleTabIds={tabOrder.map((t) => t.id)}
+            <div className={styles["app-domain-group-badge"]}>
+              {faviconUrl && !faviconError ? (
+                <img
+                  src={faviconUrl}
+                  alt=""
+                  className={styles["app-domain-group-badge-favicon"]}
+                  onError={() => setFaviconError(true)}
                 />
-              </Reorder.Item>
-            ))}
-          </Reorder.Group>
-        </div>
-      )}
-    </Card>
+              ) : (
+                <Globe size={ICON_SIZE.SMALL} className={styles["app-domain-group-badge-icon"]} />
+              )}
+            </div>
+
+            <span className={styles["app-domain-group-title"]}>{group.domain}</span>
+
+            <Tag className={styles["app-domain-group-count"]}>{group.tabs.length}</Tag>
+          </Button>
+
+          {/* 操作按钮组：flex 排列，不再绝对定位 */}
+          <div className={styles["app-domain-group-actions"]}>
+            {/* 休眠整组——释放内存但保留标签页位置 */}
+            <Tooltip title={t("tabs.discardGroup")}>
+              <Button
+                type="text"
+                size="small"
+                icon={<Moon size={ICON_SIZE.SMALL} />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  void discardDomainGroup(group.domain).catch(() => {
+                    /* store 已 toast */
+                  });
+                }}
+                aria-label={t("tabs.discardGroup")}
+                className={`app-hover-reveal ${styles["app-domain-group-action"]}`}
+              />
+            </Tooltip>
+
+            {/* 关闭整个域名 */}
+            <Tooltip title={t("tabs.closeDomain")}>
+              <Button
+                type="text"
+                size="small"
+                danger
+                loading={closing}
+                disabled={closing}
+                icon={closing ? undefined : <X size={ICON_SIZE.SMALL} />}
+                onClick={(e: React.MouseEvent) => {
+                  void handleCloseAll(e);
+                }}
+                aria-label={t("tabs.closeDomain")}
+                // closing 时强制显示（is-visible），其余情况由 hover/focus 驱动
+                className={`app-hover-reveal ${styles["app-domain-group-action"]}${closing ? ` ${styles["is-visible"]}` : ""}`}
+              />
+            </Tooltip>
+          </div>
+        </>
+      }
+    >
+      {/* 标签列表 — 使用 motion Reorder 实现分组内拖拽排序 */}
+      <div className={styles["app-domain-group-list"]}>
+        <Reorder.Group
+          axis="y"
+          values={tabOrder}
+          onReorder={handleReorder}
+          className={styles["app-domain-group-sortable"]}
+        >
+          {tabOrder.map((tab) => (
+            <Reorder.Item
+              key={tab.id}
+              value={tab}
+              className={styles["app-domain-group-sortable-item"]}
+              whileDrag={{
+                scale: 1.02,
+                boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+                zIndex: 10,
+                position: "relative" as const,
+              }}
+            >
+              <TabItem
+                tab={tab}
+                onJump={(id, wid) => {
+                  void jumpToTab(id, wid);
+                }}
+                onClose={(id) => {
+                  void closeSingleTab(id);
+                }}
+                hideFavicon={!showItemFavicon}
+                showUrlHint={ambiguousIds.has(tab.id)}
+                selectable
+                visibleTabIds={tabOrder.map((t) => t.id)}
+              />
+            </Reorder.Item>
+          ))}
+        </Reorder.Group>
+      </div>
+    </GroupCardShell>
   );
 }

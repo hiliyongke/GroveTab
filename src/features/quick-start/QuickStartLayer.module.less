@@ -13,6 +13,53 @@
   margin-bottom: 20px;
 }
 
+/* ── 标题栏：左侧标题 + 右侧快捷操作 ── */
+.quick-start-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  min-height: 28px;
+}
+
+.quick-start-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ant-color-text-tertiary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+/* ── 右侧快捷操作按钮组 ── */
+.quick-start-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.app-quick-start:hover .quick-start-actions {
+  opacity: 1;
+}
+
+.quick-start-action-btn {
+  width: 26px !important;
+  height: 26px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  color: var(--ant-color-text-tertiary) !important;
+  border-radius: var(--app-radius-sm) !important;
+}
+
+.quick-start-action-btn:hover {
+  color: var(--ant-color-text) !important;
+  background: var(--ant-color-fill-secondary) !important;
+}
+
 /* ── 整体容器：CSS Grid，让所有卡片共享同一列轨 ── */
 .speed-dial-grid-wrapper {
   display: grid;

@@ -57,6 +57,8 @@ interface TabSnapshot {
   incognito: boolean;
 }
 const tabSnapshots = new Map<number, TabSnapshot>();
+/** tabId → groupId 缓存，用于识别标签被加入/移出 Tab Group。 */
+const tabGroupSnapshots = new Map<number, number>();
 
 /** 记录「本次被成套关闭」的窗口： windowId -> closedTab 记录 id 集 */
 const windowCloseBuffer = new Map<number, string[]>();
@@ -72,6 +74,7 @@ function snapshotTab(tab: chrome.tabs.Tab): void {
     pinned: tab.pinned ?? false,
     incognito: tab.incognito ?? false,
   });
+  tabGroupSnapshots.set(tab.id, tab.groupId ?? -1);
 }
 
 /** SW 启动时全量补一次，避免被挂起后快照丢失 */
@@ -269,8 +272,20 @@ chrome.tabs.onCreated.addListener((tab) => {
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  const previousGroupId = tabGroupSnapshots.get(tabId) ?? -1;
+  const nextGroupId = tab.groupId ?? -1;
+
   // 同步更新快照（拿到最新 url/title/favicon，供 onRemoved 读取）
   snapshotTab(tab);
+
+  if (typeof changeInfo.groupId === "number" || previousGroupId !== nextGroupId) {
+    swBroadcast(nextGroupId === -1 ? "tab-ungrouped" : "tab-grouped", {
+      id: tabId,
+      windowId: tab.windowId,
+      previousGroupId,
+      groupId: nextGroupId,
+    });
+  }
 
   // 仅广播有意义的变更
   if (
@@ -307,6 +322,7 @@ chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
   // 从快照中拿出被关闭 tab 的信息，写入「最近关闭」与「历史事件」
   const snap = tabSnapshots.get(tabId);
   tabSnapshots.delete(tabId);
+  tabGroupSnapshots.delete(tabId);
   if (snap !== undefined && !snap.incognito && !isUrlIgnored(snap.url)) {
     void (async () => {
       try {
@@ -378,10 +394,121 @@ chrome.tabs.onMoved.addListener((tabId, moveInfo) => {
   });
 });
 
+/**
+ * onAttached / onDetached：当用户**直接在浏览器原生标签栏**把 tab 拖到另一个窗口时触发，
+ * Chrome 不会发 onMoved（onMoved 仅限同窗口内移动），必须监听这两条事件才能让插件 UI
+ * 与浏览器实时双向同步。
+ */
+chrome.tabs.onAttached.addListener((tabId, attachInfo) => {
+  // 同步快照中的 windowId，否则 onRemoved 时记录到错误窗口
+  const snap = tabSnapshots.get(tabId);
+  if (snap !== undefined) {
+    snap.windowId = attachInfo.newWindowId;
+  }
+  swBroadcast("tab-attached", {
+    id: tabId,
+    windowId: attachInfo.newWindowId,
+    newPosition: attachInfo.newPosition,
+  });
+});
+
+chrome.tabs.onDetached.addListener((tabId, detachInfo) => {
+  swBroadcast("tab-detached", {
+    id: tabId,
+    oldWindowId: detachInfo.oldWindowId,
+    oldPosition: detachInfo.oldPosition,
+  });
+});
+
+/**
+ * onReplaced：预渲染 / 后台标签转前台等场景，旧 tabId 被替换为新 tabId。
+ * 不广播详细 payload，触发一次全量刷新即可。
+ */
+chrome.tabs.onReplaced.addListener((addedTabId, removedTabId) => {
+  // 旧 id 不再有效，先把快照搬到新 id 上
+  const snap = tabSnapshots.get(removedTabId);
+  if (snap !== undefined) {
+    tabSnapshots.delete(removedTabId);
+    tabSnapshots.set(addedTabId, { ...snap, id: addedTabId });
+  }
+  const groupId = tabGroupSnapshots.get(removedTabId);
+  if (groupId !== undefined) {
+    tabGroupSnapshots.delete(removedTabId);
+    tabGroupSnapshots.set(addedTabId, groupId);
+  }
+  // 借用 tab-updated 触发前端的全量静默刷新（store 对 tab-updated 不做全量刷新——
+  // 这里改用 tab-moved 语义，前端会 silent reload）
+  swBroadcast("tab-moved", { id: addedTabId, replacedFrom: removedTabId });
+});
+
+if (typeof chrome.tabGroups !== "undefined") {
+  // Chrome 138+ 提供 onCreated；老版本运行时该事件可能不存在，做特性检测
+  if (
+    typeof (
+      chrome.tabGroups as {
+        onCreated?: chrome.events.Event<(group: chrome.tabGroups.TabGroup) => void>;
+      }
+    ).onCreated !== "undefined"
+  ) {
+    chrome.tabGroups.onCreated.addListener((group) => {
+      swBroadcast("tab-group-updated", {
+        id: group.id,
+        title: group.title,
+        color: group.color,
+        collapsed: group.collapsed,
+        windowId: group.windowId,
+      });
+    });
+  }
+
+  chrome.tabGroups.onUpdated.addListener((group) => {
+    swBroadcast("tab-group-updated", {
+      id: group.id,
+      title: group.title,
+      color: group.color,
+      collapsed: group.collapsed,
+      windowId: group.windowId,
+    });
+  });
+
+  chrome.tabGroups.onMoved.addListener((group) => {
+    swBroadcast("tab-group-updated", {
+      id: group.id,
+      title: group.title,
+      color: group.color,
+      collapsed: group.collapsed,
+      windowId: group.windowId,
+    });
+  });
+
+  chrome.tabGroups.onRemoved.addListener((group) => {
+    swBroadcast("tab-ungrouped", {
+      groupId: group.id,
+      windowId: group.windowId,
+    });
+  });
+}
+
 // ── Window Event Listeners ────────────────────────────
 
 chrome.windows.onFocusChanged.addListener((windowId) => {
   swBroadcast("window-focus-changed", { windowId });
+});
+
+/**
+ * 用户在浏览器中新建 / 关闭整个窗口时实时同步给插件 UI，
+ * 让 WindowView 的卡片随浏览器动态增减，而不是等下次手动刷新。
+ */
+chrome.windows.onCreated.addListener((window) => {
+  swBroadcast("window-created", {
+    windowId: window.id,
+    incognito: window.incognito,
+    type: window.type,
+  });
+});
+
+chrome.windows.onRemoved.addListener((windowId) => {
+  swBroadcast("window-removed", { windowId });
 });
 
 // ── Context Menu ──────────────────────────────────────
