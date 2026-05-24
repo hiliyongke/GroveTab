@@ -35,7 +35,7 @@
 
 /* ── 分组容器：在 wrapper 网格中占满整行 ── */
 .speed-dial-group {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 10px;
   grid-column: 1 / -1;
@@ -52,12 +52,18 @@
   color: var(--ant-color-text-secondary);
   letter-spacing: 0.01em;
   padding: var(--app-space-1) var(--app-space-3);
-  background: color-mix(in srgb, var(--speed-dial-group-accent, var(--ant-color-primary)) 6%, var(--ant-color-bg-container));
+  background: color-mix(
+    in srgb,
+    var(--speed-dial-group-accent, var(--ant-color-primary)) 6%,
+    var(--ant-color-bg-container)
+  );
   border: 1px solid var(--ant-color-border-secondary);
   border-left: 3px solid var(--ant-color-primary);
   border-radius: var(--app-radius-sm);
   width: fit-content;
-  transition: background 120ms ease, border-left-color 120ms ease;
+  transition:
+    background 120ms ease,
+    border-left-color 120ms ease;
 }
 
 /* ── 分组内网格 ── */
@@ -86,13 +92,13 @@
 }
 
 .app-speed-dial-card :global(.ant-card-body) {
-  padding: 0 !important;
+  padding: 0;
 }
 
 .app-speed-dial-card__body {
   padding: 0;
   height: 100%;
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
 }
 
@@ -108,14 +114,16 @@
   z-index: 10;
   width: 22px;
   height: 22px;
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 160ms ease, background 120ms ease;
+  transition:
+    opacity 160ms ease,
+    background 120ms ease;
   padding: var(--app-space-1);
   border-radius: var(--app-radius-xs);
-  background: rgba(0, 0, 0, 0.04);
+  background: color-mix(in srgb, #000 4%, transparent);
   color: var(--ant-color-text-secondary);
   cursor: grab;
 }
@@ -129,29 +137,33 @@
 }
 
 .speed-dial-drag-handle:hover {
-  background: rgba(0, 0, 0, 0.1);
+  background: color-mix(in srgb, #000 10%, transparent);
   color: var(--ant-color-text);
 }
 
 .speed-dial-drag-handle:active {
-  cursor: grabbing !important;
-  opacity: 1 !important;
-  background: rgba(0, 0, 0, 0.15);
+  cursor: grabbing;
+  opacity: 1;
+  background: color-mix(in srgb, #000 15%, transparent);
 }
 
 /* ── 更多按钮（hover 时浮现，定位由父层 div 控制） ── */
 .speed-dial-more-btn {
   width: 22px;
   height: 22px;
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   justify-content: center;
   border-radius: var(--app-radius-xs);
-  background: rgba(0, 0, 0, 0.04);
+  background: color-mix(in srgb, #000 4%, transparent);
   color: var(--ant-color-text-tertiary);
   opacity: 0;
   transform: scale(0.9);
-  transition: opacity 160ms ease, transform 160ms ease, color 120ms ease, background 120ms ease;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease,
+    color 120ms ease,
+    background 120ms ease;
   cursor: pointer;
 }
 
@@ -162,7 +174,7 @@
 
 .speed-dial-more-btn:hover {
   color: var(--ant-color-text);
-  background: rgba(0, 0, 0, 0.1);
+  background: color-mix(in srgb, #000 10%, transparent);
 }
 
 /* ── 更多按钮容器（含菜单） ── */
@@ -178,7 +190,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 10;
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   justify-content: center;
   border-radius: var(--ant-border-radius-lg);
@@ -186,7 +198,11 @@
 
 .app-speed-dial-preview {
   overflow: hidden;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--speed-dial-card-accent, var(--ant-color-primary)) 18%, transparent) 0%, color-mix(in srgb, var(--speed-dial-card-accent, var(--ant-color-primary)) 8%, transparent) 100%);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--speed-dial-card-accent, var(--ant-color-primary)) 18%, transparent) 0%,
+    color-mix(in srgb, var(--speed-dial-card-accent, var(--ant-color-primary)) 8%, transparent) 100%
+  );
   cursor: pointer;
 }
 
@@ -205,7 +221,7 @@
 
 .app-speed-dial-content,
 .app-speed-dial-add-content {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 2px;
   min-height: 42px;
@@ -275,7 +291,11 @@
 }
 
 .app-speed-dial-add-preview {
-  background: linear-gradient(135deg, color-mix(in srgb, var(--ant-color-primary) 10%, transparent) 0%, color-mix(in srgb, var(--ant-color-primary) 4%, transparent) 100%);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--ant-color-primary) 10%, transparent) 0%,
+    color-mix(in srgb, var(--ant-color-primary) 4%, transparent) 100%
+  );
   border-bottom: 1px solid var(--ant-color-border-secondary);
 }
 
@@ -293,13 +313,13 @@
   background: var(--ant-color-bg-elevated);
   border: 1px solid var(--ant-color-border-secondary);
   border-radius: var(--ant-border-radius, 8px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 12px color-mix(in srgb, #000 12%, transparent);
   padding: var(--app-space-1);
   z-index: 1000;
 }
 
 .speed-dial-menu-item {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: var(--app-space-2);
   padding: var(--app-space-2) var(--app-space-3);
@@ -337,7 +357,7 @@
 /* ── 空状态 ── */
 .speed-dial-empty {
   grid-column: 1 / -1;
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   align-items: center;
   gap: 10px;

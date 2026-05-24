@@ -37,14 +37,16 @@
 .appearance-preset-card {
   all: unset;
   box-sizing: border-box;
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   align-items: stretch;
   overflow: hidden;
   cursor: pointer;
   border-radius: var(--app-radius-md);
   border: 1.5px solid var(--ant-color-border-secondary);
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .appearance-preset-card:hover {
@@ -63,8 +65,8 @@
 }
 
 .appearance-preview-editable {
-  --appearance-edit-icon: rgba(0, 0, 0, 0.4);
-  color: var(--appearance-edit-icon);
+  --appearance-edit-icon: color-mix(in srgb, #000 40%, transparent);
+  color: var(--appearance-edit-icon, color-mix(in srgb, #000 40%, transparent));
 }
 
 .appearance-preset-preview--skin {
@@ -99,12 +101,12 @@
 
 .appearance-mode-badge.is-dark {
   color: var(--ant-color-text-inverse, #fff);
-  background: rgba(0, 0, 0, 0.5);
+  background: color-mix(in srgb, #000 50%, transparent);
 }
 
 .appearance-mode-badge.is-light {
   color: var(--ant-color-text, #333);
-  background: rgba(255, 255, 255, 0.72);
+  background: color-mix(in srgb, #fff 72%, transparent);
 }
 
 /* ── 预设卡片底部信息 ── */
@@ -162,7 +164,7 @@
 .appearance-file-stack,
 .appearance-switch-stack,
 .appearance-visibility-list {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
 }
 
@@ -185,7 +187,7 @@
 .appearance-fit-row,
 .appearance-overlay-row,
 .appearance-width-row {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
 }
 
@@ -230,7 +232,7 @@
 }
 
 .appearance-slider-value {
-  font-feature-settings: 'tnum';
+  font-feature-settings: "tnum";
 }
 
 /* ── 卡片/区域容器 ── */
@@ -242,7 +244,7 @@
 }
 
 .appearance-custom-box {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 14px;
   padding: var(--app-space-3);
@@ -310,7 +312,7 @@
 }
 
 .appearance-editor-toggle-row {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 8px;
 }
@@ -350,4 +352,9 @@
 .appearance-width-note {
   font-size: 10px;
   color: var(--ant-color-text-quaternary);
+}
+
+/* ── 快捷启动卡片尺寸选择器 ── */
+.appearance-quickstart-select {
+  width: 120px;
 }

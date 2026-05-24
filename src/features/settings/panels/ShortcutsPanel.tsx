@@ -6,23 +6,23 @@
  *   - 页面内快捷键自定义（可录制新快捷键）
  */
 
-import { useState, useCallback, useEffect } from 'react';
-import { Alert, Button, App } from 'antd';
-import { RotateCcw } from 'lucide-react';
+import { useState, useCallback, useEffect } from "react";
+import { Alert, Button, App } from "antd";
+import { RotateCcw } from "lucide-react";
 
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { useT } from '@/shared/i18n';
-import { useSettingsStore } from '@/store';
-import { useResolvedKeybindings } from '@/shared/hooks/use-keybinding';
-import type { KeybindingAction } from '@/shared/config/keybindings';
-import { Field } from '@/features/settings/components/Field';
-import { BRAND } from '@/shared/config/brand';
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useT } from "@/shared/i18n";
+import { useSettingsStore } from "@/store";
+import { useResolvedKeybindings } from "@/shared/hooks/use-keybinding";
+import type { KeybindingAction } from "@/shared/config/keybindings";
+import { Field } from "@/features/settings/components/Field";
+import { BRAND } from "@/shared/config/brand";
 
 /** Chrome 全局快捷键（只读） */
 const GLOBAL_SHORTCUTS = [
-  { labelKey: 'shortcuts.openCanopy', keys: 'Alt + C' },
-  { labelKey: 'shortcuts.saveAll', keys: 'Alt + Shift + S' },
-  { labelKey: 'shortcuts.toggleSearch', keys: 'Alt + K' },
+  { labelKey: "shortcuts.openCanopy", keys: "Alt + C" },
+  { labelKey: "shortcuts.saveAll", keys: "Alt + Shift + S" },
+  { labelKey: "shortcuts.toggleSearch", keys: "Alt + K" },
 ];
 
 /**
@@ -48,66 +48,62 @@ function KeybindingRecorder({
       e.stopPropagation();
 
       // 忽略单独的修饰键
-      if (['Control', 'Shift', 'Alt', 'Meta'].includes(e.key)) return;
+      if (["Control", "Shift", "Alt", "Meta"].includes(e.key)) return;
 
       const parts: string[] = [];
-      if (e.metaKey || e.ctrlKey) parts.push('Mod');
-      if (e.shiftKey) parts.push('Shift');
-      if (e.altKey) parts.push('Alt');
+      if (e.metaKey || e.ctrlKey) parts.push("Mod");
+      if (e.shiftKey) parts.push("Shift");
+      if (e.altKey) parts.push("Alt");
 
       // 主键映射
       let mainKey = e.key;
-      if (mainKey === ' ') mainKey = 'Space';
-      if (mainKey === 'Escape') mainKey = 'Escape';
+      if (mainKey === " ") mainKey = "Space";
+      if (mainKey === "Escape") mainKey = "Escape";
       parts.push(mainKey.length === 1 ? mainKey.toLowerCase() : mainKey);
 
-      const keyStr = parts.join('+');
+      const keyStr = parts.join("+");
       onRecord(keyStr);
       setRecording(false);
     };
 
     // Escape 取消录制
     const cancelHandler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && recording) {
+      if (e.key === "Escape" && recording) {
         e.preventDefault();
         e.stopPropagation();
         setRecording(false);
       }
     };
 
-    window.addEventListener('keydown', handler, true);
-    window.addEventListener('keydown', cancelHandler, true);
+    window.addEventListener("keydown", handler, true);
+    window.addEventListener("keydown", cancelHandler, true);
     return () => {
-      window.removeEventListener('keydown', handler, true);
-      window.removeEventListener('keydown', cancelHandler, true);
+      window.removeEventListener("keydown", handler, true);
+      window.removeEventListener("keydown", cancelHandler, true);
     };
   }, [recording, currentKeys, onRecord]);
 
   const formatDisplay = (key: string) => {
-    return key
-      .replace(/Mod/g, '⌘/Ctrl')
-      .replace(/\+/g, ' + ');
+    return key.replace(/Mod/g, "⌘/Ctrl").replace(/\+/g, " + ");
   };
 
   return (
     <div className="settings-keybinding-recorder">
-      <button
-        type="button"
+      <Button
+        htmlType="button"
         onClick={() => setRecording(true)}
-        aria-label={
-          recording ? t('shortcuts.recording') : t('shortcuts.resetHint')
-        }
+        aria-label={recording ? t("shortcuts.recording") : t("shortcuts.resetHint")}
         aria-pressed={recording}
-        className={`settings-keybinding-trigger${recording ? ' is-recording' : ''}`}
+        className={`settings-keybinding-trigger${recording ? " is-recording" : ""}`}
       >
-        {recording ? t('shortcuts.recording') : formatDisplay(currentKeys)}
-      </button>
+        {recording ? t("shortcuts.recording") : formatDisplay(currentKeys)}
+      </Button>
       <Button
         type="text"
         size="small"
-icon={<RotateCcw size={ICON_SIZE.MEDIUM} />}
-        title={t('shortcuts.resetHint')}
-        aria-label={t('shortcuts.resetHint')}
+        icon={<RotateCcw size={ICON_SIZE.MEDIUM} />}
+        title={t("shortcuts.resetHint")}
+        aria-label={t("shortcuts.resetHint")}
         onClick={onReset}
         className="settings-keybinding-reset"
       />
@@ -128,7 +124,7 @@ export function ShortcutsPanel() {
    * 同时还检查是否撞上 Chrome 全局快捷键（Alt+C / Alt+Shift+S / Alt+K）。
    */
   const conflictMap = (() => {
-    const normalize = (k: string) => k.toLowerCase().replace(/\s+/g, '').replace(/mod/g, 'mod');
+    const normalize = (k: string) => k.toLowerCase().replace(/\s+/g, "").replace(/mod/g, "mod");
     const map = new Map<string, KeybindingAction[]>();
     for (const item of resolved) {
       const key = normalize(item.keys);
@@ -140,82 +136,93 @@ export function ShortcutsPanel() {
     for (const [key, actions] of map.entries()) {
       if (actions.length > 1) {
         for (const a of actions) {
-          dupByAction.set(a, t('shortcuts.conflict', { peers: actions.filter((x) => x !== a).join(', ') }));
+          dupByAction.set(
+            a,
+            t("shortcuts.conflict", { peers: actions.filter((x) => x !== a).join(", ") }),
+          );
         }
       }
       // 与全局快捷键冲突（全局快捷键在 Chrome 中始终生效，无法在页面内覆盖）
-      if (key === 'alt+k' || key === 'alt+c' || key === 'alt+shift+s') {
+      if (key === "alt+k" || key === "alt+c" || key === "alt+shift+s") {
         for (const a of actions) {
-          dupByAction.set(a, t('shortcuts.globalConflict'));
+          dupByAction.set(a, t("shortcuts.globalConflict"));
         }
       }
     }
     return dupByAction;
   })();
 
-  const handleRecord = useCallback((action: KeybindingAction, keyStr: string) => {
-    const updated = { ...customKeybindings, [action]: keyStr };
-    void updateSettings({ customKeybindings: updated });
-    message.success(t('shortcuts.saved'));
-  }, [customKeybindings, updateSettings, message, t]);
+  const handleRecord = useCallback(
+    (action: KeybindingAction, keyStr: string) => {
+      const updated = { ...customKeybindings, [action]: keyStr };
+      void updateSettings({ customKeybindings: updated });
+      message.success(t("shortcuts.saved"));
+    },
+    [customKeybindings, updateSettings, message, t],
+  );
 
-  const handleReset = useCallback((action: KeybindingAction) => {
-    const updated = { ...customKeybindings };
-    delete updated[action];
-    void updateSettings({ customKeybindings: Object.keys(updated).length > 0 ? updated : undefined });
-    message.success(t('shortcuts.reset'));
-  }, [customKeybindings, updateSettings, message, t]);
+  const handleReset = useCallback(
+    (action: KeybindingAction) => {
+      const updated = { ...customKeybindings };
+      delete updated[action];
+      void updateSettings({
+        customKeybindings: Object.keys(updated).length > 0 ? updated : undefined,
+      });
+      message.success(t("shortcuts.reset"));
+    },
+    [customKeybindings, updateSettings, message, t],
+  );
 
   return (
     <div className="settings-panel-stack">
       {/* Chrome 全局快捷键（只读） */}
       <section className="settings-section">
-        <Field label={t('settings.globalShortcuts')}>
-        <Alert
-          type="info"
-          message={t('settings.shortcutsHint')}
-          showIcon
-          className="settings-shortcuts-alert"
-        />
-        <div className="settings-card-list">
-          {GLOBAL_SHORTCUTS.map((item) => (
-            <div key={item.labelKey} className="settings-card-row">
-              <span className="settings-card-row__title">{t(item.labelKey, { brand: BRAND.name })}</span>
-              <kbd className="app-kbd">{item.keys}</kbd>
-            </div>
-          ))}
-        </div>
-      </Field>
+        <Field label={t("settings.globalShortcuts")}>
+          <Alert
+            type="info"
+            message={t("settings.shortcutsHint")}
+            showIcon
+            className="settings-shortcuts-alert"
+          />
+          <div className="settings-card-list">
+            {GLOBAL_SHORTCUTS.map((item) => (
+              <div key={item.labelKey} className="settings-card-row">
+                <span className="settings-card-row__title">
+                  {t(item.labelKey, { brand: BRAND.name })}
+                </span>
+                <kbd className="app-kbd">{item.keys}</kbd>
+              </div>
+            ))}
+          </div>
+        </Field>
       </section>
 
       {/* 页面内快捷键（可自定义） */}
       <section className="settings-section">
-      <Field label={t('settings.localShortcuts')} hint={t('settings.localShortcutsHint')}>
-        <div className="settings-card-list">
-          {resolved.map((item) => (
-            <div key={item.action} className="settings-card-row">
-              <div className="settings-card-row__main">
-                <div className="settings-card-row__title">{t(item.label)}</div>
+        <Field label={t("settings.localShortcuts")} hint={t("settings.localShortcutsHint")}>
+          <div className="settings-card-list">
+            {resolved.map((item) => (
+              <div key={item.action} className="settings-card-row">
+                <div className="settings-card-row__main">
+                  <div className="settings-card-row__title">{t(item.label)}</div>
                   {item.hint && (
                     <div className="settings-card-row__hint">
                       {t(item.hint, { brand: BRAND.name })}
                     </div>
                   )}
                   {conflictMap.has(item.action) && (
-                    <div className="settings-warning-inline">
-                      ⚠ {conflictMap.get(item.action)}
-                    </div>
+                    <div className="settings-warning-inline">⚠ {conflictMap.get(item.action)}</div>
                   )}
+                </div>
+                <KeybindingRecorder
+                  currentKeys={item.keys}
+                  onRecord={(keyStr) => handleRecord(item.action, keyStr)}
+                  onReset={() => handleReset(item.action)}
+                />
               </div>
-              <KeybindingRecorder
-                currentKeys={item.keys}
-                onRecord={(keyStr) => handleRecord(item.action, keyStr)}
-                onReset={() => handleReset(item.action)}
-              />
-            </div>
             ))}
-        </div>
-      </Field>
+          </div>
+        </Field>
       </section>
     </div>
   );

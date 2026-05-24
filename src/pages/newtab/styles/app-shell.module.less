@@ -9,7 +9,7 @@
   position: sticky;
   top: 0;
   z-index: 20;
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   height: var(--app-header-height);
   padding: 0 20px;
@@ -20,7 +20,7 @@
 }
 
 .app-header-left {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
@@ -34,7 +34,9 @@
 
 .app-header-status-tag,
 .app-header-metrics {
-  transition: opacity 220ms ease, transform 220ms ease;
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease;
 }
 
 .app-header-status-tag.is-hidden,
@@ -86,7 +88,7 @@
 }
 
 .app-header-search-icon {
-  color: var(--app-color-primary);
+  color: var(--ant-color-primary);
 }
 
 .app-header-metric-strong {
@@ -111,7 +113,7 @@
   cursor: pointer;
   font-size: 12px;
   font-weight: 500;
-  color: var(--app-color-primary);
+  color: var(--ant-color-primary);
   letter-spacing: -0.01em;
   transition: opacity 160ms ease;
 }
@@ -128,7 +130,7 @@
 .app-header-center {
   flex: 1 1 520px;
   min-width: 280px;
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   justify-content: center;
   padding-inline: 18px;
 }
@@ -139,7 +141,7 @@
   width: min(560px, 100%);
   max-width: 560px;
   height: 36px;
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 9px;
   padding: 0 14px;
@@ -249,7 +251,7 @@
 
 /* ── Hero 区 ── */
 .app-hero {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   align-items: center;
   gap: 16px;
@@ -257,14 +259,14 @@
 }
 
 .app-hero-brand {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   align-items: center;
   gap: 6px;
 }
 
 .app-hero-brand-row {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 10px;
 }
@@ -301,39 +303,41 @@
   background: var(--ant-color-bg-container);
   border: 1px solid var(--ant-color-border-secondary);
   border-radius: var(--app-search-radius);
-  box-shadow: var(--app-shadow-brand-glow);
+  box-shadow: var(--app-shadow-brand-flow);
 }
 
 .app-hero-search:hover {
   transform: translateY(-1px);
-  border-color: var(--app-color-primary-hover);
+  border-color: var(--app-color-primary, var(--ant-color-primary));
   box-shadow:
     0 10px 32px color-mix(in srgb, var(--ant-color-text) 10%, transparent),
-    0 0 0 4px color-mix(in srgb, var(--app-color-primary) 10%, transparent);
+    0 0 0 4px
+      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 10%, transparent);
 }
 
-[data-theme='dark'] .app-hero-search:hover {
+[data-theme="dark"] .app-hero-search:hover {
   box-shadow:
-    0 10px 32px rgba(0, 0, 0, 0.4),
-    0 0 0 4px color-mix(in srgb, var(--app-color-primary) 12%, transparent);
+    0 10px 32px color-mix(in srgb, #000 40%, transparent),
+    0 0 0 4px
+      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 12%, transparent);
 }
 
 .app-view-switcher {
   max-width: 100%;
 }
 
-/* ── 主体区包裹层（侧边栏 + 内容并排） ── */
+/* ─── 主体区包裹层（侧边栏 + 内容并排） ──────────────────────── */
 .app-main-body {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex: 1;
   min-height: 0;
 }
 
-/* ── 视图侧边栏（left/right 模式） ── */
+/* ─── 视图侧边栏（left/right 模式） ──────────────────────── */
 .app-view-sidebar {
   width: 180px;
   flex-shrink: 0;
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   justify-content: center;
   border-right: 1px solid var(--ant-color-border-secondary);
@@ -348,7 +352,7 @@
 }
 
 .app-view-sidebar__list {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 2px;
   width: 100%;
@@ -357,7 +361,7 @@
 .app-view-sidebar__item {
   all: unset;
   box-sizing: border-box;
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 10px;
   width: 100%;
@@ -387,7 +391,7 @@
   text-overflow: ellipsis;
 }
 
-/* ── Workspace 切换器 ── */
+/* ─── Workspace 切换器 ── */
 .app-workspace-switcher {
   display: inline-flex;
 }
@@ -404,21 +408,29 @@
 }
 
 .app-workspace-trigger--active {
-  border-color: color-mix(in srgb, var(--ant-color-primary) 22%, var(--ant-color-border-secondary));
+  border-color: color-mix(
+    in srgb,
+    var(--app-color-primary, var(--ant-color-primary)) 22%,
+    var(--ant-color-border-secondary)
+  );
   background: var(--ant-color-primary-bg);
-  color: var(--ant-color-primary);
+  color: var(--app-color-primary, var(--ant-color-primary));
 }
 
 .app-workspace-trigger--active:hover,
 .app-workspace-clear:hover {
-  border-color: color-mix(in srgb, var(--ant-color-primary) 30%, var(--ant-color-border-secondary));
+  border-color: color-mix(
+    in srgb,
+    var(--app-color-primary, var(--ant-color-primary)) 30%,
+    var(--ant-color-border-secondary)
+  );
 }
 
 .app-workspace-clear {
   color: var(--ant-color-text-tertiary);
 }
 
-/* ── 响应式：小屏侧边栏收缩为仅图标 ── */
+/* ─── 响应式：小屏侧边栏收缩为仅图标 ── */
 @media (max-width: 768px) {
   .app-view-sidebar {
     width: 52px;
@@ -434,14 +446,14 @@
   }
 }
 
-/* ── 视图底部固定栏（bottom 模式） ── */
+/* ─── 视图底部固定栏（bottom 模式） ──────────────────────── */
 .app-view-bottom {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 20;
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   justify-content: center;
   padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
   background: var(--app-glass-bg);
@@ -482,7 +494,7 @@
 
 .app-view-bottom__item.is-active {
   background: var(--ant-color-primary-bg);
-  color: var(--ant-color-primary);
+  color: var(--app-color-primary, var(--ant-color-primary));
   font-weight: 600;
 }
 
@@ -490,11 +502,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* bottom 模式下，主体内容预留底栏高度 */
-.app-layout-shell--view-bottom {
-  padding-bottom: 64px;
 }
 
 /* 小屏：底栏隐藏文字、缩窄按钮 */
@@ -517,34 +524,34 @@
  * Apple 皮肤：Hero 区覆盖
  * ═══════════════════════════════════════════════════════ */
 
-/* Apple：Hero 区更大留白 */
-[data-skin='apple'] .app-hero {
+/* Apple ：Hero 区更大留白 */
+[data-skin="apple"] .app-hero {
   gap: 20px;
   padding: 48px 0 32px;
 }
 
-/* Apple：品牌标题 Apple 风格 */
-[data-skin='apple'] .app-hero-title {
+/* Apple ：品牌标题 Apple 风格 */
+[data-skin="apple"] .app-hero-title {
   font-size: 28px;
   font-weight: 600;
   line-height: 1.14;
   letter-spacing: -0.02em;
 }
 
-/* Apple：slogan 更低调 */
-[data-skin='apple'] .app-hero-slogan {
+/* Apple ：slogan 更低调 */
+[data-skin="apple"] .app-hero-slogan {
   font-size: 13px;
-  color: rgba(0, 0, 0, 0.48);
+  color: color-mix(in srgb, #000 48%, transparent);
 }
 
-[data-theme='dark'][data-skin='apple'] .app-hero-slogan {
-  color: rgba(255, 255, 255, 0.48);
+[data-theme="dark"][data-skin="apple"] .app-hero-slogan {
+  color: color-mix(in srgb, #fff 48%, transparent);
 }
 
-/* Apple：Hero 搜索框 - 改为 Apple Filter/Search 按钮风格 */
-[data-skin='apple'] .app-hero-search {
+/* Apple ：Hero 搜索框 - 改为 Apple Filter/Search 按钮风格 */
+[data-skin="apple"] .app-hero-search {
   height: 44px;
-  border: 3px solid rgba(0, 0, 0, 0.04);
+  border: 3px solid color-mix(in srgb, #000 4%, transparent);
   border-radius: var(--app-radius-md);
   background: #fafafc;
   box-shadow: none;
@@ -552,75 +559,66 @@
   letter-spacing: -0.01em;
 }
 
-[data-skin='apple'] .app-hero-search:hover {
-  border-color: rgba(0, 0, 0, 0.06);
+[data-skin="apple"] .app-hero-search:hover {
+  border-color: color-mix(in srgb, #000 6%, transparent);
   box-shadow: none;
   transform: none;
 }
 
-[data-theme='dark'][data-skin='apple'] .app-hero-search {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.06);
+[data-theme="dark"][data-skin="apple"] .app-hero-search {
+  background: color-mix(in srgb, #fff 6%, transparent);
+  border-color: color-mix(in srgb, #fff 6%, transparent);
 }
 
-[data-theme='dark'][data-skin='apple'] .app-hero-search:hover {
-  border-color: rgba(255, 255, 255, 0.1);
+[data-theme="dark"][data-skin="apple"] .app-hero-search:hover {
+  border-color: color-mix(in srgb, #fff 10%, transparent);
   box-shadow: none;
   transform: none;
 }
 
-/* Apple：搜索框图标色 */
-[data-skin='apple'] .app-hero-search-icon {
-  color: rgba(0, 0, 0, 0.48) !important;
+/* Apple ：搜索框图标色 */
+[data-skin="apple"] .app-hero-search-icon {
+  color: color-mix(in srgb, #000 48%, transparent);
 }
 
-[data-theme='dark'][data-skin='apple'] .app-hero-search-icon {
-  color: rgba(255, 255, 255, 0.48) !important;
+[data-theme="dark"][data-skin="apple"] .app-hero-search-icon {
+  color: color-mix(in srgb, #fff 48%, transparent);
 }
 
-/* Apple：搜索框 ⌘K 键帽 */
-[data-skin='apple'] .app-hero-search .app-kbd {
-  background: rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+/* Apple ：搜索框 ⌘K 键帽 */
+[data-skin="apple"] .app-hero-search .app-kbd {
+  background: color-mix(in srgb, #000 4%, transparent);
+  border: 1px solid color-mix(in srgb, #000 6%, transparent);
   border-radius: var(--app-radius-xs);
-  color: rgba(0, 0, 0, 0.48);
+  color: color-mix(in srgb, #000 48%, transparent);
 }
 
-[data-theme='dark'][data-skin='apple'] .app-hero-search .app-kbd {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.48);
+[data-theme="dark"][data-skin="apple"] .app-hero-search .app-kbd {
+  background: color-mix(in srgb, #fff 8%, transparent);
+  border-color: color-mix(in srgb, #fff 10%, transparent);
+  color: color-mix(in srgb, #fff 48%, transparent);
 }
 
-/* Apple：视图切换器 - 更紧凑圆润 */
-[data-skin='apple'] .app-view-switcher {
+/* Apple ：视图切换器 - 更紧凑圆润 */
+[data-skin="apple"] .app-view-switcher {
   margin-top: 4px;
 }
 
-[data-skin='apple'] .app-view-switcher {
-  background: rgba(0, 0, 0, 0.04);
-  border-radius: var(--app-radius-sm);
-}
-
-[data-theme='dark'][data-skin='apple'] .app-view-switcher {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-[data-skin='apple'] .app-view-option {
+[data-skin="apple"] .app-view-option {
   font-size: 12px;
   letter-spacing: -0.01em;
 }
 
-/* Apple：Content 区更大呼吸感 */
-[data-skin='apple'] .app-content-shell {
+/* Apple ：Content 区更大呼吸感 */
+[data-skin="apple"] .app-content-shell {
   padding-bottom: 80px;
 }
 
-/* ── 加载 / 空状态 ── */
+/* ─── 加载 / 空状态 ── */
 .app-page-loading,
 .app-suspense-fallback,
 .app-workspace-loading {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   justify-content: center;
 }
@@ -632,18 +630,18 @@
 .app-page-loading-inner,
 .app-workspace-loading-inner,
 .app-empty-state-content {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   align-items: center;
   gap: 12px;
 }
 
-/* ── 布局外壳 ── */
+/* ─── 布局外壳 ── */
 .app-layout-shell {
   height: 100vh;
   overflow: hidden;
   position: relative;
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
 }
 
@@ -665,7 +663,7 @@
   z-index: 1;
   flex: 1;
   min-height: 0;
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
@@ -681,9 +679,9 @@
   padding-bottom: 0;
 }
 
-/* ── Workspace 区域容器 ── */
+/* ─── Workspace 区域容器 ── */
 .app-workspace-section {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
 }
 
@@ -710,7 +708,7 @@
 }
 
 .app-empty-state-body {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   align-items: center;
   gap: 4px;
@@ -741,34 +739,34 @@
 
 /* Modal 容器 */
 .app-modal__container {
-  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container)) !important;
+  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container));
   backdrop-filter: var(--app-glass-filter, blur(20px) saturate(180%));
   -webkit-backdrop-filter: var(--app-glass-filter, blur(20px) saturate(180%));
 }
 
 /* Drawer 容器 */
 .app-drawer__section {
-  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container)) !important;
+  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container));
   backdrop-filter: var(--app-glass-filter, blur(20px) saturate(180%));
   -webkit-backdrop-filter: var(--app-glass-filter, blur(20px) saturate(180%));
 }
 
-/* Popover 容器 */
-.app-popover__container .ant-popover-inner,
-.ant-popover-inner {
-  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container)) !important;
+/* Popover 容器（通过 classNames: { container: 'app-popover__container' } 注入） */
+.app-popover__container .ant-popover-inner {
+  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container));
   backdrop-filter: var(--app-glass-filter, blur(16px) saturate(180%));
   -webkit-backdrop-filter: var(--app-glass-filter, blur(16px) saturate(180%));
 }
 
-/* Dropdown 菜单 */
+/* Dropdown 菜单（暂无法全局注入 classNames，保留全局选择器） */
+/* TODO: antd v6 后续版本若支持全局 classNames，应迁移至此 */
 .ant-dropdown-menu,
 .ant-select-dropdown,
 .ant-cascader-dropdown,
 .ant-tree-select-dropdown,
 .ant-picker-dropdown .ant-picker-panel-container,
 .ant-color-picker .ant-popover-inner {
-  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container)) !important;
+  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container));
   backdrop-filter: var(--app-glass-filter, blur(16px) saturate(180%));
   -webkit-backdrop-filter: var(--app-glass-filter, blur(16px) saturate(180%));
 }

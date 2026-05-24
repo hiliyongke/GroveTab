@@ -15,7 +15,7 @@
 :root {
   color-scheme: light;
 }
-[data-theme='dark'] {
+[data-theme="dark"] {
   color-scheme: dark;
 }
 
@@ -49,7 +49,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  font-feature-settings: 'kern' 1, 'liga' 1;
+  font-feature-settings:
+    "kern" 1,
+    "liga" 1;
   font-family: var(--ant-font-family);
   font-weight: var(--app-font-weight-body, 400);
 }
@@ -73,7 +75,7 @@ h6 {
   font-weight: var(--app-font-weight-heading, 600);
 }
 
-[data-theme='dark'] body {
+[data-theme="dark"] body {
   background-color: var(--app-page-bg, var(--ant-color-bg-layout, #141414));
   background-image: var(--app-page-gradient, none);
   color: var(--ant-color-text, #f5f5f5);
@@ -90,7 +92,7 @@ h6 {
   background-color: color-mix(in srgb, var(--app-color-primary) 18%, transparent);
   color: inherit;
 }
-[data-theme='dark'] ::selection {
+[data-theme="dark"] ::selection {
   background-color: color-mix(in srgb, var(--app-color-primary) 25%, transparent);
 }
 
@@ -159,8 +161,12 @@ h6 {
 
 /** 热榜刷新按钮旋转动画 */
 @keyframes app-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ─── 页面入场动画 ─────────────────────────────────
@@ -223,7 +229,7 @@ h6 {
  * 由 AntdThemeProvider 动态控制此属性。
  */
 body::before {
-  content: '';
+  content: "";
   position: fixed;
   inset: 0;
   z-index: 1;
@@ -301,7 +307,7 @@ html[data-texture-noise] body::before {
  * Header 吸附搜索按钮 hover。
  *
  * 元素本身是原生 <button all: unset>，不存在被 antd 覆盖的问题，
- * 因此无需 !important。
+ * 因此无需 。
  */
 .app-compact-search:hover {
   background: var(--ant-color-fill-secondary);
@@ -401,13 +407,13 @@ html[data-texture-noise] body::before {
   [data-app-content],
   .app-batch-bar,
   .app-accordion-panel {
-    animation: none !important;
+    animation: none;
   }
   .app-lift:hover,
   .app-hero-search:hover,
   .app-card-interactive:hover,
   .app-card-interactive:focus-within {
-    transform: none !important;
+    transform: none;
   }
 }
 
@@ -429,13 +435,17 @@ html[data-texture-noise] body::before {
  * 这里补充全局组件级覆盖
  * ═══════════════════════════════════════════════════════════ */
 
-[data-skin='apple'] {  /* ── Apple 卡片：无边框 ── */
+[data-skin="apple"] {
+  /* ── Apple 皮肤 CSS 变量 */
+  --app-apple-blue: #0071e3;
+
+  /* ── Apple 卡片：无边框 ── */
   & .app-card {
     border: none;
   }
 
   & .app-card:hover {
-    transform: none !important;
+    transform: none;
   }
 
   /* ── Apple 按钮：pill 形 CTA ── */
@@ -451,53 +461,56 @@ html[data-texture-noise] body::before {
 
   /* ── Apple 聚焦态 ── */
   & :focus-visible {
-    outline: 2px solid #0071e3;
+    outline: 2px solid var(--app-apple-blue, #0071e3);
     outline-offset: 2px;
   }
 
   /* ── Apple DomainGroupCard：无边框、柔和阴影 ── */
   & .app-card-interactive {
-    border: none !important;
+    border: none;
     border-radius: var(--app-card-radius, 12px);
-    box-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px 0px;
+    box-shadow: 0 5px 30px color-mix(in srgb, #000 22%, transparent);
   }
 
   /* Apple：卡片 hover 不上浮，仅微调阴影 */
   & .app-card-interactive:hover,
   & .app-card-interactive:focus-within {
-    transform: none !important;
-    box-shadow: rgba(0, 0, 0, 0.26) 5px 8px 36px 0px;
-    border-color: transparent !important;
+    transform: none;
+    box-shadow: 0 8px 36px color-mix(in srgb, #000 26%, transparent);
+    border-color: transparent;
   }
 
-  [data-theme='dark'] {
+  [data-theme="dark"] {
+    /* ── Apple 暗色模式覆盖 */
+    --app-apple-blue: #2997ff;
+
     & .app-card-interactive:hover,
     & .app-card-interactive:focus-within {
-      box-shadow: rgba(0, 0, 0, 0.52) 5px 8px 36px 0px;
+      box-shadow: 0 8px 36px color-mix(in srgb, #000 52%, transparent);
     }
   }
 
   /* Apple：行级 hover 更柔 */
   & .app-row-hover:hover,
   & .app-row-hover:focus-within {
-    background-color: rgba(0, 0, 0, 0.03);
+    background-color: color-mix(in srgb, #000 3%, transparent);
   }
 
   /* ── Apple ActivityStrip：pill 胶囊风格 ── */
   & .activity-strip__item {
     border: none;
     border-radius: var(--app-radius-pill);
-    background: rgba(0, 0, 0, 0.04);
+    background: color-mix(in srgb, #000 4%, transparent);
     font-size: 13px;
     letter-spacing: -0.01em;
   }
 
   & .activity-strip__icon {
-    color: #0071e3;
+    color: var(--app-apple-blue, #0071e3);
   }
 
   & .activity-strip__action-btn {
-    color: #0071e3 !important;
+    color: var(--app-apple-blue, #0071e3);
   }
 
   /* ── Apple 域名分组头 ── */
@@ -507,7 +520,7 @@ html[data-texture-noise] body::before {
 
   /* Apple：分组内 favicon 徽章更圆润 */
   & .app-domain-group-badge {
-    border-radius: var(--app-radius-sm) !important;
+    border-radius: var(--app-radius-sm);
   }
 
   /* ── Apple Tag 标签 ── */
@@ -542,7 +555,7 @@ html[data-texture-noise] body::before {
   & .app-accordion-panel {
     border: none;
     border-radius: var(--app-card-radius, 12px);
-    box-shadow: rgba(0, 0, 0, 0.12) 2px 4px 20px 0px;
+    box-shadow: 0 4px 20px color-mix(in srgb, #000 12%, transparent);
   }
 
   /* ── Apple 选中态通知栏 ── */
@@ -555,77 +568,79 @@ html[data-texture-noise] body::before {
   & .app-widget-card {
     border: none;
     border-radius: var(--app-card-radius, 12px);
-    box-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px 0px;
+    box-shadow: 0 5px 30px color-mix(in srgb, #000 22%, transparent);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
 
   & .app-widget-card:hover {
-    transform: none !important;
+    transform: none;
   }
 
   /* ── Apple 滚动条 ── */
   & ::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.15);
+    background: color-mix(in srgb, #000 15%, transparent);
     border-radius: var(--app-radius-circle);
   }
 
   /* ── Apple 选中态文字 ── */
   & ::selection {
-    background-color: rgba(0, 113, 227, 0.18);
+    background-color: color-mix(in srgb, var(--app-apple-blue, #0071e3) 18%, transparent);
     color: inherit;
   }
 
-  [data-theme='dark'] {
+  [data-theme="dark"] {
     & a,
     & .app-typography a {
       color: var(--app-apple-link-dark);
     }
 
     & .app-card-interactive {
-      box-shadow: rgba(0, 0, 0, 0.44) 3px 5px 30px 0px;
+      box-shadow: 0 5px 30px color-mix(in srgb, #000 44%, transparent);
     }
 
     & .app-card-interactive:hover,
     & .app-card-interactive:focus-within {
-      box-shadow: rgba(0, 0, 0, 0.52) 5px 8px 36px 0px;
+      box-shadow: 0 8px 36px color-mix(in srgb, #000 52%, transparent);
     }
 
     & .app-row-hover:hover,
     & .app-row-hover:focus-within {
-      background-color: rgba(255, 255, 255, 0.05);
+      background-color: color-mix(in srgb, #fff 5%, transparent);
     }
 
     & .activity-strip__item {
-      background: rgba(255, 255, 255, 0.08);
+      background: color-mix(in srgb, #fff 8%, transparent);
     }
 
     & .activity-strip__icon {
-      color: #2997ff;
+      color: var(--app-apple-blue-dark, #2997ff);
     }
 
     & .activity-strip__action-btn {
-      color: #2997ff !important;
+      color: var(--app-apple-blue-dark, #2997ff);
     }
 
     & .app-accordion-panel {
-      box-shadow: rgba(0, 0, 0, 0.32) 2px 4px 20px 0px;
+      box-shadow: 0 4px 20px color-mix(in srgb, #000 32%, transparent);
     }
 
     & .app-widget-card {
-      box-shadow: rgba(0, 0, 0, 0.44) 3px 5px 30px 0px;
+      box-shadow: 0 5px 30px color-mix(in srgb, #000 44%, transparent);
     }
 
     & ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.15);
+      background: color-mix(in srgb, #fff 15%, transparent);
     }
 
     & ::selection {
-      background-color: rgba(0, 113, 227, 0.32);
+      background-color: color-mix(in srgb, var(--app-apple-blue, #0071e3) 32%, transparent);
     }
   }
 }
-/* ═══════════════════════════════════════════════════════════ * Fluent Acrylic * Microsoft Fluent Design System —— Acrylic Material
+
+/* ═══════════════════════════════════════════════════════════
+ * Fluent Acrylic * Microsoft Fluent Design System —— Acrylic Material
  * 核心视觉：
  *   · 多层半透明叠加（tint → blur → noise → highlight）
  *   · 显性噪点纹理（Fluent 标志性特征）
@@ -634,86 +649,91 @@ html[data-texture-noise] body::before {
  *   · 圆角回归 Fluent 标准（8px）
  * ═══════════════════════════════════════════════════════════ */
 
-[data-skin='glassmorphism'] {
+[data-skin="glassmorphism"] {
+  /* ── Fluent 皮肤 CSS 变量 */
+  --app-fluent-blue: #0078d4;
+  --app-fluent-blue-hover: #2b88d8;
+
   /* ── Fluent Header：Acrylic 半透明底栏 ── */
   & .app-header-shell {
     background: var(--app-glass-bg);
     backdrop-filter: var(--app-glass-filter);
     -webkit-backdrop-filter: var(--app-glass-filter);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid color-mix(in srgb, #fff 8%, transparent);
   }
 
   /* ── Fluent 卡片：多层 Acrylic 效果 ── */
   & .app-card-interactive {
-    border-color: rgba(255, 255, 255, 0.08);
-    transition: transform 0.367s cubic-bezier(0.16, 1, 0.3, 1),
-                box-shadow 0.367s cubic-bezier(0.16, 1, 0.3, 1),
-                border-color 0.25s ease;
+    border-color: color-mix(in srgb, #fff 8%, transparent);
+    transition:
+      transform 0.367s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.367s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.25s ease;
   }
 
   & .app-card-interactive:hover,
   & .app-card-interactive:focus-within {
-    border-color: rgba(255, 255, 255, 0.12);
+    border-color: color-mix(in srgb, #fff 12%, transparent);
   }
 
   /* ── Fluent 行级 hover ── */
   & .app-row-hover:hover,
   & .app-row-hover:focus-within {
-    background-color: rgba(0, 120, 212, 0.04);
+    background-color: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 4%, transparent);
   }
 
   /* ── Fluent ActivityStrip ── */
   & .activity-strip__item {
     border-radius: var(--app-radius-sm);
-    border-color: rgba(255, 255, 255, 0.06);
+    border-color: color-mix(in srgb, #fff 6%, transparent);
   }
 
   & .activity-strip__icon {
-    color: #0078D4;
+    color: var(--app-fluent-blue, #0078d4);
   }
 
   & .activity-strip__action-btn {
-    color: #0078D4 !important;
+    color: var(--app-fluent-blue, #0078d4);
   }
 
   /* ── Fluent 链接色 ── */
   & a,
   & .app-typography a {
-    color: #0078D4;
+    color: var(--app-fluent-blue, #0078d4);
   }
 
   /* ── Fluent 按钮 ── */
   & .app-button.ant-btn-primary {
-    background: #0078D4;
-    border-color: #0078D4;
+    background: var(--app-fluent-blue, #0078d4);
+    border-color: var(--app-fluent-blue, #0078d4);
     border-radius: var(--app-radius-sm);
   }
 
   & .app-button.ant-btn-primary:hover {
-    background: #2B88D8;
-    border-color: #2B88D8;
+    background: var(--app-fluent-blue-hover, #2b88d8);
+    border-color: var(--app-fluent-blue-hover, #2b88d8);
   }
 
   /* ── Fluent 聚焦态 ── */
   & :focus-visible {
-    outline: 2px solid #0078D4;
+    outline: 2px solid var(--app-fluent-blue, #0078d4);
     outline-offset: 1px;
   }
 
   /* ── Fluent WidgetCard ── */
   & .app-widget-card {
-    border-color: rgba(255, 255, 255, 0.06);
+    border-color: color-mix(in srgb, #fff 6%, transparent);
   }
 
   /* ── Fluent 滚动条 ── */
   & ::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.2);
+    background: color-mix(in srgb, #000 20%, transparent);
     border-radius: var(--app-radius-xs);
   }
 
   /* ── Fluent 选中态 ── */
   & ::selection {
-    background-color: rgba(0, 120, 212, 0.2);
+    background-color: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 20%, transparent);
     color: inherit;
   }
 
@@ -731,158 +751,185 @@ html[data-texture-noise] body::before {
      用 linear-gradient 叠一层极淡的高光作为"内填光"，强化金属/玻璃质感。 */
   & .app-drawer__section {
     background:
-      linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 40%),
-      var(--app-glass-bg) !important;
-    backdrop-filter: var(--app-glass-filter) !important;
-    -webkit-backdrop-filter: var(--app-glass-filter) !important;
-    border-left: 1px solid rgba(255, 255, 255, 0.18);
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, #fff 18%, transparent),
+        color-mix(in srgb, #fff 0%, transparent) 40%
+      ),
+      var(--app-glass-bg);
+    backdrop-filter: var(--app-glass-filter);
+    -webkit-backdrop-filter: var(--app-glass-filter);
+    border-left: 1px solid color-mix(in srgb, #fff 18%, transparent);
     box-shadow:
-      -8px 0 32px rgba(0, 0, 0, 0.18),
-      inset 1px 0 0 rgba(255, 255, 255, 0.12);
+      -8px 0 32px color-mix(in srgb, #000 18%, transparent),
+      inset 1px 0 0 color-mix(in srgb, #fff 12%, transparent);
   }
 
   & .app-drawer__header {
-    background: transparent !important;
-    border-bottom-color: rgba(255, 255, 255, 0.06);
+    background: transparent;
+    border-bottom-color: color-mix(in srgb, #fff 6%, transparent);
   }
 
   & .app-drawer__body {
-    background: transparent !important;
+    background: transparent;
   }
 
   & .app-drawer__footer {
-    background: transparent !important;
-    border-top-color: rgba(255, 255, 255, 0.06);
+    background: transparent;
+    border-top-color: color-mix(in srgb, #fff 6%, transparent);
   }
 
   /* Drawer 遮罩层：加深以突出 Acrylic 抽屉 */
   & .app-drawer__mask {
-    background: rgba(0, 0, 0, 0.45) !important;
-    backdrop-filter: blur(4px) !important;
-    -webkit-backdrop-filter: blur(4px) !important;
+    background: color-mix(in srgb, #000 45%, transparent);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
   }
 
   /* ── Fluent SearchBox Modal：Acrylic 毛玻璃搜索弹窗 ── */
   & .search-box-container {
     background:
-      linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 45%),
-      var(--app-glass-bg) !important;
-    backdrop-filter: var(--app-glass-filter) !important;
-    -webkit-backdrop-filter: var(--app-glass-filter) !important;
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, #fff 20%, transparent),
+        color-mix(in srgb, #fff 0%, transparent) 45%
+      ),
+      var(--app-glass-bg);
+    backdrop-filter: var(--app-glass-filter);
+    -webkit-backdrop-filter: var(--app-glass-filter);
   }
 
   & .search-box-mask {
-    background: rgba(0, 0, 0, 0.45) !important;
+    background: color-mix(in srgb, #000 45%, transparent);
   }
 
   /* ── Fluent Modal：Acrylic 毛玻璃弹窗 ── */
   & .app-modal__container {
     background:
-      linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 45%),
-      var(--app-glass-bg) !important;
-    backdrop-filter: var(--app-glass-filter) !important;
-    -webkit-backdrop-filter: var(--app-glass-filter) !important;
-    border: 1px solid rgba(255, 255, 255, 0.18);
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, #fff 20%, transparent),
+        color-mix(in srgb, #fff 0%, transparent) 45%
+      ),
+      var(--app-glass-bg);
+    backdrop-filter: var(--app-glass-filter);
+    -webkit-backdrop-filter: var(--app-glass-filter);
+    border: 1px solid color-mix(in srgb, #fff 18%, transparent);
     box-shadow:
-      0 16px 48px rgba(0, 0, 0, 0.22),
-      0 2px 8px rgba(0, 0, 0, 0.14),
-      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      0 16px 48px color-mix(in srgb, #000 22%, transparent),
+      0 2px 8px color-mix(in srgb, #000 14%, transparent),
+      inset 0 1px 0 color-mix(in srgb, #fff 12%, transparent);
   }
 
   & .app-modal__header {
-    background: transparent !important;
-    border-bottom-color: rgba(255, 255, 255, 0.06);
+    background: transparent;
+    border-bottom-color: color-mix(in srgb, #fff 6%, transparent);
   }
 
   & .app-modal__body {
-    background: transparent !important;
+    background: transparent;
   }
 
   & .app-modal__footer {
-    background: transparent !important;
-    border-top-color: rgba(255, 255, 255, 0.06);
+    background: transparent;
+    border-top-color: color-mix(in srgb, #fff 6%, transparent);
   }
 
   /* Modal 遮罩层：加深以突出 Acrylic 弹窗 */
   & .app-modal__mask {
-    background: rgba(0, 0, 0, 0.45) !important;
-    backdrop-filter: blur(4px) !important;
-    -webkit-backdrop-filter: blur(4px) !important;
+    background: color-mix(in srgb, #000 45%, transparent);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
   }
 
-  [data-theme='dark'] {
+  [data-theme="dark"] {
+    /* ── Fluent 暗色模式 CSS 变量 */
+    --app-fluent-blue-dark: #60cdff;
+
     & .app-card-interactive:hover,
     & .app-card-interactive:focus-within {
-      border-color: rgba(255, 255, 255, 0.12);
+      border-color: color-mix(in srgb, #fff 12%, transparent);
     }
 
     & .app-row-hover:hover,
     & .app-row-hover:focus-within {
-      background-color: rgba(0, 120, 212, 0.08);
+      background-color: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 8%, transparent);
     }
 
     & .activity-strip__icon {
-      color: #60CDFF;
+      color: var(--app-fluent-blue-dark, #60cdff);
     }
 
     & .activity-strip__action-btn {
-      color: #60CDFF !important;
+      color: var(--app-fluent-blue-dark, #60cdff);
     }
 
     & a,
     & .app-typography a {
-      color: #60CDFF;
+      color: var(--app-fluent-blue-dark, #60cdff);
     }
 
     & .app-widget-card {
-      border-color: rgba(255, 255, 255, 0.06);
+      border-color: color-mix(in srgb, #fff 6%, transparent);
     }
 
     & ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.2);
+      background: color-mix(in srgb, #fff 20%, transparent);
     }
 
     & ::selection {
-      background-color: rgba(0, 120, 212, 0.36);
+      background-color: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 36%, transparent);
     }
 
     & .app-drawer__section {
       background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 40%),
-        var(--app-glass-bg) !important;
-      border-left-color: rgba(255, 255, 255, 0.08);
+        linear-gradient(
+          135deg,
+          color-mix(in srgb, #fff 8%, transparent),
+          color-mix(in srgb, #fff 0%, transparent) 40%
+        ),
+        var(--app-glass-bg);
+      border-left-color: color-mix(in srgb, #fff 8%, transparent);
       box-shadow:
-        -8px 0 32px rgba(0, 0, 0, 0.4),
-        inset 1px 0 0 rgba(255, 255, 255, 0.06);
+        -8px 0 32px color-mix(in srgb, #000 40%, transparent),
+        inset 1px 0 0 color-mix(in srgb, #fff 6%, transparent);
     }
 
     & .app-drawer__mask {
-      background: rgba(0, 0, 0, 0.55) !important;
+      background: color-mix(in srgb, #000 55%, transparent);
     }
 
     & .search-box-container {
       background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 45%),
-        var(--app-glass-bg) !important;
+        linear-gradient(
+          135deg,
+          color-mix(in srgb, #fff 8%, transparent),
+          color-mix(in srgb, #fff 0%, transparent) 45%
+        ),
+        var(--app-glass-bg);
     }
 
     & .search-box-mask {
-      background: rgba(0, 0, 0, 0.55) !important;
+      background: color-mix(in srgb, #000 55%, transparent);
     }
 
     & .app-modal__container {
       background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 45%),
-        var(--app-glass-bg) !important;
-      border-color: rgba(255, 255, 255, 0.08);
+        linear-gradient(
+          135deg,
+          color-mix(in srgb, #fff 8%, transparent),
+          color-mix(in srgb, #fff 0%, transparent) 45%
+        ),
+        var(--app-glass-bg);
+      border-color: color-mix(in srgb, #fff 8%, transparent);
       box-shadow:
-        0 16px 48px rgba(0, 0, 0, 0.45),
-        0 2px 8px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        0 16px 48px color-mix(in srgb, #000 45%, transparent),
+        0 2px 8px color-mix(in srgb, #000 30%, transparent),
+        inset 0 1px 0 color-mix(in srgb, #fff 6%, transparent);
     }
 
     & .app-modal__mask {
-      background: rgba(0, 0, 0, 0.55) !important;
+      background: color-mix(in srgb, #000 55%, transparent);
     }
   }
 }

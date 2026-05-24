@@ -5,7 +5,7 @@
  */
 
 .devtools-page {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 12px;
   padding: var(--app-space-5) 0 var(--app-space-2);
@@ -22,14 +22,14 @@
   box-shadow: var(--app-shadow-card);
   overflow: hidden;
   flex: 1;
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   min-height: 0;
 }
 
 /* ===== Hero：标题 + 统计行 ===== */
 .devtools-hero {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 12px;
   padding: 14px 18px 12px;
@@ -37,7 +37,7 @@
 }
 
 .devtools-brand {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 9px;
   min-width: 0;
@@ -74,7 +74,7 @@
 }
 
 .devtools-stats {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 6px;
   margin-left: auto;
@@ -93,7 +93,7 @@
 
 /* ===== Toolbar：分类 + 搜索 ===== */
 .devtools-toolbar {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 10px;
   padding: 10px 18px;
@@ -113,7 +113,7 @@
 
 /* ===== Workbench：左右双栏（Flexbox 方案）===== */
 .devtools-workbench {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex: 1;
   min-height: 0;
   overflow: hidden;
@@ -135,7 +135,7 @@
 }
 
 .devtools-section-head {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 6px;
   margin-bottom: 8px;
@@ -155,14 +155,14 @@
 
 /* ===== 工具卡片：紧凑横排 ===== */
 .devtools-grid {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 6px;
 }
 
 .devtools-card {
   width: 100%;
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: flex-start;
   gap: 10px;
   padding: 10px 12px;
@@ -172,7 +172,10 @@
   color: inherit;
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+  transition:
+    border-color 0.16s ease,
+    background 0.16s ease,
+    box-shadow 0.16s ease;
 }
 
 .devtools-card:hover,
@@ -190,7 +193,7 @@
 }
 
 .devtools-card-head {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: flex-start;
   gap: 10px;
   min-width: 0;
@@ -215,7 +218,7 @@
 }
 
 .devtools-card-title {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 6px;
   min-width: 0;
@@ -252,7 +255,9 @@
   border-radius: var(--app-radius-sm);
   color: var(--ant-color-text-tertiary);
   cursor: pointer;
-  transition: color 0.15s ease, background 0.15s ease;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
 }
 
 .devtools-fav-btn:hover {
@@ -277,8 +282,8 @@
 
 /* ===== 右侧：工作台面板（flex:1 撑满，独立滚动）===== */
 .devtools-panel-pane {
-  flex:1;
-  min-width:0;
+  flex: 1;
+  min-width: 0;
   padding: 14px;
   background: color-mix(in srgb, var(--ant-color-bg-layout) 38%, transparent);
   overflow-y: auto;
@@ -299,7 +304,7 @@
 }
 
 .devtools-panel-title {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 9px;
   min-width: 0;
@@ -330,13 +335,13 @@
 
 /* ===== 工具表单通用 ===== */
 .devtools-form {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 10px;
 }
 
 .devtools-options {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
@@ -365,7 +370,7 @@
 }
 
 .devtools-actions {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
@@ -373,7 +378,7 @@
 
 /* ===== 颜色预览 ===== */
 .devtools-color-preview {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 10px;
 }
@@ -396,7 +401,7 @@
 }
 
 .devtools-output-head {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   justify-content: space-between;
   padding: var(--app-space-2) var(--app-space-2);
@@ -465,7 +470,7 @@
 
 /* ===== 空状态 ===== */
 .devtools-empty-state {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   justify-content: center;
   padding: 32px 0;
   grid-column: 1 / -1;
@@ -473,7 +478,7 @@
 
 /* ===== 隐私提示 ===== */
 .devtools-privacy {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   justify-content: center;
   align-items: center;
   gap: 6px;

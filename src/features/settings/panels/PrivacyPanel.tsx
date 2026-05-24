@@ -13,6 +13,7 @@
 
 import { useState } from "react";
 import { Switch, Select, Slider, Button, Popconfirm, Space, Typography } from "antd";
+import styles from "./PrivacyPanel.module.less";
 import { Trash2, Eraser } from "lucide-react";
 
 import { ICON_SIZE } from "@/shared/utils/icon-size";
@@ -91,7 +92,7 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
       </section>
 
       {/* ── 容量与过期 ────────────────────────────────── */}
-      <section className="settings-section" style={{ opacity: disabled ? 0.55 : 1 }}>
+      <section className={`settings-section${disabled ? " is-disabled" : ""}`}>
         <Typography.Title level={3} className="settings-section__title">
           {t("privacy.sectionCapacity")}
         </Typography.Title>
@@ -134,7 +135,7 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
             <Select
               value={ttlHours}
               disabled={disabled}
-              style={{ width: "100%", maxWidth: 280 }}
+              className={styles["privacy-select-wide"]}
               onChange={(v) => {
                 void updateSettings({ historyClosedTabsTtlHours: v });
               }}
@@ -148,7 +149,7 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
       </section>
 
       {/* ── URL 黑名单 ────────────────────────────────── */}
-      <section className="settings-section" style={{ opacity: disabled ? 0.55 : 1 }}>
+      <section className={`settings-section${disabled ? " is-disabled" : ""}`}>
         <Typography.Title level={3} className="settings-section__title">
           {t("privacy.sectionBlocklist")}
         </Typography.Title>
@@ -158,7 +159,7 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
               mode="tags"
               value={blocklist}
               disabled={disabled}
-              style={{ width: "100%" }}
+              className={styles["privacy-select-full"]}
               placeholder={t("privacy.urlBlocklistPlaceholder")}
               tokenSeparators={[",", " ", "\n"]}
               onChange={(v: string[]) => {

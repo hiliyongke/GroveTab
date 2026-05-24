@@ -272,10 +272,11 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
               <Button
                 size="small"
                 type="primary"
+                iconPosition="end"
+                icon={<ArrowRight size={ICON_SIZE.DEFAULT} />}
                 onClick={() => setStepIndex((idx) => Math.min(idx + 1, TOUR_STEPS.length - 1))}
               >
                 {t("onboarding.tour.next")}
-                <ArrowRight size={ICON_SIZE.DEFAULT} style={{ marginLeft: 6 }} />
               </Button>
             ) : (
               <Button

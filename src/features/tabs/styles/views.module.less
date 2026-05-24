@@ -3,13 +3,13 @@
 }
 
 .app-window-toolbar {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   justify-content: flex-end;
   margin-bottom: 16px;
 }
 
 .app-window-panel-label {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 8px;
 }
@@ -31,13 +31,13 @@
 
 .app-window-panel-body,
 .app-frequency-list {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 2px;
 }
 
 .app-frequency-header {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
@@ -93,7 +93,7 @@
 }
 
 .app-selection-notice__body {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -101,7 +101,7 @@
 }
 
 .app-selection-notice__summary {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 4px;
 }
@@ -134,12 +134,12 @@
 }
 
 .app-grid-card :global(.ant-card-body) {
-  padding: 2px !important;
+  padding: 2px;
 }
 
 .app-grid-card__body {
   padding: 0;
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
 }
 
@@ -147,16 +147,20 @@
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 10;
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   justify-content: center;
   overflow: hidden;
   border-radius: var(--ant-border-radius-lg);
-  background: linear-gradient(135deg, color-mix(in srgb, var(--app-grid-card-accent, var(--ant-color-primary)) 18%, transparent) 0%, color-mix(in srgb, var(--app-grid-card-accent, var(--ant-color-primary)) 8%, transparent) 100%);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--app-grid-card-accent, var(--ant-color-primary)) 18%, transparent) 0%,
+    color-mix(in srgb, var(--app-grid-card-accent, var(--ant-color-primary)) 8%, transparent) 100%
+  );
 }
 
 .app-grid-card-content {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 2px;
   min-height: 42px;
@@ -198,7 +202,7 @@
 }
 
 .app-grid-card-meta {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 6px;
   width: 100%;
@@ -232,7 +236,7 @@
 .app-grid-popover {
   width: 340px;
   max-width: calc(100vw - 32px);
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
 }
 
@@ -241,7 +245,7 @@
 }
 
 .app-grid-popover__header {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 8px;
   padding: 10px 8px 10px 12px;
@@ -272,7 +276,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: color-mix(in srgb, var(--app-grid-popover-accent, var(--ant-color-primary)) 14%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--app-grid-popover-accent, var(--ant-color-primary)) 14%,
+    transparent
+  );
   color: var(--app-grid-popover-accent, var(--ant-color-primary));
   font-size: 10px;
   font-weight: 700;
@@ -302,7 +310,7 @@
 }
 
 .app-grid-popover__list {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 2px;
   max-height: min(60vh, 420px);
@@ -315,7 +323,7 @@
 }
 
 .app-tab-group-label {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 8px;
 }
@@ -354,7 +362,7 @@
 .app-batch-bar__actions,
 .app-compact-view-spacer,
 .app-compact-view-item {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
 }
 
 .app-tab-group-list,
@@ -405,7 +413,7 @@
    ============================================================ */
 
 .app-bookmark-shell {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   flex: 1 1 auto;
   gap: 14px;
@@ -512,7 +520,7 @@
      display:flex，导致它对子元素而言不是 flex 容器，子级 .app-bm-tree 即使写
      flex:1 + height:100% 也拿不到任何高度，最终画布塌陷为 0 → 看不见。
      这里在树状视图下显式补齐 flex 容器声明，让高度沿 flex 链一路传递到画布。 */
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   overflow: hidden;
   padding-right: 0;
@@ -551,7 +559,7 @@
 }
 
 .app-bookmark-loading-wrap {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   justify-content: center;
   padding: 60px 0;
@@ -585,14 +593,14 @@
 }
 
 .app-bookmark-section {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 4px;
   min-width: 0; /* 防止子节点撑爆网格列 */
 }
 
 .app-bookmark-section__head {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 10px;
   width: 100%;
@@ -622,12 +630,16 @@
 .app-bookmark-section__badge {
   width: 24px;
   height: 24px;
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   border-radius: 6px;
-  background: linear-gradient(135deg, var(--ant-color-primary-bg), var(--ant-color-primary-bg-hover));
+  background: linear-gradient(
+    135deg,
+    var(--ant-color-primary-bg),
+    var(--ant-color-primary-bg-hover)
+  );
   color: var(--ant-color-primary);
 }
 
@@ -673,7 +685,7 @@
 }
 
 .app-bookmark-subgroup__head {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 6px;
   width: 100%;
@@ -779,7 +791,7 @@
   width: 18px;
   height: 18px;
   border-radius: 4px;
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   justify-content: center;
   font-size: 10px;
@@ -818,7 +830,9 @@
   color: var(--ant-color-text-quaternary);
   opacity: 0;
   transform: translateX(-4px);
-  transition: opacity var(--ant-motion-duration-mid), transform var(--ant-motion-duration-mid);
+  transition:
+    opacity var(--ant-motion-duration-mid),
+    transform var(--ant-motion-duration-mid);
 }
 
 .app-bookmark-row:hover .app-bookmark-row__action,
@@ -831,7 +845,7 @@
 /* ---- Search results ----
    搜索结果同样按多列网格平铺，避免大屏单列拉空 */
 .app-bookmark-search-results {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 8px;
   width: 100%;
@@ -864,7 +878,7 @@
   bottom: 24px;
   left: 50%;
   z-index: var(--app-batch-bar-z, 1);
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 10px;
   padding: 8px 10px 8px 16px;
@@ -969,7 +983,7 @@
 }
 
 .app-timeline-segment-list {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 2px;
 }
@@ -985,7 +999,7 @@
 }
 
 .app-kanban-view {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   gap: 12px;
   overflow-x: auto;
   padding-bottom: 12px;
@@ -1032,7 +1046,7 @@
 }
 
 .app-kanban-column__header {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 4px;
 }
@@ -1069,7 +1083,7 @@
 
 .app-kanban-card,
 .app-kanban-overlay {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: var(--app-space-2);
   padding: var(--app-space-2) var(--app-space-2);
@@ -1132,7 +1146,7 @@
 }
 
 .app-duplicate-footer {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   justify-content: space-between;
 }
@@ -1156,7 +1170,7 @@
 }
 
 .app-duplicate-group__header {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -1174,13 +1188,13 @@
 }
 
 .app-duplicate-group__list {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 6px;
 }
 
 .app-duplicate-option {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: var(--app-space-2);
   padding: var(--app-space-2) var(--app-space-2);
@@ -1204,7 +1218,7 @@
 }
 
 .app-duplicate-option__content {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex: 1;
   min-width: 0;
   flex-direction: column;
@@ -1229,7 +1243,7 @@
 }
 
 .app-duplicate-option__aside {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   align-items: flex-end;
   gap: 2px;
@@ -1264,7 +1278,7 @@
 .app-tab-context-menu__tag-list,
 .app-tab-context-menu__tag-input,
 .app-tab-context-menu__note-actions {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
 }
 
 .app-tab-context-menu__tag-list {

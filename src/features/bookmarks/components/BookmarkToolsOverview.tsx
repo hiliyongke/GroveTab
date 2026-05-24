@@ -84,7 +84,7 @@ export function BookmarkToolsOverview({
           type="warning"
           showIcon
           message={t("bookmark.tools.emptyFoldersHint", { count: overview.emptyFolders })}
-          style={{ marginTop: 16 }}
+          className={styles["bm-tools__overview-alert"]}
         />
       )}
 
@@ -93,7 +93,7 @@ export function BookmarkToolsOverview({
           type="warning"
           showIcon
           message={t("bookmark.tools.duplicatesHint", { count: overview.duplicates })}
-          style={{ marginTop: 16 }}
+          className={styles["bm-tools__overview-alert"]}
         />
       )}
 

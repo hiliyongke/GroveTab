@@ -396,9 +396,9 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
       <div className={styles["bm-tools__layout"]}>
         <nav className={styles["bm-tools__nav"]}>
           {navItems.map((item) => (
-            <button
+            <Button
               key={item.key}
-              type="button"
+              htmlType="button"
               className={`bm-tools__nav-item${activeTool === item.key ? " is-active" : ""}`}
               onClick={() => setActiveTool(item.key)}
             >
@@ -407,7 +407,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
               {item.badge !== undefined && item.badge > 0 && (
                 <span className={styles["bm-tools__nav-badge"]}>{item.badge}</span>
               )}
-            </button>
+            </Button>
           ))}
         </nav>
         <section className={styles["bm-tools__content"]}>{renderActive()}</section>

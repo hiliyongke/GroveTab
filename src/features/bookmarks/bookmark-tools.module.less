@@ -32,7 +32,7 @@
 
 /* ── 左侧导航 ────────────────────────────────────────────── */
 .bm-tools__nav {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 2px;
   padding: 6px 4px 6px 0;
@@ -40,7 +40,7 @@
 }
 
 .bm-tools__nav-item {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 10px;
   padding: 9px 12px;
@@ -90,7 +90,7 @@
   font-size: 11px;
   font-weight: 600;
   background: var(--ant-color-error);
-  color: #fff;
+  color: var(--ant-color-white, #fff);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -109,13 +109,13 @@
 }
 
 .bm-tools__panel {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 14px;
 }
 
 .bm-tools__panel-header {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: flex-start;
   gap: 12px;
 }
@@ -153,7 +153,7 @@
 }
 
 .bm-tools__stat-card {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 12px;
   padding: 14px;
@@ -217,7 +217,7 @@
 }
 
 .bm-tools__quick {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 12px;
   padding: 14px;
@@ -236,11 +236,11 @@
 .bm-tools__quick:hover {
   transform: translateY(-1px);
   border-color: var(--ant-color-primary);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px color-mix(in srgb, #000 6%, transparent);
 }
 
 .bm-tools__quick-text {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 2px;
   min-width: 0;
@@ -258,7 +258,7 @@
 
 /* ── 列表区共通 ──────────────────────────────────────────── */
 .bm-tools__list {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 10px;
 }
@@ -295,7 +295,7 @@
 }
 
 .bm-tools__group-header {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
@@ -322,7 +322,7 @@
 }
 
 .bm-tools__group-body {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
 }
 
@@ -335,7 +335,7 @@
 
 /* 单行 */
 .bm-tools__row {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 10px;
   padding: 9px 12px;
@@ -397,7 +397,7 @@
 
 /* 健康汇总 chips */
 .bm-tools__health-summary {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-wrap: wrap;
   gap: 8px;
 }
@@ -438,7 +438,7 @@
 
 /* 进度条 */
 .bm-tools__progress {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 4px;
 }
@@ -480,4 +480,13 @@
 .bm-tools__tag--no-border {
   border: none;
   background: transparent;
+}
+
+/* ── Overview 用 ─────────────────────────────────── */
+.bm-tools__overview-alert {
+  margin-top: 16px;
+}
+
+.bm-tools__overview-actions {
+  margin-top: 16px;
 }

@@ -1,5 +1,5 @@
 .trending-page {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 16px;
   padding: 28px 0 0;
@@ -34,7 +34,7 @@
 .trending-loading-state__inner,
 .trending-board-card__placeholder,
 .trending-disguise-list {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
 }
 
@@ -52,7 +52,7 @@
 .trending-list-item,
 .trending-rank-badge,
 .trending-disguise-row {
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   align-items: center;
 }
 
@@ -146,7 +146,9 @@
 
 .trending-board-card {
   min-height: 420px;
-  transition: transform 160ms ease, box-shadow 160ms ease;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .trending-board-card:hover {
@@ -156,7 +158,7 @@
 
 .trending-board-card__body {
   height: 100%;
-  display: flex;
+  display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   padding: 14px 16px;
 }
