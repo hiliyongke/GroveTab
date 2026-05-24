@@ -190,7 +190,7 @@ export function SpeedDialGrid({ sites }: SpeedDialGridProps) {
           {showAddButton && (
             <div className={styles["speed-dial-add-cell"]}>
               <Card
-                className={`${styles["app-card-interactive"]} ${styles["app-speed-dial-card"]} ${styles["app-speed-dial-card--add"]}`}
+                className={`app-card-interactive ${styles["app-speed-dial-card"]} ${styles["app-speed-dial-card--add"]}`}
                 classNames={{ body: styles["app-speed-dial-card__body"] }}
                 onClick={handleAddClick}
               >

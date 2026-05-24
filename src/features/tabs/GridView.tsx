@@ -18,19 +18,19 @@
  *       4. 不打断 Grid 的浏览上下文
  */
 
-import { useMemo, useState } from 'react';
-import { Button, Card, Popover, theme } from 'antd';
-import { Volume2, X } from 'lucide-react';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { useTabsStore, useSettingsStore } from '@/store';
-import { useT } from '@/shared/i18n';
-import { groupTabsByDomain } from '@/shared/utils/domain';
-import { useAccent } from '@/shared/hooks/useAccent';
-import { findAmbiguousTitleIds } from '@/shared/utils/url-display';
-import { cssVars } from '@/shared/utils/css-vars';
-import { TabItem } from './TabItem';
-import type { LiveTab } from '@/shared/types';
-import styles from './styles/views.module.less';
+import { useMemo, useState } from "react";
+import { Button, Card, Popover, theme } from "antd";
+import { Volume2, X } from "lucide-react";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useTabsStore, useSettingsStore } from "@/store";
+import { useT } from "@/shared/i18n";
+import { groupTabsByDomain } from "@/shared/utils/domain";
+import { useAccent } from "@/shared/hooks/useAccent";
+import { findAmbiguousTitleIds } from "@/shared/utils/url-display";
+import { cssVars } from "@/shared/utils/css-vars";
+import { TabItem } from "./TabItem";
+import type { LiveTab } from "@/shared/types";
+import styles from "./styles/views.module.less";
 
 /**
  * 网格视图主组件：每个域名一张大卡片
@@ -44,9 +44,7 @@ export function GridView() {
    * 切到 hover 后，鼠标移到多 tab 卡片上立即看到列表，移开自动收起，更适合
    * 喜欢「快速预览」的用户。
    */
-  const expandTrigger = useSettingsStore(
-    (s) => s.settings.gridExpandTrigger ?? 'click',
-  );
+  const expandTrigger = useSettingsStore((s) => s.settings.gridExpandTrigger ?? "click");
   const { t } = useT();
 
   const groups = useMemo(() => groupTabsByDomain(tabs), [tabs]);
@@ -63,21 +61,23 @@ export function GridView() {
   };
 
   return (
-    <div className={styles['app-grid-view']}>
+    <div className={styles["app-grid-view"]}>
       {groups.map((group) => (
         <GridCard
           key={group.domain}
           domain={group.domain}
           colorKey={group.colorKey}
           tabs={group.tabs}
-          onJump={(id, wid) => { void jumpToTab(id, wid); }}
+          onJump={(id, wid) => {
+            void jumpToTab(id, wid);
+          }}
           open={activeDomain === group.domain}
-          onOpenChange={(next) =>
-            setActiveDomain(next ? group.domain : null)
-          }
+          onOpenChange={(next) => setActiveDomain(next ? group.domain : null)}
           onJumpFromPopover={handleJumpFromPopover}
-          onCloseTab={(id) => { void closeSingleTab(id); }}
-          countLabel={t('header.tabCount', { count: group.tabs.length })}
+          onCloseTab={(id) => {
+            void closeSingleTab(id);
+          }}
+          countLabel={t("header.tabCount", { count: group.tabs.length })}
           expandTrigger={expandTrigger}
         />
       ))}
@@ -97,7 +97,7 @@ interface GridCardProps {
   onCloseTab: (tabId: number) => void;
   countLabel: string;
   /** 展开触发方式：'click' 点击 / 'hover' 悬停 */
-  expandTrigger: 'click' | 'hover';
+  expandTrigger: "click" | "hover";
 }
 
 /**
@@ -133,7 +133,7 @@ function GridCard({
    */
   const handleCardClick = () => {
     if (isMulti) {
-      if (expandTrigger === 'click') {
+      if (expandTrigger === "click") {
         onOpenChange(!open);
       } else if (first) {
         onJump(first.id, first.windowId);
@@ -146,13 +146,13 @@ function GridCard({
   const cardNode = (
     <Card
       onClick={handleCardClick}
-      className={`${styles['app-card-interactive']} ${styles['app-grid-card']}`}
-      classNames={{ body: styles['app-grid-card__body'] }}
+      className={`app-card-interactive ${styles["app-grid-card"]}`}
+      classNames={{ body: styles["app-grid-card__body"] }}
       style={{
         borderRadius: token.borderRadiusLG,
         ...cssVars({
-          '--app-hover-border': token.colorPrimaryBorder,
-          '--app-grid-card-accent': color,
+          "--app-hover-border": token.colorPrimaryBorder,
+          "--app-grid-card-accent": color,
         }),
       }}
     >
@@ -166,32 +166,22 @@ function GridCard({
             onError={() => setFaviconError(true)}
           />
         ) : (
-          <span className={styles["app-grid-card-fallback"]}>
-            {domain.charAt(0).toUpperCase()}
-          </span>
+          <span className={styles["app-grid-card-fallback"]}>{domain.charAt(0).toUpperCase()}</span>
         )}
 
         {/* 多 tab 角标：数字，右上角 */}
-        {isMulti && (
-          <span className={styles["app-grid-card-count"]}>
-            {tabs.length}
-          </span>
-        )}
+        {isMulti && <span className={styles["app-grid-card-count"]}>{tabs.length}</span>}
       </div>
 
       {/* 底部信息区 */}
       <div className={styles["app-grid-card-content"]}>
         <div className={styles["app-grid-card-meta"]}>
-          <span className={styles["app-grid-card-domain"]}>
-            {domain}
-          </span>
+          <span className={styles["app-grid-card-domain"]}>{domain}</span>
           {hasAudible && (
             <Volume2 size={ICON_SIZE.SMALL} className={styles["app-grid-card-audible"]} />
           )}
         </div>
-        <span className={styles["app-grid-card-copy"]}>
-          {countLabel}
-        </span>
+        <span className={styles["app-grid-card-copy"]}>{countLabel}</span>
       </div>
     </Card>
   );
@@ -204,7 +194,7 @@ function GridCard({
    * 离开延迟 150ms，让用户能从卡片移到浮层而不会先关掉。
    */
   const popoverMouseDelay =
-    expandTrigger === 'hover' ? { mouseEnterDelay: 0.1, mouseLeaveDelay: 0.15 } : {};
+    expandTrigger === "hover" ? { mouseEnterDelay: 0.1, mouseLeaveDelay: 0.15 } : {};
 
   return (
     <Popover
@@ -215,7 +205,7 @@ function GridCard({
       placement="bottom"
       arrow
       destroyOnHidden
-      classNames={{ container: 'app-grid-popover-container' }}
+      classNames={{ container: "app-grid-popover-container" }}
       overlayClassName={styles["app-grid-popover-overlay"]}
       content={
         <DomainTabsPanel
@@ -280,9 +270,9 @@ function DomainTabsPanel({
     if (tabs.length <= 1) onClose();
   };
 
-  const hasFavicon = typeof faviconSrc === 'string' && faviconSrc.length > 0;
+  const hasFavicon = typeof faviconSrc === "string" && faviconSrc.length > 0;
   const popoverStyle: React.CSSProperties = cssVars({
-    '--app-grid-popover-accent': accentColor,
+    "--app-grid-popover-accent": accentColor,
   });
 
   return (
@@ -310,7 +300,7 @@ function DomainTabsPanel({
         </span>
         {/* 计数 —— secondary tone，tabular */}
         <span className={styles["app-grid-popover__count"]}>
-          {t('header.tabCount', { count: tabs.length })}
+          {t("header.tabCount", { count: tabs.length })}
         </span>
         {/* 关闭按钮 —— antd Button（键盘可达 + ant 原生样式） */}
         <Button

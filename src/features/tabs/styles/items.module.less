@@ -47,18 +47,36 @@
   border-top-right-radius: var(--app-domain-card-radius);
 }
 
+.app-domain-group-header-wrap {
+  display: flex;
+  align-items: center;
+  position: relative; /* 为左侧色条提供定位上下文 */
+  min-height: 48px;
+  border: none;
+  border-bottom: 1px solid var(--app-domain-card-header-border, transparent);
+  background: transparent;
+}
+
 .app-domain-group-header {
   display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 10px;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   height: 48px;
-  padding: 0 80px 0 14px;
+  padding: 0 10px 0 14px;
   border: none;
-  border-bottom: 1px solid var(--app-domain-card-header-border, transparent);
   background: transparent;
   cursor: pointer;
   text-align: left;
+}
+
+.app-domain-group-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  padding-right: 8px;
 }
 
 .app-domain-group-chevron {
@@ -115,22 +133,19 @@
 }
 
 .app-domain-group-action {
-  position: absolute;
-  top: 10px;
   width: 28px;
   height: 28px;
   padding: 0;
-  display: flex; /* antd 组件内部微调整 */
+  display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .app-domain-group-action--discard {
-  right: 44px;
 }
 
 .app-domain-group-action--close {
-  right: 8px;
 }
 
 .app-domain-group-list {
@@ -277,14 +292,25 @@
 }
 
 .app-tab-item-status {
-  display: flex; /* antd 组件内部微调整 */
+  display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   flex-shrink: 0;
 }
 
 .app-tab-item-status-primary {
   color: var(--app-tab-primary);
+}
+
+.app-tab-item.is-selected::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--app-tab-primary);
 }
 
 .app-tab-item-action {

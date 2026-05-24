@@ -28,6 +28,18 @@
   }
 }
 
+@media (min-width: 1024px) {
+  .speed-dial-grid-wrapper {
+    grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 180px), 1fr));
+  }
+}
+
+@media (min-width: 1440px) {
+  .speed-dial-grid-wrapper {
+    grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 200px), 1fr));
+  }
+}
+
 /* ── 网格布局：display:contents 让站点卡片成为 wrapper 的直接子网格项 ── */
 .speed-dial-grid {
   display: contents;
@@ -76,6 +88,18 @@
 @media (min-width: 768px) {
   .speed-dial-group-grid {
     grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 160px), 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .speed-dial-group-grid {
+    grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 180px), 1fr));
+  }
+}
+
+@media (min-width: 1440px) {
+  .speed-dial-group-grid {
+    grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 200px), 1fr));
   }
 }
 

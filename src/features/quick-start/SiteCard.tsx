@@ -99,8 +99,8 @@ export function SiteCard({
 
   return (
     <Card
-      className={`${styles["app-card-interactive"]} ${styles["app-speed-dial-card"]}`}
-      classNames={{ body: "app-speed-dial-card__body" }}
+      className={`app-card-interactive ${styles["app-speed-dial-card"]}`}
+      classNames={{ body: styles["app-speed-dial-card__body"] }}
       style={cardStyle}
     >
       {/* 缩略图区 —— 16:10，favicon 主色渐变 */}
