@@ -52,7 +52,7 @@
     "antd": "^6.3.6",
     "lucide-react": "^1.8.0",
     "minisearch": "^7.2.0",
-    "nanoid": "^5.1.9",
+    "nanoid": "^5.1.11",
     "pinyin-pro": "^3.28.1",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
