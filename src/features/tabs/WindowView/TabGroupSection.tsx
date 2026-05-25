@@ -97,14 +97,14 @@ export function TabGroupSection({
   const { token } = theme.useToken();
   const [renaming, setRenaming] = useState(false);
   const [titleDraft, setTitleDraft] = useState(() =>
-    getGroupTitle(groupId, tabs, translate("windowGroup.untitled")),
+    getGroupTitle(groupId, tabs, translate('未命名分组')),
   );
   const [busy, setBusy] = useState(false);
 
   const color = (tabs.find((tab) => tab.groupColor)?.groupColor ?? "grey") as TabGroupColor;
   const collapsed = tabs.some((tab) => tab.groupCollapsed === true);
   const title = useMemo(
-    () => getGroupTitle(groupId, tabs, t("windowGroup.untitled")),
+    () => getGroupTitle(groupId, tabs, t('未命名分组')),
     [groupId, tabs, t],
   );
   const colorValue = COLOR_HEX[color] ?? COLOR_HEX.grey;
@@ -117,7 +117,7 @@ export function TabGroupSection({
       if (successKey) feedback.success(t(successKey));
       onRefresh();
     } catch (err) {
-      feedback.error(t("windowGroup.actionFailed"), err);
+      feedback.error(t('标签组操作失败，请重试'), err);
       onRefresh();
     } finally {
       setBusy(false);
@@ -203,8 +203,8 @@ export function TabGroupSection({
 
   const handleCloseGroup = () => {
     Modal.confirm({
-      title: t("windowGroup.closeConfirmTitle"),
-      content: t("windowGroup.closeConfirmContent", { count: tabs.length }),
+      title: t('关闭该标签组？'),
+      content: t('将关闭该组内 {count} 个标签。', { count: tabs.length }),
       okButtonProps: { danger: true },
       onOk: () =>
         runGroupAction(async () => {
@@ -238,7 +238,7 @@ export function TabGroupSection({
     {
       key: "rename",
       icon: <Pencil size={ICON_SIZE.SMALL} />,
-      label: t("windowGroup.rename"),
+      label: t('重命名'),
       onClick: () => {
         setTitleDraft(title);
         setRenaming(true);
@@ -249,7 +249,7 @@ export function TabGroupSection({
       icon: <Palette size={ICON_SIZE.SMALL} />,
       label: (
         <Popover trigger="click" placement="right" content={colorPicker}>
-          {t("windowGroup.changeColor")}
+          {t('更换颜色')}
         </Popover>
       ),
     },
@@ -257,26 +257,26 @@ export function TabGroupSection({
     {
       key: "ungroup",
       icon: <Ungroup size={ICON_SIZE.SMALL} />,
-      label: t("windowGroup.ungroup"),
+      label: t('解散分组'),
       onClick: handleUngroup,
     },
     {
       key: "discard",
       icon: <Moon size={ICON_SIZE.SMALL} />,
-      label: t("windowGroup.discard"),
+      label: t('休眠组内标签'),
       onClick: handleDiscardGroup,
     },
     {
       key: "move-new-window",
       icon: <ExternalLink size={ICON_SIZE.SMALL} />,
-      label: t("windowGroup.moveToNewWindow"),
+      label: t('移动到新窗口'),
       onClick: handleMoveToNewWindow,
     },
     {
       key: "close",
       danger: true,
       icon: <X size={ICON_SIZE.SMALL} />,
-      label: t("windowGroup.close"),
+      label: t('关闭分组'),
       onClick: handleCloseGroup,
     },
   ];
@@ -332,13 +332,13 @@ export function TabGroupSection({
         </Button>
 
         <Dropdown menu={{ items: menuItems }} trigger={["click"]} placement="bottomRight">
-          <Tooltip title={t("common.more")}>
+          <Tooltip title={t('更多')}>
             <Button
               type="text"
               size="small"
               loading={busy}
               icon={busy ? undefined : <MoreHorizontal size={ICON_SIZE.SMALL} />}
-              aria-label={t("common.more")}
+              aria-label={t('更多')}
               className={styles["app-window-group-action"]}
             />
           </Tooltip>

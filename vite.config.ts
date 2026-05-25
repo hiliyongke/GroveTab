@@ -2,7 +2,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { writeFileSync, mkdirSync, readFileSync, readdirSync, copyFileSync } from "node:fs";
+import { writeFileSync, mkdirSync, readFileSync, readdirSync, copyFileSync, existsSync } from "node:fs";
+import { createHash } from "node:crypto";
 
 /**
  * 构建时品牌配置（与 src/shared/config/brand.ts 保持同步）
@@ -34,18 +35,117 @@ interface Manifest {
   [key: string]: unknown;
 }
 
+/**
+ * 从 i18n/source 构建翻译查找表
+ * key-mapping.json: { "header.search": "k_9iqbwju", ... }
+ * en.json / zh-CN.json: [{ key: "k_9iqbwju", "zh-CN": "搜索", en: "Search" }, ...]
+ *
+ * _locales 中的 key 格式为下划线（如 header_search），对应 key-mapping 中的点号格式（header.search）
+ */
+function buildI18nLookup(locale: "zh-CN" | "en"): Record<string, string> {
+  const keyMappingPath = resolve(__dirname, "i18n/source/key-mapping.json");
+  const sourcePath = resolve(__dirname, `i18n/source/${locale}.json`);
+
+  if (!existsSync(keyMappingPath) || !existsSync(sourcePath)) {
+    return {};
+  }
+
+  // key-mapping: { "header.search": "k_9iqbwju" }
+  const keyMapping = JSON.parse(readFileSync(keyMappingPath, "utf-8")) as Record<string, string>;
+
+  // source: [{ key: "k_xxx", "zh-CN": "...", en: "..." }]
+  type SourceEntry = { key: string; "zh-CN": string; en: string };
+  const sourceEntries = JSON.parse(readFileSync(sourcePath, "utf-8")) as SourceEntry[];
+
+  // 构建 k_xxx → 翻译文本 的映射
+  const keyToText: Record<string, string> = {};
+  for (const entry of sourceEntries) {
+    keyToText[entry.key] = entry[locale] || entry["zh-CN"] || "";
+  }
+
+  // 构建 "header.search" → 翻译文本 的映射
+  const lookup: Record<string, string> = {};
+  for (const [dotKey, kId] of Object.entries(keyMapping)) {
+    const text = keyToText[kId];
+    if (text) {
+      // 同时存储点号格式和下划线格式，方便查找
+      lookup[dotKey] = text;
+      lookup[dotKey.replace(/\./g, "_")] = text;
+    }
+  }
+  return lookup;
+}
+
+/**
+ * 构建时翻译文件打包：将 i18n/source/*.json 以内容哈希命名复制到 dist/i18n/
+ * 返回 i18n manifest：{ "zh-CN": "/i18n/zh-CN.{hash}.json", "en": "/i18n/en.{hash}.json" }
+ */
+function buildI18nAssets(): Record<string, string> {
+  const locales = ["zh-CN", "en"] as const;
+  const i18nDistDir = resolve(__dirname, "dist/i18n");
+  mkdirSync(i18nDistDir, { recursive: true });
+
+  const manifest: Record<string, string> = {};
+
+  for (const locale of locales) {
+    const srcPath = resolve(__dirname, `i18n/source/${locale}.json`);
+    if (!existsSync(srcPath)) {
+      console.warn(`[i18n] 翻译文件不存在，跳过：${srcPath}`);
+      continue;
+    }
+
+    const content = readFileSync(srcPath);
+    const hash = createHash("md5").update(content).digest("hex").slice(0, 8);
+    const destFileName = `${locale}.${hash}.json`;
+    const destPath = resolve(i18nDistDir, destFileName);
+
+    writeFileSync(destPath, content);
+    manifest[locale] = `/i18n/${destFileName}`;
+    console.log(`[i18n] 翻译文件已打包：dist/i18n/${destFileName}`);
+  }
+
+  return manifest;
+}
+
 function writeBrandLocales() {
   const localeMap = [
-    { dir: "zh_CN", locale: "zh-CN" },
-    { dir: "en", locale: "en" },
-  ] as const;
+    { dir: "zh_CN", locale: "zh-CN" as const },
+    { dir: "en", locale: "en" as const },
+  ];
 
   for (const item of localeMap) {
     const file = resolve(__dirname, "dist/_locales", item.dir, "messages.json");
     const messages = JSON.parse(readFileSync(file, "utf-8")) as Record<
       string,
-      { message: string; description?: string }
+      { message: string; description?: string; placeholders?: Record<string, unknown> }
     >;
+
+    // 从 i18n/source 构建翻译查找表
+    const i18nLookup = buildI18nLookup(item.locale);
+
+    // 遍历 _locales 中所有 key，尝试从 i18n/source 自动同步翻译
+    // 品牌相关字段单独处理，其余字段从 i18n/source 自动拉取
+    const brandKeys = new Set([
+      "appName",
+      "appDescription",
+      "context_save_all",
+      "newtab_title",
+      "popup_title",
+      "onboarding_title",
+    ]);
+
+    for (const msgKey of Object.keys(messages)) {
+      if (brandKeys.has(msgKey)) continue;
+      // _locales key 格式（如 header_search）→ i18n lookup key
+      const text = i18nLookup[msgKey];
+      if (text) {
+        // 保留原有 placeholders 结构，只更新 message 文本
+        // 注意：_locales 使用 $count$ 占位符，i18n/source 使用 {count}，需转换
+        messages[msgKey].message = text.replace(/\{(\w+)\}/g, "$$$$1$$");
+      }
+    }
+
+    // 品牌相关字段：始终由 BUILD_BRAND 控制
     messages.appName.message = BUILD_BRAND.name;
     messages.appDescription.message = pickLocaleField(BUILD_BRAND.description, item.locale);
     messages.context_save_all.message =
@@ -57,7 +157,9 @@ function writeBrandLocales() {
     messages.popup_title.message = BUILD_BRAND.name;
     messages.onboarding_title.message =
       item.locale === "zh-CN" ? `欢迎使用 ${BUILD_BRAND.name}` : `Welcome to ${BUILD_BRAND.name}`;
+
     writeFileSync(file, JSON.stringify(messages, null, 2));
+    console.log(`[i18n] _locales/${item.dir}/messages.json 已同步（${Object.keys(i18nLookup).length / 2} 条翻译可用）`);
   }
 }
 
@@ -88,6 +190,11 @@ function chromeExtensionPlugin() {
 
       writeFileSync(resolve(__dirname, "dist/manifest.json"), JSON.stringify(manifest, null, 2));
       writeBrandLocales();
+
+      // 构建翻译文件（哈希命名）并获取 manifest
+      const i18nManifest = buildI18nAssets();
+      // 注入到 HTML 的内联脚本：window.__I18N_MANIFEST__ = { "zh-CN": "/i18n/zh-CN.xxx.json", ... }
+      const i18nManifestScript = `<script>window.__I18N_MANIFEST__=${JSON.stringify(i18nManifest)};</script>`;
 
       // 注入全部构建产物 CSS，避免多入口/懒加载样式因文件顺序不稳定而丢失
       const assetsDir = resolve(__dirname, "dist/assets");
@@ -120,6 +227,7 @@ function chromeExtensionPlugin() {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>${BUILD_BRAND.name}</title>
+    ${i18nManifestScript}
     <script src="./theme-init.js"></script>
     <link rel="stylesheet" href="./prepaint.css" />
     ${cssLinks}
@@ -133,7 +241,7 @@ function chromeExtensionPlugin() {
         resolve(__dirname, "dist/src/pages/popup/index.html"),
         `<!DOCTYPE html>
 <html lang="zh-CN">
-  <head><meta charset="UTF-8" /><title>${BUILD_BRAND.name} Popup</title>${popupCssLinks}</head>
+  <head><meta charset="UTF-8" /><title>${BUILD_BRAND.name} Popup</title>${i18nManifestScript}${popupCssLinks}</head>
   <body><div id="root"></div><script type="module" src="/popup.js"></script></body>
 </html>`,
       );

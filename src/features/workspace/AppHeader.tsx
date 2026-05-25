@@ -86,14 +86,14 @@ export function AppHeader({
           color={hasTidySuggestions ? "gold" : "green"}
           className={`app-header-status-tag${compactSearchVisible ? " is-hidden" : ""}`}
         >
-          {hasTidySuggestions ? t("dashboard.tidyReady") : t("dashboard.allClear")}
+          {hasTidySuggestions ? t('可整理') : t('状态良好')}
         </Tag>
         {/* 核心计数 —— 仅在吸附搜索未激活时显示 */}
         <span className={`app-header-metrics${compactSearchVisible ? " is-hidden" : ""}`}>
-          <span className="app-header-metric-strong">{tabCount}</span> {t("dashboard.tabsStat")}
+          <span className="app-header-metric-strong">{tabCount}</span> {t('标签页')}
           <span className="app-header-dot">·</span>
           <span className="app-header-metric-strong">{domainCount}</span>{" "}
-          {t("dashboard.domainsStat")}
+          {t('域名')}
           {(duplicateTabsCount > 0 || idleTabsCount > 0) && (
             <>
               <span className="app-header-dot">·</span>
@@ -102,10 +102,10 @@ export function AppHeader({
               >
                 {duplicateTabsCount + idleTabsCount}
               </span>{" "}
-              {t("header.pending")}
+              {t('待处理')}
               {onTidy && (
                 <Button type="link" className="app-header-tidy-link" onClick={onTidy}>
-                  {t("dashboard.tidyAction")}
+                  {t('一键整理')}
                 </Button>
               )}
             </>
@@ -123,14 +123,14 @@ export function AppHeader({
         <Button
           type="text"
           onClick={onOpenSearch}
-          aria-label={t("search.placeholder")}
+          aria-label={t('搜索标签页...')}
           className={`app-compact-search app-header-search-trigger${compactSearchVisible ? " is-visible" : ""}`}
         >
           <Search
             size={ICON_SIZE.DEFAULT}
             className="app-icon app-icon--search app-header-search-icon"
           />
-          <span className="app-header-search-trigger-text">{t("search.placeholder")}</span>
+          <span className="app-header-search-trigger-text">{t('搜索标签页...')}</span>
           <span className="app-kbd" aria-hidden>
             ⌘K
           </span>
@@ -145,7 +145,7 @@ export function AppHeader({
             icon={<Globe size={ICON_SIZE.SMALL} />}
             onClick={() => onPageModeChange("workspace")}
           >
-            {t("pageMode.workspace")}
+            {t('工作台')}
           </Button>
         )}
         <DropdownMenu currentPageMode={pageMode} onPageModeChange={onPageModeChange} />
@@ -163,34 +163,34 @@ export function AppHeader({
             aria-label={t(`theme.${theme}`)}
           />
         </Tooltip>
-        <Tooltip title={t("header.settings")}>
+        <Tooltip title={t('设置')}>
           <Button
             size="small"
             type="text"
             icon={<Settings size={ICON_SIZE.SMALL} className="app-icon app-icon--settings" />}
             onClick={onSettings}
-            aria-label={t("header.settings")}
+            aria-label={t('设置')}
           />
         </Tooltip>
         {onInsights && (
-          <Tooltip title={t("insights.title")}>
+          <Tooltip title={t('本地隐私洞察')}>
             <Button
               size="small"
               type="text"
               icon={<BarChart3 size={ICON_SIZE.SMALL} className="app-icon app-icon--insights" />}
               onClick={onInsights}
-              aria-label={t("insights.title")}
+              aria-label={t('本地隐私洞察')}
             />
           </Tooltip>
         )}
         {onOpenHistory && (
-          <Tooltip title={t("header.history")}>
+          <Tooltip title={t('历史记录')}>
             <Button
               size="small"
               type="text"
               icon={<History size={ICON_SIZE.SMALL} className="app-icon" />}
               onClick={onOpenHistory}
-              aria-label={t("header.history")}
+              aria-label={t('历史记录')}
             />
           </Tooltip>
         )}

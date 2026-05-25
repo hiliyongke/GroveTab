@@ -131,8 +131,8 @@ function PopupContent() {
   }, [recentTabs, query]);
   const isSearching = query.trim() !== "";
   const tabCountLabel = isSearching
-    ? t("popup.matchingTabs", { matched: filteredTabs.length, total: recentTabs.length })
-    : t("popup.allTabs", { count: recentTabs.length });
+    ? t('匹配 {matched} / 共 {total} 个', { matched: filteredTabs.length, total: recentTabs.length })
+    : t('全部 {count} 个标签页', { count: recentTabs.length });
 
   const openNewTab = useCallback(() => {
     void createTab({ url: chrome.runtime.getURL("src/pages/newtab/index.html") });
@@ -148,7 +148,7 @@ function PopupContent() {
       window.close();
     } catch (err) {
       console.warn(`${BRAND.logTag}/popup archive failed`, err);
-      setArchiveError(t("popup.archiveFailed"));
+      setArchiveError(t('归档失败，请重试'));
     } finally {
       setArchiving(false);
     }
@@ -178,7 +178,7 @@ function PopupContent() {
         size="middle"
         allowClear
         className="popup-search"
-        placeholder={t("popup.searchPlaceholder")}
+        placeholder={t('搜索标签页或上网（回车）')}
         prefix={<Search size={ICON_SIZE.MEDIUM} className="popup-search-icon" />}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
@@ -191,7 +191,7 @@ function PopupContent() {
         </Text>
         {filteredTabs.length > 0 && (
           <Text type="secondary" className="popup-meta-hint">
-            {t("popup.scrollHint")}
+            {t('滚动查看全部')}
           </Text>
         )}
       </div>
@@ -204,7 +204,7 @@ function PopupContent() {
               image={Empty.PRESENTED_IMAGE_SIMPLE}
               description={
                 <Text type="secondary" className="popup-empty-text">
-                  {t("popup.noRecentTabs")}
+                  {t('暂无最近标签')}
                 </Text>
               }
             />
@@ -235,7 +235,7 @@ function PopupContent() {
       {/* 底部：操作按钮区 */}
       <div className="popup-actions">
         {/* 主操作：归档 —— 独占整行 */}
-        <Tooltip title={!hasAnyTab ? t("popup.noTabsToArchive") : ""} mouseEnterDelay={0.3}>
+        <Tooltip title={!hasAnyTab ? t('当前没有可归档的标签页') : ""} mouseEnterDelay={0.3}>
           <Button
             type="primary"
             icon={<Save size={ICON_SIZE.MEDIUM} />}
@@ -247,13 +247,13 @@ function PopupContent() {
             }}
             className="popup-actions__primary"
           >
-            {t("popup.archiveWindow")}
+            {t('归档当前窗口')}
           </Button>
         </Tooltip>
         {/* 次要操作：打开工作台 + 设置 —— 并排 */}
         <div className="popup-actions__secondary">
           <Button icon={<LayoutGrid size={ICON_SIZE.MEDIUM} />} block onClick={openNewTab}>
-            {t("popup.openWorkspace")}
+            {t('打开工作台')}
             <ExternalLink size={ICON_SIZE.MICRO} className="popup-external-icon" />
           </Button>
           <Button
@@ -266,7 +266,7 @@ function PopupContent() {
               window.close();
             }}
           >
-            {t("header.settings")}
+            {t('设置')}
           </Button>
         </div>
       </div>
@@ -283,7 +283,7 @@ function PopupContent() {
           }}
           className="popup-about-link"
         >
-          {t("popup.aboutGroveTab", { brand: BRAND.name })}
+          {t('关于 {brand}', { brand: BRAND.name })}
         </Button>
       </div>
 
@@ -308,7 +308,7 @@ function RecentTabRow({
       <Button
         type="text"
         onClick={onClick}
-        aria-label={t("popup.openTab", { title: tab.title })}
+        aria-label={t('打开 {title}', { title: tab.title })}
         className="popup-row-main"
       >
         <img
@@ -333,7 +333,7 @@ function RecentTabRow({
           e.stopPropagation();
           onClose();
         }}
-        aria-label={t("popup.closeTab", { title: tab.title })}
+        aria-label={t('关闭标签页 {title}', { title: tab.title })}
         className="popup-row-close app-hover-reveal"
       >
         <X size={ICON_SIZE.SMALL} />

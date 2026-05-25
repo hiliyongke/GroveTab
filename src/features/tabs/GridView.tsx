@@ -25,7 +25,7 @@ import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useTabsStore, useSettingsStore } from "@/store";
 import { useT } from "@/shared/i18n";
 import { groupTabsByDomain } from "@/shared/utils/domain";
-import { useAccent } from "@/shared/hooks/useAccent";
+import { useAccent } from "@/shared/hooks/use-accent";
 import { findAmbiguousTitleIds } from "@/shared/utils/url-display";
 import { cssVars } from "@/shared/utils/css-vars";
 import { TabItem } from "./TabItem";
@@ -110,7 +110,7 @@ export function GridView() {
           onCloseTab={(id) => {
             void closeSingleTab(id);
           }}
-          countLabel={t("header.tabCount", { count: group.tabs.length })}
+          countLabel={t('{count} 个标签页', { count: group.tabs.length })}
           expandTrigger={expandTrigger}
         />
       ))}
@@ -342,7 +342,7 @@ function DomainTabsPanel({
         </Typography.Text>
         {/* 计数 —— secondary tone，tabular */}
         <Typography.Text className={styles["app-grid-popover__count"]}>
-          {t("header.tabCount", { count: tabs.length })}
+          {t('{count} 个标签页', { count: tabs.length })}
         </Typography.Text>
         {/* 关闭按钮 —— antd Button（键盘可达 + ant 原生样式） */}
         <Button

@@ -189,10 +189,10 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
       await saveStats({ daily: [], lastFlushAt: Date.now() });
       setMetrics([]);
       setStats(null);
-      feedback.success(t("insights.cleared"));
+      feedback.success(t('已清除所有本地统计'));
     } catch (err) {
       console.warn("[insights] clear failed", err);
-      feedback.error(t("insights.clearFailed"));
+      feedback.error(t('清除失败，请重试'));
     }
   };
 
@@ -202,7 +202,7 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
       onCancel={onClose}
       footer={null}
       width="min(760px, calc(100vw - 24px))"
-      title={t("insights.title")}
+      title={t('本地隐私洞察')}
       centered
       destroyOnHidden
     >
@@ -213,20 +213,20 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
           </Flex>
         ) : isAllEmpty ? (
           <FeatureEmptyState
-            title={t("insights.empty")}
+            title={t('暂无数据')}
             icon={<BarChart3 size={ICON_SIZE.LARGE} />}
-            hints={[t("insights.emptyHint1"), t("insights.emptyHint2")]}
+            hints={[t('继续使用扩展以生成洞察数据'), t('所有数据均在本地计算，不会上传')]}
           />
         ) : (
           <Row gutter={[12, 12]}>
             <Col xs={24} md={12}>
-              <Card size="small" title={t("insights.dailyOpens")}>
+              <Card size="small" title={t('近 7 天每日打开次数')}>
                 {dailyAllZero ? (
                   <FeatureEmptyState
-                    title={t("insights.dailyEmpty")}
+                    title={t('近 7 天暂无打开记录')}
                     icon={<BarChart3 size={ICON_SIZE.LARGE} />}
                     size="small"
-                    hints={[t("insights.emptyHint1")]}
+                    hints={[t('继续使用扩展以生成洞察数据')]}
                   />
                 ) : (
                   <LineChart
@@ -238,13 +238,13 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
               </Card>
             </Col>
             <Col xs={24} md={12}>
-              <Card size="small" title={t("insights.topDomains")}>
+              <Card size="small" title={t('Top 10 访问域名')}>
                 {topDomains.length === 0 ? (
                   <FeatureEmptyState
-                    title={t("insights.empty")}
+                    title={t('暂无数据')}
                     icon={<BarChart3 size={ICON_SIZE.LARGE} />}
                     size="small"
-                    hints={[t("insights.emptyHint1"), t("insights.emptyHint2")]}
+                    hints={[t('继续使用扩展以生成洞察数据'), t('所有数据均在本地计算，不会上传')]}
                   />
                 ) : (
                   <BarList
@@ -255,13 +255,13 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
               </Card>
             </Col>
             <Col xs={24} md={12}>
-              <Card size="small" title={t("insights.archiveStat")}>
+              <Card size="small" title={t('累计归档')}>
                 {archiveStats.totalTabs === 0 ? (
                   <FeatureEmptyState
-                    title={t("insights.archiveEmpty")}
+                    title={t('尚未归档过 Tab')}
                     icon={<BarChart3 size={ICON_SIZE.LARGE} />}
                     size="small"
-                    hints={[t("insights.emptyHint1")]}
+                    hints={[t('继续使用扩展以生成洞察数据')]}
                   />
                 ) : (
                   <>
@@ -269,20 +269,20 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
                       {archiveStats.totalTabs}
                     </Title>
                     <Text type="secondary">
-                      {t("insights.archiveDesc", { mb: archiveStats.savedMemMB })}
+                      {t('约节省 {mb} MB 内存', { mb: archiveStats.savedMemMB })}
                     </Text>
                   </>
                 )}
               </Card>
             </Col>
             <Col xs={24} md={12}>
-              <Card size="small" title={t("insights.topActions")}>
+              <Card size="small" title={t('使用频率前 5')}>
                 {topActions.length === 0 ? (
                   <FeatureEmptyState
-                    title={t("insights.empty")}
+                    title={t('暂无数据')}
                     icon={<BarChart3 size={ICON_SIZE.LARGE} />}
                     size="small"
-                    hints={[t("insights.emptyHint1"), t("insights.emptyHint2")]}
+                    hints={[t('继续使用扩展以生成洞察数据'), t('所有数据均在本地计算，不会上传')]}
                   />
                 ) : (
                   <BarList
@@ -300,14 +300,14 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
 
         <Flex className={styles["insights-footer"]}>
           <Popconfirm
-            title={t("insights.clearConfirm")}
+            title={t('将清空所有本地统计数据，不可恢复。继续？')}
             onConfirm={() => void handleClearAll()}
-            okText={t("archive.delete")}
-            cancelText={t("archive.cancel")}
+            okText={t('删除')}
+            cancelText={t('取消')}
             disabled={loading || isAllEmpty}
           >
             <Button danger size="small" disabled={loading || isAllEmpty}>
-              {t("insights.clearAll")}
+              {t('清除所有统计')}
             </Button>
           </Popconfirm>
         </Flex>

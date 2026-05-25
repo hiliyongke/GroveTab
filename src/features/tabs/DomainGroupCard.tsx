@@ -22,7 +22,7 @@ import { ChevronDown, X, Globe, Moon } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { Reorder } from "motion/react";
 import type { DomainGroup } from "@/shared/utils/domain";
-import { useAccent } from "@/shared/hooks/useAccent";
+import { useAccent } from "@/shared/hooks/use-accent";
 import { getFaviconUrl } from "@/features/quick-start/utils/siteUtils";
 import type { SpeedDialSite } from "@/shared/types";
 import { useResolvedTheme } from "@/shared/hooks/use-resolved-theme";
@@ -179,7 +179,7 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
             type="text"
             onClick={toggleCollapse}
             aria-expanded={!collapsed}
-            aria-label={collapsed ? t("tabs.expand") : t("tabs.collapse")}
+            aria-label={collapsed ? t('展开') : t('折叠')}
             className={`app-row-hover app-domain-group-header-btn ${styles["app-domain-group-header"]}`}
           >
             <ChevronDown
@@ -216,7 +216,7 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
           {/* 操作按钮组：flex 排列，不再绝对定位 */}
           <Flex className={styles["app-domain-group-actions"]}>
             {/* 休眠整组——释放内存但保留标签页位置 */}
-            <Tooltip title={t("tabs.discardGroup")}>
+            <Tooltip title={t('休眠整组')}>
               <Button
                 type="text"
                 size="small"
@@ -227,13 +227,13 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
                     /* store 已 toast */
                   });
                 }}
-                aria-label={t("tabs.discardGroup")}
+                aria-label={t('休眠整组')}
                 className={`app-hover-reveal ${styles["app-domain-group-action"]}`}
               />
             </Tooltip>
 
             {/* 关闭整个域名 */}
-            <Tooltip title={t("tabs.closeDomain")}>
+            <Tooltip title={t('关闭此域名所有标签页')}>
               <Button
                 type="text"
                 size="small"
@@ -244,7 +244,7 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
                 onClick={(e: React.MouseEvent) => {
                   void handleCloseAll(e);
                 }}
-                aria-label={t("tabs.closeDomain")}
+                aria-label={t('关闭此域名所有标签页')}
                 // closing 时强制显示（is-visible），其余情况由 hover/focus 驱动
                 className={`app-hover-reveal ${styles["app-domain-group-action"]}${closing ? ` ${styles["is-visible"]}` : ""}`}
               />

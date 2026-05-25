@@ -20,7 +20,7 @@ export function useBookmarkHealth(onMutated: () => void, refreshOverview: () => 
     const granted = await chrome.permissions.request({ origins: ["<all_urls>"] });
     setHealthPermission(granted);
     if (!granted) {
-      feedback.error(t("bookmark.tools.healthNeedPermission"));
+      feedback.error(t('需要授权访问任意网址才能检测书签有效性'));
       return;
     }
     setHealthLoading(true);
@@ -44,7 +44,7 @@ export function useBookmarkHealth(onMutated: () => void, refreshOverview: () => 
   const applyRemoveDead = useCallback(async () => {
     if (healthResults === null) return;
     const removed = await removeDeadBookmarks(healthResults);
-    feedback.success(t("bookmark.tools.healthDone", { count: removed }));
+    feedback.success(t('已删除 {count} 个失效书签', { count: removed }));
     onMutated();
     setHealthResults(null);
     void refreshOverview();

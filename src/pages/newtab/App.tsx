@@ -6,7 +6,6 @@ import {
   useRef,
   lazy,
   Suspense,
-  type CSSProperties,
 } from "react";
 import { Layout, Spin, Typography, FloatButton, Flex } from "antd";
 import { useTabsStore, useSettingsStore, useSelectionStore } from "@/store";
@@ -29,13 +28,14 @@ import { ViewSidebar } from "@/features/workspace/ViewSidebar";
 import { ViewBottomBar } from "@/features/workspace/ViewBottomBar";
 import { DomainGroupView } from "@/features/tabs/DomainGroupView";
 import { track } from "@/shared/utils/metrics";
-import { resolveGradient } from "@/shared/theme/gradient-presets";
-import { cssVars } from "@/shared/utils/css-vars";
 import type { NewtabPageMode } from "@/shared/types";
 import { VALID_VIEWS, type ViewMode } from "@/shared/config/views";
 import { registerViews } from "@/shared/config/view-registry";
 import { findDuplicates } from "@/shared/utils/dedupe";
 import { detectIdleTabs } from "@/shared/utils/idle-detect";
+import { useHashNavigation } from "./hooks/use-hash-navigation";
+import { useLayoutStyle } from "./hooks/use-layout-style";
+import { usePanelState } from "./hooks/use-panel-state";
 
 const TrendingPage = lazy(() =>
   import("@/features/trending/TrendingPage").then((m) => ({ default: m.TrendingPage })),
@@ -111,44 +111,12 @@ const { Content } = Layout;
 const { Text } = Typography;
 
 function AppContent() {
-  const [initialSettingsTab, setInitialSettingsTab] = useState<"appearance" | "about">(
-    "appearance",
-  );
-  const [openSettingsFromHash, setOpenSettingsFromHash] = useState(false);
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const hash = window.location.hash;
-    if (hash === "#about") {
-      setInitialSettingsTab("about");
-    }
-    if (hash === "#settings") {
-      setOpenSettingsFromHash(true);
-    }
-  }, []);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const hash = window.location.hash;
-      if (hash === "#about" || hash === "#settings") {
-        history.replaceState(null, "", window.location.pathname);
-      }
-    }
-  }, [initialSettingsTab, openSettingsFromHash]);
-  const [showSettings, setShowSettings] = useState(false);
-  useEffect(() => {
-    if (initialSettingsTab === "about" || openSettingsFromHash) {
-      setShowSettings(true);
-    }
-  }, [initialSettingsTab, openSettingsFromHash]);
-  const [showInsights, setShowInsights] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
-  /** tidyExpandSignal 对 TidySuggestionBar：默认为 0，点 "一键整理" 时 +1 触发展开 */
+  // ── hash 路由处理 ──────────────────────────────────────────────────────────
+  const { initialSettingsTab, openSettingsFromHash } = useHashNavigation();
+
   const [tidyExpandSignal, setTidyExpandSignal] = useState(0);
   const tidySectionRef = useRef<HTMLDivElement>(null);
-  /** initRunId —— 初始化失败时递增此值，触发 useEffect 重新执行 */
   const [initRunId, setInitRunId] = useState(0);
-
-  /** 滚动进度，用于背景联动等视差效果 */
-  const [scrollProgress, setScrollProgress] = useState(0);
 
   const {
     checked,
@@ -218,46 +186,50 @@ function AppContent() {
   const showHeroSlogan = uiVisibility?.heroSlogan !== false;
   const showHeroSearch = uiVisibility?.heroSearch !== false;
   const viewMode: ViewMode = VALID_VIEWS.includes(defaultView) ? defaultView : "domain";
-  const layoutBackground = resolveGradient(gradientPreset, resolvedDark, customGradient);
 
-  /** searchFromHash 触发搜索框显示 */
-  const [showSearch, setShowSearch] = useState(false);
-  useEffect(() => {
-    if (searchFromHash) {
-      setShowSearch(true);
-    }
-  }, [searchFromHash]);
+  // ── 面板状态管理 ───────────────────────────────────────────────────────────
+  const {
+    showSearch,
+    showSettings,
+    showInsights,
+    showHistory,
+    setShowSearch,
+    setShowSettings,
+    setShowInsights,
+    setShowHistory,
+    handleOpenSearch,
+    handleOpenSettings,
+    handleOpenInsights,
+    handleOpenHistory,
+    handlePageModeChange,
+    handleOpenArchive,
+  } = usePanelState({ openSettingsFromHash, initialSettingsTab, searchFromHash });
 
-  /** 页面内快捷键：通过可配置的 useKeybinding hook 注册 */
+  // ── 背景 / 布局样式 ────────────────────────────────────────────────────────
+  const { layoutStyle, overlayStyle, contentShellStyle, setScrollProgress } =
+    useLayoutStyle({
+      gradientPreset,
+      customGradient,
+      backgroundImage,
+      backgroundOverlay,
+      contentMaxWidth,
+    });
+
+  // ── 快捷键 ─────────────────────────────────────────────────────────────────
   const handleViewChange = useCallback((view: ViewMode) => {
     const prev = useSettingsStore.getState().settings.defaultView;
-    // 切换视图仅写 settings；viewMode 从 settings 派生，会自动更新
     void useSettingsStore.getState().updateSettings({ defaultView: view });
     void track("view_switch", { from: prev, to: view });
   }, []);
 
-  useKeybinding(
-    "search",
-    useCallback(() => setShowSearch((v) => !v), []),
-  );
+  const handleToggleSearch = useCallback(() => setShowSearch((v) => !v), [setShowSearch]);
+  const handleToggleHistory = useCallback(() => setShowHistory((v) => !v), [setShowHistory]);
 
-  /**
-   * 打开「历史记录」面板的全局快捷键。
-   * 默认 ChromeCommands 注册为 `Alt+H`（sw 供作业系统级快捷），页内额外增加 Cmd/Ctrl+⌫ H
-   * 以该快捷与现有 useKeybinding 机制一致。这里临时需要代码中手动增加 listener：
-   */
+  useKeybinding("search", handleToggleSearch);
+  useKeybinding("openHistory", handleToggleHistory);
+
+  /** 同时响应来自 sw 的「operation:open-history」广播（chrome.commands 接入点） */
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      const meta = e.metaKey || e.ctrlKey;
-      if (meta && e.shiftKey && (e.key === "H" || e.key === "h")) {
-        e.preventDefault();
-        setShowHistory((v) => !v);
-      }
-    };
-    window.addEventListener("keydown", handler);
-    /** 同时响应来自 sw 的「operation:open-history」广播（可选接入），
-     *  如果以后要进一步接管 chrome.commands。
-     */
     const onMessage = (msg: { type?: string }) => {
       if (msg.type === "open-history") {
         setShowHistory(true);
@@ -265,16 +237,10 @@ function AppContent() {
     };
     chrome.runtime?.onMessage?.addListener?.(onMessage);
     return () => {
-      window.removeEventListener("keydown", handler);
       chrome.runtime?.onMessage?.removeListener?.(onMessage);
     };
-  }, []);
+  }, [setShowHistory]);
 
-  /**
-   * 多选快捷键
-   *   - Escape：退出多选模式
-   *   - Ctrl/Cmd+A：全选当前视图所有标签
-   */
   useKeybinding(
     "exitSelection",
     useCallback(() => {
@@ -296,52 +262,6 @@ function AppContent() {
     }, []),
   );
 
-  const handlePageModeChange = useCallback((mode: NewtabPageMode) => {
-    const prev = useSettingsStore.getState().settings.newtabPageMode ?? "workspace";
-    void useSettingsStore.getState().updateSettings({ newtabPageMode: mode });
-    setShowSearch(false);
-    setShowSettings(false);
-    setShowInsights(false);
-    void track("newtab_page_mode_switch", { from: prev, to: mode });
-  }, []);
-
-  const handleOpenSearch = useCallback(() => {
-    setShowSearch(true);
-    setShowSettings(false);
-    setShowInsights(false);
-  }, []);
-
-  const handleOpenArchive = useCallback(() => {
-    // 切换到 workspace + archive 视图 Tab
-    const currentMode = useSettingsStore.getState().settings.newtabPageMode;
-    if (currentMode !== "workspace") {
-      void useSettingsStore.getState().updateSettings({ newtabPageMode: "workspace" });
-    }
-    void useSettingsStore.getState().updateSettings({ defaultView: "archive" });
-    setShowSearch(false);
-    setShowSettings(false);
-    setShowInsights(false);
-  }, []);
-
-  const handleOpenSettings = useCallback(() => {
-    setShowSettings(true);
-    setShowSearch(false);
-    setShowInsights(false);
-  }, []);
-
-  const handleOpenInsights = useCallback(() => {
-    setShowInsights(true);
-    setShowSearch(false);
-    setShowSettings(false);
-  }, []);
-
-  const handleOpenHistory = useCallback(() => {
-    setShowHistory(true);
-    setShowSearch(false);
-    setShowSettings(false);
-    setShowInsights(false);
-  }, []);
-
   const handleTidy = useCallback(() => {
     setTidyExpandSignal((s) => s + 1);
     tidySectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -352,11 +272,10 @@ function AppContent() {
     setInitRunId((value) => value + 1);
   }, [retryInit]);
 
-  /** Workspace 统计摘要 —— 计算 tabCount、domainCount 等 */
+  // ── 统计摘要 ───────────────────────────────────────────────────────────────
   const tabs = useTabsStore((s) => s.tabs);
   const tabCount = useMemo(() => tabs.length, [tabs]);
   const domainCount = useMemo(() => new Set(tabs.map((tab) => tab.hostname)).size, [tabs]);
-  /** dupGroups / idleTabsArr 计算开销较大，用 useMemo 避免无关渲染时重复执行 */
   const dupGroups = useMemo(() => findDuplicates(tabs, dedupStrictness), [tabs, dedupStrictness]);
   const idleTabsArr = useMemo(
     () => detectIdleTabs(tabs, idleThresholdMinutes),
@@ -366,51 +285,7 @@ function AppContent() {
   const idleTabsCount = idleTabsArr.length;
   const hasTidySuggestions = duplicateTabsCount > 0 || idleTabsCount > 0;
 
-  /**
-   * 构建 Layout 背景样式（useMemo 缓存，避免每次渲染重建对象）：
-   *   - 基础层：渐变背景
-   *   - 图片层：backgroundImage.url（如有）
-   *   - 遮罩层：通过 ::after 伪元素实现（在 index.css 中）
-   */
-  const layoutStyle = useMemo<CSSProperties>(() => {
-    const style: CSSProperties = {
-      minHeight: "100vh",
-      background: layoutBackground,
-      position: "relative",
-    };
-
-    /** 如果有背景图，叠加在渐变之上 */
-    if (backgroundImage?.url) {
-      const isEmbeddedImage =
-        backgroundImage.url.startsWith("data:") || backgroundImage.url.startsWith("blob:");
-      style.backgroundImage = `url("${backgroundImage.url}")`;
-      style.backgroundSize = backgroundImage.fit === "repeat" ? "auto" : backgroundImage.fit;
-      style.backgroundRepeat = backgroundImage.fit === "repeat" ? "repeat" : "no-repeat";
-      style.backgroundPosition = backgroundImage.position ?? "center";
-      style.backgroundAttachment = isEmbeddedImage ? "scroll" : "fixed";
-      /** 渐变作为 fallback */
-      style.backgroundColor = layoutBackground;
-    }
-
-    return style;
-  }, [layoutBackground, backgroundImage]);
-
-  const overlayBlur = Math.min(Math.max(backgroundOverlay?.blur ?? 0, 0), 12);
-  const overlayStyle = useMemo<CSSProperties | undefined>(() => {
-    if (!backgroundOverlay?.enabled) return undefined;
-
-    // 滚动时增加额外的模糊和变暗效果
-    const dynamicBlur = overlayBlur + scrollProgress * 8;
-    const dynamicOpacity = Math.min(0.8, scrollProgress * 0.4);
-
-    return cssVars({
-      "--app-background-overlay-bg": resolvedDark
-        ? backgroundOverlay.colorDark
-        : backgroundOverlay.color,
-      "--app-background-overlay-filter": dynamicBlur > 0 ? `blur(${dynamicBlur}px)` : "none",
-      "--app-background-overlay-opacity": `${dynamicOpacity}`,
-    });
-  }, [backgroundOverlay, resolvedDark, overlayBlur, scrollProgress]);
+  // ── 内容区 className ───────────────────────────────────────────────────────
   const contentShellClassName = [
     "app-content-shell",
     contentMaxWidth > 0 ? "app-content-shell--bounded" : "",
@@ -418,13 +293,6 @@ function AppContent() {
   ]
     .filter(Boolean)
     .join(" ");
-  const contentShellStyle = useMemo<CSSProperties | undefined>(
-    () =>
-      contentMaxWidth > 0
-        ? cssVars({ "--app-content-max-width": `${contentMaxWidth}px` })
-        : undefined,
-    [contentMaxWidth],
-  );
 
   // --- 所有 hooks 必须在以上结束；以下开始进入 JSX ---
 
@@ -433,7 +301,7 @@ function AppContent() {
       <Flex align="center" justify="center" style={{ minHeight: "100vh" }}>
         <Flex vertical align="center" gap={12}>
           <Spin />
-          <Text type="secondary">{t("tabs.loading")}</Text>
+          <Text type="secondary">{t('加载标签页中...')}</Text>
         </Flex>
       </Flex>
     );
@@ -456,7 +324,7 @@ function AppContent() {
               inset: 0,
               zIndex: 0,
               pointerEvents: "none",
-              background: resolvedDark ? "#000" : "#000",
+              background: resolvedDark ? "#000" : "rgba(0,0,0,0.6)",
               opacity: `var(--app-background-overlay-opacity, 0)`,
               transition: "opacity 0.1s ease-out",
             }}
@@ -494,7 +362,6 @@ function AppContent() {
           style={contentShellStyle}
           onScroll={(e) => {
             const target = e.currentTarget as HTMLElement;
-            // 计算滚动进度 0 ~ 1 (向下滚动 300px 达到最大效果)
             const progress = Math.min(1, Math.max(0, target.scrollTop / 300));
             setScrollProgress(progress);
           }}
@@ -524,7 +391,6 @@ function AppContent() {
 
           {pageMode === "workspace" && <QuickStartLayer onOpenSettings={handleOpenSettings} />}
 
-          {/* workspace 内容区：使用 AppWorkspace 子组件渲染 */}
           {pageMode === "trending" && (
             <Suspense
               fallback={
@@ -588,12 +454,12 @@ function AppContent() {
         />
         <SettingsPanel
           open={showSettings}
-          onOpenChange={(open: boolean) => {
-            if (!open) setShowSettings(false);
-          }}
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+          onOpenChange={(open: boolean) => { if (!open) setShowSettings(false as boolean); }}
           defaultActiveTab={initialSettingsTab}
         />
-        <InsightsPanel open={showInsights} onClose={() => setShowInsights(false)} />
+        {/* eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */}
+        <InsightsPanel open={showInsights} onClose={() => setShowInsights(false as boolean)} />
         <HistoryPanel open={showHistory} onClose={() => setShowHistory(false)} />
       </Suspense>
     </Layout>

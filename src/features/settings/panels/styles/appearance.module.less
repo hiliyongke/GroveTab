@@ -29,12 +29,14 @@
   border-radius: var(--app-radius-sm);
 }
 
-.appearance-grid .appearance-preset-card:hover {
+.appearance-grid .appearance-preset-card:hover,
+.appearance-gradient-grid .appearance-preset-card:hover {
   transform: none;
   background: var(--app-bg-hover);
 }
 
-.appearance-grid .appearance-preset-card.is-selected {
+.appearance-grid .appearance-preset-card.is-selected,
+.appearance-gradient-grid .appearance-preset-card.is-selected {
   background: var(--app-bg-selected);
 }
 
@@ -54,7 +56,8 @@
   display: none;
 }
 
-.appearance-grid .appearance-mode-badge {
+.appearance-grid .appearance-mode-badge,
+.appearance-gradient-grid .appearance-mode-badge {
   top: 2px;
   right: 2px;
   width: 10px;
@@ -62,7 +65,8 @@
   border-radius: 3px;
 }
 
-.appearance-grid .appearance-mode-badge svg {
+.appearance-grid .appearance-mode-badge svg,
+.appearance-gradient-grid .appearance-mode-badge svg {
   width: 7px;
   height: 7px;
 }
@@ -83,15 +87,6 @@
   border-radius: var(--app-radius-sm);
 }
 
-.appearance-gradient-grid .appearance-preset-card:hover {
-  transform: none;
-  background: var(--app-bg-hover);
-}
-
-.appearance-gradient-grid .appearance-preset-card.is-selected {
-  background: var(--app-bg-selected);
-}
-
 .appearance-gradient-grid .appearance-preset-preview--gradient {
   width: 28px;
   height: 20px;
@@ -105,19 +100,6 @@
   font-size: 11px;
   text-align: left;
   background: transparent;
-}
-
-.appearance-gradient-grid .appearance-mode-badge {
-  top: 2px;
-  right: 2px;
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-}
-
-.appearance-gradient-grid .appearance-mode-badge svg {
-  width: 7px;
-  height: 7px;
 }
 
 .appearance-gradient-grid .appearance-preset-edit-icon {

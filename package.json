@@ -1,5 +1,5 @@
 {
-  "name": "grovetab",
+  "name": "tab",
   "private": true,
   "version": "1.3.0",
   "type": "module",
@@ -11,7 +11,10 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "esbuild"
-    ]
+    ],
+    "patchedDependencies": {
+      "eslint-plugin-css-modules@2.12.0": "patches/eslint-plugin-css-modules@2.12.0.patch"
+    }
   },
   "scripts": {
     "dev": "vite",
@@ -27,11 +30,15 @@
     "lint:style": "stylelint \"src/**/*.{less,css}\"",
     "lint:style:fix": "stylelint \"src/**/*.{less,css}\" --fix",
     "check-quota": "node scripts/check-quota.mjs",
-    "release": "node scripts/release.mjs",
-    "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,css,json}\"",
+    "release": "release-it",
+    "release:dry": "release-it --dry-run",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css,less,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css,less,json}\"",
     "type-check": "tsc --noEmit",
     "knip": "knip",
+    "depcheck": "depcheck",
+    "i18n:scan": "node scripts/i18n-scan.mjs",
+    "i18n:check": "node scripts/i18n-check.mjs",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -52,7 +59,6 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@tanstack/react-virtual": "^3.13.24",
     "antd": "^6.3.6",
-    "date-fns": "^4.1.0",
     "dayjs": "^1.11.20",
     "lucide-react": "^1.8.0",
     "minisearch": "^7.2.0",
@@ -68,7 +74,9 @@
   "devDependencies": {
     "@commitlint/cli": "^19.6.0",
     "@commitlint/config-conventional": "^19.6.0",
+    "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
+    "@release-it/conventional-changelog": "^11.0.0",
     "@types/chrome": "^0.1.40",
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
@@ -76,6 +84,7 @@
     "@vitejs/plugin-react": "^6.0.1",
     "esbuild": "^0.28.0",
     "eslint": "^10.2.1",
+    "eslint-plugin-css-modules": "^2.12.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
@@ -86,6 +95,7 @@
     "lint-staged": "^17.0.5",
     "postcss-less": "^6.0.0",
     "prettier": "^3.8.3",
+    "release-it": "^20.0.1",
     "stylelint": "^17.12.0",
     "stylelint-config-recess-order": "^7.7.0",
     "stylelint-config-standard": "^40.0.0",

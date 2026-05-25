@@ -40,8 +40,8 @@ export function BookmarkHealthPanel({
     <div className={styles["bm-tools__panel"]}>
       <div className={styles["bm-tools__panel-header"]}>
         <div>
-          <div className={styles["bm-tools__panel-title"]}>{t("bookmark.tools.health")}</div>
-          <div className={styles["bm-tools__panel-subtitle"]}>{t("bookmark.tools.healthHint")}</div>
+          <div className={styles["bm-tools__panel-title"]}>{t('失效检测')}</div>
+          <div className={styles["bm-tools__panel-subtitle"]}>{t('逐条检测书签是否可访问；需要网页访问权限，首次会弹出授权。')}</div>
         </div>
         <div className={styles["bm-tools__panel-actions"]}>
           <Button
@@ -52,7 +52,7 @@ export function BookmarkHealthPanel({
               void checkHealth();
             }}
           >
-            {t("bookmark.tools.scan")}
+            {t('开始扫描')}
           </Button>
           {deadList.length > 0 && (
             <Button
@@ -62,14 +62,14 @@ export function BookmarkHealthPanel({
                 void applyRemoveDead();
               }}
             >
-              {t("bookmark.tools.removeDeadAll", { count: deadList.length })}
+              {t('删除全部失效（{count} 个）', { count: deadList.length })}
             </Button>
           )}
         </div>
       </div>
 
       {healthPermission === false && (
-        <Alert type="error" showIcon message={t("bookmark.tools.healthNeedPermission")} />
+        <Alert type="error" showIcon message={t('需要授权访问任意网址才能检测书签有效性')} />
       )}
 
       {healthLoading && healthProgress !== null && (
@@ -83,7 +83,7 @@ export function BookmarkHealthPanel({
             status="active"
           />
           <div className={styles["bm-tools__progress-text"]}>
-            {t("bookmark.tools.healthProgress", {
+            {t('正在检测 {done}/{total}', {
               done: healthProgress.done,
               total: healthProgress.total,
             })}
@@ -94,19 +94,19 @@ export function BookmarkHealthPanel({
       {healthStats !== null && (
         <div className={styles["bm-tools__health-summary"]}>
           <span className="bm-tools__chip is-success">
-            <span className={styles["bm-tools__chip-dot"]} /> {t("bookmark.tools.statusOk")}{" "}
+            <span className={styles["bm-tools__chip-dot"]} /> {t('可达')}{" "}
             {healthStats.ok}
           </span>
           <span className="bm-tools__chip is-danger">
-            <span className={styles["bm-tools__chip-dot"]} /> {t("bookmark.tools.statusDead")}{" "}
+            <span className={styles["bm-tools__chip-dot"]} /> {t('失效')}{" "}
             {healthStats.dead}
           </span>
           <span className="bm-tools__chip is-warning">
-            <span className={styles["bm-tools__chip-dot"]} /> {t("bookmark.tools.statusTimeout")}{" "}
+            <span className={styles["bm-tools__chip-dot"]} /> {t('超时')}{" "}
             {healthStats.timeout}
           </span>
           <span className="bm-tools__chip is-muted">
-            <span className={styles["bm-tools__chip-dot"]} /> {t("bookmark.tools.statusSkipped")}{" "}
+            <span className={styles["bm-tools__chip-dot"]} /> {t('跳过')}{" "}
             {healthStats.skipped}
           </span>
         </div>
@@ -120,16 +120,16 @@ export function BookmarkHealthPanel({
           options={[
             {
               value: "dead",
-              label: `${t("bookmark.tools.statusDead")} (${healthStats?.dead ?? 0})`,
+              label: `${t('失效')} (${healthStats?.dead ?? 0})`,
             },
             {
               value: "timeout",
-              label: `${t("bookmark.tools.statusTimeout")} (${healthStats?.timeout ?? 0})`,
+              label: `${t('超时')} (${healthStats?.timeout ?? 0})`,
             },
-            { value: "ok", label: `${t("bookmark.tools.statusOk")} (${healthStats?.ok ?? 0})` },
+            { value: "ok", label: `${t('可达')} (${healthStats?.ok ?? 0})` },
             {
               value: "all",
-              label: `${t("bookmark.tools.statusAll")} (${healthStats?.total ?? 0})`,
+              label: `${t('全部')} (${healthStats?.total ?? 0})`,
             },
           ]}
         />
@@ -138,13 +138,13 @@ export function BookmarkHealthPanel({
       {healthResults === null && !healthLoading && (
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description={t("bookmark.tools.idle")}
+          description={t('点击"开始扫描"查看结果')}
           className={styles["bm-tools__empty"]}
         />
       )}
 
       {healthResults !== null && filteredHealth.length === 0 && (
-        <Alert type="success" showIcon message={t("bookmark.tools.healthFilterEmpty")} />
+        <Alert type="success" showIcon message={t('当前筛选下没有书签')} />
       )}
 
       {healthResults !== null && filteredHealth.length > 0 && (
@@ -174,7 +174,7 @@ export function BookmarkHealthPanel({
                 )}
               </Tag>
               {r.bookmark.url !== undefined && (
-                <Tooltip title={t("bookmark.tools.openInNewTab")}>
+                <Tooltip title={t('新标签页打开')}>
                   <Button
                     type="text"
                     size="small"

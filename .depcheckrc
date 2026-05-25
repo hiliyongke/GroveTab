@@ -1,0 +1,17 @@
+{
+  "ignores": [
+    "@commitlint/cli",
+    "@commitlint/config-conventional",
+    "@eslint/eslintrc",
+    "@eslint/js",
+    "eslint-plugin-css-modules",
+    "eslint-plugin-react-hooks",
+    "eslint-plugin-react-refresh",
+    "globals",
+    "postcss-less",
+    "stylelint-config-recess-order",
+    "stylelint-config-standard",
+    "stylelint-less",
+    "typescript-eslint"
+  ]
+}

@@ -166,7 +166,7 @@ export function parseImportJSON(text: string): { sessions: ArchivedSession[]; er
   }
 }
 
-// ── v1.0 封板：多格式导出（F-15） ──────────────────────
+// ── 多格式导出 ────────────────────────────────────────
 
 /**
  * Markdown 导出：`## 会话名` + `- [title](url)`。
@@ -232,7 +232,7 @@ function escapeAttr(s: string): string {
   return escapeHtml(s);
 }
 
-// ── v1.0 封板：多格式导入（F-15） ──────────────────────
+// ── 多格式导入 ────────────────────────────────────────
 
 /**
  * 从 Netscape HTML 书签解析会话（H3 = 会话名，A = Tab；未分组归入"未命名"）。
@@ -244,7 +244,6 @@ export function parseImportHTML(text: string): { sessions: ArchivedSession[]; er
     const doc = parser.parseFromString(text, 'text/html');
     const sessions: ArchivedSession[] = [];
 
-    // 找到每个 H3 对应的紧随其后的 DL
     const h3s = Array.from(doc.querySelectorAll('h3'));
     const handled = new Set<HTMLAnchorElement>();
 
@@ -363,8 +362,10 @@ export function parseImportAuto(text: string): { sessions: ArchivedSession[]; er
   if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
     return parseImportJSON(trimmed);
   }
-  if (trimmed.toLowerCase().startsWith('<!doctype netscape-bookmark-file-1') ||
-      trimmed.toLowerCase().includes('<dl>')) {
+  if (
+    trimmed.toLowerCase().startsWith('<!doctype netscape-bookmark-file-1') ||
+    trimmed.toLowerCase().includes('<dl>')
+  ) {
     return parseImportHTML(trimmed);
   }
   return parseImportOneTab(trimmed);

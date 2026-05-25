@@ -1,4 +1,3 @@
-import { Button } from "antd";
 import {
   Activity,
   Binary,
@@ -11,7 +10,6 @@ import {
   GitCompare,
   Globe2,
   Hash,
-  Heart,
   KeyRound,
   Link,
   Palette,
@@ -20,11 +18,8 @@ import {
   Shield,
   Terminal,
   Type,
-  Wrench,
 } from "lucide-react";
-import type { DevToolDefinition } from "../tool-registry";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
-import styles from "../DeveloperToolsPage.module.less";
 
 /** 工具图标映射（导出供 DeveloperToolsPage 使用） */
 export const TOOL_ICONS: Record<string, React.ReactNode> = {
@@ -59,52 +54,3 @@ export const TOOL_ICONS: Record<string, React.ReactNode> = {
   "mime-type": <FileType size={ICON_SIZE.LARGE} />,
   "random-gen": <Dices size={ICON_SIZE.LARGE} />,
 };
-
-interface ToolCardProps {
-  tool: DevToolDefinition;
-  title: string;
-  description: string;
-  selected: boolean;
-  favorited: boolean;
-  onClick: () => void;
-  onToggleFavorite: (event: React.MouseEvent) => void;
-}
-
-export function ToolCard({
-  tool,
-  title,
-  description,
-  selected,
-  favorited,
-  onClick,
-  onToggleFavorite,
-}: ToolCardProps) {
-  return (
-    <Button
-      type="text"
-      className={`devtools-card${selected ? " is-selected" : ""}`}
-      onClick={onClick}
-      aria-pressed={selected}
-    >
-      <span className={styles["devtools-card-icon"]}>
-        {TOOL_ICONS[tool.id] ?? <Wrench size={ICON_SIZE.DEFAULT} />}
-      </span>
-      <div className={styles["devtools-card-body"]}>
-        <div className={styles["devtools-card-title"]}>
-          <span>{title}</span>
-          {tool.localOnly && <span className={styles["devtools-local-badge"]}>Local</span>}
-        </div>
-        <div className={styles["devtools-card-desc"]}>{description}</div>
-      </div>
-      <span
-        className={`devtools-fav-btn${favorited ? " is-active" : ""}`}
-        onClick={onToggleFavorite}
-        role="button"
-        tabIndex={0}
-        aria-label="收藏"
-      >
-        <Heart size={12} />
-      </span>
-    </Button>
-  );
-}

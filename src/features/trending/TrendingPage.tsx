@@ -262,7 +262,7 @@ function HotBoardSkeletonCard({
             <Tag className={styles["trending-board-card__tag"]}>{platformSubtitle}</Tag>
           )}
         </div>
-        <Tooltip title={t("trending.refresh")}>
+        <Tooltip title={t('刷新')}>
           <Button
             type="text"
             size="small"
@@ -285,13 +285,13 @@ function HotBoardSkeletonCard({
           <>
             <Spin size="small" />
             <Text type="secondary" className={styles["trending-board-card__placeholder-text"]}>
-              {t("trending.loading")}
+              {t('正在加载热榜…')}
             </Text>
           </>
         ) : errored ? (
           <>
             <Text type="danger" className={styles["trending-board-card__placeholder-text"]}>
-              {t("trending.noData")}
+              {t('暂无数据')}
             </Text>
             <Button
               type="link"
@@ -301,14 +301,14 @@ function HotBoardSkeletonCard({
               }}
               className={styles["trending-board-card__retry-btn"]}
             >
-              {t("trending.refresh")}
+              {t('刷新')}
             </Button>
           </>
         ) : (
           <>
             <Spin size="small" />
             <Text type="secondary" className={styles["trending-board-card__placeholder-text"]}>
-              {t("trending.loading")}
+              {t('正在加载热榜…')}
             </Text>
           </>
         )}
@@ -347,7 +347,7 @@ function HotBoardCard({
             <Tag className={styles["trending-board-card__tag"]}>{board.subtitle}</Tag>
           )}
         </div>
-        <Tooltip title={t("trending.refresh")}>
+        <Tooltip title={t('刷新')}>
           <Button
             type="text"
             size="small"
@@ -369,7 +369,7 @@ function HotBoardCard({
         {board.items.length === 0 ? (
           <div className={styles["trending-board-card__empty"]}>
             <Text type="secondary" className={styles["trending-board-card__placeholder-text"]}>
-              {t("trending.noData")}
+              {t('暂无数据')}
             </Text>
           </div>
         ) : (
@@ -460,8 +460,8 @@ export function TrendingPage() {
 
   const groupModeOptions = useMemo(
     () => [
-      { value: "default" as TrendingGroupMode, label: t("trending.groupDefault") },
-      { value: "compact" as TrendingGroupMode, label: t("trending.groupCompact") },
+      { value: "default" as TrendingGroupMode, label: t('默认') },
+      { value: "compact" as TrendingGroupMode, label: t('紧凑') },
     ],
     [t],
   );
@@ -515,11 +515,11 @@ export function TrendingPage() {
                 <Flame size={ICON_SIZE.LARGE} />
               </span>
               <Title level={4} className={styles["trending-toolbar-card__title"]}>
-                {t("trending.title")}
+                {t('全网热榜')}
               </Title>
             </div>
             <Space size={4} className={styles["trending-toolbar-card__actions"]}>
-              <Tooltip title={t("trending.refreshAll")}>
+              <Tooltip title={t('全部刷新')}>
                 <Button
                   type="text"
                   size="small"
@@ -533,7 +533,7 @@ export function TrendingPage() {
                   disabled={loading}
                 />
               </Tooltip>
-              <Tooltip title={t("trending.stealthMode")}>
+              <Tooltip title={t('偷摸模式')}>
                 <Button
                   type="text"
                   size="small"
@@ -567,10 +567,10 @@ export function TrendingPage() {
         <Alert
           type="warning"
           showIcon
-          message={t("trending.allFailed")}
+          message={t('热榜数据源暂时不可用，请稍后重试')}
           action={
             <Button size="small" onClick={handleRefreshAll} loading={loading}>
-              {t("trending.refreshAll")}
+              {t('全部刷新')}
             </Button>
           }
           className={styles["trending-alert"]}
@@ -581,11 +581,11 @@ export function TrendingPage() {
         <div className={styles["trending-loading-state"]}>
           <div className={styles["trending-loading-state__inner"]}>
             <Spin />
-            <Text type="secondary">{t("trending.loading")}</Text>
+            <Text type="secondary">{t('正在加载热榜…')}</Text>
           </div>
         </div>
       ) : activePlatforms.length === 0 ? (
-        <Empty description={t("trending.noPlatforms")} className={styles["trending-empty-state"]} />
+        <Empty description={t('没有可用的平台')} className={styles["trending-empty-state"]} />
       ) : (
         <div
           className={cx(styles["trending-grid"], groupMode === "compact" && styles["is-compact"])}

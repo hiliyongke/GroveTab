@@ -306,11 +306,11 @@ export function ArchiveView() {
     const total = restoringSession?.tabCount ?? outcome.restored;
     void track("archive_restore", { restored: outcome.restored, total });
     if (outcome.cancelled) {
-      feedback.info(t("archive.restoreCancelled", { restored: outcome.restored }));
+      feedback.info(t('已取消恢复，成功恢复 {restored} 个标签', { restored: outcome.restored }));
     } else if (outcome.restored === total) {
-      feedback.success(t("archive.restoredOk"));
+      feedback.success(t('恢复成功'));
     } else {
-      feedback.warning(t("archive.restorePartial", { restored: outcome.restored, total }));
+      feedback.warning(t('部分恢复成功，已恢复 {restored}/{total} 个标签', { restored: outcome.restored, total }));
     }
     setRestoreDialogOpen(false);
     setRestoringSession(null);
@@ -322,14 +322,14 @@ export function ArchiveView() {
       void track("archive_delete");
       await refreshSessions();
     } catch (err) {
-      feedback.error(t("archive.deleteFailed"), err);
+      feedback.error(t('删除失败，请重试'), err);
     }
   };
 
   const handleShare = async (id: string) => {
     const payload = await exportSingleSession(id);
     if (payload === null) {
-      feedback.error(t("archive.shareFailed"));
+      feedback.error(t('分享失败，请重试'));
       return;
     }
     try {
@@ -342,9 +342,9 @@ export function ArchiveView() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      feedback.success(t("archive.shareOk"));
+      feedback.success(t('已下载会话 JSON'));
     } catch (err) {
-      feedback.error(t("archive.shareFailed"), err);
+      feedback.error(t('分享失败，请重试'), err);
     }
   };
 
@@ -372,11 +372,11 @@ export function ArchiveView() {
 
   const handleOpenMerge = (ids: string[]) => {
     if (ids.length < 2) {
-      feedback.warning(t("archive.mergeNeedTwo"));
+      feedback.warning(t('请至少选择 2 个会话'));
       return;
     }
     setSelectedIds(new Set(ids));
-    setMergeName(t("archive.mergedDefaultName"));
+    setMergeName(t('合并会话'));
     setMergeOpen(true);
   };
 
@@ -387,15 +387,15 @@ export function ArchiveView() {
       await refreshSessions();
       setMergeOpen(false);
       cancelSelect();
-      feedback.success(t("archive.mergedOk", { count: newSession.tabCount }));
+      feedback.success(t('已合并为 1 个会话，共 {count} 个标签', { count: newSession.tabCount }));
       void useMetadataStore.getState().pushActivity({
         id: `merge-${newSession.id}`,
         type: "archive",
         ts: Date.now(),
-        summary: t("archive.mergedActivity", { count: newSession.tabCount, name: newSession.name }),
+        summary: t('已合并为「{name}」（{count} 个标签）', { count: newSession.tabCount, name: newSession.name }),
       });
     } catch (err) {
-      feedback.error(t("archive.mergeFailed"), err);
+      feedback.error(t('合并失败，请重试'), err);
     }
   };
 
@@ -406,14 +406,14 @@ export function ArchiveView() {
 
   const handleOpenSingle = async (tab: { url: string }) => {
     if (!isSafeExternalUrl(tab.url)) {
-      feedback.error(t("archive.restoreFailed"));
+      feedback.error(t('恢复失败，请重试'));
       return;
     }
     try {
       const currentWindow = await getCurrentWindow();
       await createTab({ url: tab.url, windowId: currentWindow?.id, active: true });
     } catch (err) {
-      feedback.error(t("archive.restoreFailed"), err);
+      feedback.error(t('恢复失败，请重试'), err);
     }
   };
 
@@ -442,12 +442,12 @@ export function ArchiveView() {
         pinned: tab.pinned,
       }));
       const failCount = archivedCount - closedCount;
-      const subNote = failCount > 0 ? t("archive.closeIncomplete", { count: failCount }) : "";
+      const subNote = failCount > 0 ? t('已有 {count} 个标签页未能关闭，可稍后手动处理', { count: failCount }) : "";
       void useUndoStore
         .getState()
         .addRecord(
           snapshots,
-          t("archive.archivedRichToast", { count: archivedCount, name: session.name }),
+          t('已归档 {count} 个标签到「{name}」', { count: archivedCount, name: session.name }),
           { archivedSessionId: session.id, subNote },
         );
 
@@ -455,16 +455,16 @@ export function ArchiveView() {
         id: `archive-${session.id}`,
         type: "archive",
         ts: Date.now(),
-        summary: t("activity.archived", { count: archivedCount, name: session.name }),
+        summary: t('已归档 {count} 个标签到「{name}」', { count: archivedCount, name: session.name }),
         primaryAction: {
           id: "view",
-          label: t("activity.viewArchive"),
+          label: t('查看归档'),
           kind: "open_archive",
           payload: session.id,
         },
       });
     } catch (err) {
-      feedback.error(t("archive.archiveFailed"), err);
+      feedback.error(t('归档失败，请重试'), err);
     } finally {
       setArchivingCurrent(false);
     }
@@ -493,8 +493,8 @@ export function ArchiveView() {
           <Save size={ICON_SIZE.LARGE} className={styles["app-archive-header__icon"]} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div className={styles["app-archive-header__title"]}>{t("archive.title")}</div>
-          <div className={styles["app-archive-header__subtitle"]}>{t("archive.description")}</div>
+          <div className={styles["app-archive-header__title"]}>{t('归档会话')}</div>
+          <div className={styles["app-archive-header__subtitle"]}>{t('归档 = 把当前窗口所有标签页打包成一个「会话」快照，保存后会关闭这些标签页。需要时点击「恢复」即可在当前窗口里重新打开，适合整理浏览环境或临时腾出空间。')}</div>
         </div>
       </div>
 
@@ -511,7 +511,7 @@ export function ArchiveView() {
           <div className={styles["archive-toolbar"]}>
             <Input.Search
               className={styles["archive-toolbar__search"]}
-              placeholder={t("archive.searchPlaceholder")}
+              placeholder={t('搜索归档会话...')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               allowClear
@@ -523,10 +523,10 @@ export function ArchiveView() {
               onChange={(value: SortMode) => setSortMode(value)}
               suffixIcon={<ArrowDownUp size={ICON_SIZE.TINY} />}
               options={[
-                { value: "newest", label: t("archive.toolbar.sortNewest") },
-                { value: "oldest", label: t("archive.toolbar.sortOldest") },
-                { value: "largest", label: t("archive.toolbar.sortLargest") },
-                { value: "name", label: t("archive.toolbar.sortName") },
+                { value: "newest", label: t('最近创建') },
+                { value: "oldest", label: t('最早创建') },
+                { value: "largest", label: t('标签最多') },
+                { value: "name", label: t('按名称') },
               ]}
               style={{ width: 140 }}
               size="middle"
@@ -536,7 +536,7 @@ export function ArchiveView() {
 
             {isSearching && (
               <span className={styles["archive-search-result"]}>
-                {t("archive.searchResults", {
+                {t('找到 {count} / 共 {total} 个会话', {
                   count: totalAfterFilter,
                   total: sessions.length,
                 })}
@@ -571,9 +571,9 @@ export function ArchiveView() {
                 onClick={() => {
                   void handleArchiveCurrent();
                 }}
-                title={t("header.tabCount", { count: tabCount })}
+                title={t('{count} 个标签页', { count: tabCount })}
               >
-                {t("header.archive")}
+                {t('归档')}
               </Button>
             </div>
           </div>
@@ -582,19 +582,19 @@ export function ArchiveView() {
             <div className={styles["app-archive-loading"]}>
               <div className={styles["app-archive-loading__content"]}>
                 <Spin />
-                <span className={styles["app-archive-loading__copy"]}>{t("archive.loading")}</span>
+                <span className={styles["app-archive-loading__copy"]}>{t('加载中...')}</span>
               </div>
             </div>
           ) : totalAfterFilter === 0 ? (
             sessions.length === 0 ? (
               <FeatureEmptyState
-                title={t("archive.empty")}
-                description={t("archive.emptyHint")}
+                title={t('暂无归档会话')}
+                description={t('点击归档按钮保存当前所有标签页')}
                 icon={<Inbox size={ICON_SIZE.HERO} />}
-                hints={[t("archive.emptyHint1"), t("archive.emptyHint2"), t("archive.emptyHint3")]}
+                hints={[t('一键归档当前窗口所有标签，释放浏览器内存'), t('支持整组恢复或选择性恢复，不丢失任何进度'), t('自动快照定时保存您的标签状态')]}
                 actions={[
                   {
-                    text: t("archive.archiveCurrentWindow"),
+                    text: t('归档当前窗口'),
                     onClick: () => {
                       void handleArchiveCurrent();
                     },
@@ -603,7 +603,7 @@ export function ArchiveView() {
                 ]}
               />
             ) : (
-              <Empty description={t("archive.empty")} />
+              <Empty description={t('暂无归档会话')} />
             )
           ) : (
             buckets.map((bucket) => (
@@ -656,20 +656,20 @@ export function ArchiveView() {
       <Modal
         open={mergeOpen}
         rootClassName={styles["app-archive-merge-modal"]}
-        title={t("archive.mergeTitle")}
+        title={t('合并会话')}
         onCancel={() => setMergeOpen(false)}
         onOk={() => void handleConfirmMerge()}
-        okText={t("archive.merge")}
-        cancelText={t("archive.cancel")}
+        okText={t('合并')}
+        cancelText={t('取消')}
         centered
       >
         <Typography.Text className={styles["app-archive-merge-copy"]}>
-          {t("archive.mergeDesc", { count: selectedIds.size })}
+          {t('将合并 {count} 个会话为一个新会话，并按 URL 去重。原会话将被删除。', { count: selectedIds.size })}
         </Typography.Text>
         <Input
           value={mergeName}
           onChange={(e) => setMergeName(e.target.value)}
-          placeholder={t("archive.mergeNamePlaceholder")}
+          placeholder={t('新会话名')}
         />
       </Modal>
 
@@ -704,9 +704,9 @@ export function ArchiveView() {
             try {
               await renameSession(id, newName);
               await refreshSessions();
-              feedback.success(t("archive.renameOk"));
+              feedback.success(t('重命名成功'));
             } catch (err) {
-              feedback.error(t("archive.rename"), err);
+              feedback.error(t('重命名'), err);
             }
           }}
         />

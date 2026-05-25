@@ -1,0 +1,46 @@
+{
+  "$schema": "https://unpkg.com/release-it/schema/release-it.json",
+  "git": {
+    "commitMessage": "chore(release): v${version}",
+    "tagName": "v${version}",
+    "tagAnnotation": "Release v${version}",
+    "requireCleanWorkingDir": true,
+    "requireUpstream": false,
+    "push": true
+  },
+  "github": {
+    "release": true,
+    "releaseName": "v${version}",
+    "assets": ["build/grovetab-v${version}.zip"]
+  },
+  "hooks": {
+    "before:init": ["pnpm run type-check", "pnpm run test"],
+    "after:bump": [
+      "vite build && node scripts/build-sw.mjs",
+      "node scripts/check-quota.mjs",
+      "node scripts/package-zip.mjs"
+    ]
+  },
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "preset": {
+        "name": "conventionalcommits",
+        "types": [
+          { "type": "feat", "section": "✨ Features" },
+          { "type": "fix", "section": "🐛 Bug Fixes" },
+          { "type": "perf", "section": "⚡ Performance" },
+          { "type": "refactor", "section": "♻️ Refactoring" },
+          { "type": "docs", "section": "📝 Documentation" },
+          { "type": "build", "section": "🏗️ Build System" },
+          { "type": "ci", "section": "👷 CI/CD" },
+          { "type": "chore", "hidden": true },
+          { "type": "style", "hidden": true },
+          { "type": "test", "hidden": true },
+          { "type": "revert", "section": "⏪ Reverts" }
+        ]
+      },
+      "infile": "CHANGELOG.md",
+      "header": "# Changelog\n\nAll notable changes to GroveTab will be documented in this file.\n"
+    }
+  }
+}

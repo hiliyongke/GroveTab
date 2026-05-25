@@ -139,7 +139,7 @@ function extractJustNow(tabs: LiveTab[], t: TFn): [TimeSegment | null, LiveTab[]
   return [
     {
       key: "today-justNow",
-      label: t("timeline.justNow"),
+      label: t('刚刚'),
       tabs: recent,
     },
     rest,
@@ -186,7 +186,7 @@ function getTimeSegments(tabs: LiveTab[], granularity: "day" | "hour", t: TFn): 
     if (todayTabs.length > 0) {
       segments.push({
         key: "today",
-        label: t("timeline.today"),
+        label: t('今天'),
         tabs: [...todayTabs].sort(byAccessDesc),
       });
     }
@@ -200,11 +200,11 @@ function getTimeSegments(tabs: LiveTab[], granularity: "day" | "hour", t: TFn): 
   // —— 昨天 ——
   if (granularity === "hour") {
     // hour 档下：昨天也按整点小时桶倒序，前缀带「昨天 」
-    segments.push(...bucketByHour(yesterdayTabs, `${t("timeline.yesterdayPrefix")} `, "yesterday"));
+    segments.push(...bucketByHour(yesterdayTabs, `${t('昨天')} `, "yesterday"));
   } else if (yesterdayTabs.length > 0) {
     segments.push({
       key: "yesterday",
-      label: t("timeline.yesterday"),
+      label: t('昨天'),
       tabs: [...yesterdayTabs].sort(byAccessDesc),
     });
   }
@@ -213,14 +213,14 @@ function getTimeSegments(tabs: LiveTab[], granularity: "day" | "hour", t: TFn): 
   if (weekTabs.length > 0) {
     segments.push({
       key: "week",
-      label: t("timeline.thisWeek"),
+      label: t('本周'),
       tabs: [...weekTabs].sort(byAccessDesc),
     });
   }
   if (olderTabs.length > 0) {
     segments.push({
       key: "older",
-      label: t("timeline.older"),
+      label: t('更早'),
       tabs: [...olderTabs].sort(byAccessDesc),
     });
   }

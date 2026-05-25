@@ -31,7 +31,6 @@ export interface ChromeTabGroup {
 export type ChromeTabGroupUpdateProperties = Omit<chrome.tabGroups.UpdateProperties, "color"> & {
   color?: ChromeTabGroupColor;
 };
-export type ChromeTabGroupMoveProperties = chrome.tabGroups.MoveProperties;
 export interface ChromeTabsGroupOptions extends Omit<chrome.tabs.GroupOptions, "tabIds"> {
   tabIds: number | number[];
 }
@@ -47,7 +46,7 @@ function normalizeTabIds(tabIds: number | number[]): number | [number, ...number
 }
 
 /** 判断当前运行环境是否支持 `chrome.tabGroups`。 */
-export function isTabGroupsAvailable(): boolean {
+function isTabGroupsAvailable(): boolean {
   return (
     typeof chrome !== "undefined" &&
     chrome.tabGroups !== undefined &&
@@ -92,19 +91,6 @@ export async function updateTabGroup(
     chrome.tabGroups.update(groupId, updateProperties),
   );
   if (!group) throw new Error("tabGroups.update: updated group was not returned");
-  return group as ChromeTabGroup;
-}
-
-/** 移动整个 Tab Group，可用于同窗口排序或跨窗口迁移。 */
-export async function moveTabGroup(
-  groupId: number,
-  moveProperties: ChromeTabGroupMoveProperties,
-): Promise<ChromeTabGroup> {
-  assertTabGroupsAvailable("tabGroups.move");
-  const group = await safeCall("tabGroups.move", () =>
-    chrome.tabGroups.move(groupId, moveProperties),
-  );
-  if (!group) throw new Error("tabGroups.move: moved group was not returned");
   return group as ChromeTabGroup;
 }
 

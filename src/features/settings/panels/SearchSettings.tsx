@@ -110,14 +110,14 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
     setCustomEngineName('');
     setCustomEngineUrl('');
     setCustomEngineIcon('');
-    feedback.success(t('settings.customSearchEngineAdded'));
+    feedback.success(t('已添加自定义搜索引擎'));
   };
 
   return (
     <div className="settings-panel-stack settings-panel-stack--regular">
       <Field
-        label={t('settings.searchScope')}
-        hint={t('settings.searchScopeHint')}
+        label={t('搜索范围')}
+        hint={t('选择搜索时匹配哪些字段；缩小范围可提升搜索速度')}
       >
         <Checkbox.Group
           className="settings-checkbox-group"
@@ -127,16 +127,16 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
             handleSetting({ searchScope: values as SearchScopeField[] });
           }}
           options={[
-            { label: t('settings.searchScopeTitle'), value: 'title' },
-            { label: t('settings.searchScopeHostname'), value: 'hostname' },
-            { label: t('settings.searchScopeUrl'), value: 'url' },
+            { label: t('标题'), value: 'title' },
+            { label: t('域名'), value: 'hostname' },
+            { label: t('URL'), value: 'url' },
           ]}
         />
       </Field>
 
       <Field
-        label={t('settings.searchEnablePinyin')}
-        hint={t('settings.searchEnablePinyinHint')}
+        label={t('拼音搜索')}
+        hint={t('开启后支持用拼音首字母或全拼搜索中文标题；对非中文用户可关闭以节省性能')}
       >
         <Switch
           checked={settings.searchEnablePinyin ?? true}
@@ -145,8 +145,8 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
       </Field>
 
       <Field
-        label={t('settings.searchSortBy')}
-        hint={t('settings.searchSortByHint')}
+        label={t('搜索结果排序')}
+        hint={t('相关度：按匹配程度排序；最近访问：按标签最后活跃时间排序')}
       >
         <Segmented
           block
@@ -157,15 +157,15 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
             })
           }
           options={[
-            { value: 'relevance', label: t('settings.searchSortByRelevance') },
-            { value: 'recentAccess', label: t('settings.searchSortByRecentAccess') },
+            { value: 'relevance', label: t('相关度') },
+            { value: 'recentAccess', label: t('最近访问') },
           ]}
         />
       </Field>
 
       <Field
-        label={t('settings.searchDefaultEngine')}
-        hint={t('settings.searchDefaultEngineHint')}
+        label={t('默认搜索引擎')}
+        hint={t('在搜索框中回车时使用的搜索引擎')}
       >
         <Select<SearchEngineId>
           value={defaultSearchEngine}
@@ -182,8 +182,8 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
       </Field>
 
       <Field
-        label={t('settings.searchEnabledEngines')}
-        hint={t('settings.searchEnabledEnginesHint')}
+        label={t('启用的搜索引擎')}
+        hint={t('选择搜索框下方快捷切换的搜索引擎')}
       >
         <Checkbox.Group
           className="settings-checkbox-group"
@@ -199,41 +199,41 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
             });
           }}
           options={allEngines.map((item) => ({
-            label: item.builtIn ? item.label : <span>{item.label} <Tag>{t('settings.customSearchEngineTag')}</Tag></span>,
+            label: item.builtIn ? item.label : <span>{item.label} <Tag>{t('自定义')}</Tag></span>,
             value: item.id,
           }))}
         />
       </Field>
 
       <Field
-        label={t('settings.customSearchEngine')}
-        hint={t('settings.customSearchEngineHint')}
+        label={t('自定义搜索引擎')}
+        hint={t('添加任意搜索引擎；URL 可使用 {query} 作为关键词占位，不填会自动追加 q={query}')}
       >
         <Space.Compact className="settings-control-full">
           <Input
             value={customEngineName}
             onChange={(e) => setCustomEngineName(e.target.value)}
-            placeholder={t('settings.customSearchEngineName')}
+            placeholder={t('名称')}
           />
           <Input
             value={customEngineUrl}
             onChange={(e) => setCustomEngineUrl(e.target.value)}
-            placeholder={t('settings.customSearchEngineUrl')}
+            placeholder={t('搜索 URL')}
           />
           <Input
             value={customEngineIcon}
             onChange={(e) => setCustomEngineIcon(e.target.value)}
-            placeholder={t('settings.customSearchEngineIcon')}
+            placeholder={t('Logo URL（可选）')}
           />
           <Button type="primary" disabled={!canAddCustomEngine} onClick={handleAddCustomEngine}>
-            {t('settings.customSearchEngineAdd')}
+            {t('添加')}
           </Button>
         </Space.Compact>
       </Field>
 
       <Field
-        label={t('settings.searchAutoFallbackToWeb')}
-        hint={t('settings.searchAutoFallbackToWebHint')}
+        label={t('本地无结果时优先网页搜索')}
+        hint={t('开启后，若没有匹配的已打开标签，搜索框会高亮网页搜索动作')}
       >
         <Switch
           checked={settings.searchAutoFallbackToWeb ?? true}
@@ -242,8 +242,8 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
       </Field>
 
       <Field
-        label={t('settings.searchUseHistorySuggestions')}
-        hint={t('settings.searchUseHistorySuggestionsHint')}
+        label={t('使用浏览历史建议')}
+        hint={t('从浏览器历史中提取页面作为建议；首次使用会申请 history 权限')}
       >
         <Switch
           checked={settings.searchUseHistorySuggestions ?? true}
@@ -252,8 +252,8 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
       </Field>
 
       <Field
-        label={t('settings.searchUseHotSuggestions')}
-        hint={t('settings.searchUseHotSuggestionsHint')}
+        label={t('显示热门关键词建议')}
+        hint={t('在输入为空或本地结果不足时附加热词，可选择来源')}
       >
         <Switch
           checked={settings.searchUseHotSuggestions ?? true}
@@ -266,8 +266,8 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
         仅在总开关 searchUseHotSuggestions 打开时生效；无值时默认 local。
       */}
       <Field
-        label={t('settings.hotSuggestionSource')}
-        hint={t('settings.hotSuggestionSourceHint')}
+        label={t('热词来源')}
+        hint={t('选择热词从哪里来；本地来源完全离线，不产生任何网络请求')}
       >
         <Select<UserSettings['hotSuggestionSource']>
           value={settings.hotSuggestionSource ?? 'local'}
@@ -275,26 +275,26 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
           onChange={(v) => handleSetting({ hotSuggestionSource: v })}
           className="settings-control-full"
           options={[
-            { value: 'local', label: t('settings.hotSourceLocal') },
-            { value: 'preset', label: t('settings.hotSourcePreset') },
-            { value: 'trending', label: t('settings.hotSourceTrending') },
-            { value: 'off', label: t('settings.hotSourceOff') },
+            { value: 'local', label: t('本地（基于你的搜索历史）') },
+            { value: 'preset', label: t('预设词表（静态）') },
+            { value: 'trending', label: t('公共热榜（来自互联网）') },
+            { value: 'off', label: t('关闭') },
           ]}
         />
       </Field>
 
       {/* 清空最近搜索 —— 将应用命名空间下的搜索历史键直接置为空数组 */}
       <Field
-        label={t('settings.clearRecentSearches')}
+        label={t('清空最近搜索')}
         hint={t('settings.clearRecentSearchesHint')}
       >
         <Popconfirm
-          title={t('settings.clearRecentSearchesConfirm')}
+          title={t('确认清空全部最近搜索？')}
           onConfirm={() => {
             void (async () => {
               try {
                 await setData(STORAGE_KEYS.searchHistory, []);
-                feedback.success(t('settings.clearRecentSearchesDone'));
+                feedback.success(t('最近搜索已清空'));
               } catch (err) {
                 console.error('[SearchSettings] clearSearchHistory failed:', err);
               }
@@ -302,7 +302,7 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
           }}
         >
           <Button size="small" danger>
-            {t('settings.clearRecentSearches')}
+            {t('清空最近搜索')}
           </Button>
         </Popconfirm>
       </Field>

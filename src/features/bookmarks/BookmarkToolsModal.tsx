@@ -119,30 +119,30 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
     {
       key: "overview",
       icon: <LayoutDashboard size={ICON_SIZE.MEDIUM} />,
-      label: t("bookmark.tools.overview"),
+      label: t('总览'),
     },
     {
       key: "dedupe",
       icon: <Copy size={ICON_SIZE.MEDIUM} />,
-      label: t("bookmark.tools.dedupe"),
+      label: t('去重'),
       badge: dups?.length,
     },
     {
       key: "health",
       icon: <HeartPulse size={ICON_SIZE.MEDIUM} />,
-      label: t("bookmark.tools.health"),
+      label: t('失效检测'),
       badge: deadList.length,
     },
     {
       key: "organize",
       icon: <FolderTree size={ICON_SIZE.MEDIUM} />,
-      label: t("bookmark.tools.organize"),
+      label: t('智能整理'),
       badge: clusters?.length,
     },
     {
       key: "empty",
       icon: <FolderX size={ICON_SIZE.MEDIUM} />,
-      label: t("bookmark.tools.empty"),
+      label: t('空文件夹'),
       badge: emptyFolders?.length,
     },
   ];
@@ -152,9 +152,9 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
     <div className={styles["bm-tools__panel"]}>
       <div className={styles["bm-tools__panel-header"]}>
         <div>
-          <div className={styles["bm-tools__panel-title"]}>{t("bookmark.tools.organize")}</div>
+          <div className={styles["bm-tools__panel-title"]}>{t('智能整理')}</div>
           <div className={styles["bm-tools__panel-subtitle"]}>
-            {t("bookmark.tools.organizeHint")}
+            {t('按域名聚类书签。选择想整理的分类，执行后会在"其他书签"下新建同名文件夹，所有同域书签移过去。')}
           </div>
         </div>
         <div className={styles["bm-tools__panel-actions"]}>
@@ -166,7 +166,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
               void scanClusters();
             }}
           >
-            {t("bookmark.tools.scan")}
+            {t('开始扫描')}
           </Button>
           {clusters !== null && clusters.length > 0 && (
             <Button
@@ -177,7 +177,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
               }}
               disabled={selectedClusters.size === 0}
             >
-              {t("bookmark.tools.organizeApply", { count: selectedClusters.size })}
+              {t('整理选中的 {count} 个分类', { count: selectedClusters.size })}
             </Button>
           )}
         </div>
@@ -186,13 +186,13 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
       {clusters === null && (
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description={t("bookmark.tools.idle")}
+          description={t('点击"开始扫描"查看结果')}
           className={styles["bm-tools__empty"]}
         />
       )}
 
       {clusters !== null && clusters.length === 0 && (
-        <Alert type="success" showIcon message={t("bookmark.tools.organizeEmpty")} />
+        <Alert type="success" showIcon message={t('没有可整理的大簇（需同域名≥ 3 个书签）。')} />
       )}
 
       {clusters !== null && clusters.length > 0 && (
@@ -215,7 +215,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
                   <SiteIcon url={`https://${c.domain}`} />
                   <div className={styles["bm-tools__group-title"]}>{c.domain}</div>
                   <Tag color="blue" className={styles["bm-tools__tag--noborder"]}>
-                    {t("bookmark.tools.organizeCount", { count: c.items.length })}
+                    {t('{count} 个书签', { count: c.items.length })}
                   </Tag>
                   <Button
                     type="text"
@@ -225,7 +225,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
                       setExpandedCluster(expanded ? null : c.domain);
                     }}
                   >
-                    {expanded ? t("bookmark.tools.collapse") : t("bookmark.tools.expand")}
+                    {expanded ? t('收起') : t('展开')}
                   </Button>
                 </div>
                 {expanded && (
@@ -255,8 +255,8 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
     <div className={styles["bm-tools__panel"]}>
       <div className={styles["bm-tools__panel-header"]}>
         <div>
-          <div className={styles["bm-tools__panel-title"]}>{t("bookmark.tools.empty")}</div>
-          <div className={styles["bm-tools__panel-subtitle"]}>{t("bookmark.tools.emptyHint")}</div>
+          <div className={styles["bm-tools__panel-title"]}>{t('空文件夹')}</div>
+          <div className={styles["bm-tools__panel-subtitle"]}>{t('扫描完全不含书签的文件夹（包括嵌套都为空的子文件夹），一键清理。')}</div>
         </div>
         <div className={styles["bm-tools__panel-actions"]}>
           <Button
@@ -267,7 +267,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
               void scanEmptyFolders();
             }}
           >
-            {t("bookmark.tools.scan")}
+            {t('开始扫描')}
           </Button>
           {emptyFolders !== null && emptyFolders.length > 0 && (
             <Button
@@ -277,7 +277,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
                 void applyRemoveEmpty();
               }}
             >
-              {t("bookmark.tools.emptyRemoveAll", {
+              {t('清理全部（共 {count} 个）', {
                 count: emptyFolders.reduce((s, e) => s + e.size, 0),
               })}
             </Button>
@@ -288,13 +288,13 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
       {emptyFolders === null && (
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description={t("bookmark.tools.idle")}
+          description={t('点击"开始扫描"查看结果')}
           className={styles["bm-tools__empty"]}
         />
       )}
 
       {emptyFolders !== null && emptyFolders.length === 0 && (
-        <Alert type="success" showIcon message={t("bookmark.tools.emptyClean")} />
+        <Alert type="success" showIcon message={t('没有空文件夹，结构干净。')} />
       )}
 
       {emptyFolders !== null && emptyFolders.length > 0 && (
@@ -307,11 +307,11 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
                 <FolderX size={ICON_SIZE.MEDIUM} className="bm-tools__row-icon is-warning" />
                 <div className={styles["bm-tools__row-main"]}>
                   <div className={styles["bm-tools__row-title"]}>
-                    {e.folder.title || t("bookmark.tools.unnamed")}
+                    {e.folder.title || t('未命名文件夹')}
                   </div>
                   {e.size > 1 && (
                     <div className={styles["bm-tools__row-sub"]}>
-                      {t("bookmark.tools.emptyCascade", { count: e.size })}
+                      {t('嵌套连带删除 {count} 个空文件夹', { count: e.size })}
                     </div>
                   )}
                 </div>
@@ -379,10 +379,10 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
       title={
         <div className={styles["bm-tools__title"]}>
           <Hash size={ICON_SIZE.MEDIUM} />
-          <span>{t("bookmark.tools.title")}</span>
+          <span>{t('书签工具箱')}</span>
           {overview !== null && (
             <span className={styles["bm-tools__title-meta"]}>
-              {t("bookmark.tools.titleMeta", {
+              {t('共 {bookmarks} 个书签·{folders} 个文件夹', {
                 bookmarks: overview.total,
                 folders: overview.folders,
               })}

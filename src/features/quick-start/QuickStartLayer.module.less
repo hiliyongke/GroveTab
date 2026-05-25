@@ -540,45 +540,6 @@
   color: var(--ant-color-text-tertiary);
 }
 
-/* ── 操作菜单 ── */
-.speed-dial-menu {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 4px;
-  min-width: 140px;
-  background: var(--ant-color-bg-elevated);
-  border: 1px solid var(--ant-color-border-secondary);
-  border-radius: var(--ant-border-radius, 8px);
-  box-shadow: 0 4px 12px color-mix(in srgb, #000 12%, transparent);
-  padding: var(--app-space-1);
-  z-index: 1000;
-}
-
-.speed-dial-menu-item {
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-  gap: var(--app-space-2);
-  padding: var(--app-space-2) var(--app-space-3);
-  font-size: 13px;
-  color: var(--ant-color-text);
-  border-radius: var(--app-radius-xs);
-  cursor: pointer;
-  transition: background 120ms ease;
-}
-
-.speed-dial-menu-item:hover {
-  background: var(--ant-color-bg-text-hover);
-}
-
-.speed-dial-menu-item--danger {
-  color: var(--ant-color-error);
-}
-
-.speed-dial-menu-item--danger:hover {
-  background: var(--ant-color-error-bg);
-}
-
 /* ── 新增卡片 ── */
 .app-speed-dial-card--add {
 }

@@ -92,18 +92,18 @@ function KeybindingRecorder({
       <Button
         htmlType="button"
         onClick={() => setRecording(true)}
-        aria-label={recording ? t("shortcuts.recording") : t("shortcuts.resetHint")}
+        aria-label={recording ? t('按下快捷键…') : t('恢复默认')}
         aria-pressed={recording}
         className={`settings-keybinding-trigger${recording ? " is-recording" : ""}`}
       >
-        {recording ? t("shortcuts.recording") : formatDisplay(currentKeys)}
+        {recording ? t('按下快捷键…') : formatDisplay(currentKeys)}
       </Button>
       <Button
         type="text"
         size="small"
         icon={<RotateCcw size={ICON_SIZE.MEDIUM} />}
-        title={t("shortcuts.resetHint")}
-        aria-label={t("shortcuts.resetHint")}
+        title={t('恢复默认')}
+        aria-label={t('恢复默认')}
         onClick={onReset}
         className="settings-keybinding-reset"
       />
@@ -138,14 +138,14 @@ export function ShortcutsPanel() {
         for (const a of actions) {
           dupByAction.set(
             a,
-            t("shortcuts.conflict", { peers: actions.filter((x) => x !== a).join(", ") }),
+            t('与 {peers} 冲突', { peers: actions.filter((x) => x !== a).join(", ") }),
           );
         }
       }
       // 与全局快捷键冲突（全局快捷键在 Chrome 中始终生效，无法在页面内覆盖）
       if (key === "alt+k" || key === "alt+c" || key === "alt+shift+s") {
         for (const a of actions) {
-          dupByAction.set(a, t("shortcuts.globalConflict"));
+          dupByAction.set(a, t('与 Chrome 全局快捷键冲突，可能被全局快捷键拦截'));
         }
       }
     }
@@ -156,7 +156,7 @@ export function ShortcutsPanel() {
     (action: KeybindingAction, keyStr: string) => {
       const updated = { ...customKeybindings, [action]: keyStr };
       void updateSettings({ customKeybindings: updated });
-      message.success(t("shortcuts.saved"));
+      message.success(t('快捷键已保存'));
     },
     [customKeybindings, updateSettings, message, t],
   );
@@ -168,7 +168,7 @@ export function ShortcutsPanel() {
       void updateSettings({
         customKeybindings: Object.keys(updated).length > 0 ? updated : undefined,
       });
-      message.success(t("shortcuts.reset"));
+      message.success(t('已恢复默认快捷键'));
     },
     [customKeybindings, updateSettings, message, t],
   );
@@ -177,10 +177,10 @@ export function ShortcutsPanel() {
     <div className="settings-panel-stack">
       {/* Chrome 全局快捷键（只读） */}
       <section className="settings-section">
-        <Field label={t("settings.globalShortcuts")}>
+        <Field label={t('全局快捷键')}>
           <Alert
             type="info"
-            message={t("settings.shortcutsHint")}
+            message={t('在 chrome://extensions/shortcuts 中自定义快捷键')}
             showIcon
             className="settings-shortcuts-alert"
           />
@@ -199,7 +199,7 @@ export function ShortcutsPanel() {
 
       {/* 页面内快捷键（可自定义） */}
       <section className="settings-section">
-        <Field label={t("settings.localShortcuts")} hint={t("settings.localShortcutsHint")}>
+        <Field label={t('页面内快捷键')} hint={t('点击快捷键区域即可录制新按键组合；点击重置按钮恢复默认')}>
           <div className="settings-card-list">
             {resolved.map((item) => (
               <div key={item.action} className="settings-card-row">

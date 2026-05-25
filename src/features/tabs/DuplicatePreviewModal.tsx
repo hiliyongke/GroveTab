@@ -122,17 +122,17 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
     try {
       await closeMultipleTabs(toClose);
       await loadAllTabs();
-      message.success(t("dedup.mergedToast", { count: toClose.length }));
+      message.success(t('已合并 {count} 个重复标签', { count: toClose.length }));
       await pushActivity({
         id: nanoid(6),
         type: "dedup_merge",
         ts: Date.now(),
-        summary: t("activity.dedupMerged", { count: toClose.length }),
+        summary: t('已合并 {count} 个重复标签', { count: toClose.length }),
       });
       onClose();
     } catch (err) {
       console.warn("[DuplicatePreviewModal] merge failed", err);
-      message.error(t("dedup.mergedFailed"));
+      message.error(t('合并失败，部分标签可能仍然存在'));
     } finally {
       setBusy(false);
     }
@@ -151,7 +151,7 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
   return (
     <Modal
       open={open}
-      title={t("dedup.previewTitle")}
+      title={t('重复合并预览')}
       width={720}
       onCancel={onClose}
       centered
@@ -160,18 +160,18 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
         <Flex justify="space-between" align="center" className={styles["app-duplicate-footer"]}>
           <Space>
             <Button size="small" onClick={handleKeepAllOldest}>
-              {t("dedup.keepOldest")}
+              {t('全部勾选最旧')}
             </Button>
             <Button size="small" onClick={handleKeepNone}>
-              {t("dedup.keepNone")}
+              {t('全不勾选')}
             </Button>
           </Space>
           <Space>
             <Text type="secondary" className={styles["app-duplicate-summary"]}>
-              {t("dedup.mergeSummary", { close: closeCount, keep: keepCount })}
+              {t('将关闭 {close} 个 / 保留 {keep} 个', { close: closeCount, keep: keepCount })}
             </Text>
             <Button onClick={onClose} disabled={busy}>
-              {t("dedup.ignoreOnce")}
+              {t('忽略本次')}
             </Button>
             <Button
               type="primary"
@@ -179,7 +179,7 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
               loading={busy}
               disabled={closeCount === 0}
             >
-              {t("dedup.mergeNow")}
+              {t('合并')}
             </Button>
           </Space>
         </Flex>
@@ -187,7 +187,7 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
     >
       <Flex vertical className={styles["app-duplicate-groups"]}>
         {effectiveGroups.length === 0 ? (
-          <Text type="secondary">{t("dedup.emptyPreview")}</Text>
+          <Text type="secondary">{t('没有需要预览的重复组。')}</Text>
         ) : (
           effectiveGroups.map((group) => (
             <GroupSection
@@ -241,7 +241,7 @@ function GroupSection({ group, keeperId, onChange, token: _token, t, locale }: G
           {group.canonicalUrl}
         </Text>
         <Tag color="gold" className={styles["app-duplicate-group__tag"]}>
-          {t("dedup.willClose", { count: closeCount })}
+          {t('将关闭 {count}', { count: closeCount })}
         </Tag>
       </Flex>
       <Radio.Group
@@ -273,7 +273,7 @@ function GroupSection({ group, keeperId, onChange, token: _token, t, locale }: G
             </Flex>
             <Flex vertical className={styles["app-duplicate-option__aside"]}>
               <Text type="secondary" className={styles["app-duplicate-option__meta"]}>
-                {t("dedup.windowLabel", { id: tab.windowId })}
+                {t('窗口 {id}', { id: tab.windowId })}
               </Text>
               <Text type="secondary" className={styles["app-duplicate-option__meta"]}>
                 {formatOpenedAt(tab.lastAccessed, locale)}

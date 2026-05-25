@@ -70,11 +70,11 @@ export function FrequencyView() {
       <Flex className={styles["app-frequency-header"]} align="center" gap="small">
         <Flame size={ICON_SIZE.MEDIUM} className={styles["app-frequency-header-icon"]} />
         <Typography.Text className={styles["app-frequency-header-copy"]}>
-          {t("view.frequencyDesc", { count: sortedTabs.length })}
+          {t('最常使用的 {count} 个标签页', { count: sortedTabs.length })}
         </Typography.Text>
         {isFallback && (
           <Tag bordered={false} color="default" className={styles["app-frequency-rebuild-tag"]}>
-            {t("view.frequencyRebuilding")}
+            {t('数据重建中')}
           </Tag>
         )}
       </Flex>

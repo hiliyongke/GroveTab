@@ -410,7 +410,7 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1400);
     } catch {
-      setError(t("devtools.copyFailed"));
+      setError(t('复制失败'));
     }
   }, [output, t]);
 
@@ -753,13 +753,13 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
           <Input
             size="small"
             prefix={<Regex size={14} />}
-            placeholder={t("devtools.pattern")}
+            placeholder={t('正则')}
             value={regexPattern}
             onChange={(event) => setRegexPattern(event.target.value)}
           />
           <Input
             size="small"
-            placeholder={t("devtools.flags")}
+            placeholder={t('标志')}
             value={regexFlags}
             onChange={(event) => setRegexFlags(event.target.value.replace(/[^gimsuy]/g, ""))}
             maxLength={7}
@@ -781,7 +781,7 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
       {isDualInput ? (
         <div className={styles["devtools-two-col"]}>
           <div className={styles["devtools-field"]}>
-            <span className={styles["devtools-field-label"]}>{t("devtools.leftText")}</span>
+            <span className={styles["devtools-field-label"]}>{t('左侧文本')}</span>
             <Input.TextArea
               value={input}
               onChange={(event) => setInput(event.target.value)}
@@ -790,7 +790,7 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
             />
           </div>
           <div className={styles["devtools-field"]}>
-            <span className={styles["devtools-field-label"]}>{t("devtools.rightText")}</span>
+            <span className={styles["devtools-field-label"]}>{t('右侧文本')}</span>
             <Input.TextArea
               value={input2}
               onChange={(event) => setInput2(event.target.value)}
@@ -802,7 +802,7 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
       ) : (
         tool.id !== "random-gen" && (
           <div className={styles["devtools-field"]}>
-            <span className={styles["devtools-field-label"]}>{t("devtools.input")}</span>
+            <span className={styles["devtools-field-label"]}>{t('输入')}</span>
             <Input.TextArea
               value={input}
               onChange={(event) => setInput(event.target.value)}
@@ -823,7 +823,7 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
             }}
             loading={computing}
           >
-            {t("devtools.execute")}
+            {t('执行')}
           </Button>
         )}
         {isAutoExecute && (
@@ -831,20 +831,20 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
             color="blue"
             className={`${styles["devtools-tag"]} ${styles["devtools-tag--realtime"]}`}
           >
-            {t("devtools.realtime")}
+            {t('实时')}
           </Tag>
         )}
         {isBidirectional && (
           <Button onClick={handleSwap} icon={<ArrowRightLeft size={14} />}>
-            {t("devtools.swap")}
+            {t('交换')}
           </Button>
         )}
         <Button onClick={handleClear} icon={<Trash2 size={14} />}>
-          {t("devtools.clear")}
+          {t('清空')}
         </Button>
         {TOOL_EXAMPLES[tool.id] && (
           <Button onClick={handleFillExample} icon={<Terminal size={14} />}>
-            {t("devtools.example")}
+            {t('示例')}
           </Button>
         )}
         {tool.id === "random-gen" && (
@@ -855,7 +855,7 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
             }}
             loading={computing}
           >
-            {t("devtools.generate")}
+            {t('生成')}
           </Button>
         )}
       </div>
@@ -871,9 +871,9 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
         <div className={styles["devtools-output"]}>
           <div className={styles["devtools-output-head"]}>
             <Text type="secondary" className={styles["devtools-output-label"]}>
-              {t("devtools.output")}
+              {t('输出')}
             </Text>
-            <Tooltip title={copied ? t("devtools.copied") : t("devtools.copy")}>
+            <Tooltip title={copied ? t('已复制') : t('复制')}>
               <Button
                 size="small"
                 type="text"

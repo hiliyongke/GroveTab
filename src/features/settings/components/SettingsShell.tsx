@@ -43,7 +43,7 @@ export function SettingsShell({
       onClose={handleClose}
       destroyOnClose
       width={704}
-      title={t("settings.title")}
+      title={t('设置')}
       classNames={{
         mask: styles["settings-drawer__mask"],
         header: styles["settings-drawer__header"],
@@ -54,7 +54,7 @@ export function SettingsShell({
       rootClassName={styles["settings-drawer"]}
     >
       <div className={styles["settings-shell"]}>
-        <nav className={styles["settings-nav"]} aria-label={t("settings.title")}>
+        <nav className={styles["settings-nav"]} aria-label={t('设置')}>
           <Menu
             mode="inline"
             selectedKeys={[activeTab]}

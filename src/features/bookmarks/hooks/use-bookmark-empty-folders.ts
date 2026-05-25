@@ -23,7 +23,7 @@ export function useBookmarkEmptyFolders(
   const applyRemoveEmpty = useCallback(async () => {
     if (emptyFolders === null) return;
     const removed = await removeEmptyFolders(emptyFolders);
-    feedback.success(t("bookmark.tools.emptyDone", { count: removed }));
+    feedback.success(t('已清理 {count} 个空文件夹', { count: removed }));
     onMutated();
     setEmptyFolders(null);
     void refreshOverview();

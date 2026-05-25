@@ -51,7 +51,7 @@ export function BatchOperationsMenu({
   const menuItems: MenuProps["items"] = [
     {
       key: "restore",
-      label: t("archive.batchRestore"),
+      label: t('批量恢复'),
       icon: <Undo2 size={ICON_SIZE.SMALL} />,
       disabled: selectedCount === 0 || operating,
       onClick: () => {
@@ -59,9 +59,9 @@ export function BatchOperationsMenu({
           setOperating(true);
           try {
             await onBatchRestore(Array.from(selectedIds));
-            feedback.success(t("archive.batchRestoreSuccess", { count: selectedCount }));
+            feedback.success(t('已恢复 {count} 个会话', { count: selectedCount }));
           } catch (_error) {
-            feedback.error(t("archive.batchRestoreFailed"));
+            feedback.error(t('批量恢复失败'));
           } finally {
             setOperating(false);
           }
@@ -70,7 +70,7 @@ export function BatchOperationsMenu({
     },
     {
       key: "delete",
-      label: t("archive.batchDelete"),
+      label: t('批量删除'),
       icon: <Trash2 size={ICON_SIZE.SMALL} />,
       danger: true,
       disabled: selectedCount === 0 || operating,
@@ -79,9 +79,9 @@ export function BatchOperationsMenu({
           setOperating(true);
           try {
             await onBatchDelete(Array.from(selectedIds));
-            feedback.success(t("archive.batchDeleteSuccess", { count: selectedCount }));
+            feedback.success(t('已删除 {count} 个会话', { count: selectedCount }));
           } catch (_error) {
-            feedback.error(t("archive.batchDeleteFailed"));
+            feedback.error(t('批量删除失败'));
           } finally {
             setOperating(false);
           }
@@ -93,7 +93,7 @@ export function BatchOperationsMenu({
     },
     {
       key: "merge",
-      label: t("archive.merge"),
+      label: t('合并'),
       icon: <GitMerge size={ICON_SIZE.SMALL} />,
       disabled: selectedCount < 2 || operating,
       onClick: () => {
@@ -102,7 +102,7 @@ export function BatchOperationsMenu({
           try {
             await onMergeSessions(Array.from(selectedIds));
           } catch (_error) {
-            feedback.error(t("archive.mergeFailed"));
+            feedback.error(t('合并失败，请重试'));
           } finally {
             setOperating(false);
           }
@@ -111,7 +111,7 @@ export function BatchOperationsMenu({
     },
     {
       key: "export",
-      label: t("archive.batchExport"),
+      label: t('批量导出'),
       icon: <Download size={ICON_SIZE.SMALL} />,
       disabled: selectedCount === 0 || operating,
       onClick: () => {
@@ -119,9 +119,9 @@ export function BatchOperationsMenu({
           setOperating(true);
           try {
             await onExportSessions(Array.from(selectedIds));
-            feedback.success(t("archive.batchExportSuccess", { count: selectedCount }));
+            feedback.success(t('已导出 {count} 个会话', { count: selectedCount }));
           } catch (_error) {
-            feedback.error(t("archive.batchExportFailed"));
+            feedback.error(t('批量导出失败'));
           } finally {
             setOperating(false);
           }
@@ -134,7 +134,7 @@ export function BatchOperationsMenu({
     <Space size={8}>
       {/* 选择模式切换 */}
       {!selectable ? (
-        <Tooltip title={t("archive.selectMode")}>
+        <Tooltip title={t('多选')}>
           <Button
             size="small"
             type="text"
@@ -142,7 +142,7 @@ export function BatchOperationsMenu({
             onClick={() => onToggleSelectMode(true)}
             disabled={totalCount === 0}
           >
-            {t("archive.selectMode")}
+            {t('多选')}
           </Button>
         </Tooltip>
       ) : (
@@ -155,19 +155,19 @@ export function BatchOperationsMenu({
             classNames={{ indicator: "app-archive-batch-menu__badge-indicator" }}
           >
             <span className="app-archive-batch-menu__summary">
-              {t("archive.selectedCount", { count: selectedCount })}
+              {t('已选 {count}', { count: selectedCount })}
             </span>
           </Badge>
 
           {/* 批量操作下拉菜单 */}
           <Dropdown menu={{ items: menuItems }} placement="bottomRight" disabled={operating}>
             <Button size="small" type="primary" loading={operating} disabled={selectedCount === 0}>
-              {t("archive.batchOperations")}
+              {t('批量操作')}
             </Button>
           </Dropdown>
 
           {/* 取消选择 */}
-          <Tooltip title={t("archive.cancelSelect")}>
+          <Tooltip title={t('退出多选')}>
             <Button
               size="small"
               type="text"
@@ -181,16 +181,16 @@ export function BatchOperationsMenu({
       {/* 清空所有会话 */}
       {totalCount > 0 && (
         <Popconfirm
-          title={t("archive.clearAllConfirmTitle")}
-          description={t("archive.clearAllConfirmDesc", { count: totalCount })}
+          title={t('确认清空')}
+          description={t('将删除所有归档会话，此操作不可撤销。', { count: totalCount })}
           onConfirm={() => {
             void onClearAll();
           }}
-          okText={t("archive.clearAllConfirmOk")}
-          cancelText={t("archive.clearAllConfirmCancel")}
+          okText={t('清空')}
+          cancelText={t('取消')}
           okButtonProps={{ danger: true }}
         >
-          <Tooltip title={t("archive.clearAll")}>
+          <Tooltip title={t('清空全部')}>
             <Button size="small" type="text" danger icon={<Trash2 size={ICON_SIZE.DEFAULT} />} />
           </Tooltip>
         </Popconfirm>

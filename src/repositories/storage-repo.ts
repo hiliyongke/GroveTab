@@ -348,11 +348,15 @@ export async function getOgEntry(url: string): Promise<OgEntry | undefined> {
 export async function saveOgEntry(entry: OgEntry): Promise<void> {
   const index = (await getData<Record<string, OgEntry>>(STORAGE_KEYS.ogIndex)) ?? {};
   index[entry.url] = entry;
-  // LRU：超过 10000 条时淘汰最老 1000 条
+  // LRU：超过 10000 条时才触发一次批量清理，淘汰最老 1000 条
+  // 优化：仅在超限时排序，避免每次写入都 O(n log n) 全量排序
   const keys = Object.keys(index);
   if (keys.length > 10000) {
-    const sorted = keys.sort((a, b) => (index[a]?.fetchedAt ?? 0) - (index[b]?.fetchedAt ?? 0));
-    for (const k of sorted.slice(0, 1000)) delete index[k];
+    const oldest = keys
+      .map((k) => ({ k, t: index[k]?.fetchedAt ?? 0 }))
+      .sort((a, b) => a.t - b.t)
+      .slice(0, 1000);
+    for (const { k } of oldest) delete index[k];
   }
   await setData(STORAGE_KEYS.ogIndex, index);
 }

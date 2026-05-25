@@ -66,8 +66,8 @@ export function TabGroupView() {
         map.set(gid, {
           groupId: gid,
           title: gid === -1
-            ? t('tabGroup.ungrouped')
-            : (tab.groupTitle || t('tabGroup.unnamed')),
+            ? t('未分组')
+            : (tab.groupTitle || t('未命名分组')),
           color: gid === -1 ? 'grey' : (tab.groupColor || 'grey'),
           tabs: [],
         });
@@ -85,7 +85,7 @@ export function TabGroupView() {
   if (tabs.length === 0) {
     return (
       <Empty
-        description={t('tabs.empty')}
+        description={t('没有打开的标签页')}
         className={styles['app-tab-group-empty']}
       />
     );

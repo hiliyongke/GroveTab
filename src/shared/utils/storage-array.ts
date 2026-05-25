@@ -48,22 +48,3 @@ export function saveStringArray(key: string, value: string[]): void {
     // 静默处理存储失败（如配额超出）
   }
 }
-
-/**
- * 向 localStorage 中的字符串数组添加一项（去重）。
- *
- * @param key - localStorage 的键名
- * @param item - 要添加的字符串
- * @param maxLength - 最大长度（默认 50）
- * @returns 添加后的数组
- */
-export function appendToStringArray(key: string, item: string, maxLength = 50): string[] {
-  const existing = loadStringArray(key);
-  const filtered = existing.filter((i) => i !== item);
-  filtered.unshift(item);
-  if (filtered.length > maxLength) {
-    filtered.length = maxLength;
-  }
-  saveStringArray(key, filtered);
-  return filtered;
-}

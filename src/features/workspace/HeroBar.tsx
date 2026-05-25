@@ -95,7 +95,7 @@ export function HeroBar({
             className="app-hero-search"
             size="large"
             readOnly
-            placeholder={t("search.placeholder")}
+            placeholder={t('搜索标签页...')}
             prefix={
               <Search
                 size={ICON_SIZE.XXL}

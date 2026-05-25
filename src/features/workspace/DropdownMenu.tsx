@@ -21,7 +21,7 @@ export function DropdownMenu({
       label: (
         <span className="app-space-menu-item">
           <TrendingUp size={ICON_SIZE.SMALL} />
-          {t('pageMode.trending')}
+          {t('热榜')}
         </span>
       ),
       onClick: () => onPageModeChange('trending'),
@@ -31,7 +31,7 @@ export function DropdownMenu({
       label: (
         <span className="app-space-menu-item">
           <Wrench size={ICON_SIZE.SMALL} />
-          {t('pageMode.devtools')}
+          {t('开发工具栏')}
         </span>
       ),
       onClick: () => onPageModeChange('devtools'),

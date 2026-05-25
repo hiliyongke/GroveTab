@@ -52,8 +52,8 @@ export function UndoToast() {
   const mainLabel = isArchive
     ? activeToast.description
     : tabCount === 1
-    ? t('undo.closeOne')
-    : t('undo.close', { count: tabCount });
+    ? t('已关闭 1 个标签页')
+    : t('已关闭 {count} 个标签页', { count: tabCount });
 
   const handleUndo = () => {
     void undoRecord(activeToast.id);
@@ -81,7 +81,7 @@ export function UndoToast() {
             icon={<Archive size={ICON_SIZE.DEFAULT} />}
             onClick={() => openArchivePanel(activeToast.archivedSessionId)}
           >
-            {t('activity.viewArchive')}
+            {t('查看归档')}
           </Button>
         )}
 
@@ -92,7 +92,7 @@ export function UndoToast() {
           icon={<Undo2 size={ICON_SIZE.MEDIUM} />}
           onClick={handleUndo}
         >
-          {t('undo.action')}
+          {t('撤销')}
         </Button>
 
         <Button

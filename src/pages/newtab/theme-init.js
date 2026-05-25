@@ -4,7 +4,7 @@
  */
 (function () {
   var PREPAINT_KEY = 'app_prepaint_theme';
-  var LEGACY_PREPAINT_KEY = 'grovetab_prepaint_theme';
+  var LEGACY_PREPAINT_KEY = 'app_prepaint_theme';
 
   function getSystemTheme() {
     try {
@@ -21,7 +21,7 @@
 
   /**
    * 应用主题到 DOM
-   * ⚠️ 同步约定：以下背景色值必须与 background-colors.less 中的 --app-bg-layout 变量保持一致
+   * ⚠️ 同步约定：以下背景色值必须与 _variables.less 中的 --app-bg-layout 变量保持一致
    *   明色：var(--ant-color-bg-layout) → #f5f5f5
    *   暗色：var(--ant-color-bg-layout) → #141414
    */

@@ -26,7 +26,7 @@ export function useBookmarkDedupe(
   const applyDedupe = useCallback(async () => {
     if (dups === null) return;
     const removed = await mergeDuplicateBookmarks(dups);
-    feedback.success(t("bookmark.tools.dedupeDone", { count: removed }));
+    feedback.success(t('已合并 {count} 项重复书签', { count: removed }));
     onMutated();
     setDups(null);
     void refreshOverview();

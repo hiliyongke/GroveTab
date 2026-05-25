@@ -180,7 +180,7 @@ export function WindowView() {
 
     const { tab } = dragData;
     if (tab.incognito !== dropData.incognito) {
-      feedback.warning(t("windowDrag.incognitoBlocked"));
+      feedback.warning(t('无痕标签页不能拖入普通窗口'));
       return;
     }
 
@@ -223,13 +223,13 @@ export function WindowView() {
         void loadAllTabs({ silent: true });
       }
     } catch (err) {
-      feedback.error(t("windowDrag.failed"), err);
+      feedback.error(t('标签页移动失败'), err);
       void loadAllTabs({ silent: true });
     }
   };
 
   if (tabs.length === 0) {
-    return <Empty description={t("tabs.empty")} className={styles["app-window-empty"]} />;
+    return <Empty description={t('没有打开的标签页')} className={styles["app-window-empty"]} />;
   }
 
   return (

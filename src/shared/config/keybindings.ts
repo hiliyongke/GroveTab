@@ -9,6 +9,7 @@
 /** 快捷键动作标识符 */
 export type KeybindingAction =
   | 'search'
+  | 'openHistory'
   | 'exitSelection'
   | 'selectAll';
 
@@ -37,6 +38,12 @@ export const KEYBINDING_DEFS: KeybindingDef[] = [
     defaultKey: 'Mod+k',
     labelKey: 'shortcuts.localSearch',
     hintKey: 'shortcuts.localSearchHint',
+  },
+  {
+    action: 'openHistory',
+    defaultKey: 'Mod+Shift+h',
+    labelKey: 'shortcuts.openHistory',
+    hintKey: 'shortcuts.openHistoryHint',
   },
   {
     action: 'exitSelection',

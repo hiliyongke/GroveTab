@@ -31,22 +31,22 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
   const sections = [
     {
       key: "general",
-      title: t("settings.sectionGeneral"),
+      title: t('通用行为'),
       content: <GeneralSettings settings={settings} updateSettings={updateSettings} />,
     },
     {
       key: "view-layout",
-      title: t("settings.sectionViewLayout"),
+      title: t('视图与布局'),
       content: <ViewLayoutSettings settings={settings} updateSettings={updateSettings} />,
     },
     {
       key: "timeline",
-      title: t("settings.sectionTimeline"),
+      title: t('时间轴'),
       content: <TimelineSettings settings={settings} updateSettings={updateSettings} />,
     },
     {
       key: "search",
-      title: t("settings.sectionSearch"),
+      title: t('搜索'),
       content: <SearchSettings settings={settings} updateSettings={updateSettings} />,
     },
   ];

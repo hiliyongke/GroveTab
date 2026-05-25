@@ -20,9 +20,17 @@ import { build } from 'esbuild';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
+
+const pkg = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf-8'));
+// 从 package.json name 字段派生品牌名（如 my-tab → MyTab）
+const APP_NAME = (() => {
+  const raw = pkg.name; // e.g. "tab"
+  return raw.charAt(0).toUpperCase() + raw.slice(1).replace(/tab$/i, 'Tab');
+})();
 
 await build({
   entryPoints: [resolve(ROOT, 'src/sw/index.ts')],
@@ -67,7 +75,7 @@ const popupCssLinks = cssFiles
 const popupHtml = await readFile(popupHtmlFile, 'utf-8');
 const normalizedPopupHtml = popupHtml.replace(
   /<head>[\s\S]*?<\/head>/,
-  `<head><meta charset="UTF-8" /><title>GroveTab Popup</title>${popupCssLinks}</head>`,
+  `<head><meta charset="UTF-8" /><title>${APP_NAME} Popup</title>${popupCssLinks}</head>`,
 );
 await writeFile(popupHtmlFile, normalizedPopupHtml);
 console.log('[build-sw] popup HTML CSS links normalized');

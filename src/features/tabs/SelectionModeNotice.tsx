@@ -37,28 +37,28 @@ export function SelectionModeNotice({
     >
       <Flex className={styles["app-selection-notice__body"]}>
         <Flex vertical className={styles["app-selection-notice__summary"]}>
-          <Flex className={styles["app-selection-notice__title"]}>{t("selection.title")}</Flex>
+          <Flex className={styles["app-selection-notice__title"]}>{t('多选模式')}</Flex>
           <Flex className={styles["app-selection-notice__meta"]}>
             {selectedCount > 0
-              ? t("selection.summary", {
+              ? t('已选 {count} 个标签（{domains} 个域名 / {windows} 个窗口）', {
                   count: selectedCount,
                   domains: selectedDomainCount,
                   windows: selectedWindowCount,
                 })
-              : t("selection.empty")}
+              : t('未选择任何标签页，点击标签开始多选')}
           </Flex>
-          <Flex className={styles["app-selection-notice__hint"]}>{t("selection.hint")}</Flex>
+          <Flex className={styles["app-selection-notice__hint"]}>{t('按住 Ctrl/Cmd 点击标签进行多选；Shift 点击可选中范围')}</Flex>
         </Flex>
 
         <Space size={6} wrap>
           <Button size="small" onClick={onSelectAll}>
-            {t("selection.selectAll")}
+            {t('全选')}
           </Button>
           <Button size="small" onClick={onClearSelection} disabled={selectedCount === 0}>
-            {t("selection.clear")}
+            {t('取消选择')}
           </Button>
           <Button size="small" type="text" onClick={onExitSelectionMode}>
-            {t("selection.exit")}
+            {t('退出多选')}
           </Button>
         </Space>
       </Flex>

@@ -127,7 +127,7 @@ export const useUndoStore = create<UndoState>((set, get) => ({
         }
       }
     } catch (err) {
-      feedback.error(translate('undo.restoreFailed'), err);
+      feedback.error(translate('恢复失败，请重试'), err);
       // 失败也要把记录清掉，否则用户再点一次还是同一条 record，体验更差
     }
 

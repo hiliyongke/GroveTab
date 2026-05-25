@@ -143,7 +143,7 @@ export function DeveloperToolsPage() {
         label: (
           <span className={styles["devtools-sidebar-group-title"]}>
             <Star size={12} className={styles["devtools-sidebar-group-icon-fav"]} />
-            {t("devtools.favorites")}
+            {t('收藏')}
           </span>
         ),
         tools: favoriteTools,
@@ -180,7 +180,7 @@ export function DeveloperToolsPage() {
                 <Wrench size={ICON_SIZE.LARGE} />
               </span>
               <Title level={5} className={styles["devtools-title"]}>
-                {t("devtools.title")}
+                {t('开发工具栏')}
               </Title>
             </div>
           </div>
@@ -188,7 +188,7 @@ export function DeveloperToolsPage() {
           <div className={styles["devtools-sidebar-search"]}>
             <Input
               prefix={<Search size={14} />}
-              placeholder={t("devtools.searchPlaceholder")}
+              placeholder={t('搜索工具…')}
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               allowClear
@@ -230,7 +230,7 @@ export function DeveloperToolsPage() {
               ))
             ) : (
               <Empty
-                description={t("devtools.searchPlaceholder")}
+                description={t('搜索工具…')}
                 className={styles["devtools-empty-state"]}
               />
             )}
@@ -238,7 +238,7 @@ export function DeveloperToolsPage() {
 
           <div className={styles["devtools-sidebar-footer"]}>
             <Shield size={12} />
-            <span>{t("devtools.privacyNote")}</span>
+            <span>{t('所有工具均在本地处理，输入内容不会上传到任何服务器')}</span>
           </div>
         </aside>
 
@@ -252,7 +252,7 @@ export function DeveloperToolsPage() {
                 {toolTexts[selectedTool.id]?.title ?? selectedTool.titleKey}
               </Title>
               <Tag color="green" className={styles["devtools-tag-local"]}>
-                {t("devtools.localOnly")}
+                {t('本地处理')}
               </Tag>
               <span
                 className={`${styles["devtools-main-fav-btn"]} ${favorites.includes(selectedTool.id) ? styles["is-active"] : ""}`}

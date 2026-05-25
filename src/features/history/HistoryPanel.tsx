@@ -115,12 +115,12 @@ function useRelativeTime() {
     (ts: number): string => {
       const diff = Date.now() - ts;
       const m = Math.floor(diff / 60000);
-      if (m < 1) return t("history.justNow");
-      if (m < 60) return t("history.minutesAgo", { n: m });
+      if (m < 1) return t('刚刚');
+      if (m < 60) return t('{n} 分钟前', { n: m });
       const h = Math.floor(m / 60);
-      if (h < 24) return t("history.hoursAgo", { n: h });
+      if (h < 24) return t('{n} 小时前', { n: h });
       const d = Math.floor(h / 24);
-      return t("history.daysAgo", { n: d });
+      return t('{n} 天前', { n: d });
     },
     [t],
   );
@@ -190,12 +190,12 @@ function SnapshotDiffCard({
       <div className={styles["history-diff-card-head"]}>
         <div className={styles["history-diff-card-title"]}>
           <Camera size={ICON_SIZE.SMALL} />
-          <span>{t("history.diffTitle")}</span>
+          <span>{t('昨天 → 今天')}</span>
         </div>
-        <span className={styles["history-diff-card-subtitle"]}>{t("history.diffSubtitle")}</span>
+        <span className={styles["history-diff-card-subtitle"]}>{t('按站点汇总的使用变化')}</span>
       </div>
       <div className={styles["history-diff-card-total"]}>
-        {t("history.diffTotalDelta", {
+        {t('总标签 {today}（昨天 {yesterday}，{sign}{delta}）', {
           today: diff.today.totalTabs,
           yesterday: diff.yesterday.totalTabs,
           sign,
@@ -203,7 +203,7 @@ function SnapshotDiffCard({
         })}
       </div>
       {isFlat ? (
-        <div className={styles["history-diff-empty"]}>{t("history.diffEmpty")}</div>
+        <div className={styles["history-diff-empty"]}>{t('两天访问的站点完全一致 ✨')}</div>
       ) : (
         <div className={styles["history-diff-cols"]}>
           {addedShown.length > 0 && (
@@ -212,7 +212,7 @@ function SnapshotDiffCard({
                 className={`${styles["history-diff-col-title"]} ${styles["history-diff-col-title--added"]}`}
               >
                 <TrendingUp size={ICON_SIZE.TINY} />
-                <span>{t("history.diffAdded")}</span>
+                <span>{t('新开始访问')}</span>
               </div>
               <Space className={styles["history-diff-chips"]} size={[4, 4]} wrap>
                 {addedShown.map((item) => (
@@ -228,7 +228,7 @@ function SnapshotDiffCard({
                   <Tag
                     className={`${styles["history-diff-chip"]} ${styles["history-diff-chip--more"]}`}
                   >
-                    {t("history.diffMore", { n: addedExtra })}
+                    {t('还有 {n} 个', { n: addedExtra })}
                   </Tag>
                 )}
               </Space>
@@ -240,7 +240,7 @@ function SnapshotDiffCard({
                 className={`${styles["history-diff-col-title"]} ${styles["history-diff-col-title--removed"]}`}
               >
                 <TrendingDown size={ICON_SIZE.TINY} />
-                <span>{t("history.diffRemoved")}</span>
+                <span>{t('今天不再活跃')}</span>
               </div>
               <Space className={styles["history-diff-chips"]} size={[4, 4]} wrap>
                 {removedShown.map((item) => (
@@ -256,7 +256,7 @@ function SnapshotDiffCard({
                   <Tag
                     className={`${styles["history-diff-chip"]} ${styles["history-diff-chip--more"]}`}
                   >
-                    {t("history.diffMore", { n: removedExtra })}
+                    {t('还有 {n} 个', { n: removedExtra })}
                   </Tag>
                 )}
               </Space>
@@ -384,10 +384,10 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
       try {
         await createTab({ url: rec.url, active: true, pinned: rec.pinned });
         await deleteClosedTab(rec.id);
-        feedback.success(t("history.restored"));
+        feedback.success(t('已恢复 1 个标签页'));
         void refresh();
       } catch (err) {
-        feedback.error(t("history.restored"), err);
+        feedback.error(t('已恢复 1 个标签页'), err);
       }
     },
     [refresh, t],
@@ -406,7 +406,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
       // 找到 win.tabIds 对应的 closed tabs，依次重开
       const targets = closedTabs.filter((c) => win.tabIds.includes(c.id));
       if (targets.length === 0) {
-        feedback.warning(t("history.emptyClosed"));
+        feedback.warning(t('最近没有关闭过任何标签页'));
         return;
       }
       let success = 0;
@@ -420,7 +420,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
         }
       }
       await deleteClosedWindow(win.id);
-      feedback.success(t("history.restoredCount", { count: success }));
+      feedback.success(t('已恢复 {count} 个标签页', { count: success }));
       void refresh();
     },
     [closedTabs, refresh, t],
@@ -443,20 +443,20 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
   const handleUndoEvent = useCallback(
     async (e: HistoryEvent) => {
       if (!hasHistoryUndoHandler(e.type)) {
-        feedback.warning(t("history.undoNotSupported"));
+        feedback.warning(t('未注册撤销处理'));
         return;
       }
       try {
         const ok = await undoHistoryEvent(e);
         if (!ok) {
-          feedback.warning(t("history.undoFailed"));
+          feedback.warning(t('撤销失败'));
           return;
         }
         await markHistoryEventUndone(e.id);
-        feedback.success(t("history.undoSuccess"));
+        feedback.success(t('已撤销'));
         void refresh();
       } catch (err) {
-        feedback.error(t("history.undoFailed"), err);
+        feedback.error(t('撤销失败'), err);
       }
     },
     [refresh, t],
@@ -464,7 +464,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
 
   const handleClearAll = useCallback(async () => {
     await clearAllNativeHistory();
-    feedback.success(t("history.cleared"));
+    feedback.success(t('已清空历史记录'));
     void refresh();
   }, [refresh, t]);
 
@@ -473,14 +473,14 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
   const headerExtra = (
     <div className={styles["history-panel-header-extra"]}>
       <Popconfirm
-        title={t("history.clearAllConfirm")}
+        title={t('确定要清空全部历史记录吗？此操作不可撤销。')}
         onConfirm={() => {
           void handleClearAll();
         }}
         okButtonProps={{ danger: true }}
       >
         <Button size="small" type="text" danger icon={<Trash2 size={ICON_SIZE.SMALL} />}>
-          {t("history.clearAll")}
+          {t('清空全部')}
         </Button>
       </Popconfirm>
     </div>
@@ -533,7 +533,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
         </div>
       </div>
       <div className={styles["history-item-actions"]}>
-        <Tooltip title={t("history.restore")}>
+        <Tooltip title={t('恢复')}>
           <Button
             type="text"
             size="small"
@@ -543,7 +543,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
             }}
           />
         </Tooltip>
-        <Tooltip title={t("history.delete")}>
+        <Tooltip title={t('删除')}>
           <Button
             type="text"
             size="small"
@@ -562,7 +562,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
     <div key={`win-${win.id}`} className={styles["history-window-card"]}>
       <div className={styles["history-window-card-head"]}>
         <Layers size={ICON_SIZE.SMALL} />
-        <span>{t("history.restoreWindow", { count: win.tabCount })}</span>
+        <span>{t('恢复整个窗口（{count} 个标签）', { count: win.tabCount })}</span>
         <span className={styles["history-item-dot"]}>·</span>
         <span className={styles["history-window-card-time"]}>{relTime(win.ts)}</span>
       </div>
@@ -574,7 +574,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
           void handleRestoreWindow(win);
         }}
       >
-        {t("history.restore")}
+        {t('恢复')}
       </Button>
     </div>
   );
@@ -583,34 +583,34 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
   const eventDescription = (e: HistoryEvent): string => {
     switch (e.type) {
       case "tab_opened":
-        return t("history.eventTabOpened");
+        return t('打开了');
       case "tab_closed":
-        return t("history.eventTabClosed");
+        return t('关闭了');
       case "window_closed":
-        return t("history.eventWindowClosed", {
+        return t('关闭了一个窗口（{count} 个标签）', {
           count: typeof e.extra?.tabCount === "number" ? e.extra.tabCount : 0,
         });
       case "tab_pinned":
-        return t("history.eventTabPinned");
+        return t('置顶了');
       case "tab_tagged":
-        return t("history.eventTabTagged");
+        return t('加了标签');
       case "archive_create":
-        return t("history.eventArchiveCreate");
+        return t('创建了归档');
       case "archive_restore":
-        return t("history.eventArchiveRestore");
+        return t('恢复了归档');
       case "snapshot_create":
-        return t("history.eventSnapshotCreate");
+        return t('自动快照');
       case "search_query":
-        return t("history.eventSearchQuery", {
+        return t('搜索了 "{query}"', {
           query: typeof e.extra?.query === "string" ? e.extra.query : "",
         });
       case "search_engine_open":
-        return t("history.eventSearchEngineOpen", {
+        return t('通过 {engine} 搜索了 "{query}"', {
           query: typeof e.extra?.query === "string" ? e.extra.query : "",
           engine: typeof e.extra?.engine === "string" ? e.extra.engine : "",
         });
       case "workspace_switch":
-        return t("history.eventWorkspaceSwitch");
+        return t('切换了工作区');
       default:
         return "";
     }
@@ -638,7 +638,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
             )}
             {isUndone && (
               <Tag color="default" className={styles["history-item-tag"]}>
-                {t("history.undone")}
+                {t('已撤销')}
               </Tag>
             )}
           </div>
@@ -653,7 +653,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
           </div>
         </div>
         {e.undoable === true && !isUndone && (
-          <Tooltip title={t("history.undo")}>
+          <Tooltip title={t('撤销')}>
             <Button
               type="text"
               size="small"
@@ -664,7 +664,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
             />
           </Tooltip>
         )}
-        <Tooltip title={t("history.delete")}>
+        <Tooltip title={t('删除')}>
           <Button
             type="text"
             size="small"
@@ -687,8 +687,8 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
         <div className={styles["history-panel-title"]}>
           <History size={ICON_SIZE.MEDIUM} />
           <div>
-            <div>{t("history.title")}</div>
-            <div className={styles["history-panel-subtitle"]}>{t("history.subtitle")}</div>
+            <div>{t('历史记录')}</div>
+            <div className={styles["history-panel-subtitle"]}>{t('回看你在插件里做过什么，并一键恢复关闭的标签页')}</div>
           </div>
         </div>
       }
@@ -707,7 +707,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
           <Input
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder={t("history.searchPlaceholder")}
+            placeholder={t('搜索历史…')}
             prefix={<Search size={ICON_SIZE.SMALL} />}
             allowClear
             size="middle"
@@ -717,8 +717,8 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
             onChange={(k) => setActiveTab(k as "closed" | "timeline")}
             size="small"
             items={[
-              { key: "closed", label: t("history.tabRecentlyClosed") },
-              { key: "timeline", label: t("history.tabTimeline") },
+              { key: "closed", label: t('最近关闭') },
+              { key: "timeline", label: t('操作时间线') },
             ]}
           />
           {activeTab === "timeline" && (
@@ -727,10 +727,10 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
               value={filterMode}
               onChange={(v) => setFilterMode(v)}
               options={[
-                { value: "all", label: t("history.filterAll") },
-                { value: "tabs", label: t("history.filterTabs") },
-                { value: "search", label: t("history.filterSearch") },
-                { value: "archive", label: t("history.filterArchive") },
+                { value: "all", label: t('全部') },
+                { value: "tabs", label: t('标签操作') },
+                { value: "search", label: t('搜索行为') },
+                { value: "archive", label: t('归档/快照') },
               ]}
               block
             />
@@ -741,7 +741,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
           {snapshotDiff !== null && <SnapshotDiffCard diff={snapshotDiff} t={t} />}
           {activeTab === "closed" ? (
             filteredClosedTabs.length === 0 && closedWindows.length === 0 ? (
-              <Empty description={t("history.emptyClosed")} image={Empty.PRESENTED_IMAGE_SIMPLE} />
+              <Empty description={t('最近没有关闭过任何标签页')} image={Empty.PRESENTED_IMAGE_SIMPLE} />
             ) : (
               <>
                 {closedWindows.length > 0 && (
@@ -763,10 +763,10 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
             )
           ) : filteredEvents.length === 0 ? (
             <Empty
-              description={loading ? "..." : t("history.empty")}
+              description={loading ? "..." : t('还没有任何历史记录')}
               image={Empty.PRESENTED_IMAGE_SIMPLE}
             >
-              <div className={styles["history-empty-hint"]}>{t("history.emptyHint")}</div>
+              <div className={styles["history-empty-hint"]}>{t('正常使用一段时间后，这里会出现可恢复的最近关闭与操作流水')}</div>
             </Empty>
           ) : (
             TIME_GROUPS.map(({ id, labelKey }) => {
@@ -785,5 +785,3 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
     </Drawer>
   );
 }
-
-export default HistoryPanel;

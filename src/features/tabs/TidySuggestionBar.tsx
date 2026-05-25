@@ -89,7 +89,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
       const toClose = group.tabs.slice(1).map((tab) => tab.id);
       void runAction(
         () => closeMultipleTabs(toClose),
-        t("dedup.mergedOne", { count: toClose.length }),
+        t('已合并 {count} 个重复标签页', { count: toClose.length }),
       );
     },
     [closeMultipleTabs, runAction, t],
@@ -99,7 +99,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
     const toClose = dupGroups.flatMap((group) => group.tabs.slice(1).map((tab) => tab.id));
     void runAction(
       () => closeMultipleTabs(toClose),
-      t("dedup.mergedAll", { count: toClose.length }),
+      t('已合并全部 {count} 个重复标签页', { count: toClose.length }),
     );
   }, [closeMultipleTabs, dupGroups, runAction, t]);
 
@@ -111,7 +111,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
         const ids = items.map((item) => item.tab.id);
         await discardMultipleTabs(ids);
         await loadAllTabs({ silent: true });
-        message.success(t("tidy.discardedIdle", { count: ids.length }));
+        message.success(t('已休眠 {count} 个闲置标签', { count: ids.length }));
       } catch {
         // store 已 toast
       } finally {
@@ -150,7 +150,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
     await loadAllTabs({ silent: true });
     setBusy(false);
     if (mergedCount > 0 || discardedCount > 0) {
-      message.success(t("tidy.tidyAllDone", { merged: mergedCount, discarded: discardedCount }));
+      message.success(t('已合并 {merged} 个重复标签，休眠 {discarded} 个闲置标签', { merged: mergedCount, discarded: discardedCount }));
     }
   }, [busy, closeMultipleTabs, discardMultipleTabs, dupGroups, idleTabs, loadAllTabs, message, t]);
 
@@ -158,12 +158,12 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
 
   const summaryParts: string[] = [];
   if (totalDupTabs > 0) {
-    summaryParts.push(t("tidy.dupSummary", { count: dupGroups.length, tabs: totalDupTabs }));
+    summaryParts.push(t('{count} 组重复标签（{tabs} 个可合并）', { count: dupGroups.length, tabs: totalDupTabs }));
   }
   if (staleCount > 0) {
-    summaryParts.push(t("tidy.staleSummary", { count: staleCount }));
+    summaryParts.push(t('{count} 个长期未用标签', { count: staleCount }));
   } else if (idleOnlyCount > 0) {
-    summaryParts.push(t("tidy.idleSummary", { count: idleOnlyCount }));
+    summaryParts.push(t('{count} 个闲置标签', { count: idleOnlyCount }));
   }
 
   return (
@@ -189,9 +189,9 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                 }}
                 className={styles["tidy-suggestion__solid-action"]}
               >
-                {t("tidy.tidyAll")}
+                {t('一键整理')}
               </Button>
-              <Tooltip title={expanded ? t("tabs.collapse") : t("tabs.expand")}>
+              <Tooltip title={expanded ? t('折叠') : t('展开')}>
                 <Button
                   type="text"
                   size="small"
@@ -204,7 +204,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                   onClick={() => setExpanded(!expanded)}
                 />
               </Tooltip>
-              <Tooltip title={t("dedup.dismiss")}>
+              <Tooltip title={t('忽略')}>
                 <Button
                   type="text"
                   size="small"
@@ -237,7 +237,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                   className={`${styles["tidy-suggestion__section-icon"]} ${styles["tidy-suggestion__section-icon--dup"]}`}
                 />
                 <Typography.Text className={styles["tidy-suggestion__section-title"]}>
-                  {t("tidy.dupSection")}
+                  {t('重复标签')}
                 </Typography.Text>
                 <Button
                   size="small"
@@ -245,7 +245,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                   onClick={() => setPreviewOpen(true)}
                   className={styles["tidy-suggestion__link-action"]}
                 >
-                  {t("dedup.preview")}
+                  {t('预览')}
                 </Button>
                 <Button
                   size="small"
@@ -254,7 +254,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                   onClick={handleMergeAll}
                   className={styles["tidy-suggestion__link-action"]}
                 >
-                  {t("dedup.mergeAll")}
+                  {t('全部合并')}
                 </Button>
               </Flex>
               <List
@@ -272,7 +272,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                         loading={busy}
                         onClick={() => handleMergeGroup(group)}
                       >
-                        {t("dedup.merge")}
+                        {t('合并')}
                       </Button>,
                     ]}
                   >
@@ -304,7 +304,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                   className={`${styles["tidy-suggestion__section-icon"]} ${styles["tidy-suggestion__section-icon--idle"]}`}
                 />
                 <Typography.Text className={styles["tidy-suggestion__section-title"]}>
-                  {t("tidy.idleSection")}
+                  {t('闲置标签')}
                 </Typography.Text>
                 <Button
                   size="small"
@@ -315,7 +315,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                   }}
                   className={styles["tidy-suggestion__link-action"]}
                 >
-                  {t("tidy.discardAllIdle")}
+                  {t('全部休眠')}
                 </Button>
               </Flex>
               <List
@@ -332,7 +332,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                         color={item.level === "stale" ? "volcano" : "default"}
                         className={styles["tidy-suggestion__level-tag"]}
                       >
-                        {item.level === "stale" ? t("tidy.stale") : t("tidy.idle")}
+                        {item.level === "stale" ? t('长期未用') : t('闲置')}
                       </Tag>,
                     ]}
                   >
@@ -344,7 +344,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                       }
                       description={
                         <Typography.Text className={styles["tidy-suggestion__item-desc"]}>
-                          {t("tidy.lastAccessed", { time: formatIdleTime(item.hoursSinceAccess) })}
+                          {t('{time}未访问', { time: formatIdleTime(item.hoursSinceAccess) })}
                         </Typography.Text>
                       }
                     />

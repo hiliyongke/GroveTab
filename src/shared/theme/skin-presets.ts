@@ -76,7 +76,7 @@ interface CardStyleConfig {
 /** 单套皮肤完整配置 */
 export interface SkinPreset {
   id: SkinPresetId;
-  /** i18n key，如 skin.minimal → t('skin.minimal') */
+  /** i18n key，如 skin.minimal → t('极简毛玻璃') */
   labelKey: string;
   /** 皮肤描述 i18n key */
   descriptionKey: string;

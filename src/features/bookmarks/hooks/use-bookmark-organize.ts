@@ -30,7 +30,7 @@ export function useBookmarkOrganize(onMutated: () => void, refreshOverview: () =
       const fid = await organizeClusterIntoFolder(c, parentId);
       if (fid !== null) created += 1;
     }
-    feedback.success(t("bookmark.tools.organizeDone", { count: created }));
+    feedback.success(t('已创建 {count} 个分类文件夹', { count: created }));
     onMutated();
     setClusters(null);
     void refreshOverview();

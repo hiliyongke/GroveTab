@@ -110,7 +110,7 @@ export function AboutPanel() {
 
       <section className="settings-section">
         <div>
-          <div className={styles["about-panel__section-title"]}>{t("about.featuresTitle")}</div>
+          <div className={styles["about-panel__section-title"]}>{t('核心能力')}</div>
           <div className={styles["about-panel__feature-grid"]}>
             {FEATURES.map((feature) => {
               const Icon = feature.icon;
@@ -139,11 +139,11 @@ export function AboutPanel() {
         <div>
           <div className={styles["about-panel__tips-title"]}>
             <Sparkles size={ICON_SIZE.MEDIUM} />
-            {t("about.tipsTitle")}
+            {t('使用小贴士')}
           </div>
           <List
             className={styles["about-panel__tips-list"]}
-            dataSource={[t("about.tip1"), t("about.tip2"), t("about.tip3"), t("about.tip4")]}
+            dataSource={[t('⌘/Ctrl + K 呼出搜索；再按一次关闭；Cmd + 1..9 切换搜索引擎。'), t('在 "数据" Tab 可以一键恢复默认配置 / 重播引导 / 全量重置。'), t('右键点击标签页可以快速归档、固定或添加书签。'), t('在 "外观" Tab 可以尝试极客模式定制圆角、字号、主色等细节。')]}
             renderItem={(item) => (
               <List.Item style={{ padding: "4px 0", borderBottom: "none" }}>{item}</List.Item>
             )}
@@ -155,7 +155,7 @@ export function AboutPanel() {
 
       <section className="settings-section">
         <div className={styles["about-panel__support"]}>
-          <div className={styles["about-panel__support-title"]}>{t("about.supportTitle")}</div>
+          <div className={styles["about-panel__support-title"]}>{t('反馈与开源')}</div>
           <div className={styles["about-panel__support-actions"]}>
             <Button
               icon={<Code2 size={ICON_SIZE.MEDIUM} />}
@@ -167,7 +167,7 @@ export function AboutPanel() {
                 }
               }}
             >
-              {t("about.openSource")}
+              {t('开源地址')}
             </Button>
             <Button
               icon={<Mail size={ICON_SIZE.MEDIUM} />}
@@ -180,7 +180,7 @@ export function AboutPanel() {
                 }
               }}
             >
-              {t("about.feedback")}
+              {t('问题反馈')}
             </Button>
             <Button
               icon={<ExternalLink size={ICON_SIZE.MEDIUM} />}
@@ -193,11 +193,11 @@ export function AboutPanel() {
                 }
               }}
             >
-              {t("about.changelog")}
+              {t('更新日志')}
             </Button>
           </div>
           <div className={styles["about-panel__support-copy"]}>
-            {t("about.madeWith")} ❤️ · {t("about.privacyLocal")}
+            {t('Made with')} ❤️ · {t('100% 本地优先 · 零数据上传')}
           </div>
         </div>
       </section>

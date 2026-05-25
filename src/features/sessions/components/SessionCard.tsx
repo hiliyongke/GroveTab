@@ -14,8 +14,12 @@ import { useMemo } from "react";
 import { Undo2, Trash2, Pencil, Share2, ChevronDown, Sparkles } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { Button, Tooltip, Popconfirm, Checkbox, Tag, Image } from "antd";
-import { format, formatDistanceToNow } from "date-fns";
-import { zhCN, enUS } from "date-fns/locale";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/zh-cn";
+import "dayjs/locale/en";
+
+dayjs.extend(relativeTime);
 import type { ArchivedSession, ArchivedTab } from "@/shared/types";
 import { useT } from "@/shared/i18n";
 import styles from "../styles/archive.module.less";
@@ -61,7 +65,7 @@ export function SessionCard({
   onToggleExpand,
 }: SessionCardProps) {
   const { t } = useT();
-  const dateLocale = locale === "zh-CN" ? zhCN : enUS;
+  const dayjsLocale = locale === "zh-CN" ? "zh-cn" : "en";
 
   /** 命中 tabs 优先排前面的 preview faves */
   const previewFavicons = useMemo(() => {
@@ -109,12 +113,12 @@ export function SessionCard({
               className={styles["archive-card__checkbox"]}
               checked={selected === true}
               onChange={() => onToggleSelect?.(session.id)}
-              aria-label={t("archive.selectToggle")}
+              aria-label={t('选择此会话')}
             />
           )}
           {isAuto && (
             <Tag color="gold" className={styles["archive-card__auto-tag"]}>
-              <Sparkles size={ICON_SIZE.TINY} /> {t("archive.filter.autoSnapshots")}
+              <Sparkles size={ICON_SIZE.TINY} /> {t('自动快照')}
             </Tag>
           )}
         </div>
@@ -153,11 +157,11 @@ export function SessionCard({
       {/* 标题 + 描述 */}
       <div className={styles["archive-card__title"]}>{highlightText(session.name)}</div>
       <div className={styles["archive-card__meta"]}>
-        <span>{t("archive.tabCount", { count: session.tabCount })}</span>
+        <span>{t('{count} 个标签页', { count: session.tabCount })}</span>
         <span className={styles["archive-card__meta-dot"]}>·</span>
-        <Tooltip title={format(session.createdAt, "yyyy-MM-dd HH:mm", { locale: dateLocale })}>
+        <Tooltip title={dayjs(session.createdAt).locale(dayjsLocale).format("YYYY-MM-DD HH:mm")}>
           <span>
-            {formatDistanceToNow(session.createdAt, { addSuffix: true, locale: dateLocale })}
+            {dayjs(session.createdAt).locale(dayjsLocale).fromNow()}
           </span>
         </Tooltip>
       </div>
@@ -166,7 +170,7 @@ export function SessionCard({
       {expanded && (
         <div className={styles["archive-card__details"]}>
           {session.tabs.length === 0 ? (
-            <div className={styles["archive-card__details-empty"]}>{t("archive.empty")}</div>
+            <div className={styles["archive-card__details-empty"]}>{t('暂无归档会话')}</div>
           ) : (
             session.tabs.map((tab, idx) => {
               const isMatched = matchedTabIndexes?.has(idx) ?? false;
@@ -217,9 +221,9 @@ export function SessionCard({
           icon={<Undo2 size={ICON_SIZE.MEDIUM} />}
           onClick={() => onRestore(session.id)}
         >
-          {t("archive.restore")}
+          {t('恢复')}
         </Button>
-        <Tooltip title={expanded ? t("archive.collapse") : t("archive.expand")}>
+        <Tooltip title={expanded ? t('收起') : t('展开')}>
           <Button
             type="text"
             size="small"
@@ -233,7 +237,7 @@ export function SessionCard({
           />
         </Tooltip>
         <span className={styles["archive-card__actions-spacer"]} />
-        <Tooltip title={t("archive.rename")}>
+        <Tooltip title={t('重命名')}>
           <Button
             type="text"
             size="small"
@@ -242,7 +246,7 @@ export function SessionCard({
           />
         </Tooltip>
         {onShare && (
-          <Tooltip title={t("archive.share")}>
+          <Tooltip title={t('分享')}>
             <Button
               type="text"
               size="small"
@@ -252,14 +256,14 @@ export function SessionCard({
           </Tooltip>
         )}
         <Popconfirm
-          title={t("archive.deleteConfirmTitle")}
-          description={t("archive.deleteConfirmDesc")}
+          title={t('确认删除')}
+          description={t('删除后无法恢复，确定要删除此会话吗？')}
           onConfirm={() => onDelete(session.id)}
-          okText={t("archive.deleteConfirmOk")}
-          cancelText={t("archive.deleteConfirmCancel")}
+          okText={t('删除')}
+          cancelText={t('取消')}
           okButtonProps={{ danger: true }}
         >
-          <Tooltip title={t("archive.delete")}>
+          <Tooltip title={t('删除')}>
             <Button type="text" size="small" danger icon={<Trash2 size={ICON_SIZE.MEDIUM} />} />
           </Tooltip>
         </Popconfirm>

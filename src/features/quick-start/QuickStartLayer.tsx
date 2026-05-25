@@ -47,9 +47,9 @@ export function QuickStartLayer({ onOpenSettings }: QuickStartLayerProps) {
   return (
     <section className={styles["app-quick-start"]}>
       <div className={styles["quick-start-header"]}>
-        <span className={styles["quick-start-title"]}>{t("quickStart.title")}</span>
+        <span className={styles["quick-start-title"]}>{t('常用站点')}</span>
         <div className={styles["quick-start-actions"]}>
-          <Tooltip title={t("quickStart.addSite")} placement="top">
+          <Tooltip title={t('添加站点')} placement="top">
             <Button
               type="text"
               size="small"
@@ -59,7 +59,7 @@ export function QuickStartLayer({ onOpenSettings }: QuickStartLayerProps) {
             />
           </Tooltip>
           {onOpenSettings && (
-            <Tooltip title={t("settings.title")} placement="top">
+            <Tooltip title={t('设置')} placement="top">
               <Button
                 type="text"
                 size="small"

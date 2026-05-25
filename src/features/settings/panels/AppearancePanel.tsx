@@ -286,7 +286,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
     <div className={`settings-panel-stack ${styles["appearance-panel"]}`}>
       {/* ── 皮肤预设选择器 ── */}
       <section className="settings-section">
-        <Field label={t("skin.title")} hint={t("skin.hint")}>
+        <Field label={t('皮肤风格')} hint={t('选择一套视觉风格；不同皮肤改变圆角、阴影、色彩、毛玻璃等整体观感')}>
           <div className={styles["appearance-grid"]}>
             {SKIN_PRESETS.map((skin) => {
               const isSelected =
@@ -322,10 +322,10 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
 
       {/* ── 极客模式：单 token 精细化定制 ── */}
       <section className="settings-section">
-        <Field label={t("skin.customTitle")} hint={t("skin.customHint")}>
+        <Field label={t('精细定制（极客模式）')} hint={t('在当前皮肤基础上覆盖单项 token；关闭开关即可恢复预设')}>
           <div className={styles["appearance-toggle-group"]}>
             <div className={styles["appearance-toggle-row"]}>
-              <span className={styles["appearance-toggle-label"]}>{t("skin.customEnable")}</span>
+              <span className={styles["appearance-toggle-label"]}>{t('启用定制')}</span>
               <Switch
                 checked={settings.skinCustom !== undefined}
                 onChange={(on) => {
@@ -339,12 +339,12 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
             {settings.skinCustom !== undefined && (
               <div className={styles["appearance-custom-box"]}>
                 <SliderField
-                  label={t("skin.customRadius")}
+                  label={t('圆角')}
                   value={settings.skinCustom.borderRadius ?? skinCustomBase.borderRadius}
                   min={0}
                   max={24}
                   step={1}
-                  hint={t("skin.customRadiusHint")}
+                  hint={t('控制卡片/按钮/输入框基础圆角，0 为尖角')}
                   onChange={(value) => {
                     void updateSettings({
                       skinCustom: { ...settings.skinCustom, borderRadius: value },
@@ -353,12 +353,12 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                 />
 
                 <SliderField
-                  label={t("skin.customFontSize")}
+                  label={t('基础字号')}
                   value={settings.skinCustom.fontSize ?? skinCustomBase.fontSize}
                   min={12}
                   max={16}
                   step={1}
-                  hint={t("skin.customFontSizeHint")}
+                  hint={t('正文基础字号，影响整站文本密度')}
                   onChange={(value) => {
                     void updateSettings({
                       skinCustom: { ...settings.skinCustom, fontSize: value },
@@ -367,12 +367,12 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                 />
 
                 <SliderField
-                  label={t("skin.customControlHeight")}
+                  label={t('控件高度')}
                   value={settings.skinCustom.controlHeight ?? skinCustomBase.controlHeight}
                   min={24}
                   max={40}
                   step={2}
-                  hint={t("skin.customControlHeightHint")}
+                  hint={t('较矮更紧凑，较高更舒适')}
                   onChange={(value) => {
                     void updateSettings({
                       skinCustom: { ...settings.skinCustom, controlHeight: value },
@@ -381,12 +381,12 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                 />
 
                 <SliderField
-                  label={t("skin.customBorderWidth")}
+                  label={t('边框粗细')}
                   value={settings.skinCustom.borderWidth ?? skinCustomBase.borderWidth}
                   min={0.5}
                   max={2}
                   step={0.5}
-                  hint={t("skin.customBorderWidthHint")}
+                  hint={t('线条粗细，0.5 / 1 / 1.5 / 2px')}
                   onChange={(value) => {
                     void updateSettings({
                       skinCustom: { ...settings.skinCustom, borderWidth: value },
@@ -397,7 +397,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                 <div className={styles["appearance-slider-group"]}>
                   <div className={styles["appearance-toggle-row"]}>
                     <span className={styles["appearance-slider-label"]}>
-                      {t("skin.customColorPrimary")}
+                      {t('品牌主色')}
                     </span>
                     <ColorPicker
                       value={settings.skinCustom.colorPrimary ?? skinCustomBase.colorPrimary}
@@ -411,7 +411,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                     />
                   </div>
                   <div className={styles["appearance-slider-hint"]}>
-                    {t("skin.customColorPrimaryHint")}
+                    {t('覆盖皮肤预设的主色；用于按钮、链接、选中态')}
                   </div>
                 </div>
 
@@ -421,7 +421,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                     void updateSettings({ skinCustom: undefined });
                   }}
                 >
-                  {t("skin.customReset")}
+                  {t('恢复默认')}
                 </Button>
               </div>
             )}
@@ -431,7 +431,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
 
       {/* ── 语言选择 ── */}
       <section className="settings-section">
-        <Field label={t("settings.language")}>
+        <Field label={t('语言')}>
           <Select
             value={settings.language}
             onChange={(v) => {
@@ -449,11 +449,11 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
       {/* ══════════════════════════════════════════
           背景定制区
           ══════════════════════════════════════════ */}
-      <Divider className={styles["appearance-divider"]}>{t("bg.sectionTitle")}</Divider>
+      <Divider className={styles["appearance-divider"]}>{t('背景定制')}</Divider>
 
       {/* ── 渐变背景预设 ── */}
       <section className="settings-section">
-        <Field label={t("gradient.title")} hint={t("gradient.hint")}>
+        <Field label={t('背景主题')} hint={t('选择页面背景风格；带 ☀ 标记的适合浅色模式，带 🌙 标记的适合深色模式')}>
           <div className={styles["appearance-gradient-grid"]}>
             {GRADIENT_PRESETS.map((preset) => {
               const isSelected = settings.gradientPreset === preset.id;
@@ -509,7 +509,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
               <div className={styles["appearance-editor-header"]}>
                 <span className={styles["appearance-editor-title"]}>
                   <Pencil size={ICON_SIZE.MEDIUM} className={styles["appearance-editor-icon"]} />
-                  {t("gradient.customEditor")}
+                  {t('自定义渐变编辑器')}
                 </span>
                 <Button
                   size="small"
@@ -517,7 +517,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                   icon={showGradientEditor ? undefined : <Pencil size={ICON_SIZE.MEDIUM} />}
                   onClick={() => setShowGradientEditor(!showGradientEditor)}
                 >
-                  {showGradientEditor ? t("gradient.collapseEditor") : t("gradient.expandEditor")}
+                  {showGradientEditor ? t('收起') : t('编辑')}
                 </Button>
               </div>
 
@@ -529,7 +529,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
               {showGradientEditor && (
                 <>
                   <SliderField
-                    label={t("gradient.angle")}
+                    label={t('角度')}
                     value={customGradient.angle}
                     min={0}
                     max={360}
@@ -597,13 +597,13 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                         });
                       }}
                     >
-                      {t("gradient.addStop")}
+                      {t('添加色标')}
                     </Button>
                   )}
 
                   <div className={styles["appearance-editor-dark"]}>
                     <div className={styles["appearance-editor-note"]}>
-                      {t("gradient.darkModeConfig")}
+                      {t('深色模式配置')}
                     </div>
                     <div className={styles["appearance-editor-toggle-row"]}>
                       <Switch
@@ -622,7 +622,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                         }}
                       />
                       <span className={styles["appearance-mode-note"]}>
-                        {t("gradient.independentDark")}
+                        {t('独立深色模式配色')}
                       </span>
                     </div>
 
@@ -668,10 +668,10 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
 
       {/* ── 自定义背景图 ── */}
       <section className="settings-section">
-        <Field label={t("bg.imageTitle")} hint={t("bg.imageHint")}>
+        <Field label={t('自定义背景图')} hint={t('上传图片或粘贴 URL；背景图叠加在渐变之上，渐变作为 fallback')}>
           <Space direction="vertical" size={8} className="settings-control-full">
             <Input
-              placeholder={t("bg.imageUrlPlaceholder")}
+              placeholder={t('粘贴图片 URL（https://... 或 data:image/...）')}
               value={settings.backgroundImage?.url ?? ""}
               onChange={(e) => updateBgImage({ url: e.target.value })}
               suffix={
@@ -700,7 +700,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                 accept="image/*"
               >
                 <Button size="small" icon={<Image size={ICON_SIZE.MEDIUM} />}>
-                  {t("bg.uploadImage")}
+                  {t('上传图片')}
                 </Button>
               </Upload>
               {settings.backgroundImage?.url && (
@@ -710,9 +710,9 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                   onChange={(v) => updateBgImage({ fit: v })}
                   className={styles["appearance-fit-select"]}
                   options={[
-                    { value: "cover", label: t("bg.fitCover") },
-                    { value: "contain", label: t("bg.fitContain") },
-                    { value: "repeat", label: t("bg.fitRepeat") },
+                    { value: "cover", label: t('铺满裁切') },
+                    { value: "contain", label: t('完整显示') },
+                    { value: "repeat", label: t('平铺') },
                   ]}
                 />
               )}
@@ -723,7 +723,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
 
       {/* ── 背景遮罩层 ── */}
       <section className="settings-section">
-        <Field label={t("bg.overlayTitle")} hint={t("bg.overlayHint")}>
+        <Field label={t('背景遮罩')} hint={t('在背景上叠加半透明遮罩层，让文字在复杂背景上保持可读')}>
           <Space direction="vertical" size={8} className="settings-control-full">
             <div className={styles["appearance-editor-toggle-row"]}>
               <Switch
@@ -731,13 +731,13 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                 checked={settings.backgroundOverlay?.enabled ?? false}
                 onChange={(checked) => updateBgOverlay({ enabled: checked })}
               />
-              <span className={styles["appearance-mode-note"]}>{t("bg.overlayEnabled")}</span>
+              <span className={styles["appearance-mode-note"]}>{t('启用遮罩层')}</span>
             </div>
 
             {settings.backgroundOverlay?.enabled && (
               <>
                 <div className={styles["appearance-overlay-row"]}>
-                  <span className={styles["appearance-color-label"]}>{t("bg.overlayColor")}</span>
+                  <span className={styles["appearance-color-label"]}>{t('遮罩颜色')}</span>
                   <ColorPicker
                     size="small"
                     value={
@@ -762,7 +762,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                   />
                 </div>
                 <SliderField
-                  label={t("bg.overlayBlur")}
+                  label={t('背景模糊')}
                   value={Math.min(settings.backgroundOverlay?.blur ?? 0, 12)}
                   min={0}
                   max={12}
@@ -779,11 +779,11 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
       {/* ══════════════════════════════════════════
           布局定制区
           ══════════════════════════════════════════ */}
-      <Divider className={styles["appearance-divider"]}>{t("layout.sectionTitle")}</Divider>
+      <Divider className={styles["appearance-divider"]}>{t('布局定制')}</Divider>
 
       {/* ── 布局密度 ── */}
       <section className="settings-section">
-        <Field label={t("layout.density")} hint={t("layout.densityHint")}>
+        <Field label={t('布局密度')} hint={t('紧凑：信息密度优先 / 默认：舒适平衡 / 宽松：大屏友好')}>
           <Select
             value={settings.layoutDensity ?? "default"}
             onChange={(v) => {
@@ -791,9 +791,9 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
             }}
             className="settings-control-full"
             options={[
-              { value: "compact", label: t("layout.densityCompact") },
-              { value: "default", label: t("layout.densityDefault") },
-              { value: "comfortable", label: t("layout.densityComfortable") },
+              { value: "compact", label: t('紧凑') },
+              { value: "default", label: t('默认') },
+              { value: "comfortable", label: t('宽松') },
             ]}
           />
         </Field>
@@ -801,7 +801,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
 
       {/* ── 内容区最大宽度 ── */}
       <section className="settings-section">
-        <Field label={t("layout.maxWidth")} hint={t("layout.maxWidthHint")}>
+        <Field label={t('内容区最大宽度')} hint={t('控制卡片区域的最大宽度；设为 0 表示不限制')}>
           <div className={styles["appearance-width-row"]}>
             <InputNumber
               min={0}
@@ -814,7 +814,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
               className={styles["appearance-width-input"]}
             />
             <span className={styles["appearance-width-unit"]}>px</span>
-            <span className={styles["appearance-width-note"]}>({t("layout.maxWidthZero")})</span>
+            <span className={styles["appearance-width-note"]}>({t('0 = 不限制')})</span>
           </div>
         </Field>
       </section>
@@ -822,11 +822,11 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
       {/* ══════════════════════════════════════════
           动效与无障碍
           ══════════════════════════════════════════ */}
-      <Divider className={styles["appearance-divider"]}>{t("a11y.sectionTitle")}</Divider>
+      <Divider className={styles["appearance-divider"]}>{t('动效与无障碍')}</Divider>
 
       {/* ── 减弱动效 ── */}
       <section className="settings-section">
-        <Field label={t("a11y.reducedMotion")} hint={t("a11y.reducedMotionHint")}>
+        <Field label={t('减弱动效')} hint={t('关闭过渡动画和 hover 效果，减少视觉干扰；对前庭功能障碍用户友好')}>
           <Select
             value={settings.reducedMotion ?? "auto"}
             onChange={(v) => {
@@ -834,9 +834,9 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
             }}
             className="settings-control-full"
             options={[
-              { value: "auto", label: t("a11y.reducedMotionAuto") },
-              { value: "on", label: t("a11y.reducedMotionOn") },
-              { value: "off", label: t("a11y.reducedMotionOff") },
+              { value: "auto", label: t('跟随系统') },
+              { value: "on", label: t('始终减弱') },
+              { value: "off", label: t('始终启用') },
             ]}
           />
         </Field>
@@ -846,7 +846,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
           5 套预设：涟漪 / 星光 / 彩纸 / 樱花 / 关闭；
           按需 chunk，默认 'off' 不会拉取 canvas 代码。 */}
       <section className="settings-section">
-        <Field label={t("effects.clickEffect")} hint={t("effects.clickEffectHint")}>
+        <Field label={t('点击动效')} hint={t('点击页面时的粒子效果；默认关闭。启用 "减弱动效" 或系统偏好 reduce motion 时自动禁用。')}>
           <Select
             value={settings.clickEffect ?? "off"}
             onChange={(v) => {
@@ -854,11 +854,11 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
             }}
             className="settings-control-full"
             options={[
-              { value: "off", label: t("effects.clickOff") },
-              { value: "ripple", label: t("effects.clickRipple") },
-              { value: "sparkle", label: t("effects.clickSparkle") },
-              { value: "confetti", label: t("effects.clickConfetti") },
-              { value: "petal", label: t("effects.clickPetal") },
+              { value: "off", label: t('关闭') },
+              { value: "ripple", label: t('涟漪') },
+              { value: "sparkle", label: t('星光') },
+              { value: "confetti", label: t('彩纸') },
+              { value: "petal", label: t('樱花') },
             ]}
           />
         </Field>
@@ -868,7 +868,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
           支持 URL 或本地文件（IndexedDB 持久化）；速率可调；
           提示视频会占用更多内存/电量，用户按需开启。 */}
       <section className="settings-section">
-        <Field label={t("effects.videoBg")} hint={t("effects.videoBgHint")}>
+        <Field label={t('视频背景')} hint={t('使用视频作为桌面背景。视频会占用额外内存与电量，按需开启。')}>
           <Select
             value={settings.videoBackground?.type ?? "none"}
             onChange={(v) => {
@@ -890,9 +890,9 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
             }}
             className="settings-control-full"
             options={[
-              { value: "none", label: t("effects.videoBgNone") },
-              { value: "url", label: t("effects.videoBgUrl") },
-              { value: "file", label: t("effects.videoBgFile") },
+              { value: "none", label: t('不使用') },
+              { value: "url", label: t('远程 URL') },
+              { value: "file", label: t('本地文件') },
             ]}
           />
         </Field>
@@ -900,7 +900,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
 
       {settings.videoBackground?.type === "url" && (
         <section className="settings-section">
-          <Field label={t("effects.videoBgUrlLabel")} hint={t("effects.videoBgUrlHint")}>
+          <Field label={t('视频 URL')} hint={t('支持 MP4 / WebM；若跨域或 CSP 受限可能无法播放。')}>
             <Input
               placeholder="https://example.com/bg.mp4"
               value={settings.videoBackground.src ?? ""}
@@ -920,7 +920,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
 
       {settings.videoBackground?.type === "file" && (
         <section className="settings-section">
-          <Field label={t("effects.videoBgFileLabel")} hint={t("effects.videoBgFileHint")}>
+          <Field label={t('本地视频')} hint={t('保存在浏览器内部（IndexedDB），不会上传任何数据。')}>
             <Upload
               accept="video/mp4,video/webm"
               showUploadList={false}
@@ -955,8 +955,8 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
               <Button icon={<Image size={ICON_SIZE.MEDIUM} />}>
                 {settings.videoBackground.fileKey !== undefined &&
                 settings.videoBackground.fileKey !== ""
-                  ? t("effects.videoBgFileChange")
-                  : t("effects.videoBgFileSelect")}
+                  ? t('更换视频文件')
+                  : t('选择视频文件')}
               </Button>
             </Upload>
           </Field>
@@ -965,7 +965,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
 
       {settings.videoBackground?.type !== undefined && settings.videoBackground.type !== "none" && (
         <section className="settings-section">
-          <Field label={t("effects.videoBgRate")} hint={t("effects.videoBgRateHint")}>
+          <Field label={t('播放速率')} hint={t('慢速播放（0.5×）更适合做背景氛围。')}>
             <Slider
               min={0.25}
               max={2}
@@ -988,29 +988,29 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
       {/* ══════════════════════════════════════════
           UI 区域显隐
           ══════════════════════════════════════════ */}
-      <Divider className={styles["appearance-divider"]}>{t("uiVisibility.sectionTitle")}</Divider>
+      <Divider className={styles["appearance-divider"]}>{t('区域显隐')}</Divider>
 
       <section className="settings-section">
-        <Field label={t("uiVisibility.sectionTitle")} hint={t("uiVisibility.hint")}>
+        <Field label={t('区域显隐')} hint={t('隐藏不需要的区域，打造极简界面')}>
           <Space direction="vertical" size={10} className="settings-control-full">
             {(
               [
-                ["header", t("uiVisibility.header"), t("uiVisibility.headerHint")],
-                ["heroLogo", t("uiVisibility.heroLogo"), t("uiVisibility.heroLogoHint")],
-                ["heroTitle", t("uiVisibility.heroTitle"), t("uiVisibility.heroTitleHint")],
-                ["heroSlogan", t("uiVisibility.heroSlogan"), t("uiVisibility.heroSloganHint")],
-                ["heroSearch", t("uiVisibility.heroSearch"), t("uiVisibility.heroSearchHint")],
+                ["header", t('顶栏'), t('品牌标识 + 归档/主题/设置按钮')],
+                ["heroLogo", t('品牌 Logo'), t('Hero 区左侧树形图标')],
+                ["heroTitle", t('品牌标题'), t('Hero 区主标题，如"林栖标签页"')],
+                ["heroSlogan", t('品牌副标题'), t('Hero 区口号文案，如"你的标签页，找到归属"')],
+                ["heroSearch", t('搜索框'), t('居中大号搜索框 + 视图切换')],
                 [
                   "viewSwitcher",
-                  t("uiVisibility.viewSwitcher"),
-                  t("uiVisibility.viewSwitcherHint"),
+                  t('视图切换'),
+                  t('域名/时间轴/紧凑等视图标签行'),
                 ],
                 [
                   "tidySuggestion",
-                  t("uiVisibility.tidySuggestion"),
-                  t("uiVisibility.tidySuggestionHint"),
+                  t('整理建议'),
+                  t('重复标签/闲置标签智能整理建议栏'),
                 ],
-                ["quickStart", t("uiVisibility.quickStart"), t("uiVisibility.quickStartHint")],
+                ["quickStart", t('常用站点'), t('首页常用站点快捷入口')],
               ] as const
             ).map(([key, label, hint]) => (
               <VisibilityRow
@@ -1031,22 +1031,22 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                   onChange={(v) => void updateSettings({ speedDialGroupEnabled: v })}
                 />
                 <VisibilityRow
-                  label={t("quickStart.showAddButton")}
-                  hint={t("quickStart.showAddButtonHint")}
+                  label={t('显示添加按钮')}
+                  hint={t('隐藏后可通过设置页添加常用站点')}
                   checked={settings.showAddSiteButton ?? true}
                   onChange={(v) => void updateSettings({ showAddSiteButton: v })}
                 />
                 {settings.speedDialGroupEnabled && (
                   <VisibilityRow
-                    label={t("quickStart.groupCollapsible")}
-                    hint={t("quickStart.groupCollapsibleHint")}
+                    label={t('分组可折叠')}
+                    hint={t('点击组头折叠/展开分组内容')}
                     checked={settings.quickStartGroupCollapsible ?? true}
                     onChange={(v) => void updateSettings({ quickStartGroupCollapsible: v })}
                   />
                 )}
                 <VisibilityRow
-                  label={t("quickStart.fabAddButton")}
-                  hint={t("quickStart.fabAddButtonHint")}
+                  label={t('浮动添加按钮')}
+                  hint={t('在右下角显示悬浮的添加按钮，快捷键 Ctrl+Shift+A / ⌘+Shift+A')}
                   checked={settings.quickStartFabAddButton ?? false}
                   onChange={(v) => void updateSettings({ quickStartFabAddButton: v })}
                 />
@@ -1054,10 +1054,10 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                 <div className={styles["appearance-visibility-row"]}>
                   <div>
                     <div className={styles["appearance-visibility-title"]}>
-                      {t("quickStart.layoutMode")}
+                      {t('布局模式')}
                     </div>
                     <div className={styles["appearance-visibility-hint"]}>
-                      {t("quickStart.layoutModeHint")}
+                      {t('选择常用站点的布局方式')}
                     </div>
                   </div>
                   <Select
@@ -1066,8 +1066,8 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                     value={settings.quickStartLayoutMode ?? "grid"}
                     onChange={(v) => void updateSettings({ quickStartLayoutMode: v })}
                     options={[
-                      { value: "grid", label: t("quickStart.layoutModeGrid") },
-                      { value: "list", label: t("quickStart.layoutModeList") },
+                      { value: "grid", label: t('网格视图') },
+                      { value: "list", label: t('列表视图') },
                     ]}
                   />
                 </div>
@@ -1075,10 +1075,10 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                 <div className={styles["appearance-visibility-row"]}>
                   <div>
                     <div className={styles["appearance-visibility-title"]}>
-                      {t("quickStart.cardSize")}
+                      {t('卡片大小')}
                     </div>
                     <div className={styles["appearance-visibility-hint"]}>
-                      {t("quickStart.cardSizeHint")}
+                      {t('选择常用站点卡片的尺寸，自动模式会随屏幕宽度自适应')}
                     </div>
                   </div>
                   <Select
@@ -1087,21 +1087,21 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                     value={settings.quickStartCardSize ?? "md"}
                     onChange={(v) => void updateSettings({ quickStartCardSize: v })}
                     options={[
-                      { value: "sm", label: t("quickStart.cardSizeSm") },
-                      { value: "md", label: t("quickStart.cardSizeMd") },
-                      { value: "lg", label: t("quickStart.cardSizeLg") },
-                      { value: "auto", label: t("quickStart.cardSizeAuto") },
+                      { value: "sm", label: t('紧凑') },
+                      { value: "md", label: t('默认') },
+                      { value: "lg", label: t('宽松') },
+                      { value: "auto", label: t('自适应') },
                     ]}
                   />
                 </div>
                 {/* 卡片精确宽度：在预设档位基础上微调 */}
                 <SliderField
-                  label={t("quickStart.cardExactWidth")}
+                  label={t('卡片宽度微调')}
                   value={settings.quickStartCardExactWidth ?? 0}
                   min={80}
                   max={280}
                   step={8}
-                  hint={t("quickStart.cardExactWidthHint")}
+                  hint={t('在预设基础上连续微调卡片宽度（80–280px）；设为 0 则跟随预设')}
                   onChange={(value) => {
                     void updateSettings({
                       quickStartCardExactWidth: value === 0 ? undefined : value,
@@ -1110,13 +1110,13 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                 />
                 {/* 网格间距：控制卡片之间的水平与垂直间距 */}
                 <SliderField
-                  label={t("quickStart.gridGap")}
+                  label={t('网格间距')}
                   value={settings.quickStartGridGap ?? 12}
                   min={4}
                   max={24}
                   step={4}
                   suffix="px"
-                  hint={t("quickStart.gridGapHint")}
+                  hint={t('控制卡片之间的水平与垂直间距（4–24px），默认 12px')}
                   onChange={(value) => {
                     void updateSettings({ quickStartGridGap: value });
                   }}
@@ -1125,12 +1125,12 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                 {(settings.quickStartCardSize ?? "md") === "auto" && (
                   <>
                     <SliderField
-                      label={t("quickStart.autoLgThreshold")}
+                      label={t('auto→lg 阈值')}
                       value={settings.quickStartAutoThresholds?.lgThreshold ?? 6}
                       min={1}
                       max={30}
                       step={1}
-                      hint={t("quickStart.autoLgThresholdHint")}
+                      hint={t('站点数 ≤ 此值时使用 lg 卡片尺寸（默认 6）')}
                       onChange={(value) => {
                         void updateSettings({
                           quickStartAutoThresholds: {
@@ -1141,12 +1141,12 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                       }}
                     />
                     <SliderField
-                      label={t("quickStart.autoMdThreshold")}
+                      label={t('auto→md 阈值')}
                       value={settings.quickStartAutoThresholds?.mdThreshold ?? 14}
                       min={1}
                       max={50}
                       step={1}
-                      hint={t("quickStart.autoMdThresholdHint")}
+                      hint={t('站点数 ≤ 此值时使用 md 卡片尺寸（默认 14），超过则使用 sm')}
                       onChange={(value) => {
                         void updateSettings({
                           quickStartAutoThresholds: {
@@ -1162,10 +1162,10 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                 <div className={styles["appearance-visibility-row"]}>
                   <div>
                     <div className={styles["appearance-visibility-title"]}>
-                      {t("grid.cardSize")}
+                      {t('卡片大小')}
                     </div>
                     <div className={styles["appearance-visibility-hint"]}>
-                      {t("grid.cardSizeHint")}
+                      {t('选择网格视图卡片的尺寸，自动模式会根据标签页数量自适应')}
                     </div>
                   </div>
                   <Select
@@ -1174,10 +1174,10 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                     value={settings.gridCardSize ?? "md"}
                     onChange={(v) => void updateSettings({ gridCardSize: v })}
                     options={[
-                      { value: "sm", label: t("grid.cardSizeSm") },
-                      { value: "md", label: t("grid.cardSizeMd") },
-                      { value: "lg", label: t("grid.cardSizeLg") },
-                      { value: "auto", label: t("grid.cardSizeAuto") },
+                      { value: "sm", label: t('紧凑') },
+                      { value: "md", label: t('默认') },
+                      { value: "lg", label: t('宽松') },
+                      { value: "auto", label: t('自适应') },
                     ]}
                   />
                 </div>

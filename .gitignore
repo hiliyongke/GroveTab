@@ -14,6 +14,7 @@ dist/
 Thumbs.db
 
 # Build
+build/
 *.crx
 *.pem
 *.zip

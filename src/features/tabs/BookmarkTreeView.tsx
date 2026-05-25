@@ -38,7 +38,7 @@ import {
 } from "lucide-react";
 import type { BookmarkNode } from "@/chrome/bookmarks";
 import { getFaviconUrl } from "@/chrome";
-import { useAccent } from "@/shared/hooks/useAccent";
+import { useAccent } from "@/shared/hooks/use-accent";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
 import { Button, Divider, Flex, Typography } from "antd";
@@ -560,7 +560,7 @@ const PanZoom = forwardRef<
       <div
         className="app-bm-tree__panzoom-toolbar"
         role="toolbar"
-        aria-label={t("bookmark.tree.zoomToolbar")}
+        aria-label={t('画布缩放')}
         onMouseDown={(e) => e.stopPropagation()}
         onDoubleClick={(e) => e.stopPropagation()}
       >
@@ -574,8 +574,8 @@ const PanZoom = forwardRef<
             const rect = vp.getBoundingClientRect();
             zoomAt(scale - ZOOM_STEP, rect.width / 2, rect.height / 2);
           }}
-          title={t("bookmark.tree.zoomOut")}
-          aria-label={t("bookmark.tree.zoomOut")}
+          title={t('缩小')}
+          aria-label={t('缩小')}
           disabled={scale <= ZOOM_MIN + 1e-3}
         >
           <ZoomOut size={ICON_SIZE.SMALL} />
@@ -585,8 +585,8 @@ const PanZoom = forwardRef<
           size="small"
           className={styles["app-bm-tree__panzoom-percent"]}
           onClick={reset}
-          title={t("bookmark.tree.resetZoom")}
-          aria-label={t("bookmark.tree.resetZoom")}
+          title={t('重置缩放')}
+          aria-label={t('重置缩放')}
         >
           {zoomPercent}%
         </Button>
@@ -600,8 +600,8 @@ const PanZoom = forwardRef<
             const rect = vp.getBoundingClientRect();
             zoomAt(scale + ZOOM_STEP, rect.width / 2, rect.height / 2);
           }}
-          title={t("bookmark.tree.zoomIn")}
-          aria-label={t("bookmark.tree.zoomIn")}
+          title={t('放大')}
+          aria-label={t('放大')}
           disabled={scale >= ZOOM_MAX - 1e-3}
         >
           <ZoomIn size={ICON_SIZE.SMALL} />
@@ -616,8 +616,8 @@ const PanZoom = forwardRef<
           size="small"
           className={styles["app-bm-tree__panzoom-btn"]}
           onClick={fit}
-          title={t("bookmark.tree.fitScreen")}
-          aria-label={t("bookmark.tree.fitScreen")}
+          title={t('适应画布')}
+          aria-label={t('适应画布')}
         >
           <Maximize2 size={ICON_SIZE.SMALL} />
         </Button>
@@ -626,8 +626,8 @@ const PanZoom = forwardRef<
           size="small"
           className={styles["app-bm-tree__panzoom-btn"]}
           onClick={reset}
-          title={t("bookmark.tree.resetZoom")}
-          aria-label={t("bookmark.tree.resetZoom")}
+          title={t('重置缩放')}
+          aria-label={t('重置缩放')}
         >
           <RotateCcw size={ICON_SIZE.SMALL} />
         </Button>
@@ -680,8 +680,8 @@ export function BookmarkTreeView({
       type="text"
       className={`${styles["panzoom-btn"]}${showHost ? ` ${styles["panzoom-btn--active"]}` : ""}`}
       onClick={toggleShowHost}
-      title={showHost ? t("bookmark.tree.hideHost") : t("bookmark.tree.showHost")}
-      aria-label={showHost ? t("bookmark.tree.hideHost") : t("bookmark.tree.showHost")}
+      title={showHost ? t('隐藏域名') : t('显示域名')}
+      aria-label={showHost ? t('隐藏域名') : t('显示域名')}
       aria-pressed={showHost}
     >
       {showHost ? <Eye size={ICON_SIZE.SMALL} /> : <EyeOff size={ICON_SIZE.SMALL} />}

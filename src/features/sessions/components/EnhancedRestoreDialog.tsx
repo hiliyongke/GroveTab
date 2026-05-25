@@ -99,21 +99,21 @@ export function EnhancedRestoreDialog({
 
   const getStatusMessage = () => {
     if (!isRestoring && !outcome) {
-      return t('archive.restoreReady');
+      return t('准备恢复 {count} 个标签页');
     }
     
     if (isRestoring) {
-      return t('archive.restoreInProgress', { current: progress, total });
+      return t('正在恢复…', { current: progress, total });
     }
     
     if (outcome) {
       if (outcome.cancelled) {
-        return t('archive.restoreCancelled', { restored: outcome.restored });
+        return t('已取消恢复，成功恢复 {restored} 个标签', { restored: outcome.restored });
       }
       if (outcome.restored === total) {
-        return t('archive.restoreCompleted', { count: outcome.restored });
+        return t('恢复完成', { count: outcome.restored });
       }
-      return t('archive.restorePartial', { restored: outcome.restored, total });
+      return t('部分恢复成功，已恢复 {restored}/{total} 个标签', { restored: outcome.restored, total });
     }
     
     return '';
@@ -131,11 +131,11 @@ export function EnhancedRestoreDialog({
     <Modal
       open={open}
       rootClassName="app-archive-dialog app-archive-restore-dialog"
-      title={t('archive.restoreTitle')}
+      title={t('恢复会话')}
       onCancel={handleClose}
       footer={[
         <Button key="cancel" onClick={handleClose}>
-          {isRestoring ? t('archive.cancelRestore') : t('archive.close')}
+          {isRestoring ? t('取消恢复') : t('关闭归档面板')}
         </Button>,
         !isRestoring && !outcome && (
           <Button
@@ -144,7 +144,7 @@ export function EnhancedRestoreDialog({
             icon={<Play size={ICON_SIZE.MEDIUM} />}
             onClick={handleRestore}
           >
-            {t('archive.startRestore')}
+            {t('开始恢复')}
           </Button>
         ),
         isRestoring && (
@@ -154,7 +154,7 @@ export function EnhancedRestoreDialog({
             icon={<X size={ICON_SIZE.MEDIUM} />}
             onClick={handleCancelRestore}
           >
-            {t('archive.stopRestore')}
+            {t('停止')}
           </Button>
         ),
         outcome && !outcome.cancelled && outcome.restored > 0 && (
@@ -164,7 +164,7 @@ export function EnhancedRestoreDialog({
             icon={<CheckCircle size={ICON_SIZE.MEDIUM} />}
             onClick={handleClose}
           >
-            {t('archive.done')}
+            {t('完成')}
           </Button>
         ),
       ].filter(Boolean)}
@@ -175,23 +175,23 @@ export function EnhancedRestoreDialog({
         {/* 会话信息 */}
         <div className="app-archive-dialog__session-summary">
           <div className="app-archive-dialog__current-name">{sessionName}</div>
-          <div className="app-archive-dialog__label">{t('archive.tabCount', { count: tabCount })}</div>
+          <div className="app-archive-dialog__label">{t('{count} 个标签页', { count: tabCount })}</div>
         </div>
 
         {/* 恢复策略选择 */}
         {!isRestoring && !outcome && (
           <div className="app-archive-dialog__section">
-            <div className="app-archive-dialog__strategy-label">{t('archive.restoreStrategy')}</div>
+            <div className="app-archive-dialog__strategy-label">{t('恢复策略')}</div>
             <Radio.Group
               value={restoreStrategy}
               onChange={(e) => setRestoreStrategy(e.target.value)}
             >
               <Space direction="vertical">
                 <Radio value="new_window">
-                  {t('archive.strategyNewWindow')}
+                  {t('新窗口')}
                 </Radio>
                 <Radio value="current_window">
-                  {t('archive.strategyCurrentWindow')}
+                  {t('当前窗口')}
                 </Radio>
               </Space>
             </Radio.Group>
@@ -229,8 +229,8 @@ export function EnhancedRestoreDialog({
         {!isRestoring && !outcome && (
           <div className="app-archive-dialog__strategy-copy">
             {restoreStrategy === 'new_window' 
-              ? t('archive.strategyNewWindowDesc')
-              : t('archive.strategyCurrentWindowDesc')
+              ? t('在新的浏览器窗口中打开所有标签页')
+              : t('在当前窗口中打开所有标签页')
             }
           </div>
         )}

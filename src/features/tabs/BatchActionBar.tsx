@@ -82,7 +82,7 @@ export function BatchActionBar() {
         groupId: tab.groupId,
         windowId: tab.windowId,
         incognito: tab.incognito,
-        title: tab.groupTitle?.trim() ?? t("windowGroup.untitled"),
+        title: tab.groupTitle?.trim() ?? t('未命名分组'),
       }));
   }, [tabs, t]);
 
@@ -117,15 +117,15 @@ export function BatchActionBar() {
 
     try {
       const { archivedCount, closedCount } = await archiveSelectedTabs(ids);
-      feedback.success(translate("archive.archivedOk", { count: archivedCount }));
+      feedback.success(translate('已归档 {count} 个标签页', { count: archivedCount }));
       if (closedCount < archivedCount) {
         feedback.warning(
-          translate("archive.closeIncomplete", { count: archivedCount - closedCount }),
+          translate('已有 {count} 个标签页未能关闭，可稍后手动处理', { count: archivedCount - closedCount }),
         );
       }
       resetAfterBatch();
     } catch (err) {
-      feedback.error(translate("archive.archiveFailed"), err);
+      feedback.error(translate('归档失败，请重试'), err);
     }
   }, [selectedIds, resetAfterBatch]);
 
@@ -133,7 +133,7 @@ export function BatchActionBar() {
     if (selectedTabs.length === 0) return false;
     const incognito = selectedTabs[0]?.incognito ?? false;
     const sameProfile = selectedTabs.every((tab) => tab.incognito === incognito);
-    if (!sameProfile) feedback.warning(t("batch.profileMixed"));
+    if (!sameProfile) feedback.warning(t('隐身窗口与普通窗口的标签不能混合移动或分组'));
     return sameProfile;
   }, [selectedTabs, t]);
 
@@ -149,32 +149,32 @@ export function BatchActionBar() {
         await moveTabs(restIds.slice(i, i + BATCH), newWindow.id, -1);
       }
       swBroadcast("tab-moved", { windowId: newWindow.id, count: selectedTabs.length });
-      feedback.success(t("batch.movedToNewWindow", { count: selectedTabs.length }));
+      feedback.success(t('已将 {count} 个标签移到新窗口', { count: selectedTabs.length }));
       resetAfterBatch();
       void loadAllTabs({ silent: true });
     } catch (err) {
-      feedback.error(t("batch.moveFailed"), err);
+      feedback.error(t('移动所选标签失败，请重试'), err);
       void loadAllTabs({ silent: true });
     }
   }, [ensureSameProfile, selectedTabs, resetAfterBatch, loadAllTabs, t]);
 
   const handleCreateGroup = useCallback(() => {
     if (!ensureSameProfile()) return;
-    let groupName = t("windowGroup.newGroup");
+    let groupName = t('新分组');
     Modal.confirm({
-      title: t("batch.createGroup"),
+      title: t('新建分组'),
       content: (
         <Input
           autoFocus
           defaultValue={groupName}
-          placeholder={t("batch.groupNamePlaceholder")}
+          placeholder={t('输入分组名称')}
           onChange={(event) => {
             groupName = event.target.value;
           }}
         />
       ),
-      okText: t("batch.createGroup"),
-      cancelText: t("archive.cancel"),
+      okText: t('新建分组'),
+      cancelText: t('取消'),
       onOk: async () => {
         const [firstTab] = selectedTabs;
         if (!firstTab) return;
@@ -190,7 +190,7 @@ export function BatchActionBar() {
             ids,
             { windowId: firstTab.windowId },
             {
-              title: groupName.trim() || t("windowGroup.newGroup"),
+              title: groupName.trim() || t('新分组'),
               color: "blue",
             },
           );
@@ -199,11 +199,11 @@ export function BatchActionBar() {
             windowId: firstTab.windowId,
             count: ids.length,
           });
-          feedback.success(t("windowGroup.created"));
+          feedback.success(t('已创建分组'));
           resetAfterBatch();
           void loadAllTabs({ silent: true });
         } catch (err) {
-          feedback.error(t("batch.groupFailed"), err);
+          feedback.error(t('批量分组失败，请重试'), err);
           void loadAllTabs({ silent: true });
         }
       },
@@ -221,11 +221,11 @@ export function BatchActionBar() {
   const handleSplitSideBySide = useCallback(async () => {
     if (!ensureSameProfile()) return;
     if (selectedTabs.length < 2) {
-      feedback.warning(t("split.needTwo"));
+      feedback.warning(t('请至少选中 2 个标签页'));
       return;
     }
     if (selectedTabs.length > 4) {
-      feedback.warning(t("split.tooMany"));
+      feedback.warning(t('最多支持并排 4 个标签页'));
       return;
     }
     const layoutByCount: Record<number, SplitLayout> = {
@@ -238,11 +238,11 @@ export function BatchActionBar() {
       const ids = selectedTabs.map((tab) => tab.id);
       await splitTabsToLayout(ids, layout);
       swBroadcast("tab-moved", { count: selectedTabs.length });
-      feedback.success(t("split.openedSideBySide", { count: selectedTabs.length }));
+      feedback.success(t('已并排打开 {count} 个标签页', { count: selectedTabs.length }));
       resetAfterBatch();
       void loadAllTabs({ silent: true });
     } catch (err) {
-      feedback.error(t("split.failed"), err);
+      feedback.error(t('分屏操作失败，请重试'), err);
       void loadAllTabs({ silent: true });
     }
   }, [ensureSameProfile, selectedTabs, resetAfterBatch, loadAllTabs, t]);
@@ -251,7 +251,7 @@ export function BatchActionBar() {
     if (selectedTabs.length === 0 || existingGroups.length === 0) return;
     let targetGroupId = existingGroups[0]?.groupId;
     Modal.confirm({
-      title: t("batch.joinExistingGroup"),
+      title: t('加入现有分组'),
       content: (
         <Select
           autoFocus
@@ -259,20 +259,20 @@ export function BatchActionBar() {
           className={styles["app-batch-bar__select"]}
           options={existingGroups.map((group) => ({
             value: group.groupId,
-            label: `${group.title} · ${t("window.otherWithId", { id: group.windowId })}`,
+            label: `${group.title} · ${t('窗口 {id}', { id: group.windowId })}`,
           }))}
           onChange={(value) => {
             targetGroupId = value;
           }}
         />
       ),
-      okText: t("batch.joinExistingGroup"),
-      cancelText: t("archive.cancel"),
+      okText: t('加入现有分组'),
+      cancelText: t('取消'),
       onOk: async () => {
         const target = existingGroups.find((group) => group.groupId === targetGroupId);
         if (!target) return;
         if (!selectedTabs.every((tab) => tab.incognito === target.incognito)) {
-          feedback.warning(t("batch.profileMixed"));
+          feedback.warning(t('隐身窗口与普通窗口的标签不能混合移动或分组'));
           return;
         }
         try {
@@ -289,11 +289,11 @@ export function BatchActionBar() {
             windowId: target.windowId,
             count: ids.length,
           });
-          feedback.success(t("batch.joinedGroup"));
+          feedback.success(t('已加入目标分组'));
           resetAfterBatch();
           void loadAllTabs({ silent: true });
         } catch (err) {
-          feedback.error(t("batch.groupFailed"), err);
+          feedback.error(t('批量分组失败，请重试'), err);
           void loadAllTabs({ silent: true });
         }
       },
@@ -313,7 +313,7 @@ export function BatchActionBar() {
     <Flex
       className={`${styles["app-batch-bar"]} app-surface-elevated`}
       role="toolbar"
-      aria-label={t("selection.title")}
+      aria-label={t('多选模式')}
       style={batchBarStyle}
       align="center"
       justify="space-between"
@@ -324,7 +324,7 @@ export function BatchActionBar() {
           <Pointer size={ICON_SIZE.LARGE} className={styles["app-batch-bar__pointer"]} />
         </Badge>
         <Typography.Text className={styles["app-batch-bar__summary-copy"]}>
-          {t("selection.title")}
+          {t('多选模式')}
         </Typography.Text>
       </Flex>
 
@@ -332,14 +332,14 @@ export function BatchActionBar() {
 
       {/* 操作组：危险→中性→主要，视觉权重递增 */}
       <Flex align="center" gap="small" className={styles["app-batch-bar__actions"]}>
-        <Tooltip title={t("batch.close")} placement="top">
+        <Tooltip title={t('关闭所选')} placement="top">
           <Popconfirm
-            title={t("batch.closeConfirm", { count })}
+            title={t('确认关闭 {count} 个标签页？此操作可通过撤销恢复。', { count })}
             onConfirm={() => {
               void handleBatchClose();
             }}
-            okText={t("batch.close")}
-            cancelText={t("archive.cancel")}
+            okText={t('关闭所选')}
+            cancelText={t('取消')}
             okButtonProps={{ danger: true, size: "small" }}
             cancelButtonProps={{ size: "small" }}
           >
@@ -348,12 +348,12 @@ export function BatchActionBar() {
               danger
               icon={<X size={ICON_SIZE.DEFAULT} className={styles["app-batch-bar__danger-icon"]} />}
             >
-              {t("batch.close")}
+              {t('关闭所选')}
             </Button>
           </Popconfirm>
         </Tooltip>
 
-        <Tooltip title={t("batch.discard")} placement="top">
+        <Tooltip title={t('休眠所选')} placement="top">
           <Button
             size="small"
             icon={
@@ -363,11 +363,11 @@ export function BatchActionBar() {
               void handleBatchDiscard();
             }}
           >
-            {t("batch.discard")}
+            {t('休眠所选')}
           </Button>
         </Tooltip>
 
-        <Tooltip title={t("batch.moveToNewWindow")} placement="top">
+        <Tooltip title={t('移到新窗口')} placement="top">
           <Button
             size="small"
             icon={<ExternalLink size={ICON_SIZE.DEFAULT} />}
@@ -375,12 +375,12 @@ export function BatchActionBar() {
               void handleMoveToNewWindow();
             }}
           >
-            {t("batch.moveToNewWindow")}
+            {t('移到新窗口')}
           </Button>
         </Tooltip>
 
         {/* 并排打开（分屏）：仅在 2-4 选中时可用，自动选择布局 */}
-        <Tooltip title={t("split.openSideBySideTooltip")} placement="top">
+        <Tooltip title={t('把选中的标签页拆成独立窗口并排展示')} placement="top">
           <Button
             size="small"
             icon={<Columns2 size={ICON_SIZE.DEFAULT} />}
@@ -389,44 +389,44 @@ export function BatchActionBar() {
               void handleSplitSideBySide();
             }}
           >
-            {t("split.openSideBySide")}
+            {t('并排打开')}
           </Button>
         </Tooltip>
 
-        <Tooltip title={t("batch.createGroup")} placement="top">
+        <Tooltip title={t('新建分组')} placement="top">
           <Button
             size="small"
             icon={<FolderPlus size={ICON_SIZE.DEFAULT} />}
             onClick={handleCreateGroup}
           >
-            {t("batch.createGroup")}
+            {t('新建分组')}
           </Button>
         </Tooltip>
 
-        <Tooltip title={t("batch.joinExistingGroup")} placement="top">
+        <Tooltip title={t('加入现有分组')} placement="top">
           <Button
             size="small"
             icon={<FolderInput size={ICON_SIZE.DEFAULT} />}
             disabled={existingGroups.length === 0}
             onClick={handleJoinExistingGroup}
           >
-            {t("batch.joinExistingGroup")}
+            {t('加入现有分组')}
           </Button>
         </Tooltip>
 
-        <Tooltip title={t("batch.archive")} placement="top">
+        <Tooltip title={t('归档所选')} placement="top">
           <Popconfirm
-            title={t("batch.archiveConfirm", { count })}
+            title={t('确认归档 {count} 个标签页？归档后可在归档面板中恢复。', { count })}
             onConfirm={() => {
               void handleBatchArchive();
             }}
-            okText={t("batch.archive")}
-            cancelText={t("archive.cancel")}
+            okText={t('归档所选')}
+            cancelText={t('取消')}
             okButtonProps={{ size: "small" }}
             cancelButtonProps={{ size: "small" }}
           >
             <Button size="small" type="primary" icon={<Save size={ICON_SIZE.DEFAULT} />}>
-              {t("batch.archive")}
+              {t('归档所选')}
             </Button>
           </Popconfirm>
         </Tooltip>
@@ -434,7 +434,7 @@ export function BatchActionBar() {
 
       <Flex className={styles["app-divider-soft"]} aria-hidden />
 
-      <Tooltip title={t("batch.cancel")} placement="top">
+      <Tooltip title={t('取消选择')} placement="top">
         <Button
           size="small"
           type="text"
@@ -442,7 +442,7 @@ export function BatchActionBar() {
             <XCircle size={ICON_SIZE.DEFAULT} className={styles["app-batch-bar__danger-icon"]} />
           }
           onClick={exitSelectionMode}
-          aria-label={t("batch.cancel")}
+          aria-label={t('取消选择')}
         />
       </Tooltip>
     </Flex>

@@ -84,7 +84,7 @@ export function AppWorkspace({
       <div className="app-page-loading">
         <div className="app-page-loading-inner">
           <Spin />
-          <Typography.Text type="secondary">{t('tabs.loading')}</Typography.Text>
+          <Typography.Text type="secondary">{t('加载标签页中...')}</Typography.Text>
         </div>
       </div>
     );
@@ -102,7 +102,7 @@ export function AppWorkspace({
           description={initError}
           action={
             <Button size="small" onClick={onRetryInit}>
-              {t('context.retry')}
+              {t('重试')}
             </Button>
           }
           className="app-init-alert"
@@ -123,22 +123,22 @@ export function AppWorkspace({
           <div className="app-workspace-loading">
             <div className="app-workspace-loading-inner">
               <Spin />
-              <Typography.Text type="secondary">{t('tabs.loading')}</Typography.Text>
+              <Typography.Text type="secondary">{t('加载标签页中...')}</Typography.Text>
             </div>
           </div>
         ) : tabCount === 0 && viewMode !== 'archive' ? (
           <FeatureEmptyState
-            title={t('tabs.empty')}
-            description={t('tabs.emptyHint')}
+            title={t('没有打开的标签页')}
+            description={t('打开一些网页，然后回到这里查看')}
             icon={<Globe size={ICON_SIZE.XXLARGE} />}
             hints={[
-              t('tabs.emptyHint1'),
-              t('tabs.emptyHint2'),
-              t('tabs.emptyHint3'),
+              t('按 Cmd+K 可快速搜索标签'),
+              t('点击归档按钮可保存当前所有标签'),
+              t('支持 9 种不同视图浏览方式'),
             ]}
             actions={[
-              { text: t('dashboard.openArchives'), onClick: onOpenArchive, type: 'primary' },
-              { text: t('header.settings'), onClick: onOpenSettings, type: 'default' },
+              { text: t('查看归档列表'), onClick: onOpenArchive, type: 'primary' },
+              { text: t('设置'), onClick: onOpenSettings, type: 'default' },
             ]}
           />
         ) : ViewComponent !== null ? (

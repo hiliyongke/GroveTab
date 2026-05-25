@@ -4,14 +4,9 @@
   padding-bottom: 0;
 }
 
-.search-box-mask {
-  backdrop-filter: blur(var(--app-overlay-blur, 12px));
-  background: var(--app-overlay-mask-bg, rgba(15, 23, 42, 0.24));
-}
 
 .search-box-modal .ant-modal-content,
-.search-box-modal .ant-modal-body,
-.search-box-body {
+.search-box-modal .ant-modal-body {
   padding: 0;
 }
 
@@ -20,13 +15,7 @@
   background: transparent;
 }
 
-.search-box-container {
-  overflow: hidden;
-  border: 1px solid var(--app-hairline, var(--ant-color-border-secondary));
-  box-shadow: var(--app-shadow-floating, var(--app-shadow-card));
-  backdrop-filter: var(--app-glass-filter);
-  -webkit-backdrop-filter: var(--app-glass-filter);
-}
+
 
 /* ─── 搜索弹窗外壳 ─── */
 .search-box-shell {
@@ -216,14 +205,7 @@
   color: var(--searchbox-engine-color, var(--searchbox-accent));
 }
 
-/* 兼容旧 DOM，防止增量构建缓存期间样式断层 */
-.search-box-engine {
-  min-width: 132px;
-}
 
-.search-box-engine-icon {
-  color: var(--searchbox-text-secondary);
-}
 
 /* ─── 搜索结果列表区域 ─── */
 .search-box-list-area {
@@ -245,10 +227,7 @@
   opacity: 0.4;
 }
 
-.search-box-empty-text {
-  font-size: 13px;
-  color: var(--searchbox-text-secondary);
-}
+
 
 /* ─── 搜索结果分组 ─── */
 .search-box-section {
@@ -382,12 +361,7 @@
   text-overflow: ellipsis;
 }
 
-.search-box-highlight {
-  padding: 0;
-  font-weight: 700;
-  color: var(--searchbox-accent);
-  background: transparent;
-}
+
 
 .search-box-enter-icon {
   flex-shrink: 0;

@@ -440,6 +440,11 @@ html[data-texture-noise] body::before {
   /* ── Apple 皮肤 CSS 变量 */
   --app-apple-blue: #0071e3;
 
+  /* ── Apple 背景色覆盖 ── */
+  --app-card-bg: transparent;
+  --app-card-hover-bg: color-mix(in srgb, #000 3%, transparent);
+  --app-list-item-hover-bg: color-mix(in srgb, #000 3%, transparent);
+
   /* ── Apple 卡片：无边框 ── */
   & .app-card {
     border: none;
@@ -484,6 +489,10 @@ html[data-texture-noise] body::before {
   [data-theme="dark"] {
     /* ── Apple 暗色模式覆盖 */
     --app-apple-blue: #2997ff;
+
+    /* ── Apple 暗色背景色覆盖 ── */
+    --app-card-hover-bg: color-mix(in srgb, #fff 5%, transparent);
+    --app-list-item-hover-bg: color-mix(in srgb, #fff 5%, transparent);
 
     & .app-card-interactive:hover,
     & .app-card-interactive:focus-within {
@@ -654,6 +663,11 @@ html[data-texture-noise] body::before {
   /* ── Fluent 皮肤 CSS 变量 */
   --app-fluent-blue: #0078d4;
   --app-fluent-blue-hover: #2b88d8;
+
+  /* ── Fluent 背景色覆盖 ── */
+  --app-card-bg: var(--app-bg-glass);
+  --app-card-hover-bg: color-mix(in srgb, var(--app-color-primary, #0078d4) 4%, transparent);
+  --app-list-item-hover-bg: color-mix(in srgb, var(--app-color-primary, #0078d4) 4%, transparent);
 
   /* ── Fluent Header：Acrylic 半透明底栏 ── */
   & .app-header-shell {
@@ -846,6 +860,10 @@ html[data-texture-noise] body::before {
   [data-theme="dark"] {
     /* ── Fluent 暗色模式 CSS 变量 */
     --app-fluent-blue-dark: #60cdff;
+
+    /* ── Fluent 暗色背景色覆盖 ── */
+    --app-card-hover-bg: color-mix(in srgb, var(--app-color-primary, #0078d4) 8%, transparent);
+    --app-list-item-hover-bg: color-mix(in srgb, var(--app-color-primary, #0078d4) 8%, transparent);
 
     & .app-card-interactive:hover,
     & .app-card-interactive:focus-within {

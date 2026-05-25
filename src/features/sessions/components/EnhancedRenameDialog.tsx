@@ -53,8 +53,8 @@ export function EnhancedRenameDialog({
     
     // 基于标签页数量生成建议
     if (tabCount > 0) {
-      generated.push(`${t('archive.session')} ${tabCount} ${t('archive.tabs')}`);
-      generated.push(`${tabCount} ${t('archive.tabs')} ${t('archive.from')} ${new Date().toLocaleDateString()}`);
+      generated.push(`${t('会话')} ${tabCount} ${t('标签页')}`);
+      generated.push(`${tabCount} ${t('标签页')} ${t('来自')} ${new Date().toLocaleDateString()}`);
     }
     
     // 基于域名生成建议
@@ -70,9 +70,9 @@ export function EnhancedRenameDialog({
       .slice(0, 3);
     
     if (domains.length > 0) {
-      generated.push(`${domains.join(', ')} ${t('archive.tabs')}`);
+      generated.push(`${domains.join(', ')} ${t('标签页')}`);
       if (domains.length === 1) {
-        generated.push(`${domains[0]} ${t('archive.session')}`);
+        generated.push(`${domains[0]} ${t('会话')}`);
       }
     }
     
@@ -138,11 +138,11 @@ export function EnhancedRenameDialog({
     <Modal
       open={open}
       rootClassName="app-archive-dialog app-archive-rename-dialog"
-      title={t('archive.renameTitle')}
+      title={t('重命名会话')}
       onCancel={onClose}
       footer={[
         <Button key="cancel" onClick={onClose}>
-          {t('archive.cancel')}
+          {t('取消')}
         </Button>,
         <Button
           key="rename"
@@ -152,7 +152,7 @@ export function EnhancedRenameDialog({
           disabled={!isNameValid}
           onClick={handleRename}
         >
-          {t('archive.renameConfirm')}
+          {t('确认重命名')}
         </Button>,
       ]}
       width={520}
@@ -161,17 +161,17 @@ export function EnhancedRenameDialog({
       <Space direction="vertical" size="middle" className="app-archive-dialog__stack">
         {/* 当前名称 */}
         <div className="app-archive-dialog__section">
-          <div className="app-archive-dialog__label">{t('archive.currentName')}</div>
+          <div className="app-archive-dialog__label">{t('当前名称')}</div>
           <div className="app-archive-dialog__current-name">{currentName}</div>
         </div>
 
         {/* 新名称输入 */}
         <div className="app-archive-dialog__section">
-          <div className="app-archive-dialog__strategy-label">{t('archive.newName')}</div>
+          <div className="app-archive-dialog__strategy-label">{t('新名称')}</div>
           <Input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            placeholder={t('archive.renamePlaceholder')}
+            placeholder={t('输入新名称')}
             maxLength={100}
             showCount
             autoFocus
@@ -182,7 +182,7 @@ export function EnhancedRenameDialog({
         {/* 命名建议 */}
         {suggestions.length > 0 && (
           <div className="app-archive-dialog__section">
-            <div className="app-archive-dialog__label">{t('archive.nameSuggestions')}</div>
+            <div className="app-archive-dialog__label">{t('推荐名称')}</div>
             <Space wrap>
               {suggestions.map((suggestion, index) => (
                 <Tag
@@ -203,7 +203,7 @@ export function EnhancedRenameDialog({
           <div className="app-archive-dialog__section">
             <div className="app-archive-dialog__label app-archive-dialog__tag-label">
               <TagIcon size={12} />
-              {t('archive.tags')}
+              {t('标签')}
             </div>
             <Space wrap>
               {tags.map((tag, index) => (
@@ -223,7 +223,7 @@ export function EnhancedRenameDialog({
         {/* 验证提示 */}
         {!isNameValid && (
           <Alert
-            message={t('archive.nameValidation')}
+            message={t('名称格式不正确')}
             type="warning"
             showIcon
             icon={<AlertCircle size={ICON_SIZE.SMALL} />}
@@ -234,9 +234,9 @@ export function EnhancedRenameDialog({
         {/* 预览 */}
         <Divider className="app-archive-dialog__divider" />
         <div className="app-archive-dialog__section">
-          <div className="app-archive-dialog__label">{t('archive.preview')}</div>
+          <div className="app-archive-dialog__label">{t('预览')}</div>
           <div className={`app-archive-dialog__preview-value${isNameValid ? '' : ' is-invalid'}`}>
-            {newName.trim() || t('archive.noName')}
+            {newName.trim() || t('名称不能为空')}
           </div>
         </div>
       </Space>

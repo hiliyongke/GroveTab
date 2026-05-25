@@ -13,7 +13,7 @@ import { GripVertical, Pencil, Trash2, ExternalLink, MoreHorizontal } from "luci
 import { cssVars } from "@/shared/utils/css-vars";
 import { useT } from "@/shared/i18n";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
-import { useAccent } from "@/shared/hooks/useAccent";
+import { useAccent } from "@/shared/hooks/use-accent";
 import type { SpeedDialSite } from "@/shared/types";
 import { getHostname, getInitial, getFaviconUrl } from "./utils/siteUtils";
 import type { DraggableAttributes } from "@dnd-kit/core";
@@ -68,7 +68,7 @@ export function SiteCard({
     {
       key: "open",
       icon: <ExternalLink size={ICON_SIZE.SMALL} />,
-      label: t("quickStart.openInNewTab"),
+      label: t('新标签页打开'),
       onClick: ({ domEvent }) => {
         domEvent.stopPropagation();
         openSite();
@@ -77,7 +77,7 @@ export function SiteCard({
     {
       key: "edit",
       icon: <Pencil size={ICON_SIZE.SMALL} />,
-      label: t("quickStart.edit"),
+      label: t('编辑'),
       onClick: ({ domEvent }) => {
         domEvent.stopPropagation();
         onEdit(site);
@@ -86,7 +86,7 @@ export function SiteCard({
     {
       key: "delete",
       icon: <Trash2 size={ICON_SIZE.SMALL} />,
-      label: t("quickStart.remove"),
+      label: t('删除'),
       danger: true,
       onClick: ({ domEvent }) => {
         domEvent.stopPropagation();

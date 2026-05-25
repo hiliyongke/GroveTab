@@ -31,7 +31,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: ".nvmrc"
+          node-version-file: ".node-version"
           cache: "pnpm"
 
       - name: Install dependencies
@@ -54,7 +54,6 @@ jobs:
 
       - name: Knip (dead code detection)
         run: pnpm run knip
-        continue-on-error: true
 
   commitlint:
     name: Commit Lint
@@ -73,7 +72,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: ".nvmrc"
+          node-version-file: ".node-version"
           cache: "pnpm"
 
       - name: Install dependencies
@@ -81,7 +80,7 @@ jobs:
 
       - name: Validate PR commit messages
         run: |
-          npx commitlint \
+          pnpm exec commitlint \
             --from ${{ github.event.pull_request.base.sha }} \
             --to ${{ github.event.pull_request.head.sha }} \
             --verbose

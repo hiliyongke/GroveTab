@@ -27,7 +27,7 @@ export type GradientPresetId =
 
 export interface GradientPreset {
   id: GradientPresetId;
-  /** i18n key 前缀，如 gradient.slate → t('gradient.slate') */
+  /** i18n key 前缀，如 gradient.slate → t('石板灰') */
   labelKey: string;
   /** 浅色模式渐变 CSS */
   light: string;

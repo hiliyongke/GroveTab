@@ -164,27 +164,27 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
 
         <div className={styles["onboarding-card__headline"]}>
           <Typography.Title level={2} className={styles["onboarding-card__title"]}>
-            {t("onboarding.title", { brand: BRAND.name })}
+            {t('欢迎使用 {brand}', { brand: BRAND.name })}
             <Zap size={ICON_SIZE.MEDIUM} className={styles["onboarding-card__title-icon"]} />
           </Typography.Title>
           <Text type="secondary" className={styles["onboarding-card__subtitle"]}>
-            {t("onboarding.desc")}
+            {t('你的标签页，找到归属。')}
           </Text>
         </div>
 
         <Paragraph type="secondary" className={styles["onboarding-card__detail"]}>
-          {t("onboarding.detail")}
+          {t('每次打开新标签页，所有已打开的网页都会在这里展示。按域名分组、搜索、归档—3 秒内找到任何标签。')}
         </Paragraph>
 
         <Space wrap size={12} className={styles["onboarding-card__features"]}>
           <Tag color="processing" className={styles["onboarding-card__feature-tag"]}>
-            {t("onboarding.featureSearch")}
+            {t('全局搜索')}
           </Tag>
           <Tag color="gold" className={styles["onboarding-card__feature-tag"]}>
-            {t("onboarding.featureArchive")}
+            {t('一键归档')}
           </Tag>
           <Tag color="green" className={styles["onboarding-card__feature-tag"]}>
-            {t("onboarding.featureGroup")}
+            {t('智能分组')}
           </Tag>
         </Space>
 
@@ -199,7 +199,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
             icon={<Globe size={ICON_SIZE.LARGE} />}
             autoFocus
           >
-            {t("onboarding.modeTakeover")}
+            {t('接管新标签页（推荐）')}
           </Button>
           <Button
             size="large"
@@ -209,11 +209,11 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
             }}
             icon={<Package size={ICON_SIZE.LARGE} />}
           >
-            {t("onboarding.modePopupOnly")}
+            {t('仅工具栏按钮')}
           </Button>
         </div>
         <Text type="secondary" className={styles["onboarding-card__hint"]}>
-          {t("onboarding.modeHint")}
+          {t('随时可在 设置 → 行为 中切换模式')}
         </Text>
       </Card>
     );
@@ -239,7 +239,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
               {t(step.titleKey)}
             </Text>
             <Text type="secondary" className={styles["onboarding-tour__step-index"]}>
-              {t("onboarding.tour.stepIndex", { current: stepIndex + 1, total: TOUR_STEPS.length })}
+              {t('第 {current} / {total} 步', { current: stepIndex + 1, total: TOUR_STEPS.length })}
             </Text>
           </div>
         </div>
@@ -257,7 +257,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
             onClick={() => void finish()}
             className={styles["onboarding-tour__skip"]}
           >
-            {t("onboarding.tour.skip")}
+            {t('跳过引导')}
           </Button>
           <Space size={8}>
             <Button
@@ -266,7 +266,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
               disabled={stepIndex === 0}
               onClick={() => setStepIndex((idx) => Math.max(idx - 1, 0))}
             >
-              {t("onboarding.tour.prev")}
+              {t('上一步')}
             </Button>
             {stepIndex < TOUR_STEPS.length - 1 ? (
               <Button
@@ -276,7 +276,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
                 icon={<ArrowRight size={ICON_SIZE.DEFAULT} />}
                 onClick={() => setStepIndex((idx) => Math.min(idx + 1, TOUR_STEPS.length - 1))}
               >
-                {t("onboarding.tour.next")}
+                {t('下一步')}
               </Button>
             ) : (
               <Button
@@ -285,7 +285,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
                 icon={<Check size={ICON_SIZE.DEFAULT} />}
                 onClick={() => void finish()}
               >
-                {t("onboarding.tour.done")}
+                {t('开始使用')}
               </Button>
             )}
           </Space>

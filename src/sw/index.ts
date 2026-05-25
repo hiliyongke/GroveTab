@@ -13,6 +13,7 @@
 import { swBroadcast } from "@/shared/utils/sw-broadcast";
 import { archiveCurrentWindowTabs } from "./archive-handler";
 import { createAutoSnapshot } from "@/services/archive";
+import { todayStr } from "@/shared/utils/date";
 import {
   getSettings,
   getStats,
@@ -199,8 +200,6 @@ function urlKey(url: string): string {
     return url;
   }
 }
-
-import { todayStr } from "@/shared/utils/date";
 
 function incrementStats(url: string): void {
   if (url === "") return;

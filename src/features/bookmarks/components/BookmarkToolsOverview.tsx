@@ -55,25 +55,25 @@ export function BookmarkToolsOverview({
       <div className={styles["bm-tools__overview-stats"]}>
         <StatCard
           icon={<div className={styles["bm-tools__stat-icon"]}>📊</div>}
-          label={t("bookmark.tools.statFolders")}
+          label={t('文件夹')}
           value={overview.folders}
           accent="primary"
         />
         <StatCard
           icon={<div className={styles["bm-tools__stat-icon"]}>🔖</div>}
-          label={t("bookmark.tools.statBookmarks")}
+          label={t('书签总数')}
           value={overview.total}
           accent="success"
         />
         <StatCard
           icon={<div className={styles["bm-tools__stat-icon"]}>📁</div>}
-          label={t("bookmark.tools.statEmptyFolders")}
+          label={t('空文件夹数')}
           value={overview.emptyFolders}
           accent={overview.emptyFolders > 0 ? "warning" : "info"}
         />
         <StatCard
           icon={<div className={styles["bm-tools__stat-icon"]}>#️⃣</div>}
-          label={t("bookmark.tools.statDuplicates")}
+          label={t('重复书签数')}
           value={overview.duplicates}
           accent={overview.duplicates > 0 ? "warning" : "info"}
         />
@@ -83,7 +83,7 @@ export function BookmarkToolsOverview({
         <Alert
           type="warning"
           showIcon
-          message={t("bookmark.tools.emptyFoldersHint", { count: overview.emptyFolders })}
+          message={t('发现 {count} 个空文件夹，可一键清理', { count: overview.emptyFolders })}
           className={styles["bm-tools__overview-alert"]}
         />
       )}
@@ -92,14 +92,14 @@ export function BookmarkToolsOverview({
         <Alert
           type="warning"
           showIcon
-          message={t("bookmark.tools.duplicatesHint", { count: overview.duplicates })}
+          message={t('发现 {count} 个重复书签，可合并清理', { count: overview.duplicates })}
           className={styles["bm-tools__overview-alert"]}
         />
       )}
 
       <div className={styles["bm-tools__overview-actions"]} style={{ marginTop: 16 }}>
         <Button onClick={onRefresh} icon={<RefreshCw size={ICON_SIZE.SMALL} />}>
-          {t("bookmark.tools.refreshOverview")}
+          {t('刷新总览')}
         </Button>
       </div>
     </div>

@@ -31,8 +31,8 @@ export function TimelineSettings({ settings, updateSettings }: TimelineSettingsP
   return (
     <div className="settings-panel-stack settings-panel-stack--regular">
       <Field
-        label={t('settings.timelineGranularity')}
-        hint={t('settings.timelineGranularityHint')}
+        label={t('时间轴分组粒度')}
+        hint={t('按天更简洁；按小时把今天和昨天按整点拆成小桶，一眼看清每个小时的访问节奏')}
       >
         <Segmented
           block
@@ -43,15 +43,15 @@ export function TimelineSettings({ settings, updateSettings }: TimelineSettingsP
             })
           }
           options={[
-            { value: 'day', label: t('settings.granularityDay') },
-            { value: 'hour', label: t('settings.granularityHour') },
+            { value: 'day', label: t('按天') },
+            { value: 'hour', label: t('按小时') },
           ]}
         />
       </Field>
 
       <Field
-        label={t('settings.timelineShowExactTime')}
-        hint={t('settings.timelineShowExactTimeHint')}
+        label={t('显示具体时间')}
+        hint={t('在时段旁和每条标签旁展示具体访问时间（HH:mm）')}
       >
         <Switch
           checked={settings.timelineShowExactTime ?? false}

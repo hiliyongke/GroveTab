@@ -22,7 +22,7 @@ import { SpeedDialAddModal } from "./SpeedDialAddModal";
 import { SortableSiteCard } from "./SortableSiteCard";
 import { useSpeedDialSortable } from "./hooks/useSpeedDialSortable";
 import { useSiteGroups } from "./hooks/useSiteGroups";
-import { useAccent } from "@/shared/hooks/useAccent";
+import { useAccent } from "@/shared/hooks/use-accent";
 import { getHostname, getFaviconUrl } from "./utils/siteUtils";
 
 /**
@@ -200,7 +200,7 @@ export function SpeedDialGrid({ sites, onAdd }: SpeedDialGridProps) {
   const { grouped } = useSiteGroups({
     sites,
     groupEnabled,
-    ungroupedLabel: t("quickStart.ungrouped"),
+    ungroupedLabel: t('未分组'),
   });
 
   /** 渲染一组卡片 */
@@ -233,10 +233,10 @@ export function SpeedDialGrid({ sites, onAdd }: SpeedDialGridProps) {
       <div className={styles["speed-dial-grid"]}>
         <div className={styles["speed-dial-empty"]}>
           <Typography.Text strong className={styles["speed-dial-empty-title"]}>
-            {t("quickStart.emptyTitle")}
+            {t('把你最常去的站点放在这里')}
           </Typography.Text>
           <Typography.Text type="secondary" className={styles["speed-dial-empty-desc"]}>
-            {t("quickStart.emptyDesc")}
+            {t('每次打开新标签页，一键直达你的工作入口')}
           </Typography.Text>
           <Button
             type="primary"
@@ -244,7 +244,7 @@ export function SpeedDialGrid({ sites, onAdd }: SpeedDialGridProps) {
             icon={<Plus size={ICON_SIZE.SMALL} />}
             onClick={handleAddClick}
           >
-            {t("quickStart.addSite")}
+            {t('添加站点')}
           </Button>
         </div>
         {!onAdd && (
@@ -308,7 +308,7 @@ export function SpeedDialGrid({ sites, onAdd }: SpeedDialGridProps) {
                           </div>
                           <div className={styles["app-speed-dial-add-content"]}>
                             <span className={styles["app-speed-dial-add-label"]}>
-                              {t("quickStart.addSite")}
+                              {t('添加站点')}
                             </span>
                             <span className={styles["app-speed-dial-add-hint"]} aria-hidden="true">
                               placeholder
@@ -340,7 +340,7 @@ export function SpeedDialGrid({ sites, onAdd }: SpeedDialGridProps) {
                     </div>
                     <div className={styles["app-speed-dial-add-content"]}>
                       <span className={styles["app-speed-dial-add-label"]}>
-                        {t("quickStart.addSite")}
+                        {t('添加站点')}
                       </span>
                       <span className={styles["app-speed-dial-add-hint"]} aria-hidden="true">
                         placeholder

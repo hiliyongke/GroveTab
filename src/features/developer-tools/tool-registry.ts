@@ -346,7 +346,7 @@ export const DEV_TOOLS: DevToolDefinition[] = [
 ];
 
 /** 按分类筛选工具 */
-export function getToolsByCategory(category: DevToolCategory | 'all'): DevToolDefinition[] {
+function getToolsByCategory(category: DevToolCategory | 'all'): DevToolDefinition[] {
   const tools = category === 'all' ? DEV_TOOLS : DEV_TOOLS.filter((tool) => tool.category === category);
   return [...tools].sort((a, b) => a.order - b.order);
 }

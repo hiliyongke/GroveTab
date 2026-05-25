@@ -139,9 +139,9 @@ export function SpeedDialAddModal({ open, onClose, editingSite, existingGroups }
   return (
     <Modal
       open={open}
-      title={isEdit ? t('quickStart.editTitle') : t('quickStart.addTitle')}
-      okText={isEdit ? t('quickStart.save') : t('quickStart.add')}
-      cancelText={t('quickStart.cancel')}
+      title={isEdit ? t('编辑常用站点') : t('添加常用站点')}
+      okText={isEdit ? t('保存') : t('添加')}
+      cancelText={t('取消')}
       onOk={() => void handleOk()}
       onCancel={onClose}
       confirmLoading={confirmLoading}
@@ -149,23 +149,23 @@ export function SpeedDialAddModal({ open, onClose, editingSite, existingGroups }
       width={440}
     >
 <Form layout="vertical" className={styles['app-speed-dial-form']}>
-        <Form.Item label={t('quickStart.urlLabel')}>
+        <Form.Item label={t('网址')}>
           <Input
             value={url}
             onChange={(e) => setUrlWithFlag(e.target.value)}
-            placeholder={t('quickStart.urlPlaceholder')}
+            placeholder={t('输入网址，如 github.com')}
             autoFocus
           />
         </Form.Item>
-        <Form.Item label={t('quickStart.titleLabel')}>
+        <Form.Item label={t('标题')}>
           <Input
             value={title}
             onChange={(e) => setTitleWithFlag(e.target.value)}
-            placeholder={t('quickStart.titlePlaceholder')}
+            placeholder={t('显示名称（可选）')}
           />
         </Form.Item>
         {groupEnabled && (
-          <Form.Item label={t('quickStart.groupLabel')}>
+          <Form.Item label={t('分组')}>
             <Select
               mode="tags"
               maxCount={1}
@@ -177,8 +177,8 @@ export function SpeedDialAddModal({ open, onClose, editingSite, existingGroups }
               options={existingGroups.map((g) => ({ value: g, label: g }))}
               allowClear
               showSearch
-              placeholder={t('quickStart.groupPlaceholder')}
-              notFoundContent={t('quickStart.groupNotFound')}
+              placeholder={t('选择已有分组或输入新分组名')}
+              notFoundContent={t('输入即可创建新分组')}
               suffixIcon={null}
             />
           </Form.Item>

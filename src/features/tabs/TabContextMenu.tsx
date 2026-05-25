@@ -174,7 +174,7 @@ export function TabContextMenu({
           }}
           className={styles["app-tab-context-menu__button"]}
         >
-          {pinned ? t("context.unpin") : t("context.pin")}
+          {pinned ? t('取消固定') : t('固定')}
         </Button>
 
         {/* 休眠标签页 */}
@@ -195,7 +195,7 @@ export function TabContextMenu({
             }}
             className={styles["app-tab-context-menu__button"]}
           >
-            {t("tabs.discard")}
+            {t('休眠标签页')}
           </Button>
         )}
 
@@ -217,7 +217,7 @@ export function TabContextMenu({
             }}
             className={styles["app-tab-context-menu__button"]}
           >
-            {t("context.splitScreen")}
+            {t('分屏显示')}
           </Button>
         )}
 
@@ -242,7 +242,7 @@ export function TabContextMenu({
             }}
             className={styles["app-tab-context-menu__button"]}
           >
-            {t("context.addToQuickStart")}
+            {t('添加到常用站点')}
           </Button>
         )}
 
@@ -256,7 +256,7 @@ export function TabContextMenu({
           onClick={() => setShowTagInput(true)}
           className={styles["app-tab-context-menu__button"]}
         >
-          {t("context.addTag")}
+          {t('添加标签')}
         </Button>
 
         {/* 已有 tags */}
@@ -294,10 +294,10 @@ export function TabContextMenu({
                   setShowTagInput(false);
                 }
               }}
-              placeholder={t("context.tagPlaceholder")}
+              placeholder={t('输入标签名...')}
             />
             <Button type="primary" size="small" onClick={handleAddTag}>
-              {t("context.save")}
+              {t('保存')}
             </Button>
           </Flex>
         )}
@@ -315,7 +315,7 @@ export function TabContextMenu({
           }}
           className={styles["app-tab-context-menu__button"]}
         >
-          {note ? t("context.editNote") : t("context.addNote")}
+          {note ? t('编辑备注') : t('添加备注')}
         </Button>
 
         {showNoteInput && (
@@ -324,7 +324,7 @@ export function TabContextMenu({
               autoFocus
               value={noteValue}
               onChange={(e) => setNoteValue(e.target.value)}
-              placeholder={t("context.notePlaceholder")}
+              placeholder={t('输入备注...')}
               rows={3}
               className={styles["app-tab-context-menu__note-field"]}
             />
@@ -334,10 +334,10 @@ export function TabContextMenu({
               className={styles["app-tab-context-menu__note-actions"]}
             >
               <Button size="small" onClick={() => setShowNoteInput(false)}>
-                {t("context.cancel")}
+                {t('取消')}
               </Button>
               <Button type="primary" size="small" onClick={handleSaveNote}>
-                {t("context.save")}
+                {t('保存')}
               </Button>
             </Flex>
           </Flex>

@@ -27,9 +27,9 @@ export function BookmarkDedupePanel({
     <div className={styles["bm-tools__panel"]}>
       <div className={styles["bm-tools__panel-header"]}>
         <div>
-          <div className={styles["bm-tools__panel-title"]}>{t("bookmark.tools.dedupe")}</div>
+          <div className={styles["bm-tools__panel-title"]}>{t('去重')}</div>
           <div className={styles["bm-tools__panel-subtitle"]}>
-            {t("bookmark.tools.dedupeHint", { mode: dedupStrictness })}
+            {t('依据当前去重严格度：{mode}。默认保留每组第一个书签，删除其余重复项。', { mode: dedupStrictness })}
           </div>
         </div>
         <div className={styles["bm-tools__panel-actions"]}>
@@ -41,7 +41,7 @@ export function BookmarkDedupePanel({
               void scanDuplicates();
             }}
           >
-            {t("bookmark.tools.scan")}
+            {t('开始扫描')}
           </Button>
           {dups !== null && dups.length > 0 && (
             <Button
@@ -51,7 +51,7 @@ export function BookmarkDedupePanel({
                 void applyDedupe();
               }}
             >
-              {t("bookmark.tools.mergeAll", {
+              {t('合并全部（删除 {count} 项）', {
                 count: dups.reduce((s, g) => s + g.items.length - 1, 0),
               })}
             </Button>
@@ -62,13 +62,13 @@ export function BookmarkDedupePanel({
       {dups === null && (
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description={t("bookmark.tools.idle")}
+          description={t('点击"开始扫描"查看结果')}
           className={styles["bm-tools__empty"]}
         />
       )}
 
       {dups !== null && dups.length === 0 && (
-        <Alert type="success" showIcon message={t("bookmark.tools.dedupeClean")} />
+        <Alert type="success" showIcon message={t('未发现重复书签，一切整齐。')} />
       )}
 
       {dups !== null && dups.length > 0 && (
@@ -81,7 +81,7 @@ export function BookmarkDedupePanel({
                   {g.key}
                 </div>
                 <Tag color="orange">
-                  {t("bookmark.tools.dedupeItems", { count: g.items.length })}
+                  {t('共 {count} 项重复', { count: g.items.length })}
                 </Tag>
               </div>
               <div className={styles["bm-tools__group-body"]}>
@@ -95,9 +95,9 @@ export function BookmarkDedupePanel({
                       <div className={styles["bm-tools__row-sub"]}>{item.url}</div>
                     </div>
                     {idx === 0 ? (
-                      <Tag color="green">{t("bookmark.tools.keep")}</Tag>
+                      <Tag color="green">{t('保留')}</Tag>
                     ) : (
-                      <Tag color="red">{t("bookmark.tools.willRemove")}</Tag>
+                      <Tag color="red">{t('将被删除')}</Tag>
                     )}
                   </div>
                 ))}

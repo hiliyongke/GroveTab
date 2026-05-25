@@ -70,7 +70,7 @@ export function ArchiveSidebar({ sessions, activeFilter, onSelectFilter }: Archi
     <aside className={styles["archive-sidebar"]}>
       <div className={styles["archive-sidebar__group"]}>
         <div className={styles["archive-sidebar__group-title"]}>
-          {t("archive.filter.timeRange")}
+          {t('按时间')}
         </div>
         <div className={styles["archive-sidebar__list"]}>
           {FILTERS.map((filter) => {
@@ -94,7 +94,7 @@ export function ArchiveSidebar({ sessions, activeFilter, onSelectFilter }: Archi
       </div>
 
       <div className={styles["archive-sidebar__group"]}>
-        <div className={styles["archive-sidebar__group-title"]}>{t("archive.filter.special")}</div>
+        <div className={styles["archive-sidebar__group-title"]}>{t('专项')}</div>
         <div className={styles["archive-sidebar__list"]}>
           <Button
             type="text"
@@ -105,7 +105,7 @@ export function ArchiveSidebar({ sessions, activeFilter, onSelectFilter }: Archi
               <Sparkles size={ICON_SIZE.MEDIUM} />
             </span>
             <span className={styles["archive-sidebar__item-label"]}>
-              {t("archive.filter.autoSnapshots")}
+              {t('自动快照')}
             </span>
             <span className={styles["archive-sidebar__item-count"]}>{counts.auto}</span>
           </Button>

@@ -38,7 +38,7 @@ export function WorkspaceSwitcher() {
     { type: 'divider' as const },
     {
       key: 'clear',
-      label: t('workspace.clear'),
+      label: t('清除筛选'),
       onClick: () => handleSwitch(undefined),
     },
   ];
@@ -52,7 +52,7 @@ export function WorkspaceSwitcher() {
           className="app-workspace-trigger"
           icon={<FolderOpen size={ICON_SIZE.DEFAULT} />}
         >
-          {t('workspace.title')}
+          {t('工作区')}
         </Button>
       </Dropdown>
     );
@@ -70,13 +70,13 @@ export function WorkspaceSwitcher() {
           {active.name}
         </Button>
       </Dropdown>
-      <Tooltip title={t('workspace.clear')}>
+      <Tooltip title={t('清除筛选')}>
         <Button
           size="small"
           type="text"
           className="app-workspace-clear"
           icon={<X size={ICON_SIZE.MICRO} />}
-          aria-label={t('workspace.clear')}
+          aria-label={t('清除筛选')}
           onClick={() => handleSwitch(undefined)}
         />
       </Tooltip>

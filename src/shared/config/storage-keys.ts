@@ -59,7 +59,7 @@ export function isAppStorageKey(value: string): boolean {
 /** 非 chrome.storage 的轻量本地缓存键。 */
 export const LOCAL_CACHE_KEYS = Object.freeze({
   prepaintTheme: "app_prepaint_theme",
-  legacyPrepaintTheme: "grovetab_prepaint_theme",
+  legacyPrepaintTheme: "app_prepaint_theme",
   weather: `${BRAND.id}_weather_cache`,
   tidyDismissed: `${BRAND.id}_tidy_dismissed`,
 });

@@ -40,7 +40,7 @@ import { feedback } from "@/shared/ui/feedback";
 import { translate } from "@/shared/i18n/core";
 import { BookmarkToolsModal } from "@/features/bookmarks/BookmarkToolsModal";
 import { isSafeExternalUrl } from "@/shared/utils/url-safety";
-import { useAccent } from "@/shared/hooks/useAccent";
+import { useAccent } from "@/shared/hooks/use-accent";
 import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
 import { BookmarkTreeView } from "./BookmarkTreeView";
 import styles from "./styles/views.module.less";
@@ -79,13 +79,13 @@ function resolveFolderTitle(node: BookmarkNode, t: (key: string) => string): str
   if (node.title?.trim()) return node.title;
   switch (node.id) {
     case "1":
-      return t("bookmark.folder.bar");
+      return t('书签栏');
     case "2":
-      return t("bookmark.folder.others");
+      return t('其他书签');
     case "3":
-      return t("bookmark.folder.mobile");
+      return t('移动设备书签');
     default:
-      return t("bookmark.folder.unnamed");
+      return t('未命名文件夹');
   }
 }
 
@@ -346,7 +346,7 @@ export function BookmarkView() {
       const tree = await getBookmarkTree();
       setBookmarks(tree);
     } else {
-      feedback.error(translate("bookmark.permissionDenied"));
+      feedback.error(translate('书签权限被拒绝'));
     }
   }, []);
 
@@ -364,13 +364,13 @@ export function BookmarkView() {
 
   const handleOpenBookmark = useCallback(async (url: string) => {
     if (!isSafeExternalUrl(url)) {
-      feedback.error(translate("bookmark.openFailed"));
+      feedback.error(translate('打开书签失败，请重试'));
       return;
     }
     try {
       await createTab({ url });
     } catch (err) {
-      feedback.error(translate("bookmark.openFailed"), err);
+      feedback.error(translate('打开书签失败，请重试'), err);
     }
   }, []);
 
@@ -389,7 +389,7 @@ export function BookmarkView() {
         if (result !== null) count++;
       }
     }
-    feedback.success(translate("bookmark.bookmarkedAll", { count }));
+    feedback.success(translate('已收藏 {count} 个标签页', { count }));
     const tree = await getBookmarkTree();
     setBookmarks(tree);
   }, [tabs]);
@@ -451,17 +451,17 @@ export function BookmarkView() {
     return (
       <Space className={styles["app-bookmark-empty"]} align="center">
         <FeatureEmptyState
-          title={t("bookmark.needPermission")}
+          title={t('需要授权才能访问浏览器书签')}
           icon={<BookOpen size={24} className={styles["app-bookmark-empty-icon"]} />}
           actions={[
             {
-              text: t("bookmark.grantPermission"),
+              text: t('授权访问书签'),
               onClick: () => {
                 void handleRequestPermission();
               },
             },
           ]}
-          hints={[t("bookmark.hint1"), t("bookmark.hint2")]}
+          hints={[t('一键收藏当前所有标签页'), t('使用工具箱去重、检测失效链接')]}
         />
       </Space>
     );
@@ -473,7 +473,7 @@ export function BookmarkView() {
       <Space className={styles["app-bookmark-header"]}>
         <Space className={styles["app-bookmark-header__title"]}>
           <BookOpen size={ICON_SIZE.MEDIUM} className={styles["app-bookmark-header__icon"]} />
-          <Typography.Text>{t("bookmark.title")}</Typography.Text>
+          <Typography.Text>{t('我的书签')}</Typography.Text>
           {totalBookmarks > 0 && (
             <Tag className={styles["app-bookmark-header__count"]}>{totalBookmarks}</Tag>
           )}
@@ -487,7 +487,7 @@ export function BookmarkView() {
               {
                 value: "list",
                 icon: (
-                  <Tooltip title={t("bookmark.layout.list")}>
+                  <Tooltip title={t('列表视图')}>
                     <ListIcon size={ICON_SIZE.SMALL} />
                   </Tooltip>
                 ),
@@ -495,7 +495,7 @@ export function BookmarkView() {
               {
                 value: "mindmap",
                 icon: (
-                  <Tooltip title={t("bookmark.layout.mindmap")}>
+                  <Tooltip title={t('脑图（横向）')}>
                     <Network size={ICON_SIZE.SMALL} />
                   </Tooltip>
                 ),
@@ -503,14 +503,14 @@ export function BookmarkView() {
               {
                 value: "orgchart",
                 icon: (
-                  <Tooltip title={t("bookmark.layout.orgchart")}>
+                  <Tooltip title={t('架构图（垂直）')}>
                     <GitBranch size={ICON_SIZE.SMALL} />
                   </Tooltip>
                 ),
               },
             ]}
           />
-          <Tooltip title={t("bookmark.bookmarkAll")}>
+          <Tooltip title={t('收藏全部标签')}>
             <Button
               size="small"
               icon={<Plus size={ICON_SIZE.SMALL} />}
@@ -518,16 +518,16 @@ export function BookmarkView() {
                 void handleBookmarkAll();
               }}
             >
-              {t("bookmark.bookmarkAll")}
+              {t('收藏全部标签')}
             </Button>
           </Tooltip>
-          <Tooltip title={t("bookmark.tools.entry")}>
+          <Tooltip title={t('工具箱')}>
             <Button
               size="small"
               icon={<Wrench size={ICON_SIZE.SMALL} />}
               onClick={() => setToolsOpen(true)}
             >
-              {t("bookmark.tools.entry")}
+              {t('工具箱')}
             </Button>
           </Tooltip>
         </Space>
@@ -537,7 +537,7 @@ export function BookmarkView() {
       <Space className={styles["app-bookmark-search-wrap"]}>
         <Input
           prefix={<Search size={ICON_SIZE.MEDIUM} className={styles["app-bookmark-search-icon"]} />}
-          placeholder={t("bookmark.searchPlaceholder")}
+          placeholder={t('搜索书签...')}
           value={searchQuery}
           onChange={(e) => {
             void handleSearch(e.target.value);
@@ -558,16 +558,16 @@ export function BookmarkView() {
           ) : searchResults.length === 0 ? (
             <Space className={styles["app-bookmark-result-empty"]} align="center">
               <FeatureEmptyState
-                title={t("bookmark.noResults")}
+                title={t('没有找到匹配的书签')}
                 size="small"
                 icon={<Search size={20} />}
-                hints={[t("bookmark.searchHint1"), t("bookmark.searchHint2")]}
+                hints={[t('试试搜索网站名称或域名'), t('支持中英文关键词搜索')]}
               />
             </Space>
           ) : (
             <Space direction="vertical" size={0} className={styles["app-bookmark-search-results"]}>
               <Typography.Text className={styles["app-bookmark-search-meta"]}>
-                {t("bookmark.searchCount", { count: searchResults.length })}
+                {t('找到 {count} 个匹配书签', { count: searchResults.length })}
               </Typography.Text>
               <Space direction="vertical" size={0} className={styles["app-bookmark-search-list"]}>
                 {searchResults.map((item) => (
@@ -584,10 +584,10 @@ export function BookmarkView() {
         ) : topSections.length === 0 ? (
           <Space className={styles["app-bookmark-result-empty"]} align="center">
             <FeatureEmptyState
-              title={t("bookmark.emptyTitle")}
+              title={t('暂无书签')}
               icon={<BookOpen size={20} />}
               size="small"
-              hints={[t("bookmark.hint1"), t("bookmark.hint2")]}
+              hints={[t('一键收藏当前所有标签页'), t('使用工具箱去重、检测失效链接')]}
             />
           </Space>
         ) : layout === "mindmap" ? (
