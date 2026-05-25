@@ -8,12 +8,13 @@
  * React 组件侧（`I18nProvider` / `useT`）继续放在 `index.tsx`。
  */
 
-import { useSettingsStore } from '@/store';
-import zhCN from './zh-CN';
-import en from './en';
+import { useSettingsStore } from "@/store";
+import { fetchGet } from "@/chrome/fetch";
+import zhCN from "./zh-CN";
+import en from "./en";
 
 /** 目前支持的两种语言 */
-export type Locale = 'zh-CN' | 'en';
+export type Locale = "zh-CN" | "en";
 
 // ─── 字典文件类型定义 ─────────────────────────────────────────
 
@@ -22,7 +23,7 @@ export interface DictionaryEntry {
   /** k_ 前缀标准键名（如 "k_0a3b7x2"） */
   key: string;
   /** 中文原文 */
-  'zh-CN': string;
+  "zh-CN": string;
   /** 英文翻译 */
   en: string;
 }
@@ -35,7 +36,7 @@ export type DictionaryFile = DictionaryEntry[];
 
 /** 字典表：按 Locale 索引到 key→value 的平坦 Map */
 let dictionaries: Record<Locale, Record<string, string>> = {
-  'zh-CN': zhCN,
+  "zh-CN": zhCN,
   en,
 };
 
@@ -66,8 +67,8 @@ let ChineseKeyMap: Record<string, string> = {};
  * 示例：k_0a3b7x2, k_z9y8c4d
  */
 export function generateKeyId(): string {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let id = 'k_';
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let id = "k_";
   for (let i = 0; i < 7; i++) {
     id += chars[Math.floor(Math.random() * chars.length)];
   }
@@ -88,11 +89,11 @@ export function loadChineseKeyMap(source?: DictionaryFile | Record<string, strin
   if (source && Array.isArray(source)) {
     // 新格式：DictionaryFile 数组
     for (const entry of source) {
-      ChineseKeyMap[entry['zh-CN']] = entry.key;
+      ChineseKeyMap[entry["zh-CN"]] = entry.key;
     }
   } else {
     // 旧格式：从 dictionaries 中遍历 zh-CN
-    const zhDict = source || dictionaries['zh-CN'];
+    const zhDict = source || dictionaries["zh-CN"];
     for (const [key, value] of Object.entries(zhDict)) {
       // 中文原文 → 键名映射（允许一对多，后者覆盖前者）
       ChineseKeyMap[value] = key;
@@ -111,8 +112,14 @@ let dictLoadedFromSource = false;
  *   window.__I18N_MANIFEST__ = { "zh-CN": "/i18n/zh-CN.{hash}.json", "en": "/i18n/en.{hash}.json" }
  */
 function getI18nManifest(): Record<string, string> {
-  if (typeof window !== 'undefined' && (window as unknown as Record<string, unknown>).__I18N_MANIFEST__) {
-    return (window as unknown as Record<string, unknown>).__I18N_MANIFEST__ as Record<string, string>;
+  if (
+    typeof window !== "undefined" &&
+    (window as unknown as Record<string, unknown>).__I18N_MANIFEST__
+  ) {
+    return (window as unknown as Record<string, unknown>).__I18N_MANIFEST__ as Record<
+      string,
+      string
+    >;
   }
   return {};
 }
@@ -121,7 +128,7 @@ function getI18nManifest(): Record<string, string> {
  * 获取指定 locale 的翻译文件 URL
  * 优先使用构建时注入的哈希命名路径，回退到开发时的原始路径
  */
-function getI18nUrl(locale: Locale, baseUrl = ''): string {
+function getI18nUrl(locale: Locale, baseUrl = ""): string {
   const manifest = getI18nManifest();
   if (manifest[locale]) {
     return manifest[locale];
@@ -135,10 +142,10 @@ function getI18nUrl(locale: Locale, baseUrl = ''): string {
  * @param locale  目标语言
  * @param baseUrl 基础路径（开发模式用）
  */
-async function fetchLocaleDict(locale: Locale, baseUrl = ''): Promise<DictionaryFile | null> {
+async function fetchLocaleDict(locale: Locale, baseUrl = ""): Promise<DictionaryFile | null> {
   const url = getI18nUrl(locale, baseUrl);
   try {
-    const res = await fetch(url);
+    const res = await fetchGet(url);
     if (!res.ok) {
       console.warn(`[i18n] 翻译文件加载失败 (${res.status}): ${url}`);
       return null;
@@ -153,7 +160,10 @@ async function fetchLocaleDict(locale: Locale, baseUrl = ''): Promise<Dictionary
 /**
  * 从 DictionaryFile 数组构建 Record<string, string> 格式的字典
  */
-function buildDictFromEntries(entries: DictionaryFile, field: 'zh-CN' | 'en'): Record<string, string> {
+function buildDictFromEntries(
+  entries: DictionaryFile,
+  field: "zh-CN" | "en",
+): Record<string, string> {
   const dict: Record<string, string> = {};
   for (const entry of entries) {
     if (entry[field]) {
@@ -184,38 +194,38 @@ export async function loadDictionary(baseUrl?: string, force = false): Promise<b
 
   try {
     const [zhCNData, enData] = await Promise.all([
-      fetchLocaleDict('zh-CN', baseUrl),
-      fetchLocaleDict('en', baseUrl),
+      fetchLocaleDict("zh-CN", baseUrl),
+      fetchLocaleDict("en", baseUrl),
     ]);
 
     // 至少有一个语言加载成功才替换字典
     if (!zhCNData && !enData) {
-      console.warn('[i18n] 所有翻译文件加载失败，回退到内嵌字典');
+      console.warn("[i18n] 所有翻译文件加载失败，回退到内嵌字典");
       return false;
     }
 
     if (zhCNData) {
-      dictionaries['zh-CN'] = buildDictFromEntries(zhCNData, 'zh-CN');
+      dictionaries["zh-CN"] = buildDictFromEntries(zhCNData, "zh-CN");
       // 使用新格式数据构建中文→键名映射
       loadChineseKeyMap(zhCNData);
     }
 
     if (enData) {
-      dictionaries.en = buildDictFromEntries(enData, 'en');
+      dictionaries.en = buildDictFromEntries(enData, "en");
     }
 
     // 标记缓存已加载
     dictLoadedFromSource = true;
 
     if (import.meta.env?.DEV) {
-      const zhCount = zhCNData ? Object.keys(dictionaries['zh-CN']).length : 0;
+      const zhCount = zhCNData ? Object.keys(dictionaries["zh-CN"]).length : 0;
       const enCount = enData ? Object.keys(dictionaries.en).length : 0;
       console.log(`[i18n] 字典加载完成：zh-CN ${zhCount} 条，en ${enCount} 条`);
     }
 
     return true;
   } catch (err) {
-    console.warn('[i18n] 字典加载异常，回退到内嵌字典:', err);
+    console.warn("[i18n] 字典加载异常，回退到内嵌字典:", err);
     return false;
   }
 }
@@ -236,7 +246,7 @@ export async function loadLocale(locale: Locale, baseUrl?: string): Promise<bool
     dictionaries[locale] = buildDictFromEntries(data, locale);
 
     // 如果加载的是中文，同步更新 ChineseKeyMap
-    if (locale === 'zh-CN') {
+    if (locale === "zh-CN") {
       loadChineseKeyMap(data);
     }
 
@@ -271,11 +281,7 @@ function containsChinese(str: string): boolean {
  *   1. 标准 key 查找（如 "search.placeholder"）
  *   2. 中文直达查找（如 "搜索标签页..."）——先反查为 key 再查翻译
  */
-function lookup(
-  locale: Locale,
-  key: string,
-  params?: Record<string, string | number>,
-): string {
+function lookup(locale: Locale, key: string, params?: Record<string, string | number>): string {
   let actualKey = key;
   let isChinese = false;
 
@@ -290,7 +296,7 @@ function lookup(
   }
 
   // 中文语言：直接返回中文原文（无需查字典）
-  if (locale === 'zh-CN' && isChinese) {
+  if (locale === "zh-CN" && isChinese) {
     let text = key;
     if (params) {
       Object.entries(params).forEach(([k, v]) => {
@@ -366,13 +372,14 @@ export function translateDebug(
   }
 
   const actualKey = resolvedKey ?? key;
-  const zhCN = dictionaries['zh-CN']?.[actualKey];
+  const zhCN = dictionaries["zh-CN"]?.[actualKey];
   const en = dictionaries.en?.[actualKey];
   const result = lookup(locale, key, params);
 
-  const isMissing = locale !== 'zh-CN'
-    ? !dictionaries[locale]?.[actualKey] && !dictionaries.en?.[actualKey]
-    : false;
+  const isMissing =
+    locale !== "zh-CN"
+      ? !dictionaries[locale]?.[actualKey] && !dictionaries.en?.[actualKey]
+      : false;
 
   return {
     inputKey: key,
@@ -408,13 +415,8 @@ export function translateWithLocale(
  * @param key    翻译 key（支持标准 key 或中文原文）
  * @param params 占位符替换 Map
  */
-export function translate(
-  key: string,
-  params?: Record<string, string | number>,
-): string {
+export function translate(key: string, params?: Record<string, string | number>): string {
   const lang = useSettingsStore.getState().settings?.language;
-  const loc: Locale = lang === 'en' ? 'en' : 'zh-CN';
+  const loc: Locale = lang === "en" ? "en" : "zh-CN";
   return lookup(loc, key, params);
 }
-
-

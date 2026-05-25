@@ -198,6 +198,33 @@ export async function storageGetAllKeys(): Promise<string[]> {
   return Object.keys(all);
 }
 
+/**
+ * 获取 chrome.storage.local 的已用字节数。
+ *
+ * @param keys 指定 key 或 key 数组；传 null 表示全部
+ */
+export async function storageGetBytesInUse(keys: string | string[] | null = null): Promise<number> {
+  return safeCall("storage.local.getBytesInUse", () => chrome.storage.local.getBytesInUse(keys));
+}
+
+/**
+ * 注册 chrome.storage.onChanged 监听器。
+ *
+ * @param listener 变更回调
+ * @returns 取消监听的函数
+ */
+export function storageOnChanged(
+  listener: (changes: Record<string, chrome.storage.StorageChange>, areaName: string) => void,
+): () => void {
+  if (typeof chrome === "undefined" || chrome.storage?.onChanged === undefined) {
+    return () => {
+      /* noop */
+    };
+  }
+  chrome.storage.onChanged.addListener(listener);
+  return () => chrome.storage.onChanged.removeListener(listener);
+}
+
 // ── Favicon ───────────────────────────────────────────
 
 /**

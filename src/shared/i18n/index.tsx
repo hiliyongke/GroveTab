@@ -9,9 +9,26 @@
  * 从本文件 re-export（仅类型不算 value export，不破坏 fast-refresh）。
  */
 
-import React, { createContext, useContext, useCallback, useMemo, useRef, useState, useEffect } from 'react';
-import { useSettingsStore } from '@/store';
-import { translateWithLocale, translateDebug, getDictionaries, loadChineseKeyMap, loadDictionary, loadLocale, type Locale, type TranslateDebugInfo } from './core';
+import React, {
+  createContext,
+  useContext,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  useEffect,
+} from "react";
+import { useSettingsStore } from "@/store";
+import {
+  translateWithLocale,
+  translateDebug,
+  getDictionaries,
+  loadChineseKeyMap,
+  loadDictionary,
+  loadLocale,
+  type Locale,
+  type TranslateDebugInfo,
+} from "./core";
 
 /** 类型 re-export：方便外部使用调试信息类型 */
 export type { TranslateDebugInfo };
@@ -68,28 +85,28 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     loadChineseKeyMap();
 
     // 异步加载哈希命名的翻译文件（生产）或原始文件（开发）
-    loadDictionary().then((success) => {
+    void loadDictionary().then((success) => {
       if (success) {
         setDictReady(true);
         // 开发模式：加载完成后输出词条统计
         if (import.meta.env.DEV) {
           const dicts = getDictionaries();
-          const zhCount = Object.keys(dicts['zh-CN']).length;
+          const zhCount = Object.keys(dicts["zh-CN"]).length;
           const enCount = Object.keys(dicts.en).length;
-          const missingEn = Object.keys(dicts['zh-CN']).filter((k) => !dicts.en[k]).length;
-          console.groupCollapsed('[i18n] 翻译字典加载完成');
+          const missingEn = Object.keys(dicts["zh-CN"]).filter((k) => !dicts.en[k]).length;
+          console.groupCollapsed("[i18n] 翻译字典加载完成");
           console.log(`  zh-CN：${zhCount} 条`);
           console.log(`  en：${enCount} 条`);
           if (missingEn > 0) {
             console.warn(`  ⚠️  英文缺失：${missingEn} 条`);
           } else {
-            console.log('  ✅ 英文翻译完整');
+            console.log("  ✅ 英文翻译完整");
           }
           console.groupEnd();
         }
       } else {
         // 加载失败：内嵌字典仍可用，仅标记未就绪
-        console.warn('[i18n] 翻译文件加载失败，使用内嵌字典');
+        console.warn("[i18n] 翻译文件加载失败，使用内嵌字典");
       }
     });
   }, []);
@@ -99,9 +116,12 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
    *   - settings 已加载：使用 settings.language
    *   - 未加载：回退到 navigator 推断
    */
-  const locale: Locale = (loaded && settingsLocale)
-    ? settingsLocale
-    : (navigator.language.startsWith('zh') ? 'zh-CN' : 'en');
+  const locale: Locale =
+    loaded && settingsLocale
+      ? settingsLocale
+      : navigator.language.startsWith("zh")
+        ? "zh-CN"
+        : "en";
 
   // ── 语言切换：动态加载目标语言翻译文件 ──────────────────────
   useEffect(() => {
@@ -117,10 +137,10 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     if (prev === null) return;
 
     // 语言发生切换，加载目标语言的翻译文件
-    loadLocale(locale).then((success) => {
+    void loadLocale(locale).then((success) => {
       if (success) {
         // 触发重渲染，使用新语言的翻译
-        setDictReady((v) => !v ? true : v);
+        setDictReady((v) => (!v ? true : v));
       } else {
         console.warn(`[i18n] 语言 ${locale} 翻译文件加载失败，使用内嵌字典`);
       }
@@ -134,21 +154,26 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     [updateSettings],
   );
 
-  const t = useCallback(
+  const tBase = useCallback(
     (key: string, params?: Record<string, string | number>) =>
       translateWithLocale(locale, key, params),
     // dictReady 作为依赖：字典加载完成后触发重渲染，确保 t() 使用最新字典
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [locale, dictReady],
-  ) as TFunction;
+  );
 
   // 挂载 debug 方法：返回指定 key 的完整调试信息
-  t.debug = useCallback(
-    (key: string, params?: Record<string, string | number>) =>
-      translateDebug(locale, key, params),
+  const tDebug = useCallback(
+    (key: string, params?: Record<string, string | number>) => translateDebug(locale, key, params),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [locale, dictReady],
   );
+
+  // 将 debug 方法挂载到翻译函数上，组合为 TFunction
+  const t = useMemo<TFunction>(() => {
+    // 使用 Object.assign 而非直接赋属性，避免修改不可变引用
+    return Object.assign(tBase as TFunction, { debug: tDebug });
+  }, [tBase, tDebug]);
 
   /** 用 useMemo 稳定化 context value，避免消费组件因引用变化而无限重渲染 */
   const contextValue = useMemo(
@@ -156,17 +181,13 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     [locale, t, setLocale, dictReady],
   );
 
-  return (
-    <I18nContext.Provider value={contextValue}>
-      {children}
-    </I18nContext.Provider>
-  );
+  return <I18nContext.Provider value={contextValue}>{children}</I18nContext.Provider>;
 }
 
 /** 组件内获取 `t` / `locale` / `setLocale` */
 export function useT() {
   const ctx = useContext(I18nContext);
-  if (!ctx) throw new Error('useT must be used within I18nProvider');
+  if (!ctx) throw new Error("useT must be used within I18nProvider");
   return ctx;
 }
 
@@ -192,35 +213,33 @@ export function Trans({ children }: { children: React.ReactNode }) {
   const { t } = useT();
 
   // 1. 递归收集子元素中的文本片段和占位符位置
-  const parts: Array<{ type: 'text'; value: string } | { type: 'tag'; index: number }> = [];
+  const parts: Array<{ type: "text"; value: string } | { type: "tag"; index: number }> = [];
   let tagIndex = 0;
 
   function collect(node: React.ReactNode): void {
     if (React.isValidElement(node)) {
-      parts.push({ type: 'tag', index: tagIndex++ });
+      parts.push({ type: "tag", index: tagIndex++ });
       const childNodes = (node.props as { children?: React.ReactNode }).children;
       React.Children.forEach(childNodes, collect);
-    } else if (typeof node === 'string') {
-      parts.push({ type: 'text', value: node });
-    } else if (typeof node === 'number') {
-      parts.push({ type: 'text', value: String(node) });
+    } else if (typeof node === "string") {
+      parts.push({ type: "text", value: node });
+    } else if (typeof node === "number") {
+      parts.push({ type: "text", value: String(node) });
     } else if (Array.isArray(node)) {
       node.forEach(collect);
     }
   }
 
-  if (typeof children === 'string') {
+  if (typeof children === "string") {
     return <>{t(children)}</>;
   }
 
-  if (typeof children === 'number') {
+  if (typeof children === "number") {
     return <>{t(String(children))}</>;
   }
 
   collect(children);
-  const rawText = parts
-    .map((p) => (p.type === 'text' ? p.value : `<${p.index}>`))
-    .join('');
+  const rawText = parts.map((p) => (p.type === "text" ? p.value : `<${p.index}>`)).join("");
 
   // 2. 翻译文本
   const translated = t(rawText);
@@ -231,7 +250,7 @@ export function Trans({ children }: { children: React.ReactNode }) {
   }
 
   // 4. 将翻译结果按 <0>/<1>/... 占位符拆分
-  const tagCount = parts.filter((p) => p.type === 'tag').length;
+  const tagCount = parts.filter((p) => p.type === "tag").length;
   if (tagCount === 0) {
     return <>{translated}</>;
   }
@@ -257,7 +276,7 @@ export function Trans({ children }: { children: React.ReactNode }) {
   collectTagElements(children);
 
   for (const part of translatedParts) {
-    const tagMatch = part.match(/^<(\d+)>$/);
+    const tagMatch = /^<(\d+)>$/.exec(part);
     if (tagMatch) {
       const idx = parseInt(tagMatch[1]!, 10);
       const maybeTagEl = tagElements[idx];

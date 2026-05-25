@@ -75,23 +75,17 @@ function countBookmarks(nodes: BookmarkNode[] | undefined): number {
 /** 树排布方向 */
 export type TreeOrientation = "horizontal" | "vertical";
 
+import { loadString, saveString } from "@/shared/utils/storage-array";
+
 /** 偏好：是否在卡片中常驻显示 hostname（持久化到 localStorage） */
 const SHOW_HOST_KEY = "app:bookmark-tree:showHost";
 
 function readShowHost(): boolean {
-  try {
-    return localStorage.getItem(SHOW_HOST_KEY) === "1";
-  } catch {
-    return false;
-  }
+  return loadString(SHOW_HOST_KEY) === "1";
 }
 
 function writeShowHost(v: boolean) {
-  try {
-    localStorage.setItem(SHOW_HOST_KEY, v ? "1" : "0");
-  } catch {
-    /* ignore */
-  }
+  saveString(SHOW_HOST_KEY, v ? "1" : "0");
 }
 
 /** 上下文：是否显示 hostname */
@@ -560,7 +554,7 @@ const PanZoom = forwardRef<
       <div
         className="app-bm-tree__panzoom-toolbar"
         role="toolbar"
-        aria-label={t('画布缩放')}
+        aria-label={t("画布缩放")}
         onMouseDown={(e) => e.stopPropagation()}
         onDoubleClick={(e) => e.stopPropagation()}
       >
@@ -574,8 +568,8 @@ const PanZoom = forwardRef<
             const rect = vp.getBoundingClientRect();
             zoomAt(scale - ZOOM_STEP, rect.width / 2, rect.height / 2);
           }}
-          title={t('缩小')}
-          aria-label={t('缩小')}
+          title={t("缩小")}
+          aria-label={t("缩小")}
           disabled={scale <= ZOOM_MIN + 1e-3}
         >
           <ZoomOut size={ICON_SIZE.SMALL} />
@@ -585,8 +579,8 @@ const PanZoom = forwardRef<
           size="small"
           className={styles["app-bm-tree__panzoom-percent"]}
           onClick={reset}
-          title={t('重置缩放')}
-          aria-label={t('重置缩放')}
+          title={t("重置缩放")}
+          aria-label={t("重置缩放")}
         >
           {zoomPercent}%
         </Button>
@@ -600,8 +594,8 @@ const PanZoom = forwardRef<
             const rect = vp.getBoundingClientRect();
             zoomAt(scale + ZOOM_STEP, rect.width / 2, rect.height / 2);
           }}
-          title={t('放大')}
-          aria-label={t('放大')}
+          title={t("放大")}
+          aria-label={t("放大")}
           disabled={scale >= ZOOM_MAX - 1e-3}
         >
           <ZoomIn size={ICON_SIZE.SMALL} />
@@ -616,8 +610,8 @@ const PanZoom = forwardRef<
           size="small"
           className={styles["app-bm-tree__panzoom-btn"]}
           onClick={fit}
-          title={t('适应画布')}
-          aria-label={t('适应画布')}
+          title={t("适应画布")}
+          aria-label={t("适应画布")}
         >
           <Maximize2 size={ICON_SIZE.SMALL} />
         </Button>
@@ -626,8 +620,8 @@ const PanZoom = forwardRef<
           size="small"
           className={styles["app-bm-tree__panzoom-btn"]}
           onClick={reset}
-          title={t('重置缩放')}
-          aria-label={t('重置缩放')}
+          title={t("重置缩放")}
+          aria-label={t("重置缩放")}
         >
           <RotateCcw size={ICON_SIZE.SMALL} />
         </Button>
@@ -680,8 +674,8 @@ export function BookmarkTreeView({
       type="text"
       className={`${styles["panzoom-btn"]}${showHost ? ` ${styles["panzoom-btn--active"]}` : ""}`}
       onClick={toggleShowHost}
-      title={showHost ? t('隐藏域名') : t('显示域名')}
-      aria-label={showHost ? t('隐藏域名') : t('显示域名')}
+      title={showHost ? t("隐藏域名") : t("显示域名")}
+      aria-label={showHost ? t("隐藏域名") : t("显示域名")}
       aria-pressed={showHost}
     >
       {showHost ? <Eye size={ICON_SIZE.SMALL} /> : <EyeOff size={ICON_SIZE.SMALL} />}

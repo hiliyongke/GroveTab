@@ -13,13 +13,14 @@
  *   5. 后续归档读写自动路由到 IndexedDB
  */
 
-import type { ArchivedSession } from '@/shared/types';
-import { CONFIG } from '@/shared/config';
-import { APP_RESOURCE_NAMES, STORAGE_KEYS } from '@/shared/config/storage-keys';
+import type { ArchivedSession } from "@/shared/types";
+import { CONFIG } from "@/shared/config";
+import { APP_RESOURCE_NAMES, STORAGE_KEYS } from "@/shared/config/storage-keys";
+import { getStorageBytesInUse, getStorageLocal, removeStorageLocal } from "@/chrome/storage";
 
-const DB_NAME = `${APP_RESOURCE_NAMES.videoDb.replace(/-video$/, '')}-db`;
+const DB_NAME = `${APP_RESOURCE_NAMES.videoDb.replace(/-video$/, "")}-db`;
 const DB_VERSION = CONFIG.cache.dbVersion;
-const SESSIONS_STORE = 'sessions';
+const SESSIONS_STORE = "sessions";
 const QUOTA_THRESHOLD = CONFIG.cache.idbQuotaThreshold; // 可配置阈值
 
 /** IndexedDB 实例缓存 */
@@ -48,7 +49,7 @@ function openDB(): Promise<IDBDatabase> {
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(SESSIONS_STORE)) {
-        db.createObjectStore(SESSIONS_STORE, { keyPath: 'id' });
+        db.createObjectStore(SESSIONS_STORE, { keyPath: "id" });
       }
     };
 
@@ -57,7 +58,7 @@ function openDB(): Promise<IDBDatabase> {
       resolve(dbInstance);
     };
 
-    request.onerror = () => reject(toIDBError(request.error, 'openDB'));
+    request.onerror = () => reject(toIDBError(request.error, "openDB"));
   });
 }
 
@@ -66,9 +67,9 @@ function openDB(): Promise<IDBDatabase> {
  */
 export async function shouldFallbackToIDB(): Promise<boolean> {
   try {
-    const usedBytes = await chrome.storage.local.getBytesInUse(null);
+    const usedBytes = await getStorageBytesInUse(null);
     const totalBytes = 10 * 1024 * 1024; // chrome.storage.local 上限 10MB
-    return (usedBytes / totalBytes) >= QUOTA_THRESHOLD;
+    return usedBytes / totalBytes >= QUOTA_THRESHOLD;
   } catch {
     return false;
   }
@@ -81,7 +82,7 @@ export async function shouldFallbackToIDB(): Promise<boolean> {
  */
 async function migrateSessionsToIDB(): Promise<number> {
   // 1. 读取 chrome.storage.local 中的 sessions
-  const result = await chrome.storage.local.get(STORAGE_KEYS.sessions);
+  const result = await getStorageLocal(STORAGE_KEYS.sessions);
   const rawSessions: unknown = result[STORAGE_KEYS.sessions];
   const sessions = isArchivedSessionArray(rawSessions) ? rawSessions : [];
 
@@ -89,7 +90,7 @@ async function migrateSessionsToIDB(): Promise<number> {
 
   // 2. 写入 IndexedDB
   const db = await openDB();
-  const tx = db.transaction(SESSIONS_STORE, 'readwrite');
+  const tx = db.transaction(SESSIONS_STORE, "readwrite");
   const store = tx.objectStore(SESSIONS_STORE);
 
   for (const session of sessions) {
@@ -98,11 +99,11 @@ async function migrateSessionsToIDB(): Promise<number> {
 
   await new Promise<void>((resolve, reject) => {
     tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(toIDBError(tx.error, 'migrateSessionsToIDB'));
+    tx.onerror = () => reject(toIDBError(tx.error, "migrateSessionsToIDB"));
   });
 
   // 3. 从 chrome.storage.local 删除
-  await chrome.storage.local.remove(STORAGE_KEYS.sessions);
+  await removeStorageLocal(STORAGE_KEYS.sessions);
 
   console.log(`[IDB Fallback] Migrated ${sessions.length} sessions to IndexedDB`);
   return sessions.length;
@@ -113,13 +114,13 @@ async function migrateSessionsToIDB(): Promise<number> {
  */
 export async function getSessionsFromIDB(): Promise<ArchivedSession[]> {
   const db = await openDB();
-  const tx = db.transaction(SESSIONS_STORE, 'readonly');
+  const tx = db.transaction(SESSIONS_STORE, "readonly");
   const store = tx.objectStore(SESSIONS_STORE);
 
   return new Promise((resolve, reject) => {
     const request = store.getAll();
     request.onsuccess = () => resolve(request.result as ArchivedSession[]);
-    request.onerror = () => reject(toIDBError(request.error, 'getSessionsFromIDB'));
+    request.onerror = () => reject(toIDBError(request.error, "getSessionsFromIDB"));
   });
 }
 
@@ -128,7 +129,7 @@ export async function getSessionsFromIDB(): Promise<ArchivedSession[]> {
  */
 export async function saveSessionsToIDB(sessions: ArchivedSession[]): Promise<void> {
   const db = await openDB();
-  const tx = db.transaction(SESSIONS_STORE, 'readwrite');
+  const tx = db.transaction(SESSIONS_STORE, "readwrite");
   const store = tx.objectStore(SESSIONS_STORE);
 
   // 清空旧数据
@@ -139,7 +140,7 @@ export async function saveSessionsToIDB(sessions: ArchivedSession[]): Promise<vo
 
   await new Promise<void>((resolve, reject) => {
     tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(toIDBError(tx.error, 'saveSessionsToIDB'));
+    tx.onerror = () => reject(toIDBError(tx.error, "saveSessionsToIDB"));
   });
 }
 
@@ -149,13 +150,13 @@ export async function saveSessionsToIDB(sessions: ArchivedSession[]): Promise<vo
 export async function hasIDBData(): Promise<boolean> {
   try {
     const db = await openDB();
-    const tx = db.transaction(SESSIONS_STORE, 'readonly');
+    const tx = db.transaction(SESSIONS_STORE, "readonly");
     const store = tx.objectStore(SESSIONS_STORE);
 
     return new Promise((resolve, reject) => {
       const request = store.count();
       request.onsuccess = () => resolve(request.result > 0);
-      request.onerror = () => reject(toIDBError(request.error, 'hasIDBData'));
+      request.onerror = () => reject(toIDBError(request.error, "hasIDBData"));
     });
   } catch {
     return false;
@@ -179,6 +180,6 @@ export async function autoFallbackIfNeeded(): Promise<void> {
 
     await migrateSessionsToIDB();
   } catch (err) {
-    console.error('[IDB Fallback] Auto-migration failed:', err);
+    console.error("[IDB Fallback] Auto-migration failed:", err);
   }
 }

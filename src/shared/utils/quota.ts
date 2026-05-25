@@ -2,6 +2,8 @@
  * QuotaMonitor — Storage capacity monitoring with 8 MiB warning threshold
  */
 
+import { getStorageBytesInUse } from "@/chrome/storage";
+
 const WARNING_THRESHOLD = 8 * 1024 * 1024; // 8 MiB
 
 export interface QuotaStatus {
@@ -14,13 +16,8 @@ export interface QuotaStatus {
 /** Get current storage usage */
 export async function getQuotaStatus(): Promise<QuotaStatus> {
   const totalBytes = 10 * 1024 * 1024; // chrome.storage.local limit
-  let usedBytes = 0;
-  try {
-    usedBytes = await chrome.storage.local.getBytesInUse(null);
-  } catch {
-  // 兜底：从数据大小估算
-    usedBytes = 0;
-  }
+  // getStorageBytesInUse 内部已做异常兜底，出错时返回 0
+  const usedBytes = await getStorageBytesInUse(null);
   const percentage = Math.round((usedBytes / totalBytes) * 100);
   const isWarning = usedBytes >= WARNING_THRESHOLD;
 

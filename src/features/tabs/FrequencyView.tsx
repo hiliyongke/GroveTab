@@ -15,6 +15,7 @@ import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { Tag, Flex, Typography } from "antd";
 import { CONFIG } from "@/shared/config";
 import { STORAGE_KEYS } from "@/shared/config/storage-keys";
+import { storageOnChanged } from "@/chrome";
 import styles from "./styles/views.module.less";
 
 const MAX_DISPLAY = CONFIG.ui.maxDisplay;
@@ -37,14 +38,12 @@ export function FrequencyView() {
   }, [statsLoaded, loadStats]);
 
   useEffect(() => {
-    if (typeof chrome === "undefined" || chrome.storage?.onChanged === undefined) return;
-    const listener = (changes: Record<string, chrome.storage.StorageChange>, areaName: string) => {
+    const unsubscribe = storageOnChanged((changes, areaName) => {
       if (areaName === "local" && changes[STORAGE_KEYS.stats] !== undefined) {
         void loadStats();
       }
-    };
-    chrome.storage.onChanged.addListener(listener);
-    return () => chrome.storage.onChanged.removeListener(listener);
+    });
+    return unsubscribe;
   }, [loadStats]);
 
   const sortedTabs = useMemo(() => {
@@ -70,11 +69,11 @@ export function FrequencyView() {
       <Flex className={styles["app-frequency-header"]} align="center" gap="small">
         <Flame size={ICON_SIZE.MEDIUM} className={styles["app-frequency-header-icon"]} />
         <Typography.Text className={styles["app-frequency-header-copy"]}>
-          {t('最常使用的 {count} 个标签页', { count: sortedTabs.length })}
+          {t("最常使用的 {count} 个标签页", { count: sortedTabs.length })}
         </Typography.Text>
         {isFallback && (
           <Tag bordered={false} color="default" className={styles["app-frequency-rebuild-tag"]}>
-            {t('数据重建中')}
+            {t("数据重建中")}
           </Tag>
         )}
       </Flex>

@@ -12,6 +12,7 @@
 
 import type { BookmarkNode } from "@/chrome/bookmarks";
 import { flattenBookmarks, removeBookmark, moveBookmark, createBookmark } from "@/chrome/bookmarks";
+import { fetchNoCors } from "@/chrome/fetch";
 import { normalizeUrl } from "@/shared/utils/dedupe";
 import { extractHostname } from "@/chrome/utils";
 
@@ -97,12 +98,7 @@ async function checkOne(b: BookmarkNode): Promise<BookmarkHealth> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), HEALTH_TIMEOUT_MS);
   try {
-    const resp = await fetch(url, {
-      method: "GET",
-      mode: "no-cors",
-      signal: controller.signal,
-      redirect: "follow",
-    });
+    const resp = await fetchNoCors(url, controller.signal);
     clearTimeout(timer);
     // no-cors 模式 status 始终 0；认为"能联通"就是 ok
     return { bookmark: b, status: "ok", httpStatus: resp.status };

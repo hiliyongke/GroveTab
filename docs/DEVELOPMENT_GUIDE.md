@@ -24,38 +24,39 @@
 15. [构建与发布流程](#15-构建与发布流程)
 16. [Chrome 扩展开发规范](#16-chrome-扩展开发规范)
 17. [性能规范](#17-性能规范)
-18. [Review 检查清单](#18-review-检查清单)
+18. [React 极致性能最佳实践](#18-react-极致性能最佳实践)
+19. [Review 检查清单](#19-review-检查清单)
 
 ---
 
 ## 1. 技术栈总览
 
-| 分类 | 技术 | 版本 | 说明 |
-|------|------|------|------|
-| 运行时 | React | ^19 | 函数组件 + Hooks，禁止 Class 组件 |
-| 语言 | TypeScript | ^6 | 严格模式，全量类型覆盖 |
-| 构建 | Vite | ^8 | 开发服务器 + 生产构建 |
-| UI 组件库 | Ant Design | ^6 | 唯一 UI 组件库，禁止混用其他组件库 |
-| 状态管理 | Zustand | ^5 | 按 slice 拆分，禁止 Redux/MobX |
-| 样式 | Less + CSS Modules | ^4 | 组件级样式隔离 |
-| 图标 | lucide-react | ^1 | 唯一图标库，禁止混用 |
-| 动画 | motion | ^12 | Framer Motion 继任者 |
-| 拖拽 | @dnd-kit | ^6/^10 | 无障碍拖拽 |
-| 虚拟列表 | @tanstack/react-virtual | ^3 | 长列表性能优化 |
-| 搜索 | minisearch | ^7 | 本地全文搜索 |
-| 日期 | dayjs | ^1 | 禁止使用 moment.js |
-| 拼音 | pinyin-pro | ^3 | 中文拼音搜索支持 |
-| 快捷键 | tinykeys | ^3 | 键盘快捷键绑定 |
-| 域名解析 | tldts | ^7 | URL/域名解析 |
-| ID 生成 | nanoid | ^5 | 唯一 ID 生成 |
-| 包管理 | pnpm | ^9 | 禁止使用 npm/yarn |
-| 测试 | Vitest | ^4 | 单元测试框架 |
-| Lint | ESLint | ^10 | Flat Config 模式 |
-| 格式化 | Prettier | ^3 | 统一代码格式 |
-| 样式 Lint | Stylelint | ^17 | Less/CSS 规范检查 |
-| 提交规范 | commitlint | ^19 | Conventional Commits |
-| 发布 | release-it | ^20 | 自动化版本发布 |
-| 死代码检测 | knip | ^6 | 未使用文件/导出检测 |
+| 分类       | 技术                    | 版本   | 说明                               |
+| ---------- | ----------------------- | ------ | ---------------------------------- |
+| 运行时     | React                   | ^19    | 函数组件 + Hooks，禁止 Class 组件  |
+| 语言       | TypeScript              | ^6     | 严格模式，全量类型覆盖             |
+| 构建       | Vite                    | ^8     | 开发服务器 + 生产构建              |
+| UI 组件库  | Ant Design              | ^6     | 唯一 UI 组件库，禁止混用其他组件库 |
+| 状态管理   | Zustand                 | ^5     | 按 slice 拆分，禁止 Redux/MobX     |
+| 样式       | Less + CSS Modules      | ^4     | 组件级样式隔离                     |
+| 图标       | lucide-react            | ^1     | 唯一图标库，禁止混用               |
+| 动画       | motion                  | ^12    | Framer Motion 继任者               |
+| 拖拽       | @dnd-kit                | ^6/^10 | 无障碍拖拽                         |
+| 虚拟列表   | @tanstack/react-virtual | ^3     | 长列表性能优化                     |
+| 搜索       | minisearch              | ^7     | 本地全文搜索                       |
+| 日期       | dayjs                   | ^1     | 禁止使用 moment.js                 |
+| 拼音       | pinyin-pro              | ^3     | 中文拼音搜索支持                   |
+| 快捷键     | tinykeys                | ^3     | 键盘快捷键绑定                     |
+| 域名解析   | tldts                   | ^7     | URL/域名解析                       |
+| ID 生成    | nanoid                  | ^5     | 唯一 ID 生成                       |
+| 包管理     | pnpm                    | ^9     | 禁止使用 npm/yarn                  |
+| 测试       | Vitest                  | ^4     | 单元测试框架                       |
+| Lint       | ESLint                  | ^10    | Flat Config 模式                   |
+| 格式化     | Prettier                | ^3     | 统一代码格式                       |
+| 样式 Lint  | Stylelint               | ^17    | Less/CSS 规范检查                  |
+| 提交规范   | commitlint              | ^19    | Conventional Commits               |
+| 发布       | release-it              | ^20    | 自动化版本发布                     |
+| 死代码检测 | knip                    | ^6     | 未使用文件/导出检测                |
 
 ### 核心原则
 
@@ -104,16 +105,16 @@ src/
 
 ### 目录命名规则
 
-| 类型 | 命名规则 | 示例 |
-|------|---------|------|
-| 功能目录 | `kebab-case` | `quick-start/`, `developer-tools/` |
-| React 组件文件 | `PascalCase.tsx` | `TabItem.tsx`, `SearchBox.tsx` |
-| CSS Modules 文件 | `PascalCase.module.less` | `SearchBox.module.less` |
-| Hook 文件 | `use-kebab-case.ts` | `use-search-results.ts` |
-| 工具/服务文件 | `kebab-case.ts` | `archive-operations.ts` |
-| 类型文件 | `kebab-case.ts` | `settings.ts`, `tab.ts` |
-| 配置文件 | `kebab-case.ts` | `search-engines.ts`, `z-index.ts` |
-| Store 切片 | `kebab-case-slice.ts` | `tabs-slice.ts`, `settings-slice.ts` |
+| 类型             | 命名规则                 | 示例                                 |
+| ---------------- | ------------------------ | ------------------------------------ |
+| 功能目录         | `kebab-case`             | `quick-start/`, `developer-tools/`   |
+| React 组件文件   | `PascalCase.tsx`         | `TabItem.tsx`, `SearchBox.tsx`       |
+| CSS Modules 文件 | `PascalCase.module.less` | `SearchBox.module.less`              |
+| Hook 文件        | `use-kebab-case.ts`      | `use-search-results.ts`              |
+| 工具/服务文件    | `kebab-case.ts`          | `archive-operations.ts`              |
+| 类型文件         | `kebab-case.ts`          | `settings.ts`, `tab.ts`              |
+| 配置文件         | `kebab-case.ts`          | `search-engines.ts`, `z-index.ts`    |
+| Store 切片       | `kebab-case-slice.ts`    | `tabs-slice.ts`, `settings-slice.ts` |
 
 ### Feature 模块内部结构
 
@@ -216,18 +217,20 @@ type TabItem = {
 };
 
 // ✅ 正确：使用 type 定义联合类型/工具类型
-type ViewMode = 'list' | 'grid' | 'kanban';
+type ViewMode = "list" | "grid" | "kanban";
 type TabId = number;
 
 // ✅ 正确：使用 import type 导入纯类型
-import type { TabItem } from '@/shared/types';
+import type { TabItem } from "@/shared/types";
 
 // ❌ 错误：使用 any
 const data: any = fetchData();
 
 // ✅ 正确：使用 unknown + 类型守卫
 const data: unknown = fetchData();
-if (isTabItem(data)) { /* ... */ }
+if (isTabItem(data)) {
+  /* ... */
+}
 ```
 
 ### 数组类型规范
@@ -246,13 +249,13 @@ const callbacks: Array<() => void> = [];
 
 ```typescript
 // ✅ 优先使用可选链
-const title = tab?.title ?? '无标题';
+const title = tab?.title ?? "无标题";
 
 // ✅ 使用空值合并而非 ||（避免 0/false 被误判）
 const count = settings.count ?? 10;
 
 // ❌ 避免非空断言（!），除非有充分理由
-const el = document.getElementById('root')!; // 需要注释说明原因
+const el = document.getElementById("root")!; // 需要注释说明原因
 ```
 
 ### 函数类型规范
@@ -262,10 +265,14 @@ const el = document.getElementById('root')!; // 需要注释说明原因
 type Handler = (event: MouseEvent) => void;
 
 // ✅ 正确：异步函数明确返回类型
-async function fetchTabs(): Promise<TabItem[]> { /* ... */ }
+async function fetchTabs(): Promise<TabItem[]> {
+  /* ... */
+}
 
 // ✅ 正确：事件处理函数命名以 handle 开头
-const handleClick = (e: React.MouseEvent) => { /* ... */ };
+const handleClick = (e: React.MouseEvent) => {
+  /* ... */
+};
 ```
 
 ---
@@ -291,19 +298,21 @@ interface TabItemProps {
 export default () => <div />;
 
 // ❌ 错误：Class 组件（项目不使用）
-class TabItem extends React.Component { /* ... */ }
+class TabItem extends React.Component {
+  /* ... */
+}
 ```
 
 ### 禁止使用的原生 HTML 标签
 
 以下原生标签被 ESLint 规则强制禁止，必须使用 Antd 对应组件：
 
-| 禁止 | 替代方案 |
-|------|---------|
-| `<button>` | `<Button>` from antd |
-| `<h1>` ~ `<h6>` | `<Typography.Title level={1~6}>` |
-| `<p>` | `<Typography.Paragraph>` 或 `<Typography.Text>` |
-| `<input>` | `<Input>` / `<InputNumber>` / `<Checkbox>` 等 |
+| 禁止            | 替代方案                                        |
+| --------------- | ----------------------------------------------- |
+| `<button>`      | `<Button>` from antd                            |
+| `<h1>` ~ `<h6>` | `<Typography.Title level={1~6}>`                |
+| `<p>`           | `<Typography.Paragraph>` 或 `<Typography.Text>` |
+| `<input>`       | `<Input>` / `<InputNumber>` / `<Checkbox>` 等   |
 
 ### 禁止内联样式
 
@@ -328,7 +337,9 @@ const cssVars = { '--custom-color': accentColor };
 ```tsx
 // ✅ 正确：自定义 Hook 以 use 开头，放在 hooks/ 目录
 // features/search/hooks/use-search-results.ts
-export function useSearchResults(query: string) { /* ... */ }
+export function useSearchResults(query: string) {
+  /* ... */
+}
 
 // ✅ 正确：useEffect 依赖项完整声明
 useEffect(() => {
@@ -342,15 +353,15 @@ useEffect(() => {
 }, []);
 
 // ✅ 正确：使用 useCallback 稳定化回调
-const handleClose = useCallback((id: number) => {
-  closeTab(id);
-}, [closeTab]);
+const handleClose = useCallback(
+  (id: number) => {
+    closeTab(id);
+  },
+  [closeTab],
+);
 
 // ✅ 正确：使用 useMemo 缓存昂贵计算
-const filteredTabs = useMemo(
-  () => tabs.filter(t => t.title.includes(query)),
-  [tabs, query],
-);
+const filteredTabs = useMemo(() => tabs.filter((t) => t.title.includes(query)), [tabs, query]);
 ```
 
 ### 组件文件大小限制
@@ -369,7 +380,7 @@ const filteredTabs = useMemo(
 
 ```typescript
 // store/xxx-slice.ts
-import { create } from 'zustand';
+import { create } from "zustand";
 
 interface XxxState {
   // 状态字段
@@ -390,7 +401,7 @@ export const useXxxStore = create<XxxState & XxxActions>((set, get) => ({
 
   // 操作实现
   addItem: (item) => set((state) => ({ items: [...state.items, item] })),
-  removeItem: (id) => set((state) => ({ items: state.items.filter(i => i.id !== id) })),
+  removeItem: (id) => set((state) => ({ items: state.items.filter((i) => i.id !== id) })),
 }));
 ```
 
@@ -405,24 +416,22 @@ const addTab = useTabsStore((s) => s.addTab);
 const store = useTabsStore();
 
 // ✅ 正确：多个字段时使用 shallow 比较
-import { useShallow } from 'zustand/react/shallow';
-const { tabs, loading } = useTabsStore(
-  useShallow((s) => ({ tabs: s.tabs, loading: s.loading }))
-);
+import { useShallow } from "zustand/react/shallow";
+const { tabs, loading } = useTabsStore(useShallow((s) => ({ tabs: s.tabs, loading: s.loading })));
 ```
 
 ### 现有 Store 切片
 
-| 切片文件 | Hook | 职责 |
-|---------|------|------|
-| `tabs-slice.ts` | `useTabsStore` | 标签页数据与操作 |
-| `settings-slice.ts` | `useSettingsStore` | 用户设置 |
-| `undo-slice.ts` | `useUndoStore` | 撤销/重做历史 |
-| `metadata-slice.ts` | `useMetadataStore` | 标签页元数据（OG、favicon） |
-| `selection-slice.ts` | `useSelectionStore` | 多选状态 |
-| `stats-slice.ts` | `useStatsStore` | 使用统计 |
-| `kanban-slice.ts` | `useKanbanStore` | 看板视图状态 |
-| `speed-dial-slice.ts` | `useSpeedDialStore` | 快速拨号数据 |
+| 切片文件              | Hook                | 职责                        |
+| --------------------- | ------------------- | --------------------------- |
+| `tabs-slice.ts`       | `useTabsStore`      | 标签页数据与操作            |
+| `settings-slice.ts`   | `useSettingsStore`  | 用户设置                    |
+| `undo-slice.ts`       | `useUndoStore`      | 撤销/重做历史               |
+| `metadata-slice.ts`   | `useMetadataStore`  | 标签页元数据（OG、favicon） |
+| `selection-slice.ts`  | `useSelectionStore` | 多选状态                    |
+| `stats-slice.ts`      | `useStatsStore`     | 使用统计                    |
+| `kanban-slice.ts`     | `useKanbanStore`    | 看板视图状态                |
+| `speed-dial-slice.ts` | `useSpeedDialStore` | 快速拨号数据                |
 
 ---
 
@@ -456,12 +465,12 @@ import styles from './SearchBox.module.less';
 
 ```less
 // ✅ 正确：引入全局变量（reference 模式，不重复输出 CSS）
-@import (reference) '~@/shared/styles/_variables.less';
+@import (reference) "~@/shared/styles/_variables.less";
 
 .container {
-  padding: @app-space-4;        // 16px
+  padding: @app-space-4; // 16px
   border-radius: @app-radius-md; // 6px
-  gap: @app-card-gap;           // 16px
+  gap: @app-card-gap; // 16px
 }
 ```
 
@@ -469,18 +478,34 @@ import styles from './SearchBox.module.less';
 
 ```less
 // ❌ 错误：硬编码十六进制颜色（Stylelint 会报错）
-.title { color: #1677ff; }
-.bg { background: #f5f5f5; }
+.title {
+  color: #1677ff;
+}
+.bg {
+  background: #f5f5f5;
+}
 
 // ✅ 正确：使用 Antd CSS Token 变量
-.title { color: var(--ant-color-primary); }
-.text { color: var(--ant-color-text); }
-.bg { background: var(--ant-color-bg-container); }
+.title {
+  color: var(--ant-color-primary);
+}
+.text {
+  color: var(--ant-color-text);
+}
+.bg {
+  background: var(--ant-color-bg-container);
+}
 
 // ✅ 正确：使用业务语义变量（--app-* 前缀）
-.card { background: var(--app-card-bg); }
-.hover:hover { background: var(--app-bg-hover); }
-.selected { background: var(--app-bg-selected); }
+.card {
+  background: var(--app-card-bg);
+}
+.hover:hover {
+  background: var(--app-bg-hover);
+}
+.selected {
+  background: var(--app-bg-selected);
+}
 ```
 
 ### 布局规范（强制）
@@ -488,8 +513,8 @@ import styles from './SearchBox.module.less';
 ```less
 // ❌ 错误：在 Less 中手写 flex/grid 布局（Stylelint 会报错）
 .container {
-  display: flex;        // 禁止
-  display: grid;        // 禁止
+  display: flex; // 禁止
+  display: grid; // 禁止
   display: inline-flex; // 禁止
 }
 
@@ -502,10 +527,13 @@ import styles from './SearchBox.module.less';
 
 ```less
 // ❌ 禁止使用 !important（Stylelint 会报错）
-.title { color: red !important; }
+.title {
+  color: red !important;
+}
 
 // ❌ 禁止空块
-.empty { }
+.empty {
+}
 
 // ❌ 禁止重复属性
 .item {
@@ -558,53 +586,53 @@ import styles from './SearchBox.module.less';
 
 ### 常用组件对应关系
 
-| 场景 | 使用组件 |
-|------|---------|
-| 按钮 | `<Button>` |
+| 场景           | 使用组件                                                              |
+| -------------- | --------------------------------------------------------------------- |
+| 按钮           | `<Button>`                                                            |
 | 文字/标题/段落 | `<Typography.Text>` / `<Typography.Title>` / `<Typography.Paragraph>` |
-| 输入框 | `<Input>` / `<Input.Search>` / `<InputNumber>` |
-| 选择器 | `<Select>` / `<Segmented>` |
-| 开关 | `<Switch>` |
-| 复选框 | `<Checkbox>` |
-| 单选框 | `<Radio>` / `<Radio.Group>` |
-| 弹窗 | `<Modal>` |
-| 抽屉 | `<Drawer>` |
-| 提示 | `<Tooltip>` / `<Popover>` |
-| 标签 | `<Tag>` |
-| 徽标 | `<Badge>` |
-| 列表 | `<List>` |
-| 卡片 | `<Card>` |
-| 分割线 | `<Divider>` |
-| 水平排列 | `<Flex>` |
-| 间距 | `<Space>` |
-| 空状态 | `<Empty>` 或 `<FeatureEmptyState>`（项目封装） |
-| 加载 | `<Spin>` |
-| 进度 | `<Progress>` |
-| 菜单 | `<Menu>` / `<Dropdown>` |
-| 面包屑 | `<Breadcrumb>` |
-| 标签页 | `<Tabs>` |
-| 折叠 | `<Collapse>` |
-| 树形 | `<Tree>` |
-| 表格 | `<Table>` |
-| 表单 | `<Form>` |
-| 消息提示 | `feedback.message.*`（项目封装，见 `shared/ui/feedback.ts`） |
-| 通知 | `feedback.notification.*` |
-| 确认弹窗 | `feedback.modal.confirm(...)` |
+| 输入框         | `<Input>` / `<Input.Search>` / `<InputNumber>`                        |
+| 选择器         | `<Select>` / `<Segmented>`                                            |
+| 开关           | `<Switch>`                                                            |
+| 复选框         | `<Checkbox>`                                                          |
+| 单选框         | `<Radio>` / `<Radio.Group>`                                           |
+| 弹窗           | `<Modal>`                                                             |
+| 抽屉           | `<Drawer>`                                                            |
+| 提示           | `<Tooltip>` / `<Popover>`                                             |
+| 标签           | `<Tag>`                                                               |
+| 徽标           | `<Badge>`                                                             |
+| 列表           | `<List>`                                                              |
+| 卡片           | `<Card>`                                                              |
+| 分割线         | `<Divider>`                                                           |
+| 水平排列       | `<Flex>`                                                              |
+| 间距           | `<Space>`                                                             |
+| 空状态         | `<Empty>` 或 `<FeatureEmptyState>`（项目封装）                        |
+| 加载           | `<Spin>`                                                              |
+| 进度           | `<Progress>`                                                          |
+| 菜单           | `<Menu>` / `<Dropdown>`                                               |
+| 面包屑         | `<Breadcrumb>`                                                        |
+| 标签页         | `<Tabs>`                                                              |
+| 折叠           | `<Collapse>`                                                          |
+| 树形           | `<Tree>`                                                              |
+| 表格           | `<Table>`                                                             |
+| 表单           | `<Form>`                                                              |
+| 消息提示       | `feedback.message.*`（项目封装，见 `shared/ui/feedback.ts`）          |
+| 通知           | `feedback.notification.*`                                             |
+| 确认弹窗       | `feedback.modal.confirm(...)`                                         |
 
 ### 反馈 API 使用规范
 
 ```typescript
 // ✅ 正确：使用项目封装的 feedback 模块（支持在非组件上下文中调用）
-import { feedback } from '@/shared/ui/feedback';
+import { feedback } from "@/shared/ui/feedback";
 
-feedback.message.success('操作成功');
-feedback.message.error('操作失败');
-feedback.notification.info({ message: '提示', description: '详情' });
-feedback.modal.confirm({ title: '确认删除？', onOk: handleDelete });
+feedback.message.success("操作成功");
+feedback.message.error("操作失败");
+feedback.notification.info({ message: "提示", description: "详情" });
+feedback.modal.confirm({ title: "确认删除？", onOk: handleDelete });
 
 // ❌ 错误：直接使用 antd 静态方法（不支持主题）
-import { message } from 'antd';
-message.success('操作成功');
+import { message } from "antd";
+message.success("操作成功");
 ```
 
 ---
@@ -641,9 +669,7 @@ Antd Token（--ant-*）
 
 ```html
 <!-- 由 AntdThemeProvider 自动管理，开发者不需要手动设置 -->
-<html data-theme="light|dark"
-      data-skin="glassmorphism|solid|..."
-      data-texture-noise>
+<html data-theme="light|dark" data-skin="glassmorphism|solid|..." data-texture-noise></html>
 ```
 
 ### 新增皮肤规范
@@ -716,12 +742,12 @@ const msg = '操作成功';
 
 ### 翻译函数说明
 
-| 函数/组件 | 适用场景 | 来源 |
-|-----------|---------|------|
-| `useT()` → `t(key, params?)` | React 组件内 | `@/shared/i18n` |
-| `translate(key, params?)` | Store、Chrome 回调、非 React 环境 | `@/shared/i18n/core` |
-| `translateWithLocale(locale, key, params?)` | 需要指定语言的场景 | `@/shared/i18n/core` |
-| `<Trans>` | JSX 中含嵌套标签的富文本 | `@/shared/i18n` |
+| 函数/组件                                   | 适用场景                          | 来源                 |
+| ------------------------------------------- | --------------------------------- | -------------------- |
+| `useT()` → `t(key, params?)`                | React 组件内                      | `@/shared/i18n`      |
+| `translate(key, params?)`                   | Store、Chrome 回调、非 React 环境 | `@/shared/i18n/core` |
+| `translateWithLocale(locale, key, params?)` | 需要指定语言的场景                | `@/shared/i18n/core` |
+| `<Trans>`                                   | JSX 中含嵌套标签的富文本          | `@/shared/i18n`      |
 
 ### 新增翻译词条
 
@@ -742,11 +768,11 @@ pnpm i18n:check
 
 `pnpm i18n:check` 会输出三类问题：
 
-| 问题类型 | 说明 | 修复方式 |
-|---------|------|---------|
-| 英文翻译缺失 | `en.json` 中 `en` 字段为空 | 补充 `i18n/source/en.json` |
-| 未使用词条 | 字典中有 key 但代码中未使用 | 可安全删除 |
-| 未登记词条 | 代码中有中文但字典中无对应 key | 运行 `pnpm i18n:scan` 补录 |
+| 问题类型     | 说明                           | 修复方式                   |
+| ------------ | ------------------------------ | -------------------------- |
+| 英文翻译缺失 | `en.json` 中 `en` 字段为空     | 补充 `i18n/source/en.json` |
+| 未使用词条   | 字典中有 key 但代码中未使用    | 可安全删除                 |
+| 未登记词条   | 代码中有中文但字典中无对应 key | 运行 `pnpm i18n:scan` 补录 |
 
 ### 调试工具
 
@@ -756,7 +782,7 @@ pnpm i18n:check
 const { t } = useT();
 
 // 返回完整调试信息：inputKey / resolvedKey / zh-CN / en / result / isMissing
-const info = t.debug('设置');
+const info = t.debug("设置");
 console.log(info);
 // {
 //   inputKey: '设置',
@@ -777,10 +803,10 @@ console.log(info);
 const { setLocale } = useT();
 
 // 切换到英文
-setLocale('en');
+setLocale("en");
 
 // 切换到中文
-setLocale('zh-CN');
+setLocale("zh-CN");
 ```
 
 语言切换时会自动加载目标语言的翻译文件（仅加载目标语言，避免不必要的网络请求）。
@@ -789,8 +815,8 @@ setLocale('zh-CN');
 
 ```typescript
 // 使用 dayjs（已配置语言）
-import dayjs from 'dayjs';
-dayjs(date).format('YYYY年MM月DD日');
+import dayjs from "dayjs";
+dayjs(date).format("YYYY年MM月DD日");
 ```
 
 ---
@@ -799,34 +825,34 @@ dayjs(date).format('YYYY年MM月DD日');
 
 项目配置了以下路径别名，**必须使用别名而非相对路径**（跨目录引用时）：
 
-| 别名 | 对应路径 | 使用场景 |
-|------|---------|---------|
-| `@/*` | `src/*` | 通用，最常用 |
-| `@pages/*` | `src/pages/*` | 页面入口 |
-| `@features/*` | `src/features/*` | 功能模块 |
-| `@shared/*` | `src/shared/*` | 共享资源 |
-| `@store/*` | `src/store/*` | 状态管理 |
-| `@services/*` | `src/services/*` | 业务服务 |
-| `@repos/*` | `src/repositories/*` | 数据仓库 |
-| `@chrome/*` | `src/chrome/*` | Chrome API 封装 |
+| 别名          | 对应路径             | 使用场景        |
+| ------------- | -------------------- | --------------- |
+| `@/*`         | `src/*`              | 通用，最常用    |
+| `@pages/*`    | `src/pages/*`        | 页面入口        |
+| `@features/*` | `src/features/*`     | 功能模块        |
+| `@shared/*`   | `src/shared/*`       | 共享资源        |
+| `@store/*`    | `src/store/*`        | 状态管理        |
+| `@services/*` | `src/services/*`     | 业务服务        |
+| `@repos/*`    | `src/repositories/*` | 数据仓库        |
+| `@chrome/*`   | `src/chrome/*`       | Chrome API 封装 |
 
 ```typescript
 // ✅ 正确：使用路径别名
-import { useTabsStore } from '@/store';
-import type { TabItem } from '@/shared/types';
-import { translate } from '@/shared/i18n/core';
+import { useTabsStore } from "@/store";
+import type { TabItem } from "@/shared/types";
+import { translate } from "@/shared/i18n/core";
 
 // ❌ 错误：跨目录使用相对路径
-import { useTabsStore } from '../../../store';
-import type { TabItem } from '../../shared/types';
+import { useTabsStore } from "../../../store";
+import type { TabItem } from "../../shared/types";
 ```
 
 **例外**：同一目录内的文件可以使用相对路径：
 
 ```typescript
 // ✅ 同目录内可以使用相对路径
-import { helper } from './utils';
-import styles from './Component.module.less';
+import { helper } from "./utils";
+import styles from "./Component.module.less";
 ```
 
 ---
@@ -845,12 +871,12 @@ tests/
 
 ### 测试覆盖率要求
 
-| 指标 | 最低要求 |
-|------|---------|
-| Lines | 80% |
-| Functions | 80% |
-| Branches | 70% |
-| Statements | 80% |
+| 指标       | 最低要求 |
+| ---------- | -------- |
+| Lines      | 80%      |
+| Functions  | 80%      |
+| Branches   | 70%      |
+| Statements | 80%      |
 
 ### 测试编写规范
 
@@ -858,22 +884,22 @@ tests/
 // ✅ 正确：测试文件命名
 // tests/unit/utils/tab-utils.test.ts
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
-describe('tabUtils', () => {
-  describe('groupByDomain', () => {
-    it('should group tabs by domain', () => {
+describe("tabUtils", () => {
+  describe("groupByDomain", () => {
+    it("should group tabs by domain", () => {
       const tabs = [
-        { id: 1, url: 'https://github.com/a' },
-        { id: 2, url: 'https://github.com/b' },
-        { id: 3, url: 'https://google.com' },
+        { id: 1, url: "https://github.com/a" },
+        { id: 2, url: "https://github.com/b" },
+        { id: 3, url: "https://google.com" },
       ];
       const result = groupByDomain(tabs);
-      expect(result['github.com']).toHaveLength(2);
-      expect(result['google.com']).toHaveLength(1);
+      expect(result["github.com"]).toHaveLength(2);
+      expect(result["google.com"]).toHaveLength(1);
     });
 
-    it('should handle empty array', () => {
+    it("should handle empty array", () => {
       expect(groupByDomain([])).toEqual({});
     });
   });
@@ -903,19 +929,19 @@ describe('tabUtils', () => {
 
 ### 提交类型（type）
 
-| 类型 | 说明 | 出现在 CHANGELOG |
-|------|------|----------------|
-| `feat` | 新功能 | ✅ ✨ Features |
-| `fix` | Bug 修复 | ✅ 🐛 Bug Fixes |
-| `perf` | 性能优化 | ✅ ⚡ Performance |
-| `refactor` | 重构（不影响功能） | ✅ ♻️ Refactoring |
-| `docs` | 文档更新 | ✅ 📝 Documentation |
-| `build` | 构建系统变更 | ✅ 🏗️ Build System |
-| `ci` | CI/CD 配置变更 | ✅ 👷 CI/CD |
-| `revert` | 回滚提交 | ✅ ⏪ Reverts |
-| `style` | 代码格式（不影响逻辑） | ❌ 隐藏 |
-| `test` | 测试相关 | ❌ 隐藏 |
-| `chore` | 杂项（依赖更新等） | ❌ 隐藏 |
+| 类型       | 说明                   | 出现在 CHANGELOG    |
+| ---------- | ---------------------- | ------------------- |
+| `feat`     | 新功能                 | ✅ ✨ Features      |
+| `fix`      | Bug 修复               | ✅ 🐛 Bug Fixes     |
+| `perf`     | 性能优化               | ✅ ⚡ Performance   |
+| `refactor` | 重构（不影响功能）     | ✅ ♻️ Refactoring   |
+| `docs`     | 文档更新               | ✅ 📝 Documentation |
+| `build`    | 构建系统变更           | ✅ 🏗️ Build System  |
+| `ci`       | CI/CD 配置变更         | ✅ 👷 CI/CD         |
+| `revert`   | 回滚提交               | ✅ ⏪ Reverts       |
+| `style`    | 代码格式（不影响逻辑） | ❌ 隐藏             |
+| `test`     | 测试相关               | ❌ 隐藏             |
+| `chore`    | 杂项（依赖更新等）     | ❌ 隐藏             |
 
 ### 提交示例
 
@@ -958,41 +984,41 @@ chore/xxx     # 杂项分支
 
 ### ESLint 关键规则
 
-| 规则 | 级别 | 说明 |
-|------|------|------|
-| `@typescript-eslint/no-unused-vars` | error | 未使用变量（`_` 前缀除外） |
-| `@typescript-eslint/no-floating-promises` | error | 未处理的 Promise |
-| `@typescript-eslint/no-misused-promises` | error | Promise 误用 |
-| `react-hooks/exhaustive-deps` | warn | Hook 依赖项完整性 |
-| `i18n-zh/no-bare-zh-in-jsx` | warn | JSX 中硬编码中文 |
-| `i18n-zh/no-bare-zh-in-js` | warn | JS 中硬编码中文 |
-| `i18n-zh/no-explicit-any` | error | 禁止使用 TypeScript `any` 类型 |
-| `tab/no-whole-store-subscription` | error | 禁止订阅整个 Zustand Store |
-| `tab/no-relative-cross-dir-import` | error | 跨目录引用必须使用路径别名 |
-| `tab/no-direct-chrome-api` | warn | 禁止业务代码直接调用 `chrome.*` |
-| `tab/no-direct-storage-api` | error | 禁止非 repos 层调用 `chrome.storage.*` |
-| `tab/no-direct-feedback-api` | warn | 禁止直接使用 antd 静态 message/notification/modal |
-| `tab/prefer-named-function-component` | warn | 禁止匿名箭头函数组件 |
-| `tab/no-default-export-anonymous-component` | warn | 禁止 export default 匿名组件 |
-| `tab/no-large-component` | warn | 组件文件超过 400 行时警告 |
-| `tab/no-direct-web-storage-api` | error | 禁止业务代码直接使用 `localStorage`/`sessionStorage` |
-| `tab/no-direct-window-api` | warn | 禁止业务代码直接调用 `window.*` API |
-| `tab/no-direct-navigator-api` | warn | 禁止业务代码直接调用 `navigator.*` Web API |
-| `tab/no-direct-fetch` | error | 禁止业务层直接使用 `fetch`，应通过 services 层 |
-| `no-restricted-syntax` (button/h1~h6/p/input) | error | 禁止原生 HTML 标签 |
-| `no-restricted-syntax` (inline style) | error | 禁止内联 style 对象 |
-| `css-modules/no-unused-class` | warn | CSS Modules 未使用的 class |
-| `css-modules/no-undef-class` | warn | CSS Modules 未定义的 class |
+| 规则                                          | 级别  | 说明                                                 |
+| --------------------------------------------- | ----- | ---------------------------------------------------- |
+| `@typescript-eslint/no-unused-vars`           | error | 未使用变量（`_` 前缀除外）                           |
+| `@typescript-eslint/no-floating-promises`     | error | 未处理的 Promise                                     |
+| `@typescript-eslint/no-misused-promises`      | error | Promise 误用                                         |
+| `react-hooks/exhaustive-deps`                 | warn  | Hook 依赖项完整性                                    |
+| `i18n-zh/no-bare-zh-in-jsx`                   | warn  | JSX 中硬编码中文                                     |
+| `i18n-zh/no-bare-zh-in-js`                    | warn  | JS 中硬编码中文                                      |
+| `i18n-zh/no-explicit-any`                     | error | 禁止使用 TypeScript `any` 类型                       |
+| `tab/no-whole-store-subscription`             | error | 禁止订阅整个 Zustand Store                           |
+| `tab/no-relative-cross-dir-import`            | error | 跨目录引用必须使用路径别名                           |
+| `tab/no-direct-chrome-api`                    | warn  | 禁止业务代码直接调用 `chrome.*`                      |
+| `tab/no-direct-storage-api`                   | error | 禁止非 repos 层调用 `chrome.storage.*`               |
+| `tab/no-direct-feedback-api`                  | warn  | 禁止直接使用 antd 静态 message/notification/modal    |
+| `tab/prefer-named-function-component`         | warn  | 禁止匿名箭头函数组件                                 |
+| `tab/no-default-export-anonymous-component`   | warn  | 禁止 export default 匿名组件                         |
+| `tab/no-large-component`                      | warn  | 组件文件超过 400 行时警告                            |
+| `tab/no-direct-web-storage-api`               | error | 禁止业务代码直接使用 `localStorage`/`sessionStorage` |
+| `tab/no-direct-window-api`                    | warn  | 禁止业务代码直接调用 `window.*` API                  |
+| `tab/no-direct-navigator-api`                 | warn  | 禁止业务代码直接调用 `navigator.*` Web API           |
+| `tab/no-direct-fetch`                         | error | 禁止业务层直接使用 `fetch`，应通过 services 层       |
+| `no-restricted-syntax` (button/h1~h6/p/input) | error | 禁止原生 HTML 标签                                   |
+| `no-restricted-syntax` (inline style)         | error | 禁止内联 style 对象                                  |
+| `css-modules/no-unused-class`                 | warn  | CSS Modules 未使用的 class                           |
+| `css-modules/no-undef-class`                  | warn  | CSS Modules 未定义的 class                           |
 
 ### Stylelint 关键规则
 
-| 规则 | 说明 |
-|------|------|
+| 规则                                         | 说明                      |
+| -------------------------------------------- | ------------------------- |
 | `declaration-property-value-disallowed-list` | 禁止 `display: flex/grid` |
-| `color-no-hex` | 禁止十六进制颜色 |
-| `declaration-no-important` | 禁止 `!important` |
-| `declaration-block-no-duplicate-properties` | 禁止重复属性 |
-| `block-no-empty` | 禁止空块 |
+| `color-no-hex`                               | 禁止十六进制颜色          |
+| `declaration-no-important`                   | 禁止 `!important`         |
+| `declaration-block-no-duplicate-properties`  | 禁止重复属性              |
+| `block-no-empty`                             | 禁止空块                  |
 
 ### Prettier 配置
 
@@ -1013,6 +1039,7 @@ chore/xxx     # 杂项分支
 ### Knip 死代码检测
 
 定期运行 `pnpm knip` 检测：
+
 - 未使用的文件
 - 未使用的导出
 - 未使用的依赖
@@ -1020,6 +1047,7 @@ chore/xxx     # 杂项分支
 ### 依赖检查
 
 运行 `pnpm depcheck` 检测：
+
 - 未使用的 npm 依赖
 - 缺少的 npm 依赖
 
@@ -1085,7 +1113,7 @@ PATCH：向后兼容的 Bug 修复
 
 ```typescript
 // ✅ 正确：通过封装层调用
-import { getTabs, closeTab } from '@chrome/tabs';
+import { getTabs, closeTab } from "@chrome/tabs";
 const tabs = await getTabs({ currentWindow: true });
 
 // ❌ 错误：直接调用 Chrome API
@@ -1114,11 +1142,14 @@ const tabs = await chrome.tabs.query({ currentWindow: true });
 
 ## 17. 性能规范
 
+> 本章为宏观性能策略（代码分割、存储配额、动画）。
+> React 组件级极致性能规范见 [第 18 章](#18-react-极致性能最佳实践)。
+
 ### 渲染性能
 
 ```tsx
 // ✅ 长列表必须使用虚拟滚动
-import { useVirtualizer } from '@tanstack/react-virtual';
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 // ✅ 昂贵计算使用 useMemo
 const sortedTabs = useMemo(() => [...tabs].sort(compareFn), [tabs]);
@@ -1136,11 +1167,11 @@ export const TabCard = React.memo(function TabCard({ tab }: Props) {
 
 ```tsx
 // ✅ 使用 motion 库（GPU 加速）
-import { motion } from 'motion/react';
-<motion.div animate={{ opacity: 1 }} initial={{ opacity: 0 }} />
+import { motion } from "motion/react";
+<motion.div animate={{ opacity: 1 }} initial={{ opacity: 0 }} />;
 
 // ✅ 尊重用户的减少动画偏好
-import { useReducedMotion } from '@/shared/hooks';
+import { useReducedMotion } from "@/shared/hooks";
 const prefersReduced = useReducedMotion();
 const duration = prefersReduced ? 0 : 0.3;
 ```
@@ -1158,7 +1189,494 @@ const duration = prefersReduced ? 0 : 0.3;
 
 ---
 
-## 18. Review 检查清单
+---
+
+## 18. React 极致性能最佳实践
+
+> 本章是对第 5 章（React 组件规范）和第 17 章（性能规范）的深度补充，
+> 聚焦于「写出来就是高性能」的编码习惯，而非事后优化。
+
+### 18.1 渲染优化三原则
+
+| 原则               | 含义                   | 工具                               |
+| ------------------ | ---------------------- | ---------------------------------- |
+| **减少渲染次数**   | 只在真正需要时重新渲染 | `React.memo` / 精确 Zustand 选择器 |
+| **减少渲染工作量** | 每次渲染尽可能少做计算 | `useMemo` / `useCallback`          |
+| **减少渲染范围**   | 状态变化只影响最小子树 | 状态下移 / 组件拆分                |
+
+### 18.2 React.memo 使用规范
+
+```tsx
+// ✅ 正确：纯展示组件（Props 不变则不重渲染）
+export const TabCard = React.memo(function TabCard({ tab, onClose }: TabCardProps) {
+  return (
+    <div className={styles.card}>
+      <Typography.Text>{tab.title}</Typography.Text>
+      <Button onClick={() => onClose(tab.id)} />
+    </div>
+  );
+});
+
+// ✅ 正确：自定义比较函数（仅比较关键字段，避免深比较开销）
+export const TabCard = React.memo(
+  function TabCard({ tab, onClose }: TabCardProps) { /* ... */ },
+  (prev, next) => prev.tab.id === next.tab.id && prev.tab.title === next.tab.title,
+);
+
+// ❌ 错误：memo 包裹后仍传入每次渲染都新建的对象/函数（memo 失效）
+<TabCard tab={tab} onClose={(id) => closeTab(id)} />  // 箭头函数每次新建
+<TabCard tab={tab} style={{ padding: 8 }} />           // 对象字面量每次新建
+
+// ✅ 正确：配合 useCallback 稳定化回调，确保 memo 真正生效
+const handleClose = useCallback((id: number) => closeTab(id), [closeTab]);
+<TabCard tab={tab} onClose={handleClose} />
+```
+
+**何时不需要 memo：**
+
+- 组件本身渲染极快（< 0.1ms），memo 的比较开销可能更大
+- 组件的 Props 几乎每次都变化（memo 永远不命中）
+- 组件是顶层页面组件（渲染频率低）
+
+### 18.3 useMemo / useCallback 使用规范
+
+```tsx
+// ✅ 必须 useMemo：昂贵计算（排序、过滤、搜索大数组）
+const sortedTabs = useMemo(() => [...tabs].sort((a, b) => a.title.localeCompare(b.title)), [tabs]);
+
+// ✅ 必须 useMemo：作为其他 memo 组件的 Props 传入的对象
+const tabStyle = useMemo(() => ({ "--accent": tab.color }), [tab.color]);
+
+// ✅ 必须 useCallback：作为 memo 组件 Props 传入的函数
+const handleClose = useCallback(
+  (id: number) => {
+    closeTab(id);
+  },
+  [closeTab],
+);
+
+// ✅ 必须 useCallback：作为 useEffect 依赖项的函数
+const fetchData = useCallback(async () => {
+  const data = await loadTabs();
+  setTabs(data);
+}, [loadTabs]);
+
+useEffect(() => {
+  void fetchData();
+}, [fetchData]);
+
+// ❌ 不必要的 useMemo（简单计算，memo 开销 > 计算开销）
+const count = useMemo(() => tabs.length, [tabs]); // 直接写 tabs.length
+const title = useMemo(() => `共 ${count} 个`, [count]); // 直接写模板字符串
+
+// ❌ 不必要的 useCallback（不传给子组件、不作为 effect 依赖）
+const handleInternalClick = useCallback(() => {
+  setOpen(true);
+}, []); // 仅在组件内部使用，无需 useCallback
+```
+
+**黄金法则：useMemo/useCallback 只在以下场景使用：**
+
+1. 计算结果作为另一个 `useMemo`/`useEffect` 的依赖
+2. 值/函数传给 `React.memo` 包裹的子组件
+3. 计算本身确实昂贵（可用 `console.time` 验证 > 1ms）
+
+### 18.4 状态设计规范（避免无效重渲染）
+
+```tsx
+// ❌ 错误：将无关状态合并到同一个 useState
+const [state, setState] = useState({ count: 0, name: "", isOpen: false });
+// count 变化会导致依赖 name/isOpen 的子组件也重渲染
+
+// ✅ 正确：拆分独立状态
+const [count, setCount] = useState(0);
+const [name, setName] = useState("");
+const [isOpen, setIsOpen] = useState(false);
+
+// ❌ 错误：在父组件存储可以下移的状态
+function TabList() {
+  const [tooltipVisible, setTooltipVisible] = useState(false); // 只有 TabCard 用
+  return <TabCard onTooltipChange={setTooltipVisible} />;
+}
+
+// ✅ 正确：状态下移到真正使用它的组件
+function TabCard() {
+  const [tooltipVisible, setTooltipVisible] = useState(false); // 状态内聚
+  return <Tooltip open={tooltipVisible}>...</Tooltip>;
+}
+
+// ❌ 错误：派生状态存入 state（导致双重渲染）
+const [tabs, setTabs] = useState<Tab[]>([]);
+const [filteredTabs, setFilteredTabs] = useState<Tab[]>([]); // 派生值
+useEffect(() => {
+  setFilteredTabs(tabs.filter((t) => t.pinned)); // 多一次渲染
+}, [tabs]);
+
+// ✅ 正确：派生值用 useMemo 计算
+const [tabs, setTabs] = useState<Tab[]>([]);
+const filteredTabs = useMemo(() => tabs.filter((t) => t.pinned), [tabs]);
+```
+
+### 18.5 useEffect 精细化规范
+
+```tsx
+// ❌ 错误：effect 依赖粒度过粗（整个对象作为依赖）
+useEffect(() => {
+  document.title = settings.title;
+}, [settings]); // settings 任意字段变化都触发
+
+// ✅ 正确：只依赖真正用到的字段
+useEffect(() => {
+  document.title = settings.title;
+}, [settings.title]);
+
+// ❌ 错误：在 effect 内部定义函数（每次渲染都是新函数引用）
+useEffect(() => {
+  async function load() {
+    const data = await fetchTabs();
+    setTabs(data);
+  }
+  void load();
+}, [fetchTabs]); // fetchTabs 若不稳定则死循环
+
+// ✅ 正确：用 useCallback 稳定化，或直接内联不提取
+useEffect(() => {
+  let cancelled = false;
+  void fetchTabs().then((data) => {
+    if (!cancelled) setTabs(data);
+  });
+  return () => {
+    cancelled = true;
+  }; // 清理：避免竞态条件
+}, [fetchTabs]);
+
+// ✅ 正确：竞态条件处理（异步 effect 必须处理取消）
+useEffect(() => {
+  const controller = new AbortController();
+  void loadData(controller.signal).then(setData);
+  return () => controller.abort();
+}, [id]);
+
+// ❌ 错误：不必要的 effect（可以在事件处理中直接计算）
+useEffect(() => {
+  setFullName(`${firstName} ${lastName}`);
+}, [firstName, lastName]);
+
+// ✅ 正确：事件驱动的派生值直接计算，无需 effect
+const fullName = `${firstName} ${lastName}`; // 或 useMemo
+```
+
+### 18.6 列表渲染规范
+
+```tsx
+// ❌ 错误：使用数组下标作为 key（列表重排时导致状态错乱）
+{
+  tabs.map((tab, index) => <TabCard key={index} tab={tab} />);
+}
+
+// ✅ 正确：使用稳定唯一 ID 作为 key
+{
+  tabs.map((tab) => <TabCard key={tab.id} tab={tab} />);
+}
+
+// ❌ 错误：超过 50 条数据不使用虚拟滚动
+{
+  allTabs.map((tab) => <TabCard key={tab.id} tab={tab} />);
+} // 500 条 = 500 个 DOM
+
+// ✅ 正确：长列表必须使用虚拟滚动
+import { useVirtualizer } from "@tanstack/react-virtual";
+
+function TabList({ tabs }: { tabs: Tab[] }) {
+  const parentRef = useRef<HTMLDivElement>(null);
+  const virtualizer = useVirtualizer({
+    count: tabs.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 48, // 预估行高
+    overscan: 5, // 预渲染屏外条数
+  });
+
+  return (
+    <div ref={parentRef} className={styles.scrollContainer}>
+      <div style={{ height: virtualizer.getTotalSize() }}>
+        {virtualizer.getVirtualItems().map((virtualItem) => (
+          <div key={virtualItem.key} style={{ transform: `translateY(${virtualItem.start}px)` }}>
+            <TabCard tab={tabs[virtualItem.index]!} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ✅ 正确：列表项组件用 React.memo 包裹，避免兄弟节点更新时全量重渲染
+const TabCard = React.memo(function TabCard({ tab }: { tab: Tab }) {
+  return <div>{tab.title}</div>;
+});
+```
+
+### 18.7 Context 性能规范
+
+```tsx
+// ❌ 错误：Context value 是每次渲染都新建的对象（所有消费者都重渲染）
+function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setTheme] = useState("light");
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme }}>
+      {" "}
+      {/* 每次新对象 */}
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+// ✅ 正确：用 useMemo 稳定化 Context value
+function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setTheme] = useState("light");
+  const value = useMemo(() => ({ theme, setTheme }), [theme]);
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+}
+
+// ✅ 更优：读写分离，订阅读的组件不因写函数变化而重渲染
+const ThemeStateContext = React.createContext<string>("light");
+const ThemeDispatchContext = React.createContext<React.Dispatch<React.SetStateAction<string>>>(
+  () => {},
+);
+
+function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setTheme] = useState("light");
+  return (
+    <ThemeDispatchContext.Provider value={setTheme}>
+      <ThemeStateContext.Provider value={theme}>{children}</ThemeStateContext.Provider>
+    </ThemeDispatchContext.Provider>
+  );
+}
+```
+
+> **注意**：本项目全局状态优先使用 Zustand（精确订阅，天然避免 Context 性能问题）。
+> Context 仅用于主题注入等低频变化的场景。
+
+### 18.8 图片与资源懒加载
+
+```tsx
+// ✅ 正确：图片懒加载（视口外不加载）
+<img src={tab.favicon} loading="lazy" alt="" />;
+
+// ✅ 正确：大型功能模块代码分割
+const SettingsPanel = React.lazy(() => import("@features/settings/SettingsPanel"));
+
+function App() {
+  return (
+    <Suspense fallback={<Spin />}>
+      <SettingsPanel />
+    </Suspense>
+  );
+}
+
+// ✅ 正确：预加载即将需要的模块（hover 时触发）
+const preloadSettings = () => import("@features/settings/SettingsPanel");
+
+<Button
+  onMouseEnter={preloadSettings} // hover 时预加载
+  onClick={openSettings}
+>
+  设置
+</Button>;
+```
+
+### 18.9 事件处理性能规范
+
+```tsx
+// ❌ 错误：在 JSX 中直接写箭头函数（每次渲染新建函数，破坏 memo）
+<Button onClick={() => handleClose(tab.id)}>关闭</Button>;
+
+// ✅ 正确：提前绑定参数，配合 useCallback
+const handleClose = useCallback(() => {
+  closeTab(tab.id);
+}, [closeTab, tab.id]);
+<Button onClick={handleClose}>关闭</Button>;
+
+// ✅ 正确：列表场景使用事件委托（单个监听器处理所有子项）
+function TabList({ tabs }: { tabs: Tab[] }) {
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      const tabId = (e.target as HTMLElement).closest("[data-tab-id]")?.getAttribute("data-tab-id");
+      if (tabId) activateTab(Number(tabId));
+    },
+    [activateTab],
+  );
+
+  return (
+    <div onClick={handleClick}>
+      {" "}
+      {/* 委托到父容器 */}
+      {tabs.map((tab) => (
+        <div key={tab.id} data-tab-id={tab.id}>
+          {tab.title}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ✅ 正确：高频事件（scroll/resize/input）必须节流或防抖
+import { useDebouncedCallback } from "use-debounce"; // 或手写
+
+const handleSearch = useDebouncedCallback((value: string) => {
+  setQuery(value);
+}, 200);
+
+<Input onChange={(e) => handleSearch(e.target.value)} />;
+```
+
+### 18.10 Ref 使用规范
+
+```tsx
+// ✅ 正确：DOM 引用使用 useRef
+const inputRef = useRef<HTMLInputElement>(null);
+useEffect(() => {
+  inputRef.current?.focus();
+}, []);
+
+// ✅ 正确：存储不触发重渲染的可变值（如定时器 ID、上一次的值）
+const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+const prevValueRef = useRef(value);
+
+// ✅ 正确：用 useRef 缓存最新回调（解决闭包陈旧值问题）
+function useLatestCallback<T extends (...args: never[]) => unknown>(fn: T): T {
+  const ref = useRef(fn);
+  useEffect(() => {
+    ref.current = fn;
+  });
+  return useCallback((...args) => ref.current(...args), []) as T;
+}
+
+// ❌ 错误：用 ref 替代 state 存储需要触发渲染的值
+const countRef = useRef(0);
+countRef.current += 1; // 不会触发重渲染，UI 不更新
+```
+
+### 18.11 性能测量与调试
+
+```tsx
+// ✅ 开发阶段：使用 React DevTools Profiler 录制渲染
+// 1. 打开 React DevTools → Profiler 标签
+// 2. 点击录制，执行操作，停止录制
+// 3. 查看 Flamegraph，找出渲染耗时 > 16ms 的组件
+
+// ✅ 代码中标记性能测量点
+const startTime = performance.now();
+const result = expensiveComputation(data);
+console.log(`计算耗时: ${performance.now() - startTime}ms`);
+
+// ✅ 使用 React 内置的 Profiler 组件（生产环境也可用）
+import { Profiler } from "react";
+
+<Profiler
+  id="TabList"
+  onRender={(id, phase, actualDuration) => {
+    if (actualDuration > 16) {
+      console.warn(`[Perf] ${id} ${phase} 渲染耗时 ${actualDuration.toFixed(2)}ms`);
+    }
+  }}
+>
+  <TabList tabs={tabs} />
+</Profiler>;
+
+// ✅ 使用 why-did-you-render 检测意外重渲染（仅开发环境）
+// 在 src/pages/newtab/main.tsx 顶部引入（已配置则跳过）
+import "@/shared/utils/why-did-you-render"; // 开发环境专用
+```
+
+### 18.12 React 19 新特性使用规范
+
+```tsx
+// ✅ 使用 use() Hook 读取 Promise（替代 useEffect + useState 的异步模式）
+import { use, Suspense } from "react";
+
+function TabDetails({ tabPromise }: { tabPromise: Promise<Tab> }) {
+  const tab = use(tabPromise); // 自动 Suspense
+  return <Typography.Text>{tab.title}</Typography.Text>;
+}
+
+// 父组件用 Suspense 包裹
+<Suspense fallback={<Spin />}>
+  <TabDetails tabPromise={fetchTab(id)} />
+</Suspense>;
+
+// ✅ 使用 useTransition 标记非紧急更新（保持 UI 响应）
+import { useTransition } from "react";
+
+function SearchBox() {
+  const [query, setQuery] = useState("");
+  const [isPending, startTransition] = useTransition();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value); // 紧急：立即更新输入框
+    startTransition(() => {
+      setSearchResults(search(e.target.value)); // 非紧急：可被打断
+    });
+  };
+
+  return (
+    <>
+      <Input value={query} onChange={handleChange} />
+      {isPending ? <Spin size="small" /> : <ResultList />}
+    </>
+  );
+}
+
+// ✅ 使用 useDeferredValue 延迟非紧急值（替代手动防抖）
+import { useDeferredValue } from "react";
+
+function TabList({ query }: { query: string }) {
+  const deferredQuery = useDeferredValue(query); // 输入时不阻塞
+  const filtered = useMemo(
+    () => tabs.filter((t) => t.title.includes(deferredQuery)),
+    [tabs, deferredQuery],
+  );
+  return <VirtualList items={filtered} />;
+}
+
+// ✅ 使用 useOptimistic 实现乐观更新（操作即时反馈）
+import { useOptimistic } from "react";
+
+function TabItem({ tab }: { tab: Tab }) {
+  const [optimisticTab, setOptimisticTab] = useOptimistic(tab);
+
+  const handlePin = async () => {
+    setOptimisticTab({ ...tab, pinned: true }); // 立即更新 UI
+    await pinTab(tab.id); // 异步持久化
+  };
+
+  return (
+    <div>
+      {optimisticTab.pinned ? "📌" : ""}
+      {optimisticTab.title}
+    </div>
+  );
+}
+```
+
+### 18.13 性能检查清单（编码时自检）
+
+在提交代码前，对每个新增/修改的组件执行以下自检：
+
+| 检查项                                                         | 说明                                       |
+| -------------------------------------------------------------- | ------------------------------------------ |
+| Props 中有无每次新建的对象/数组/函数？                         | 若有，用 `useMemo`/`useCallback` 稳定化    |
+| 子组件是否应该用 `React.memo` 包裹？                           | 纯展示组件、列表项组件必须包裹             |
+| `useEffect` 依赖是否最小化？                                   | 只依赖真正用到的字段，不依赖整个对象       |
+| 列表超过 50 条是否使用虚拟滚动？                               | 使用 `@tanstack/react-virtual`             |
+| 高频事件是否有防抖/节流？                                      | `input`/`scroll`/`resize` 必须处理         |
+| 状态是否可以下移？                                             | 状态只在最近的公共祖先存储                 |
+| 派生值是否用 `useMemo` 而非 `useEffect + setState`？           | 避免双重渲染                               |
+| 异步 effect 是否处理了竞态条件？                               | 使用 `AbortController` 或 `cancelled` 标志 |
+| 是否使用了 `useTransition`/`useDeferredValue` 处理非紧急更新？ | 搜索、过滤等场景                           |
+
+---
+
+## 19. Review 检查清单
 
 ### 代码质量
 
@@ -1202,10 +1720,19 @@ const duration = prefersReduced ? 0 : 0.3;
 
 ### 性能
 
-- [ ] 长列表使用虚拟滚动
-- [ ] 昂贵计算使用 `useMemo`
-- [ ] 事件回调使用 `useCallback`
+- [ ] 长列表（> 50 条）使用虚拟滚动（`@tanstack/react-virtual`）
+- [ ] 昂贵计算使用 `useMemo`（> 1ms 的计算）
+- [ ] 传给 `memo` 子组件的回调使用 `useCallback` 稳定化
 - [ ] 动画尊重 `prefers-reduced-motion`
+- [ ] 纯展示组件和列表项组件使用 `React.memo` 包裹
+- [ ] Props 中无每次渲染都新建的对象/数组字面量
+- [ ] 派生值用 `useMemo` 计算，而非 `useEffect + setState`
+- [ ] 高频事件（input/scroll/resize）有防抖或节流处理
+- [ ] 异步 `useEffect` 处理了竞态条件（`AbortController` 或 `cancelled` 标志）
+- [ ] 搜索/过滤等非紧急更新使用 `useTransition` 或 `useDeferredValue`
+- [ ] `useEffect` 依赖项精确到字段，未依赖整个对象
+- [ ] 状态已下移到最近的使用方，未在父组件存储子组件私有状态
+- [ ] Context value 已用 `useMemo` 稳定化（或使用 Zustand 替代）
 
 ### Git 规范
 
@@ -1225,31 +1752,31 @@ const duration = prefersReduced ? 0 : 0.3;
 
 ### ESLint 错误速查
 
-| 错误信息 | 原因 | 修复方式 |
-|---------|------|---------|
-| `禁止使用原生 <button>` | 使用了原生 button 标签 | 替换为 `<Button>` from antd |
-| `JSX 中发现硬编码中文` | 未使用 i18n | 用 `{t('...')}` 包裹 |
-| `字符串中发现硬编码中文` | 未使用 i18n | 用 `translate('...')` 包裹 |
-| `禁止使用内联 style={{...}}` | 内联样式 | 移到 CSS Modules |
-| `no-floating-promises` | 未 await 的 Promise | 添加 `void` 或 `await` |
-| `no-unused-vars` | 未使用的变量 | 删除或加 `_` 前缀 |
+| 错误信息                     | 原因                   | 修复方式                    |
+| ---------------------------- | ---------------------- | --------------------------- |
+| `禁止使用原生 <button>`      | 使用了原生 button 标签 | 替换为 `<Button>` from antd |
+| `JSX 中发现硬编码中文`       | 未使用 i18n            | 用 `{t('...')}` 包裹        |
+| `字符串中发现硬编码中文`     | 未使用 i18n            | 用 `translate('...')` 包裹  |
+| `禁止使用内联 style={{...}}` | 内联样式               | 移到 CSS Modules            |
+| `no-floating-promises`       | 未 await 的 Promise    | 添加 `void` 或 `await`      |
+| `no-unused-vars`             | 未使用的变量           | 删除或加 `_` 前缀           |
 
 ### Stylelint 错误速查
 
-| 错误信息 | 原因 | 修复方式 |
-|---------|------|---------|
-| `Unexpected value "flex" for property "display"` | 手写 flex 布局 | 使用 `<Flex>` 组件 |
-| `Unexpected hex color` | 硬编码颜色 | 使用 `var(--ant-*)` 变量 |
-| `Unexpected invalid option "!important"` | 使用了 !important | 移除，通过 Token 覆盖 |
+| 错误信息                                         | 原因              | 修复方式                 |
+| ------------------------------------------------ | ----------------- | ------------------------ |
+| `Unexpected value "flex" for property "display"` | 手写 flex 布局    | 使用 `<Flex>` 组件       |
+| `Unexpected hex color`                           | 硬编码颜色        | 使用 `var(--ant-*)` 变量 |
+| `Unexpected invalid option "!important"`         | 使用了 !important | 移除，通过 Token 覆盖    |
 
 ### TypeScript 错误速查
 
-| 错误信息 | 原因 | 修复方式 |
-|---------|------|---------|
-| `Object is possibly 'undefined'` | noUncheckedIndexedAccess | 添加可选链或类型守卫 |
-| `Parameter 'xxx' implicitly has an 'any' type` | 缺少类型注解 | 添加明确类型 |
-| `Property 'xxx' does not exist` | 类型不匹配 | 检查类型定义或添加类型守卫 |
+| 错误信息                                       | 原因                     | 修复方式                   |
+| ---------------------------------------------- | ------------------------ | -------------------------- |
+| `Object is possibly 'undefined'`               | noUncheckedIndexedAccess | 添加可选链或类型守卫       |
+| `Parameter 'xxx' implicitly has an 'any' type` | 缺少类型注解             | 添加明确类型               |
+| `Property 'xxx' does not exist`                | 类型不匹配               | 检查类型定义或添加类型守卫 |
 
 ---
 
-*本文档随项目演进持续更新。如有疑问或建议，请提交 Issue 或 PR。*
+_本文档随项目演进持续更新。如有疑问或建议，请提交 Issue 或 PR。_

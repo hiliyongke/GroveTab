@@ -48,3 +48,72 @@ export function saveStringArray(key: string, value: string[]): void {
     // 静默处理存储失败（如配额超出）
   }
 }
+
+/**
+ * 从 localStorage 安全读取字符串值。
+ *
+ * @param key - localStorage 的键名
+ * @returns 字符串值；如果键不存在则返回 null
+ */
+export function loadString(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 将字符串值安全写入 localStorage。
+ *
+ * @param key - localStorage 的键名
+ * @param value - 要存储的字符串值
+ */
+export function saveString(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // 静默处理存储失败（如配额超出）
+  }
+}
+
+/**
+ * 从 sessionStorage 安全读取字符串值。
+ *
+ * @param key - sessionStorage 的键名
+ * @returns 字符串值；如果键不存在则返回 null
+ */
+export function loadSessionString(key: string): string | null {
+  try {
+    return sessionStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 将字符串值安全写入 sessionStorage。
+ *
+ * @param key - sessionStorage 的键名
+ * @param value - 要存储的字符串值
+ */
+export function saveSessionString(key: string, value: string): void {
+  try {
+    sessionStorage.setItem(key, value);
+  } catch {
+    // 静默处理存储失败（如配额超出）
+  }
+}
+
+/**
+ * 从 sessionStorage 安全删除指定键。
+ *
+ * @param key - sessionStorage 的键名
+ */
+export function removeSessionString(key: string): void {
+  try {
+    sessionStorage.removeItem(key);
+  } catch {
+    // 静默处理
+  }
+}

@@ -1,6 +1,6 @@
 /**
  * EnhancedRenameDialog — 增强的命名对话框
- * 
+ *
  * 设计目标：
  * - 提供智能命名建议
  * - 支持标签分类
@@ -8,11 +8,11 @@
  * - 提供更好的视觉反馈
  */
 
-import { useState, useEffect } from 'react';
-import { Modal, Button, Input, Space, Tag, Alert, Divider } from 'antd';
-import { CheckCircle, AlertCircle, Tag as TagIcon } from 'lucide-react';
-import { useT } from '@/shared/i18n';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { Modal, Button, Input, Space, Tag, Alert, Divider } from "antd";
+import { CheckCircle, AlertCircle, Tag as TagIcon } from "lucide-react";
+import { useT } from "@/shared/i18n";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
 
 interface EnhancedRenameDialogProps {
   open: boolean;
@@ -36,101 +36,82 @@ export function EnhancedRenameDialog({
   const { t } = useT();
   const [newName, setNewName] = useState(currentName);
   const [isRenaming, setIsRenaming] = useState(false);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [tags, setTags] = useState<string[]>([]);
 
+  // 派生值：从 tabUrls 提取域名（useMemo，避免重复计算）
+  const domains = useMemo(
+    () =>
+      tabUrls
+        .map((url) => {
+          try {
+            return new URL(url).hostname.replace("www.", "");
+          } catch {
+            return null;
+          }
+        })
+        .filter((d): d is string => d !== null),
+    [tabUrls],
+  );
+
+  // 派生值：命名建议（useMemo，替代 useState + useEffect）
+  const suggestions = useMemo<string[]>(() => {
+    const generated: string[] = [];
+    if (tabCount > 0) {
+      generated.push(`${t("会话")} ${tabCount} ${t("标签页")}`);
+      generated.push(`${tabCount} ${t("标签页")} ${t("来自")} ${new Date().toLocaleDateString()}`);
+    }
+    const topDomains = domains.slice(0, 3);
+    if (topDomains.length > 0) {
+      generated.push(`${topDomains.join(", ")} ${t("标签页")}`);
+      if (topDomains.length === 1) {
+        generated.push(`${topDomains[0]} ${t("会话")}`);
+      }
+    }
+    return generated;
+  }, [tabCount, domains, t]);
+
+  // 派生值：标签列表（useMemo，替代 useState + useEffect）
+  const tags = useMemo<string[]>(() => {
+    const keywords = ["research", "work", "personal", "shopping", "news", "entertainment"];
+    const matchedKeywords = keywords.filter((keyword) =>
+      tabUrls.some((url) => url.toLowerCase().includes(keyword)),
+    );
+    return [...new Set([...domains.slice(0, 5), ...matchedKeywords])].slice(0, 8);
+  }, [domains, tabUrls]);
+
+  // 仅在对话框打开时重置输入状态
   useEffect(() => {
     if (open) {
       setNewName(currentName);
       setIsRenaming(false);
-      generateSuggestions();
-      extractTags();
     }
-  }, [open, currentName, tabUrls]);
+  }, [open, currentName]);
 
-  const generateSuggestions = () => {
-    const generated: string[] = [];
-    
-    // 基于标签页数量生成建议
-    if (tabCount > 0) {
-      generated.push(`${t('会话')} ${tabCount} ${t('标签页')}`);
-      generated.push(`${tabCount} ${t('标签页')} ${t('来自')} ${new Date().toLocaleDateString()}`);
-    }
-    
-    // 基于域名生成建议
-    const domains = tabUrls
-      .map(url => {
-        try {
-          return new URL(url).hostname.replace('www.', '');
-        } catch {
-          return null;
-        }
-      })
-      .filter(Boolean)
-      .slice(0, 3);
-    
-    if (domains.length > 0) {
-      generated.push(`${domains.join(', ')} ${t('标签页')}`);
-      if (domains.length === 1) {
-        generated.push(`${domains[0]} ${t('会话')}`);
-      }
-    }
-    
-    setSuggestions(generated);
-  };
-
-  const extractTags = () => {
-    // 基于域名提取标签
-    const domains = tabUrls
-      .map(url => {
-        try {
-          return new URL(url).hostname.replace('www.', '');
-        } catch {
-          return null;
-        }
-      })
-      .filter((domain): domain is string => domain !== null)
-      .slice(0, 5);
-    
-    // 基于内容关键词提取标签
-    const keywords = ['research', 'work', 'personal', 'shopping', 'news', 'entertainment'];
-    const matchedKeywords = keywords.filter(keyword => 
-      tabUrls.some(url => url.toLowerCase().includes(keyword))
-    );
-    
-    setTags([...new Set([...domains, ...matchedKeywords])].slice(0, 8));
-  };
-
-  const handleRename = async () => {
-    if (!newName.trim()) {
-      return;
-    }
-    
+  const handleRename = useCallback(async () => {
+    if (!newName.trim()) return;
     setIsRenaming(true);
     try {
       await onRenameConfirm(sessionId, newName.trim());
       onClose();
     } catch (error) {
-      console.error('Rename failed:', error);
+      console.error("Rename failed:", error);
     } finally {
       setIsRenaming(false);
     }
-  };
+  }, [newName, onRenameConfirm, sessionId, onClose]);
 
-  const handleSuggestionClick = (suggestion: string) => {
+  const handleSuggestionClick = useCallback((suggestion: string) => {
     setNewName(suggestion);
-  };
+  }, []);
 
-  const handleTagClick = (tag: string) => {
-    const updatedName = newName.trim();
-    if (updatedName.includes(tag)) {
-      // 如果已包含标签，则移除
-      setNewName(updatedName.replace(new RegExp(`\\s*#${tag}\\s*`, 'g'), '').trim());
-    } else {
-      // 否则添加标签
-      setNewName(`${updatedName} #${tag}`.trim());
-    }
-  };
+  const handleTagClick = useCallback((tag: string) => {
+    setNewName((prev) => {
+      const trimmed = prev.trim();
+      if (trimmed.includes(tag)) {
+        return trimmed.replace(new RegExp(`\\s*#${tag}\\s*`, "g"), "").trim();
+      }
+      return `${trimmed} #${tag}`.trim();
+    });
+  }, []);
 
   const isNameValid = newName.trim().length > 0 && newName.trim().length <= 100;
 
@@ -138,11 +119,11 @@ export function EnhancedRenameDialog({
     <Modal
       open={open}
       rootClassName="app-archive-dialog app-archive-rename-dialog"
-      title={t('重命名会话')}
+      title={t("重命名会话")}
       onCancel={onClose}
       footer={[
         <Button key="cancel" onClick={onClose}>
-          {t('取消')}
+          {t("取消")}
         </Button>,
         <Button
           key="rename"
@@ -150,9 +131,11 @@ export function EnhancedRenameDialog({
           icon={<CheckCircle size={ICON_SIZE.MEDIUM} />}
           loading={isRenaming}
           disabled={!isNameValid}
-          onClick={handleRename}
+          onClick={() => {
+            void handleRename();
+          }}
         >
-          {t('确认重命名')}
+          {t("确认重命名")}
         </Button>,
       ]}
       width={520}
@@ -161,32 +144,34 @@ export function EnhancedRenameDialog({
       <Space direction="vertical" size="middle" className="app-archive-dialog__stack">
         {/* 当前名称 */}
         <div className="app-archive-dialog__section">
-          <div className="app-archive-dialog__label">{t('当前名称')}</div>
+          <div className="app-archive-dialog__label">{t("当前名称")}</div>
           <div className="app-archive-dialog__current-name">{currentName}</div>
         </div>
 
         {/* 新名称输入 */}
         <div className="app-archive-dialog__section">
-          <div className="app-archive-dialog__strategy-label">{t('新名称')}</div>
+          <div className="app-archive-dialog__strategy-label">{t("新名称")}</div>
           <Input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            placeholder={t('输入新名称')}
+            placeholder={t("输入新名称")}
             maxLength={100}
             showCount
             autoFocus
-            onPressEnter={handleRename}
+            onPressEnter={() => {
+              void handleRename();
+            }}
           />
         </div>
 
         {/* 命名建议 */}
         {suggestions.length > 0 && (
           <div className="app-archive-dialog__section">
-            <div className="app-archive-dialog__label">{t('推荐名称')}</div>
+            <div className="app-archive-dialog__label">{t("推荐名称")}</div>
             <Space wrap>
-              {suggestions.map((suggestion, index) => (
+              {suggestions.map((suggestion) => (
                 <Tag
-                  key={index}
+                  key={suggestion}
                   color="blue"
                   className="app-archive-dialog__tag"
                   onClick={() => handleSuggestionClick(suggestion)}
@@ -203,13 +188,13 @@ export function EnhancedRenameDialog({
           <div className="app-archive-dialog__section">
             <div className="app-archive-dialog__label app-archive-dialog__tag-label">
               <TagIcon size={12} />
-              {t('标签')}
+              {t("标签")}
             </div>
             <Space wrap>
-              {tags.map((tag, index) => (
+              {tags.map((tag) => (
                 <Tag
-                  key={index}
-                  color={newName.includes(tag) ? 'green' : 'default'}
+                  key={tag}
+                  color={newName.includes(tag) ? "green" : "default"}
                   className="app-archive-dialog__tag"
                   onClick={() => handleTagClick(tag)}
                 >
@@ -223,7 +208,7 @@ export function EnhancedRenameDialog({
         {/* 验证提示 */}
         {!isNameValid && (
           <Alert
-            message={t('名称格式不正确')}
+            message={t("名称格式不正确")}
             type="warning"
             showIcon
             icon={<AlertCircle size={ICON_SIZE.SMALL} />}
@@ -234,9 +219,9 @@ export function EnhancedRenameDialog({
         {/* 预览 */}
         <Divider className="app-archive-dialog__divider" />
         <div className="app-archive-dialog__section">
-          <div className="app-archive-dialog__label">{t('预览')}</div>
-          <div className={`app-archive-dialog__preview-value${isNameValid ? '' : ' is-invalid'}`}>
-            {newName.trim() || t('名称不能为空')}
+          <div className="app-archive-dialog__label">{t("预览")}</div>
+          <div className={`app-archive-dialog__preview-value${isNameValid ? "" : " is-invalid"}`}>
+            {newName.trim() || t("名称不能为空")}
           </div>
         </div>
       </Space>
