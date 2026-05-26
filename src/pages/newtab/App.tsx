@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo, useRef, lazy, Suspense } from "react";
-import { Layout, Spin, Typography, FloatButton, Flex } from "antd";
+import { Layout, Spin, Typography, FloatButton, Flex, Segmented } from "antd";
 import { useTabsStore, useSettingsStore, useSelectionStore } from "@/store";
 import { useShallow } from "zustand/shallow";
 import { useSwBroadcast, useResolvedTheme, useAppInitialization } from "@/shared/hooks";
@@ -21,7 +21,7 @@ import { ViewBottomBar } from "@/features/workspace/ViewBottomBar";
 import { DomainGroupView } from "@/features/tabs/DomainGroupView";
 import { track } from "@/shared/utils/metrics";
 import type { NewtabPageMode } from "@/shared/types";
-import { VALID_VIEWS, type ViewMode } from "@/shared/config/views";
+import { VALID_VIEWS, VIEW_CONFIGS, type ViewMode } from "@/shared/config/views";
 import { registerViews } from "@/shared/config/view-registry";
 import { findDuplicates } from "@/shared/utils/dedupe";
 import { detectIdleTabs } from "@/shared/utils/idle-detect";
@@ -279,6 +279,15 @@ function AppContent() {
   const idleTabsCount = idleTabsArr.length;
   const hasTidySuggestions = duplicateTabsCount > 0 || idleTabsCount > 0;
 
+  const viewSegmentedOptions = useMemo(
+    () =>
+      VIEW_CONFIGS.map((view) => ({
+        value: view.id,
+        label: <span className="app-view-option">{t(view.labelKey)}</span>,
+      })),
+    [t],
+  );
+
   // ── 内容区 className ───────────────────────────────────────────────────────
   const contentShellClassName = [
     "app-content-shell",
@@ -362,16 +371,12 @@ function AppContent() {
         >
           {pageMode === "workspace" && showHeroBar && (
             <HeroBar
-              viewMode={viewMode}
-              onViewChange={handleViewChange}
               onOpenSearch={handleOpenSearch}
               sentinelRef={heroSearchRef}
               showLogo={showHeroLogo}
               showTitle={showHeroTitle}
               showSlogan={showHeroSlogan}
               showSearch={showHeroSearch}
-              showViewSwitcher={showViewSwitcher}
-              viewTabPosition={viewTabPosition}
             />
           )}
 
@@ -384,6 +389,19 @@ function AppContent() {
             )}
 
           {pageMode === "workspace" && <QuickStartLayer onOpenSettings={handleOpenSettings} />}
+
+          {pageMode === "workspace" && showViewSwitcher && viewTabPosition === "top" && (
+            <div className="app-view-switcher-wrap">
+              <Segmented<ViewMode>
+                value={viewMode}
+                onChange={(v: ViewMode) => handleViewChange(v)}
+                options={viewSegmentedOptions}
+                size="middle"
+                className="app-view-switcher"
+                classNames={{ item: "app-view-switcher__item" }}
+              />
+            </div>
+          )}
 
           {pageMode === "trending" && (
             <Suspense

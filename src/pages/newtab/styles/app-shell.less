@@ -288,9 +288,13 @@
 .app-view-option {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: var(--app-space-1) var(--app-space-1);
+  justify-content: center;
+  min-height: 30px;
+  padding: 0 2px;
   font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.01em;
 }
 
 /* ── Hero 区 ── */
@@ -322,14 +326,6 @@
   filter: blur(24px);
   opacity: 0.72;
   transform: translateX(-50%);
-}
-
-.app-hero-brand {
-  /* Antd Flex 通过 props 提供 flex-direction: column, align-items: center, gap: 6px */
-}
-
-.app-hero-brand-row {
-  /* Antd Flex 通过 props 提供 align-items: center, gap: 10px */
 }
 
 .app-hero-logo {
@@ -417,8 +413,47 @@
       color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 12%, transparent);
 }
 
-.app-view-switcher {
+.app-view-switcher-wrap {
+  display: flex;
+  justify-content: center;
   max-width: 100%;
+  margin: calc(var(--app-space-5, 24px) * -0.35) 0 var(--app-space-5, 24px);
+  padding: 2px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.app-view-switcher-wrap::-webkit-scrollbar {
+  display: none;
+}
+
+.app-view-switcher {
+  flex: 0 0 auto;
+  max-width: 100%;
+  background: var(--ant-color-fill-quaternary);
+  border: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 68%, transparent);
+  border-radius: var(--app-radius-md);
+  box-shadow: none;
+}
+
+.app-view-switcher__item {
+  border-radius: calc(var(--app-radius-md) - 2px);
+}
+
+.app-view-switcher__item .ant-segmented-item-label {
+  min-height: 30px;
+  padding: 0 11px;
+  line-height: 30px;
+}
+
+.app-view-switcher__item:hover {
+  color: var(--ant-color-text);
+}
+
+.app-view-switcher .ant-segmented-thumb,
+.app-view-switcher .ant-segmented-item-selected {
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--ant-color-text) 8%, transparent);
 }
 
 /* ─── 主体区包裹层（侧边栏 + 内容并排） ──────────────────────── */
@@ -839,9 +874,16 @@
   color: color-mix(in srgb, #fff 48%, transparent);
 }
 
-/* Apple ：视图切换器 - 更紧凑圆润 */
+/* Apple ：视图切换器 - 系统分段控件风格 */
 [data-skin="apple"] .app-view-switcher {
-  margin-top: 4px;
+  background: color-mix(in srgb, #000 4%, transparent);
+  border-color: color-mix(in srgb, #000 6%, transparent);
+  border-radius: var(--app-radius-md);
+}
+
+[data-theme="dark"][data-skin="apple"] .app-view-switcher {
+  background: color-mix(in srgb, #fff 8%, transparent);
+  border-color: color-mix(in srgb, #fff 10%, transparent);
 }
 
 [data-skin="apple"] .app-view-option {
@@ -855,20 +897,8 @@
 }
 
 /* ─── 加载 / 空状态 ── */
-.app-page-loading,
-.app-suspense-fallback,
-.app-workspace-loading {
-  /* Antd Flex 通过 props 提供 display: flex, align-items: center, justify-content: center */
-}
-
 .app-page-loading {
   min-height: 100vh;
-}
-
-.app-page-loading-inner,
-.app-workspace-loading-inner,
-.app-empty-state-content {
-  /* Antd Flex 通过 props 提供 display: flex, flex-direction: column, align-items: center, gap */
 }
 
 /* ─── 优雅的加载微交互 ───────────────────────────── */
