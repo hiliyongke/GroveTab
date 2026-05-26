@@ -26,6 +26,8 @@ import {
   Input,
   Upload,
   Divider,
+  Flex,
+  Typography,
 } from "antd";
 import { Pencil, Plus, MinusCircle, Sun, Moon, Image, Trash2 } from "lucide-react";
 import { cssVars } from "@/shared/utils/css-vars";
@@ -79,17 +81,19 @@ function SliderField({
   onChange: (value: number) => void;
 }) {
   return (
-    <div className={styles["appearance-slider-group"]}>
-      <div className={styles["appearance-slider-header"]}>
-        <span className={styles["appearance-slider-label"]}>{label}</span>
-        <span className={styles["appearance-slider-value"]}>
+    <Flex vertical className={styles["appearance-slider-group"]}>
+      <Flex align="center" justify="space-between" className={styles["appearance-slider-header"]}>
+        <Typography.Text className={styles["appearance-slider-label"]}>{label}</Typography.Text>
+        <Typography.Text className={styles["appearance-slider-value"]}>
           {value}
           {suffix}
-        </span>
-      </div>
+        </Typography.Text>
+      </Flex>
       <Slider min={min} max={max} step={step} value={value} onChange={onChange} />
-      <div className={styles["appearance-slider-hint"]}>{hint}</div>
-    </div>
+      {hint !== "" && (
+        <Typography.Text className={styles["appearance-slider-hint"]}>{hint}</Typography.Text>
+      )}
+    </Flex>
   );
 }
 
@@ -105,13 +109,13 @@ function VisibilityRow({
   onChange: (value: boolean) => void;
 }) {
   return (
-    <div className={styles["appearance-visibility-row"]}>
-      <div>
-        <div className={styles["appearance-visibility-title"]}>{label}</div>
-        <div className={styles["appearance-visibility-hint"]}>{hint}</div>
-      </div>
+    <Flex align="center" justify="space-between" className={styles["appearance-visibility-row"]}>
+      <Flex vertical>
+        <Typography.Text className={styles["appearance-visibility-title"]}>{label}</Typography.Text>
+        <Typography.Text className={styles["appearance-visibility-hint"]}>{hint}</Typography.Text>
+      </Flex>
       <Switch size="small" checked={checked} onChange={onChange} />
-    </div>
+    </Flex>
   );
 }
 
@@ -136,16 +140,18 @@ function PresetCard({
       className={`${styles["appearance-preset-card"]}${selected ? ` ${styles["is-selected"]}` : ""}`}
     >
       {preview}
-      <div className={styles["appearance-preset-meta"]}>
-        <div
+      <Flex vertical className={styles["appearance-preset-meta"]}>
+        <Typography.Text
           className={`${styles["appearance-preset-title"]}${selected ? ` ${styles["is-selected"]}` : ""}`}
         >
           {label}
-        </div>
+        </Typography.Text>
         {description && (
-          <div className={styles["appearance-preset-description"]}>{description}</div>
+          <Typography.Text className={styles["appearance-preset-description"]}>
+            {description}
+          </Typography.Text>
         )}
-      </div>
+      </Flex>
     </Button>
   );
 }
@@ -283,7 +289,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
   );
 
   return (
-    <div className={`settings-panel-stack ${styles["appearance-panel"]}`}>
+    <Flex vertical className={`settings-panel-stack ${styles["appearance-panel"]}`}>
       {/* ── 皮肤预设选择器 ── */}
       <section className="settings-section">
         <Field
@@ -329,9 +335,15 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
           label={t("精细定制（极客模式）")}
           hint={t("在当前皮肤基础上覆盖单项 token；关闭开关即可恢复预设")}
         >
-          <div className={styles["appearance-toggle-group"]}>
-            <div className={styles["appearance-toggle-row"]}>
-              <span className={styles["appearance-toggle-label"]}>{t("启用定制")}</span>
+          <Flex vertical className={styles["appearance-toggle-group"]}>
+            <Flex
+              align="center"
+              justify="space-between"
+              className={styles["appearance-toggle-row"]}
+            >
+              <Typography.Text className={styles["appearance-toggle-label"]}>
+                {t("启用定制")}
+              </Typography.Text>
               <Switch
                 checked={settings.skinCustom !== undefined}
                 onChange={(on) => {
@@ -340,10 +352,10 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                   });
                 }}
               />
-            </div>
+            </Flex>
 
             {settings.skinCustom !== undefined && (
-              <div className={styles["appearance-custom-box"]}>
+              <Flex vertical className={styles["appearance-custom-box"]}>
                 <SliderField
                   label={t("圆角")}
                   value={settings.skinCustom.borderRadius ?? skinCustomBase.borderRadius}
@@ -427,9 +439,9 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                 >
                   {t("恢复默认")}
                 </Button>
-              </div>
+              </Flex>
             )}
-          </div>
+          </Flex>
         </Field>
       </section>
 
@@ -1206,7 +1218,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
           </Space>
         </Field>
       </section>
-    </div>
+    </Flex>
   );
 }
 

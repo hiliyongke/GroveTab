@@ -15,7 +15,7 @@
 import { useState, useSyncExternalStore, useEffect, useMemo } from "react";
 import { Plus, Save, Inbox, ArrowDownUp } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
-import { Button, Spin, Input, Modal, Typography, Select, Empty } from "antd";
+import { Button, Spin, Input, Modal, Typography, Select, Empty, Flex } from "antd";
 import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
 import type { ArchivedSession } from "@/shared/types";
 import {
@@ -306,11 +306,13 @@ export function ArchiveView() {
     const total = restoringSession?.tabCount ?? outcome.restored;
     void track("archive_restore", { restored: outcome.restored, total });
     if (outcome.cancelled) {
-      feedback.info(t('已取消恢复，成功恢复 {restored} 个标签', { restored: outcome.restored }));
+      feedback.info(t("已取消恢复，成功恢复 {restored} 个标签", { restored: outcome.restored }));
     } else if (outcome.restored === total) {
-      feedback.success(t('恢复成功'));
+      feedback.success(t("恢复成功"));
     } else {
-      feedback.warning(t('部分恢复成功，已恢复 {restored}/{total} 个标签', { restored: outcome.restored, total }));
+      feedback.warning(
+        t("部分恢复成功，已恢复 {restored}/{total} 个标签", { restored: outcome.restored, total }),
+      );
     }
     setRestoreDialogOpen(false);
     setRestoringSession(null);
@@ -322,14 +324,14 @@ export function ArchiveView() {
       void track("archive_delete");
       await refreshSessions();
     } catch (err) {
-      feedback.error(t('删除失败，请重试'), err);
+      feedback.error(t("删除失败，请重试"), err);
     }
   };
 
   const handleShare = async (id: string) => {
     const payload = await exportSingleSession(id);
     if (payload === null) {
-      feedback.error(t('分享失败，请重试'));
+      feedback.error(t("分享失败，请重试"));
       return;
     }
     try {
@@ -342,9 +344,9 @@ export function ArchiveView() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      feedback.success(t('已下载会话 JSON'));
+      feedback.success(t("已下载会话 JSON"));
     } catch (err) {
-      feedback.error(t('分享失败，请重试'), err);
+      feedback.error(t("分享失败，请重试"), err);
     }
   };
 
@@ -372,11 +374,11 @@ export function ArchiveView() {
 
   const handleOpenMerge = (ids: string[]) => {
     if (ids.length < 2) {
-      feedback.warning(t('请至少选择 2 个会话'));
+      feedback.warning(t("请至少选择 2 个会话"));
       return;
     }
     setSelectedIds(new Set(ids));
-    setMergeName(t('合并会话'));
+    setMergeName(t("合并会话"));
     setMergeOpen(true);
   };
 
@@ -387,15 +389,18 @@ export function ArchiveView() {
       await refreshSessions();
       setMergeOpen(false);
       cancelSelect();
-      feedback.success(t('已合并为 1 个会话，共 {count} 个标签', { count: newSession.tabCount }));
+      feedback.success(t("已合并为 1 个会话，共 {count} 个标签", { count: newSession.tabCount }));
       void useMetadataStore.getState().pushActivity({
         id: `merge-${newSession.id}`,
         type: "archive",
         ts: Date.now(),
-        summary: t('已合并为「{name}」（{count} 个标签）', { count: newSession.tabCount, name: newSession.name }),
+        summary: t("已合并为「{name}」（{count} 个标签）", {
+          count: newSession.tabCount,
+          name: newSession.name,
+        }),
       });
     } catch (err) {
-      feedback.error(t('合并失败，请重试'), err);
+      feedback.error(t("合并失败，请重试"), err);
     }
   };
 
@@ -406,14 +411,14 @@ export function ArchiveView() {
 
   const handleOpenSingle = async (tab: { url: string }) => {
     if (!isSafeExternalUrl(tab.url)) {
-      feedback.error(t('恢复失败，请重试'));
+      feedback.error(t("恢复失败，请重试"));
       return;
     }
     try {
       const currentWindow = await getCurrentWindow();
       await createTab({ url: tab.url, windowId: currentWindow?.id, active: true });
     } catch (err) {
-      feedback.error(t('恢复失败，请重试'), err);
+      feedback.error(t("恢复失败，请重试"), err);
     }
   };
 
@@ -442,12 +447,15 @@ export function ArchiveView() {
         pinned: tab.pinned,
       }));
       const failCount = archivedCount - closedCount;
-      const subNote = failCount > 0 ? t('已有 {count} 个标签页未能关闭，可稍后手动处理', { count: failCount }) : "";
+      const subNote =
+        failCount > 0
+          ? t("已有 {count} 个标签页未能关闭，可稍后手动处理", { count: failCount })
+          : "";
       void useUndoStore
         .getState()
         .addRecord(
           snapshots,
-          t('已归档 {count} 个标签到「{name}」', { count: archivedCount, name: session.name }),
+          t("已归档 {count} 个标签到「{name}」", { count: archivedCount, name: session.name }),
           { archivedSessionId: session.id, subNote },
         );
 
@@ -455,16 +463,19 @@ export function ArchiveView() {
         id: `archive-${session.id}`,
         type: "archive",
         ts: Date.now(),
-        summary: t('已归档 {count} 个标签到「{name}」', { count: archivedCount, name: session.name }),
+        summary: t("已归档 {count} 个标签到「{name}」", {
+          count: archivedCount,
+          name: session.name,
+        }),
         primaryAction: {
           id: "view",
-          label: t('查看归档'),
+          label: t("查看归档"),
           kind: "open_archive",
           payload: session.id,
         },
       });
     } catch (err) {
-      feedback.error(t('归档失败，请重试'), err);
+      feedback.error(t("归档失败，请重试"), err);
     } finally {
       setArchivingCurrent(false);
     }
@@ -487,31 +498,37 @@ export function ArchiveView() {
   const totalAfterFilter = sortedSessions.length;
 
   return (
-    <div className={styles["archive-view"]}>
-      <div className={styles["app-archive-header"]}>
-        <div className={styles["app-archive-header__badge"]}>
+    <Flex vertical className={styles["archive-view"]}>
+      <Flex align="center" gap={12} className={styles["app-archive-header"]}>
+        <Flex align="center" justify="center" className={styles["app-archive-header__badge"]}>
           <Save size={ICON_SIZE.LARGE} className={styles["app-archive-header__icon"]} />
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div className={styles["app-archive-header__title"]}>{t('归档会话')}</div>
-          <div className={styles["app-archive-header__subtitle"]}>{t('归档 = 把当前窗口所有标签页打包成一个「会话」快照，保存后会关闭这些标签页。需要时点击「恢复」即可在当前窗口里重新打开，适合整理浏览环境或临时腾出空间。')}</div>
-        </div>
-      </div>
+        </Flex>
+        <Flex vertical className={styles["app-archive-header__content"]}>
+          <Typography.Text className={styles["app-archive-header__title"]}>
+            {t("归档会话")}
+          </Typography.Text>
+          <Typography.Text className={styles["app-archive-header__subtitle"]}>
+            {t(
+              "归档 = 把当前窗口所有标签页打包成一个「会话」快照，保存后会关闭这些标签页。需要时点击「恢复」即可在当前窗口里重新打开，适合整理浏览环境或临时腾出空间。",
+            )}
+          </Typography.Text>
+        </Flex>
+      </Flex>
 
       <div className={styles["archive-shell"]}>
         <ArchiveSidebar sessions={sessions} activeFilter={scope} onSelectFilter={setScope} />
 
-        <div className={styles["archive-main"]}>
+        <Flex vertical gap={16} className={styles["archive-main"]}>
           <ArchiveStats
             sessions={sessions}
             activeFilter={scope === "earlier" ? "all" : scope}
             onSelectFilter={handleSelectStatsFilter}
           />
 
-          <div className={styles["archive-toolbar"]}>
+          <Flex align="center" gap={10} className={styles["archive-toolbar"]}>
             <Input.Search
               className={styles["archive-toolbar__search"]}
-              placeholder={t('搜索归档会话...')}
+              placeholder={t("搜索归档会话...")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               allowClear
@@ -523,27 +540,27 @@ export function ArchiveView() {
               onChange={(value: SortMode) => setSortMode(value)}
               suffixIcon={<ArrowDownUp size={ICON_SIZE.TINY} />}
               options={[
-                { value: "newest", label: t('最近创建') },
-                { value: "oldest", label: t('最早创建') },
-                { value: "largest", label: t('标签最多') },
-                { value: "name", label: t('按名称') },
+                { value: "newest", label: t("最近创建") },
+                { value: "oldest", label: t("最早创建") },
+                { value: "largest", label: t("标签最多") },
+                { value: "name", label: t("按名称") },
               ]}
-              style={{ width: 140 }}
+              popupMatchSelectWidth={false}
               size="middle"
             />
 
             <span className={styles["archive-toolbar__spacer"]} />
 
             {isSearching && (
-              <span className={styles["archive-search-result"]}>
-                {t('找到 {count} / 共 {total} 个会话', {
+              <Typography.Text className={styles["archive-search-result"]}>
+                {t("找到 {count} / 共 {total} 个会话", {
                   count: totalAfterFilter,
                   total: sessions.length,
                 })}
-              </span>
+              </Typography.Text>
             )}
 
-            <div className={styles["archive-toolbar__primary-actions"]}>
+            <Flex align="center" gap={8} className={styles["archive-toolbar__primary-actions"]}>
               <BatchOperationsMenu
                 selectedIds={selectedIds}
                 totalCount={sessions.length}
@@ -571,30 +588,41 @@ export function ArchiveView() {
                 onClick={() => {
                   void handleArchiveCurrent();
                 }}
-                title={t('{count} 个标签页', { count: tabCount })}
+                title={t("{count} 个标签页", { count: tabCount })}
               >
-                {t('归档')}
+                {t("归档")}
               </Button>
-            </div>
-          </div>
+            </Flex>
+          </Flex>
 
           {loading ? (
-            <div className={styles["app-archive-loading"]}>
-              <div className={styles["app-archive-loading__content"]}>
+            <Flex justify="center" className={styles["app-archive-loading"]}>
+              <Flex
+                vertical
+                align="center"
+                gap={12}
+                className={styles["app-archive-loading__content"]}
+              >
                 <Spin />
-                <span className={styles["app-archive-loading__copy"]}>{t('加载中...')}</span>
-              </div>
-            </div>
+                <Typography.Text className={styles["app-archive-loading__copy"]}>
+                  {t("加载中...")}
+                </Typography.Text>
+              </Flex>
+            </Flex>
           ) : totalAfterFilter === 0 ? (
             sessions.length === 0 ? (
               <FeatureEmptyState
-                title={t('暂无归档会话')}
-                description={t('点击归档按钮保存当前所有标签页')}
+                title={t("暂无归档会话")}
+                description={t("点击归档按钮保存当前所有标签页")}
                 icon={<Inbox size={ICON_SIZE.HERO} />}
-                hints={[t('一键归档当前窗口所有标签，释放浏览器内存'), t('支持整组恢复或选择性恢复，不丢失任何进度'), t('自动快照定时保存您的标签状态')]}
+                hints={[
+                  t("一键归档当前窗口所有标签，释放浏览器内存"),
+                  t("支持整组恢复或选择性恢复，不丢失任何进度"),
+                  t("自动快照定时保存您的标签状态"),
+                ]}
                 actions={[
                   {
-                    text: t('归档当前窗口'),
+                    text: t("归档当前窗口"),
                     onClick: () => {
                       void handleArchiveCurrent();
                     },
@@ -603,20 +631,31 @@ export function ArchiveView() {
                 ]}
               />
             ) : (
-              <Empty description={t('暂无归档会话')} />
+              <Empty description={t("暂无归档会话")} />
             )
           ) : (
             buckets.map((bucket) => (
-              <section key={bucket.key} className={styles["archive-time-group"]}>
+              <Flex
+                key={bucket.key}
+                vertical
+                gap={12}
+                component="section"
+                className={styles["archive-time-group"]}
+              >
                 {sortMode !== "largest" && sortMode !== "name" && (
-                  <header className={styles["archive-time-group__header"]}>
-                    <span className={styles["archive-time-group__title"]}>
+                  <Flex
+                    align="baseline"
+                    gap={10}
+                    component="header"
+                    className={styles["archive-time-group__header"]}
+                  >
+                    <Typography.Text className={styles["archive-time-group__title"]}>
                       {t(bucket.labelKey)}
-                    </span>
-                    <span className={styles["archive-time-group__count"]}>
+                    </Typography.Text>
+                    <Typography.Text className={styles["archive-time-group__count"]}>
                       {bucket.sessions.length}
-                    </span>
-                  </header>
+                    </Typography.Text>
+                  </Flex>
                 )}
                 <div className={styles["archive-card-grid"]}>
                   {bucket.sessions.map((session) => (
@@ -646,30 +685,32 @@ export function ArchiveView() {
                     />
                   ))}
                 </div>
-              </section>
+              </Flex>
             ))
           )}
-        </div>
+        </Flex>
       </div>
 
       {/* 合并 Modal */}
       <Modal
         open={mergeOpen}
         rootClassName={styles["app-archive-merge-modal"]}
-        title={t('合并会话')}
+        title={t("合并会话")}
         onCancel={() => setMergeOpen(false)}
         onOk={() => void handleConfirmMerge()}
-        okText={t('合并')}
-        cancelText={t('取消')}
+        okText={t("合并")}
+        cancelText={t("取消")}
         centered
       >
         <Typography.Text className={styles["app-archive-merge-copy"]}>
-          {t('将合并 {count} 个会话为一个新会话，并按 URL 去重。原会话将被删除。', { count: selectedIds.size })}
+          {t("将合并 {count} 个会话为一个新会话，并按 URL 去重。原会话将被删除。", {
+            count: selectedIds.size,
+          })}
         </Typography.Text>
         <Input
           value={mergeName}
           onChange={(e) => setMergeName(e.target.value)}
-          placeholder={t('新会话名')}
+          placeholder={t("新会话名")}
         />
       </Modal>
 
@@ -704,13 +745,13 @@ export function ArchiveView() {
             try {
               await renameSession(id, newName);
               await refreshSessions();
-              feedback.success(t('重命名成功'));
+              feedback.success(t("重命名成功"));
             } catch (err) {
-              feedback.error(t('重命名'), err);
+              feedback.error(t("重命名"), err);
             }
           }}
         />
       )}
-    </div>
+    </Flex>
   );
 }

@@ -10,7 +10,7 @@
 
 /* ── 常见站点区块：与下方 workspace 内容保持稳定呼吸感 ── */
 .app-quick-start {
-  margin-bottom: 20px;
+  margin-bottom: var(--app-space-6, 32px);
 }
 
 /* ── 标题栏：左侧标题 + 右侧快捷操作 ── */
@@ -18,7 +18,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: var(--app-space-3, 12px);
   min-height: 28px;
 }
 
@@ -65,8 +65,15 @@
   display: grid;
   /* 卡片最小宽度由 --speed-dial-card-min-width 控制（默认 152px，对应 'md' 档） */
   grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 152px), 1fr));
-  gap: var(--speed-dial-grid-gap, 12px);
+  gap: var(--speed-dial-grid-gap, 16px);
   align-items: start;
+}
+
+@media (max-width: 767px) {
+  .speed-dial-grid-wrapper {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+  }
 }
 
 @media (min-width: 768px) {
@@ -96,7 +103,7 @@
 .speed-dial-group {
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
-  gap: 10px;
+  gap: var(--app-space-3, 12px);
   grid-column: 1 / -1;
   width: 100%;
 }
@@ -184,14 +191,14 @@
 .speed-dial-list {
   display: flex;
   flex-direction: column;
-  gap: var(--speed-dial-grid-gap, 12px);
+  gap: var(--speed-dial-grid-gap, 16px);
 }
 
 /* 列表容器（分组模式） */
 .speed-dial-group-list {
   display: flex;
   flex-direction: column;
-  gap: var(--speed-dial-grid-gap, 12px);
+  gap: var(--speed-dial-grid-gap, 16px);
 }
 
 /* 列表条目 */
@@ -292,7 +299,14 @@
 .speed-dial-group-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 152px), 1fr));
-  gap: var(--speed-dial-grid-gap, 12px);
+  gap: var(--speed-dial-grid-gap, 16px);
+}
+
+@media (max-width: 767px) {
+  .speed-dial-group-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+  }
 }
 
 @media (min-width: 768px) {

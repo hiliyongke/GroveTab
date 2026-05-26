@@ -349,19 +349,20 @@
   background: var(--ant-color-bg-container);
   border: 1px solid var(--app-hairline);
   /* 预创建合成层 + 隔离重绘，防止 hover 时合成层重建导致相邻元素抖动 */
-  will-change: transform;
+  will-change: transform, box-shadow, border-color;
   contain: layout style paint;
-  transition:
-    transform 180ms ease,
-    box-shadow 180ms ease,
-    border-color 180ms ease;
+  transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
   position: relative;
 }
 
 .archive-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--app-shadow-sm);
-  border-color: color-mix(in srgb, var(--ant-color-primary) 30%, var(--app-hairline));
+  transform: translateY(-4px);
+  box-shadow: var(--app-shadow-md);
+  border-color: color-mix(in srgb, var(--ant-color-primary) 40%, var(--app-hairline));
+}
+
+.archive-card:active {
+  transform: translateY(-2px) scale(0.98);
 }
 
 .archive-card.is-highlighted {
@@ -492,11 +493,16 @@
   cursor: pointer;
   /* 隔离重绘范围，防止 hover 背景色变化导致相邻元素重绘 */
   contain: layout style paint;
-  transition: background 140ms ease;
+  transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .archive-card__tab-row:hover {
   background: var(--ant-color-fill-tertiary);
+  transform: translateX(2px);
+}
+
+.archive-card__tab-row:active {
+  transform: scale(0.98);
 }
 
 .archive-card__tab-row.is-matched {
@@ -582,12 +588,6 @@
   color: var(--ant-color-text-secondary);
   font-size: 13px;
 }
-
-
-
-
-
-
 
 /* ─── 响应式：窄屏 ─────────────────────────────────────────────── */
 @media (max-width: 960px) {

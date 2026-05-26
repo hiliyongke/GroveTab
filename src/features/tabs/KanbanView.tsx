@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/refs */
 
 import { useEffect, useMemo, useState } from "react";
-import { Button, Card, Input, Popconfirm, theme, App as AntApp, Typography, Space } from "antd";
+import { Button, Card, Input, Popconfirm, theme, App as AntApp, Typography, Flex } from "antd";
 import { Plus, Trash2, Save, PenLine, X, GripVertical } from "lucide-react";
 import { cssVars } from "@/shared/utils/css-vars";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
@@ -93,9 +93,9 @@ export function KanbanView() {
     try {
       await addColumn(name);
       setNewColumnName("");
-      message.success(t('已添加列「{name}」', { name }));
+      message.success(t("已添加列「{name}」", { name }));
     } catch (err) {
-      message.error(t('新增列失败，请重试'));
+      message.error(t("新增列失败，请重试"));
       console.warn("[kanban] addColumn failed", err);
     }
   };
@@ -103,14 +103,14 @@ export function KanbanView() {
   const handleSaveAsSession = async (col: KanbanColumn) => {
     const live = tabs.filter((t) => col.cards.some((c) => c.url === t.url));
     if (live.length === 0) {
-      message.warning(t('拖拽 Tab 到此列'));
+      message.warning(t("拖拽 Tab 到此列"));
       return;
     }
     try {
       await archiveSelectedTabs(live.map((t) => t.id));
-      message.success(t('已归档 {count} 个标签页', { count: live.length }));
+      message.success(t("已归档 {count} 个标签页", { count: live.length }));
     } catch (err) {
-      message.error(t('归档保存失败'));
+      message.error(t("归档保存失败"));
       console.warn("[kanban] archive failed", err);
     }
   };
@@ -186,7 +186,7 @@ export function KanbanView() {
         await reorderColumns(fromIndex, toIndex);
       }
     } catch (err) {
-      message.error(t('移动失败，请重试'));
+      message.error(t("移动失败，请重试"));
       console.warn("[kanban] drag operation failed", err);
     }
   };
@@ -199,12 +199,12 @@ export function KanbanView() {
       onDragEnd={(e) => void onDragEnd(e)}
       onDragCancel={() => setActive(null)}
     >
-      <div className={styles["app-kanban-theme"]} style={kanbanThemeStyle}>
-        <div className={styles["app-kanban-view"]}>
+      <Flex vertical className={styles["app-kanban-theme"]} style={kanbanThemeStyle}>
+        <Flex align="flex-start" gap={12} className={styles["app-kanban-view"]}>
           {/* 左侧：实时 Tab 源栏 —— 只作为拖出源，不是排序目标 */}
-          <Space direction="vertical" size={0} className={styles["app-kanban-source"]}>
+          <Flex vertical gap={0} className={styles["app-kanban-source"]}>
             <Typography.Text className={styles["app-kanban-source__title"]}>
-              {t('看板')}
+              {t("看板")}
             </Typography.Text>
             {tabs.map((tab) => (
               <TabSourceItem
@@ -218,7 +218,7 @@ export function KanbanView() {
                 reduced={reduced}
               />
             ))}
-          </Space>
+          </Flex>
 
           {/* 右侧：列排序层 —— 每列作为一个可排序单元 */}
           <SortableContext
@@ -236,14 +236,14 @@ export function KanbanView() {
                 onRename={(name) => void renameColumn(col.id, name)}
                 onRemove={() => {
                   removeColumn(col.id).catch((err) => {
-                    message.error(t('删除列失败'));
+                    message.error(t("删除列失败"));
                     console.warn("[kanban] removeColumn failed", err);
                   });
                 }}
                 onSaveAsSession={() => void handleSaveAsSession(col)}
                 onRemoveCard={(url) => {
                   removeCard(col.id, url).catch((err) => {
-                    message.error(t('移除卡片失败'));
+                    message.error(t("移除卡片失败"));
                     console.warn("[kanban] removeCard failed", err);
                   });
                 }}
@@ -252,12 +252,12 @@ export function KanbanView() {
           </SortableContext>
 
           {/* 新增列 */}
-          <Space direction="vertical" size={0} className={styles["app-kanban-add-column"]}>
+          <Flex vertical gap={0} className={styles["app-kanban-add-column"]}>
             <Input
               value={newColumnName}
               onChange={(e) => setNewColumnName(e.target.value)}
               onPressEnter={() => void handleAddColumn()}
-              placeholder={t('新增列')}
+              placeholder={t("新增列")}
               suffix={
                 <Button
                   size="small"
@@ -267,9 +267,9 @@ export function KanbanView() {
                 />
               }
             />
-          </Space>
-        </div>
-      </div>
+          </Flex>
+        </Flex>
+      </Flex>
 
       {/* DragOverlay：拖拽时渲染的抬升副本 */}
       <DragOverlay dropAnimation={null}>
@@ -293,8 +293,10 @@ function TabSourceItem({ card, reduced }: { card: KanbanCard; reduced: boolean }
   };
 
   return (
-    <Space
+    <Flex
       ref={setNodeRef}
+      align="center"
+      gap="small"
       {...attributes}
       {...listeners}
       className={`${styles["app-kanban-card"]} ${styles["app-kanban-card--source"]}`}
@@ -315,7 +317,7 @@ function TabSourceItem({ card, reduced }: { card: KanbanCard; reduced: boolean }
       <Typography.Text className={styles["app-kanban-card__title"]} title={card.title}>
         {card.title}
       </Typography.Text>
-    </Space>
+    </Flex>
   );
 }
 
@@ -366,8 +368,9 @@ function KanbanColumnView({
   };
 
   return (
-    <div
+    <Flex
       ref={sortable.setNodeRef}
+      vertical
       className={styles["app-kanban-column-wrap"]}
       style={columnWrapStyle}
     >
@@ -377,7 +380,7 @@ function KanbanColumnView({
         style={columnCardStyle}
         classNames={{ body: styles["app-kanban-column__body"] }}
         title={
-          <span className={styles["app-kanban-column__header"]}>
+          <Flex align="center" gap={4} className={styles["app-kanban-column__header"]}>
             {/* 列拖拽句柄 —— 只有点住这里才能拖整列 */}
             <Button
               type="text"
@@ -386,7 +389,7 @@ function KanbanColumnView({
               {...sortable.attributes}
               {...sortable.listeners}
               className={styles["app-kanban-column__drag-handle"]}
-              aria-label={t('重命名')}
+              aria-label={t("拖动列")}
             />
             <ColumnNameEditor col={col} onRename={onRename} />
             <Typography.Text className={styles["app-kanban-column__count"]}>
@@ -397,22 +400,22 @@ function KanbanColumnView({
               size="small"
               icon={<Save size={ICON_SIZE.TINY} />}
               onClick={onSaveAsSession}
-              title={t('另存为归档会话')}
+              title={t("另存为归档会话")}
             />
-            <Popconfirm title={t('删除列')} onConfirm={onRemove}>
+            <Popconfirm title={t("删除列")} onConfirm={onRemove}>
               <Button type="text" size="small" icon={<Trash2 size={ICON_SIZE.TINY} />} />
             </Popconfirm>
-          </span>
+          </Flex>
         }
       >
-        <div ref={body.setNodeRef} className={styles["app-kanban-column__dropzone"]}>
+        <Flex ref={body.setNodeRef} vertical className={styles["app-kanban-column__dropzone"]}>
           <SortableContext
             items={col.cards.map((c) => `card::${col.id}::${c.url}`)}
             strategy={verticalListSortingStrategy}
           >
             {col.cards.length === 0 ? (
               <Typography.Text className={styles["app-kanban-column__empty"]}>
-                {t('拖拽 Tab 到此列')}
+                {t("拖拽 Tab 到此列")}
               </Typography.Text>
             ) : (
               col.cards.map((card) => (
@@ -429,9 +432,9 @@ function KanbanColumnView({
               ))
             )}
           </SortableContext>
-        </div>
+        </Flex>
       </Card>
-    </div>
+    </Flex>
   );
 }
 
@@ -477,8 +480,10 @@ function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: S
   };
 
   return (
-    <div
+    <Flex
       ref={setNodeRef}
+      align="center"
+      gap="small"
       {...attributes}
       {...listeners}
       className={`${styles["app-kanban-card"]}${offline ? ` ${styles["is-offline"]}` : ""}`}
@@ -507,7 +512,7 @@ function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: S
       )}
       <Typography.Text
         className={`${styles["app-kanban-card__title"]} ${styles["app-kanban-card__title--grow"]}`}
-        title={offline ? `${card.title} · ${t('已离线（点击重新打开）')}` : card.title}
+        title={offline ? `${card.title} · ${t("已离线（点击重新打开）")}` : card.title}
       >
         {card.title}
       </Typography.Text>
@@ -519,9 +524,9 @@ function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: S
           e.stopPropagation();
           onRemove();
         }}
-        aria-label={t('删除卡片')}
+        aria-label={t("删除卡片")}
       />
-    </div>
+    </Flex>
   );
 }
 
@@ -554,7 +559,11 @@ function ColumnNameEditor({
     );
   }
   return (
-    <span className={styles["app-kanban-column__name"]} onDoubleClick={() => setEditing(true)}>
+    <Flex
+      align="center"
+      className={styles["app-kanban-column__name"]}
+      onDoubleClick={() => setEditing(true)}
+    >
       {col.name}
       <Button
         type="text"
@@ -562,7 +571,7 @@ function ColumnNameEditor({
         icon={<PenLine size={ICON_SIZE.TINY} />}
         onClick={() => setEditing(true)}
       />
-    </span>
+    </Flex>
   );
 }
 
@@ -571,9 +580,12 @@ function DragPreview({ active }: { active: ActiveDrag }) {
   const { t } = useT();
   if (active.data.kind === "column") {
     return (
-      <Space className={`${styles["app-kanban-overlay"]} ${styles["app-kanban-overlay--column"]}`}>
-        {t('拖动列中…')}
-      </Space>
+      <Flex
+        align="center"
+        className={`${styles["app-kanban-overlay"]} ${styles["app-kanban-overlay--column"]}`}
+      >
+        {t("拖动列中…")}
+      </Flex>
     );
   }
   const card =
@@ -583,7 +595,7 @@ function DragPreview({ active }: { active: ActiveDrag }) {
         ? active.data.card
         : null;
   return (
-    <Space className={styles["app-kanban-overlay"]}>
+    <Flex align="center" gap="small" className={styles["app-kanban-overlay"]}>
       {card?.favIconUrl !== undefined && card.favIconUrl !== "" && (
         <img
           src={card?.favIconUrl}
@@ -597,8 +609,8 @@ function DragPreview({ active }: { active: ActiveDrag }) {
         />
       )}
       <Typography.Text className={styles["app-kanban-card__title"]}>
-        {card ? card.title : t('拖动卡片中…')}
+        {card ? card.title : t("拖动卡片中…")}
       </Typography.Text>
-    </Space>
+    </Flex>
   );
 }

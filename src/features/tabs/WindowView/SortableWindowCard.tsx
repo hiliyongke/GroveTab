@@ -3,7 +3,6 @@ import { CSS } from "@dnd-kit/utilities";
 import type { ReactNode } from "react";
 
 import type { WindowDragData } from "./dragTypes";
-import domainStyles from "../styles/items.module.less";
 import styles from "../styles/views.module.less";
 
 interface SortableWindowCardProps {
@@ -26,7 +25,7 @@ export function SortableWindowCard({ windowId, children }: SortableWindowCardPro
   return (
     <div
       ref={setNodeRef}
-      className={`${domainStyles["app-domain-masonry-item"]} ${styles["app-window-sortable-card"]}${isDragging ? ` ${styles["is-dragging"]}` : ""}`}
+      className={`${styles["app-window-sortable-card"]}${isDragging ? ` ${styles["is-dragging"]}` : ""}`}
       style={style}
       {...attributes}
       {...listeners}

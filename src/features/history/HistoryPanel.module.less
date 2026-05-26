@@ -147,16 +147,22 @@
   padding: 8px 8px 8px 10px;
   border-radius: 8px;
   cursor: default;
-  transition: background-color 0.15s ease;
+  transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
   min-height: 48px;
   /* 抗闪白：预创建合成层 + 隔离重绘范围 */
-  will-change: background-color;
+  will-change: background-color, transform;
   contain: layout style paint;
 }
 
 .history-item:hover,
 .history-event:hover {
   background: var(--history-fill-secondary);
+  transform: translateX(2px);
+}
+
+.history-item:active,
+.history-event:active {
+  transform: scale(0.98);
 }
 
 .history-item-favicon,

@@ -17,7 +17,7 @@
  *   2) Popup 底部"关于"链接：打开新 Tab，URL hash #about，App 监听后自动打开设置面板并切到 about Tab
  */
 
-import { Button, Divider, List } from "antd";
+import { Button, Divider, Flex, List, Typography } from "antd";
 import { cssVars } from "@/shared/utils/css-vars";
 import {
   Package,
@@ -98,19 +98,27 @@ export function AboutPanel() {
   });
 
   return (
-    <div className={`${styles["about-panel"]} settings-panel-stack`}>
+    <Flex vertical className={`${styles["about-panel"]} settings-panel-stack`}>
       <section className="settings-section">
-        <div className={styles["about-panel__hero"]} style={heroStyle}>
-          <div className={styles["about-panel__logo"]}>{BRAND.shortName}</div>
-          <div className={styles["about-panel__brand"]}>{brandName}</div>
-          <div className={styles["about-panel__slogan"]}>「{slogan}」</div>
-          <div className={styles["about-panel__version"]}>v{PKG_VERSION}</div>
-        </div>
+        <Flex vertical align="center" className={styles["about-panel__hero"]} style={heroStyle}>
+          <Flex align="center" justify="center" className={styles["about-panel__logo"]}>
+            {BRAND.shortName}
+          </Flex>
+          <Typography.Title level={3} className={styles["about-panel__brand"]}>
+            {brandName}
+          </Typography.Title>
+          <Typography.Text className={styles["about-panel__slogan"]}>「{slogan}」</Typography.Text>
+          <Typography.Text className={styles["about-panel__version"]}>
+            v{PKG_VERSION}
+          </Typography.Text>
+        </Flex>
       </section>
 
       <section className="settings-section">
-        <div>
-          <div className={styles["about-panel__section-title"]}>{t('核心能力')}</div>
+        <Flex vertical>
+          <Typography.Title level={4} className={styles["about-panel__section-title"]}>
+            {t("核心能力")}
+          </Typography.Title>
           <div className={styles["about-panel__feature-grid"]}>
             {FEATURES.map((feature) => {
               const Icon = feature.icon;
@@ -118,45 +126,59 @@ export function AboutPanel() {
                 "--about-feature-color": feature.color,
               });
               return (
-                <div key={feature.titleKey} className={styles["about-panel__feature-card"]}>
-                  <div className={styles["about-panel__feature-icon"]} style={featureStyle}>
+                <Flex key={feature.titleKey} className={styles["about-panel__feature-card"]}>
+                  <Flex
+                    align="center"
+                    justify="center"
+                    className={styles["about-panel__feature-icon"]}
+                    style={featureStyle}
+                  >
                     <Icon size={ICON_SIZE.LARGE} />
-                  </div>
-                  <div className={styles["about-panel__feature-copy"]}>
-                    <div className={styles["about-panel__feature-title"]}>
+                  </Flex>
+                  <Flex vertical className={styles["about-panel__feature-copy"]}>
+                    <Typography.Text className={styles["about-panel__feature-title"]}>
                       {t(feature.titleKey)}
-                    </div>
-                    <div className={styles["about-panel__feature-desc"]}>{t(feature.descKey)}</div>
-                  </div>
-                </div>
+                    </Typography.Text>
+                    <Typography.Text className={styles["about-panel__feature-desc"]}>
+                      {t(feature.descKey)}
+                    </Typography.Text>
+                  </Flex>
+                </Flex>
               );
             })}
           </div>
-        </div>
+        </Flex>
       </section>
 
       <section className="settings-section">
-        <div>
-          <div className={styles["about-panel__tips-title"]}>
+        <Flex vertical>
+          <Flex align="center" className={styles["about-panel__tips-title"]}>
             <Sparkles size={ICON_SIZE.MEDIUM} />
-            {t('使用小贴士')}
-          </div>
+            {t("使用小贴士")}
+          </Flex>
           <List
             className={styles["about-panel__tips-list"]}
-            dataSource={[t('⌘/Ctrl + K 呼出搜索；再按一次关闭；Cmd + 1..9 切换搜索引擎。'), t('在 "数据" Tab 可以一键恢复默认配置 / 重播引导 / 全量重置。'), t('右键点击标签页可以快速归档、固定或添加书签。'), t('在 "外观" Tab 可以尝试极客模式定制圆角、字号、主色等细节。')]}
+            dataSource={[
+              t("⌘/Ctrl + K 呼出搜索；再按一次关闭；Cmd + 1..9 切换搜索引擎。"),
+              t('在 "数据" Tab 可以一键恢复默认配置 / 重播引导 / 全量重置。'),
+              t("右键点击标签页可以快速归档、固定或添加书签。"),
+              t('在 "外观" Tab 可以尝试极客模式定制圆角、字号、主色等细节。'),
+            ]}
             renderItem={(item) => (
               <List.Item style={{ padding: "4px 0", borderBottom: "none" }}>{item}</List.Item>
             )}
           />
-        </div>
+        </Flex>
       </section>
 
       <Divider className={styles["about-panel__divider"]} />
 
       <section className="settings-section">
-        <div className={styles["about-panel__support"]}>
-          <div className={styles["about-panel__support-title"]}>{t('反馈与开源')}</div>
-          <div className={styles["about-panel__support-actions"]}>
+        <Flex vertical className={styles["about-panel__support"]}>
+          <Typography.Title level={4} className={styles["about-panel__support-title"]}>
+            {t("反馈与开源")}
+          </Typography.Title>
+          <Flex wrap="wrap" className={styles["about-panel__support-actions"]}>
             <Button
               icon={<Code2 size={ICON_SIZE.MEDIUM} />}
               onClick={() => {
@@ -167,7 +189,7 @@ export function AboutPanel() {
                 }
               }}
             >
-              {t('开源地址')}
+              {t("开源地址")}
             </Button>
             <Button
               icon={<Mail size={ICON_SIZE.MEDIUM} />}
@@ -180,7 +202,7 @@ export function AboutPanel() {
                 }
               }}
             >
-              {t('问题反馈')}
+              {t("问题反馈")}
             </Button>
             <Button
               icon={<ExternalLink size={ICON_SIZE.MEDIUM} />}
@@ -193,14 +215,14 @@ export function AboutPanel() {
                 }
               }}
             >
-              {t('更新日志')}
+              {t("更新日志")}
             </Button>
-          </div>
-          <div className={styles["about-panel__support-copy"]}>
-            {t('Made with')} ❤️ · {t('100% 本地优先 · 零数据上传')}
-          </div>
-        </div>
+          </Flex>
+          <Typography.Text className={styles["about-panel__support-copy"]}>
+            {t("Made with")} ❤️ · {t("100% 本地优先 · 零数据上传")}
+          </Typography.Text>
+        </Flex>
       </section>
-    </div>
+    </Flex>
   );
 }

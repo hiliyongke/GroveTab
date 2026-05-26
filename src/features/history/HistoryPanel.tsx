@@ -34,6 +34,8 @@ import {
   theme,
   Image,
   Space,
+  Flex,
+  Typography,
 } from "antd";
 import {
   History,
@@ -115,12 +117,12 @@ function useRelativeTime() {
     (ts: number): string => {
       const diff = Date.now() - ts;
       const m = Math.floor(diff / 60000);
-      if (m < 1) return t('刚刚');
-      if (m < 60) return t('{n} 分钟前', { n: m });
+      if (m < 1) return t("刚刚");
+      if (m < 60) return t("{n} 分钟前", { n: m });
       const h = Math.floor(m / 60);
-      if (h < 24) return t('{n} 小时前', { n: h });
+      if (h < 24) return t("{n} 小时前", { n: h });
       const d = Math.floor(h / 24);
-      return t('{n} 天前', { n: d });
+      return t("{n} 天前", { n: d });
     },
     [t],
   );
@@ -186,34 +188,45 @@ function SnapshotDiffCard({
   const addedExtra = diff.added.length - addedShown.length;
   const removedExtra = diff.removed.length - removedShown.length;
   return (
-    <div className={styles["history-diff-card"]}>
-      <div className={styles["history-diff-card-head"]}>
-        <div className={styles["history-diff-card-title"]}>
+    <Flex vertical gap={10} className={styles["history-diff-card"]}>
+      <Flex
+        align="baseline"
+        justify="space-between"
+        gap={8}
+        className={styles["history-diff-card-head"]}
+      >
+        <Flex align="center" gap={6} className={styles["history-diff-card-title"]}>
           <Camera size={ICON_SIZE.SMALL} />
-          <span>{t('昨天 → 今天')}</span>
-        </div>
-        <span className={styles["history-diff-card-subtitle"]}>{t('按站点汇总的使用变化')}</span>
-      </div>
-      <div className={styles["history-diff-card-total"]}>
-        {t('总标签 {today}（昨天 {yesterday}，{sign}{delta}）', {
+          <Typography.Text>{t("昨天 → 今天")}</Typography.Text>
+        </Flex>
+        <Typography.Text className={styles["history-diff-card-subtitle"]}>
+          {t("按站点汇总的使用变化")}
+        </Typography.Text>
+      </Flex>
+      <Typography.Text className={styles["history-diff-card-total"]}>
+        {t("总标签 {today}（昨天 {yesterday}，{sign}{delta}）", {
           today: diff.today.totalTabs,
           yesterday: diff.yesterday.totalTabs,
           sign,
           delta: Math.abs(diff.delta),
         })}
-      </div>
+      </Typography.Text>
       {isFlat ? (
-        <div className={styles["history-diff-empty"]}>{t('两天访问的站点完全一致 ✨')}</div>
+        <Typography.Text className={styles["history-diff-empty"]}>
+          {t("两天访问的站点完全一致 ✨")}
+        </Typography.Text>
       ) : (
         <div className={styles["history-diff-cols"]}>
           {addedShown.length > 0 && (
-            <div className={styles["history-diff-col"]}>
-              <div
+            <Flex vertical gap={6} className={styles["history-diff-col"]}>
+              <Flex
+                align="center"
+                gap={4}
                 className={`${styles["history-diff-col-title"]} ${styles["history-diff-col-title--added"]}`}
               >
                 <TrendingUp size={ICON_SIZE.TINY} />
-                <span>{t('新开始访问')}</span>
-              </div>
+                <Typography.Text>{t("新开始访问")}</Typography.Text>
+              </Flex>
               <Space className={styles["history-diff-chips"]} size={[4, 4]} wrap>
                 {addedShown.map((item) => (
                   <Tag
@@ -228,20 +241,22 @@ function SnapshotDiffCard({
                   <Tag
                     className={`${styles["history-diff-chip"]} ${styles["history-diff-chip--more"]}`}
                   >
-                    {t('还有 {n} 个', { n: addedExtra })}
+                    {t("还有 {n} 个", { n: addedExtra })}
                   </Tag>
                 )}
               </Space>
-            </div>
+            </Flex>
           )}
           {removedShown.length > 0 && (
-            <div className={styles["history-diff-col"]}>
-              <div
+            <Flex vertical gap={6} className={styles["history-diff-col"]}>
+              <Flex
+                align="center"
+                gap={4}
                 className={`${styles["history-diff-col-title"]} ${styles["history-diff-col-title--removed"]}`}
               >
                 <TrendingDown size={ICON_SIZE.TINY} />
-                <span>{t('今天不再活跃')}</span>
-              </div>
+                <Typography.Text>{t("今天不再活跃")}</Typography.Text>
+              </Flex>
               <Space className={styles["history-diff-chips"]} size={[4, 4]} wrap>
                 {removedShown.map((item) => (
                   <Tag
@@ -256,15 +271,15 @@ function SnapshotDiffCard({
                   <Tag
                     className={`${styles["history-diff-chip"]} ${styles["history-diff-chip--more"]}`}
                   >
-                    {t('还有 {n} 个', { n: removedExtra })}
+                    {t("还有 {n} 个", { n: removedExtra })}
                   </Tag>
                 )}
               </Space>
-            </div>
+            </Flex>
           )}
         </div>
       )}
-    </div>
+    </Flex>
   );
 }
 
@@ -384,10 +399,10 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
       try {
         await createTab({ url: rec.url, active: true, pinned: rec.pinned });
         await deleteClosedTab(rec.id);
-        feedback.success(t('已恢复 1 个标签页'));
+        feedback.success(t("已恢复 1 个标签页"));
         void refresh();
       } catch (err) {
-        feedback.error(t('已恢复 1 个标签页'), err);
+        feedback.error(t("已恢复 1 个标签页"), err);
       }
     },
     [refresh, t],
@@ -406,7 +421,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
       // 找到 win.tabIds 对应的 closed tabs，依次重开
       const targets = closedTabs.filter((c) => win.tabIds.includes(c.id));
       if (targets.length === 0) {
-        feedback.warning(t('最近没有关闭过任何标签页'));
+        feedback.warning(t("最近没有关闭过任何标签页"));
         return;
       }
       let success = 0;
@@ -420,7 +435,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
         }
       }
       await deleteClosedWindow(win.id);
-      feedback.success(t('已恢复 {count} 个标签页', { count: success }));
+      feedback.success(t("已恢复 {count} 个标签页", { count: success }));
       void refresh();
     },
     [closedTabs, refresh, t],
@@ -443,20 +458,20 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
   const handleUndoEvent = useCallback(
     async (e: HistoryEvent) => {
       if (!hasHistoryUndoHandler(e.type)) {
-        feedback.warning(t('未注册撤销处理'));
+        feedback.warning(t("未注册撤销处理"));
         return;
       }
       try {
         const ok = await undoHistoryEvent(e);
         if (!ok) {
-          feedback.warning(t('撤销失败'));
+          feedback.warning(t("撤销失败"));
           return;
         }
         await markHistoryEventUndone(e.id);
-        feedback.success(t('已撤销'));
+        feedback.success(t("已撤销"));
         void refresh();
       } catch (err) {
-        feedback.error(t('撤销失败'), err);
+        feedback.error(t("撤销失败"), err);
       }
     },
     [refresh, t],
@@ -464,26 +479,26 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
 
   const handleClearAll = useCallback(async () => {
     await clearAllNativeHistory();
-    feedback.success(t('已清空历史记录'));
+    feedback.success(t("已清空历史记录"));
     void refresh();
   }, [refresh, t]);
 
   // ── 渲染 ────────────────────────────────────
 
   const headerExtra = (
-    <div className={styles["history-panel-header-extra"]}>
+    <Flex align="center" gap={6} className={styles["history-panel-header-extra"]}>
       <Popconfirm
-        title={t('确定要清空全部历史记录吗？此操作不可撤销。')}
+        title={t("确定要清空全部历史记录吗？此操作不可撤销。")}
         onConfirm={() => {
           void handleClearAll();
         }}
         okButtonProps={{ danger: true }}
       >
         <Button size="small" type="text" danger icon={<Trash2 size={ICON_SIZE.SMALL} />}>
-          {t('清空全部')}
+          {t("清空全部")}
         </Button>
       </Popconfirm>
-    </div>
+    </Flex>
   );
 
   const drawerVars = {
@@ -498,7 +513,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
   } as CSSProperties;
 
   const renderClosedItem = (rec: ClosedTabRecord) => (
-    <div key={rec.id} className={styles["history-item"]}>
+    <Flex key={rec.id} align="center" gap={10} className={styles["history-item"]}>
       {rec.favIconUrl !== "" ? (
         <Image
           src={rec.favIconUrl}
@@ -514,26 +529,30 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
           <Globe size={ICON_SIZE.SMALL} />
         </span>
       )}
-      <div
+      <Flex
+        vertical
+        gap={2}
         className={styles["history-item-main"]}
         onClick={() => {
           void handleRestoreOne(rec);
         }}
       >
-        <div className={styles["history-item-title"]}>{rec.title || rec.url}</div>
-        <div className={styles["history-item-subtitle"]}>
-          <span>{rec.hostname || rec.url}</span>
-          <span className={styles["history-item-dot"]}>·</span>
-          <span>{relTime(rec.ts)}</span>
+        <Flex align="center" gap={6} className={styles["history-item-title"]}>
+          {rec.title || rec.url}
+        </Flex>
+        <Flex align="center" gap={4} className={styles["history-item-subtitle"]}>
+          <Typography.Text>{rec.hostname || rec.url}</Typography.Text>
+          <Typography.Text className={styles["history-item-dot"]}>·</Typography.Text>
+          <Typography.Text>{relTime(rec.ts)}</Typography.Text>
           {rec.pinned && (
             <Tag color="gold" className={styles["history-item-tag"]}>
               📌
             </Tag>
           )}
-        </div>
-      </div>
-      <div className={styles["history-item-actions"]}>
-        <Tooltip title={t('恢复')}>
+        </Flex>
+      </Flex>
+      <Flex gap={2} className={styles["history-item-actions"]}>
+        <Tooltip title={t("恢复")}>
           <Button
             type="text"
             size="small"
@@ -543,7 +562,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
             }}
           />
         </Tooltip>
-        <Tooltip title={t('删除')}>
+        <Tooltip title={t("删除")}>
           <Button
             type="text"
             size="small"
@@ -553,19 +572,28 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
             }}
           />
         </Tooltip>
-      </div>
-    </div>
+      </Flex>
+    </Flex>
   );
 
   /** 整窗快照卡片（显示在最近关闭列表顶部） */
   const renderClosedWindow = (win: ClosedWindowRecord) => (
-    <div key={`win-${win.id}`} className={styles["history-window-card"]}>
-      <div className={styles["history-window-card-head"]}>
+    <Flex
+      key={`win-${win.id}`}
+      align="center"
+      justify="space-between"
+      className={styles["history-window-card"]}
+    >
+      <Flex align="center" gap={8} className={styles["history-window-card-head"]}>
         <Layers size={ICON_SIZE.SMALL} />
-        <span>{t('恢复整个窗口（{count} 个标签）', { count: win.tabCount })}</span>
-        <span className={styles["history-item-dot"]}>·</span>
-        <span className={styles["history-window-card-time"]}>{relTime(win.ts)}</span>
-      </div>
+        <Typography.Text>
+          {t("恢复整个窗口（{count} 个标签）", { count: win.tabCount })}
+        </Typography.Text>
+        <Typography.Text className={styles["history-item-dot"]}>·</Typography.Text>
+        <Typography.Text className={styles["history-window-card-time"]}>
+          {relTime(win.ts)}
+        </Typography.Text>
+      </Flex>
       <Button
         size="small"
         type="primary"
@@ -574,32 +602,32 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
           void handleRestoreWindow(win);
         }}
       >
-        {t('恢复')}
+        {t("恢复")}
       </Button>
-    </div>
+    </Flex>
   );
 
   /** 一条事件的描述文本（不同 type 不同模板） */
   const eventDescription = (e: HistoryEvent): string => {
     switch (e.type) {
       case "tab_opened":
-        return t('打开了');
+        return t("打开了");
       case "tab_closed":
-        return t('关闭了');
+        return t("关闭了");
       case "window_closed":
-        return t('关闭了一个窗口（{count} 个标签）', {
+        return t("关闭了一个窗口（{count} 个标签）", {
           count: typeof e.extra?.tabCount === "number" ? e.extra.tabCount : 0,
         });
       case "tab_pinned":
-        return t('置顶了');
+        return t("置顶了");
       case "tab_tagged":
-        return t('加了标签');
+        return t("加了标签");
       case "archive_create":
-        return t('创建了归档');
+        return t("创建了归档");
       case "archive_restore":
-        return t('恢复了归档');
+        return t("恢复了归档");
       case "snapshot_create":
-        return t('自动快照');
+        return t("自动快照");
       case "search_query":
         return t('搜索了 "{query}"', {
           query: typeof e.extra?.query === "string" ? e.extra.query : "",
@@ -610,7 +638,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
           engine: typeof e.extra?.engine === "string" ? e.extra.engine : "",
         });
       case "workspace_switch":
-        return t('切换了工作区');
+        return t("切换了工作区");
       default:
         return "";
     }
@@ -619,9 +647,18 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
   const renderEvent = (e: HistoryEvent) => {
     const isUndone = e.extra?.undone === true;
     return (
-      <div key={e.id} className={`history-event${isUndone ? " is-undone" : ""}`}>
-        <span className={styles["history-event-icon"]}>{eventIcon(e.type)}</span>
-        <div
+      <Flex
+        key={e.id}
+        align="center"
+        gap={10}
+        className={`${styles["history-event"]}${isUndone ? ` ${styles["is-undone"]}` : ""}`}
+      >
+        <Typography.Text className={styles["history-event-icon"]}>
+          {eventIcon(e.type)}
+        </Typography.Text>
+        <Flex
+          vertical
+          gap={2}
           className={styles["history-event-main"]}
           onClick={() => {
             if (e.url !== undefined && e.url !== "") {
@@ -629,31 +666,33 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
             }
           }}
         >
-          <div className={styles["history-event-line"]}>
-            <span className={styles["history-event-action"]}>{eventDescription(e)}</span>
+          <Flex align="center" gap={6} className={styles["history-event-line"]}>
+            <Typography.Text className={styles["history-event-action"]}>
+              {eventDescription(e)}
+            </Typography.Text>
             {e.title !== undefined && e.title !== "" && (
-              <span className={styles["history-event-target"]} title={e.url}>
+              <Typography.Text className={styles["history-event-target"]} title={e.url}>
                 {e.title}
-              </span>
+              </Typography.Text>
             )}
             {isUndone && (
               <Tag color="default" className={styles["history-item-tag"]}>
-                {t('已撤销')}
+                {t("已撤销")}
               </Tag>
             )}
-          </div>
-          <div className={styles["history-event-meta"]}>
+          </Flex>
+          <Flex align="center" gap={4} className={styles["history-event-meta"]}>
             {e.hostname !== undefined && e.hostname !== "" && (
               <>
-                <span>{e.hostname}</span>
-                <span className={styles["history-item-dot"]}>·</span>
+                <Typography.Text>{e.hostname}</Typography.Text>
+                <Typography.Text className={styles["history-item-dot"]}>·</Typography.Text>
               </>
             )}
-            <span>{relTime(e.ts)}</span>
-          </div>
-        </div>
+            <Typography.Text>{relTime(e.ts)}</Typography.Text>
+          </Flex>
+        </Flex>
         {e.undoable === true && !isUndone && (
-          <Tooltip title={t('撤销')}>
+          <Tooltip title={t("撤销")}>
             <Button
               type="text"
               size="small"
@@ -664,7 +703,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
             />
           </Tooltip>
         )}
-        <Tooltip title={t('删除')}>
+        <Tooltip title={t("删除")}>
           <Button
             type="text"
             size="small"
@@ -674,7 +713,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
             }}
           />
         </Tooltip>
-      </div>
+      </Flex>
     );
   };
 
@@ -684,13 +723,15 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
       onClose={onClose}
       width={520}
       title={
-        <div className={styles["history-panel-title"]}>
+        <Flex align="center" gap={10} className={styles["history-panel-title"]}>
           <History size={ICON_SIZE.MEDIUM} />
-          <div>
-            <div>{t('历史记录')}</div>
-            <div className={styles["history-panel-subtitle"]}>{t('回看你在插件里做过什么，并一键恢复关闭的标签页')}</div>
-          </div>
-        </div>
+          <Flex vertical>
+            <Typography.Text>{t("历史记录")}</Typography.Text>
+            <Typography.Text className={styles["history-panel-subtitle"]}>
+              {t("回看你在插件里做过什么，并一键恢复关闭的标签页")}
+            </Typography.Text>
+          </Flex>
+        </Flex>
       }
       extra={headerExtra}
       classNames={{
@@ -702,12 +743,12 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
       }}
       rootClassName="history-panel-root"
     >
-      <div className={styles["history-panel-shell"]} style={drawerVars}>
-        <div className={styles["history-panel-toolbar"]}>
+      <Flex vertical className={styles["history-panel-shell"]} style={drawerVars}>
+        <Flex vertical gap={10} className={styles["history-panel-toolbar"]}>
           <Input
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder={t('搜索历史…')}
+            placeholder={t("搜索历史…")}
             prefix={<Search size={ICON_SIZE.SMALL} />}
             allowClear
             size="middle"
@@ -717,8 +758,8 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
             onChange={(k) => setActiveTab(k as "closed" | "timeline")}
             size="small"
             items={[
-              { key: "closed", label: t('最近关闭') },
-              { key: "timeline", label: t('操作时间线') },
+              { key: "closed", label: t("最近关闭") },
+              { key: "timeline", label: t("操作时间线") },
             ]}
           />
           {activeTab === "timeline" && (
@@ -727,61 +768,86 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
               value={filterMode}
               onChange={(v) => setFilterMode(v)}
               options={[
-                { value: "all", label: t('全部') },
-                { value: "tabs", label: t('标签操作') },
-                { value: "search", label: t('搜索行为') },
-                { value: "archive", label: t('归档/快照') },
+                { value: "all", label: t("全部") },
+                { value: "tabs", label: t("标签操作") },
+                { value: "search", label: t("搜索行为") },
+                { value: "archive", label: t("归档/快照") },
               ]}
               block
             />
           )}
-        </div>
+        </Flex>
 
-        <div className={styles["history-panel-list"]}>
+        <Flex vertical gap={16} className={styles["history-panel-list"]}>
           {snapshotDiff !== null && <SnapshotDiffCard diff={snapshotDiff} t={t} />}
           {activeTab === "closed" ? (
             filteredClosedTabs.length === 0 && closedWindows.length === 0 ? (
-              <Empty description={t('最近没有关闭过任何标签页')} image={Empty.PRESENTED_IMAGE_SIMPLE} />
+              <Empty
+                description={t("最近没有关闭过任何标签页")}
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
             ) : (
               <>
                 {closedWindows.length > 0 && (
-                  <div className={styles["history-window-list"]}>
+                  <Flex vertical gap={2} className={styles["history-window-list"]}>
                     {closedWindows.map(renderClosedWindow)}
-                  </div>
+                  </Flex>
                 )}
                 {TIME_GROUPS.map(({ id, labelKey }) => {
                   const list = groupedClosed.get(id);
                   if (!list || list.length === 0) return null;
                   return (
-                    <section key={id} className={styles["history-group"]}>
-                      <div className={styles["history-group-title"]}>{t(labelKey)}</div>
-                      <div className={styles["history-list"]}>{list.map(renderClosedItem)}</div>
-                    </section>
+                    <Flex
+                      key={id}
+                      vertical
+                      gap={4}
+                      component="section"
+                      className={styles["history-group"]}
+                    >
+                      <Typography.Text className={styles["history-group-title"]}>
+                        {t(labelKey)}
+                      </Typography.Text>
+                      <Flex vertical gap={2} className={styles["history-list"]}>
+                        {list.map(renderClosedItem)}
+                      </Flex>
+                    </Flex>
                   );
                 })}
               </>
             )
           ) : filteredEvents.length === 0 ? (
             <Empty
-              description={loading ? "..." : t('还没有任何历史记录')}
+              description={loading ? "..." : t("还没有任何历史记录")}
               image={Empty.PRESENTED_IMAGE_SIMPLE}
             >
-              <div className={styles["history-empty-hint"]}>{t('正常使用一段时间后，这里会出现可恢复的最近关闭与操作流水')}</div>
+              <div className={styles["history-empty-hint"]}>
+                {t("正常使用一段时间后，这里会出现可恢复的最近关闭与操作流水")}
+              </div>
             </Empty>
           ) : (
             TIME_GROUPS.map(({ id, labelKey }) => {
               const list = groupedEvents.get(id);
               if (!list || list.length === 0) return null;
               return (
-                <section key={id} className={styles["history-group"]}>
-                  <div className={styles["history-group-title"]}>{t(labelKey)}</div>
-                  <div className={styles["history-list"]}>{list.map(renderEvent)}</div>
-                </section>
+                <Flex
+                  key={id}
+                  vertical
+                  gap={4}
+                  component="section"
+                  className={styles["history-group"]}
+                >
+                  <Typography.Text className={styles["history-group-title"]}>
+                    {t(labelKey)}
+                  </Typography.Text>
+                  <Flex vertical gap={2} className={styles["history-list"]}>
+                    {list.map(renderEvent)}
+                  </Flex>
+                </Flex>
               );
             })
           )}
-        </div>
-      </div>
+        </Flex>
+      </Flex>
     </Drawer>
   );
 }

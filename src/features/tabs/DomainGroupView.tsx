@@ -2,32 +2,58 @@
  * DomainGroupView — 默认视图：按域名分组（antd 版）
  *
  * 设计：
- *   - 完全响应式列数：`column-width: 320px` 让浏览器按容器宽度自动决定列数
+ *   - 外层 CSS Grid 负责按列等分铺满可用宽度
+ *   - 每一列内部纵向流动，避免普通 Grid/Ant Row 的固定行高问题
  *   - settings 里的 domainGroupColumns 仍作"是否固定列数"的可选 override
- *   - 使用 CSS multi-column 实现伪瀑布流：高矮不一的分组自然错位排布
  *   - 列间距 16px、卡片垂直间距 14px
  */
 
-import { useMemo } from "react";
-import { Flex } from "antd";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTabsStore, useMetadataStore, useSettingsStore } from "@/store";
-import { groupTabsByDomain } from "@/shared/utils/domain";
+import { groupTabsByDomain, type DomainGroup } from "@/shared/utils/domain";
 import { cssVars } from "@/shared/utils/css-vars";
 import { DomainGroupCard } from "./DomainGroupCard";
 import styles from "./styles/items.module.less";
 
-/**
- * 构造响应式 multi-column 布局样式
- *
- * @param forcedColumns - 若用户在设置中显式指定列数（1–6），则强制使用该列数；
- *                        否则返回纯响应式配置（按 `column-width` 自适应）
- */
-function getColumnVars(forcedColumns: number | null): React.CSSProperties {
-  if (forcedColumns && forcedColumns >= 1 && forcedColumns <= 6) {
-    return cssVars({ "--app-domain-column-count": String(forcedColumns) });
-  }
+const DOMAIN_COLUMN_MIN_WIDTH = 320;
+const DOMAIN_COLUMN_GAP = 16;
+const DOMAIN_COLUMN_MAX_AUTO = 8;
 
-  return cssVars({ "--app-domain-column-width": "320px" });
+function getAutoColumnCount(containerWidth: number, groupCount: number): number {
+  if (groupCount <= 0 || containerWidth <= 0) return 1;
+
+  const fitCount = Math.floor(
+    (containerWidth + DOMAIN_COLUMN_GAP) / (DOMAIN_COLUMN_MIN_WIDTH + DOMAIN_COLUMN_GAP),
+  );
+
+  return Math.min(groupCount, Math.max(1, fitCount), DOMAIN_COLUMN_MAX_AUTO);
+}
+
+function getColumnVars(columnCount: number): React.CSSProperties {
+  return cssVars({
+    "--app-domain-column-count": String(columnCount),
+  });
+}
+
+function splitIntoFlowColumns(groups: DomainGroup[], columnCount: number): DomainGroup[][] {
+  const safeColumnCount = Math.max(1, columnCount);
+  const columns = Array.from({ length: safeColumnCount }, () => [] as DomainGroup[]);
+  const columnHeights = Array.from({ length: safeColumnCount }, () => 0);
+
+  groups.forEach((group) => {
+    let targetColumnIndex = 0;
+
+    for (let index = 1; index < columnHeights.length; index += 1) {
+      if (columnHeights[index]! < columnHeights[targetColumnIndex]!) {
+        targetColumnIndex = index;
+      }
+    }
+
+    columns[targetColumnIndex]!.push(group);
+    columnHeights[targetColumnIndex]! += group.tabs.length + 1;
+  });
+
+  return columns;
 }
 
 /**
@@ -36,6 +62,8 @@ function getColumnVars(forcedColumns: number | null): React.CSSProperties {
 export function DomainGroupView() {
   const tabs = useTabsStore((s) => s.tabs);
   const pinnedUrls = useMetadataStore((s) => s.pinnedUrls);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
   // 仅当用户显式设置了 1–6 的有效数值时才锁定列数，'auto' 或 undefined 走响应式
   const forcedColumns = useSettingsStore((s) => {
     const v = s.settings.domainGroupColumns;
@@ -45,6 +73,31 @@ export function DomainGroupView() {
   const sortBy = useSettingsStore((s) => s.settings.domainGroupSortBy ?? "tabCount");
 
   const groups = useMemo(() => groupTabsByDomain(tabs), [tabs]);
+
+  useLayoutEffect(() => {
+    const node = containerRef.current;
+    if (!node || forcedColumns !== null) return;
+
+    const updateWidth = () => {
+      setContainerWidth(node.clientWidth);
+    };
+
+    updateWidth();
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", updateWidth);
+      return () => window.removeEventListener("resize", updateWidth);
+    }
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      const width = entry?.contentRect.width ?? node.clientWidth;
+      setContainerWidth(width);
+    });
+    observer.observe(node);
+
+    return () => observer.disconnect();
+  }, [forcedColumns, groups.length]);
 
   // 根据 sortBy 配置排序分组；固定分组始终优先
   const sortedGroups = useMemo(() => {
@@ -79,17 +132,24 @@ export function DomainGroupView() {
     return null;
   }
 
+  const columnCount = forcedColumns ?? getAutoColumnCount(containerWidth, sortedGroups.length);
+  const columns = splitIntoFlowColumns(sortedGroups, columnCount);
+
   return (
-    <Flex
-      className={`${styles["app-domain-masonry"]}${forcedColumns !== null ? ` ${styles["is-fixed-columns"]}` : ""}`}
-      style={getColumnVars(forcedColumns)}
-      wrap="wrap"
+    <div
+      ref={containerRef}
+      className={styles["app-domain-masonry"]}
+      style={getColumnVars(columnCount)}
     >
-      {sortedGroups.map((group) => (
-        <Flex key={group.domain} className={styles["app-domain-masonry-item"]}>
-          <DomainGroupCard group={group} initialCollapsed={false} />
-        </Flex>
+      {columns.map((column, columnIndex) => (
+        <div key={columnIndex} className={styles["app-domain-masonry-column"]}>
+          {column.map((group) => (
+            <div key={group.domain} className={styles["app-domain-masonry-item"]}>
+              <DomainGroupCard group={group} initialCollapsed={false} />
+            </div>
+          ))}
+        </div>
       ))}
-    </Flex>
+    </div>
   );
 }

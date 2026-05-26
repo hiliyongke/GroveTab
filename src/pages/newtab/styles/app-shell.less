@@ -695,6 +695,40 @@
   /* Antd Flex 通过 props 提供 display: flex, flex-direction: column, align-items: center, gap */
 }
 
+/* ─── 优雅的加载微交互 ───────────────────────────── */
+@keyframes app-pulse-loading {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.98);
+  }
+}
+
+.app-page-loading-inner,
+.app-workspace-loading-inner {
+  animation: app-pulse-loading 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.app-page-loading-inner .ant-spin-dot,
+.app-workspace-loading-inner .ant-spin-dot {
+  font-size: 28px;
+}
+
+.app-page-loading-inner .ant-typography,
+.app-workspace-loading-inner .ant-typography {
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  color: var(--ant-color-text-tertiary);
+}
+
 /* ─── 布局外壳 ── */
 .app-layout-shell {
   height: 100vh;

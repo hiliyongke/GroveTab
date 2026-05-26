@@ -25,8 +25,8 @@
 /* ── 主布局：左导航 + 右内容 ─────────────────────────────── */
 .bm-tools__layout {
   display: grid;
-  grid-template-columns: 188px 1fr;
-  gap: 16px;
+  grid-template-columns: 200px 1fr; /* 稍微加宽左侧导航，提升呼吸感 */
+  gap: 24px; /* 增加左右间距 */
   min-height: 480px;
 }
 
@@ -34,12 +34,10 @@
 .bm-tools__nav {
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
-  gap: 2px;
-  padding: 6px 4px 6px 0;
+  gap: 4px; /* 增加导航项间距 */
+  padding: 8px 12px 8px 0; /* 增加内边距 */
   border-right: 1px solid var(--ant-color-border-secondary);
 }
-
-
 
 .bm-tools__nav-icon {
   display: inline-flex;
@@ -70,20 +68,18 @@
   justify-content: center;
 }
 
-
-
 /* ── 右侧内容区 ──────────────────────────────────────────── */
 .bm-tools__content {
   min-width: 0;
   max-height: 560px;
   overflow-y: auto;
-  padding-right: 4px;
+  padding-right: 8px; /* 增加右侧内边距，避免滚动条贴边 */
 }
 
 .bm-tools__panel {
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
-  gap: 14px;
+  gap: 20px; /* 增加面板内部间距 */
 }
 
 .bm-tools__panel-header {
@@ -122,17 +118,23 @@
 .bm-tools__stat-card {
   display: flex; /* antd 组件内部微调整 */
   align-items: center;
-  gap: 12px;
-  padding: 14px;
-  border-radius: 10px;
+  gap: 16px; /* 增加图标和文字间距 */
+  padding: 16px; /* 增加卡片内边距 */
+  border-radius: 12px; /* 稍微增大圆角 */
   background: var(--ant-color-fill-quaternary);
   border: 1px solid var(--ant-color-border-secondary);
+  transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1); /* 添加过渡动画 */
+}
+
+.bm-tools__stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--app-shadow-sm);
 }
 
 .bm-tools__stat-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 9px;
+  width: 42px; /* 稍微增大图标容器 */
+  height: 42px;
+  border-radius: 10px;
   background: var(--ant-color-bg-container);
   display: inline-flex;
   align-items: center;
@@ -175,24 +177,25 @@
   color: var(--ant-color-text-tertiary);
 }
 
-
-
 /* ── 列表区共通 ──────────────────────────────────────────── */
 .bm-tools__list {
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
-  gap: 10px;
+  gap: 12px; /* 增加列表项间距 */
 }
-
-
 
 /* 分组（去重组 / 整理簇） */
 .bm-tools__group {
   border: 1px solid var(--ant-color-border-secondary);
-  border-radius: 10px;
+  border-radius: 12px; /* 稍微增大圆角 */
   overflow: hidden;
   background: var(--ant-color-bg-container);
-  transition: border-color 0.15s;
+  transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1); /* 优化过渡动画 */
+}
+
+.bm-tools__group:hover {
+  border-color: var(--ant-color-border);
+  box-shadow: var(--app-shadow-sm);
 }
 
 .bm-tools__group.is-checked {
@@ -243,10 +246,10 @@
 .bm-tools__row {
   display: flex; /* antd 组件内部微调整 */
   align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
+  gap: 12px; /* 增加行内元素间距 */
+  padding: 10px 16px; /* 增加行内边距 */
   background: transparent;
-  transition: background-color 0.15s;
+  transition: background-color var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1); /* 优化过渡动画 */
 }
 
 .bm-tools__row:hover {
@@ -283,8 +286,6 @@
   text-overflow: ellipsis;
 }
 
-
-
 /* 失效检测：状态着色（左边一道色条） */
 .bm-tools__row.is-status-dead {
   border-left: 3px solid var(--ant-color-error);
@@ -305,8 +306,6 @@
   flex-wrap: wrap;
   gap: 8px;
 }
-
-
 
 /* 进度条 */
 .bm-tools__progress {
@@ -344,8 +343,6 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
-
-
 
 /* ── Overview 用 ─────────────────────────────────── */
 .bm-tools__overview-alert {

@@ -21,6 +21,8 @@ import {
   Empty,
   Divider,
   Upload,
+  Flex,
+  Typography,
 } from "antd";
 import {
   Download,
@@ -82,13 +84,13 @@ export function DataPanel() {
     setProfileName("");
     const updated = await getProfiles();
     setProfiles(updated);
-    message.success(t('预设已保存'));
+    message.success(t("预设已保存"));
   }, [profileName, settings, message, t]);
 
   const handleApplyProfile = useCallback(
     (profile: SettingsProfile) => {
       void updateSettings(profile.settings);
-      message.success(t('已应用预设「{name}」', { name: profile.name }));
+      message.success(t("已应用预设「{name}」", { name: profile.name }));
     },
     [updateSettings, message, t],
   );
@@ -98,7 +100,7 @@ export function DataPanel() {
       await deleteProfile(id);
       const updated = await getProfiles();
       setProfiles(updated);
-      message.success(t('预设已删除'));
+      message.success(t("预设已删除"));
     },
     [message, t],
   );
@@ -111,7 +113,7 @@ export function DataPanel() {
       setEditingName("");
       const updated = await getProfiles();
       setProfiles(updated);
-      message.success(t('预设已重命名'));
+      message.success(t("预设已重命名"));
     },
     [editingName, message, t],
   );
@@ -130,12 +132,12 @@ export function DataPanel() {
       JSON.stringify(bundle, null, 2),
       `${APP_RESOURCE_NAMES.backupFilePrefix}-${new Date().toISOString().slice(0, 10)}.json`,
     );
-    message.success(t('已导出归档 + 工作台配置'));
+    message.success(t("已导出归档 + 工作台配置"));
   };
 
   const handleImport = async (file: File) => {
     if (file.size > MAX_IMPORT_FILE_BYTES) {
-      setImportStatus(t('导入文件过大，请控制在 {size} 以内', { size: "2 MB" }));
+      setImportStatus(t("导入文件过大，请控制在 {size} 以内", { size: "2 MB" }));
       return;
     }
 
@@ -155,27 +157,27 @@ export function DataPanel() {
 
     const { sessions, errors } = parseImportJSON(importText);
     if (errors.length > 0) {
-      setImportStatus(t('导入失败：{count} 个错误', { count: errors.length }));
+      setImportStatus(t("导入失败：{count} 个错误", { count: errors.length }));
       return;
     }
     const existing = await getArchivedSessions();
     const existingIds = new Set(existing.map((session) => session.id));
     const newSessions = sessions.filter((session) => !existingIds.has(session.id));
     await saveSessions([...newSessions, ...existing]);
-    setImportStatus(t('已导入 {count} 个归档，并恢复工作台配置', { count: newSessions.length }));
+    setImportStatus(t("已导入 {count} 个归档，并恢复工作台配置", { count: newSessions.length }));
   };
 
   const handleClearAll = () => {
     modal.confirm({
-      title: t('清空所有归档'),
-      content: t('确认清空？点击执行'),
+      title: t("清空所有归档"),
+      content: t("确认清空？点击执行"),
       okButtonProps: { danger: true },
-      okText: t('清空所有归档'),
-      cancelText: t('取消'),
+      okText: t("清空所有归档"),
+      cancelText: t("取消"),
       onOk: async () => {
         try {
           await saveSessions([]);
-          message.success(t('清空所有归档'));
+          message.success(t("清空所有归档"));
         } catch (err) {
           console.error("[DataPanel] clearAll failed:", err);
         }
@@ -184,13 +186,13 @@ export function DataPanel() {
   };
 
   return (
-    <div className={`${styles["data-panel"]} settings-panel-stack`}>
+    <Flex vertical className={`${styles["data-panel"]} settings-panel-stack`}>
       <section className="settings-section">
-        <Field label={t('配置预设')} hint={t('保存当前配置为预设，一键切换不同的使用场景')}>
-          <div className={styles["data-panel__profile-create"]}>
+        <Field label={t("配置预设")} hint={t("保存当前配置为预设，一键切换不同的使用场景")}>
+          <Flex className={styles["data-panel__profile-create"]}>
             <Input
               size="small"
-              placeholder={t('输入预设名称…')}
+              placeholder={t("输入预设名称…")}
               value={profileName}
               onChange={(e) => setProfileName(e.target.value)}
               onPressEnter={() => {
@@ -208,19 +210,24 @@ export function DataPanel() {
                 void handleCreateProfile();
               }}
             >
-              {t('保存')}
+              {t("保存")}
             </Button>
-          </div>
+          </Flex>
           {profiles.length === 0 ? (
             <Empty
               image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description={t('暂无预设')}
+              description={t("暂无预设")}
               className={styles["data-panel__empty"]}
             />
           ) : (
-            <div className={styles["data-panel__profile-list"]}>
+            <Flex vertical className={styles["data-panel__profile-list"]}>
               {profiles.map((profile) => (
-                <div key={profile.id} className={styles["data-panel__profile-card"]}>
+                <Flex
+                  key={profile.id}
+                  align="center"
+                  justify="space-between"
+                  className={styles["data-panel__profile-card"]}
+                >
                   {editingId === profile.id ? (
                     <Input
                       size="small"
@@ -236,14 +243,16 @@ export function DataPanel() {
                       autoFocus
                     />
                   ) : (
-                    <span className={styles["data-panel__profile-name"]}>{profile.name}</span>
+                    <Typography.Text className={styles["data-panel__profile-name"]}>
+                      {profile.name}
+                    </Typography.Text>
                   )}
                   <Space size={4}>
                     <Button
                       type="text"
                       size="small"
                       icon={<ArrowLeftRight size={ICON_SIZE.MEDIUM} />}
-                      title={t('应用此预设')}
+                      title={t("应用此预设")}
                       onClick={() => {
                         void handleApplyProfile(profile);
                       }}
@@ -252,19 +261,19 @@ export function DataPanel() {
                       type="text"
                       size="small"
                       icon={<Pencil size={ICON_SIZE.MEDIUM} />}
-                      title={t('重命名')}
+                      title={t("重命名")}
                       onClick={() => {
                         setEditingId(profile.id);
                         setEditingName(profile.name);
                       }}
                     />
                     <Popconfirm
-                      title={t('确认删除此预设？')}
+                      title={t("确认删除此预设？")}
                       onConfirm={() => {
                         void handleDeleteProfile(profile.id);
                       }}
-                      okText={t('删除')}
-                      cancelText={t('取消')}
+                      okText={t("删除")}
+                      cancelText={t("取消")}
                       okButtonProps={{ danger: true }}
                     >
                       <Button
@@ -272,13 +281,13 @@ export function DataPanel() {
                         size="small"
                         danger
                         icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
-                        title={t('删除')}
+                        title={t("删除")}
                       />
                     </Popconfirm>
                   </Space>
-                </div>
+                </Flex>
               ))}
-            </div>
+            </Flex>
           )}
         </Field>
       </section>
@@ -286,17 +295,21 @@ export function DataPanel() {
       {quotaInfo !== null && (
         <section className="settings-section">
           <div className={styles["data-panel__quota"]}>
-            <div className={styles["data-panel__quota-header"]}>
-              <span className={styles["data-panel__quota-label"]}>
+            <Flex
+              align="center"
+              justify="space-between"
+              className={styles["data-panel__quota-header"]}
+            >
+              <Flex align="center" className={styles["data-panel__quota-label"]}>
                 <HardDrive size={ICON_SIZE.MEDIUM} className={styles["data-panel__quota-icon"]} />
-                {t('存储空间')}
-              </span>
-              <span
+                {t("存储空间")}
+              </Flex>
+              <Typography.Text
                 className={`${styles["data-panel__quota-meta"]}${quotaInfo.isWarning ? ` ${styles["is-warning"]}` : ""}`}
               >
                 {formatBytes(quotaInfo.usedBytes)} / {formatBytes(quotaInfo.totalBytes)}
-              </span>
-            </div>
+              </Typography.Text>
+            </Flex>
             <Progress
               percent={Math.round(quotaInfo.percentage)}
               size="small"
@@ -307,7 +320,7 @@ export function DataPanel() {
               <Alert
                 type="error"
                 showIcon
-                description={t('存储空间即将用完，建议清理归档数据')}
+                description={t("存储空间即将用完，建议清理归档数据")}
                 className={styles["data-panel__quota-alert"]}
               />
             )}
@@ -316,7 +329,7 @@ export function DataPanel() {
       )}
 
       <section className="settings-section">
-        <div className={styles["data-panel__actions"]}>
+        <Flex vertical className={styles["data-panel__actions"]}>
           <Button
             block
             icon={<Download size={ICON_SIZE.MEDIUM} />}
@@ -324,7 +337,7 @@ export function DataPanel() {
               void handleExport();
             }}
           >
-            {t('导出归档数据')}
+            {t("导出归档数据")}
           </Button>
           <Upload
             accept=".json"
@@ -335,49 +348,53 @@ export function DataPanel() {
             }}
           >
             <Button block icon={<UploadIcon size={ICON_SIZE.MEDIUM} />}>
-              {t('导入归档数据')}
+              {t("导入归档数据")}
             </Button>
           </Upload>
           {importStatus !== null && (
-            <div className={styles["data-panel__import-status"]}>{importStatus}</div>
+            <Typography.Text className={styles["data-panel__import-status"]}>
+              {importStatus}
+            </Typography.Text>
           )}
-        </div>
+        </Flex>
       </section>
 
       <section className="settings-section">
         <Button block danger icon={<Trash2 size={ICON_SIZE.MEDIUM} />} onClick={handleClearAll}>
-          {t('清空所有归档')}
+          {t("清空所有归档")}
         </Button>
 
-        <Divider className={styles["data-panel__divider"]}>{t('危险区')}</Divider>
+        <Divider className={styles["data-panel__divider"]}>{t("危险区")}</Divider>
 
         <Popconfirm
-          title={t('恢复默认配置？')}
-          description={t('将重置全部设置（主题/皮肤/快捷键…）为默认值；所有归档、书签、历史记录数据继续保留。')}
+          title={t("恢复默认配置？")}
+          description={t(
+            "将重置全部设置（主题/皮肤/快捷键…）为默认值；所有归档、书签、历史记录数据继续保留。",
+          )}
           onConfirm={() => {
             void (async () => {
               try {
                 await resetSettings();
-                message.success(t('配置已恢复默认，页面即将刷新'));
+                message.success(t("配置已恢复默认，页面即将刷新"));
               } catch (err) {
                 console.error("[DataPanel] resetSettings failed:", err);
-                message.error(t('恢复默认配置失败，请重试'));
+                message.error(t("恢复默认配置失败，请重试"));
               }
             })();
           }}
         >
           <Button block icon={<RotateCcw size={ICON_SIZE.MEDIUM} />}>
-            {t('恢复默认配置')}
+            {t("恢复默认配置")}
           </Button>
         </Popconfirm>
 
         <Popconfirm
-          title={t('重播欢迎教程？下次打开新标签页将重新弹出。')}
+          title={t("重播欢迎教程？下次打开新标签页将重新弹出。")}
           onConfirm={() => {
             void (async () => {
               try {
                 await removeData(STORAGE_KEYS.onboardingDone);
-                message.success(t('欢迎教程已重置'));
+                message.success(t("欢迎教程已重置"));
               } catch (err) {
                 console.error("[DataPanel] replayOnboarding failed:", err);
               }
@@ -385,7 +402,7 @@ export function DataPanel() {
           }}
         >
           <Button block icon={<Sparkles size={ICON_SIZE.MEDIUM} />}>
-            {t('重播欢迎教程')}
+            {t("重播欢迎教程")}
           </Button>
         </Popconfirm>
 
@@ -396,27 +413,33 @@ export function DataPanel() {
           onClick={() => {
             let confirmText = "";
             modal.confirm({
-              title: t('恢复出厂设置'),
+              title: t("恢复出厂设置"),
               content: (
-                <div className={styles["data-panel__factory-confirm"]}>
-                  <Alert type="error" showIcon message={t('此操作不可撤销：将清除所有归档、书签元数据、设置、历史记录。请确认已导出备份。')} />
-                  <div className={styles["data-panel__factory-copy"]}>
-                    {t('输入 RESET 以确认执行：')}
-                  </div>
+                <Flex vertical className={styles["data-panel__factory-confirm"]}>
+                  <Alert
+                    type="error"
+                    showIcon
+                    message={t(
+                      "此操作不可撤销：将清除所有归档、书签元数据、设置、历史记录。请确认已导出备份。",
+                    )}
+                  />
+                  <Typography.Text className={styles["data-panel__factory-copy"]}>
+                    {t("输入 RESET 以确认执行：")}
+                  </Typography.Text>
                   <Input
                     placeholder="RESET"
                     onChange={(e) => {
                       confirmText = e.target.value;
                     }}
                   />
-                </div>
+                </Flex>
               ),
-              okText: t('全量重置'),
+              okText: t("全量重置"),
               okButtonProps: { danger: true },
-              cancelText: t('取消'),
+              cancelText: t("取消"),
               onOk: async () => {
                 if (confirmText.trim().toUpperCase() !== "RESET") {
-                  message.error(t('请输入 RESET 以确认'));
+                  message.error(t("请输入 RESET 以确认"));
                   return Promise.reject(new Error("must type RESET"));
                 }
                 try {
@@ -427,11 +450,11 @@ export function DataPanel() {
                     }
                   }
                   await resetSettings();
-                  message.success(t('已恢复出厂设置，页面即将刷新'));
+                  message.success(t("已恢复出厂设置，页面即将刷新"));
                   setTimeout(() => window.location.reload(), 400);
                 } catch (err) {
                   console.error("[DataPanel] factoryReset failed:", err);
-                  message.error(t('请输入 RESET 以确认'));
+                  message.error(t("请输入 RESET 以确认"));
                   return Promise.reject(err instanceof Error ? err : new Error(String(err)));
                 }
                 return undefined;
@@ -439,9 +462,9 @@ export function DataPanel() {
             });
           }}
         >
-          {t('恢复出厂设置')}
+          {t("恢复出厂设置")}
         </Button>
       </section>
-    </div>
+    </Flex>
   );
 }

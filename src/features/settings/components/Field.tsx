@@ -7,24 +7,26 @@
  *   - 间距紧凑但不拥挤
  */
 
-import { Typography } from "antd";
+import type { ReactNode } from "react";
+
+import { Flex, Typography } from "antd";
 
 interface FieldProps {
   label: string;
   hint?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export function Field({ label, hint, children }: FieldProps) {
   return (
-    <div className="settings-field">
-      <div className="settings-field__label">{label}</div>
+    <Flex vertical className="settings-field">
+      <Typography.Text className="settings-field__label">{label}</Typography.Text>
       {children}
       {hint && (
         <Typography.Text className="settings-field__hint" type="secondary">
           {hint}
         </Typography.Text>
       )}
-    </div>
+    </Flex>
   );
 }

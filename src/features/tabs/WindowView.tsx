@@ -43,7 +43,6 @@ import { useT } from "@/shared/i18n";
 import { WindowCard } from "./WindowView/WindowCard";
 import { SortableWindowCard } from "./WindowView/SortableWindowCard";
 import type { WindowDragData, WindowDropData } from "./WindowView/dragTypes";
-import domainStyles from "./styles/items.module.less";
 import styles from "./styles/views.module.less";
 
 type WindowCardDefaultCollapsed = "current-only" | "all-expanded" | "all-collapsed";
@@ -72,10 +71,10 @@ function groupTabsByWindow(tabs: LiveTab[]): Map<number, LiveTab[]> {
 
 function getColumnVars(forcedColumns: number | null): React.CSSProperties {
   if (forcedColumns && forcedColumns >= 1 && forcedColumns <= 6) {
-    return cssVars({ "--app-domain-column-count": String(forcedColumns) });
+    return cssVars({ "--app-window-grid-template": `repeat(${forcedColumns}, minmax(0, 1fr))` });
   }
 
-  return cssVars({ "--app-domain-column-width": "360px" });
+  return cssVars({ "--app-window-card-min-width": "360px" });
 }
 
 function shouldCollapseWindow(
@@ -180,7 +179,7 @@ export function WindowView() {
 
     const { tab } = dragData;
     if (tab.incognito !== dropData.incognito) {
-      feedback.warning(t('无痕标签页不能拖入普通窗口'));
+      feedback.warning(t("无痕标签页不能拖入普通窗口"));
       return;
     }
 
@@ -223,13 +222,13 @@ export function WindowView() {
         void loadAllTabs({ silent: true });
       }
     } catch (err) {
-      feedback.error(t('标签页移动失败'), err);
+      feedback.error(t("标签页移动失败"), err);
       void loadAllTabs({ silent: true });
     }
   };
 
   if (tabs.length === 0) {
-    return <Empty description={t('没有打开的标签页')} className={styles["app-window-empty"]} />;
+    return <Empty description={t("没有打开的标签页")} className={styles["app-window-empty"]} />;
   }
 
   return (
@@ -244,10 +243,7 @@ export function WindowView() {
         items={sortedWindowIds.map((id) => `window-sort:${id}`)}
         strategy={rectSortingStrategy}
       >
-        <div
-          className={`${domainStyles["app-domain-masonry"]}${forcedColumns !== null ? ` ${domainStyles["is-fixed-columns"]}` : ""}`}
-          style={getColumnVars(forcedColumns)}
-        >
+        <div className={styles["app-window-grid"]} style={getColumnVars(forcedColumns)}>
           {sortedWindowIds.map((windowId) => {
             const windowTabs = windowGroups.get(windowId) ?? [];
             return (

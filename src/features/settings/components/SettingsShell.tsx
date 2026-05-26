@@ -1,4 +1,4 @@
-import { Drawer, Menu, Typography } from "antd";
+import { Drawer, Flex, Menu, Typography } from "antd";
 import { useCallback, useMemo } from "react";
 
 import { useT } from "@/shared/i18n";
@@ -43,7 +43,7 @@ export function SettingsShell({
       onClose={handleClose}
       destroyOnClose
       width={704}
-      title={t('设置')}
+      title={t("设置")}
       classNames={{
         mask: styles["settings-drawer__mask"],
         header: styles["settings-drawer__header"],
@@ -53,8 +53,8 @@ export function SettingsShell({
       }}
       rootClassName={styles["settings-drawer"]}
     >
-      <div className={styles["settings-shell"]}>
-        <nav className={styles["settings-nav"]} aria-label={t('设置')}>
+      <Flex className={styles["settings-shell"]}>
+        <nav className={styles["settings-nav"]} aria-label={t("设置")}>
           <Menu
             mode="inline"
             selectedKeys={[activeTab]}
@@ -66,14 +66,14 @@ export function SettingsShell({
         </nav>
 
         <main className={styles["settings-content"]}>
-          <div className={styles["settings-content__header"]}>
+          <Flex align="center" className={styles["settings-content__header"]}>
             <Typography.Title level={2} className={styles["settings-content__title"]}>
               {activeItem ? t(activeItem.labelKey) : null}
             </Typography.Title>
-          </div>
+          </Flex>
           <div className={styles["settings-content__body"]}>{activeItem?.content}</div>
         </main>
-      </div>
+      </Flex>
     </Drawer>
   );
 }

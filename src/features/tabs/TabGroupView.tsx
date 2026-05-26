@@ -10,26 +10,26 @@
  *   - 支持将域名分组同步到 Chrome Tab Group
  */
 
-import { useMemo } from 'react';
-import { Tag, Collapse, Empty } from 'antd';
-import { useTabsStore } from '@/store';
-import { TabItem } from './TabItem';
-import { useT } from '@/shared/i18n';
-import styles from './styles/views.module.less';
+import { useMemo } from "react";
+import { Tag, Collapse, Empty, Flex, Typography } from "antd";
+import { useTabsStore } from "@/store";
+import { TabItem } from "./TabItem";
+import { useT } from "@/shared/i18n";
+import styles from "./styles/views.module.less";
 
 /**
  * Chrome Tab Group 颜色映射到 antd Tag color
  */
 const GROUP_COLOR_MAP: Record<string, string> = {
-  grey: 'default',
-  blue: 'blue',
-  red: 'red',
-  yellow: 'gold',
-  green: 'green',
-  pink: 'magenta',
-  purple: 'purple',
-  cyan: 'cyan',
-  orange: 'orange',
+  grey: "default",
+  blue: "blue",
+  red: "red",
+  yellow: "gold",
+  green: "green",
+  pink: "magenta",
+  purple: "purple",
+  cyan: "cyan",
+  orange: "orange",
 };
 
 interface TabGroupData {
@@ -65,10 +65,8 @@ export function TabGroupView() {
       if (!map.has(gid)) {
         map.set(gid, {
           groupId: gid,
-          title: gid === -1
-            ? t('未分组')
-            : (tab.groupTitle || t('未命名分组')),
-          color: gid === -1 ? 'grey' : (tab.groupColor || 'grey'),
+          title: gid === -1 ? t("未分组") : tab.groupTitle || t("未命名分组"),
+          color: gid === -1 ? "grey" : tab.groupColor || "grey",
           tabs: [],
         });
       }
@@ -83,12 +81,7 @@ export function TabGroupView() {
   }, [tabs, t]);
 
   if (tabs.length === 0) {
-    return (
-      <Empty
-        description={t('没有打开的标签页')}
-        className={styles['app-tab-group-empty']}
-      />
-    );
+    return <Empty description={t("没有打开的标签页")} className={styles["app-tab-group-empty"]} />;
   }
 
   /** 为每个分组内的标签构造可见 ID 列表（用于多选） */
@@ -101,32 +94,36 @@ export function TabGroupView() {
       items={groups.map((group) => ({
         key: String(group.groupId),
         label: (
-          <div className={styles['app-tab-group-label']}>
+          <Flex align="center" gap={8} className={styles["app-tab-group-label"]}>
             <Tag
-              color={GROUP_COLOR_MAP[group.color] || 'default'}
-              className={styles['app-tab-group-tag']}
+              color={GROUP_COLOR_MAP[group.color] || "default"}
+              className={styles["app-tab-group-tag"]}
             >
               {group.title}
             </Tag>
-            <span className={styles['app-tab-group-count']}>
+            <Typography.Text className={styles["app-tab-group-count"]}>
               {group.tabs.length}
-            </span>
-          </div>
+            </Typography.Text>
+          </Flex>
         ),
         children: (
-          <div className={styles['app-tab-group-list']}>
+          <Flex vertical gap={2} className={styles["app-tab-group-list"]}>
             {group.tabs.map((tab) => (
               <TabItem
                 key={tab.id}
                 tab={tab}
-                onJump={(id, wid) => { void jumpToTab(id, wid); }}
-                onClose={(id) => { void closeSingleTab(id); }}
+                onJump={(id, wid) => {
+                  void jumpToTab(id, wid);
+                }}
+                onClose={(id) => {
+                  void closeSingleTab(id);
+                }}
                 showHostname
                 selectable
                 visibleTabIds={allTabIds}
               />
             ))}
-          </div>
+          </Flex>
         ),
       }))}
     />

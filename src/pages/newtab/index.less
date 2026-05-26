@@ -189,6 +189,28 @@ h6 {
   animation: app-fade-in-up 0.36s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* ─── 视图切换动画 ─────────────────────────────────
+ * 路由/视图切换时的淡入淡出效果
+ */
+@keyframes app-view-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.app-view-transition {
+  animation: app-view-fade-in var(--app-motion-duration-slow, 0.3s) cubic-bezier(0.22, 1, 0.36, 1);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 /* ─── 底部浮动操作栏入场 ───────────────────────────
  * 上滑 + 渐入，配合 scale 让点击感更有物理性。
  */
@@ -288,6 +310,51 @@ html[data-texture-noise] body::before {
 .app-divider-soft--horizontal {
   width: 100%;
   height: 1px;
+}
+
+/** ─── 基础组件过渡动画（Button / Input） ─────────────
+ * 统一按钮和输入框的交互过渡动画，使其更平滑
+ */
+.app-button,
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-input-search-button {
+  transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+.app-button:active {
+  transform: scale(0.96);
+}
+
+/** ─── 全局弹窗（Modal）样式优化 ─────────────
+ * 统一弹窗的遮罩、背景色、内边距及阴影效果
+ */
+.app-modal__mask {
+  background-color: var(--app-overlay-mask-bg) !important;
+  backdrop-filter: blur(var(--app-overlay-blur));
+  -webkit-backdrop-filter: blur(var(--app-overlay-blur));
+}
+
+.app-modal__container {
+  box-shadow: var(--app-shadow-floating) !important;
+  border-radius: calc(var(--app-radius-lg) + 4px);
+  overflow: hidden;
+}
+
+.app-modal__header {
+  padding: var(--app-space-4) var(--app-space-5) !important;
+  margin-bottom: 0 !important;
+  border-bottom: 1px solid var(--app-hairline);
+}
+
+.app-modal__body {
+  padding: var(--app-space-5) !important;
+}
+
+.app-modal__footer {
+  padding: var(--app-space-3) var(--app-space-5) !important;
+  margin-top: 0 !important;
+  border-top: 1px solid var(--app-hairline);
 }
 
 /** 吸附/悬浮状态：让元素在 hover/focus 时轻微上浮 + 柔和 ring

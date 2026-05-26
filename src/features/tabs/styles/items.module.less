@@ -1,21 +1,27 @@
 .app-domain-masonry {
-  column-gap: var(--app-domain-column-gap, 20px);
-  column-fill: balance;
-  column-width: var(--app-domain-column-width, 320px);
+  --app-domain-column-count: 1;
+
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(var(--app-domain-column-count), minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
 }
 
-.app-domain-masonry.is-fixed-columns {
-  column-width: auto;
-  column-count: var(--app-domain-column-count, auto);
+.app-domain-masonry-column {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .app-domain-masonry-item {
-  break-inside: avoid;
-  page-break-inside: avoid;
-  margin-bottom: 16px;
+  width: 100%;
+  min-width: 0;
 }
 
 .app-domain-group-card {
+  width: 100%;
   position: relative;
   overflow: hidden;
   box-shadow: var(--app-shadow-card);

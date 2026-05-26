@@ -19,7 +19,7 @@
  */
 
 import { useMemo, useState } from "react";
-import { Button, Card, Popover, theme, Typography, Space } from "antd";
+import { Button, Card, Flex, Popover, theme, Typography, Space } from "antd";
 import { Volume2, X } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useTabsStore, useSettingsStore } from "@/store";
@@ -94,27 +94,28 @@ export function GridView() {
   };
 
   return (
-    <Space className={styles["app-grid-view"]} style={wrapperStyle}>
+    <div className={styles["app-grid-view"]} style={wrapperStyle}>
       {groups.map((group) => (
-        <GridCard
-          key={group.domain}
-          domain={group.domain}
-          colorKey={group.colorKey}
-          tabs={group.tabs}
-          onJump={(id, wid) => {
-            void jumpToTab(id, wid);
-          }}
-          open={activeDomain === group.domain}
-          onOpenChange={(next) => setActiveDomain(next ? group.domain : null)}
-          onJumpFromPopover={handleJumpFromPopover}
-          onCloseTab={(id) => {
-            void closeSingleTab(id);
-          }}
-          countLabel={t('{count} 个标签页', { count: group.tabs.length })}
-          expandTrigger={expandTrigger}
-        />
+        <div key={group.domain} className={styles["app-grid-view__cell"]}>
+          <GridCard
+            domain={group.domain}
+            colorKey={group.colorKey}
+            tabs={group.tabs}
+            onJump={(id, wid) => {
+              void jumpToTab(id, wid);
+            }}
+            open={activeDomain === group.domain}
+            onOpenChange={(next) => setActiveDomain(next ? group.domain : null)}
+            onJumpFromPopover={handleJumpFromPopover}
+            onCloseTab={(id) => {
+              void closeSingleTab(id);
+            }}
+            countLabel={t("{count} 个标签页", { count: group.tabs.length })}
+            expandTrigger={expandTrigger}
+          />
+        </div>
       ))}
-    </Space>
+    </div>
   );
 }
 
@@ -186,7 +187,7 @@ function GridCard({
       data-card-accent={color}
     >
       {/* 缩略图区 —— 16:10 宽高比 */}
-      <Space className={styles["app-grid-card-preview"]}>
+      <Flex align="center" justify="center" className={styles["app-grid-card-preview"]}>
         {first?.favIconUrl && !faviconError ? (
           <img
             src={first.favIconUrl}
@@ -206,18 +207,18 @@ function GridCard({
         {isMulti && (
           <Typography.Text className={styles["app-grid-card-count"]}>{tabs.length}</Typography.Text>
         )}
-      </Space>
+      </Flex>
 
       {/* 底部信息区 */}
-      <Space direction="vertical" size={0} className={styles["app-grid-card-content"]}>
-        <Space className={styles["app-grid-card-meta"]}>
+      <Flex vertical gap={2} className={styles["app-grid-card-content"]}>
+        <Flex align="center" gap={6} className={styles["app-grid-card-meta"]}>
           <Typography.Text className={styles["app-grid-card-domain"]}>{domain}</Typography.Text>
           {hasAudible && (
             <Volume2 size={ICON_SIZE.SMALL} className={styles["app-grid-card-audible"]} />
           )}
-        </Space>
+        </Flex>
         <Typography.Text className={styles["app-grid-card-copy"]}>{countLabel}</Typography.Text>
-      </Space>
+      </Flex>
     </Card>
   );
 
@@ -311,14 +312,9 @@ function DomainTabsPanel({
   });
 
   return (
-    <Space
-      direction="vertical"
-      size={0}
-      className={styles["app-grid-popover"]}
-      style={popoverStyle}
-    >
+    <Flex vertical className={styles["app-grid-popover"]} style={popoverStyle}>
       {/* Header —— 色条 + favicon + 域名 + 计数 + 关闭 */}
-      <Space className={styles["app-grid-popover__header"]}>
+      <Flex align="center" gap={8} className={styles["app-grid-popover__header"]}>
         {/* 左侧身份色条 */}
         <Typography.Text aria-hidden className={styles["app-grid-popover__accent"]} />
         {/* favicon */}
@@ -342,7 +338,7 @@ function DomainTabsPanel({
         </Typography.Text>
         {/* 计数 —— secondary tone，tabular */}
         <Typography.Text className={styles["app-grid-popover__count"]}>
-          {t('{count} 个标签页', { count: tabs.length })}
+          {t("{count} 个标签页", { count: tabs.length })}
         </Typography.Text>
         {/* 关闭按钮 —— antd Button（键盘可达 + ant 原生样式） */}
         <Button
@@ -353,10 +349,10 @@ function DomainTabsPanel({
           icon={<X size={ICON_SIZE.MEDIUM} />}
           className={styles["app-grid-popover__close"]}
         />
-      </Space>
+      </Flex>
 
       {/* 列表区 */}
-      <Space direction="vertical" size={0} className={styles["app-grid-popover__list"]}>
+      <Space direction="vertical" size={2} className={styles["app-grid-popover__list"]}>
         {tabs.map((tab) => (
           <TabItem
             key={tab.id}
@@ -367,6 +363,6 @@ function DomainTabsPanel({
           />
         ))}
       </Space>
-    </Space>
+    </Flex>
   );
 }

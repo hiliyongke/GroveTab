@@ -1,10 +1,10 @@
-import { Space } from "antd";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 
 import type { LiveTab } from "@/shared/types";
 import { TabItem } from "../TabItem";
 import type { WindowDragData } from "./dragTypes";
+import styles from "../styles/views.module.less";
 
 interface DraggableTabProps {
   tab: LiveTab;
@@ -26,7 +26,13 @@ export function DraggableTab({ tab, visibleTabIds, onJump, onClose }: DraggableT
   };
 
   return (
-    <Space ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div
+      ref={setNodeRef}
+      className={styles["app-window-draggable-tab"]}
+      style={style}
+      {...attributes}
+      {...listeners}
+    >
       <TabItem
         tab={tab}
         onJump={onJump}
@@ -35,6 +41,6 @@ export function DraggableTab({ tab, visibleTabIds, onJump, onClose }: DraggableT
         selectable
         visibleTabIds={visibleTabIds}
       />
-    </Space>
+    </div>
   );
 }

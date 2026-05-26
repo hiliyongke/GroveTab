@@ -11,6 +11,7 @@
   flex: 1;
   min-height: 0;
   height: calc(100vh - var(--app-header-height, 56px) - 64px);
+  gap: var(--app-space-4);
 }
 
 /* ===== Shell：整体卡片容器 ===== */
@@ -111,12 +112,13 @@
   border-radius: var(--app-radius-md);
   cursor: pointer;
   color: var(--ant-color-text-secondary);
-  transition: all 0.15s ease;
+  transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .devtools-sidebar-item:hover {
   background: color-mix(in srgb, var(--ant-color-text) 4%, transparent);
   color: var(--ant-color-text);
+  transform: translateX(2px);
 }
 
 .devtools-sidebar-item.is-active {
@@ -228,12 +230,13 @@
   border-radius: var(--app-radius-sm);
   color: var(--ant-color-text-tertiary);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .devtools-main-fav-btn:hover {
   color: var(--ant-color-error);
   background: var(--ant-color-error-bg);
+  transform: scale(1.1);
 }
 
 .devtools-main-fav-btn.is-active {
@@ -283,8 +286,6 @@
   color: var(--ant-color-text-secondary);
   font-size: 11px;
 }
-
-
 
 .devtools-actions {
   display: flex; /* antd 组件内部微调整 */
@@ -353,8 +354,6 @@
   line-height: 1.5;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
-
-
 
 /* ===== 错误提示 ===== */
 .devtools-error {

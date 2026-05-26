@@ -15,7 +15,7 @@
  */
 
 import { useEffect, useCallback, useState } from "react";
-import { Modal, Button, List, Tag, Alert, Checkbox, Empty } from "antd";
+import { Modal, Button, List, Tag, Alert, Checkbox, Empty, Flex, Typography } from "antd";
 import {
   Copy,
   HeartPulse,
@@ -119,45 +119,49 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
     {
       key: "overview",
       icon: <LayoutDashboard size={ICON_SIZE.MEDIUM} />,
-      label: t('总览'),
+      label: t("总览"),
     },
     {
       key: "dedupe",
       icon: <Copy size={ICON_SIZE.MEDIUM} />,
-      label: t('去重'),
+      label: t("去重"),
       badge: dups?.length,
     },
     {
       key: "health",
       icon: <HeartPulse size={ICON_SIZE.MEDIUM} />,
-      label: t('失效检测'),
+      label: t("失效检测"),
       badge: deadList.length,
     },
     {
       key: "organize",
       icon: <FolderTree size={ICON_SIZE.MEDIUM} />,
-      label: t('智能整理'),
+      label: t("智能整理"),
       badge: clusters?.length,
     },
     {
       key: "empty",
       icon: <FolderX size={ICON_SIZE.MEDIUM} />,
-      label: t('空文件夹'),
+      label: t("空文件夹"),
       badge: emptyFolders?.length,
     },
   ];
 
   // ── 智能整理 ──
   const renderOrganize = () => (
-    <div className={styles["bm-tools__panel"]}>
-      <div className={styles["bm-tools__panel-header"]}>
-        <div>
-          <div className={styles["bm-tools__panel-title"]}>{t('智能整理')}</div>
-          <div className={styles["bm-tools__panel-subtitle"]}>
-            {t('按域名聚类书签。选择想整理的分类，执行后会在"其他书签"下新建同名文件夹，所有同域书签移过去。')}
-          </div>
-        </div>
-        <div className={styles["bm-tools__panel-actions"]}>
+    <Flex vertical gap={20} className={styles["bm-tools__panel"]}>
+      <Flex align="flex-start" gap={12} className={styles["bm-tools__panel-header"]}>
+        <Flex vertical className={styles["bm-tools__panel-copy"]}>
+          <Typography.Text className={styles["bm-tools__panel-title"]}>
+            {t("智能整理")}
+          </Typography.Text>
+          <Typography.Text className={styles["bm-tools__panel-subtitle"]}>
+            {t(
+              '按域名聚类书签。选择想整理的分类，执行后会在"其他书签"下新建同名文件夹，所有同域书签移过去。',
+            )}
+          </Typography.Text>
+        </Flex>
+        <Flex align="center" gap={8} className={styles["bm-tools__panel-actions"]}>
           <Button
             type="primary"
             loading={orgLoading}
@@ -166,7 +170,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
               void scanClusters();
             }}
           >
-            {t('开始扫描')}
+            {t("开始扫描")}
           </Button>
           {clusters !== null && clusters.length > 0 && (
             <Button
@@ -177,11 +181,11 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
               }}
               disabled={selectedClusters.size === 0}
             >
-              {t('整理选中的 {count} 个分类', { count: selectedClusters.size })}
+              {t("整理选中的 {count} 个分类", { count: selectedClusters.size })}
             </Button>
           )}
-        </div>
-      </div>
+        </Flex>
+      </Flex>
 
       {clusters === null && (
         <Empty
@@ -192,18 +196,24 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
       )}
 
       {clusters !== null && clusters.length === 0 && (
-        <Alert type="success" showIcon message={t('没有可整理的大簇（需同域名≥ 3 个书签）。')} />
+        <Alert type="success" showIcon message={t("没有可整理的大簇（需同域名≥ 3 个书签）。")} />
       )}
 
       {clusters !== null && clusters.length > 0 && (
-        <div className={styles["bm-tools__list"]}>
+        <Flex vertical gap={12} className={styles["bm-tools__list"]}>
           {clusters.map((c) => {
             const checked = selectedClusters.has(c.domain);
             const expanded = expandedCluster === c.domain;
             return (
-              <div key={c.domain} className={`bm-tools__group${checked ? " is-checked" : ""}`}>
-                <div
-                  className="bm-tools__group-header is-clickable"
+              <Flex
+                key={c.domain}
+                vertical
+                className={`${styles["bm-tools__group"]}${checked ? ` ${styles["is-checked"]}` : ""}`}
+              >
+                <Flex
+                  align="center"
+                  gap={10}
+                  className={`${styles["bm-tools__group-header"]} ${styles["is-clickable"]}`}
                   onClick={() => {
                     const next = new Set(selectedClusters);
                     if (checked) next.delete(c.domain);
@@ -213,9 +223,11 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
                 >
                   <Checkbox checked={checked} onChange={() => undefined} />
                   <SiteIcon url={`https://${c.domain}`} />
-                  <div className={styles["bm-tools__group-title"]}>{c.domain}</div>
+                  <Typography.Text className={styles["bm-tools__group-title"]}>
+                    {c.domain}
+                  </Typography.Text>
                   <Tag color="blue" className={styles["bm-tools__tag--noborder"]}>
-                    {t('{count} 个书签', { count: c.items.length })}
+                    {t("{count} 个书签", { count: c.items.length })}
                   </Tag>
                   <Button
                     type="text"
@@ -225,40 +237,49 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
                       setExpandedCluster(expanded ? null : c.domain);
                     }}
                   >
-                    {expanded ? t('收起') : t('展开')}
+                    {expanded ? t("收起") : t("展开")}
                   </Button>
-                </div>
+                </Flex>
                 {expanded && (
-                  <div className={styles["bm-tools__group-body"]}>
+                  <Flex vertical className={styles["bm-tools__group-body"]}>
                     {c.items.map((item) => (
-                      <div key={item.id} className="bm-tools__row is-mini">
-                        <div className={styles["bm-tools__row-main"]}>
-                          <div className={styles["bm-tools__row-title"]}>
+                      <Flex
+                        key={item.id}
+                        className={`${styles["bm-tools__row"]} ${styles["is-mini"]}`}
+                      >
+                        <Flex vertical className={styles["bm-tools__row-main"]}>
+                          <Typography.Text className={styles["bm-tools__row-title"]}>
                             {item.title || item.url}
-                          </div>
-                          <div className={styles["bm-tools__row-sub"]}>{item.url}</div>
-                        </div>
-                      </div>
+                          </Typography.Text>
+                          <Typography.Text className={styles["bm-tools__row-sub"]}>
+                            {item.url}
+                          </Typography.Text>
+                        </Flex>
+                      </Flex>
                     ))}
-                  </div>
+                  </Flex>
                 )}
-              </div>
+              </Flex>
             );
           })}
-        </div>
+        </Flex>
       )}
-    </div>
+    </Flex>
   );
 
   // ── 空文件夹 ──
   const renderEmpty = () => (
-    <div className={styles["bm-tools__panel"]}>
-      <div className={styles["bm-tools__panel-header"]}>
-        <div>
-          <div className={styles["bm-tools__panel-title"]}>{t('空文件夹')}</div>
-          <div className={styles["bm-tools__panel-subtitle"]}>{t('扫描完全不含书签的文件夹（包括嵌套都为空的子文件夹），一键清理。')}</div>
-        </div>
-        <div className={styles["bm-tools__panel-actions"]}>
+    <Flex vertical gap={20} className={styles["bm-tools__panel"]}>
+      <Flex align="flex-start" gap={12} className={styles["bm-tools__panel-header"]}>
+        <Flex vertical className={styles["bm-tools__panel-copy"]}>
+          <Typography.Text className={styles["bm-tools__panel-title"]}>
+            {t("空文件夹")}
+          </Typography.Text>
+          <Typography.Text className={styles["bm-tools__panel-subtitle"]}>
+            {t("扫描完全不含书签的文件夹（包括嵌套都为空的子文件夹），一键清理。")}
+          </Typography.Text>
+        </Flex>
+        <Flex align="center" gap={8} className={styles["bm-tools__panel-actions"]}>
           <Button
             type="primary"
             loading={emptyLoading}
@@ -267,7 +288,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
               void scanEmptyFolders();
             }}
           >
-            {t('开始扫描')}
+            {t("开始扫描")}
           </Button>
           {emptyFolders !== null && emptyFolders.length > 0 && (
             <Button
@@ -277,13 +298,13 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
                 void applyRemoveEmpty();
               }}
             >
-              {t('清理全部（共 {count} 个）', {
+              {t("清理全部（共 {count} 个）", {
                 count: emptyFolders.reduce((s, e) => s + e.size, 0),
               })}
             </Button>
           )}
-        </div>
-      </div>
+        </Flex>
+      </Flex>
 
       {emptyFolders === null && (
         <Empty
@@ -294,7 +315,7 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
       )}
 
       {emptyFolders !== null && emptyFolders.length === 0 && (
-        <Alert type="success" showIcon message={t('没有空文件夹，结构干净。')} />
+        <Alert type="success" showIcon message={t("没有空文件夹，结构干净。")} />
       )}
 
       {emptyFolders !== null && emptyFolders.length > 0 && (
@@ -303,24 +324,24 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
           dataSource={emptyFolders}
           renderItem={(e) => (
             <List.Item>
-              <div className={styles["bm-tools__row"]}>
-                <FolderX size={ICON_SIZE.MEDIUM} className="bm-tools__row-icon is-warning" />
-                <div className={styles["bm-tools__row-main"]}>
-                  <div className={styles["bm-tools__row-title"]}>
-                    {e.folder.title || t('未命名文件夹')}
-                  </div>
+              <Flex align="center" gap={12} className={styles["bm-tools__row"]}>
+                <FolderX size={ICON_SIZE.MEDIUM} className={styles["is-warning"]} />
+                <Flex vertical className={styles["bm-tools__row-main"]}>
+                  <Typography.Text className={styles["bm-tools__row-title"]}>
+                    {e.folder.title || t("未命名文件夹")}
+                  </Typography.Text>
                   {e.size > 1 && (
-                    <div className={styles["bm-tools__row-sub"]}>
-                      {t('嵌套连带删除 {count} 个空文件夹', { count: e.size })}
-                    </div>
+                    <Typography.Text className={styles["bm-tools__row-sub"]}>
+                      {t("嵌套连带删除 {count} 个空文件夹", { count: e.size })}
+                    </Typography.Text>
                   )}
-                </div>
-              </div>
+                </Flex>
+              </Flex>
             </List.Item>
           )}
         />
       )}
-    </div>
+    </Flex>
   );
 
   const renderActive = () => {
@@ -377,41 +398,51 @@ export function BookmarkToolsModal({ open, onClose, onMutated }: BookmarkToolsMo
       footer={null}
       width={920}
       title={
-        <div className={styles["bm-tools__title"]}>
+        <Flex align="center" gap={8} className={styles["bm-tools__title"]}>
           <Hash size={ICON_SIZE.MEDIUM} />
-          <span>{t('书签工具箱')}</span>
+          <Typography.Text>{t("书签工具箱")}</Typography.Text>
           {overview !== null && (
-            <span className={styles["bm-tools__title-meta"]}>
-              {t('共 {bookmarks} 个书签·{folders} 个文件夹', {
+            <Typography.Text className={styles["bm-tools__title-meta"]}>
+              {t("共 {bookmarks} 个书签·{folders} 个文件夹", {
                 bookmarks: overview.total,
                 folders: overview.folders,
               })}
-            </span>
+            </Typography.Text>
           )}
-        </div>
+        </Flex>
       }
       destroyOnHidden
       className={styles["bm-tools__modal"]}
     >
-      <div className={styles["bm-tools__layout"]}>
-        <nav className={styles["bm-tools__nav"]}>
+      <Flex gap={24} className={styles["bm-tools__layout"]}>
+        <Flex vertical gap={4} className={styles["bm-tools__nav"]}>
           {navItems.map((item) => (
             <Button
               key={item.key}
               htmlType="button"
-              className={`bm-tools__nav-item${activeTool === item.key ? " is-active" : ""}`}
+              className={`${styles["bm-tools__nav-item"]}${activeTool === item.key ? ` ${styles["is-active"]}` : ""}`}
               onClick={() => setActiveTool(item.key)}
             >
-              <span className={styles["bm-tools__nav-icon"]}>{item.icon}</span>
-              <span className={styles["bm-tools__nav-label"]}>{item.label}</span>
-              {item.badge !== undefined && item.badge > 0 && (
-                <span className={styles["bm-tools__nav-badge"]}>{item.badge}</span>
-              )}
+              <Flex align="center" gap={8} className={styles["bm-tools__nav-content"]}>
+                <Typography.Text className={styles["bm-tools__nav-icon"]}>
+                  {item.icon}
+                </Typography.Text>
+                <Typography.Text className={styles["bm-tools__nav-label"]}>
+                  {item.label}
+                </Typography.Text>
+                {item.badge !== undefined && item.badge > 0 && (
+                  <Typography.Text className={styles["bm-tools__nav-badge"]}>
+                    {item.badge}
+                  </Typography.Text>
+                )}
+              </Flex>
             </Button>
           ))}
-        </nav>
-        <section className={styles["bm-tools__content"]}>{renderActive()}</section>
-      </div>
+        </Flex>
+        <Flex vertical className={styles["bm-tools__content"]}>
+          {renderActive()}
+        </Flex>
+      </Flex>
     </Modal>
   );
 }

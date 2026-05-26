@@ -142,6 +142,8 @@
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 8px;
+  /* 添加过渡动画 */
+  transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Switch 在 flex 列容器中会被 stretch 拉伸，强制左对齐保持原尺寸 */
@@ -257,6 +259,13 @@
   border-radius: var(--ant-border-radius-lg, 10px);
   background: var(--app-bg-surface);
   border: 1px solid var(--ant-color-border-secondary);
+  /* 添加悬浮效果和过渡动画 */
+  transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:global(.settings-card-row:hover) {
+  border-color: var(--ant-color-border);
+  box-shadow: var(--app-shadow-sm);
 }
 
 :global(.settings-card-row__main) {

@@ -7,7 +7,7 @@
  */
 
 import { useState, useCallback, useEffect } from "react";
-import { Alert, Button, App } from "antd";
+import { Alert, Button, App, Flex, Typography } from "antd";
 import { RotateCcw } from "lucide-react";
 
 import { ICON_SIZE } from "@/shared/utils/icon-size";
@@ -88,26 +88,26 @@ function KeybindingRecorder({
   };
 
   return (
-    <div className="settings-keybinding-recorder">
+    <Flex align="center" className="settings-keybinding-recorder">
       <Button
         htmlType="button"
         onClick={() => setRecording(true)}
-        aria-label={recording ? t('按下快捷键…') : t('恢复默认')}
+        aria-label={recording ? t("按下快捷键…") : t("恢复默认")}
         aria-pressed={recording}
         className={`settings-keybinding-trigger${recording ? " is-recording" : ""}`}
       >
-        {recording ? t('按下快捷键…') : formatDisplay(currentKeys)}
+        {recording ? t("按下快捷键…") : formatDisplay(currentKeys)}
       </Button>
       <Button
         type="text"
         size="small"
         icon={<RotateCcw size={ICON_SIZE.MEDIUM} />}
-        title={t('恢复默认')}
-        aria-label={t('恢复默认')}
+        title={t("恢复默认")}
+        aria-label={t("恢复默认")}
         onClick={onReset}
         className="settings-keybinding-reset"
       />
-    </div>
+    </Flex>
   );
 }
 
@@ -138,14 +138,14 @@ export function ShortcutsPanel() {
         for (const a of actions) {
           dupByAction.set(
             a,
-            t('与 {peers} 冲突', { peers: actions.filter((x) => x !== a).join(", ") }),
+            t("与 {peers} 冲突", { peers: actions.filter((x) => x !== a).join(", ") }),
           );
         }
       }
       // 与全局快捷键冲突（全局快捷键在 Chrome 中始终生效，无法在页面内覆盖）
       if (key === "alt+k" || key === "alt+c" || key === "alt+shift+s") {
         for (const a of actions) {
-          dupByAction.set(a, t('与 Chrome 全局快捷键冲突，可能被全局快捷键拦截'));
+          dupByAction.set(a, t("与 Chrome 全局快捷键冲突，可能被全局快捷键拦截"));
         }
       }
     }
@@ -156,7 +156,7 @@ export function ShortcutsPanel() {
     (action: KeybindingAction, keyStr: string) => {
       const updated = { ...customKeybindings, [action]: keyStr };
       void updateSettings({ customKeybindings: updated });
-      message.success(t('快捷键已保存'));
+      message.success(t("快捷键已保存"));
     },
     [customKeybindings, updateSettings, message, t],
   );
@@ -168,62 +168,79 @@ export function ShortcutsPanel() {
       void updateSettings({
         customKeybindings: Object.keys(updated).length > 0 ? updated : undefined,
       });
-      message.success(t('已恢复默认快捷键'));
+      message.success(t("已恢复默认快捷键"));
     },
     [customKeybindings, updateSettings, message, t],
   );
 
   return (
-    <div className="settings-panel-stack">
+    <Flex vertical className="settings-panel-stack">
       {/* Chrome 全局快捷键（只读） */}
       <section className="settings-section">
-        <Field label={t('全局快捷键')}>
+        <Field label={t("全局快捷键")}>
           <Alert
             type="info"
-            message={t('在 chrome://extensions/shortcuts 中自定义快捷键')}
+            message={t("在 chrome://extensions/shortcuts 中自定义快捷键")}
             showIcon
             className="settings-shortcuts-alert"
           />
-          <div className="settings-card-list">
+          <Flex vertical className="settings-card-list">
             {GLOBAL_SHORTCUTS.map((item) => (
-              <div key={item.labelKey} className="settings-card-row">
-                <span className="settings-card-row__title">
+              <Flex
+                key={item.labelKey}
+                align="center"
+                justify="space-between"
+                className="settings-card-row"
+              >
+                <Typography.Text className="settings-card-row__title">
                   {t(item.labelKey, { brand: BRAND.name })}
-                </span>
+                </Typography.Text>
                 <kbd className="app-kbd">{item.keys}</kbd>
-              </div>
+              </Flex>
             ))}
-          </div>
+          </Flex>
         </Field>
       </section>
 
       {/* 页面内快捷键（可自定义） */}
       <section className="settings-section">
-        <Field label={t('页面内快捷键')} hint={t('点击快捷键区域即可录制新按键组合；点击重置按钮恢复默认')}>
-          <div className="settings-card-list">
+        <Field
+          label={t("页面内快捷键")}
+          hint={t("点击快捷键区域即可录制新按键组合；点击重置按钮恢复默认")}
+        >
+          <Flex vertical className="settings-card-list">
             {resolved.map((item) => (
-              <div key={item.action} className="settings-card-row">
-                <div className="settings-card-row__main">
-                  <div className="settings-card-row__title">{t(item.label)}</div>
+              <Flex
+                key={item.action}
+                align="center"
+                justify="space-between"
+                className="settings-card-row"
+              >
+                <Flex vertical className="settings-card-row__main">
+                  <Typography.Text className="settings-card-row__title">
+                    {t(item.label)}
+                  </Typography.Text>
                   {item.hint && (
-                    <div className="settings-card-row__hint">
+                    <Typography.Text className="settings-card-row__hint">
                       {t(item.hint, { brand: BRAND.name })}
-                    </div>
+                    </Typography.Text>
                   )}
                   {conflictMap.has(item.action) && (
-                    <div className="settings-warning-inline">⚠ {conflictMap.get(item.action)}</div>
+                    <Typography.Text className="settings-warning-inline">
+                      ⚠ {conflictMap.get(item.action)}
+                    </Typography.Text>
                   )}
-                </div>
+                </Flex>
                 <KeybindingRecorder
                   currentKeys={item.keys}
                   onRecord={(keyStr) => handleRecord(item.action, keyStr)}
                   onReset={() => handleReset(item.action)}
                 />
-              </div>
+              </Flex>
             ))}
-          </div>
+          </Flex>
         </Field>
       </section>
-    </div>
+    </Flex>
   );
 }

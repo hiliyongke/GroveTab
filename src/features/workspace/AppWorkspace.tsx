@@ -10,18 +10,18 @@
  * 设计原则：纯渲染组件，所有状态由父组件 AppContent 通过 props 传入。
  */
 
-import { useMemo, useCallback, Suspense } from 'react';
-import { Spin, Alert, Button, Typography } from 'antd';
-import { Globe } from 'lucide-react';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { useTabsStore, useSelectionStore } from '@/store';
-import { OnboardingCard } from '@/features/sessions/OnboardingCard';
-import { DomainGroupView } from '@/features/tabs/DomainGroupView';
-import { SelectionModeNotice } from '@/features/tabs/SelectionModeNotice';
-import { FeatureEmptyState } from '@/shared/ui/FeatureEmptyState';
-import { useT } from '@/shared/i18n';
-import type { ViewMode } from '@/shared/config/views';
-import { getViewComponentMap } from '@/shared/config/view-registry';
+import { useMemo, useCallback, Suspense } from "react";
+import { Spin, Alert, Button, Typography } from "antd";
+import { Globe } from "lucide-react";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useTabsStore, useSelectionStore } from "@/store";
+import { OnboardingCard } from "@/features/sessions/OnboardingCard";
+import { DomainGroupView } from "@/features/tabs/DomainGroupView";
+import { SelectionModeNotice } from "@/features/tabs/SelectionModeNotice";
+import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
+import { useT } from "@/shared/i18n";
+import type { ViewMode } from "@/shared/config/views";
+import { getViewComponentMap } from "@/shared/config/view-registry";
 
 interface AppWorkspaceProps {
   /** 初始化是否完成 */
@@ -64,7 +64,10 @@ export function AppWorkspace({
   const exitSelectionMode = useSelectionStore((s) => s.exitSelectionMode);
 
   /* ---------- 派生状态 ---------- */
-  const selectedTabs = useMemo(() => tabs.filter((tab) => selectedIds.has(tab.id)), [tabs, selectedIds]);
+  const selectedTabs = useMemo(
+    () => tabs.filter((tab) => selectedIds.has(tab.id)),
+    [tabs, selectedIds],
+  );
   const tabCount = useMemo(() => tabs.length, [tabs]);
 
   /* ---------- useMemo 缓存视图组件 ---------- */
@@ -84,7 +87,7 @@ export function AppWorkspace({
       <div className="app-page-loading">
         <div className="app-page-loading-inner">
           <Spin />
-          <Typography.Text type="secondary">{t('加载标签页中...')}</Typography.Text>
+          <Typography.Text type="secondary">{t("加载标签页中...")}</Typography.Text>
         </div>
       </div>
     );
@@ -102,14 +105,14 @@ export function AppWorkspace({
           description={initError}
           action={
             <Button size="small" onClick={onRetryInit}>
-              {t('重试')}
+              {t("重试")}
             </Button>
           }
           className="app-init-alert"
         />
       )}
 
-      {viewMode !== 'archive' && selectionMode && (
+      {viewMode !== "archive" && selectionMode && (
         <SelectionModeNotice
           selectedTabs={selectedTabs}
           onSelectAll={handleSelectAllTabs}
@@ -123,29 +126,41 @@ export function AppWorkspace({
           <div className="app-workspace-loading">
             <div className="app-workspace-loading-inner">
               <Spin />
-              <Typography.Text type="secondary">{t('加载标签页中...')}</Typography.Text>
+              <Typography.Text type="secondary">{t("加载标签页中...")}</Typography.Text>
             </div>
           </div>
-        ) : tabCount === 0 && viewMode !== 'archive' ? (
+        ) : tabCount === 0 && viewMode !== "archive" ? (
           <FeatureEmptyState
-            title={t('没有打开的标签页')}
-            description={t('打开一些网页，然后回到这里查看')}
+            title={t("没有打开的标签页")}
+            description={t("打开一些网页，然后回到这里查看")}
             icon={<Globe size={ICON_SIZE.XXLARGE} />}
             hints={[
-              t('按 Cmd+K 可快速搜索标签'),
-              t('点击归档按钮可保存当前所有标签'),
-              t('支持 9 种不同视图浏览方式'),
+              t("按 Cmd+K 可快速搜索标签"),
+              t("点击归档按钮可保存当前所有标签"),
+              t("支持 9 种不同视图浏览方式"),
             ]}
             actions={[
-              { text: t('查看归档列表'), onClick: onOpenArchive, type: 'primary' },
-              { text: t('设置'), onClick: onOpenSettings, type: 'default' },
+              { text: t("查看归档列表"), onClick: onOpenArchive, type: "primary" },
+              { text: t("设置"), onClick: onOpenSettings, type: "default" },
             ]}
           />
         ) : ViewComponent !== null ? (
-          <Suspense fallback={<div className="app-suspense-fallback"><Spin /></div>}>
-            <ViewComponent />
-          </Suspense>
-        ) : <DomainGroupView />}
+          <div key={viewMode} className="app-view-transition">
+            <Suspense
+              fallback={
+                <div className="app-suspense-fallback">
+                  <Spin />
+                </div>
+              }
+            >
+              <ViewComponent />
+            </Suspense>
+          </div>
+        ) : (
+          <div key="domain-group" className="app-view-transition">
+            <DomainGroupView />
+          </div>
+        )}
       </section>
     </>
   );

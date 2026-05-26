@@ -1,5 +1,34 @@
 .app-window-empty {
-  padding: 80px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--app-space-8, 80px) var(--app-space-4, 16px);
+  color: var(--ant-color-text-tertiary);
+  text-align: center;
+}
+
+.app-window-grid {
+  --app-window-card-min-width: 360px;
+  --app-window-grid-template: repeat(
+    auto-fill,
+    minmax(min(100%, var(--app-window-card-min-width)), var(--app-window-card-min-width))
+  );
+
+  display: grid;
+  grid-template-columns: var(--app-window-grid-template);
+  gap: 16px;
+  align-items: start;
+  width: 100%;
+}
+
+.app-window-sortable-card {
+  width: 100%;
+  min-width: 0;
+}
+
+.app-window-sortable-card.is-dragging {
+  opacity: 0.86;
 }
 
 .app-frequency-list {
@@ -20,6 +49,11 @@
 .app-window-group-color-grid,
 .app-window-ghost-dropzone {
   display: flex; /* antd 组件内部微调整 */
+}
+
+.app-window-card-header-layout {
+  width: 100%;
+  min-width: 0;
 }
 
 .app-window-card-header {
@@ -105,12 +139,13 @@
 .app-window-card-action,
 .app-window-group-action {
   flex-shrink: 0;
-  margin-right: 8px;
 }
 
 .app-window-card-body {
   flex-direction: column;
   gap: 10px;
+  width: 100%;
+  min-width: 0;
   padding: 8px;
   background: var(--app-window-card-bg);
 }
@@ -119,6 +154,8 @@
 .app-window-ungrouped-section {
   flex-direction: column;
   gap: 4px;
+  width: 100%;
+  min-width: 0;
   overflow: hidden;
   border: 1px solid var(--app-window-group-border, var(--ant-color-border-secondary));
   border-radius: var(--app-radius-md);
@@ -179,7 +216,22 @@
 .app-window-group-list {
   flex-direction: column;
   gap: 2px;
+  width: 100%;
+  min-width: 0;
   padding: 4px;
+}
+
+.app-window-group-list :global(.ant-list-items) {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.app-window-draggable-tab {
+  display: block;
+  width: 100%;
+  min-width: 0;
 }
 
 .app-window-ungrouped-section {
@@ -325,25 +377,50 @@
 }
 
 .app-grid-view {
+  --app-grid-card-basis: var(--grid-card-min-width, 200px);
+
   display: grid;
-  /* 卡片最小宽度由 --grid-card-min-width 控制（默认 200px，对应 'md' 档） */
-  grid-template-columns: repeat(auto-fill, minmax(var(--grid-card-min-width, 200px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--app-grid-card-basis)), 1fr));
+  grid-auto-rows: 1fr;
   gap: 12px;
+  align-items: stretch;
+  justify-content: stretch;
+  width: 100%;
+}
+
+.app-grid-view__cell {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+}
+
+.app-grid-view__cell > * {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+}
+
+@media (max-width: 767px) {
+  .app-grid-view {
+    --app-grid-card-basis: 140px;
+  }
 }
 
 @media (min-width: 1024px) {
   .app-grid-view {
-    grid-template-columns: repeat(auto-fill, minmax(var(--grid-card-min-width, 220px), 1fr));
+    --app-grid-card-basis: var(--grid-card-min-width, 220px);
   }
 }
 
 @media (min-width: 1440px) {
   .app-grid-view {
-    grid-template-columns: repeat(auto-fill, minmax(var(--grid-card-min-width, 240px), 1fr));
+    --app-grid-card-basis: var(--grid-card-min-width, 240px);
   }
 }
 
 .app-grid-card {
+  width: 100%;
+  height: 100%;
   cursor: pointer;
   overflow: hidden;
 }
@@ -354,17 +431,12 @@
 
 .app-grid-card__body {
   padding: 0;
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
 }
 
 .app-grid-card-preview {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 10;
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
   border-radius: var(--ant-border-radius-lg);
   background: linear-gradient(
@@ -375,9 +447,6 @@
 }
 
 .app-grid-card-content {
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
-  gap: 2px;
   min-height: 42px;
   padding: 8px 8px 6px;
   border-radius: 0 0 var(--ant-border-radius-lg) var(--ant-border-radius-lg);
@@ -402,9 +471,6 @@
   right: 6px;
   min-width: 22px;
   height: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   padding: 0 6px;
   border-radius: var(--app-radius-md);
   border: 1px solid var(--ant-color-border-secondary);
@@ -417,9 +483,6 @@
 }
 
 .app-grid-card-meta {
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-  gap: 6px;
   width: 100%;
   min-width: 0;
 }
@@ -451,8 +514,6 @@
 .app-grid-popover {
   width: 340px;
   max-width: calc(100vw - 32px);
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
 }
 
 .app-grid-popover-container {
@@ -460,9 +521,6 @@
 }
 
 .app-grid-popover__header {
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-  gap: 8px;
   padding: 10px 8px 10px 12px;
   border-bottom: 1px solid var(--ant-color-border-secondary);
 }
@@ -525,22 +583,26 @@
 }
 
 .app-grid-popover__list {
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
-  gap: 2px;
   max-height: min(60vh, 420px);
   overflow-y: auto;
   padding: 4px 4px 8px;
 }
 
 .app-tab-group-empty {
-  padding: 80px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--app-space-8, 80px) var(--app-space-4, 16px);
+  color: var(--ant-color-text-tertiary);
+  text-align: center;
 }
 
 .app-tab-group-label {
   display: flex; /* antd 组件内部微调整 */
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 
 .app-tab-group-tag {
@@ -598,6 +660,7 @@
 
 .app-tab-group-list {
   gap: 2px;
+  min-width: 0;
 }
 
 .app-compact-view {
@@ -633,7 +696,7 @@
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   flex: 1 1 auto;
-  gap: 14px;
+  gap: var(--app-space-4, 16px);
   /* 关键：flex 子项默认 min-height:auto 会被自身内容撑高，
      需重置为 0，才能让 .app-bookmark-result 的 flex:1+min-height:0
      真正从父级 .app-content-shell 拿到限高，否则画布无法严格撑满。 */
@@ -804,7 +867,7 @@
 .app-bookmark-sections {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-  gap: 20px 24px;
+  gap: var(--app-space-5, 24px) var(--app-space-6, 32px);
   align-items: start;
   width: 100%;
 }
@@ -812,16 +875,16 @@
 .app-bookmark-section {
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
-  gap: 4px;
+  gap: var(--app-space-2, 8px);
   min-width: 0; /* 防止子节点撑爆网格列 */
 }
 
 .app-bookmark-section__head {
   display: flex; /* antd 组件内部微调整 */
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
-  padding: 6px 4px;
+  padding: 8px 6px;
   border: none;
   background: transparent;
   cursor: pointer;
@@ -1174,6 +1237,16 @@
   transition: color var(--ant-motion-duration-fast);
 }
 
+.app-timeline-segment-trigger-content {
+  min-width: 0;
+}
+
+.app-timeline-segment-label {
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
 .app-timeline-segment-range {
   color: var(--ant-color-text-tertiary);
   font-size: 11.5px;
@@ -1184,9 +1257,6 @@
 .app-timeline-segment-count {
   min-width: 20px;
   height: 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   padding: 0 var(--app-space-2);
   border-radius: var(--app-radius-sm);
   background: var(--ant-color-fill-secondary);
@@ -1209,6 +1279,7 @@
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .app-kanban-theme {
@@ -1224,8 +1295,6 @@
 }
 
 .app-kanban-view {
-  display: flex; /* antd 组件内部微调整 */
-  gap: 12px;
   overflow-x: auto;
   padding-bottom: 12px;
 }
@@ -1271,9 +1340,7 @@
 }
 
 .app-kanban-column__header {
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-  gap: 4px;
+  min-width: 0;
 }
 
 .app-kanban-column__drag-handle {
@@ -1308,9 +1375,6 @@
 
 .app-kanban-card,
 .app-kanban-overlay {
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-  gap: var(--app-space-2);
   padding: var(--app-space-2) var(--app-space-2);
   border-radius: var(--app-radius-sm);
   font-size: 11.5px;

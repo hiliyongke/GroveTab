@@ -19,7 +19,7 @@
  */
 
 import { useMemo, useState } from "react";
-import { Timeline, Button, theme } from "antd";
+import { Timeline, Button, theme, Flex, Typography, Space } from "antd";
 import { ChevronDown } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useTabsStore, useSettingsStore } from "@/store";
@@ -139,7 +139,7 @@ function extractJustNow(tabs: LiveTab[], t: TFn): [TimeSegment | null, LiveTab[]
   return [
     {
       key: "today-justNow",
-      label: t('刚刚'),
+      label: t("刚刚"),
       tabs: recent,
     },
     rest,
@@ -186,7 +186,7 @@ function getTimeSegments(tabs: LiveTab[], granularity: "day" | "hour", t: TFn): 
     if (todayTabs.length > 0) {
       segments.push({
         key: "today",
-        label: t('今天'),
+        label: t("今天"),
         tabs: [...todayTabs].sort(byAccessDesc),
       });
     }
@@ -200,11 +200,11 @@ function getTimeSegments(tabs: LiveTab[], granularity: "day" | "hour", t: TFn): 
   // —— 昨天 ——
   if (granularity === "hour") {
     // hour 档下：昨天也按整点小时桶倒序，前缀带「昨天 」
-    segments.push(...bucketByHour(yesterdayTabs, `${t('昨天')} `, "yesterday"));
+    segments.push(...bucketByHour(yesterdayTabs, `${t("昨天")} `, "yesterday"));
   } else if (yesterdayTabs.length > 0) {
     segments.push({
       key: "yesterday",
-      label: t('昨天'),
+      label: t("昨天"),
       tabs: [...yesterdayTabs].sort(byAccessDesc),
     });
   }
@@ -213,14 +213,14 @@ function getTimeSegments(tabs: LiveTab[], granularity: "day" | "hour", t: TFn): 
   if (weekTabs.length > 0) {
     segments.push({
       key: "week",
-      label: t('本周'),
+      label: t("本周"),
       tabs: [...weekTabs].sort(byAccessDesc),
     });
   }
   if (olderTabs.length > 0) {
     segments.push({
       key: "older",
-      label: t('更早'),
+      label: t("更早"),
       tabs: [...olderTabs].sort(byAccessDesc),
     });
   }
@@ -251,13 +251,19 @@ function SegmentHeader({
       aria-expanded={!collapsed}
       className={`${styles["app-timeline-segment-header"]} ${styles["app-timeline-segment-trigger"]}`}
     >
-      <span>{label}</span>
-      {rangeText && <span className={styles["app-timeline-segment-range"]}>{rangeText}</span>}
-      <span className={styles["app-timeline-segment-count"]}>{count}</span>
-      <ChevronDown
-        size={ICON_SIZE.MICRO}
-        className={`${styles["app-timeline-segment-chevron"]}${collapsed ? ` ${styles["is-collapsed"]}` : ""}`}
-      />
+      <Space size={8} className={styles["app-timeline-segment-trigger-content"]}>
+        <Typography.Text className={styles["app-timeline-segment-label"]}>{label}</Typography.Text>
+        {rangeText && (
+          <Typography.Text className={styles["app-timeline-segment-range"]}>
+            {rangeText}
+          </Typography.Text>
+        )}
+        <Typography.Text className={styles["app-timeline-segment-count"]}>{count}</Typography.Text>
+        <ChevronDown
+          size={ICON_SIZE.MICRO}
+          className={`${styles["app-timeline-segment-chevron"]}${collapsed ? ` ${styles["is-collapsed"]}` : ""}`}
+        />
+      </Space>
     </Button>
   );
 }
@@ -284,10 +290,11 @@ function SegmentContent({
   const rangeText = showExactTime ? formatSegmentRange(segment.tabs) : undefined;
 
   return (
-    <div
+    <Flex
+      vertical
       className={`${styles["app-timeline-segment"]}${collapsed ? ` ${styles["is-collapsed"]}` : ""}`}
     >
-      <div className={styles["app-timeline-segment__header"]}>
+      <Flex className={styles["app-timeline-segment__header"]}>
         <SegmentHeader
           label={segment.label}
           rangeText={rangeText}
@@ -295,10 +302,10 @@ function SegmentContent({
           collapsed={collapsed}
           onToggle={() => setCollapsed((v) => !v)}
         />
-      </div>
+      </Flex>
 
       {!collapsed && (
-        <div className={styles["app-timeline-segment-list"]}>
+        <Flex vertical gap={2} className={styles["app-timeline-segment-list"]}>
           {segment.tabs.map((tab) => (
             <TabItem
               key={tab.id}
@@ -315,16 +322,16 @@ function SegmentContent({
               visibleTabIds={segmentTabIds}
               trailing={
                 showExactTime && tab.lastAccessed ? (
-                  <span className={styles["app-timeline-segment-time"]}>
+                  <Typography.Text className={styles["app-timeline-segment-time"]}>
                     {formatHM(tab.lastAccessed)}
-                  </span>
+                  </Typography.Text>
                 ) : null
               }
             />
           ))}
-        </div>
+        </Flex>
       )}
-    </div>
+    </Flex>
   );
 }
 
@@ -369,8 +376,8 @@ export function TimelineView() {
   }));
 
   return (
-    <div className={styles["app-timeline-view"]}>
+    <Flex vertical className={styles["app-timeline-view"]}>
       <Timeline items={items} />
-    </div>
+    </Flex>
   );
 }
