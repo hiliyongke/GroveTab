@@ -91,6 +91,15 @@ export function SpeedDialGrid({ sites, onAdd }: SpeedDialGridProps) {
   );
   const showAddButton = useSettingsStore((s) => s.settings.showAddSiteButton ?? true);
   const cardSize = useSettingsStore((s) => s.settings.quickStartCardSize ?? "md");
+  // 这些字段必须用 selector 订阅，否则改了不会触发重渲，滑块设置无法实时生效
+  const exactWidth = useSettingsStore((s) => s.settings.quickStartCardExactWidth);
+  const gridGap = useSettingsStore((s) => s.settings.quickStartGridGap ?? 12);
+  const autoLgThreshold = useSettingsStore(
+    (s) => s.settings.quickStartAutoThresholds?.lgThreshold ?? 6,
+  );
+  const autoMdThreshold = useSettingsStore(
+    (s) => s.settings.quickStartAutoThresholds?.mdThreshold ?? 14,
+  );
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const fabAddButton = useSettingsStore((s) => s.settings.quickStartFabAddButton ?? false);
   // 仅在没有外部 onAdd 时，组件内部管理弹窗状态（向后兼容）
@@ -108,31 +117,27 @@ export function SpeedDialGrid({ sites, onAdd }: SpeedDialGridProps) {
    */
   const cardMinWidth = useMemo(() => {
     // 1. 优先使用精确宽度
-    const exactWidth = useSettingsStore.getState().settings.quickStartCardExactWidth;
     if (exactWidth) return `${exactWidth}px`;
     // 2. auto 档位：根据站点数量自适应
     if (cardSize === "auto") {
-      const thresholds = useSettingsStore.getState().settings.quickStartAutoThresholds;
-      const lgThreshold = thresholds?.lgThreshold ?? 6;
-      const mdThreshold = thresholds?.mdThreshold ?? 14;
       const count = sites.length;
-      if (count <= lgThreshold) return "208px";
-      if (count <= mdThreshold) return "160px";
+      if (count <= autoLgThreshold) return "208px";
+      if (count <= autoMdThreshold) return "160px";
       return "120px";
     }
     // 3. 固定档位
     const SIZE_MAP = { sm: "120px", md: "160px", lg: "208px" } as const;
     return SIZE_MAP[cardSize] ?? "160px";
-  }, [cardSize, sites.length]);
+  }, [cardSize, sites.length, exactWidth, autoLgThreshold, autoMdThreshold]);
 
   /** 顶层 wrapper 上注入 --speed-dial-card-min-width 和 --speed-dial-grid-gap CSS 变量 */
   const wrapperStyle = useMemo(
     () =>
       cssVars({
         "--speed-dial-card-min-width": cardMinWidth,
-        "--speed-dial-grid-gap": `${useSettingsStore.getState().settings.quickStartGridGap ?? 12}px`,
+        "--speed-dial-grid-gap": `${gridGap}px`,
       }),
-    [cardMinWidth],
+    [cardMinWidth, gridGap],
   );
 
   /** 删除站点 */

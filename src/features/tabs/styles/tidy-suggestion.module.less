@@ -21,6 +21,21 @@
   transition: border-radius var(--ant-motion-duration-fast) var(--ant-motion-ease-in-out);
 }
 
+/* 收紧 antd Alert 内部 padding，原本上下 ~12px 让条目过"高" */
+.tidy-suggestion__alert :global(.ant-alert) {
+  padding-block: 6px;
+}
+
+/* 让 antd Alert 的 icon 与文字基线更贴 */
+.tidy-suggestion__alert :global(.ant-alert-icon) {
+  margin-inline-end: 8px;
+  font-size: 14px;
+}
+
+.tidy-suggestion__alert :global(.ant-alert-message) {
+  width: 100%;
+}
+
 .tidy-suggestion.is-expanded .tidy-suggestion__alert {
   border-bottom-color: transparent;
   border-radius: var(--app-card-radius, 12px) var(--app-card-radius, 12px) 0 0;
@@ -35,6 +50,7 @@
 
 .tidy-suggestion__summary {
   gap: 10px;
+  width: 100%;
 }
 
 .tidy-suggestion__summary-text {
@@ -42,29 +58,47 @@
   font-size: 12.5px;
   font-weight: 500;
   line-height: 1.45;
+  color: var(--ant-color-text);
 }
 
+/* 在主操作前留一点透气，让"次操作组"自成一簇，避免三个按钮粘成一坨 */
+.tidy-suggestion__summary-actions {
+  margin-left: auto;
+}
+
+/* 闪电图标：低饱和主色，避免深色下与按钮蓝撞色 */
 .tidy-suggestion__alert-icon {
-  color: var(--app-color-primary);
+  color: color-mix(in srgb, var(--app-color-primary) 70%, var(--ant-color-text-secondary));
 }
 
-.tidy-suggestion__dismiss-icon {
+.tidy-suggestion__dismiss-icon,
+.tidy-suggestion__chevron {
   color: var(--ant-color-text-tertiary);
 }
 
 /* ── 一键整理按钮：低调品牌色底 ── */
 .tidy-suggestion__solid-action {
-  color: var(--ant-color-text);
-  background: color-mix(in srgb, var(--app-color-primary) 8%, var(--ant-color-bg-container));
-  border-color: color-mix(in srgb, var(--app-color-primary) 18%, var(--app-hairline));
+  height: 26px;
+  padding-inline: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--app-color-primary);
+  background: color-mix(in srgb, var(--app-color-primary) 12%, transparent);
+  border-color: color-mix(in srgb, var(--app-color-primary) 28%, transparent);
   box-shadow: none;
 }
 
 .tidy-suggestion__solid-action:hover,
 .tidy-suggestion__solid-action:focus-visible {
-  color: var(--ant-color-text);
-  background: color-mix(in srgb, var(--app-color-primary) 12%, var(--ant-color-bg-container));
-  border-color: color-mix(in srgb, var(--app-color-primary) 26%, var(--app-hairline));
+  color: var(--app-color-primary);
+  background: color-mix(in srgb, var(--app-color-primary) 18%, transparent);
+  border-color: color-mix(in srgb, var(--app-color-primary) 40%, transparent);
+}
+
+/* 次操作（chevron/X）：text 按钮 hover 弱化，避免在深色背景上产生明显白块 */
+.tidy-suggestion__summary-actions :global(.ant-btn-text):hover,
+.tidy-suggestion__summary-actions :global(.ant-btn-text):focus-visible {
+  background: color-mix(in srgb, var(--ant-color-text) 6%, transparent);
 }
 
 /* ── 展开箭头 ── */
@@ -79,14 +113,16 @@
 /* ── 展开面板 ── */
 .tidy-suggestion__panel {
   margin-top: 0;
-  border-color: var(--app-hairline);
+  padding: 8px 12px 10px;
+  background: var(--ant-color-bg-container);
+  border: 1px solid var(--app-hairline);
   border-top: none;
   border-radius: 0 0 var(--app-card-radius, 12px) var(--app-card-radius, 12px);
   box-shadow: none;
 }
 
 .tidy-suggestion__panel-body {
-  padding: 8px 12px 10px;
+  /* padding 已在 .tidy-suggestion__panel 上定义；保留 class 仅作为 hook 用 */
 }
 
 /* ── 分组标题 ── */

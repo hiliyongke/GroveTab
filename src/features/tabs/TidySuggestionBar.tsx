@@ -12,7 +12,7 @@
  */
 
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { Alert, App, Button, Card, List, Space, Tag, Tooltip, Typography, Flex } from "antd";
+import { Alert, App, Button, List, Space, Tag, Tooltip, Typography, Flex } from "antd";
 import { ChevronDown, X, Merge, Moon, Zap } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useTabsStore, useSettingsStore } from "@/store";
@@ -179,14 +179,11 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
   }
 
   return (
-    <Card
-      className={`${styles["tidy-suggestion"]}${expanded ? ` ${styles["is-expanded"]}` : ""}`}
-      size="small"
-    >
+    <div className={`${styles["tidy-suggestion"]}${expanded ? ` ${styles["is-expanded"]}` : ""}`}>
       <Alert
         type="info"
         showIcon
-        icon={<Zap size={ICON_SIZE.MEDIUM} className={styles["tidy-suggestion__alert-icon"]} />}
+        icon={<Zap size={ICON_SIZE.SMALL} className={styles["tidy-suggestion__alert-icon"]} />}
         message={
           <Flex className={styles["tidy-suggestion__summary"]}>
             <Typography.Text className={styles["tidy-suggestion__summary-text"]}>
@@ -236,10 +233,8 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
       />
 
       {expanded && (
-        <Card
-          className={`${styles["tidy-suggestion__panel"]} app-accordion-panel`}
-          size="small"
-          classNames={{ body: styles["tidy-suggestion__panel-body"] }}
+        <div
+          className={`${styles["tidy-suggestion__panel"]} ${styles["tidy-suggestion__panel-body"]} app-accordion-panel`}
         >
           {dupGroups.length > 0 && (
             <>
@@ -365,7 +360,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
               />{" "}
             </>
           )}
-        </Card>
+        </div>
       )}
 
       <DuplicatePreviewModal
@@ -373,6 +368,6 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
         dupGroups={dupGroups}
         onClose={() => setPreviewOpen(false)}
       />
-    </Card>
+    </div>
   );
 }

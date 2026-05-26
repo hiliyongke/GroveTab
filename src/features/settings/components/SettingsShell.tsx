@@ -42,10 +42,10 @@ export function SettingsShell({
       open={open}
       onClose={handleClose}
       destroyOnClose
+      mask={false}
       width={704}
       title={t("设置")}
       classNames={{
-        mask: styles["settings-drawer__mask"],
         header: styles["settings-drawer__header"],
         title: styles["settings-drawer__title"],
         body: styles["settings-drawer__body"],

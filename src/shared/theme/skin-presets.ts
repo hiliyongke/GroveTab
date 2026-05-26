@@ -327,49 +327,49 @@ export const SKIN_PRESETS: SkinPreset[] = [
     motionEaseOut: "cubic-bezier(0.0, 0.0, 0.2, 1)",
 
     colorBgLayoutLight: "#F3F3F3",
-    colorBgContainerLight: "rgba(255, 255, 255, 0.55)",
-    colorBgElevatedLight: "rgba(255, 255, 255, 0.72)",
-    colorBorderSecondaryLight: "rgba(0, 0, 0, 0.06)",
+    colorBgContainerLight: "#FDFDFD",
+    colorBgElevatedLight: "#FFFFFF",
+    colorBorderSecondaryLight: "rgba(0, 0, 0, 0.08)",
 
     colorBgLayoutDark: "#202020",
-    colorBgContainerDark: "rgba(44, 44, 44, 0.65)",
-    colorBgElevatedDark: "rgba(59, 59, 59, 0.72)",
-    colorBorderSecondaryDark: "rgba(255, 255, 255, 0.08)",
+    colorBgContainerDark: "#2B2B2B",
+    colorBgElevatedDark: "#303030",
+    colorBorderSecondaryDark: "rgba(255, 255, 255, 0.10)",
 
     glass: {
-      blur: 60,
-      saturate: 200,
-      bgLight: "rgba(252, 252, 252, 0.65)",
-      bgDark: "rgba(44, 44, 44, 0.58)",
+      blur: 32,
+      saturate: 180,
+      bgLight: "rgba(253, 253, 253, 0.86)",
+      bgDark: "rgba(43, 43, 43, 0.88)",
     },
 
     shadow: {
       card: {
         light:
-          "0 1px 2px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.48)",
-        dark: "0 1px 2px rgba(0,0,0,0.28), 0 2px 8px rgba(0,0,0,0.22), 0 8px 24px rgba(0,0,0,0.16), inset 0 1px 0 rgba(255,255,255,0.06)",
+          "0 1px 2px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.045), inset 0 1px 0 rgba(255,255,255,0.76)",
+        dark: "0 1px 2px rgba(0,0,0,0.42), 0 8px 28px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.07)",
       },
       cardHover: {
         light:
-          "0 2px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.08), 0 12px 32px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.56)",
-        dark: "0 2px 4px rgba(0,0,0,0.36), 0 4px 16px rgba(0,0,0,0.28), 0 12px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)",
+          "0 2px 4px rgba(0,0,0,0.06), 0 12px 32px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.86)",
+        dark: "0 2px 4px rgba(0,0,0,0.48), 0 12px 36px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,255,255,0.09)",
       },
       floating: {
         light:
-          "0 4px 16px rgba(0,0,0,0.06), 0 16px 48px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.4)",
-        dark: "0 4px 16px rgba(0,0,0,0.4), 0 16px 48px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.06)",
+          "0 8px 20px rgba(0,0,0,0.08), 0 24px 64px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.72)",
+        dark: "0 8px 24px rgba(0,0,0,0.48), 0 28px 72px rgba(0,0,0,0.44), inset 0 1px 0 rgba(255,255,255,0.08)",
       },
       brandGlow: {
-        light: "0 2px 16px rgba(0,120,212,0.1), 0 0 0 1px rgba(0,0,0,0.03)",
-        dark: "0 2px 16px rgba(0,120,212,0.12), 0 0 0 1px rgba(255,255,255,0.04)",
+        light: "0 0 0 1px rgba(0,120,212,0.16), 0 8px 24px rgba(0,120,212,0.14)",
+        dark: "0 0 0 1px rgba(96,205,255,0.18), 0 8px 28px rgba(96,205,255,0.12)",
       },
     },
 
     texture: {
       noise: true,
-      noiseOpacity: 0.05,
+      noiseOpacity: 0.045,
       grid: false,
-      gridColor: { light: "rgba(0,0,0,0.015)", dark: "rgba(255,255,255,0.015)" },
+      gridColor: { light: "rgba(0,0,0,0.018)", dark: "rgba(255,255,255,0.018)" },
     },
 
     cardStyle: {
@@ -947,47 +947,49 @@ export const SKIN_PRESETS: SkinPreset[] = [
     motionEaseInOut: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
     motionEaseOut: "cubic-bezier(0.0, 0.0, 0.2, 1)",
 
-    colorBgLayoutLight: "#FFF5F2",
-    colorBgContainerLight: "rgba(255, 255, 255, 0.55)",
-    colorBgElevatedLight: "rgba(255, 255, 255, 0.72)",
-    colorBorderSecondaryLight: "rgba(0, 0, 0, 0.06)",
+    colorBgLayoutLight: "#FFF7F4",
+    colorBgContainerLight: "#FFFDFB",
+    colorBgElevatedLight: "#FFFFFF",
+    colorBorderSecondaryLight: "rgba(138, 148, 224, 0.16)",
 
-    colorBgLayoutDark: "#1a1218",
-    colorBgContainerDark: "rgba(45, 35, 48, 0.55)",
-    colorBgElevatedDark: "rgba(58, 48, 62, 0.65)",
-    colorBorderSecondaryDark: "rgba(255, 255, 255, 0.08)",
+    colorBgLayoutDark: "#171019",
+    colorBgContainerDark: "#241A28",
+    colorBgElevatedDark: "#302338",
+    colorBorderSecondaryDark: "rgba(255, 214, 235, 0.14)",
 
     glass: {
-      blur: 48,
-      saturate: 180,
-      bgLight: "rgba(255, 255, 255, 0.45)",
-      bgDark: "rgba(35, 28, 40, 0.45)",
+      blur: 42,
+      saturate: 170,
+      bgLight: "rgba(255, 253, 251, 0.90)",
+      bgDark: "rgba(36, 26, 40, 0.88)",
     },
 
     shadow: {
       card: {
         light:
-          "0 2px 12px rgba(0,0,0,0.03), 0 8px 40px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.6)",
-        dark: "0 2px 12px rgba(0,0,0,0.25), 0 8px 40px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)",
+          "0 8px 30px rgba(138,148,224,0.08), 0 18px 58px rgba(240,168,192,0.10), inset 0 1px 0 rgba(255,255,255,0.88)",
+        dark: "0 10px 34px rgba(6,4,10,0.42), 0 18px 64px rgba(138,148,224,0.10), inset 0 1px 0 rgba(255,220,240,0.08)",
       },
       cardHover: {
         light:
-          "0 4px 20px rgba(0,0,0,0.04), 0 16px 56px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.7)",
-        dark: "0 4px 20px rgba(0,0,0,0.35), 0 16px 56px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.1)",
+          "0 12px 36px rgba(138,148,224,0.12), 0 24px 72px rgba(240,168,192,0.14), inset 0 1px 0 rgba(255,255,255,0.96)",
+        dark: "0 14px 44px rgba(6,4,10,0.52), 0 24px 76px rgba(240,168,192,0.12), inset 0 1px 0 rgba(255,220,240,0.12)",
       },
       floating: {
-        light: "0 4px 20px rgba(138,148,224,0.08), 0 16px 56px rgba(0,0,0,0.06)",
-        dark: "0 4px 20px rgba(138,148,224,0.1), 0 16px 56px rgba(0,0,0,0.35)",
+        light:
+          "0 14px 42px rgba(138,148,224,0.14), 0 28px 86px rgba(240,168,192,0.14), inset 0 1px 0 rgba(255,255,255,0.92)",
+        dark: "0 16px 48px rgba(6,4,10,0.58), 0 30px 90px rgba(138,148,224,0.12), inset 0 1px 0 rgba(255,220,240,0.10)",
       },
       brandGlow: {
-        light: "0 4px 24px rgba(138,148,224,0.08), 0 0 0 1px rgba(0,0,0,0.03)",
-        dark: "0 4px 24px rgba(138,148,224,0.1), 0 0 0 1px rgba(255,255,255,0.05)",
+        light:
+          "0 8px 28px rgba(138,148,224,0.18), 0 0 34px rgba(240,168,192,0.16), 0 0 0 1px rgba(138,148,224,0.10)",
+        dark: "0 8px 30px rgba(138,148,224,0.18), 0 0 38px rgba(240,168,192,0.14), 0 0 0 1px rgba(255,220,240,0.08)",
       },
     },
 
     texture: {
       noise: true,
-      noiseOpacity: 0.02,
+      noiseOpacity: 0.028,
       grid: false,
       gridColor: { light: "rgba(138,148,224,0.02)", dark: "rgba(240,168,192,0.02)" },
     },

@@ -444,3 +444,232 @@ body {
     transform: none;
   }
 }
+
+[data-popup][data-skin="pastel"],
+[data-popup] [data-skin="pastel"] {
+  --app-pastel-lavender: #8a94e0;
+  --app-pastel-rose: #f0a8c0;
+  --app-pastel-mint: #99f6e4;
+
+  .popup-shell {
+    background:
+      radial-gradient(
+        circle at 0% -8%,
+        color-mix(in srgb, var(--app-pastel-lavender) 18%, transparent),
+        transparent 34%
+      ),
+      radial-gradient(
+        circle at 100% 0%,
+        color-mix(in srgb, var(--app-pastel-rose) 18%, transparent),
+        transparent 32%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 62%, transparent),
+        transparent 72%
+      ),
+      var(--app-mica-surface, #fffdfb);
+  }
+
+  .popup-search,
+  .popup-list,
+  .popup-actions__secondary .ant-btn {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 52%, transparent),
+        transparent 48%
+      ),
+      color-mix(in srgb, var(--app-pastel-lavender) 5%, var(--app-acrylic-bg, #fff)) !important;
+    border-color: color-mix(
+      in srgb,
+      var(--app-pastel-lavender) 20%,
+      var(--app-acrylic-border, rgba(138, 148, 224, 0.18))
+    ) !important;
+    box-shadow: inset 0 1px 0
+      color-mix(in srgb, var(--app-acrylic-highlight, #fff) 54%, transparent) !important;
+  }
+
+  .popup-row:hover,
+  .popup-row:focus-within {
+    background: color-mix(
+      in srgb,
+      var(--app-pastel-rose) 10%,
+      var(--app-pastel-lavender) 6%
+    ) !important;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--app-pastel-lavender) 24%, transparent);
+  }
+
+  .popup-actions__primary {
+    background: linear-gradient(
+      135deg,
+      var(--app-pastel-lavender),
+      var(--app-pastel-rose)
+    ) !important;
+    border-color: transparent !important;
+    box-shadow: var(--app-shadow-brand-glow, 0 8px 28px rgba(138, 148, 224, 0.18)) !important;
+  }
+
+  [data-theme="dark"] & {
+    .popup-shell {
+      background:
+        radial-gradient(
+          circle at 0% -8%,
+          color-mix(in srgb, var(--app-pastel-lavender) 24%, transparent),
+          transparent 36%
+        ),
+        radial-gradient(
+          circle at 100% 0%,
+          color-mix(in srgb, var(--app-pastel-rose) 22%, transparent),
+          transparent 34%
+        ),
+        linear-gradient(
+          180deg,
+          color-mix(in srgb, var(--app-acrylic-highlight, #fff) 16%, transparent),
+          transparent 74%
+        ),
+        var(--app-mica-surface, #241a28);
+    }
+
+    .popup-search,
+    .popup-list,
+    .popup-actions__secondary .ant-btn {
+      background:
+        linear-gradient(
+          135deg,
+          color-mix(in srgb, var(--app-acrylic-highlight, #fff) 18%, transparent),
+          transparent 48%
+        ),
+        color-mix(in srgb, var(--app-pastel-rose) 8%, var(--app-acrylic-bg, #302338)) !important;
+      border-color: var(--app-acrylic-border, rgba(255, 214, 235, 0.16)) !important;
+    }
+
+    .popup-row:hover,
+    .popup-row:focus-within {
+      background: color-mix(in srgb, var(--app-pastel-rose) 14%, transparent) !important;
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--app-pastel-rose) 26%, transparent);
+    }
+  }
+}
+
+/* ─── Ant Design 浮层兜底：禁止透明底，统一高不透明磨砂效果 ─────────────
+ * popup 独立入口不会加载 newtab 全局样式，所以这里也需要覆盖 Tooltip / Dropdown / Message 等 portal 浮层。
+ */
+:root {
+  --app-floating-glass-bg: var(--app-acrylic-bg, var(--ant-color-bg-elevated, #ffffff));
+  --app-floating-glass-bg-strong: var(--app-acrylic-bg, var(--ant-color-bg-elevated, #ffffff));
+  --app-floating-glass-border: var(
+    --app-acrylic-border,
+    color-mix(in srgb, var(--ant-color-border-secondary, #d9d9d9) 86%, transparent)
+  );
+  --app-floating-glass-filter: saturate(var(--app-glass-saturate, 180%)) blur(18px);
+}
+
+[data-theme="dark"] {
+  --app-floating-glass-bg: var(--app-acrylic-bg, var(--ant-color-bg-elevated, #1f1f1f));
+  --app-floating-glass-bg-strong: var(--app-acrylic-bg, var(--ant-color-bg-elevated, #1f1f1f));
+  --app-floating-glass-border: var(--app-acrylic-border, color-mix(in srgb, #fff 14%, transparent));
+}
+
+.ant-drawer-content,
+.ant-modal-content,
+.ant-popover-inner,
+.ant-dropdown-menu,
+.ant-select-dropdown,
+.ant-picker-dropdown .ant-picker-panel-container,
+.ant-cascader-dropdown,
+.ant-mentions-dropdown,
+.ant-message-notice-content,
+.ant-notification-notice {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--app-acrylic-highlight, #fff) 62%, transparent),
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--app-color-primary, #0071e3) 4%, transparent),
+      transparent 58%
+    ),
+    var(--app-floating-glass-bg-strong) !important;
+  backdrop-filter: var(--app-floating-glass-filter);
+  -webkit-backdrop-filter: var(--app-floating-glass-filter);
+  border: 1px solid var(--app-floating-glass-border) !important;
+  box-shadow: var(
+    --app-shadow-floating,
+    0 16px 48px color-mix(in srgb, #000 18%, transparent)
+  ) !important;
+}
+
+.ant-tooltip-inner {
+  color: var(--ant-color-text, #1f1f1f) !important;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--app-acrylic-highlight, #fff) 54%, transparent),
+      transparent 48%
+    ),
+    var(--app-floating-glass-bg-strong) !important;
+  backdrop-filter: var(--app-floating-glass-filter);
+  -webkit-backdrop-filter: var(--app-floating-glass-filter);
+  border: 1px solid var(--app-floating-glass-border);
+  box-shadow: var(
+    --app-shadow-floating,
+    0 10px 28px color-mix(in srgb, #000 16%, transparent)
+  ) !important;
+}
+
+.ant-tooltip-arrow::before,
+.ant-popover-arrow::before,
+.ant-popover-arrow::after {
+  background: var(--app-floating-glass-bg-strong) !important;
+  backdrop-filter: var(--app-floating-glass-filter);
+  -webkit-backdrop-filter: var(--app-floating-glass-filter);
+}
+
+.ant-drawer-header,
+.ant-drawer-body,
+.ant-drawer-footer,
+.ant-modal-header,
+.ant-modal-body,
+.ant-modal-footer,
+.ant-popover-title,
+.ant-popover-inner-content {
+  background: transparent !important;
+}
+
+.ant-modal-mask,
+.ant-drawer-mask {
+  background: color-mix(in srgb, #000 42%, transparent) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+[data-theme="dark"] .ant-drawer-content,
+[data-theme="dark"] .ant-modal-content,
+[data-theme="dark"] .ant-popover-inner,
+[data-theme="dark"] .ant-dropdown-menu,
+[data-theme="dark"] .ant-select-dropdown,
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-panel-container,
+[data-theme="dark"] .ant-cascader-dropdown,
+[data-theme="dark"] .ant-mentions-dropdown,
+[data-theme="dark"] .ant-message-notice-content,
+[data-theme="dark"] .ant-notification-notice {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, #fff 8%, transparent),
+      color-mix(in srgb, #fff 0%, transparent) 42%
+    ),
+    var(--app-floating-glass-bg-strong) !important;
+}
+
+[data-theme="dark"] .ant-tooltip-inner {
+  color: var(--ant-color-text, #f5f5f5) !important;
+}
+
+[data-theme="dark"] .ant-modal-mask,
+[data-theme="dark"] .ant-drawer-mask {
+  background: color-mix(in srgb, #000 55%, transparent) !important;
+}

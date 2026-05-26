@@ -489,6 +489,451 @@ html[data-texture-noise] body::before {
   }
 }
 
+/* ─── Ant Design 浮层兜底：禁止透明底，统一高不透明磨砂效果 ─────────────
+ * 覆盖 Drawer / Modal / Tooltip / Popover / Dropdown / Select 下拉 / Message / Notification 等
+ * 通过 portal 挂到 body 下的浮层，避免浮层背景透明导致内容不可读。
+ */
+:root {
+  --app-floating-glass-bg: var(--app-acrylic-bg, var(--ant-color-bg-elevated, #ffffff));
+  --app-floating-glass-bg-strong: var(--app-acrylic-bg, var(--ant-color-bg-elevated, #ffffff));
+  --app-floating-glass-border: var(
+    --app-acrylic-border,
+    color-mix(in srgb, var(--ant-color-border-secondary, #d9d9d9) 86%, transparent)
+  );
+  --app-floating-glass-filter: saturate(var(--app-glass-saturate, 180%)) blur(18px);
+}
+
+[data-theme="dark"] {
+  --app-floating-glass-bg: var(--app-acrylic-bg, var(--ant-color-bg-elevated, #1f1f1f));
+  --app-floating-glass-bg-strong: var(--app-acrylic-bg, var(--ant-color-bg-elevated, #1f1f1f));
+  --app-floating-glass-border: var(--app-acrylic-border, color-mix(in srgb, #fff 14%, transparent));
+}
+
+.ant-drawer-content,
+.ant-modal-content,
+.ant-popover-inner,
+.ant-dropdown-menu,
+.ant-select-dropdown,
+.ant-picker-dropdown .ant-picker-panel-container,
+.ant-cascader-dropdown,
+.ant-mentions-dropdown,
+.ant-message-notice-content,
+.ant-notification-notice {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--app-acrylic-highlight, #fff) 68%, transparent),
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--app-color-primary, #0078d4) 4%, transparent),
+      transparent 58%
+    ),
+    var(--app-floating-glass-bg-strong) !important;
+  backdrop-filter: var(--app-floating-glass-filter);
+  -webkit-backdrop-filter: var(--app-floating-glass-filter);
+  border: 1px solid var(--app-floating-glass-border) !important;
+  box-shadow: var(
+    --app-shadow-floating,
+    0 16px 48px color-mix(in srgb, #000 18%, transparent)
+  ) !important;
+}
+
+.ant-tooltip-inner {
+  color: var(--ant-color-text, #1f1f1f) !important;
+  background: var(--app-floating-glass-bg-strong) !important;
+  backdrop-filter: var(--app-floating-glass-filter);
+  -webkit-backdrop-filter: var(--app-floating-glass-filter);
+  border: 1px solid var(--app-floating-glass-border);
+  box-shadow: var(
+    --app-shadow-floating,
+    0 10px 28px color-mix(in srgb, #000 16%, transparent)
+  ) !important;
+}
+
+.ant-tooltip-arrow::before,
+.ant-popover-arrow::before,
+.ant-popover-arrow::after {
+  background: var(--app-floating-glass-bg-strong) !important;
+  backdrop-filter: var(--app-floating-glass-filter);
+  -webkit-backdrop-filter: var(--app-floating-glass-filter);
+}
+
+.ant-drawer-header,
+.ant-drawer-body,
+.ant-drawer-footer,
+.ant-modal-header,
+.ant-modal-body,
+.ant-modal-footer,
+.ant-popover-title,
+.ant-popover-inner-content {
+  background: transparent !important;
+}
+
+.ant-modal-mask,
+.ant-drawer-mask {
+  background: color-mix(in srgb, #000 42%, transparent) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+[data-theme="dark"] .ant-drawer-content,
+[data-theme="dark"] .ant-modal-content,
+[data-theme="dark"] .ant-popover-inner,
+[data-theme="dark"] .ant-dropdown-menu,
+[data-theme="dark"] .ant-select-dropdown,
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-panel-container,
+[data-theme="dark"] .ant-cascader-dropdown,
+[data-theme="dark"] .ant-mentions-dropdown,
+[data-theme="dark"] .ant-message-notice-content,
+[data-theme="dark"] .ant-notification-notice {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, #fff 8%, transparent),
+      color-mix(in srgb, #fff 0%, transparent) 42%
+    ),
+    var(--app-floating-glass-bg-strong) !important;
+}
+
+[data-theme="dark"] .ant-tooltip-inner {
+  color: var(--ant-color-text, #f5f5f5) !important;
+}
+
+[data-theme="dark"] .ant-modal-mask,
+[data-theme="dark"] .ant-drawer-mask {
+  background: color-mix(in srgb, #000 55%, transparent) !important;
+}
+
+[data-skin]:not([data-skin="apple"]):not([data-skin="glassmorphism"]) {
+  --app-card-bg: var(--app-mica-surface, var(--ant-color-bg-container));
+  --app-card-hover-bg: color-mix(
+    in srgb,
+    var(--app-color-primary, var(--ant-color-primary)) 7%,
+    var(--app-mica-surface, var(--ant-color-bg-container))
+  );
+  --app-list-item-hover-bg: color-mix(
+    in srgb,
+    var(--app-color-primary, var(--ant-color-primary)) 8%,
+    transparent
+  );
+
+  & .app-card-interactive,
+  & .app-widget-card,
+  & .app-accordion-panel {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 34%, transparent),
+        transparent 76%
+      ),
+      var(--app-mica-surface, var(--ant-color-bg-container));
+    border-color: var(--app-acrylic-border, var(--ant-color-border-secondary));
+    box-shadow: var(--app-shadow-card);
+  }
+
+  & .app-card-interactive:hover,
+  & .app-card-interactive:focus-within,
+  & .app-widget-card:hover {
+    border-color: color-mix(
+      in srgb,
+      var(--app-color-primary, var(--ant-color-primary)) 30%,
+      var(--app-acrylic-border, var(--ant-color-border-secondary))
+    );
+    box-shadow: var(--app-shadow-card-hover);
+  }
+
+  & .app-row-hover:hover,
+  & .app-row-hover:focus-within {
+    background-color: var(--app-list-item-hover-bg);
+  }
+
+  & .activity-strip__item {
+    background: color-mix(
+      in srgb,
+      var(--app-color-primary, var(--ant-color-primary)) 6%,
+      var(--app-mica-surface, var(--ant-color-bg-container))
+    );
+    border-color: var(--app-acrylic-border, var(--ant-color-border-secondary));
+  }
+
+  & .activity-strip__icon,
+  & .activity-strip__action-btn,
+  & a,
+  & .app-typography a {
+    color: var(--app-color-primary, var(--ant-color-primary));
+  }
+
+  & ::selection {
+    background-color: color-mix(
+      in srgb,
+      var(--app-color-primary, var(--ant-color-primary)) 22%,
+      transparent
+    );
+    color: inherit;
+  }
+}
+
+[data-theme="dark"][data-skin]:not([data-skin="apple"]):not([data-skin="glassmorphism"]) {
+  --app-card-hover-bg: color-mix(
+    in srgb,
+    var(--app-color-primary, var(--ant-color-primary)) 10%,
+    var(--app-mica-surface, var(--ant-color-bg-container))
+  );
+  --app-list-item-hover-bg: color-mix(
+    in srgb,
+    var(--app-color-primary, var(--ant-color-primary)) 13%,
+    transparent
+  );
+
+  & .app-card-interactive,
+  & .app-widget-card,
+  & .app-accordion-panel {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 20%, transparent),
+        transparent 78%
+      ),
+      var(--app-mica-surface, var(--ant-color-bg-container));
+  }
+
+  & .activity-strip__item {
+    background: color-mix(
+      in srgb,
+      var(--app-color-primary, var(--ant-color-primary)) 10%,
+      var(--app-mica-surface, var(--ant-color-bg-container))
+    );
+  }
+
+  & ::selection {
+    background-color: color-mix(
+      in srgb,
+      var(--app-color-primary, var(--ant-color-primary)) 34%,
+      transparent
+    );
+  }
+}
+
+/* ═════════════════════════════════════════════════════════
+ * Pastel 皮肤覆盖样式（data-skin="pastel"）
+ * 柔彩玻璃：奶油实底 + 粉紫蓝绿柔光 + 可读浮层
+ * ═════════════════════════════════════════════════════════ */
+[data-skin="pastel"] {
+  --app-pastel-lavender: #8a94e0;
+  --app-pastel-rose: #f0a8c0;
+  --app-pastel-mint: #99f6e4;
+  --app-card-hover-bg: color-mix(
+    in srgb,
+    var(--app-pastel-rose) 7%,
+    var(--app-mica-surface, #fffdfb)
+  );
+  --app-list-item-hover-bg: color-mix(in srgb, var(--app-pastel-lavender) 9%, transparent);
+
+  & body::before {
+    mix-blend-mode: soft-light;
+  }
+
+  & .app-header-shell,
+  & .app-view-dock--bottom,
+  & .app-view-dock__list {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--app-pastel-rose) 9%, transparent),
+        transparent 42%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 58%, transparent),
+        transparent 90%
+      ),
+      color-mix(in srgb, var(--app-acrylic-bg, #fff) 96%, var(--app-pastel-lavender) 4%);
+    border-color: color-mix(
+      in srgb,
+      var(--app-pastel-lavender) 18%,
+      var(--app-acrylic-border, rgba(138, 148, 224, 0.18))
+    );
+  }
+
+  & .app-hero-search,
+  & .app-card-interactive,
+  & .app-widget-card,
+  & .app-accordion-panel {
+    background:
+      radial-gradient(
+        circle at 0% 0%,
+        color-mix(in srgb, var(--app-pastel-lavender) 12%, transparent),
+        transparent 34%
+      ),
+      radial-gradient(
+        circle at 100% 0%,
+        color-mix(in srgb, var(--app-pastel-rose) 12%, transparent),
+        transparent 32%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 62%, transparent),
+        transparent 78%
+      ),
+      var(--app-mica-surface, #fffdfb);
+    border-color: color-mix(
+      in srgb,
+      var(--app-pastel-lavender) 22%,
+      var(--app-acrylic-border, rgba(138, 148, 224, 0.18))
+    );
+    box-shadow: var(--app-shadow-card);
+  }
+
+  & .app-card-interactive:hover,
+  & .app-card-interactive:focus-within,
+  & .app-widget-card:hover {
+    border-color: color-mix(in srgb, var(--app-pastel-rose) 34%, var(--app-pastel-lavender));
+    box-shadow: var(--app-shadow-card-hover);
+  }
+
+  & .activity-strip__item,
+  & .app-kbd {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 44%, transparent),
+        transparent 58%
+      ),
+      color-mix(in srgb, var(--app-pastel-lavender) 8%, var(--app-mica-surface, #fffdfb));
+    border-color: color-mix(
+      in srgb,
+      var(--app-pastel-lavender) 18%,
+      var(--app-acrylic-border, rgba(138, 148, 224, 0.18))
+    );
+  }
+
+  & .app-drawer__section,
+  & .search-box-container,
+  & .app-modal__container {
+    background:
+      radial-gradient(
+        circle at 0% 0%,
+        color-mix(in srgb, var(--app-pastel-lavender) 12%, transparent),
+        transparent 36%
+      ),
+      radial-gradient(
+        circle at 100% 0%,
+        color-mix(in srgb, var(--app-pastel-rose) 14%, transparent),
+        transparent 34%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 72%, transparent),
+        transparent 74%
+      ),
+      var(--app-acrylic-bg, #ffffff);
+    backdrop-filter: blur(var(--app-glass-blur, 42px)) saturate(var(--app-glass-saturate, 170%));
+    -webkit-backdrop-filter: blur(var(--app-glass-blur, 42px))
+      saturate(var(--app-glass-saturate, 170%));
+    border: 1px solid var(--app-acrylic-border, rgba(138, 148, 224, 0.18));
+    box-shadow: var(--app-shadow-floating);
+  }
+
+  & .app-drawer__header,
+  & .app-modal__header {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--app-acrylic-highlight, #fff) 52%, transparent),
+      transparent
+    ) !important;
+    border-bottom-color: color-mix(
+      in srgb,
+      var(--app-acrylic-border, rgba(138, 148, 224, 0.18)) 86%,
+      transparent
+    );
+  }
+
+  & .app-drawer__footer,
+  & .app-modal__footer {
+    background: linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--app-pastel-rose) 7%, transparent),
+      transparent
+    ) !important;
+    border-top-color: color-mix(
+      in srgb,
+      var(--app-acrylic-border, rgba(138, 148, 224, 0.18)) 86%,
+      transparent
+    );
+  }
+
+  & .app-drawer__mask,
+  & .search-box-mask,
+  & .app-modal__mask {
+    background: var(--app-overlay-mask-bg, rgba(97, 72, 118, 0.26));
+    backdrop-filter: blur(var(--app-overlay-blur, 14px));
+    -webkit-backdrop-filter: blur(var(--app-overlay-blur, 14px));
+  }
+}
+
+[data-theme="dark"][data-skin="pastel"] {
+  --app-card-hover-bg: color-mix(
+    in srgb,
+    var(--app-pastel-rose) 11%,
+    var(--app-mica-surface, #241a28)
+  );
+  --app-list-item-hover-bg: color-mix(in srgb, var(--app-pastel-rose) 13%, transparent);
+
+  & .app-hero-search,
+  & .app-card-interactive,
+  & .app-widget-card,
+  & .app-accordion-panel {
+    background:
+      radial-gradient(
+        circle at 0% 0%,
+        color-mix(in srgb, var(--app-pastel-lavender) 18%, transparent),
+        transparent 36%
+      ),
+      radial-gradient(
+        circle at 100% 0%,
+        color-mix(in srgb, var(--app-pastel-rose) 16%, transparent),
+        transparent 34%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 24%, transparent),
+        transparent 78%
+      ),
+      var(--app-mica-surface, #241a28);
+  }
+
+  & .app-drawer__section,
+  & .search-box-container,
+  & .app-modal__container {
+    background:
+      radial-gradient(
+        circle at 0% 0%,
+        color-mix(in srgb, var(--app-pastel-lavender) 20%, transparent),
+        transparent 38%
+      ),
+      radial-gradient(
+        circle at 100% 0%,
+        color-mix(in srgb, var(--app-pastel-rose) 18%, transparent),
+        transparent 36%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 22%, transparent),
+        transparent 76%
+      ),
+      var(--app-acrylic-bg, #302338);
+    border-color: var(--app-acrylic-border, rgba(255, 214, 235, 0.16));
+  }
+
+  & .app-drawer__mask,
+  & .search-box-mask,
+  & .app-modal__mask {
+    background: var(--app-overlay-mask-bg, rgba(18, 8, 22, 0.62));
+  }
+}
+
 /* ═════════════════════════════════════════════════════════
  * Apple 皮肤覆盖样式（data-skin="apple"）
  *
@@ -555,20 +1000,6 @@ html[data-texture-noise] body::before {
     transform: none;
     box-shadow: 0 8px 36px color-mix(in srgb, #000 26%, transparent);
     border-color: transparent;
-  }
-
-  [data-theme="dark"] {
-    /* ── Apple 暗色模式覆盖 */
-    --app-apple-blue: #2997ff;
-
-    /* ── Apple 暗色背景色覆盖 ── */
-    --app-card-hover-bg: color-mix(in srgb, #fff 5%, transparent);
-    --app-list-item-hover-bg: color-mix(in srgb, #fff 5%, transparent);
-
-    & .app-card-interactive:hover,
-    & .app-card-interactive:focus-within {
-      box-shadow: 0 8px 36px color-mix(in srgb, #000 52%, transparent);
-    }
   }
 
   /* Apple：行级 hover 更柔 */
@@ -669,54 +1100,56 @@ html[data-texture-noise] body::before {
     background-color: color-mix(in srgb, var(--app-apple-blue, #0071e3) 18%, transparent);
     color: inherit;
   }
+}
 
-  [data-theme="dark"] {
-    & a,
-    & .app-typography a {
-      color: var(--app-apple-link-dark);
-    }
+[data-theme="dark"][data-skin="apple"] {
+  /* ── Apple 暗色模式覆盖 */
+  --app-apple-blue: #2997ff;
+  --app-apple-blue-dark: #2997ff;
+  --app-card-hover-bg: color-mix(in srgb, #fff 5%, transparent);
+  --app-list-item-hover-bg: color-mix(in srgb, #fff 5%, transparent);
 
-    & .app-card-interactive {
-      box-shadow: 0 5px 30px color-mix(in srgb, #000 44%, transparent);
-    }
+  & a,
+  & .app-typography a {
+    color: var(--app-apple-link-dark, #2997ff);
+  }
 
-    & .app-card-interactive:hover,
-    & .app-card-interactive:focus-within {
-      box-shadow: 0 8px 36px color-mix(in srgb, #000 52%, transparent);
-    }
+  & .app-card-interactive {
+    background: var(--app-mica-surface, #1c1c1e);
+    box-shadow: 0 5px 30px color-mix(in srgb, #000 44%, transparent);
+  }
 
-    & .app-row-hover:hover,
-    & .app-row-hover:focus-within {
-      background-color: color-mix(in srgb, #fff 5%, transparent);
-    }
+  & .app-card-interactive:hover,
+  & .app-card-interactive:focus-within {
+    box-shadow: 0 8px 36px color-mix(in srgb, #000 52%, transparent);
+  }
 
-    & .activity-strip__item {
-      background: color-mix(in srgb, #fff 8%, transparent);
-    }
+  & .app-row-hover:hover,
+  & .app-row-hover:focus-within {
+    background-color: color-mix(in srgb, #fff 5%, transparent);
+  }
 
-    & .activity-strip__icon {
-      color: var(--app-apple-blue-dark, #2997ff);
-    }
+  & .activity-strip__item {
+    background: color-mix(in srgb, #fff 8%, transparent);
+  }
 
-    & .activity-strip__action-btn {
-      color: var(--app-apple-blue-dark, #2997ff);
-    }
+  & .activity-strip__icon,
+  & .activity-strip__action-btn {
+    color: var(--app-apple-blue-dark, #2997ff);
+  }
 
-    & .app-accordion-panel {
-      box-shadow: 0 4px 20px color-mix(in srgb, #000 32%, transparent);
-    }
+  & .app-accordion-panel,
+  & .app-widget-card {
+    background: var(--app-mica-surface, #1c1c1e);
+    box-shadow: 0 5px 30px color-mix(in srgb, #000 44%, transparent);
+  }
 
-    & .app-widget-card {
-      box-shadow: 0 5px 30px color-mix(in srgb, #000 44%, transparent);
-    }
+  & ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, #fff 15%, transparent);
+  }
 
-    & ::-webkit-scrollbar-thumb {
-      background: color-mix(in srgb, #fff 15%, transparent);
-    }
-
-    & ::selection {
-      background-color: color-mix(in srgb, var(--app-apple-blue, #0071e3) 32%, transparent);
-    }
+  & ::selection {
+    background-color: color-mix(in srgb, var(--app-apple-blue, #0071e3) 32%, transparent);
   }
 }
 
@@ -734,38 +1167,64 @@ html[data-texture-noise] body::before {
   /* ── Fluent 皮肤 CSS 变量 */
   --app-fluent-blue: #0078d4;
   --app-fluent-blue-hover: #2b88d8;
+  --app-fluent-blue-subtle: rgba(0, 120, 212, 0.12);
 
-  /* ── Fluent 背景色覆盖 ── */
-  --app-card-bg: var(--app-bg-glass);
-  --app-card-hover-bg: color-mix(in srgb, var(--app-color-primary, #0078d4) 4%, transparent);
-  --app-list-item-hover-bg: color-mix(in srgb, var(--app-color-primary, #0078d4) 4%, transparent);
+  /* ── Fluent 背景色覆盖：Mica 负责窗口底板，Acrylic 只给浮层 */
+  --app-card-bg: var(--app-mica-surface, var(--ant-color-bg-container));
+  --app-card-hover-bg: color-mix(
+    in srgb,
+    var(--app-fluent-blue, #0078d4) 6%,
+    var(--app-mica-surface, var(--ant-color-bg-container))
+  );
+  --app-list-item-hover-bg: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 7%, transparent);
 
-  /* ── Fluent Header：Acrylic 半透明底栏 ── */
+  /* ── Fluent Header：Mica 顶栏，稳定不透底 */
   & .app-header-shell {
-    background: var(--app-glass-bg);
-    backdrop-filter: var(--app-glass-filter);
-    -webkit-backdrop-filter: var(--app-glass-filter);
-    border-bottom: 1px solid color-mix(in srgb, #fff 8%, transparent);
+    background:
+      linear-gradient(180deg, var(--app-acrylic-highlight), transparent 120%),
+      color-mix(
+        in srgb,
+        var(--app-mica-surface, var(--ant-color-bg-container)) 96%,
+        var(--app-fluent-blue, #0078d4) 4%
+      );
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    border-bottom: 1px solid var(--app-acrylic-border, var(--ant-color-border-secondary));
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--app-acrylic-highlight) 58%, transparent);
   }
 
-  /* ── Fluent 卡片：多层 Acrylic 效果 ── */
+  /* ── Fluent 卡片：Mica surface + 顶部微高光，内容保持清晰 */
   & .app-card-interactive {
-    border-color: color-mix(in srgb, #fff 8%, transparent);
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-acrylic-highlight) 64%, transparent),
+        transparent 72%
+      ),
+      var(--app-mica-surface, var(--ant-color-bg-container));
+    border-color: var(--app-acrylic-border, var(--ant-color-border-secondary));
+    box-shadow: var(--app-shadow-card);
     transition:
       transform 0.367s cubic-bezier(0.16, 1, 0.3, 1),
       box-shadow 0.367s cubic-bezier(0.16, 1, 0.3, 1),
-      border-color 0.25s ease;
+      border-color 0.25s ease,
+      background-color 0.25s ease;
   }
 
   & .app-card-interactive:hover,
   & .app-card-interactive:focus-within {
-    border-color: color-mix(in srgb, #fff 12%, transparent);
+    border-color: color-mix(
+      in srgb,
+      var(--app-fluent-blue, #0078d4) 28%,
+      var(--app-acrylic-border, var(--ant-color-border-secondary))
+    );
+    box-shadow: var(--app-shadow-card-hover);
   }
 
   /* ── Fluent 行级 hover ── */
   & .app-row-hover:hover,
   & .app-row-hover:focus-within {
-    background-color: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 4%, transparent);
+    background-color: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 7%, transparent);
   }
 
   /* ── Fluent ActivityStrip ── */
@@ -831,195 +1290,133 @@ html[data-texture-noise] body::before {
     mix-blend-mode: overlay;
   }
 
-  /* ── Fluent Drawer：Acrylic 毛玻璃抽屉 ──
-     设计要点：偏"磨砂"而非"透明玻璃"——表面不透度走高 (≥ 85%)，
-     依靠强 backdrop blur 把背后内容柔化为色调，而不是让背后内容清晰透入。
-     用 linear-gradient 叠一层极淡的高光作为"内填光"，强化金属/玻璃质感。 */
-  & .app-drawer__section {
-    background:
-      linear-gradient(
-        135deg,
-        color-mix(in srgb, #fff 18%, transparent),
-        color-mix(in srgb, #fff 0%, transparent) 40%
-      ),
-      var(--app-glass-bg);
-    backdrop-filter: var(--app-glass-filter);
-    -webkit-backdrop-filter: var(--app-glass-filter);
-    border-left: 1px solid color-mix(in srgb, #fff 18%, transparent);
-    box-shadow:
-      -8px 0 32px color-mix(in srgb, #000 18%, transparent),
-      inset 1px 0 0 color-mix(in srgb, #fff 12%, transparent);
-  }
-
-  & .app-drawer__header {
-    background: transparent;
-    border-bottom-color: color-mix(in srgb, #fff 6%, transparent);
-  }
-
-  & .app-drawer__body {
-    background: transparent;
-  }
-
-  & .app-drawer__footer {
-    background: transparent;
-    border-top-color: color-mix(in srgb, #fff 6%, transparent);
-  }
-
-  /* Drawer 遮罩层：加深以突出 Acrylic 抽屉 */
-  & .app-drawer__mask {
-    background: color-mix(in srgb, #000 45%, transparent);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-  }
-
-  /* ── Fluent SearchBox Modal：Acrylic 毛玻璃搜索弹窗 ── */
-  & .search-box-container {
-    background:
-      linear-gradient(
-        135deg,
-        color-mix(in srgb, #fff 20%, transparent),
-        color-mix(in srgb, #fff 0%, transparent) 45%
-      ),
-      var(--app-glass-bg);
-    backdrop-filter: var(--app-glass-filter);
-    -webkit-backdrop-filter: var(--app-glass-filter);
-  }
-
-  & .search-box-mask {
-    background: color-mix(in srgb, #000 45%, transparent);
-  }
-
-  /* ── Fluent Modal：Acrylic 毛玻璃弹窗 ── */
+  /* ── Fluent Acrylic 浮层：抽屉/弹窗使用实底 tint + 高光 + 磨砂 */
+  & .app-drawer__section,
+  & .search-box-container,
   & .app-modal__container {
     background:
       linear-gradient(
         135deg,
-        color-mix(in srgb, #fff 20%, transparent),
-        color-mix(in srgb, #fff 0%, transparent) 45%
+        color-mix(in srgb, var(--app-acrylic-highlight) 74%, transparent),
+        transparent 44%
       ),
-      var(--app-glass-bg);
-    backdrop-filter: var(--app-glass-filter);
-    -webkit-backdrop-filter: var(--app-glass-filter);
-    border: 1px solid color-mix(in srgb, #fff 18%, transparent);
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-fluent-blue, #0078d4) 5%, transparent),
+        transparent 56%
+      ),
+      var(--app-acrylic-bg, var(--ant-color-bg-elevated));
+    backdrop-filter: blur(var(--app-glass-blur, 32px)) saturate(var(--app-glass-saturate, 180%));
+    -webkit-backdrop-filter: blur(var(--app-glass-blur, 32px))
+      saturate(var(--app-glass-saturate, 180%));
+    border: 1px solid var(--app-acrylic-border, var(--ant-color-border-secondary));
+    box-shadow: var(--app-shadow-floating);
+  }
+
+  & .app-drawer__section {
+    border-right: 0;
+    border-top: 0;
+    border-bottom: 0;
     box-shadow:
-      0 16px 48px color-mix(in srgb, #000 22%, transparent),
-      0 2px 8px color-mix(in srgb, #000 14%, transparent),
-      inset 0 1px 0 color-mix(in srgb, #fff 12%, transparent);
+      -1px 0 0 color-mix(in srgb, var(--app-acrylic-highlight) 52%, transparent) inset,
+      var(--app-shadow-floating);
   }
 
+  & .app-drawer__header,
   & .app-modal__header {
-    background: transparent;
-    border-bottom-color: color-mix(in srgb, #fff 6%, transparent);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--app-acrylic-highlight) 42%, transparent),
+      transparent
+    ) !important;
+    border-bottom-color: color-mix(
+      in srgb,
+      var(--app-acrylic-border, var(--ant-color-border-secondary)) 82%,
+      transparent
+    );
   }
 
+  & .app-drawer__body,
   & .app-modal__body {
     background: transparent;
   }
 
+  & .app-drawer__footer,
   & .app-modal__footer {
-    background: transparent;
-    border-top-color: color-mix(in srgb, #fff 6%, transparent);
+    background: linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--app-acrylic-highlight) 28%, transparent),
+      transparent
+    ) !important;
+    border-top-color: color-mix(
+      in srgb,
+      var(--app-acrylic-border, var(--ant-color-border-secondary)) 82%,
+      transparent
+    );
   }
 
-  /* Modal 遮罩层：加深以突出 Acrylic 弹窗 */
+  & .app-drawer__mask,
+  & .search-box-mask,
   & .app-modal__mask {
-    background: color-mix(in srgb, #000 45%, transparent);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: color-mix(in srgb, #000 46%, transparent);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+}
+
+[data-theme="dark"][data-skin="glassmorphism"] {
+  /* ── Fluent 暗色模式 CSS 变量 */
+  --app-fluent-blue-dark: #60cdff;
+
+  /* ── Fluent 暗色背景色覆盖 ── */
+  --app-card-hover-bg: color-mix(in srgb, var(--app-color-primary, #0078d4) 8%, transparent);
+  --app-list-item-hover-bg: color-mix(in srgb, var(--app-color-primary, #0078d4) 8%, transparent);
+
+  & .app-card-interactive:hover,
+  & .app-card-interactive:focus-within {
+    border-color: color-mix(in srgb, #fff 12%, transparent);
   }
 
-  [data-theme="dark"] {
-    /* ── Fluent 暗色模式 CSS 变量 */
-    --app-fluent-blue-dark: #60cdff;
+  & .app-row-hover:hover,
+  & .app-row-hover:focus-within {
+    background-color: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 8%, transparent);
+  }
 
-    /* ── Fluent 暗色背景色覆盖 ── */
-    --app-card-hover-bg: color-mix(in srgb, var(--app-color-primary, #0078d4) 8%, transparent);
-    --app-list-item-hover-bg: color-mix(in srgb, var(--app-color-primary, #0078d4) 8%, transparent);
+  & .activity-strip__icon {
+    color: var(--app-fluent-blue-dark, #60cdff);
+  }
 
-    & .app-card-interactive:hover,
-    & .app-card-interactive:focus-within {
-      border-color: color-mix(in srgb, #fff 12%, transparent);
-    }
+  & .activity-strip__action-btn {
+    color: var(--app-fluent-blue-dark, #60cdff);
+  }
 
-    & .app-row-hover:hover,
-    & .app-row-hover:focus-within {
-      background-color: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 8%, transparent);
-    }
+  & a,
+  & .app-typography a {
+    color: var(--app-fluent-blue-dark, #60cdff);
+  }
 
-    & .activity-strip__icon {
-      color: var(--app-fluent-blue-dark, #60cdff);
-    }
+  & .app-widget-card {
+    border-color: color-mix(in srgb, #fff 6%, transparent);
+  }
 
-    & .activity-strip__action-btn {
-      color: var(--app-fluent-blue-dark, #60cdff);
-    }
+  & ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, #fff 20%, transparent);
+  }
 
-    & a,
-    & .app-typography a {
-      color: var(--app-fluent-blue-dark, #60cdff);
-    }
+  & ::selection {
+    background-color: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 36%, transparent);
+  }
 
-    & .app-widget-card {
-      border-color: color-mix(in srgb, #fff 6%, transparent);
-    }
+  & .app-drawer__section,
+  & .search-box-container,
+  & .app-modal__container {
+    border-color: color-mix(in srgb, #fff 12%, transparent);
+    box-shadow: var(--app-shadow-floating);
+  }
 
-    & ::-webkit-scrollbar-thumb {
-      background: color-mix(in srgb, #fff 20%, transparent);
-    }
-
-    & ::selection {
-      background-color: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 36%, transparent);
-    }
-
-    & .app-drawer__section {
-      background:
-        linear-gradient(
-          135deg,
-          color-mix(in srgb, #fff 8%, transparent),
-          color-mix(in srgb, #fff 0%, transparent) 40%
-        ),
-        var(--app-glass-bg);
-      border-left-color: color-mix(in srgb, #fff 8%, transparent);
-      box-shadow:
-        -8px 0 32px color-mix(in srgb, #000 40%, transparent),
-        inset 1px 0 0 color-mix(in srgb, #fff 6%, transparent);
-    }
-
-    & .app-drawer__mask {
-      background: color-mix(in srgb, #000 55%, transparent);
-    }
-
-    & .search-box-container {
-      background:
-        linear-gradient(
-          135deg,
-          color-mix(in srgb, #fff 8%, transparent),
-          color-mix(in srgb, #fff 0%, transparent) 45%
-        ),
-        var(--app-glass-bg);
-    }
-
-    & .search-box-mask {
-      background: color-mix(in srgb, #000 55%, transparent);
-    }
-
-    & .app-modal__container {
-      background:
-        linear-gradient(
-          135deg,
-          color-mix(in srgb, #fff 8%, transparent),
-          color-mix(in srgb, #fff 0%, transparent) 45%
-        ),
-        var(--app-glass-bg);
-      border-color: color-mix(in srgb, #fff 8%, transparent);
-      box-shadow:
-        0 16px 48px color-mix(in srgb, #000 45%, transparent),
-        0 2px 8px color-mix(in srgb, #000 30%, transparent),
-        inset 0 1px 0 color-mix(in srgb, #fff 6%, transparent);
-    }
-
-    & .app-modal__mask {
-      background: color-mix(in srgb, #000 55%, transparent);
-    }
+  & .app-drawer__mask,
+  & .search-box-mask,
+  & .app-modal__mask {
+    background: color-mix(in srgb, #000 62%, transparent);
   }
 }

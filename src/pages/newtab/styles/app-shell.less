@@ -13,10 +13,24 @@
   align-items: center;
   height: var(--app-header-height);
   padding: 0 20px;
-  background: color-mix(in srgb, var(--ant-color-bg-container) 54%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 42%, transparent);
-  backdrop-filter: blur(22px) saturate(170%);
-  -webkit-backdrop-filter: blur(22px) saturate(170%);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--app-acrylic-highlight, #fff) 42%, transparent),
+      transparent 120%
+    ),
+    color-mix(
+      in srgb,
+      var(--app-mica-surface, var(--ant-color-bg-container)) 96%,
+      var(--app-color-primary, var(--ant-color-primary)) 4%
+    );
+  border-bottom: 1px solid
+    var(
+      --app-acrylic-border,
+      color-mix(in srgb, var(--ant-color-border-secondary) 72%, transparent)
+    );
+  backdrop-filter: blur(18px) saturate(var(--app-glass-saturate, 160%));
+  -webkit-backdrop-filter: blur(18px) saturate(var(--app-glass-saturate, 160%));
   box-shadow: 0 12px 36px -28px color-mix(in srgb, var(--ant-color-text) 42%, transparent);
   transition:
     background 0.3s ease,
@@ -26,10 +40,24 @@
 }
 
 .app-header-shell.is-scrolled {
-  background: color-mix(in srgb, var(--ant-color-bg-elevated) 82%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 68%, transparent);
-  backdrop-filter: blur(26px) saturate(180%);
-  -webkit-backdrop-filter: blur(26px) saturate(180%);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--app-acrylic-highlight, #fff) 54%, transparent),
+      transparent 120%
+    ),
+    color-mix(
+      in srgb,
+      var(--app-acrylic-bg, var(--ant-color-bg-elevated)) 98%,
+      var(--app-color-primary, var(--ant-color-primary)) 2%
+    );
+  border-bottom: 1px solid
+    var(
+      --app-acrylic-border,
+      color-mix(in srgb, var(--ant-color-border-secondary) 86%, transparent)
+    );
+  backdrop-filter: blur(22px) saturate(var(--app-glass-saturate, 170%));
+  -webkit-backdrop-filter: blur(22px) saturate(var(--app-glass-saturate, 170%));
   box-shadow: 0 18px 46px -30px color-mix(in srgb, var(--ant-color-text) 56%, transparent);
 }
 
@@ -339,17 +367,31 @@
   cursor: pointer;
   font-size: var(--app-search-font-size);
   background:
-    linear-gradient(135deg, color-mix(in srgb, #fff 18%, transparent), transparent 42%),
-    color-mix(in srgb, var(--ant-color-bg-container) 86%, transparent);
-  border: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 70%, transparent);
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--app-acrylic-highlight, #fff) 56%, transparent),
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 4%, transparent),
+      transparent 64%
+    ),
+    var(--app-acrylic-bg, var(--ant-color-bg-elevated));
+  border: 1px solid
+    var(
+      --app-acrylic-border,
+      color-mix(in srgb, var(--ant-color-border-secondary) 76%, transparent)
+    );
   border-radius: calc(var(--app-search-radius) + 6px);
   box-shadow:
     0 24px 70px -38px
       color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 58%, transparent),
     0 12px 40px -30px color-mix(in srgb, var(--ant-color-text) 55%, transparent),
-    inset 0 1px 0 color-mix(in srgb, #fff 42%, transparent);
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
+    inset 0 1px 0 color-mix(in srgb, var(--app-acrylic-highlight, #fff) 56%, transparent);
+  backdrop-filter: blur(var(--app-glass-blur, 18px)) saturate(var(--app-glass-saturate, 160%));
+  -webkit-backdrop-filter: blur(var(--app-glass-blur, 18px))
+    saturate(var(--app-glass-saturate, 160%));
 }
 
 .app-hero-search:hover {
@@ -417,10 +459,18 @@
   padding: 10px 20px calc(12px + env(safe-area-inset-bottom, 0px));
   overflow-x: auto;
   overflow-y: hidden;
-  border-top: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 72%, transparent);
-  background: color-mix(in srgb, var(--ant-color-bg-elevated) 96%, transparent);
-  backdrop-filter: blur(12px) saturate(150%);
-  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border-top: 1px solid
+    var(
+      --app-acrylic-border,
+      color-mix(in srgb, var(--ant-color-border-secondary) 72%, transparent)
+    );
+  background: color-mix(
+    in srgb,
+    var(--app-acrylic-bg, var(--ant-color-bg-elevated)) 98%,
+    var(--app-color-primary, var(--ant-color-primary)) 2%
+  );
+  backdrop-filter: blur(12px) saturate(var(--app-glass-saturate, 150%));
+  -webkit-backdrop-filter: blur(12px) saturate(var(--app-glass-saturate, 150%));
   /* 抗闪白：预创建合成层 + 隔离重绘 + GPU 加速 */
   will-change: transform;
   contain: paint;
@@ -437,14 +487,26 @@
   padding: 6px;
   border-radius: 22px;
   background:
-    linear-gradient(135deg, color-mix(in srgb, #fff 16%, transparent), transparent 46%),
-    color-mix(in srgb, var(--ant-color-bg-container) 84%, transparent);
-  border: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 70%, transparent);
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--app-acrylic-highlight, #fff) 46%, transparent),
+      transparent 46%
+    ),
+    color-mix(
+      in srgb,
+      var(--app-acrylic-bg, var(--ant-color-bg-elevated)) 96%,
+      var(--app-color-primary, var(--ant-color-primary)) 4%
+    );
+  border: 1px solid
+    var(
+      --app-acrylic-border,
+      color-mix(in srgb, var(--ant-color-border-secondary) 70%, transparent)
+    );
   box-shadow:
     0 18px 46px -34px color-mix(in srgb, var(--ant-color-text) 54%, transparent),
-    inset 0 1px 0 color-mix(in srgb, #fff 24%, transparent);
-  backdrop-filter: blur(18px) saturate(165%);
-  -webkit-backdrop-filter: blur(18px) saturate(165%);
+    inset 0 1px 0 color-mix(in srgb, var(--app-acrylic-highlight, #fff) 38%, transparent);
+  backdrop-filter: blur(16px) saturate(var(--app-glass-saturate, 165%));
+  -webkit-backdrop-filter: blur(16px) saturate(var(--app-glass-saturate, 165%));
 }
 
 .app-view-dock--vertical .app-view-dock__list {
@@ -1047,4 +1109,130 @@
 .ant-tooltip-inner {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+}
+
+/* ═══════════════════════════════════════════════════════
+ * 浮层最终兜底：禁止透出页面内容
+ *
+ * 注意：这里位于 app-shell.less 末尾，而该文件晚于 index.less 加载。
+ * 因此用于压过皮肤里的 Acrylic / Glass 透明背景，保证抽屉、弹窗、
+ * Tooltip、Popover、Dropdown、Message 等浮层都有不透明底色。
+ * ═══════════════════════════════════════════════════════ */
+.app-drawer__section,
+.app-modal__container,
+.search-box-container,
+.app-popover__container .ant-popover-inner,
+.ant-popover-inner,
+.ant-dropdown-menu,
+.ant-select-dropdown,
+.ant-cascader-dropdown,
+.ant-tree-select-dropdown,
+.ant-picker-dropdown .ant-picker-panel-container,
+.ant-color-picker .ant-popover-inner,
+.ant-message-notice-content,
+.ant-notification-notice {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 62%, transparent),
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--app-color-primary, #0078d4) 4%, transparent),
+      transparent 58%
+    ),
+    var(--app-acrylic-bg, var(--ant-color-bg-elevated)) !important;
+  backdrop-filter: blur(var(--app-glass-blur, 18px)) saturate(var(--app-glass-saturate, 180%));
+  -webkit-backdrop-filter: blur(var(--app-glass-blur, 18px))
+    saturate(var(--app-glass-saturate, 180%));
+  border-color: var(
+    --app-acrylic-border,
+    color-mix(in srgb, var(--ant-color-border-secondary) 85%, transparent)
+  ) !important;
+  box-shadow: var(
+    --app-shadow-floating,
+    0 18px 52px color-mix(in srgb, #000000 24%, transparent)
+  ) !important;
+}
+
+.app-drawer__header,
+.app-drawer__body,
+.app-drawer__footer,
+.app-modal__header,
+.app-modal__body,
+.app-modal__footer,
+.ant-popover-title,
+.ant-popover-inner-content {
+  background: transparent !important;
+}
+
+.ant-tooltip-inner {
+  color: var(--ant-color-text) !important;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 54%, transparent),
+      transparent 48%
+    ),
+    var(--app-acrylic-bg, var(--ant-color-bg-elevated)) !important;
+  backdrop-filter: blur(14px) saturate(var(--app-glass-saturate, 180%));
+  -webkit-backdrop-filter: blur(14px) saturate(var(--app-glass-saturate, 180%));
+  border: 1px solid
+    var(
+      --app-acrylic-border,
+      color-mix(in srgb, var(--ant-color-border-secondary) 85%, transparent)
+    );
+  box-shadow: var(
+    --app-shadow-floating,
+    0 12px 30px color-mix(in srgb, #000000 22%, transparent)
+  ) !important;
+}
+
+.ant-tooltip-arrow::before,
+.ant-popover-arrow::before,
+.ant-popover-arrow::after {
+  background: var(--app-acrylic-bg, var(--ant-color-bg-elevated)) !important;
+}
+
+.app-drawer__mask,
+.app-modal__mask,
+.search-box-mask {
+  background: color-mix(in srgb, #000000 52%, transparent) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+[data-theme="dark"] .app-drawer__section,
+[data-theme="dark"] .app-modal__container,
+[data-theme="dark"] .search-box-container,
+[data-theme="dark"] .app-popover__container .ant-popover-inner,
+[data-theme="dark"] .ant-popover-inner,
+[data-theme="dark"] .ant-dropdown-menu,
+[data-theme="dark"] .ant-select-dropdown,
+[data-theme="dark"] .ant-cascader-dropdown,
+[data-theme="dark"] .ant-tree-select-dropdown,
+[data-theme="dark"] .ant-picker-dropdown .ant-picker-panel-container,
+[data-theme="dark"] .ant-color-picker .ant-popover-inner,
+[data-theme="dark"] .ant-message-notice-content,
+[data-theme="dark"] .ant-notification-notice {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 42%, transparent),
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--app-color-primary, #60cdff) 5%, transparent),
+      transparent 58%
+    ),
+    var(--app-acrylic-bg, var(--ant-color-bg-elevated)) !important;
+  border-color: var(--app-acrylic-border, color-mix(in srgb, #ffffff 12%, transparent)) !important;
+}
+
+[data-theme="dark"] .app-drawer__mask,
+[data-theme="dark"] .app-modal__mask,
+[data-theme="dark"] .search-box-mask {
+  background: color-mix(in srgb, #000000 62%, transparent) !important;
 }
