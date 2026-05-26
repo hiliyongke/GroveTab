@@ -9,6 +9,7 @@ import { useEffect, useRef } from "react";
 import { useTabsStore } from "@/store";
 import type { SwBroadcastMessage, SwBroadcastType } from "@/shared/types";
 import { APP_CHANNELS } from "@/shared/config/storage-keys";
+import { BRAND } from "@/shared/config/brand";
 
 const CHANNEL_NAME = APP_CHANNELS.swBroadcast;
 
@@ -26,7 +27,13 @@ export function useSwBroadcast() {
     };
 
     const runtimeHandler = (message: SwBroadcastMessage) => {
-      if (message && typeof message.type === "string" && typeof message.timestamp === "number") {
+      // 来源验证：只处理本扩展发出的消息，忽略其他扩展通过 chrome.runtime.sendMessage 广播的消息
+      if (
+        message &&
+        typeof message.type === "string" &&
+        typeof message.timestamp === "number" &&
+        message.source === BRAND.id
+      ) {
         handleBroadcast(message);
       }
     };

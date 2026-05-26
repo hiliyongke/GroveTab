@@ -445,20 +445,24 @@ html[data-texture-noise] body::before {
   opacity: 1;
 }
 
-/** 卡片身份色条 hover 加粗（2 → 3px）。由 DomainGroupCard 使用。 */
+/** 卡片身份色条 hover 视觉加粗。用 transform 避免 2 → 3px 尺寸变化引发布局/重绘抖动。 */
 .app-card-interactive .app-accent-bar--left {
-  transition: width var(--app-motion-duration, 0.15s) ease;
+  transform-origin: left center;
+  will-change: transform;
+  transition: transform var(--app-motion-duration, 0.15s) ease;
 }
 .app-card-interactive:hover .app-accent-bar--left,
 .app-card-interactive:focus-within .app-accent-bar--left {
-  width: 3px;
+  transform: scaleX(1.5);
 }
 .app-card-interactive .app-accent-bar--top {
-  transition: height var(--app-motion-duration, 0.15s) ease;
+  transform-origin: center top;
+  will-change: transform;
+  transition: transform var(--app-motion-duration, 0.15s) ease;
 }
 .app-card-interactive:hover .app-accent-bar--top,
 .app-card-interactive:focus-within .app-accent-bar--top {
-  height: 3px;
+  transform: scaleY(1.5);
 }
 
 /** 时间线分段标题 hover 文本提亮。颜色通过局部 CSS 变量桥接 antd token。 */

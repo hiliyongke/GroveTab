@@ -15,9 +15,7 @@ let _channel: BroadcastChannel | null = null;
 
 /** 获取或创建 BroadcastChannel（避免重复创建） */
 function getChannel(): BroadcastChannel {
-  if (!_channel) {
-    _channel = new BroadcastChannel(CHANNEL_NAME);
-  }
+  _channel ??= new BroadcastChannel(CHANNEL_NAME);
   return _channel;
 }
 
@@ -30,6 +28,7 @@ export function swBroadcast(type: SwBroadcastType, payload: Record<string, unkno
     type,
     payload,
     timestamp: Date.now(),
+    source: BRAND.id,
   };
 
   try {

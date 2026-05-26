@@ -54,30 +54,62 @@
 }
 
 .app-domain-group-header-wrap {
+  position: relative; /* 为左侧色条和整行 hover 背景提供定位上下文 */
+  isolation: isolate;
   display: flex;
   align-items: center;
-  position: relative; /* 为左侧色条提供定位上下文 */
   min-height: 48px;
   border: none;
   border-bottom: 1px solid var(--app-domain-card-header-border, transparent);
   background: transparent;
 }
 
+.app-domain-group-header-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 6px 8px;
+  z-index: -1;
+  border-radius: calc(var(--app-domain-card-radius) * 0.55);
+  background: var(--app-row-hover-bg, var(--ant-color-fill-tertiary));
+  opacity: 0;
+  transform: translateZ(0);
+  transition: opacity var(--app-motion-duration, 0.15s) ease;
+  pointer-events: none;
+}
+
+.app-domain-group-header-wrap:hover::before,
+.app-domain-group-header-wrap:focus-within::before {
+  opacity: 1;
+}
+
 .app-domain-group-header {
-  display: flex; /* antd 组件内部微调整 */
+  position: relative;
+  appearance: none;
+  display: flex;
   align-items: center;
   gap: 10px;
   flex: 1;
   min-width: 0;
   height: 48px;
+  margin: 0;
   padding: 0 10px 0 14px;
   border: none;
+  border-radius: 0;
   background: transparent;
+  color: inherit;
+  font: inherit;
   cursor: pointer;
   text-align: left;
+  transition: none;
+}
+
+.app-domain-group-header:hover,
+.app-domain-group-header:focus-visible {
+  background: transparent;
 }
 
 .app-domain-group-actions {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 2px;
@@ -141,6 +173,15 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.app-domain-group-action:global(.ant-btn):hover,
+.app-domain-group-action:global(.ant-btn):focus,
+.app-domain-group-action:global(.ant-btn):focus-visible,
+.app-domain-group-action:global(.ant-btn):active,
+.app-domain-group-action:global(.ant-btn):disabled {
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .app-domain-group-list {
@@ -320,6 +361,15 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.app-tab-item-action:global(.ant-btn):hover,
+.app-tab-item-action:global(.ant-btn):focus,
+.app-tab-item-action:global(.ant-btn):focus-visible,
+.app-tab-item-action:global(.ant-btn):active,
+.app-tab-item-action:global(.ant-btn):disabled {
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .app-tab-item-action--favorite.is-active {

@@ -3,8 +3,8 @@
  *
  * 设计：
  *   - antd Card 默认视觉；身份色条位置由设置项 `domainGroupAccentBarPosition` 决定：
- *     - `left`（默认）：左侧 2px 竖条（hover 3px），贴整卡左边缘
- *     - `top`：顶部 2px 横条（hover 3px），贴卡片顶部
+ *     - `left`（默认）：左侧 2px 竖条，hover 用 transform 做视觉加粗，贴整卡左边缘
+ *     - `top`：顶部 2px 横条，hover 用 transform 做视觉加粗，贴卡片顶部
  *     - `none`：完全隐藏身份色条
  *   - 2026-04-22 从 4px 收窄到 2px：原宽度视觉"喧宾夺主"，多卡并排时色条反而
  *     分散了对 favicon 和标题的注意力。2px 细线保留"身份索引"的语义，又不抢戏。
@@ -12,7 +12,7 @@
  *   - 色条采用纯实色（非渐变）；依 `useResolvedTheme()` 挑 barLight / barDark，
  *     浅/深色主题各自克制且可辨
  *   - favicon 外包一层 `accent.soft` 的柔光底板，让"色彩=身份"的语义集中在图标周围
- *   - hover 时整卡 boxShadow 提升 + 色条微加粗，不做额外色彩特效
+ *   - hover 时整卡 boxShadow 提升 + 色条用合成层 transform 视觉加粗，避免尺寸变化造成抖动
  *   - 子项 favicon 显示可通过设置 `domainGroupShowItemFavicon` 切换
  */
 
@@ -174,13 +174,20 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
       collapsed={collapsed}
       header={
         <>
-          {/* 分组头部 —— 可点击展开/折叠，flex:1 占满剩余空间 */}
-          <Button
-            type="text"
+          {/*
+            分组头部 —— 可点击展开/折叠，flex:1 占满剩余空间。
+            这里特意用原生 <button>：antd <Button type="text"> 自带 hover/focus 浅色背景，
+            会与我们 less 里 `app-domain-group-header-wrap::before` 自定义的高亮层叠加，
+            视觉上"多了一层"。原生按钮无默认背景，把视觉反馈完全交给我们自己的样式控制。
+            可访问性靠 aria-expanded / aria-label 维持。
+          */}
+          {/* eslint-disable-next-line no-restricted-syntax */}
+          <button
+            type="button"
             onClick={toggleCollapse}
             aria-expanded={!collapsed}
-            aria-label={collapsed ? t('展开') : t('折叠')}
-            className={`app-row-hover app-domain-group-header-btn ${styles["app-domain-group-header"]}`}
+            aria-label={collapsed ? t("展开") : t("折叠")}
+            className={styles["app-domain-group-header"]}
           >
             <ChevronDown
               size={ICON_SIZE.TINY}
@@ -211,12 +218,12 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
             </Typography.Text>
 
             <Tag className={styles["app-domain-group-count"]}>{group.tabs.length}</Tag>
-          </Button>
+          </button>
 
           {/* 操作按钮组：flex 排列，不再绝对定位 */}
           <Flex className={styles["app-domain-group-actions"]}>
             {/* 休眠整组——释放内存但保留标签页位置 */}
-            <Tooltip title={t('休眠整组')}>
+            <Tooltip title={t("休眠整组")}>
               <Button
                 type="text"
                 size="small"
@@ -227,13 +234,13 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
                     /* store 已 toast */
                   });
                 }}
-                aria-label={t('休眠整组')}
+                aria-label={t("休眠整组")}
                 className={`app-hover-reveal ${styles["app-domain-group-action"]}`}
               />
             </Tooltip>
 
             {/* 关闭整个域名 */}
-            <Tooltip title={t('关闭此域名所有标签页')}>
+            <Tooltip title={t("关闭此域名所有标签页")}>
               <Button
                 type="text"
                 size="small"
@@ -244,7 +251,7 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
                 onClick={(e: React.MouseEvent) => {
                   void handleCloseAll(e);
                 }}
-                aria-label={t('关闭此域名所有标签页')}
+                aria-label={t("关闭此域名所有标签页")}
                 // closing 时强制显示（is-visible），其余情况由 hover/focus 驱动
                 className={`app-hover-reveal ${styles["app-domain-group-action"]}${closing ? ` ${styles["is-visible"]}` : ""}`}
               />

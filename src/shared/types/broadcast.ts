@@ -29,4 +29,6 @@ export interface SwBroadcastMessage {
   type: SwBroadcastType;
   payload: Record<string, unknown>;
   timestamp: number;
+  /** 来源标识，用于接收端验证消息来自本扩展而非其他扩展 */
+  source?: string;
 }
