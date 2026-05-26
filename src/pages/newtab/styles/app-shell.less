@@ -1049,6 +1049,32 @@
   flex-direction: column;
 }
 
+.app-view-transition {
+  width: 100%;
+  min-width: 0;
+  transform-origin: top center;
+  animation: app-view-transition-in var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1)
+    both;
+}
+
+@keyframes app-view-transition-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(0.995);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-view-transition {
+    animation: none;
+  }
+}
+
 /* 树状视图：section 必须撑满剩余高度 */
 .app-workspace-section:has(.app-bookmark-result > .app-bm-tree) {
   flex: 1;
