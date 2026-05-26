@@ -974,6 +974,22 @@ const zhCN: Record<string, string> = {
   "insights.loading": "正在加载洞察数据…",
   "insights.archiveEmpty": "尚未归档过 Tab",
   "insights.dailyEmpty": "近 7 天暂无打开记录",
+  "insights.suggest.storageRisk.title": "存储空间偏紧",
+  "insights.suggest.storageRisk.desc":
+    "本地存储占用较高，建议到设置中检查存储策略，避免后续归档失败。",
+  "insights.suggest.storageRisk.action": "查看设置",
+  "insights.suggest.archiveLarge.title": "可以整理当前标签页",
+  "insights.suggest.archiveLarge.desc": "当前打开的标签较多，建议归档常用会话，让工作台保持轻快。",
+  "insights.suggest.archiveLarge.action": "去归档",
+  "insights.suggest.workspace.title": "建议创建工作区",
+  "insights.suggest.workspace.desc":
+    "你最近访问的域名较分散，可以按项目或主题建立工作区，切换时更清晰。",
+  "insights.suggest.scheduleArchive.title": "建议开启定期归档",
+  "insights.suggest.scheduleArchive.desc":
+    "最近每天打开的标签较多，可以设置定期归档，减少手动整理成本。",
+  "insights.suggest.scheduleArchive.action": "去设置",
+  "insights.suggest.allGood.title": "状态不错",
+  "insights.suggest.allGood.desc": "当前标签、存储和使用节奏都比较健康，继续保持。",
   // 事件名 → 可读名称（Top 5 操作）
   "insights.event.newtab_open": "打开新标签页",
   "insights.event.tab_jump": "跳转标签页",
@@ -1191,10 +1207,6 @@ const zhCN: Record<string, string> = {
   "quickStart.cardExactWidthHint": "在预设基础上连续微调卡片宽度（80–280px）；设为 0 则跟随预设",
   "quickStart.gridGap": "网格间距",
   "quickStart.gridGapHint": "控制卡片之间的水平与垂直间距（4–24px），默认 12px",
-  "quickStart.layoutMode": "布局模式",
-  "quickStart.layoutModeHint": "选择常用站点的布局方式",
-  "quickStart.layoutModeGrid": "网格视图",
-  "quickStart.layoutModeList": "列表视图",
   "quickStart.fabAddButton": "浮动添加按钮",
   "quickStart.fabAddButtonHint": "在右下角显示悬浮的添加按钮，快捷键 Ctrl+Shift+A / ⌘+Shift+A",
   "quickStart.autoLgThreshold": "auto→lg 阈值",

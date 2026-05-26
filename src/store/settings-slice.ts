@@ -99,6 +99,13 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     historyMaxEvents: 500,
     historyClosedTabsTtlHours: 168,
     historyUrlBlocklist: [],
+    // 内存治理默认值（任务7）
+    memoryGovernanceEnabled: false,
+    memoryPressureThreshold: 80,
+    memoryPressureAction: "notify",
+    memoryGovernanceAllowlist: [],
+    memoryGovernanceMaxTabs: 5,
+    memoryGovernanceCooldownMinutes: 10,
   },
   loaded: false,
 

@@ -1,12 +1,4 @@
-import {
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-  useRef,
-  lazy,
-  Suspense,
-} from "react";
+import { useEffect, useState, useCallback, useMemo, useRef, lazy, Suspense } from "react";
 import { Layout, Spin, Typography, FloatButton, Flex } from "antd";
 import { useTabsStore, useSettingsStore, useSelectionStore } from "@/store";
 import { useShallow } from "zustand/shallow";
@@ -36,6 +28,7 @@ import { detectIdleTabs } from "@/shared/utils/idle-detect";
 import { useHashNavigation } from "./hooks/use-hash-navigation";
 import { useLayoutStyle } from "./hooks/use-layout-style";
 import { usePanelState } from "./hooks/use-panel-state";
+import { useMemoryGovernance } from "@/shared/hooks/use-memory-governance";
 
 const TrendingPage = lazy(() =>
   import("@/features/trending/TrendingPage").then((m) => ({ default: m.TrendingPage })),
@@ -130,6 +123,8 @@ function AppContent() {
   } = useAppInitialization(initRunId);
 
   useSwBroadcast();
+  // 内存治理（任务7）：监听内存压力，按策略自动 discard 或提示
+  useMemoryGovernance();
 
   /** 全局禁止浏览器原生右键菜单，打造纯 App 体验 */
   useEffect(() => {
@@ -206,14 +201,13 @@ function AppContent() {
   } = usePanelState({ openSettingsFromHash, initialSettingsTab, searchFromHash });
 
   // ── 背景 / 布局样式 ────────────────────────────────────────────────────────
-  const { layoutStyle, overlayStyle, contentShellStyle, setScrollProgress } =
-    useLayoutStyle({
-      gradientPreset,
-      customGradient,
-      backgroundImage,
-      backgroundOverlay,
-      contentMaxWidth,
-    });
+  const { layoutStyle, overlayStyle, contentShellStyle, setScrollProgress } = useLayoutStyle({
+    gradientPreset,
+    customGradient,
+    backgroundImage,
+    backgroundOverlay,
+    contentMaxWidth,
+  });
 
   // ── 快捷键 ─────────────────────────────────────────────────────────────────
   const handleViewChange = useCallback((view: ViewMode) => {
@@ -301,7 +295,7 @@ function AppContent() {
       <Flex align="center" justify="center" style={{ minHeight: "100vh" }}>
         <Flex vertical align="center" gap={12}>
           <Spin />
-          <Text type="secondary">{t('加载标签页中...')}</Text>
+          <Text type="secondary">{t("加载标签页中...")}</Text>
         </Flex>
       </Flex>
     );
@@ -454,11 +448,12 @@ function AppContent() {
         />
         <SettingsPanel
           open={showSettings}
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-          onOpenChange={(open: boolean) => { if (!open) setShowSettings(false as boolean); }}
+          onOpenChange={(open: boolean) => {
+            if (!open) setShowSettings(false as boolean);
+          }}
           defaultActiveTab={initialSettingsTab}
         />
-        {/* eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */}
+        {}
         <InsightsPanel open={showInsights} onClose={() => setShowInsights(false as boolean)} />
         <HistoryPanel open={showHistory} onClose={() => setShowHistory(false)} />
       </Suspense>

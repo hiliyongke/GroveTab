@@ -19,7 +19,11 @@ export type SwBroadcastType =
   | "window-focus-changed"
   | "window-created"
   | "window-removed"
-  | "window-card-order-changed";
+  | "window-card-order-changed"
+  | "bookmark-created"
+  | "bookmark-changed"
+  | "bookmark-removed"
+  | "bookmark-moved";
 
 export interface SwBroadcastMessage {
   type: SwBroadcastType;

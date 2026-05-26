@@ -20,6 +20,7 @@ import type {
   ClosedWindowRecord,
   DailySnapshot,
   HistoryEvent,
+  HistoryEventType,
   SnapshotDiff,
   UserSettings,
 } from "@/shared/types";
@@ -403,4 +404,204 @@ export async function clearAllNativeHistory(): Promise<void> {
     clearClosedWindows(),
     clearDailySnapshots(),
   ]);
+}
+
+// ── 任务6：多维历史分析 API ────────────────────────────
+
+/** 按站点聚合的访问统计 */
+export interface HostStat {
+  host: string;
+  visitCount: number;
+  /** 最近一次访问时间戳 */
+  lastVisit: number;
+  /** 涉及的事件类型集合 */
+  eventTypes: HistoryEventType[];
+}
+
+/** 按时间段聚合的统计 */
+export interface PeriodStat {
+  /** 时间段标签，如 "2024-01-15" 或 "09:00-10:00" */
+  label: string;
+  /** 该时间段内的事件数 */
+  count: number;
+  /** 该时间段内涉及的站点数 */
+  uniqueHosts: number;
+}
+
+/** 历史分析结果 */
+export interface HistoryAnalysis {
+  /** 按站点聚合（按访问次数降序） */
+  byHost: HostStat[];
+  /** 按天聚合（最近 14 天） */
+  byDay: PeriodStat[];
+  /** 按小时聚合（0-23 时段分布） */
+  byHour: PeriodStat[];
+  /** 总事件数 */
+  totalEvents: number;
+  /** 分析时间范围（ms） */
+  rangeStart: number;
+  rangeEnd: number;
+}
+
+/**
+ * 对历史事件做多维聚合分析。
+ *
+ * @param rangeMs 分析时间范围（ms），默认 7 天
+ */
+export async function analyzeHistory(rangeMs = 7 * 24 * 3600 * 1000): Promise<HistoryAnalysis> {
+  const events = await getHistoryEvents();
+  const now = Date.now();
+  const rangeStart = now - rangeMs;
+  const inRange = events.filter((e) => e.ts >= rangeStart);
+
+  // 按站点聚合
+  const hostMap = new Map<
+    string,
+    { count: number; lastVisit: number; types: Set<HistoryEventType> }
+  >();
+  for (const e of inRange) {
+    const host = e.hostname ?? "";
+    if (host === "") continue;
+    const entry = hostMap.get(host) ?? { count: 0, lastVisit: 0, types: new Set() };
+    entry.count += 1;
+    if (e.ts > entry.lastVisit) entry.lastVisit = e.ts;
+    entry.types.add(e.type);
+    hostMap.set(host, entry);
+  }
+  const byHost: HostStat[] = [...hostMap.entries()]
+    .map(([host, v]) => ({
+      host,
+      visitCount: v.count,
+      lastVisit: v.lastVisit,
+      eventTypes: [...v.types],
+    }))
+    .sort((a, b) => b.visitCount - a.visitCount);
+
+  // 按天聚合（最近 14 天）
+  const dayMap = new Map<string, { count: number; hosts: Set<string> }>();
+  const DAY_MS = 24 * 3600 * 1000;
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(now - i * DAY_MS);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    dayMap.set(key, { count: 0, hosts: new Set() });
+  }
+  for (const e of events.filter((e) => e.ts >= now - 14 * DAY_MS)) {
+    const d = new Date(e.ts);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const entry = dayMap.get(key);
+    if (entry !== undefined) {
+      entry.count += 1;
+      if (e.hostname) entry.hosts.add(e.hostname);
+    }
+  }
+  const byDay: PeriodStat[] = [...dayMap.entries()].map(([label, v]) => ({
+    label,
+    count: v.count,
+    uniqueHosts: v.hosts.size,
+  }));
+
+  // 按小时聚合（0-23）
+  const hourBuckets = Array.from({ length: 24 }, (_, i) => ({
+    label: `${String(i).padStart(2, "0")}:00`,
+    count: 0,
+    hosts: new Set<string>(),
+  }));
+  for (const e of inRange) {
+    const h = new Date(e.ts).getHours();
+    const bucket = hourBuckets[h];
+    if (bucket !== undefined) {
+      bucket.count += 1;
+      if (e.hostname) bucket.hosts.add(e.hostname);
+    }
+  }
+  const byHour: PeriodStat[] = hourBuckets.map((b) => ({
+    label: b.label,
+    count: b.count,
+    uniqueHosts: b.hosts.size,
+  }));
+
+  return {
+    byHost,
+    byDay,
+    byHour,
+    totalEvents: inRange.length,
+    rangeStart,
+    rangeEnd: now,
+  };
+}
+
+/**
+ * 任务6：导出历史数据为 JSON 字符串（调用方负责触发下载）。
+ *
+ * @param options.rangeMs 时间范围（ms），默认全量
+ * @param options.eventTypes 仅导出指定类型，默认全部
+ */
+export async function exportHistoryJson(
+  options: {
+    rangeMs?: number;
+    eventTypes?: HistoryEventType[];
+  } = {},
+): Promise<string> {
+  const events = await getHistoryEvents();
+  const now = Date.now();
+  const cutoff = options.rangeMs !== undefined ? now - options.rangeMs : 0;
+  const typeSet = options.eventTypes !== undefined ? new Set(options.eventTypes) : null;
+
+  const filtered = events.filter((e) => {
+    if (e.ts < cutoff) return false;
+    if (typeSet !== null && !typeSet.has(e.type)) return false;
+    return true;
+  });
+
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    totalCount: filtered.length,
+    events: filtered,
+  };
+  return JSON.stringify(payload, null, 2);
+}
+
+/**
+ * 任务6：从 chrome.history API 补录漏记的访问记录（需要 history 权限）。
+ *
+ * 在 HistoryPanel 打开时调用一次，把 chrome.history.search 返回的
+ * 近期访问与本地 HistoryEvent 对账，补录缺失的 tab_opened 事件。
+ */
+export async function reconcileFromChromeHistory(rangeMs = 24 * 3600 * 1000): Promise<number> {
+  if (typeof chrome === "undefined" || typeof chrome.history === "undefined") return 0;
+  try {
+    const startTime = Date.now() - rangeMs;
+    const items = await chrome.history.search({
+      text: "",
+      startTime,
+      maxResults: 500,
+    });
+    if (items.length === 0) return 0;
+
+    // 读取现有事件，建立 URL 集合用于去重
+    const existing = await getHistoryEvents();
+    const existingUrls = new Set(existing.map((e) => e.url ?? ""));
+
+    let added = 0;
+    for (const item of items) {
+      if (!item.url || isUrlIgnored(item.url)) continue;
+      if (existingUrls.has(item.url)) continue;
+      await appendHistoryEvent({
+        type: "tab_opened",
+        url: item.url,
+        title: item.title ?? "",
+        ts: item.lastVisitTime ?? Date.now(),
+        extra: {
+          visitCount: item.visitCount,
+          source: "chrome_history_reconcile",
+        },
+      });
+      existingUrls.add(item.url);
+      added += 1;
+    }
+    return added;
+  } catch (err) {
+    console.warn("[history-repo] reconcileFromChromeHistory failed", err);
+    return 0;
+  }
 }

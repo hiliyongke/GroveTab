@@ -5,12 +5,14 @@
  * 以及分批恢复机制以减少 Chrome 限流与卡顿。
  */
 
-import { createTab, getCurrentWindow } from '@/chrome';
-import { filterSafeExternalUrls } from '@/shared/utils/url-safety';
-import { getArchivedSessions } from './archive-storage';
+import { createTab, getCurrentWindow, groupTabs, updateTabGroup } from "@/chrome";
+import type { ChromeTabGroupColor } from "@/chrome/tabGroups";
+import { filterSafeExternalUrls } from "@/shared/utils/url-safety";
+import type { ArchivedSession, ArchivedTab } from "@/shared/types";
+import { getArchivedSessions } from "./archive-storage";
 
 /** 恢复策略（F-14 扩展） */
-export type RestoreStrategy = 'new_window' | 'current_window' | 'partial';
+export type RestoreStrategy = "new_window" | "current_window" | "partial";
 
 /** 恢复选项 */
 export interface RestoreOptions {
@@ -25,6 +27,11 @@ export interface RestoreOptions {
   batchSize?: number;
   /** 批间隔 ms（默认 100） */
   batchInterval?: number;
+  /**
+   * 是否恢复 TabGroup 结构（任务4：高保真恢复）。
+   * 默认 true，仅在 new_window 策略下生效。
+   */
+  restoreTabGroups?: boolean;
 }
 
 /** 恢复结果 */
@@ -50,35 +57,66 @@ export async function restoreSession(
 ): Promise<RestoreOutcome> {
   const sessions = await getArchivedSessions();
   const session = sessions.find((s) => s.id === sessionId);
-  if (session === undefined) throw new Error('Session not found');
+  if (session === undefined) throw new Error("Session not found");
 
-  const sessionUrls = filterSafeExternalUrls(session.tabs.map((tab) => tab.url).filter((url): url is string => url !== ''));
-  const strategy: RestoreStrategy = options.strategy ?? 'new_window';
-  const targetUrls = filterSafeExternalUrls(strategy === 'partial' ? (options.urls ?? sessionUrls) : sessionUrls);
-  if (targetUrls.length === 0) return { restored: 0, batches: 0, cancelled: false };
+  const strategy: RestoreStrategy = options.strategy ?? "new_window";
+  const restoreTabGroups = options.restoreTabGroups !== false;
+
+  // partial 策略：按 URL 子集过滤
+  let targetTabs: ArchivedTab[];
+  if (strategy === "partial" && options.urls !== undefined) {
+    const urlSet = new Set(options.urls);
+    targetTabs = session.tabs.filter((t) => urlSet.has(t.url));
+  } else {
+    targetTabs = session.tabs;
+  }
+
+  // 按 index 排序，保证恢复顺序与原始一致
+  targetTabs = [...targetTabs].sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
+
+  const safeUrls = filterSafeExternalUrls(targetTabs.map((t) => t.url).filter(Boolean));
+  if (safeUrls.length === 0) return { restored: 0, batches: 0, cancelled: false };
 
   const batchSize = options.batchSize ?? 10;
   const batchInterval = options.batchInterval ?? 100;
 
   /** 确定 targetWindowId：new_window 开新窗、current_window 用当前 */
   let targetWindowId: number | undefined;
-  if (strategy === 'new_window') {
-    // 单 tab 走 createTab({url})，默认在当前窗口；其余情况新窗口承载
-    if (targetUrls.length === 1) {
-      await createTab({ url: targetUrls[0] });
+
+  if (strategy === "new_window") {
+    if (safeUrls.length === 1) {
+      await createTab({ url: safeUrls[0] });
       options.onProgress?.(1, 1);
       return { restored: 1, batches: 1, cancelled: false };
     }
-    if (typeof chrome !== 'undefined' && chrome.windows !== undefined) {
+    if (typeof chrome !== "undefined" && chrome.windows !== undefined) {
       try {
-        const w = await chrome.windows.create({ url: targetUrls[0], focused: true });
+        const w = await chrome.windows.create({ url: safeUrls[0], focused: true });
         targetWindowId = w?.id;
-        options.onProgress?.(1, targetUrls.length);
-        // 第一个已在 chrome.windows.create 中创建，下面从 index 1 开始
-        const restUrls = targetUrls.slice(1);
-        return await batchCreateTabs(restUrls, targetWindowId, batchSize, batchInterval, options, 1);
+        options.onProgress?.(1, safeUrls.length);
+        const restUrls = safeUrls.slice(1);
+        const outcome = await batchCreateTabs(
+          restUrls,
+          targetWindowId,
+          batchSize,
+          batchInterval,
+          options,
+          1,
+        );
+
+        // 任务4：恢复 TabGroup 结构
+        if (
+          restoreTabGroups &&
+          targetWindowId !== undefined &&
+          session.tabGroups &&
+          session.tabGroups.length > 0
+        ) {
+          await restoreTabGroupStructure(session, targetWindowId);
+        }
+
+        return outcome;
       } catch (err) {
-        console.warn('[archive] new_window failed, fallback current window', err);
+        console.warn("[archive] new_window failed, fallback current window", err);
       }
     }
   }
@@ -88,7 +126,74 @@ export async function restoreSession(
     const currentWindow = await getCurrentWindow();
     targetWindowId = currentWindow?.id;
   }
-  return batchCreateTabs(targetUrls, targetWindowId, batchSize, batchInterval, options, 0);
+  return batchCreateTabs(safeUrls, targetWindowId, batchSize, batchInterval, options, 0);
+}
+
+/**
+ * 任务4：按归档时的 TabGroup 快照重建 Tab Group 结构。
+ *
+ * 流程：
+ *   1. 查询目标窗口中刚恢复的标签页（按 URL 匹配）
+ *   2. 按原始 groupId 分组，调用 chrome.tabs.group 创建新 group
+ *   3. 调用 chrome.tabGroups.update 恢复标题和颜色
+ */
+async function restoreTabGroupStructure(session: ArchivedSession, windowId: number): Promise<void> {
+  if (!session.tabGroups || session.tabGroups.length === 0) return;
+
+  try {
+    // 等待标签页完全创建（短暂延迟）
+    await new Promise((r) => setTimeout(r, 300));
+
+    // 查询窗口中所有标签页，按 URL 建立一对多映射（同一 URL 可能对应多个 tab）
+    const windowTabs = await chrome.tabs.query({ windowId });
+    // 按 index 升序排列，与归档时的顺序对齐
+    windowTabs.sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
+    const urlToTabIds = new Map<string, number[]>();
+    for (const tab of windowTabs) {
+      if (tab.url && tab.id !== undefined) {
+        const list = urlToTabIds.get(tab.url) ?? [];
+        list.push(tab.id);
+        urlToTabIds.set(tab.url, list);
+      }
+    }
+    // 消费游标：每个 URL 被匹配一次后从队列头部移除，避免重复 URL 映射到同一 tabId
+    const urlConsumeIndex = new Map<string, number>();
+
+    // 按原始 groupId 聚合 tabId
+    const groupIdToTabIds = new Map<number, number[]>();
+    for (const archivedTab of session.tabs) {
+      if (archivedTab.groupId === undefined || archivedTab.groupId < 0) continue;
+      const candidates = urlToTabIds.get(archivedTab.url);
+      if (!candidates || candidates.length === 0) continue;
+      const consumeIdx = urlConsumeIndex.get(archivedTab.url) ?? 0;
+      if (consumeIdx >= candidates.length) continue;
+      const tabId = candidates[consumeIdx];
+      if (tabId === undefined) continue;
+      urlConsumeIndex.set(archivedTab.url, consumeIdx + 1);
+      const list = groupIdToTabIds.get(archivedTab.groupId) ?? [];
+      list.push(tabId);
+      groupIdToTabIds.set(archivedTab.groupId, list);
+    }
+
+    // 为每个原始 group 创建新 group 并恢复元数据
+    for (const archivedGroup of session.tabGroups) {
+      const tabIds = groupIdToTabIds.get(archivedGroup.groupId);
+      if (!tabIds || tabIds.length === 0) continue;
+
+      try {
+        const newGroupId = await groupTabs({ tabIds, createProperties: { windowId } });
+        await updateTabGroup(newGroupId, {
+          title: archivedGroup.title || undefined,
+          color: archivedGroup.color as ChromeTabGroupColor,
+          collapsed: archivedGroup.collapsed,
+        });
+      } catch (err) {
+        console.warn("[archive] restoreTabGroup failed for group", archivedGroup.groupId, err);
+      }
+    }
+  } catch (err) {
+    console.warn("[archive] restoreTabGroupStructure failed", err);
+  }
 }
 
 /** 分批创建标签页 */
@@ -117,7 +222,7 @@ async function batchCreateTabs(
         done += 1;
         options.onProgress?.(done, total);
       } catch (err) {
-        console.warn('[archive] createTab failed', err);
+        console.warn("[archive] createTab failed", err);
       }
     }
     batches += 1;

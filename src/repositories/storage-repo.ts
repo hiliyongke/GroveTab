@@ -54,7 +54,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   searchScope: ["title", "hostname", "url"],
   searchEnablePinyin: true,
   searchSortBy: "relevance",
-  searchDefaultEngine: "bing",
+  searchDefaultEngine: "google",
   searchEnabledEngines: ["bing", "baidu", "google", "duckduckgo"],
   searchCustomEngines: [],
   searchAutoFallbackToWeb: true,

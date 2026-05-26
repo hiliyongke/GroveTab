@@ -1,17 +1,16 @@
 /**
  * Popup 工具栏轻量版（F-26）
  *
- * 360×520 四区：
- *   · 顶部：全局搜索框（懒加载搜索核心）
+ * 400×600 三区：
+ *   · 顶部：全局搜索框
  *   · 中部：全部已打开 Tab 列表（按 lastAccessed 倒序）
- *   · 底部：归档当前窗口（大按钮，复用 archiveCurrentWindowTabs）
- *   · 底部：打开工作台（切到扩展新标签页）
+ *   · 底部：归档、工作台、设置等轻量操作
  *
- * 首屏 ≤ 200ms：不进行重的懒加载，SearchBox 以 React.lazy 延迟加载。
+ * 首屏 ≤ 200ms：只加载 popup 必需能力。
  * 无 Tab 时归档按钮置灰 + 提示。
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button, Input, Tooltip, Typography, Empty } from "antd";
 import { AntdThemeProvider } from "@/shared/ui/AntdThemeProvider";
 import { LayoutGrid, Save, Search, ExternalLink, X, Settings } from "lucide-react";
@@ -50,10 +49,12 @@ async function focusTab(tab: RecentTab): Promise<void> {
     await activateTab(tab.id, tab.windowId);
   } catch {
     // 若目标 Tab 不存在（已关闭），兜底：新开该 URL
-    try {
-      await createTab({ url: tab.url, active: true });
-    } catch (err) {
-      console.warn("[Popup] focusTab: createTab failed", err);
+    if (tab.url && !tab.url.startsWith("chrome://") && !tab.url.startsWith("chrome-extension://")) {
+      try {
+        await createTab({ url: tab.url, active: true });
+      } catch (err) {
+        console.warn("[Popup] focusTab: createTab failed", err);
+      }
     }
   }
 }
@@ -62,6 +63,7 @@ function PopupContent() {
   const [query, setQuery] = useState("");
   const [recentTabs, setRecentTabs] = useState<RecentTab[]>([]);
   const [hasAnyTab, setHasAnyTab] = useState(true);
+  const archivingRef = useRef(false);
   const [archiving, setArchiving] = useState(false);
   const [archiveError, setArchiveError] = useState("");
   /** 从用户设置读默认搜索引擎；暂以 Google 兑底 */
@@ -131,8 +133,11 @@ function PopupContent() {
   }, [recentTabs, query]);
   const isSearching = query.trim() !== "";
   const tabCountLabel = isSearching
-    ? t('匹配 {matched} / 共 {total} 个', { matched: filteredTabs.length, total: recentTabs.length })
-    : t('全部 {count} 个标签页', { count: recentTabs.length });
+    ? t("匹配 {matched} / 共 {total} 个", {
+        matched: filteredTabs.length,
+        total: recentTabs.length,
+      })
+    : t("全部 {count} 个标签页", { count: recentTabs.length });
 
   const openNewTab = useCallback(() => {
     void createTab({ url: chrome.runtime.getURL("src/pages/newtab/index.html") });
@@ -140,7 +145,8 @@ function PopupContent() {
   }, []);
 
   const archiveAll = useCallback(async () => {
-    if (archiving) return;
+    if (archivingRef.current) return;
+    archivingRef.current = true;
     setArchiving(true);
     setArchiveError("");
     try {
@@ -148,11 +154,12 @@ function PopupContent() {
       window.close();
     } catch (err) {
       console.warn(`${BRAND.logTag}/popup archive failed`, err);
-      setArchiveError(t('归档失败，请重试'));
+      setArchiveError(t("归档失败，请重试"));
+      archivingRef.current = false;
     } finally {
       setArchiving(false);
     }
-  }, [archiving, t]);
+  }, [t]);
 
   /** 快速走全网搜索（回车时触发）—— 使用用户默认引擎 */
   const runWebSearch = useCallback(() => {
@@ -164,21 +171,13 @@ function PopupContent() {
 
   return (
     <div className="popup-shell">
-      {/* 顶部品牌 */}
-      <div className="popup-brand">
-        <div className="popup-brand-mark">{BRAND.shortName}</div>
-        <Text strong className="popup-brand-name">
-          {BRAND.name}
-        </Text>
-      </div>
-
       {/* 顶部搜索框 */}
       <Input
         autoFocus
         size="middle"
         allowClear
         className="popup-search"
-        placeholder={t('搜索标签页或上网（回车）')}
+        placeholder={t("搜索标签页或上网（回车）")}
         prefix={<Search size={ICON_SIZE.MEDIUM} className="popup-search-icon" />}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
@@ -191,7 +190,7 @@ function PopupContent() {
         </Text>
         {filteredTabs.length > 0 && (
           <Text type="secondary" className="popup-meta-hint">
-            {t('滚动查看全部')}
+            {t("滚动查看全部")}
           </Text>
         )}
       </div>
@@ -204,7 +203,7 @@ function PopupContent() {
               image={Empty.PRESENTED_IMAGE_SIMPLE}
               description={
                 <Text type="secondary" className="popup-empty-text">
-                  {t('暂无最近标签')}
+                  {t("暂无最近标签")}
                 </Text>
               }
             />
@@ -235,7 +234,7 @@ function PopupContent() {
       {/* 底部：操作按钮区 */}
       <div className="popup-actions">
         {/* 主操作：归档 —— 独占整行 */}
-        <Tooltip title={!hasAnyTab ? t('当前没有可归档的标签页') : ""} mouseEnterDelay={0.3}>
+        <Tooltip title={!hasAnyTab ? t("当前没有可归档的标签页") : ""} mouseEnterDelay={0.3}>
           <Button
             type="primary"
             icon={<Save size={ICON_SIZE.MEDIUM} />}
@@ -247,13 +246,13 @@ function PopupContent() {
             }}
             className="popup-actions__primary"
           >
-            {t('归档当前窗口')}
+            {t("归档当前窗口")}
           </Button>
         </Tooltip>
         {/* 次要操作：打开工作台 + 设置 —— 并排 */}
         <div className="popup-actions__secondary">
           <Button icon={<LayoutGrid size={ICON_SIZE.MEDIUM} />} block onClick={openNewTab}>
-            {t('打开工作台')}
+            {t("打开工作台")}
             <ExternalLink size={ICON_SIZE.MICRO} className="popup-external-icon" />
           </Button>
           <Button
@@ -266,7 +265,7 @@ function PopupContent() {
               window.close();
             }}
           >
-            {t('设置')}
+            {t("设置")}
           </Button>
         </div>
       </div>
@@ -283,7 +282,7 @@ function PopupContent() {
           }}
           className="popup-about-link"
         >
-          {t('关于 {brand}', { brand: BRAND.name })}
+          {t("关于 {brand}", { brand: BRAND.name })}
         </Button>
       </div>
 
@@ -308,7 +307,7 @@ function RecentTabRow({
       <Button
         type="text"
         onClick={onClick}
-        aria-label={t('打开 {title}', { title: tab.title })}
+        aria-label={t("打开 {title}", { title: tab.title })}
         className="popup-row-main"
       >
         <img
@@ -333,7 +332,7 @@ function RecentTabRow({
           e.stopPropagation();
           onClose();
         }}
-        aria-label={t('关闭标签页 {title}', { title: tab.title })}
+        aria-label={t("关闭标签页 {title}", { title: tab.title })}
         className="popup-row-close app-hover-reveal"
       >
         <X size={ICON_SIZE.SMALL} />

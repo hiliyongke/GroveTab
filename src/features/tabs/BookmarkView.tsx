@@ -39,6 +39,8 @@ import { useT } from "@/shared/i18n";
 import { feedback } from "@/shared/ui/feedback";
 import { translate } from "@/shared/i18n/core";
 import { BookmarkToolsModal } from "@/features/bookmarks/BookmarkToolsModal";
+import { BookmarkAutoRuleModal } from "@/features/bookmarks/BookmarkAutoRuleModal";
+import { useBookmarkSync } from "@/features/bookmarks/hooks/use-bookmark-sync";
 import { isSafeExternalUrl } from "@/shared/utils/url-safety";
 import { useAccent } from "@/shared/hooks/use-accent";
 import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
@@ -321,6 +323,7 @@ export function BookmarkView() {
   const [searchResults, setSearchResults] = useState<BookmarkNode[]>([]);
   const [searching, setSearching] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
+  const [autoRuleOpen, setAutoRuleOpen] = useState(false);
   const [layout, setLayout] = useState<BookmarkLayout>("list");
   const tabs = useTabsStore((s) => s.tabs);
   const { t } = useT();
@@ -328,23 +331,33 @@ export function BookmarkView() {
   /** 解析文件夹标题（支持 Chrome 默认文件夹） */
   const resolveTitle = useCallback((n: BookmarkNode) => resolveFolderTitle(n, t), [t]);
 
+  /** 刷新书签树 */
+  const refreshBookmarks = useCallback(async () => {
+    const tree = await getBookmarkTree();
+    setBookmarks(tree);
+  }, []);
+
   /** 检查权限 */
   useEffect(() => {
     void hasBookmarksPermission().then((has) => {
       setHasPermission(has);
       setChecking(false);
       if (has) {
-        void getBookmarkTree().then(setBookmarks);
+        void refreshBookmarks();
       }
     });
-  }, []);
+  }, [refreshBookmarks]);
+
+  /** 实时同步：监听 SW 广播的书签变更事件（需求 5.1） */
+  useBookmarkSync(() => {
+    void refreshBookmarks();
+  }, hasPermission);
 
   const handleRequestPermission = useCallback(async () => {
     const granted = await requestBookmarksPermission();
     if (granted) {
       setHasPermission(true);
-      const tree = await getBookmarkTree();
-      setBookmarks(tree);
+      await refreshBookmarks();
     } else {
       feedback.error(translate("书签权限被拒绝"));
     }
@@ -521,6 +534,15 @@ export function BookmarkView() {
               {t("收藏全部标签")}
             </Button>
           </Tooltip>
+          <Tooltip title={t("自动分类规则")}>
+            <Button
+              size="small"
+              icon={<Wrench size={ICON_SIZE.SMALL} />}
+              onClick={() => setAutoRuleOpen(true)}
+            >
+              {t("自动分类")}
+            </Button>
+          </Tooltip>
           <Tooltip title={t("工具箱")}>
             <Button
               size="small"
@@ -622,9 +644,12 @@ export function BookmarkView() {
       <BookmarkToolsModal
         open={toolsOpen}
         onClose={() => setToolsOpen(false)}
-        onMutated={() => {
-          void getBookmarkTree().then(setBookmarks);
-        }}
+        onMutated={() => void refreshBookmarks()}
+      />
+      <BookmarkAutoRuleModal
+        open={autoRuleOpen}
+        onClose={() => setAutoRuleOpen(false)}
+        onMutated={() => void refreshBookmarks()}
       />
     </Space>
   );

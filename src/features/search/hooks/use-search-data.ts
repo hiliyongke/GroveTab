@@ -6,12 +6,9 @@ import {
   storageGet,
   type HistorySearchEntry,
 } from "@/chrome";
-import {
-  getRecentSearches,
-  getSearchHistory,
-  getClosedTabs,
-} from "@/repositories";
-import type { ClosedTabRecord, TrendingCache } from "@/shared/types";
+import { getRecentSearches, getSearchHistory, getClosedTabs } from "@/repositories";
+import { getArchivedSessions } from "@/services/archive";
+import type { ClosedTabRecord, TrendingCache, ArchivedSession } from "@/shared/types";
 import { STORAGE_KEYS } from "@/shared/config/storage-keys";
 import { fetchMultipleBoards } from "@/services/trending-service";
 import type { HotKeywordSource } from "@/shared/config/search-engines";
@@ -32,6 +29,8 @@ export interface SearchDataState {
   debouncedQuery: string;
   setDebouncedQuery: React.Dispatch<React.SetStateAction<string>>;
   enableHistorySuggestions: () => Promise<void>;
+  /** 归档会话列表（用于统一索引） */
+  archiveSessions: ArchivedSession[];
 }
 
 export function useSearchData(options: {
@@ -53,8 +52,9 @@ export function useSearchData(options: {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [closedTabRecords, setClosedTabRecords] = useState<ClosedTabRecord[]>([]);
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [archiveSessions, setArchiveSessions] = useState<ArchivedSession[]>([]);
 
-  // 打开时加载最近搜索、热词历史、最近关闭
+  // 打开时加载最近搜索、热词历史、最近关闭、归档会话
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
@@ -67,7 +67,12 @@ export function useSearchData(options: {
     void getClosedTabs().then((tabs) => {
       if (!cancelled) setClosedTabRecords(tabs);
     });
-    return () => { cancelled = true; };
+    void getArchivedSessions().then((sessions) => {
+      if (!cancelled) setArchiveSessions(sessions);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [open]);
 
   // 热榜缓存加载
@@ -83,7 +88,9 @@ export function useSearchData(options: {
         setTrendingCache({ boards, lastRefreshAt: Date.now() });
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [effectiveHotSource, open]);
 
   // 检查历史记录权限
@@ -93,7 +100,9 @@ export function useSearchData(options: {
     void hasHistoryPermission().then((granted) => {
       if (!cancelled) setHistoryPermission(granted);
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [open, useHistorySuggestions]);
 
   // 防抖 query
@@ -102,7 +111,9 @@ export function useSearchData(options: {
     const timer = window.setTimeout(() => {
       setDebouncedQuery(normalizedQuery);
     }, SEARCH_DEBOUNCE_MS);
-    return () => { window.clearTimeout(timer); };
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [open, normalizedQuery]);
 
   // 拉取历史建议
@@ -120,7 +131,9 @@ export function useSearchData(options: {
       .finally(() => {
         if (!cancelled) setHistoryLoading(false);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [debouncedQuery, historyPermission, open, useHistorySuggestions]);
 
   const enableHistorySuggestions = async () => {
@@ -145,5 +158,6 @@ export function useSearchData(options: {
     debouncedQuery,
     setDebouncedQuery,
     enableHistorySuggestions,
+    archiveSessions,
   };
 }

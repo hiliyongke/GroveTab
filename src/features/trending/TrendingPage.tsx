@@ -11,7 +11,19 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import type { CSSProperties, ReactNode } from "react";
-import { Alert, Button, Card, Empty, Segmented, Space, Spin, Tag, Tooltip, Typography } from "antd";
+import {
+  Alert,
+  Button,
+  Card,
+  Empty,
+  Segmented,
+  Space,
+  Spin,
+  Tag,
+  Tooltip,
+  Typography,
+  message,
+} from "antd";
 import {
   RefreshCw,
   EyeOff,
@@ -26,6 +38,9 @@ import {
   FileText,
   Table2,
   Code2,
+  Bookmark,
+  Copy,
+  Clock,
 } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
@@ -40,7 +55,11 @@ import {
   forceRefreshBoard,
   getPlatformsByCategory,
   getPlatformColor,
+  recordInterestSignal,
+  getInterestSignals,
+  applyInterestWeights,
 } from "@/services/trending-service";
+import type { InterestSignal } from "@/services/trending-service";
 import styles from "./TrendingPage.module.less";
 
 const { Text, Title } = Typography;
@@ -200,27 +219,87 @@ function RankBadge({ rank }: { rank: number }) {
   return <span className={cx(styles["trending-rank-badge"], styles["is-plain"])}>{rank}</span>;
 }
 
-function TrendingListItem({ item, rank }: { item: HotBoardData["items"][0]; rank: number }) {
+function TrendingListItem({
+  item,
+  rank,
+  onSave,
+  onReadLater,
+}: {
+  item: HotBoardData["items"][0];
+  rank: number;
+  onSave?: (item: HotBoardData["items"][0]) => void;
+  onReadLater?: (item: HotBoardData["items"][0]) => void;
+}) {
+  const { t } = useT();
   return (
     <Tooltip title={item.title} placement="topLeft" mouseEnterDelay={0.6}>
-      <a
-        href={item.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={styles["trending-list-item"]}
-      >
-        <RankBadge rank={rank} />
-        <span className={styles["trending-list-item__title"]}>{item.title}</span>
-        {item.hotLabel ? (
-          <span className={styles["trending-list-item__hot"]}>{item.hotLabel}</span>
-        ) : (
-          <span
-            className={`${styles["trending-list-item__hot"]} ${styles["trending-list-item__hot--empty"]}`}
-            aria-hidden="true"
-          />
-        )}
-        <ExternalLink size={12} className={styles["trending-list-item__icon"]} />
-      </a>
+      <div className={styles["trending-list-item"]}>
+        <a
+          href={item.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles["trending-list-item__link"]}
+          onClick={() => {
+            void recordInterestSignal(item.url, "click");
+          }}
+        >
+          <RankBadge rank={rank} />
+          <span className={styles["trending-list-item__title"]}>{item.title}</span>
+          {item.hotLabel ? (
+            <span className={styles["trending-list-item__hot"]}>{item.hotLabel}</span>
+          ) : (
+            <span
+              className={`${styles["trending-list-item__hot"]} ${styles["trending-list-item__hot--empty"]}`}
+              aria-hidden="true"
+            />
+          )}
+          <ExternalLink size={12} className={styles["trending-list-item__icon"]} />
+        </a>
+        <div className={styles["trending-list-item__actions"]}>
+          {onSave && (
+            <Tooltip title={t("加入书签")} mouseEnterDelay={0.4}>
+              <Button
+                type="text"
+                size="small"
+                icon={<Bookmark size={11} />}
+                className={styles["trending-list-item__action-btn"]}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSave(item);
+                }}
+              />
+            </Tooltip>
+          )}
+          {onReadLater && (
+            <Tooltip title={t("稍后阅读")} mouseEnterDelay={0.4}>
+              <Button
+                type="text"
+                size="small"
+                icon={<Clock size={11} />}
+                className={styles["trending-list-item__action-btn"]}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onReadLater(item);
+                }}
+              />
+            </Tooltip>
+          )}
+          <Tooltip title={t("复制链接")} mouseEnterDelay={0.4}>
+            <Button
+              type="text"
+              size="small"
+              icon={<Copy size={11} />}
+              className={styles["trending-list-item__action-btn"]}
+              onClick={(e) => {
+                e.stopPropagation();
+                void navigator.clipboard.writeText(item.url).then(() => {
+                  void message.success(t("链接已复制"), 1.5);
+                });
+              }}
+            />
+          </Tooltip>
+        </div>
+      </div>
     </Tooltip>
   );
 }
@@ -262,7 +341,7 @@ function HotBoardSkeletonCard({
             <Tag className={styles["trending-board-card__tag"]}>{platformSubtitle}</Tag>
           )}
         </div>
-        <Tooltip title={t('刷新')}>
+        <Tooltip title={t("刷新")}>
           <Button
             type="text"
             size="small"
@@ -285,13 +364,13 @@ function HotBoardSkeletonCard({
           <>
             <Spin size="small" />
             <Text type="secondary" className={styles["trending-board-card__placeholder-text"]}>
-              {t('正在加载热榜…')}
+              {t("正在加载热榜…")}
             </Text>
           </>
         ) : errored ? (
           <>
             <Text type="danger" className={styles["trending-board-card__placeholder-text"]}>
-              {t('暂无数据')}
+              {t("暂无数据")}
             </Text>
             <Button
               type="link"
@@ -301,14 +380,14 @@ function HotBoardSkeletonCard({
               }}
               className={styles["trending-board-card__retry-btn"]}
             >
-              {t('刷新')}
+              {t("刷新")}
             </Button>
           </>
         ) : (
           <>
             <Spin size="small" />
             <Text type="secondary" className={styles["trending-board-card__placeholder-text"]}>
-              {t('正在加载热榜…')}
+              {t("正在加载热榜…")}
             </Text>
           </>
         )}
@@ -320,9 +399,15 @@ function HotBoardSkeletonCard({
 function HotBoardCard({
   board,
   onRefresh,
+  signals,
+  onSaveItem,
+  onReadLaterItem,
 }: {
   board: HotBoardData;
   onRefresh: (id: string) => Promise<boolean>;
+  signals: Record<string, InterestSignal>;
+  onSaveItem: (item: HotBoardData["items"][0]) => void;
+  onReadLaterItem: (item: HotBoardData["items"][0]) => void;
 }) {
   const { t } = useT();
   const [refreshing, setRefreshing] = useState(false);
@@ -333,6 +418,12 @@ function HotBoardCard({
     await onRefresh(board.id);
     setRefreshing(false);
   }, [board.id, onRefresh]);
+
+  // 根据兴趣信号重排条目
+  const sortedItems = useMemo(
+    () => applyInterestWeights(board.items, signals),
+    [board.items, signals],
+  );
 
   return (
     <Card
@@ -347,7 +438,7 @@ function HotBoardCard({
             <Tag className={styles["trending-board-card__tag"]}>{board.subtitle}</Tag>
           )}
         </div>
-        <Tooltip title={t('刷新')}>
+        <Tooltip title={t("刷新")}>
           <Button
             type="text"
             size="small"
@@ -366,15 +457,21 @@ function HotBoardCard({
       </div>
 
       <div className={styles["trending-board-card__list"]}>
-        {board.items.length === 0 ? (
+        {sortedItems.length === 0 ? (
           <div className={styles["trending-board-card__empty"]}>
             <Text type="secondary" className={styles["trending-board-card__placeholder-text"]}>
-              {t('暂无数据')}
+              {t("暂无数据")}
             </Text>
           </div>
         ) : (
-          board.items.map((item, index) => (
-            <TrendingListItem key={item.id || index} item={item} rank={index + 1} />
+          sortedItems.map((item, index) => (
+            <TrendingListItem
+              key={item.id || index}
+              item={item}
+              rank={index + 1}
+              onSave={onSaveItem}
+              onReadLater={onReadLaterItem}
+            />
           ))
         )}
       </div>
@@ -401,6 +498,51 @@ export function TrendingPage() {
   const [boards, setBoards] = useState<Record<string, HotBoardData>>({});
   const [loading, setLoading] = useState(true);
   const [allFailed, setAllFailed] = useState(false);
+  const [signals, setSignals] = useState<Record<string, InterestSignal>>({});
+
+  // 加载兴趣信号
+  useEffect(() => {
+    void getInterestSignals().then(setSignals);
+  }, []);
+
+  /** 保存条目到书签 */
+  const handleSaveItem = useCallback(
+    (item: HotBoardData["items"][0]) => {
+      void recordInterestSignal(item.url, "save").then(() => {
+        void getInterestSignals().then(setSignals);
+      });
+      if (typeof chrome !== "undefined" && chrome.bookmarks) {
+        void chrome.bookmarks
+          .create({ title: item.title, url: item.url })
+          .then(() => {
+            void message.success(t("已加入书签"), 1.5);
+          })
+          .catch(() => {
+            void message.error(t("书签添加失败"), 1.5);
+          });
+      } else {
+        void message.warning(t("书签权限不可用"), 1.5);
+      }
+    },
+    [t],
+  );
+
+  /** 加入稍后阅读（新建标签页后台打开） */
+  const handleReadLaterItem = useCallback(
+    (item: HotBoardData["items"][0]) => {
+      void recordInterestSignal(item.url, "save").then(() => {
+        void getInterestSignals().then(setSignals);
+      });
+      if (typeof chrome !== "undefined" && chrome.tabs) {
+        void chrome.tabs.create({ url: item.url, active: false }).then(() => {
+          void message.success(t("已在后台打开"), 1.5);
+        });
+      } else {
+        window.open(item.url, "_blank", "noopener,noreferrer");
+      }
+    },
+    [t],
+  );
 
   const activePlatforms = useMemo(() => getPlatformsByCategory(category), [category]);
   const hasBoardData = Object.keys(boards).length > 0;
@@ -460,8 +602,8 @@ export function TrendingPage() {
 
   const groupModeOptions = useMemo(
     () => [
-      { value: "default" as TrendingGroupMode, label: t('默认') },
-      { value: "compact" as TrendingGroupMode, label: t('紧凑') },
+      { value: "default" as TrendingGroupMode, label: t("默认") },
+      { value: "compact" as TrendingGroupMode, label: t("紧凑") },
     ],
     [t],
   );
@@ -515,11 +657,11 @@ export function TrendingPage() {
                 <Flame size={ICON_SIZE.LARGE} />
               </span>
               <Title level={4} className={styles["trending-toolbar-card__title"]}>
-                {t('全网热榜')}
+                {t("全网热榜")}
               </Title>
             </div>
             <Space size={4} className={styles["trending-toolbar-card__actions"]}>
-              <Tooltip title={t('全部刷新')}>
+              <Tooltip title={t("全部刷新")}>
                 <Button
                   type="text"
                   size="small"
@@ -533,7 +675,7 @@ export function TrendingPage() {
                   disabled={loading}
                 />
               </Tooltip>
-              <Tooltip title={t('偷摸模式')}>
+              <Tooltip title={t("偷摸模式")}>
                 <Button
                   type="text"
                   size="small"
@@ -567,10 +709,10 @@ export function TrendingPage() {
         <Alert
           type="warning"
           showIcon
-          message={t('热榜数据源暂时不可用，请稍后重试')}
+          message={t("热榜数据源暂时不可用，请稍后重试")}
           action={
             <Button size="small" onClick={handleRefreshAll} loading={loading}>
-              {t('全部刷新')}
+              {t("全部刷新")}
             </Button>
           }
           className={styles["trending-alert"]}
@@ -581,11 +723,11 @@ export function TrendingPage() {
         <div className={styles["trending-loading-state"]}>
           <div className={styles["trending-loading-state__inner"]}>
             <Spin />
-            <Text type="secondary">{t('正在加载热榜…')}</Text>
+            <Text type="secondary">{t("正在加载热榜…")}</Text>
           </div>
         </div>
       ) : activePlatforms.length === 0 ? (
-        <Empty description={t('没有可用的平台')} className={styles["trending-empty-state"]} />
+        <Empty description={t("没有可用的平台")} className={styles["trending-empty-state"]} />
       ) : (
         <div
           className={cx(styles["trending-grid"], groupMode === "compact" && styles["is-compact"])}
@@ -604,7 +746,16 @@ export function TrendingPage() {
               );
             }
 
-            return <HotBoardCard key={platform.id} board={board} onRefresh={handleRefreshBoard} />;
+            return (
+              <HotBoardCard
+                key={platform.id}
+                board={board}
+                onRefresh={handleRefreshBoard}
+                signals={signals}
+                onSaveItem={handleSaveItem}
+                onReadLaterItem={handleReadLaterItem}
+              />
+            );
           })}
         </div>
       )}

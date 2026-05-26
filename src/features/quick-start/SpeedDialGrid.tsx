@@ -91,7 +91,6 @@ export function SpeedDialGrid({ sites, onAdd }: SpeedDialGridProps) {
   );
   const showAddButton = useSettingsStore((s) => s.settings.showAddSiteButton ?? true);
   const cardSize = useSettingsStore((s) => s.settings.quickStartCardSize ?? "md");
-  const layoutMode = useSettingsStore((s) => s.settings.quickStartLayoutMode ?? "grid");
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const fabAddButton = useSettingsStore((s) => s.settings.quickStartFabAddButton ?? false);
   // 仅在没有外部 onAdd 时，组件内部管理弹窗状态（向后兼容）
@@ -200,7 +199,7 @@ export function SpeedDialGrid({ sites, onAdd }: SpeedDialGridProps) {
   const { grouped } = useSiteGroups({
     sites,
     groupEnabled,
-    ungroupedLabel: t('未分组'),
+    ungroupedLabel: t("未分组"),
   });
 
   /** 渲染一组卡片 */
@@ -212,31 +211,16 @@ export function SpeedDialGrid({ sites, onAdd }: SpeedDialGridProps) {
     </>
   );
 
-  /** 列表视图的单行条目 */
-  const renderList = (siteList: readonly SpeedDialSite[]) => (
-    <>
-      {siteList.map((site) => (
-        <SortableSiteCard
-          key={site.id}
-          site={site}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          variant="list"
-        />
-      ))}
-    </>
-  );
-
   /** 空状态 */
   if (isEmpty) {
     return (
       <div className={styles["speed-dial-grid"]}>
         <div className={styles["speed-dial-empty"]}>
           <Typography.Text strong className={styles["speed-dial-empty-title"]}>
-            {t('把你最常去的站点放在这里')}
+            {t("把你最常去的站点放在这里")}
           </Typography.Text>
           <Typography.Text type="secondary" className={styles["speed-dial-empty-desc"]}>
-            {t('每次打开新标签页，一键直达你的工作入口')}
+            {t("每次打开新标签页，一键直达你的工作入口")}
           </Typography.Text>
           <Button
             type="primary"
@@ -244,7 +228,7 @@ export function SpeedDialGrid({ sites, onAdd }: SpeedDialGridProps) {
             icon={<Plus size={ICON_SIZE.SMALL} />}
             onClick={handleAddClick}
           >
-            {t('添加站点')}
+            {t("添加站点")}
           </Button>
         </div>
         {!onAdd && (
@@ -287,14 +271,10 @@ export function SpeedDialGrid({ sites, onAdd }: SpeedDialGridProps) {
                     />
                   )}
                   <div
-                    className={
-                      layoutMode === "list"
-                        ? styles["speed-dial-group-list"]
-                        : styles["speed-dial-group-grid"]
-                    }
+                    className={styles["speed-dial-group-grid"]}
                     style={isCollapsed ? { display: "none" } : undefined}
                   >
-                    {layoutMode === "list" ? renderList(groupSites) : renderCards(groupSites)}
+                    {renderCards(groupSites)}
                     {/* 添加按钮：放在最后一个分组的网格内，与其他卡片共享同一行 */}
                     {showAddButton && !onAdd && index === grouped.length - 1 && (
                       <div className={styles["speed-dial-add-cell"]}>
@@ -308,7 +288,7 @@ export function SpeedDialGrid({ sites, onAdd }: SpeedDialGridProps) {
                           </div>
                           <div className={styles["app-speed-dial-add-content"]}>
                             <span className={styles["app-speed-dial-add-label"]}>
-                              {t('添加站点')}
+                              {t("添加站点")}
                             </span>
                             <span className={styles["app-speed-dial-add-hint"]} aria-hidden="true">
                               placeholder
@@ -322,12 +302,8 @@ export function SpeedDialGrid({ sites, onAdd }: SpeedDialGridProps) {
               );
             })
           ) : (
-            <div
-              className={
-                layoutMode === "list" ? styles["speed-dial-list"] : styles["speed-dial-grid"]
-              }
-            >
-              {layoutMode === "list" ? renderList(sites) : renderCards(sites)}
+            <div className={styles["speed-dial-grid"]}>
+              {renderCards(sites)}
               {showAddButton && !onAdd && (
                 <div className={styles["speed-dial-add-cell"]}>
                   <Card
@@ -339,9 +315,7 @@ export function SpeedDialGrid({ sites, onAdd }: SpeedDialGridProps) {
                       <Plus size={28} className={styles["app-speed-dial-add-icon"]} />
                     </div>
                     <div className={styles["app-speed-dial-add-content"]}>
-                      <span className={styles["app-speed-dial-add-label"]}>
-                        {t('添加站点')}
-                      </span>
+                      <span className={styles["app-speed-dial-add-label"]}>{t("添加站点")}</span>
                       <span className={styles["app-speed-dial-add-hint"]} aria-hidden="true">
                         placeholder
                       </span>

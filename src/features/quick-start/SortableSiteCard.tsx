@@ -14,16 +14,9 @@ interface SortableSiteCardProps {
   site: SpeedDialSite;
   onEdit: (site: SpeedDialSite) => void;
   onDelete: (id: string) => void;
-  /** 渲染变体：'card'（网格卡片）或 'list'（紧凑列表） */
-  variant?: "card" | "list";
 }
 
-export function SortableSiteCard({
-  site,
-  onEdit,
-  onDelete,
-  variant = "card",
-}: SortableSiteCardProps) {
+export function SortableSiteCard({ site, onEdit, onDelete }: SortableSiteCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: site.id,
   });
@@ -44,7 +37,6 @@ export function SortableSiteCard({
         isDragging={isDragging}
         onEdit={onEdit}
         onDelete={onDelete}
-        variant={variant}
       />
     </div>
   );

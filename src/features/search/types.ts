@@ -56,6 +56,26 @@ export type UniversalSearchItem =
       title: string;
       subtitle: string;
       commandId: "open-history";
+    }
+  | {
+      id: string;
+      type: "archive";
+      title: string;
+      subtitle: string;
+      /** 归档会话名称 */
+      sessionName: string;
+      /** 归档会话 ID（用于恢复） */
+      sessionId: string;
+      /** 标签页 URL */
+      url: string;
+    }
+  | {
+      id: string;
+      type: "bookmark";
+      title: string;
+      subtitle: string;
+      url: string;
+      folderPath?: string;
     };
 
 export type IconRole = "tab" | "history" | "web" | "hot" | "recent" | "permission" | "search";

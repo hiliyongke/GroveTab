@@ -10,10 +10,10 @@
  * threshold 默认 24 小时；可通过 `settings.idleThresholdMinutes` 覆盖。
  */
 
-import type { LiveTab } from '@/shared/types';
+import type { LiveTab } from "@/shared/types";
 
 /** 闲置等级 */
-type IdleLevel = 'idle' | 'stale';
+type IdleLevel = "idle" | "stale";
 
 /** 闲置标签信息 */
 export interface IdleTabInfo {
@@ -34,7 +34,10 @@ const STALE_CAP_MS = 7 * 24 * 60 * 60 * 1000; // 7 天硬上限
  * @returns 按闲置等级分组的标签列表，stale 优先（更紧迫）
  */
 export function detectIdleTabs(tabs: LiveTab[], thresholdMinutes?: number): IdleTabInfo[] {
-  const minutes = thresholdMinutes !== undefined && thresholdMinutes > 0 ? thresholdMinutes : DEFAULT_IDLE_MINUTES;
+  const minutes =
+    thresholdMinutes !== undefined && thresholdMinutes > 0
+      ? thresholdMinutes
+      : DEFAULT_IDLE_MINUTES;
   const idleMs = minutes * 60 * 1000;
   const staleMs = Math.max(idleMs * 7, STALE_CAP_MS);
 
@@ -47,18 +50,21 @@ export function detectIdleTabs(tabs: LiveTab[], thresholdMinutes?: number): Idle
     // 已休眠的不重复标记
     if (tab.discarded === true) continue;
 
+    // lastAccessed 为 0 说明是新标签页或时间戳缺失，不应标记闲置
+    if (tab.lastAccessed === 0) continue;
+
     const elapsed = now - tab.lastAccessed;
 
     if (elapsed >= staleMs) {
       result.push({
         tab,
-        level: 'stale',
+        level: "stale",
         hoursSinceAccess: Math.round(elapsed / (60 * 60 * 1000)),
       });
     } else if (elapsed >= idleMs) {
       result.push({
         tab,
-        level: 'idle',
+        level: "idle",
         hoursSinceAccess: Math.round(elapsed / (60 * 60 * 1000)),
       });
     }
@@ -66,7 +72,7 @@ export function detectIdleTabs(tabs: LiveTab[], thresholdMinutes?: number): Idle
 
   // stale 优先排序
   return result.sort((a, b) => {
-    if (a.level !== b.level) return a.level === 'stale' ? -1 : 1;
+    if (a.level !== b.level) return a.level === "stale" ? -1 : 1;
     return b.hoursSinceAccess - a.hoursSinceAccess;
   });
 }

@@ -405,3 +405,181 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── 任务6：多维分析视图 ─────────────────────────────── */
+.history-analysis-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 4px;
+}
+
+.history-analysis-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.history-analysis-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.history-analysis-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--history-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 站点排行列表 */
+.history-host-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.history-host-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.history-host-item:hover {
+  background: var(--history-fill-secondary);
+}
+
+.history-host-rank {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--history-text-tertiary);
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-host-rank--top {
+  color: var(--history-accent);
+}
+
+.history-host-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--history-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history-host-bar-wrap {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--history-fill-secondary);
+  overflow: hidden;
+  max-width: 80px;
+}
+
+.history-host-bar {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--history-accent);
+  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.history-host-count {
+  font-size: 12px;
+  color: var(--history-text-secondary);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  min-width: 28px;
+  text-align: right;
+}
+
+/* 每日趋势迷你柱状图 */
+.history-day-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 56px;
+  padding: 0 2px;
+}
+
+.history-day-bar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.history-day-bar {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  background: color-mix(in srgb, var(--history-accent) 70%, transparent);
+  transition: height 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  min-height: 2px;
+  cursor: default;
+}
+
+.history-day-bar:hover {
+  background: var(--history-accent);
+}
+
+.history-day-label {
+  font-size: 9px;
+  color: var(--history-text-tertiary);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 小时热力分布 */
+.history-hour-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 3px;
+}
+
+.history-hour-cell {
+  aspect-ratio: 1;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: var(--history-text-tertiary);
+  cursor: default;
+  transition: transform 0.15s ease;
+}
+
+.history-hour-cell:hover {
+  transform: scale(1.15);
+}
+
+/* 导出按钮区 */
+.history-export-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid var(--history-border);
+}
+
+/* 范围选择器 */
+.history-range-select {
+  font-size: 12px;
+}

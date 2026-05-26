@@ -15,6 +15,7 @@ import { GeneralSettings } from "./GeneralSettings";
 import { ViewLayoutSettings } from "./ViewLayoutSettings";
 import { TimelineSettings } from "./TimelineSettings";
 import { SearchSettings } from "./SearchSettings";
+import { MemoryGovernanceSettings } from "./MemoryGovernanceSettings";
 
 interface BehaviorPanelProps {
   settings: UserSettings;
@@ -48,6 +49,11 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
       key: "search",
       title: t("搜索"),
       content: <SearchSettings settings={settings} updateSettings={updateSettings} />,
+    },
+    {
+      key: "memory-governance",
+      title: t("内存治理"),
+      content: <MemoryGovernanceSettings settings={settings} updateSettings={updateSettings} />,
     },
   ];
 

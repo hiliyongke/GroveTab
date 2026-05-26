@@ -1011,6 +1011,23 @@ const en: Record<string, string> = {
   "insights.loading": "Loading insights…",
   "insights.archiveEmpty": "No tabs archived yet",
   "insights.dailyEmpty": "No new tab opens in the last 7 days",
+  "insights.suggest.storageRisk.title": "Storage is getting tight",
+  "insights.suggest.storageRisk.desc":
+    "Local storage usage is high. Check storage settings to avoid archive failures later.",
+  "insights.suggest.storageRisk.action": "Open settings",
+  "insights.suggest.archiveLarge.title": "Time to tidy your tabs",
+  "insights.suggest.archiveLarge.desc":
+    "You have many tabs open. Archive frequent sessions to keep the workspace light.",
+  "insights.suggest.archiveLarge.action": "Archive tabs",
+  "insights.suggest.workspace.title": "Create a workspace",
+  "insights.suggest.workspace.desc":
+    "Your recent domains are scattered. Group them by project or topic for clearer switching.",
+  "insights.suggest.scheduleArchive.title": "Enable scheduled archiving",
+  "insights.suggest.scheduleArchive.desc":
+    "You open many tabs every day. Scheduled archiving can reduce manual cleanup.",
+  "insights.suggest.scheduleArchive.action": "Open settings",
+  "insights.suggest.allGood.title": "Looking good",
+  "insights.suggest.allGood.desc": "Your tabs, storage, and usage rhythm are in a healthy state.",
   // Event name → readable label (Top 5 actions)
   "insights.event.newtab_open": "Open new tab",
   "insights.event.tab_jump": "Jump to tab",
@@ -1232,10 +1249,6 @@ const en: Record<string, string> = {
   "quickStart.gridGap": "Grid Gap",
   "quickStart.gridGapHint":
     "Control horizontal and vertical spacing between cards (4–24px), default 12px",
-  "quickStart.layoutMode": "Layout Mode",
-  "quickStart.layoutModeHint": "Choose the layout style for quick access sites",
-  "quickStart.layoutModeGrid": "Grid View",
-  "quickStart.layoutModeList": "List View",
   "quickStart.fabAddButton": "Floating Add Button",
   "quickStart.fabAddButtonHint":
     "Show a floating add button at bottom-right; shortcut Ctrl+Shift+A / ⌘+Shift+A",

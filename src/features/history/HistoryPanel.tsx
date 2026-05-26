@@ -36,6 +36,8 @@ import {
   Space,
   Flex,
   Typography,
+  Select,
+  Spin,
 } from "antd";
 import {
   History,
@@ -54,6 +56,8 @@ import {
   TrendingUp,
   TrendingDown,
   Undo2,
+  BarChart2,
+  Download,
 } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
@@ -71,7 +75,11 @@ import {
   diffSnapshots,
   snapshotDateKey,
   markHistoryEventUndone,
+  analyzeHistory,
+  exportHistoryJson,
+  reconcileFromChromeHistory,
 } from "@/repositories";
+import type { HistoryAnalysis } from "@/repositories";
 import { hasHistoryUndoHandler, undoHistoryEvent } from "@/services/history/undo-bus";
 import type {
   ClosedTabRecord,
@@ -288,7 +296,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
   const { token } = theme.useToken();
   const relTime = useRelativeTime();
 
-  const [activeTab, setActiveTab] = useState<"closed" | "timeline">("closed");
+  const [activeTab, setActiveTab] = useState<"closed" | "timeline" | "analysis">("closed");
   const [keyword, setKeyword] = useState("");
   const [filterMode, setFilterMode] = useState<FilterMode>("all");
   const [closedTabs, setClosedTabs] = useState<ClosedTabRecord[]>([]);
@@ -296,6 +304,10 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
   const [events, setEvents] = useState<HistoryEvent[]>([]);
   const [snapshots, setSnapshots] = useState<DailySnapshot[]>([]);
   const [loading, setLoading] = useState(false);
+  // 任务6：分析视图状态
+  const [analysis, setAnalysis] = useState<HistoryAnalysis | null>(null);
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [analysisRangeMs, setAnalysisRangeMs] = useState(7 * 24 * 3600 * 1000);
 
   /**
    * 「昨天 → 今天」 diff：运行时计算，不落盘。
@@ -329,14 +341,33 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
       setClosedWindows(windows);
       setEvents(evts);
       setSnapshots(snaps);
+      // 任务6：静默对账 chrome.history（不阻塞主流程）
+      void reconcileFromChromeHistory(24 * 3600 * 1000);
     } finally {
       setLoading(false);
+    }
+  }, []);
+
+  /** 任务6：加载分析数据 */
+  const loadAnalysis = useCallback(async (rangeMs: number) => {
+    setAnalysisLoading(true);
+    try {
+      const result = await analyzeHistory(rangeMs);
+      setAnalysis(result);
+    } finally {
+      setAnalysisLoading(false);
     }
   }, []);
 
   useEffect(() => {
     if (open) void refresh();
   }, [open, refresh]);
+
+  useEffect(() => {
+    if (activeTab === "analysis" && open) {
+      void loadAnalysis(analysisRangeMs);
+    }
+  }, [activeTab, open, analysisRangeMs, loadAnalysis]);
 
   /** 关键词过滤的最近关闭 */
   const filteredClosedTabs = useMemo(() => {
@@ -482,6 +513,23 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
     feedback.success(t("已清空历史记录"));
     void refresh();
   }, [refresh, t]);
+
+  /** 任务6：导出历史 JSON */
+  const handleExportJson = useCallback(async () => {
+    try {
+      const json = await exportHistoryJson({ rangeMs: analysisRangeMs });
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `tabs-history-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      feedback.success(t("导出成功"));
+    } catch (err) {
+      feedback.error(t("导出失败"), err);
+    }
+  }, [analysisRangeMs, t]);
 
   // ── 渲染 ────────────────────────────────────
 
@@ -755,11 +803,20 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
           />
           <Tabs
             activeKey={activeTab}
-            onChange={(k) => setActiveTab(k as "closed" | "timeline")}
+            onChange={(k) => setActiveTab(k as "closed" | "timeline" | "analysis")}
             size="small"
             items={[
               { key: "closed", label: t("最近关闭") },
               { key: "timeline", label: t("操作时间线") },
+              {
+                key: "analysis",
+                label: (
+                  <Flex align="center" gap={4}>
+                    <BarChart2 size={12} />
+                    {t("分析")}
+                  </Flex>
+                ),
+              },
             ]}
           />
           {activeTab === "timeline" && (
@@ -779,8 +836,22 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
         </Flex>
 
         <Flex vertical gap={16} className={styles["history-panel-list"]}>
-          {snapshotDiff !== null && <SnapshotDiffCard diff={snapshotDiff} t={t} />}
-          {activeTab === "closed" ? (
+          {snapshotDiff !== null && activeTab !== "analysis" && (
+            <SnapshotDiffCard diff={snapshotDiff} t={t} />
+          )}
+          {activeTab === "analysis" ? (
+            <HistoryAnalysisView
+              analysis={analysis}
+              loading={analysisLoading}
+              rangeMs={analysisRangeMs}
+              onRangeChange={(v) => setAnalysisRangeMs(v)}
+              onExport={() => {
+                void handleExportJson();
+              }}
+              t={t}
+              styles={styles}
+            />
+          ) : activeTab === "closed" ? (
             filteredClosedTabs.length === 0 && closedWindows.length === 0 ? (
               <Empty
                 description={t("最近没有关闭过任何标签页")}
@@ -849,5 +920,166 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
         </Flex>
       </Flex>
     </Drawer>
+  );
+}
+
+// ── 任务6：多维历史分析视图组件 ──────────────────────────
+
+interface HistoryAnalysisViewProps {
+  analysis: HistoryAnalysis | null;
+  loading: boolean;
+  rangeMs: number;
+  onRangeChange: (v: number) => void;
+  onExport: () => void;
+  t: (key: string, params?: Record<string, string | number>) => string;
+  styles: Record<string, string>;
+}
+
+const RANGE_OPTIONS = [
+  { value: 1 * 24 * 3600 * 1000, label: "今天" },
+  { value: 7 * 24 * 3600 * 1000, label: "近 7 天" },
+  { value: 14 * 24 * 3600 * 1000, label: "近 14 天" },
+  { value: 30 * 24 * 3600 * 1000, label: "近 30 天" },
+];
+
+function HistoryAnalysisView({
+  analysis,
+  loading,
+  rangeMs,
+  onRangeChange,
+  onExport,
+  t,
+  styles,
+}: HistoryAnalysisViewProps): ReactNode {
+  if (loading) {
+    return (
+      <Flex align="center" justify="center" style={{ padding: "40px 0" }}>
+        <Spin size="default" />
+      </Flex>
+    );
+  }
+
+  if (analysis === null || analysis.totalEvents === 0) {
+    return (
+      <Flex vertical gap={12} className={styles["history-analysis-panel"]}>
+        <Flex align="center" justify="space-between" className={styles["history-analysis-header"]}>
+          <Select
+            size="small"
+            value={rangeMs}
+            onChange={onRangeChange}
+            options={RANGE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+            style={{ width: 110 }}
+          />
+          <Button size="small" icon={<Download size={12} />} onClick={onExport}>
+            {t("导出")}
+          </Button>
+        </Flex>
+        <Empty description={t("暂无数据")} image={Empty.PRESENTED_IMAGE_SIMPLE} />
+      </Flex>
+    );
+  }
+
+  const maxDayCount = Math.max(...analysis.byDay.map((d) => d.count), 1);
+  const maxHourCount = Math.max(...analysis.byHour.map((h) => h.count), 1);
+  const topHosts = analysis.byHost.slice(0, 10);
+  const maxHostCount = topHosts[0]?.visitCount ?? 1;
+
+  return (
+    <Flex vertical gap={16} className={styles["history-analysis-panel"]}>
+      {/* 顶部：范围选择 + 导出 */}
+      <Flex align="center" justify="space-between" className={styles["history-analysis-header"]}>
+        <Flex align="center" gap={8}>
+          <Select
+            size="small"
+            value={rangeMs}
+            onChange={onRangeChange}
+            options={RANGE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+            style={{ width: 110 }}
+          />
+          <Typography.Text style={{ fontSize: 12, opacity: 0.6 }}>
+            {t("共 {n} 条记录", { n: analysis.totalEvents })}
+          </Typography.Text>
+        </Flex>
+        <Button size="small" icon={<Download size={12} />} onClick={onExport}>
+          {t("导出 JSON")}
+        </Button>
+      </Flex>
+
+      {/* 每日趋势柱状图 */}
+      <Flex vertical gap={6} className={styles["history-analysis-section"]}>
+        <Typography.Text className={styles["history-analysis-section-title"]}>
+          <BarChart2 size={12} />
+          {t("每日活动趋势（近 14 天）")}
+        </Typography.Text>
+        <div className={styles["history-day-chart"]}>
+          {analysis.byDay.map((day) => {
+            const heightPct = maxDayCount > 0 ? (day.count / maxDayCount) * 100 : 0;
+            const shortLabel = day.label.slice(5); // MM-DD
+            return (
+              <Tooltip
+                key={day.label}
+                title={`${day.label}：${day.count} 条，${day.uniqueHosts} 个站点`}
+              >
+                <div className={styles["history-day-bar-wrap"]}>
+                  <div
+                    className={styles["history-day-bar"]}
+                    style={{ height: `${Math.max(heightPct, 2)}%` }}
+                  />
+                  <span className={styles["history-day-label"]}>{shortLabel}</span>
+                </div>
+              </Tooltip>
+            );
+          })}
+        </div>
+      </Flex>
+
+      {/* 小时热力分布 */}
+      <Flex vertical gap={6} className={styles["history-analysis-section"]}>
+        <Typography.Text className={styles["history-analysis-section-title"]}>
+          <Clock size={12} />
+          {t("活跃时段分布（24 小时）")}
+        </Typography.Text>
+        <div className={styles["history-hour-grid"]}>
+          {analysis.byHour.map((hour) => {
+            const intensity = maxHourCount > 0 ? hour.count / maxHourCount : 0;
+            const bg = `color-mix(in srgb, var(--ant-color-primary) ${Math.round(intensity * 80 + 8)}%, transparent)`;
+            return (
+              <Tooltip key={hour.label} title={`${hour.label}：${hour.count} 条`}>
+                <div className={styles["history-hour-cell"]} style={{ background: bg }}>
+                  {hour.label.slice(0, 2)}
+                </div>
+              </Tooltip>
+            );
+          })}
+        </div>
+      </Flex>
+
+      {/* 站点访问排行 */}
+      <Flex vertical gap={6} className={styles["history-analysis-section"]}>
+        <Typography.Text className={styles["history-analysis-section-title"]}>
+          <Globe size={12} />
+          {t("站点访问排行")}
+        </Typography.Text>
+        <div className={styles["history-host-list"]}>
+          {topHosts.map((item, idx) => (
+            <div key={item.host} className={styles["history-host-item"]}>
+              <span
+                className={`${styles["history-host-rank"]}${idx < 3 ? ` ${styles["history-host-rank--top"]}` : ""}`}
+              >
+                {idx + 1}
+              </span>
+              <span className={styles["history-host-name"]}>{item.host}</span>
+              <div className={styles["history-host-bar-wrap"]}>
+                <div
+                  className={styles["history-host-bar"]}
+                  style={{ width: `${(item.visitCount / maxHostCount) * 100}%` }}
+                />
+              </div>
+              <span className={styles["history-host-count"]}>{item.visitCount}</span>
+            </div>
+          ))}
+        </div>
+      </Flex>
+    </Flex>
   );
 }

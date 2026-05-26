@@ -13,8 +13,11 @@
   align-items: center;
   height: var(--app-header-height);
   padding: 0 20px;
-  background: transparent;
-  border-bottom: 1px solid transparent;
+  background: color-mix(in srgb, var(--ant-color-bg-container) 54%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 42%, transparent);
+  backdrop-filter: blur(22px) saturate(170%);
+  -webkit-backdrop-filter: blur(22px) saturate(170%);
+  box-shadow: 0 12px 36px -28px color-mix(in srgb, var(--ant-color-text) 42%, transparent);
   transition:
     background 0.3s ease,
     border-color 0.3s ease,
@@ -23,11 +26,11 @@
 }
 
 .app-header-shell.is-scrolled {
-  background: var(--app-glass-bg);
-  border-bottom: 1px solid var(--app-hairline);
-  backdrop-filter: var(--app-glass-filter);
-  -webkit-backdrop-filter: var(--app-glass-filter);
-  box-shadow: 0 4px 24px -8px color-mix(in srgb, var(--ant-color-text) 12%, transparent);
+  background: color-mix(in srgb, var(--ant-color-bg-elevated) 82%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 68%, transparent);
+  backdrop-filter: blur(26px) saturate(180%);
+  -webkit-backdrop-filter: blur(26px) saturate(180%);
+  box-shadow: 0 18px 46px -30px color-mix(in srgb, var(--ant-color-text) 56%, transparent);
 }
 
 .app-header-left {
@@ -159,12 +162,16 @@
   pointer-events: none;
   font-size: 13px;
   color: var(--ant-color-text-secondary);
-  background: color-mix(in srgb, var(--ant-color-bg-container) 72%, transparent);
-  border: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 82%, transparent);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--ant-color-bg-container) 86%, transparent),
+    color-mix(in srgb, var(--ant-color-bg-elevated) 66%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 72%, transparent);
   border-radius: 999px;
   box-shadow:
-    inset 0 1px 0 color-mix(in srgb, #fff 16%, transparent),
-    0 8px 24px color-mix(in srgb, var(--ant-color-text) 7%, transparent);
+    inset 0 1px 0 color-mix(in srgb, #fff 28%, transparent),
+    0 10px 32px color-mix(in srgb, var(--ant-color-text) 10%, transparent);
   transform: translateY(-6px) scale(0.98);
   visibility: hidden;
   transition:
@@ -172,7 +179,8 @@
     transform 220ms ease,
     visibility 0s linear 220ms,
     background 160ms ease,
-    border-color 160ms ease;
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .app-header-search-trigger.is-visible {
@@ -185,7 +193,8 @@
     transform 220ms ease,
     visibility 0s,
     background 160ms ease,
-    border-color 160ms ease;
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .app-header-search-trigger-text {
@@ -259,7 +268,32 @@
 /* ── Hero 区 ── */
 .app-hero {
   /* Antd Flex 通过 props 提供 flex-direction: column, align-items: center, gap: 16px */
-  padding: 36px 0 var(--app-space-5);
+  position: relative;
+  padding: 52px 0 36px;
+}
+
+.app-hero::before {
+  content: "";
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  width: min(820px, 86vw);
+  height: 230px;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at 24% 35%,
+      color-mix(in srgb, var(--app-color-primary, #2b6bff) 18%, transparent),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at 78% 22%,
+      color-mix(in srgb, var(--ant-color-info, #1677ff) 14%, transparent),
+      transparent 32%
+    );
+  filter: blur(24px);
+  opacity: 0.72;
+  transform: translateX(-50%);
 }
 
 .app-hero-brand {
@@ -278,17 +312,21 @@
 }
 
 .app-hero-title {
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-size: clamp(24px, 3vw, 38px);
+  font-weight: 760;
+  line-height: 1.05;
+  letter-spacing: -0.045em;
   color: var(--app-text-primary);
+  text-wrap: balance;
 }
 
 .app-hero-slogan {
-  font-size: 12px;
-  line-height: 1.4;
+  max-width: 560px;
+  font-size: 13px;
+  line-height: 1.55;
   letter-spacing: 0.01em;
   color: var(--ant-color-text-tertiary);
+  text-align: center;
 }
 
 .app-hero-search-wrap {
@@ -300,19 +338,34 @@
   height: var(--app-search-height);
   cursor: pointer;
   font-size: var(--app-search-font-size);
-  background: var(--ant-color-bg-container);
-  border: 1px solid var(--ant-color-border-secondary);
-  border-radius: var(--app-search-radius);
-  box-shadow: var(--app-shadow-brand-flow);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, #fff 18%, transparent), transparent 42%),
+    color-mix(in srgb, var(--ant-color-bg-container) 86%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 70%, transparent);
+  border-radius: calc(var(--app-search-radius) + 6px);
+  box-shadow:
+    0 24px 70px -38px
+      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 58%, transparent),
+    0 12px 40px -30px color-mix(in srgb, var(--ant-color-text) 55%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 42%, transparent);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
 }
 
 .app-hero-search:hover {
-  transform: translateY(-1px);
-  border-color: var(--app-color-primary, var(--ant-color-primary));
+  transform: translateY(-2px) scale(1.006);
+  border-color: color-mix(
+    in srgb,
+    var(--app-color-primary, var(--ant-color-primary)) 42%,
+    transparent
+  );
   box-shadow:
-    0 10px 32px color-mix(in srgb, var(--ant-color-text) 10%, transparent),
-    0 0 0 4px
-      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 10%, transparent);
+    0 30px 86px -42px
+      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 70%, transparent),
+    0 18px 46px -34px color-mix(in srgb, var(--ant-color-text) 62%, transparent),
+    0 0 0 5px
+      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 10%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 50%, transparent);
 }
 
 [data-theme="dark"] .app-hero-search:hover {
@@ -382,12 +435,16 @@
 .app-view-dock__list {
   /* Antd Flex 通过 props 提供 display: inline-flex, align-items: center, gap */
   padding: 6px;
-  border-radius: 18px;
-  background: color-mix(in srgb, var(--ant-color-bg-container) 88%, transparent);
-  border: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 78%, transparent);
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, #fff 16%, transparent), transparent 46%),
+    color-mix(in srgb, var(--ant-color-bg-container) 84%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 70%, transparent);
   box-shadow:
-    0 8px 24px color-mix(in srgb, var(--ant-color-text) 8%, transparent),
-    inset 0 1px 0 color-mix(in srgb, #fff 16%, transparent);
+    0 18px 46px -34px color-mix(in srgb, var(--ant-color-text) 54%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 24%, transparent);
+  backdrop-filter: blur(18px) saturate(165%);
+  -webkit-backdrop-filter: blur(18px) saturate(165%);
 }
 
 .app-view-dock--vertical .app-view-dock__list {
@@ -416,17 +473,19 @@
   padding: 0 12px;
   border: 0 !important;
   box-shadow: none !important;
-  border-radius: 14px;
+  border-radius: 16px;
   color: var(--ant-color-text-secondary);
   cursor: pointer;
   white-space: nowrap;
   transition:
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
     background 160ms ease,
     color 160ms ease,
     box-shadow 160ms ease;
 }
 
 .app-view-dock__item:hover {
+  transform: translateY(-1px);
   color: var(--ant-color-text);
   background: color-mix(in srgb, var(--ant-color-fill-quaternary) 92%, transparent);
   border: 0 !important;
@@ -451,13 +510,24 @@
 
 .app-view-dock__item.is-active {
   color: var(--app-color-primary, var(--ant-color-primary));
-  background: color-mix(
-    in srgb,
-    var(--app-color-primary, var(--ant-color-primary)) 12%,
-    var(--ant-color-bg-container)
+  background: linear-gradient(
+    135deg,
+    color-mix(
+      in srgb,
+      var(--app-color-primary, var(--ant-color-primary)) 18%,
+      var(--ant-color-bg-container)
+    ),
+    color-mix(
+      in srgb,
+      var(--app-color-primary, var(--ant-color-primary)) 8%,
+      var(--ant-color-bg-container)
+    )
   );
-  box-shadow: inset 0 0 0 1px
-    color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 16%, transparent) !important;
+  box-shadow:
+    inset 0 0 0 1px
+      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 18%, transparent),
+    0 10px 22px -18px
+      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 72%, transparent) !important;
 }
 
 .app-view-dock__label {
@@ -734,7 +804,35 @@
   height: 100vh;
   overflow: hidden;
   position: relative;
+  isolation: isolate;
   /* Antd Layout 通过 props 提供 display: flex, flex-direction: column */
+}
+
+.app-layout-shell::before,
+.app-layout-shell::after {
+  content: "";
+  position: fixed;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(28px);
+  opacity: 0.46;
+}
+
+.app-layout-shell::before {
+  top: -160px;
+  right: -140px;
+  width: 420px;
+  height: 420px;
+  background: color-mix(in srgb, var(--app-color-primary, #2b6bff) 24%, transparent);
+}
+
+.app-layout-shell::after {
+  left: -180px;
+  bottom: -210px;
+  width: 520px;
+  height: 520px;
+  background: color-mix(in srgb, var(--ant-color-info, #1677ff) 14%, transparent);
 }
 
 .app-background-overlay {
@@ -782,6 +880,13 @@
   /* Antd Flex 通过 props 提供 flex: 1, min-height: 0, flex-direction: column */
   overflow-y: auto;
   overflow-x: hidden;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 18px,
+    #000 calc(100% - 18px),
+    transparent 100%
+  );
 }
 
 .app-layout-shell--view-bottom .app-content-shell {

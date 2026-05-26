@@ -14,7 +14,7 @@
     "tabGroups",
     "activeTab"
   ],
-  "optional_permissions": ["history", "bookmarks"],
+  "optional_permissions": ["history", "bookmarks", "system.memory"],
   "host_permissions": [],
   "optional_host_permissions": ["<all_urls>", "https://wttr.in/*", "https://api.open-meteo.com/*"],
   "chrome_url_overrides": {
@@ -49,10 +49,6 @@
     "toggle-search": {
       "suggested_key": { "default": "Alt+K" },
       "description": "Open search in __MSG_appName__"
-    },
-    "open-history": {
-      "suggested_key": { "default": "Alt+H" },
-      "description": "Open history timeline in __MSG_appName__"
     }
   },
   "incognito": "split"

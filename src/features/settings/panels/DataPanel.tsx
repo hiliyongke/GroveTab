@@ -35,7 +35,9 @@ import {
   RotateCcw,
   AlertTriangle,
   Sparkles,
+  ShieldCheck,
 } from "lucide-react";
+import { PermissionDiagnosticsPanel } from "./PermissionDiagnosticsPanel";
 
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
@@ -464,6 +466,15 @@ export function DataPanel() {
         >
           {t("恢复出厂设置")}
         </Button>
+      </section>
+
+      {/* 任务8：权限诊断区 */}
+      <section className="settings-section">
+        <Flex align="center" gap={6} style={{ marginBottom: 8 }}>
+          <ShieldCheck size={ICON_SIZE.MEDIUM} />
+          <Typography.Text strong>{t("权限状态")}</Typography.Text>
+        </Flex>
+        <PermissionDiagnosticsPanel />
       </section>
     </Flex>
   );

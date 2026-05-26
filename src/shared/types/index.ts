@@ -27,7 +27,13 @@ export type {
 export type { ClosedTabSnapshot, UndoRecord } from "./undo";
 
 // ── 归档 / 会话 ──────────────────────────────────
-export type { ArchivedTab, ArchivedSession, AutoSnapshotMeta } from "./archive";
+export type {
+  ArchivedTab,
+  ArchivedSession,
+  AutoSnapshotMeta,
+  ArchivedTabGroup,
+  ArchivedWindowBounds,
+} from "./archive";
 
 // ── 活动记录 ────────────────────────────
 export type { ActivityRecord } from "./activity";

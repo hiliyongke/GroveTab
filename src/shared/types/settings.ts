@@ -311,13 +311,6 @@ export interface UserSettings {
   /** 常用站点是否启用分组显示，默认 false（平铺模式） */
   speedDialGroupEnabled?: boolean;
 
-  /**
-   * 常用站点布局模式。
-   *   - 'grid'：网格卡片视图（默认）
-   *   - 'list'：紧凑列表视图（站点多时省空间）
-   */
-  quickStartLayoutMode?: "grid" | "list";
-
   /** 是否显示浮动添加按钮（FAB），默认 false */
   quickStartFabAddButton?: boolean;
 
@@ -480,4 +473,47 @@ export interface UserSettings {
    * 例如：`['mail.google.com', 'localhost']`。
    */
   historyUrlBlocklist?: string[];
+
+  // ── 内存治理（任务7）────────────────────────────────
+
+  /**
+   * 内存治理主开关（默认 false）。
+   * 开启后 Service Worker 会监听 chrome.system.memory，
+   * 在内存压力达到阈值时自动 discard 或提示归档。
+   */
+  memoryGovernanceEnabled?: boolean;
+
+  /**
+   * 内存压力触发阈值（%，默认 80）。
+   * 当已用内存 / 总内存 ≥ 此值时触发治理动作。
+   * 范围：50–95。
+   */
+  memoryPressureThreshold?: number;
+
+  /**
+   * 内存压力治理动作：
+   *   - 'notify'（默认）：仅弹出提示，不自动操作
+   *   - 'discard'：自动 discard 最久未访问的非活跃标签
+   *   - 'archive'：自动将最久未访问的标签归档并关闭
+   */
+  memoryPressureAction?: "notify" | "discard" | "archive";
+
+  /**
+   * 内存治理例外白名单（hostname 数组，默认空）。
+   * 命中白名单的标签页不会被自动 discard 或归档。
+   * 固定标签、媒体播放中的标签始终豁免（无需加入白名单）。
+   */
+  memoryGovernanceAllowlist?: string[];
+
+  /**
+   * 单次治理最多操作的标签数（默认 5）。
+   * 避免一次性 discard 过多标签导致用户困惑。
+   */
+  memoryGovernanceMaxTabs?: number;
+
+  /**
+   * 两次治理动作之间的最小冷却时间（分钟，默认 10）。
+   * 避免内存抖动时频繁触发。
+   */
+  memoryGovernanceCooldownMinutes?: number;
 }

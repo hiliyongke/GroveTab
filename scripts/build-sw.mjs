@@ -19,7 +19,7 @@
 import { build } from 'esbuild';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readdir, readFile, writeFile } from 'node:fs/promises';
+import { readdir, readFile, writeFile, mkdir } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -31,6 +31,23 @@ const APP_NAME = (() => {
   const raw = pkg.name; // e.g. "tab"
   return raw.charAt(0).toUpperCase() + raw.slice(1).replace(/tab$/i, 'Tab');
 })();
+
+const commonDefine = {
+  'import.meta.env.MODE': '"production"',
+  'import.meta.env.DEV': 'false',
+  'import.meta.env.PROD': 'true',
+};
+
+const commonAlias = {
+  '@': resolve(ROOT, 'src'),
+  '@pages': resolve(ROOT, 'src/pages'),
+  '@features': resolve(ROOT, 'src/features'),
+  '@shared': resolve(ROOT, 'src/shared'),
+  '@store': resolve(ROOT, 'src/store'),
+  '@services': resolve(ROOT, 'src/services'),
+  '@repos': resolve(ROOT, 'src/repositories'),
+  '@chrome': resolve(ROOT, 'src/chrome'),
+};
 
 await build({
   entryPoints: [resolve(ROOT, 'src/sw/index.ts')],
@@ -44,16 +61,9 @@ await build({
   treeShaking: true,
   minify: true,
   legalComments: 'none',
-  // 兼容 @/ alias（与 vite.config.ts 保持一致）
-  alias: {
-    '@': resolve(ROOT, 'src'),
-  },
+  alias: commonAlias,
   // SW 是 worker 环境，剔除可能存在的 DOM 引用（理论上 SW 代码本就不该用）
-  define: {
-    'import.meta.env.MODE': '"production"',
-    'import.meta.env.DEV': 'false',
-    'import.meta.env.PROD': 'true',
-  },
+  define: commonDefine,
   loader: {
     '.ts': 'ts',
     '.tsx': 'tsx',

@@ -11,18 +11,41 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import { Modal, Button, Card, Row, Col, Typography, theme, Popconfirm, Skeleton, Flex } from "antd";
+import {
+  Modal,
+  Button,
+  Card,
+  Row,
+  Col,
+  Typography,
+  theme,
+  Popconfirm,
+  Skeleton,
+  Flex,
+  Progress,
+  Alert,
+} from "antd";
 import type { MetricEvent, StatsData } from "@/shared/types";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, Download, CheckCircle2, AlertTriangle, Info } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { cssVars } from "@/shared/utils/css-vars";
 import { getMetrics, clearMetrics, getStats, saveStats } from "@/repositories";
 import { useT } from "@/shared/i18n";
 import { feedback } from "@/shared/ui/feedback";
 import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
+import { useStorageQuota } from "./hooks/use-storage-quota";
+import { useSmartSuggestions } from "./hooks/use-smart-suggestions";
 import styles from "./insights.module.less";
 
 const { Text, Title } = Typography;
+
+/** 字节数格式化：1024 → 1 KB，1048576 → 1 MB */
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+}
 
 /**
  * 事件名归一化：旧 `newtabOpens` 合并到 `newtab_open`，
@@ -48,6 +71,10 @@ function getEventLabel(
 interface InsightsPanelProps {
   open: boolean;
   onClose: () => void;
+  /** 跳转到归档面板（智能建议操作） */
+  onOpenArchive?: () => void;
+  /** 跳转到设置面板（智能建议操作） */
+  onOpenSettings?: () => void;
 }
 
 /** 校验 StatsData 结构完整性，防止 daily 缺失导致迭代报错 */
@@ -65,12 +92,18 @@ function toLocalDayKey(date: Date): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
+export default function InsightsPanel({
+  open,
+  onClose,
+  onOpenArchive,
+  onOpenSettings,
+}: InsightsPanelProps) {
   const { token } = theme.useToken();
   const { t } = useT();
   const [metrics, setMetrics] = useState<MetricEvent[]>([]);
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(false);
+  const { info: quotaInfo, loading: quotaLoading } = useStorageQuota(open);
 
   useEffect(() => {
     if (!open) return;
@@ -178,6 +211,50 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
 
   /** 近 7 天是否全部为 0 */
   const dailyAllZero = dailyOpens.every((d) => d.count === 0);
+
+  /** 智能建议 */
+  const suggestions = useSmartSuggestions({
+    quota: quotaInfo,
+    archiveTabCount: archiveStats.totalTabs,
+    topDomainCount: topDomains.length,
+    dailyOpens: dailyOpens.map((d) => d.count),
+    onOpenArchive: () => {
+      onClose();
+      onOpenArchive?.();
+    },
+    onOpenSettings: () => {
+      onClose();
+      onOpenSettings?.();
+    },
+  });
+
+  /** 导出洞察数据为 .json.gz（通过 Blob + a 标签下载） */
+  const handleExport = () => {
+    try {
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        metrics,
+        stats,
+        topDomains,
+        topActions,
+        archiveStats,
+        dailyOpens,
+        storageQuota: quotaInfo,
+      };
+      const json = JSON.stringify(payload, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `insights-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      feedback.success(t("导出成功"));
+    } catch (err) {
+      console.warn("[insights] export failed", err);
+      feedback.error(t("导出失败"));
+    }
+  };
 
   /**
    * 清除：仅清除统计相关数据（metrics + stats）。
@@ -298,7 +375,88 @@ export default function InsightsPanel({ open, onClose }: InsightsPanelProps) {
           </Row>
         )}
 
-        <Flex className={styles["insights-footer"]}>
+        {/* 存储占用卡片 */}
+        {!quotaLoading && quotaInfo && (
+          <Row gutter={[12, 12]} style={{ marginTop: 12 }}>
+            <Col xs={24} md={12}>
+              <Card size="small" title={t("chrome.storage 占用")}>
+                <Progress
+                  percent={Math.round(quotaInfo.chromeStorageRatio * 100)}
+                  status={
+                    quotaInfo.chromeStorageRatio >= 0.9
+                      ? "exception"
+                      : quotaInfo.chromeStorageRatio >= 0.7
+                        ? "active"
+                        : "normal"
+                  }
+                  size="small"
+                />
+                <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                  {formatBytes(quotaInfo.chromeStorageUsed)} /{" "}
+                  {formatBytes(quotaInfo.chromeStorageTotal)}
+                </Typography.Text>
+              </Card>
+            </Col>
+            <Col xs={24} md={12}>
+              <Card size="small" title={t("OPFS 存储占用")}>
+                <Progress
+                  percent={quotaInfo.opfsTotal > 0 ? Math.round(quotaInfo.opfsRatio * 100) : 0}
+                  status={quotaInfo.opfsRatio >= 0.9 ? "exception" : "normal"}
+                  size="small"
+                />
+                <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                  {formatBytes(quotaInfo.opfsUsed)}
+                  {quotaInfo.opfsTotal > 0 ? ` / ${formatBytes(quotaInfo.opfsTotal)}` : ""}
+                </Typography.Text>
+              </Card>
+            </Col>
+          </Row>
+        )}
+
+        {/* 智能建议区 */}
+        {suggestions.length > 0 && (
+          <Card size="small" title={t("智能建议")} style={{ marginTop: 12 }}>
+            <Flex vertical gap={8}>
+              {suggestions.map((s) => (
+                <Alert
+                  key={s.id}
+                  type={
+                    s.level === "warning" ? "warning" : s.level === "success" ? "success" : "info"
+                  }
+                  showIcon
+                  icon={
+                    s.level === "success" ? (
+                      <CheckCircle2 size={14} />
+                    ) : s.level === "warning" ? (
+                      <AlertTriangle size={14} />
+                    ) : (
+                      <Info size={14} />
+                    )
+                  }
+                  message={t(s.titleKey)}
+                  description={t(s.descKey)}
+                  action={
+                    s.actionKey && s.onAction ? (
+                      <Button size="small" type="link" onClick={s.onAction}>
+                        {t(s.actionKey)}
+                      </Button>
+                    ) : undefined
+                  }
+                />
+              ))}
+            </Flex>
+          </Card>
+        )}
+
+        <Flex className={styles["insights-footer"]} gap={8}>
+          <Button
+            size="small"
+            icon={<Download size={12} />}
+            onClick={() => void handleExport()}
+            disabled={loading || isAllEmpty}
+          >
+            {t("导出数据")}
+          </Button>
           <Popconfirm
             title={t("将清空所有本地统计数据，不可恢复。继续？")}
             onConfirm={() => void handleClearAll()}

@@ -76,7 +76,9 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
     return settings.searchCustomEngines ?? [];
   });
   const autoFallbackToWeb = useSettingsStore((s) => s.settings.searchAutoFallbackToWeb ?? true);
-  const useHistorySuggestions = useSettingsStore((s) => s.settings.searchUseHistorySuggestions ?? true);
+  const useHistorySuggestions = useSettingsStore(
+    (s) => s.settings.searchUseHistorySuggestions ?? true,
+  );
   const useHotSuggestions = useSettingsStore((s) => s.settings.searchUseHotSuggestions ?? true);
   const hotSuggestionSource = useSettingsStore((s) => s.settings.hotSuggestionSource);
   const historyEnabled = useSettingsStore((s) => s.settings.historyEnabled !== false);
@@ -108,32 +110,69 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
 
   // ── 索引构建 ──────────────────────────────────────────────────────────────
   const tabsIndexSignature = useMemo(
-    () => `${tabs.length}|${tabs.map((t) => `${t.id}:${t.title}:${t.hostname}:${t.url}`).join("\u0001")}`,
+    () =>
+      `${tabs.length}|${tabs.map((t) => `${t.id}:${t.title}:${t.hostname}:${t.url}`).join("\u0001")}`,
     [tabs],
   );
   const { searchIndex, pinyinMatchFn } = useSearchIndex({
-    open, tabs, tabsIndexSignature, searchScope, enablePinyin,
+    open,
+    tabs,
+    tabsIndexSignature,
+    searchScope,
+    enablePinyin,
   });
 
   // ── 数据加载 ──────────────────────────────────────────────────────────────
   const {
-    recentSearches, setRecentSearches, historyForHot, trendingCache,
-    historyPermission, historyEntries, historyLoading, closedTabRecords,
-    setClosedTabRecords, setDebouncedQuery, enableHistorySuggestions,
+    recentSearches,
+    setRecentSearches,
+    historyForHot,
+    trendingCache,
+    historyPermission,
+    historyEntries,
+    historyLoading,
+    closedTabRecords,
+    setClosedTabRecords,
+    setDebouncedQuery,
+    enableHistorySuggestions,
+    archiveSessions,
   } = useSearchData({
-    open, normalizedQuery, effectiveHotSource, useHistorySuggestions, historyEnabled,
+    open,
+    normalizedQuery,
+    effectiveHotSource,
+    useHistorySuggestions,
+    historyEnabled,
   });
 
   // ── 结果计算 ──────────────────────────────────────────────────────────────
-  const {
-    sections, flatItems, firstWebItemIndex,
-  } = useSearchResults({
-    normalizedQuery, lowerQuery, isTagScopedQuery, lowerSearchText,
-    tabs, tagsByUrl, searchScope, searchSortBy, enablePinyin, pinyinMatchFn,
-    searchIndex, recentSearches, historyForHot, trendingCache, historyPermission,
-    historyEntries, closedTabRecords, historyEnabled, effectiveHotSource,
-    useHistorySuggestions, autoFallbackToWeb, currentEngine, currentEngineOption,
-    enabledEngines, customEngines, onOpenHistory,
+  const { sections, flatItems, firstWebItemIndex } = useSearchResults({
+    normalizedQuery,
+    lowerQuery,
+    isTagScopedQuery,
+    lowerSearchText,
+    tabs,
+    tagsByUrl,
+    searchScope,
+    searchSortBy,
+    enablePinyin,
+    pinyinMatchFn,
+    searchIndex,
+    recentSearches,
+    historyForHot,
+    trendingCache,
+    historyPermission,
+    historyEntries,
+    closedTabRecords,
+    historyEnabled,
+    effectiveHotSource,
+    useHistorySuggestions,
+    autoFallbackToWeb,
+    currentEngine,
+    currentEngineOption,
+    enabledEngines,
+    customEngines,
+    onOpenHistory,
+    archiveSessions,
   });
 
   // activeIndex 越界保护
@@ -162,13 +201,20 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
       try {
         const updatedRecent = await pushRecentSearch(trimmed);
         setRecentSearches(updatedRecent);
-      } catch { /* 搜索历史保存失败不影响用户操作 */ }
+      } catch {
+        /* 搜索历史保存失败不影响用户操作 */
+      }
       try {
         await createTab({ url, active });
         void track("search_web", { engine: engineId, query: trimmed });
         close();
       } catch (err) {
-        try { window.open(url, "_blank"); close(); } catch { /* 彻底失败时静默处理 */ }
+        try {
+          window.open(url, "_blank");
+          close();
+        } catch {
+          /* 彻底失败时静默处理 */
+        }
         console.error("[SearchBox] runWebSearch failed:", err);
       }
     },
@@ -188,7 +234,12 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
             await createTab({ url: item.entry.url, active: true });
             close();
           } catch (err) {
-            try { window.open(item.entry.url, "_blank", "noopener,noreferrer"); close(); } catch { /* 静默 */ }
+            try {
+              window.open(item.entry.url, "_blank", "noopener,noreferrer");
+              close();
+            } catch {
+              /* 静默 */
+            }
             console.error("[SearchBox] openHistoryEntry failed:", err);
           }
         })();
@@ -202,28 +253,97 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
             setClosedTabRecords((prev) => prev.filter((r) => r.id !== item.record.id));
             close();
           } catch (err) {
-            try { window.open(item.record.url, "_blank"); close(); } catch { /* 静默 */ }
+            try {
+              window.open(item.record.url, "_blank");
+              close();
+            } catch {
+              /* 静默 */
+            }
             console.error("[SearchBox] restoreClosedTab failed:", err);
           }
         })();
         return;
       }
-      if (item.type === "suggestion") { void runWebSearch(item.keyword, currentEngine); return; }
-      if (item.type === "web") { void runWebSearch(item.query, item.engineId); return; }
-      if (item.type === "permission") { void enableHistorySuggestions(); return; }
-      if (item.type === "command" && item.commandId === "open-history" && onOpenHistory !== undefined) {
+      if (item.type === "archive") {
+        void (async () => {
+          try {
+            await createTab({ url: item.url, active: true });
+            close();
+          } catch (err) {
+            try {
+              window.open(item.url, "_blank", "noopener,noreferrer");
+              close();
+            } catch {
+              /* 静默 */
+            }
+            console.error("[SearchBox] openArchiveTab failed:", err);
+          }
+        })();
+        return;
+      }
+      if (item.type === "bookmark") {
+        void (async () => {
+          try {
+            await createTab({ url: item.url, active: true });
+            close();
+          } catch (err) {
+            try {
+              window.open(item.url, "_blank", "noopener,noreferrer");
+              close();
+            } catch {
+              /* 静默 */
+            }
+            console.error("[SearchBox] openBookmark failed:", err);
+          }
+        })();
+        return;
+      }
+      if (item.type === "suggestion") {
+        void runWebSearch(item.keyword, currentEngine);
+        return;
+      }
+      if (item.type === "web") {
+        void runWebSearch(item.query, item.engineId);
+        return;
+      }
+      if (item.type === "permission") {
+        void enableHistorySuggestions();
+        return;
+      }
+      if (
+        item.type === "command" &&
+        item.commandId === "open-history" &&
+        onOpenHistory !== undefined
+      ) {
         close();
         onOpenHistory();
       }
     },
-    [close, currentEngine, enableHistorySuggestions, jumpToTab, onOpenHistory, runWebSearch, setClosedTabRecords],
+    [
+      close,
+      currentEngine,
+      enableHistorySuggestions,
+      jumpToTab,
+      onOpenHistory,
+      runWebSearch,
+      setClosedTabRecords,
+    ],
   );
 
   // ── 键盘导航 ──────────────────────────────────────────────────────────────
   const { handleKeyDown } = useKeyboardNav({
-    activeIndex, flatItems, firstWebItemIndex, normalizedQuery,
-    currentEngine, enabledEngines, setActiveIndex, setQuery, setDebouncedQuery,
-    close, handleActivate, runWebSearch,
+    activeIndex,
+    flatItems,
+    firstWebItemIndex,
+    normalizedQuery,
+    currentEngine,
+    enabledEngines,
+    setActiveIndex,
+    setQuery,
+    setDebouncedQuery,
+    close,
+    handleActivate,
+    runWebSearch,
   });
 
   const handleAfterOpenChange = useCallback(
@@ -240,29 +360,30 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
   );
 
   const rootVars = useMemo(
-    () => ({
-      "--searchbox-border": token.colorBorderSecondary,
-      "--searchbox-text": token.colorText,
-      "--searchbox-text-secondary": token.colorTextSecondary,
-      "--searchbox-text-tertiary": token.colorTextTertiary,
-      "--searchbox-fill-secondary": token.colorFillSecondary,
-      "--searchbox-fill-tertiary": token.colorFillTertiary,
-      "--searchbox-fill-quaternary": token.colorFillQuaternary,
-      "--searchbox-accent": token.colorPrimary,
-      "--searchbox-radius": `${token.borderRadiusLG}px`,
-      "--searchbox-transition": token.motionDurationFast,
-      "--searchbox-search-icon": iconColor("search", token),
-    }) as React.CSSProperties,
+    () =>
+      ({
+        "--searchbox-border": token.colorBorderSecondary,
+        "--searchbox-text": token.colorText,
+        "--searchbox-text-secondary": token.colorTextSecondary,
+        "--searchbox-text-tertiary": token.colorTextTertiary,
+        "--searchbox-fill-secondary": token.colorFillSecondary,
+        "--searchbox-fill-tertiary": token.colorFillTertiary,
+        "--searchbox-fill-quaternary": token.colorFillQuaternary,
+        "--searchbox-accent": token.colorPrimary,
+        "--searchbox-radius": `${token.borderRadiusLG}px`,
+        "--searchbox-transition": token.motionDurationFast,
+        "--searchbox-search-icon": iconColor("search", token),
+      }) as React.CSSProperties,
     [token],
   );
 
   const shortcutHints = useMemo(
     () => [
-      { id: "navigate", keys: ["↑", "↓"], label: t('导航') },
-      { id: "open", keys: ["↵"], label: t('打开') },
-      { id: "web", keys: ["⌘↵"], label: t('网页搜索') },
-      { id: "switch", keys: ["Tab"], label: t('切到网页搜索') },
-      { id: "close", keys: ["esc"], label: t('关闭') },
+      { id: "navigate", keys: ["↑", "↓"], label: t("导航") },
+      { id: "open", keys: ["↵"], label: t("打开") },
+      { id: "web", keys: ["⌘↵"], label: t("网页搜索") },
+      { id: "switch", keys: ["Tab"], label: t("切到网页搜索") },
+      { id: "close", keys: ["esc"], label: t("关闭") },
     ],
     [t],
   );
@@ -279,7 +400,11 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
       width={680}
       centered={false}
       className={styles["search-box-dialog"]}
-      classNames={{ mask: "search-box-mask", body: "search-box-body", container: "search-box-container" }}
+      classNames={{
+        mask: "search-box-mask",
+        body: "search-box-body",
+        container: "search-box-container",
+      }}
       rootClassName={styles["search-box-modal"]}
     >
       <div className={styles["search-box-shell"]} style={rootVars}>
@@ -292,7 +417,11 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
             arrow={false}
             classNames={{ root: styles["search-box-engine-popover"] }}
             content={
-              <ul className={styles["search-box-engine-menu"]} role="listbox" aria-label={t('搜索引擎切换')}>
+              <ul
+                className={styles["search-box-engine-menu"]}
+                role="listbox"
+                aria-label={t("搜索引擎切换")}
+              >
                 {engineOptions.map((option, idx) => {
                   const active = option.id === currentEngine;
                   const shortcut = idx < 9 ? `⌘${idx + 1}` : undefined;
@@ -303,16 +432,42 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
                       aria-selected={active}
                       className={`${styles["search-box-engine-menu-item"]} ${active ? styles["is-active"] : ""}`}
                       style={{ "--searchbox-engine-color": option.color } as React.CSSProperties}
-                      onClick={() => { setCurrentEngine(option.id); setEnginePopoverOpen(false); inputRef.current?.focus(); }}
+                      onClick={() => {
+                        setCurrentEngine(option.id);
+                        setEnginePopoverOpen(false);
+                        inputRef.current?.focus();
+                      }}
                     >
                       <span className={styles["search-box-engine-logo"]} aria-hidden="true">
                         {option.iconUrl ? (
-                          <Image src={option.iconUrl} alt="" preview={false} fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" width={16} height={16} />
-                        ) : option.label.slice(0, 1)}
+                          <Image
+                            src={option.iconUrl}
+                            alt=""
+                            preview={false}
+                            fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+                            width={16}
+                            height={16}
+                          />
+                        ) : (
+                          option.label.slice(0, 1)
+                        )}
                       </span>
                       <span className={styles["search-box-engine-menu-label"]}>{option.label}</span>
-                      {shortcut !== undefined && <span className={styles["search-box-engine-menu-shortcut"]} aria-hidden="true">{shortcut}</span>}
-                      {active && <Check size={ICON_SIZE.TINY} className={styles["search-box-engine-menu-check"]} aria-hidden="true" />}
+                      {shortcut !== undefined && (
+                        <span
+                          className={styles["search-box-engine-menu-shortcut"]}
+                          aria-hidden="true"
+                        >
+                          {shortcut}
+                        </span>
+                      )}
+                      {active && (
+                        <Check
+                          size={ICON_SIZE.TINY}
+                          className={styles["search-box-engine-menu-check"]}
+                          aria-hidden="true"
+                        />
+                      )}
                     </li>
                   );
                 })}
@@ -322,42 +477,65 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
             <Button
               type="text"
               className={`${styles["search-box-engine-trigger"]} ${enginePopoverOpen ? styles["is-open"] : ""}`}
-              style={{ "--searchbox-engine-color": currentEngineOption.color } as React.CSSProperties}
+              style={
+                { "--searchbox-engine-color": currentEngineOption.color } as React.CSSProperties
+              }
               aria-haspopup="listbox"
               aria-expanded={enginePopoverOpen}
-              aria-label={t('搜索引擎切换')}
+              aria-label={t("搜索引擎切换")}
               title={currentEngineOption.label}
             >
               <span className={styles["search-box-engine-logo"]} aria-hidden="true">
                 {currentEngineOption.iconUrl ? (
-                  <Image src={currentEngineOption.iconUrl} alt="" preview={false} fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" width={16} height={16} />
-                ) : currentEngineOption.label.slice(0, 1)}
+                  <Image
+                    src={currentEngineOption.iconUrl}
+                    alt=""
+                    preview={false}
+                    fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+                    width={16}
+                    height={16}
+                  />
+                ) : (
+                  currentEngineOption.label.slice(0, 1)
+                )}
               </span>
-              <ChevronDown size={ICON_SIZE.TINY} className={styles["search-box-engine-trigger-caret"]} aria-hidden="true" />
+              <ChevronDown
+                size={ICON_SIZE.TINY}
+                className={styles["search-box-engine-trigger-caret"]}
+                aria-hidden="true"
+              />
             </Button>
           </Popover>
           <Input
             ref={inputRef}
             size="large"
             value={query}
-            onChange={(e) => { setQuery(e.target.value); setActiveIndex(0); }}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setActiveIndex(0);
+            }}
             onKeyDown={handleKeyDown}
-            placeholder={t('搜索标签页、历史记录或直接全网搜索...')}
-            prefix={<Search size={ICON_SIZE.MEDIUM} className={styles["search-box-input-prefix"]} />}
+            placeholder={t("搜索标签页、历史记录或直接全网搜索...")}
+            prefix={
+              <Search size={ICON_SIZE.MEDIUM} className={styles["search-box-input-prefix"]} />
+            }
             allowClear
             variant="borderless"
             autoComplete="off"
             spellCheck={false}
-            aria-label={t('搜索标签页、历史记录或直接全网搜索...')}
+            aria-label={t("搜索标签页、历史记录或直接全网搜索...")}
             className={styles["search-box-input"]}
           />
           {onOpenHistory !== undefined && (
             <Button
               type="text"
               className={styles["search-box-history-trigger"]}
-              onClick={() => { close(); onOpenHistory(); }}
-              aria-label={t('查看全部历史')}
-              title={t('查看全部历史')}
+              onClick={() => {
+                close();
+                onOpenHistory();
+              }}
+              aria-label={t("查看全部历史")}
+              title={t("查看全部历史")}
             >
               <History size={ICON_SIZE.SMALL} aria-hidden="true" />
             </Button>
@@ -368,17 +546,21 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
           {flatItems.length === 0
             ? (() => {
                 const title = historyLoading
-                  ? t('正在加载历史建议...')
+                  ? t("正在加载历史建议...")
                   : normalizedQuery !== ""
-                    ? t('试试其他关键词，或直接执行网页搜索')
-                    : t('先输入关键词，或从最近搜索和热门话题开始');
+                    ? t("试试其他关键词，或直接执行网页搜索")
+                    : t("先输入关键词，或从最近搜索和热门话题开始");
                 return (
                   <div className={styles["search-box-empty"]}>
                     <FeatureEmptyState
                       title={title}
                       icon={<Search size={20} className={styles["search-box-empty-icon"]} />}
                       size="small"
-                      hints={normalizedQuery !== "" ? [t('尝试使用 site: 语法限定域名'), t('尝试使用 in: 语法限定范围')] : undefined}
+                      hints={
+                        normalizedQuery !== ""
+                          ? [t("尝试使用 site: 语法限定域名"), t("尝试使用 in: 语法限定范围")]
+                          : undefined
+                      }
                     />
                   </div>
                 );
@@ -389,7 +571,9 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
                   <section key={section.key} className={styles["search-box-section"]}>
                     <div className={styles["search-box-section-header"]}>
                       <span>{section.title}</span>
-                      <span className={styles["search-box-section-count"]}>{section.items.length}</span>
+                      <span className={styles["search-box-section-count"]}>
+                        {section.items.length}
+                      </span>
                     </div>
                     <div role="listbox" className={styles["search-box-list"]}>
                       {section.items.map((item, offset) => {
@@ -414,13 +598,17 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
 
         <div className={styles["search-box-footer"]}>
           <span className={styles["search-box-status-text"]}>
-            {flatItems.length > 0 ? t('找到 {count} 个候选项', { count: flatItems.length }) : t('输入后可在本地与网页结果间快速切换')}
+            {flatItems.length > 0
+              ? t("找到 {count} 个候选项", { count: flatItems.length })
+              : t("输入后可在本地与网页结果间快速切换")}
           </span>
           <div className={styles["search-box-shortcuts"]}>
             {shortcutHints.map((shortcut) => (
               <span key={shortcut.id} className={styles["search-box-shortcut"]}>
                 <span className={styles["search-box-shortcut-keys"]}>
-                  {shortcut.keys.map((key) => <Kbd key={`${shortcut.id}-${key}`}>{key}</Kbd>)}
+                  {shortcut.keys.map((key) => (
+                    <Kbd key={`${shortcut.id}-${key}`}>{key}</Kbd>
+                  ))}
                 </span>
                 <span>{shortcut.label}</span>
               </span>

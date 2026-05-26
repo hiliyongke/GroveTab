@@ -36,7 +36,7 @@ import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
 import { useResolvedTheme } from "@/shared/hooks";
 import { GRADIENT_PRESETS, buildGradient } from "@/shared/theme/gradient-presets";
-import { SKIN_PRESETS } from "@/shared/theme/skin-presets";
+import { SKIN_PRESETS, DEFAULT_SKIN_PRESET_ID } from "@/shared/theme/skin-presets";
 import { getSkinCustomBaseValues } from "@/shared/theme/theme-customization";
 import type { UserSettings } from "@/shared/types";
 import { Field } from "@/features/settings/components/Field";
@@ -300,7 +300,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
             {SKIN_PRESETS.map((skin) => {
               const isSelected =
                 settings.skinPreset === skin.id ||
-                (!settings.skinPreset && skin.id === "glassmorphism");
+                (!settings.skinPreset && skin.id === DEFAULT_SKIN_PRESET_ID);
               const gradientBg = `linear-gradient(135deg, ${skin.previewColors[0]}, ${skin.previewColors[1]}, ${skin.previewColors[2] ?? skin.previewColors[1]})`;
               const skinPreviewStyle: React.CSSProperties = cssVars({
                 "--appearance-preview-bg": gradientBg,
@@ -963,10 +963,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
 
       {settings.videoBackground?.type === "file" && (
         <section className="settings-section">
-          <Field
-            label={t("本地视频")}
-            hint={t("保存在浏览器内部（IndexedDB），不会上传任何数据。")}
-          >
+          <Field label={t("本地视频")} hint={t("保存在浏览器内部（OPFS），不会上传任何数据。")}>
             <Upload
               accept="video/mp4,video/webm"
               showUploadList={false}
@@ -980,20 +977,37 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                     void message.warning("请选择 MP4 或 WebM 视频");
                     return;
                   }
-                  const { saveVideoFile, removeVideoFile } = await import("@/features/effects");
-                  // 先清掉旧文件（若有），避免 IndexedDB 里积灰
+                  // 任务8：优先使用 OPFS 存储，降级到 IndexedDB
                   const old = settings.videoBackground?.fileKey;
-                  if (typeof old === "string" && old !== "") {
-                    await removeVideoFile(old).catch(() => undefined);
+                  try {
+                    const { saveBackgroundFile, removeBackgroundFile } =
+                      await import("@/features/effects/background-storage");
+                    if (typeof old === "string" && old !== "") {
+                      await removeBackgroundFile(old).catch(() => undefined);
+                    }
+                    const key = await saveBackgroundFile(file);
+                    void updateSettings({
+                      videoBackground: {
+                        ...(settings.videoBackground ?? {}),
+                        type: "file",
+                        fileKey: key,
+                      },
+                    });
+                  } catch {
+                    // OPFS 不可用时降级到 IndexedDB
+                    const { saveVideoFile, removeVideoFile } = await import("@/features/effects");
+                    if (typeof old === "string" && old !== "") {
+                      await removeVideoFile(old).catch(() => undefined);
+                    }
+                    const key = await saveVideoFile(file);
+                    void updateSettings({
+                      videoBackground: {
+                        ...(settings.videoBackground ?? {}),
+                        type: "file",
+                        fileKey: key,
+                      },
+                    });
                   }
-                  const key = await saveVideoFile(file);
-                  void updateSettings({
-                    videoBackground: {
-                      ...(settings.videoBackground ?? {}),
-                      type: "file",
-                      fileKey: key,
-                    },
-                  });
                 })();
                 return false; // 禁止 antd 自己上传
               }}
@@ -1088,25 +1102,6 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                   checked={settings.quickStartFabAddButton ?? false}
                   onChange={(v) => void updateSettings({ quickStartFabAddButton: v })}
                 />
-                {/* 布局模式：grid / list */}
-                <div className={styles["appearance-visibility-row"]}>
-                  <div>
-                    <div className={styles["appearance-visibility-title"]}>{t("布局模式")}</div>
-                    <div className={styles["appearance-visibility-hint"]}>
-                      {t("选择常用站点的布局方式")}
-                    </div>
-                  </div>
-                  <Select
-                    size="small"
-                    className={styles["appearance-quickstart-select"]}
-                    value={settings.quickStartLayoutMode ?? "grid"}
-                    onChange={(v) => void updateSettings({ quickStartLayoutMode: v })}
-                    options={[
-                      { value: "grid", label: t("网格视图") },
-                      { value: "list", label: t("列表视图") },
-                    ]}
-                  />
-                </div>
                 {/* 卡片尺寸：sm / md / lg / auto，便于适应不同站点数量与屏幕宽度 */}
                 <div className={styles["appearance-visibility-row"]}>
                   <div>

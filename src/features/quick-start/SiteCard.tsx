@@ -31,8 +31,6 @@ interface SiteCardProps {
   onEdit: (site: SpeedDialSite) => void;
   /** 删除站点 */
   onDelete: (id: string) => void;
-  /** 渲染变体：'card'（网格卡片）或 'list'（紧凑列表） */
-  variant?: "card" | "list";
 }
 
 export function SiteCard({
@@ -42,7 +40,6 @@ export function SiteCard({
   isDragging = false,
   onEdit,
   onDelete,
-  variant = "card",
 }: SiteCardProps) {
   const { t } = useT();
   const [faviconError, setFaviconError] = useState(false);
@@ -68,7 +65,7 @@ export function SiteCard({
     {
       key: "open",
       icon: <ExternalLink size={ICON_SIZE.SMALL} />,
-      label: t('新标签页打开'),
+      label: t("新标签页打开"),
       onClick: ({ domEvent }) => {
         domEvent.stopPropagation();
         openSite();
@@ -77,7 +74,7 @@ export function SiteCard({
     {
       key: "edit",
       icon: <Pencil size={ICON_SIZE.SMALL} />,
-      label: t('编辑'),
+      label: t("编辑"),
       onClick: ({ domEvent }) => {
         domEvent.stopPropagation();
         onEdit(site);
@@ -86,7 +83,7 @@ export function SiteCard({
     {
       key: "delete",
       icon: <Trash2 size={ICON_SIZE.SMALL} />,
-      label: t('删除'),
+      label: t("删除"),
       danger: true,
       onClick: ({ domEvent }) => {
         domEvent.stopPropagation();
@@ -95,71 +92,7 @@ export function SiteCard({
     },
   ];
 
-  /** 列表模式渲染 */
-  if (variant === "list") {
-    return (
-      <div
-        className={styles["speed-dial-list-item"]}
-        style={cssVars({
-          "--speed-dial-card-accent": color,
-          "--speed-dial-card-opacity": isDragging ? "0.4" : "1",
-        })}
-      >
-        {/* 拖拽手柄 */}
-        {dragListeners && (
-          <div
-            {...dragListeners}
-            {...dragAttributes}
-            className={styles["speed-dial-list-item__drag"]}
-          >
-            <GripVertical size={ICON_SIZE.XS} className={styles["speed-dial-drag-icon"]} />
-          </div>
-        )}
-
-        {/* favicon */}
-        <div className={styles["speed-dial-list-item__favicon"]}>
-          {faviconUrl && !faviconError ? (
-            <Image
-              src={faviconUrl}
-              alt=""
-              className={styles["speed-dial-list-item__favicon-img"]}
-              onError={() => setFaviconError(true)}
-              preview={false}
-              fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
-            />
-          ) : (
-            <span className={styles["speed-dial-list-item__fallback"]}>{getInitial(hostname)}</span>
-          )}
-        </div>
-
-        {/* 标题和域名 */}
-        <div className={styles["speed-dial-list-item__info"]} onClick={openSite}>
-          <span className={styles["speed-dial-list-item__title"]} title={site.title || hostname}>
-            {site.title || hostname}
-          </span>
-          <span className={styles["speed-dial-list-item__hostname"]} title={hostname}>
-            {hostname}
-          </span>
-        </div>
-
-        {/* 操作菜单 */}
-        <div className={styles["speed-dial-list-item__actions"]}>
-          <Dropdown
-            menu={{ items: menuItems }}
-            trigger={["hover"]}
-            placement="bottomRight"
-            getPopupContainer={() => document.body}
-          >
-            <span className={styles["speed-dial-more-btn"]} onClick={(e) => e.stopPropagation()}>
-              <MoreHorizontal size={ICON_SIZE.XS} />
-            </span>
-          </Dropdown>
-        </div>
-      </div>
-    );
-  }
-
-  /** 卡片模式渲染（默认） */
+  /** 卡片模式渲染 */
   const cardStyle: React.CSSProperties = cssVars({
     "--speed-dial-card-accent": color,
     "--speed-dial-card-opacity": isDragging ? "0.4" : "1",

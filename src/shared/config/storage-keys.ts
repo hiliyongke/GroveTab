@@ -49,6 +49,10 @@ export const STORAGE_KEYS = Object.freeze({
   closedWindows: key("closed_windows"),
   /** 每日标签页快照（DailySnapshot[]），用于「昨天 → 今天」对比 */
   dailySnapshots: key("daily_snapshots"),
+  /** 书签自动分类规则（BookmarkAutoRule[]） */
+  bookmarkAutoRules: key("bookmark_auto_rules"),
+  /** 热榜兴趣信号（Record<url, InterestSignal>） */
+  trendingInterest: key("trending_interest_signals"),
 });
 
 /** 判断是否属于当前应用命名空间的存储键。 */

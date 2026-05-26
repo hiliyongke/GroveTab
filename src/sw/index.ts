@@ -488,6 +488,36 @@ if (typeof chrome.tabGroups !== "undefined") {
   });
 }
 
+// ── Bookmark Event Listeners（需求 5.1）─────────────────
+// 仅在 bookmarks 权限已授予时注册（optional permission）
+// chrome.bookmarks 在未授权时为 undefined
+if (typeof chrome.bookmarks !== "undefined") {
+  chrome.bookmarks.onCreated.addListener((id, bookmark) => {
+    swBroadcast("bookmark-created", {
+      id,
+      url: bookmark.url,
+      title: bookmark.title,
+      parentId: bookmark.parentId,
+    });
+  });
+
+  chrome.bookmarks.onChanged.addListener((id, changeInfo) => {
+    swBroadcast("bookmark-changed", { id, title: changeInfo.title, url: changeInfo.url });
+  });
+
+  chrome.bookmarks.onRemoved.addListener((id, removeInfo) => {
+    swBroadcast("bookmark-removed", { id, parentId: removeInfo.parentId, index: removeInfo.index });
+  });
+
+  chrome.bookmarks.onMoved.addListener((id, moveInfo) => {
+    swBroadcast("bookmark-moved", {
+      id,
+      parentId: moveInfo.parentId,
+      oldParentId: moveInfo.oldParentId,
+    });
+  });
+}
+
 // ── Window Event Listeners ────────────────────────────
 
 chrome.windows.onFocusChanged.addListener((windowId) => {
