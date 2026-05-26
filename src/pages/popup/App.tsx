@@ -70,6 +70,32 @@ function PopupContent() {
   const [defaultEngine, setDefaultEngine] = useState<SearchEngineId>("google");
   const { t } = useT();
 
+  const refreshTabs = useCallback(async () => {
+    try {
+      const all = await queryAllTabs();
+      setHasAnyTab(all.length > 0);
+      const list: RecentTab[] = all
+        .filter((tab) => tab.id !== undefined && tab.url !== undefined && tab.url !== "")
+        .map((tab) => {
+          const url = tab.url ?? "";
+          const extensionFavicon = getFaviconUrl(url);
+          return {
+            id: tab.id!,
+            windowId: tab.windowId,
+            title: tab.title ?? url,
+            url,
+            favIconUrl: extensionFavicon !== "" ? extensionFavicon : (tab.favIconUrl ?? ""),
+            hostname: extractHostname(url),
+            lastAccessed: tab.lastAccessed ?? 0,
+          };
+        })
+        .sort((a, b) => b.lastAccessed - a.lastAccessed);
+      setRecentTabs(list);
+    } catch (err) {
+      console.warn(`${BRAND.logTag}/popup query tabs failed`, err);
+    }
+  }, []);
+
   // 读设置同步默认引擎
   useEffect(() => {
     let alive = true;
@@ -89,37 +115,50 @@ function PopupContent() {
   }, []);
 
   useEffect(() => {
-    let alive = true;
-    void (async () => {
-      try {
-        const all = await queryAllTabs();
-        if (!alive) return;
-        setHasAnyTab(all.length > 0);
-        const list: RecentTab[] = all
-          .filter((tab) => tab.id !== undefined && tab.url !== undefined && tab.url !== "")
-          .map((tab) => {
-            const url = tab.url ?? "";
-            const extensionFavicon = getFaviconUrl(url);
-            return {
-              id: tab.id!,
-              windowId: tab.windowId,
-              title: tab.title ?? url,
-              url,
-              favIconUrl: extensionFavicon !== "" ? extensionFavicon : (tab.favIconUrl ?? ""),
-              hostname: extractHostname(url),
-              lastAccessed: tab.lastAccessed ?? 0,
-            };
-          })
-          .sort((a, b) => b.lastAccessed - a.lastAccessed);
-        setRecentTabs(list);
-      } catch (err) {
-        console.warn(`${BRAND.logTag}/popup query tabs failed`, err);
-      }
-    })();
-    return () => {
-      alive = false;
+    const requestTabsRefresh = () => {
+      void refreshTabs();
     };
-  }, []);
+
+    requestTabsRefresh();
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        requestTabsRefresh();
+      }
+    };
+
+    chrome.tabs?.onCreated?.addListener?.(requestTabsRefresh);
+    chrome.tabs?.onUpdated?.addListener?.(requestTabsRefresh);
+    chrome.tabs?.onRemoved?.addListener?.(requestTabsRefresh);
+    chrome.tabs?.onActivated?.addListener?.(requestTabsRefresh);
+    chrome.tabs?.onMoved?.addListener?.(requestTabsRefresh);
+    chrome.tabs?.onAttached?.addListener?.(requestTabsRefresh);
+    chrome.tabs?.onDetached?.addListener?.(requestTabsRefresh);
+    chrome.tabs?.onReplaced?.addListener?.(requestTabsRefresh);
+    chrome.windows?.onCreated?.addListener?.(requestTabsRefresh);
+    chrome.windows?.onRemoved?.addListener?.(requestTabsRefresh);
+    chrome.windows?.onFocusChanged?.addListener?.(requestTabsRefresh);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", requestTabsRefresh);
+    window.addEventListener("pageshow", requestTabsRefresh);
+
+    return () => {
+      chrome.tabs?.onCreated?.removeListener?.(requestTabsRefresh);
+      chrome.tabs?.onUpdated?.removeListener?.(requestTabsRefresh);
+      chrome.tabs?.onRemoved?.removeListener?.(requestTabsRefresh);
+      chrome.tabs?.onActivated?.removeListener?.(requestTabsRefresh);
+      chrome.tabs?.onMoved?.removeListener?.(requestTabsRefresh);
+      chrome.tabs?.onAttached?.removeListener?.(requestTabsRefresh);
+      chrome.tabs?.onDetached?.removeListener?.(requestTabsRefresh);
+      chrome.tabs?.onReplaced?.removeListener?.(requestTabsRefresh);
+      chrome.windows?.onCreated?.removeListener?.(requestTabsRefresh);
+      chrome.windows?.onRemoved?.removeListener?.(requestTabsRefresh);
+      chrome.windows?.onFocusChanged?.removeListener?.(requestTabsRefresh);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", requestTabsRefresh);
+      window.removeEventListener("pageshow", requestTabsRefresh);
+    };
+  }, [refreshTabs]);
 
   const filteredTabs = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -221,6 +260,7 @@ function PopupContent() {
                   try {
                     await closeTab(tab.id);
                     setRecentTabs((list) => list.filter((t) => t.id !== tab.id));
+                    void refreshTabs();
                   } catch {
                     /* 关闭失败静默 */
                   }
