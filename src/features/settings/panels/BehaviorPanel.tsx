@@ -17,6 +17,8 @@ import { TimelineSettings } from "./TimelineSettings";
 import { SearchSettings } from "./SearchSettings";
 import { MemoryGovernanceSettings } from "./MemoryGovernanceSettings";
 import { ShortcutsPanel } from "./ShortcutsPanel";
+import { AutomationPanel } from "./AutomationPanel";
+import { WorkspaceTemplatesPanel } from "./WorkspaceTemplatesPanel";
 
 interface BehaviorPanelProps {
   settings: UserSettings;
@@ -60,6 +62,16 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
       key: "shortcuts",
       title: t("快捷键"),
       content: <ShortcutsPanel />,
+    },
+    {
+      key: "automation",
+      title: t("自动化规则"),
+      content: <AutomationPanel />,
+    },
+    {
+      key: "workspace-templates",
+      title: t("工作区模板"),
+      content: <WorkspaceTemplatesPanel />,
     },
   ];
 

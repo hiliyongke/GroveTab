@@ -85,3 +85,19 @@ export type { TrashedTab, TrashedItem } from "./trash";
 
 // ── 使用时长追踪 ────────────────────────────────────
 export type { DailyFocusTime, ActiveFocusSession, FocusTimeData } from "./focus-time";
+
+// ── 自动化规则 ──────────────────────────────────────
+export type {
+  RuleAction,
+  ScheduledCondition,
+  OnEventCondition,
+  AutomationRule,
+  AutomationRuleData,
+} from "./automation-rule";
+
+// ── 工作区模板 ──────────────────────────────────────
+export type {
+  TemplateTab,
+  WorkspaceTemplate,
+  WorkspaceTemplateData,
+} from "./workspace-template";

@@ -210,13 +210,13 @@
   }
 
   .tidy-suggestion__solid-action {
-    background: color-mix(in srgb, #0078d4 8%, transparent);
-    border-color: color-mix(in srgb, #0078d4 18%, rgba(255, 255, 255, 0.08));
+    background: color-mix(in srgb, var(--ant-color-primary, #0078d4) 8%, transparent);
+    border-color: color-mix(in srgb, var(--ant-color-primary, #0078d4) 18%, var(--ant-color-border-secondary, rgba(255, 255, 255, 0.08)));
   }
 
   .tidy-suggestion__solid-action:hover,
   .tidy-suggestion__solid-action:focus-visible {
-    background: color-mix(in srgb, #0078d4 14%, transparent);
-    border-color: color-mix(in srgb, #0078d4 26%, rgba(255, 255, 255, 0.12));
+    background: color-mix(in srgb, var(--ant-color-primary, #0078d4) 14%, transparent);
+    border-color: color-mix(in srgb, var(--ant-color-primary, #0078d4) 26%, var(--ant-color-border-secondary, rgba(255, 255, 255, 0.12)));
   }
 }

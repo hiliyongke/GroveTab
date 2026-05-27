@@ -264,10 +264,9 @@ function AppContent() {
     "selectAll",
     useCallback(() => {
       const selectionStore = useSelectionStore.getState();
-      if (selectionStore.selectionMode) {
-        const allIds = useTabsStore.getState().tabs.map((t) => t.id);
-        selectionStore.selectAll(allIds);
-      }
+      // 无论是否已进入多选模式，Ctrl+A 都全选当前所有标签
+      const allIds = useTabsStore.getState().tabs.map((t) => t.id);
+      selectionStore.selectAll(allIds);
     }, []),
   );
 

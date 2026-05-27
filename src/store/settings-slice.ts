@@ -11,17 +11,25 @@
  */
 
 import { create } from "zustand";
-import type { UserSettings } from "@/shared/types";
-import { getSettings, saveSettings, removeData } from "@/repositories";
+import type { UserSettings, AutomationRule, WorkspaceTemplate } from "@/shared/types";
+import { getSettings, saveSettings, removeData, getAutomationRules, getWorkspaceTemplates } from "@/repositories";
 import { STORAGE_KEYS } from "@/shared/config/storage-keys";
 
 interface SettingsState {
   settings: UserSettings;
   loaded: boolean;
+  /** 自动化规则列表（独立于 UserSettings 存储） */
+  automationRules: AutomationRule[];
+  /** 工作区模板列表（独立于 UserSettings 存储） */
+  workspaceTemplates: WorkspaceTemplate[];
   loadSettings: () => Promise<void>;
   updateSettings: (partial: Partial<UserSettings>) => Promise<void>;
   /** 恢复默认配置：同步重置 store 内存状态 + 删除 storage 键，无需刷新页面 */
   resetSettings: () => Promise<void>;
+  /** 更新自动化规则列表 */
+  setAutomationRules: (rules: AutomationRule[]) => void;
+  /** 更新工作区模板列表 */
+  setWorkspaceTemplates: (templates: WorkspaceTemplate[]) => void;
 }
 
 let settingsWriteQueue: Promise<unknown> = Promise.resolve();
@@ -109,10 +117,19 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     memoryGovernanceCooldownMinutes: 10,
   },
   loaded: false,
+  automationRules: [],
+  workspaceTemplates: [],
 
   loadSettings: async () => {
     const settings = await getSettings();
-    set({ settings, loaded: true });
+    const ruleData = await getAutomationRules();
+    const templateData = await getWorkspaceTemplates();
+    set({
+      settings,
+      loaded: true,
+      automationRules: ruleData.rules,
+      workspaceTemplates: templateData.templates,
+    });
   },
 
   /**
@@ -152,6 +169,21 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   resetSettings: async () => {
     await removeData(STORAGE_KEYS.settings);
     const settings = await getSettings();
-    set({ settings, loaded: true });
+    const ruleData = await getAutomationRules();
+    const templateData = await getWorkspaceTemplates();
+    set({
+      settings,
+      loaded: true,
+      automationRules: ruleData.rules,
+      workspaceTemplates: templateData.templates,
+    });
+  },
+
+  setAutomationRules: (rules) => {
+    set({ automationRules: rules });
+  },
+
+  setWorkspaceTemplates: (templates) => {
+    set({ workspaceTemplates: templates });
   },
 }));

@@ -57,6 +57,10 @@ export const STORAGE_KEYS = Object.freeze({
   trash: key("trash"),
   /** 标签页使用时长（DailyFocusTime[]） */
   focusTime: key("focus_time"),
+  /** 自动化规则（AutomationRuleData） */
+  automationRules: key("automation_rules"),
+  /** 工作区模板（WorkspaceTemplateData） */
+  workspaceTemplates: key("workspace_templates"),
 });
 
 /** 判断是否属于当前应用命名空间的存储键。 */

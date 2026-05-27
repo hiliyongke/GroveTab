@@ -22,6 +22,7 @@ import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { formatUrlForDisplay } from "@/shared/utils/url-display";
 import { useFocusTime } from "@/shared/hooks/use-focus-time";
 import { TabContextMenu } from "./TabContextMenu";
+import { TabPreviewCard } from "./TabPreviewCard";
 import styles from "./styles/items.module.less";
 
 interface TabItemProps {
@@ -91,6 +92,7 @@ export function TabItem({
   const enterSelectionMode = useSelectionStore((s) => s.enterSelectionMode);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [faviconError, setFaviconError] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const speedDialSites = useSpeedDialStore((s) => s.sites);
   const addSite = useSpeedDialStore((s) => s.addSite);
   /** 标准化 URL：去掉协议前缀和常见跟踪参数，用于去重比较 */
@@ -162,9 +164,13 @@ export function TabItem({
    */
   const handleClose = (e: React.MouseEvent) => {
     e.stopPropagation();
-    void Promise.resolve(onClose(tab.id)).catch(() => {
-      /* store 已 toast，此处吞掉 */
-    });
+    setIsClosing(true);
+    // 延迟实际关闭，让退场动画播放完
+    setTimeout(() => {
+      void Promise.resolve(onClose(tab.id)).catch(() => {
+        setIsClosing(false);
+      });
+    }, 180);
   };
 
   /** 选中态背景色 */
@@ -218,6 +224,7 @@ export function TabItem({
           showUrlHint ? styles["has-url-hint"] : "",
           isSelected ? styles["is-selected"] : "",
           isDiscarded ? styles["is-discarded"] : "",
+          isClosing ? styles["is-closing"] : "",
         ]
           .filter(Boolean)
           .join(" ")}
@@ -262,12 +269,15 @@ export function TabItem({
         <Flex vertical className={styles["app-tab-item-main"]}>
           {/* 上行：标题 + 标记 */}
           <Flex className={styles["app-tab-item-head"]} align="center" gap="small">
-            <Tooltip
-              title={focusTime ? `${tab.title} · ${t("今日")} ${focusTime}` : tab.title}
-              mouseEnterDelay={0.4}
+            <TabPreviewCard
+              tab={tab}
+              focusTimeLabel={focusTime || undefined}
+              onClose={(id) => {
+                void Promise.resolve(onClose(id)).catch(() => {});
+              }}
             >
               <Typography.Text className={styles["app-tab-item-title"]}>{tab.title}</Typography.Text>
-            </Tooltip>
+            </TabPreviewCard>
             {showHostname && (
               <Typography.Text className={styles["app-tab-item-hostname"]}>
                 {tab.hostname}
