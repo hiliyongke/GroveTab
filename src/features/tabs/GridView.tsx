@@ -19,7 +19,7 @@
  */
 
 import { useMemo, useState } from "react";
-import { Button, Card, Flex, Popover, theme, Typography, Space } from "antd";
+import { Button, Card, Flex, Popover, theme, Typography, Space, Empty } from "antd";
 import { Volume2, X } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useTabsStore, useSettingsStore } from "@/store";
@@ -32,10 +32,14 @@ import { TabItem } from "./TabItem";
 import type { LiveTab } from "@/shared/types";
 import styles from "./styles/views.module.less";
 
+interface GridViewProps {
+  filterQuery?: string;
+}
+
 /**
  * 网格视图主组件：每个域名一张大卡片
  */
-export function GridView() {
+export function GridView({ filterQuery = "" }: GridViewProps) {
   const tabs = useTabsStore((s) => s.tabs);
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
   const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
@@ -55,7 +59,21 @@ export function GridView() {
   const cardSize = useSettingsStore((s) => s.settings.gridCardSize ?? "md");
   const { t } = useT();
 
-  const groups = useMemo(() => groupTabsByDomain(tabs), [tabs]);
+  const allGroups = useMemo(() => groupTabsByDomain(tabs), [tabs]);
+
+  // 搜索过滤：匹配域名 或 组内任意 tab 匹配标题/URL
+  const groups = useMemo(() => {
+    const query = filterQuery.trim().toLowerCase();
+    if (!query) return allGroups;
+    return allGroups.filter((group) => {
+      if (group.domain.toLowerCase().includes(query)) return true;
+      return group.tabs.some(
+        (tab) =>
+          tab.title.toLowerCase().includes(query) ||
+          tab.url.toLowerCase().includes(query),
+      );
+    });
+  }, [allGroups, filterQuery]);
 
   /**
    * 根据卡片尺寸档位计算实际的卡片最小宽度。
@@ -85,7 +103,13 @@ export function GridView() {
   /** 当前打开 Popover 的域名（null 代表全部关闭）——同时至多一个浮层 */
   const [activeDomain, setActiveDomain] = useState<string | null>(null);
 
-  if (groups.length === 0) return null;
+  // 空状态：原始 tabs 为空时不渲染；过滤后为空时显示 Empty
+  const allTabsEmpty = tabs.length === 0;
+  if (allTabsEmpty) return null;
+
+  if (groups.length === 0) {
+    return <Empty description={t("search.noDomainResults")} />;
+  }
 
   /** Popover 内点击「跳转」：跳完顺手关闭浮层 */
   const handleJumpFromPopover = (tabId: number, windowId: number) => {

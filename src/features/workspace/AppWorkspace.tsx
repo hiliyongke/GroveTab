@@ -16,7 +16,7 @@ import { Globe } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useTabsStore, useSelectionStore } from "@/store";
 import { OnboardingCard } from "@/features/sessions/OnboardingCard";
-import { DomainGroupView } from "@/features/tabs/DomainGroupView";
+import { TabsView } from "@/features/tabs/TabsView";
 import { SelectionModeNotice } from "@/features/tabs/SelectionModeNotice";
 import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
 import { useT } from "@/shared/i18n";
@@ -158,7 +158,7 @@ export function AppWorkspace({
           </div>
         ) : (
           <div key="tabs-fallback" className="app-view-transition">
-            <DomainGroupView />
+            <TabsView />
           </div>
         )}
       </section>
