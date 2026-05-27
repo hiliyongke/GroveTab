@@ -1,12 +1,13 @@
-import { useCallback } from "react";
-import { Layout, Space, Button, Tooltip, Tag, Flex } from "antd";
-import { Search, Settings, Sun, Moon, SunMoon, Globe, BarChart3, History, Trash2 } from "lucide-react";
+import { useCallback, useState } from "react";
+import { Layout, Space, Button, Tooltip, Tag, Flex, Popover } from "antd";
+import { Search, Settings, Sun, Moon, SunMoon, Globe, BarChart3, History, Trash2, SlidersHorizontal } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useSettingsStore } from "@/store";
 import { useT } from "@/shared/i18n";
 import { BRAND } from "@/shared/config/brand";
 import { DropdownMenu } from "@/features/workspace/DropdownMenu";
 import { WorkspaceSwitcher } from "@/features/workspace/WorkspaceSwitcher";
+import { QuickTogglePanel } from "@/features/workspace/QuickTogglePanel";
 import type { NewtabPageMode } from "@/shared/types";
 
 const { Header } = Layout;
@@ -63,6 +64,8 @@ export function AppHeader({
     const next = theme === "light" ? "dark" : theme === "dark" ? "system" : "light";
     void updateSettings({ theme: next });
   }, [theme, updateSettings]);
+
+  const [quickToggleOpen, setQuickToggleOpen] = useState(false);
 
   /**
    * 主题图标：三态分别用差异化强烈的图形，避免「点了看不出变化」
@@ -166,6 +169,23 @@ export function AppHeader({
             aria-label={t(`theme.${theme}`)}
           />
         </Tooltip>
+        <Popover
+          open={quickToggleOpen}
+          onOpenChange={setQuickToggleOpen}
+          trigger="click"
+          placement="bottomRight"
+          overlayClassName="app-quick-toggle-overlay"
+          content={<QuickTogglePanel onOpenSettings={onSettings} onClose={() => setQuickToggleOpen(false)} />}
+        >
+          <Tooltip title={t('quickToggle.title')}>
+            <Button
+              size="small"
+              type="text"
+              icon={<SlidersHorizontal size={ICON_SIZE.SMALL} className="app-icon" />}
+              aria-label={t('quickToggle.title')}
+            />
+          </Tooltip>
+        </Popover>
         <Tooltip title={t('设置')}>
           <Button
             size="small"

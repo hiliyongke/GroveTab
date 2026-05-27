@@ -2,6 +2,26 @@
 
 ## 当前版本：1.3.0
 
+## 产品定位
+
+单机标签管理浏览器扩展，不考虑云同步/团队协作。
+
+## 核心架构决策
+
+- **视图合并**：domain/compact/grid → 统一 `tabs` 视图 + `tabsLayout`（masonry/compact/grid）
+- **ViewDock**：6 个视图（tabs/timeline/tabgroup/window/frequency/kanban），archive 为隐藏视图
+- **设置面板**：4 Tab（appearance/behavior/system/about），shortcuts 并入 behavior
+- **Bookmark 目录**：`features/bookmarks/`（从 tabs/ 迁出）
+- **LEGACY_VIEW_MAP**：旧设置自动迁移（domain→tabs+masonry 等）
+
+## 关键功能实现
+
+- **使用时长追踪**：SW FocusTimeTracker，按 URL×day 聚合，30天保留，useFocusTime hook
+- **自动化规则引擎**：ScheduledCondition（定时清理）+ OnEventCondition（事件触发），kind 判别字段
+- **工作区模板**：保存当前标签组为模板，一键恢复
+- **悬停预览卡片**：TabPreviewCard（Popover），含 URL/时长/域名/操作
+- **关闭退场动画**：is-closing class + CSS transition
+
 ## 近期动态（2026-05-27）
 
 ### GroveTab 产品分析 & 改进规划

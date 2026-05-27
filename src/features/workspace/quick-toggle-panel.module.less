@@ -1,0 +1,93 @@
+/**
+ * QuickTogglePanel 快捷开关面板样式
+ *
+ * Popover 内容区，紧凑布局，4 分组 × 2-3 项。
+ * 遵循项目 BEM + app- 前缀命名、CSS 变量、深色模式选择器。
+ */
+
+.root {
+  width: 280px;
+  padding: 4px 0;
+}
+
+/* ── 标题栏 ── */
+.header {
+  padding: 4px 12px 8px;
+}
+
+.headerTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--app-text-primary, rgba(0, 0, 0, 0.88));
+}
+
+/* ── 分组标题 ── */
+.groupTitle {
+  padding: 4px 12px 2px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--app-text-tertiary, rgba(0, 0, 0, 0.45));
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+
+/* ── 开关行 ── */
+.toggleRow {
+  padding: 4px 12px;
+  min-height: 32px;
+}
+
+.toggleLabel {
+  font-size: 13px;
+  color: var(--app-text-secondary, rgba(0, 0, 0, 0.65));
+}
+
+/* ── Segmented 紧凑样式 ── */
+.segmented {
+  :global(.ant-segmented-item-label) {
+    min-height: 24px;
+    padding: 0 8px;
+    font-size: 12px;
+    line-height: 24px;
+  }
+}
+
+/* ── 分割线 ── */
+.divider {
+  margin: 4px 12px;
+}
+
+/* ── 完整设置按钮 ── */
+.fullSettingsBtn {
+  margin-top: 2px;
+  color: var(--app-text-tertiary, rgba(0, 0, 0, 0.45));
+  font-size: 12px;
+
+  &:hover {
+    color: var(--app-text-secondary, rgba(0, 0, 0, 0.65));
+  }
+}
+
+/* ── 深色模式 ── */
+:global([data-theme="dark"]) {
+  .headerTitle {
+    color: var(--app-text-primary, rgba(255, 255, 255, 0.88));
+  }
+
+  .groupTitle {
+    color: var(--app-text-tertiary, rgba(255, 255, 255, 0.45));
+  }
+
+  .toggleLabel {
+    color: var(--app-text-secondary, rgba(255, 255, 255, 0.65));
+  }
+
+  .fullSettingsBtn {
+    color: var(--app-text-tertiary, rgba(255, 255, 255, 0.45));
+
+    &:hover {
+      color: var(--app-text-secondary, rgba(255, 255, 255, 0.65));
+    }
+  }
+}

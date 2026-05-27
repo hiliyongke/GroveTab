@@ -1369,5 +1369,22 @@ const en: Record<string, string> = {
   "autoCleanup.history": "history events {count} items",
   "autoCleanup.searchHistory": "search history {count} items",
   "autoCleanup.summary": "Storage running low, auto-cleaned: {items}",
+
+  // ── QuickToggle panel ──
+  "quickToggle.title": "Quick Settings",
+  "quickToggle.group.view": "View",
+  "quickToggle.group.behavior": "Behavior",
+  "quickToggle.group.privacy": "Privacy",
+  "quickToggle.showItemFavicon": "Tab favicons",
+  "quickToggle.trackTabFocusTime": "Focus time tracking",
+  "quickToggle.memoryGovernance": "Memory governance",
+  "quickToggle.historyEnabled": "History",
+  "quickToggle.fullSettings": "Full settings…",
+  "density.compact": "Compact",
+  "density.default": "Default",
+  "density.comfortable": "Comfortable",
+  "motion.auto": "Auto",
+  "motion.on": "Reduce",
+  "motion.off": "On",
 };
 export default en;

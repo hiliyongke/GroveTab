@@ -1323,5 +1323,22 @@ const zhCN: Record<string, string> = {
   "autoCleanup.history": "历史事件 {count} 条",
   "autoCleanup.searchHistory": "搜索历史 {count} 条",
   "autoCleanup.summary": "存储空间紧张，已自动清理：{items}",
+
+  // ── QuickToggle 快捷开关面板 ──
+  "quickToggle.title": "快捷设置",
+  "quickToggle.group.view": "视图",
+  "quickToggle.group.behavior": "行为",
+  "quickToggle.group.privacy": "隐私",
+  "quickToggle.showItemFavicon": "子项域名图标",
+  "quickToggle.trackTabFocusTime": "使用时长追踪",
+  "quickToggle.memoryGovernance": "内存治理",
+  "quickToggle.historyEnabled": "历史记录",
+  "quickToggle.fullSettings": "完整设置…",
+  "density.compact": "紧凑",
+  "density.default": "默认",
+  "density.comfortable": "宽松",
+  "motion.auto": "自动",
+  "motion.on": "减弱",
+  "motion.off": "开启",
 };
 export default zhCN;
