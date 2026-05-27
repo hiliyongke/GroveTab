@@ -1,16 +1,26 @@
-import { useMemo, useState } from "react";
+/**
+ * TabGroupSection — 窗口内标签组区段
+ *
+ * 嵌入在 WindowCard 内部，渲染 Chrome 原生 Tab Group：
+ *   - 彩色圆点 + 组标题（支持 inline rename）+ 标签数 + 更多操作
+ *   - 折叠/展开同步 Chrome 原生 Tab Group 状态
+ *   - 拖放目标（DroppableZone）：可拖入标签到该分组
+ *
+ * 操作逻辑复用 useTabGroupActions hook，与 TabGroupCard 保持一致。
+ */
+
+import { useMemo } from "react";
 import {
   Button,
   Dropdown,
   Input,
-  Modal,
   Popover,
+  Space,
   Tag,
   Tooltip,
   Typography,
-  theme,
-  Space,
   List,
+  theme,
 } from "antd";
 import type { MenuProps } from "antd";
 import {
@@ -25,22 +35,15 @@ import {
 } from "lucide-react";
 
 import type { LiveTab } from "@/shared/types";
+import type { ChromeTabGroupColor } from "@/chrome";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { cssVars } from "@/shared/utils/css-vars";
 import { useT } from "@/shared/i18n";
-import { translate } from "@/shared/i18n/core";
 import { feedback } from "@/shared/ui/feedback";
-import {
-  updateTabGroup,
-  ungroupTabs,
-  closeTabs,
-  discardTab,
-  createWindowWithTab,
-  moveTabs,
-  groupTabs,
-} from "@/chrome";
-import type { ChromeTabGroupColor } from "@/chrome";
+import { updateTabGroup } from "@/chrome";
 import { swBroadcast } from "@/shared/utils/sw-broadcast";
+import { useTabGroupActions } from "../hooks/useTabGroupActions";
+import type { TabGroupData } from "../components/TabGroupCard";
 import { DraggableTab } from "./DraggableTab";
 import { DroppableZone } from "./DroppableZone";
 import styles from "../styles/views.module.less";
@@ -80,11 +83,6 @@ interface TabGroupSectionProps {
   onRefresh: () => void;
 }
 
-function getGroupTitle(groupId: number, tabs: LiveTab[], fallback: string): string {
-  const title = tabs.find((tab) => tab.groupTitle)?.groupTitle?.trim();
-  return title && title.length > 0 ? title : `${fallback} #${groupId}`;
-}
-
 export function TabGroupSection({
   groupId,
   tabs,
@@ -95,130 +93,63 @@ export function TabGroupSection({
 }: TabGroupSectionProps) {
   const { t } = useT();
   const { token } = theme.useToken();
-  const [renaming, setRenaming] = useState(false);
-  const [titleDraft, setTitleDraft] = useState(() =>
-    getGroupTitle(groupId, tabs, translate('未命名分组')),
-  );
-  const [busy, setBusy] = useState(false);
 
+  // 构造 TabGroupData 供 useTabGroupActions 使用
   const color = (tabs.find((tab) => tab.groupColor)?.groupColor ?? "grey") as TabGroupColor;
-  const collapsed = tabs.some((tab) => tab.groupCollapsed === true);
-  const title = useMemo(
-    () => getGroupTitle(groupId, tabs, t('未命名分组')),
-    [groupId, tabs, t],
+  const groupCollapsed = tabs.some((tab) => tab.groupCollapsed === true);
+  const title = useMemo(() => {
+    const groupTitle = tabs.find((tab) => tab.groupTitle)?.groupTitle?.trim();
+    return groupTitle && groupTitle.length > 0 ? groupTitle : t("tabGroup.unnamed");
+  }, [tabs, t]);
+
+  const groupData = useMemo<TabGroupData>(
+    () => ({
+      groupId,
+      title,
+      color,
+      collapsed: groupCollapsed,
+      windowId: tabs[0]?.windowId ?? -1,
+      tabs,
+    }),
+    [groupId, title, color, groupCollapsed, tabs],
   );
+
+  const {
+    renaming,
+    titleDraft,
+    setTitleDraft,
+    busy,
+    startRename,
+    handleRename,
+    handleColorChange,
+    handleUngroup,
+    handleCloseGroup,
+    handleDiscardGroup,
+    handleMoveToNewWindow,
+  } = useTabGroupActions({ group: groupData });
+
   const colorValue = COLOR_HEX[color] ?? COLOR_HEX.grey;
 
-  const runGroupAction = async (action: () => Promise<void>, successKey?: string) => {
-    if (busy) return;
-    setBusy(true);
-    try {
-      await action();
-      if (successKey) feedback.success(t(successKey));
-      onRefresh();
-    } catch (err) {
-      feedback.error(t('标签组操作失败，请重试'), err);
-      onRefresh();
-    } finally {
-      setBusy(false);
-    }
-  };
-
   const handleToggleCollapsed = () => {
-    void runGroupAction(async () => {
-      const group = await updateTabGroup(groupId, { collapsed: !collapsed });
-      swBroadcast("tab-group-updated", {
-        id: group.id,
-        title: group.title,
-        color: group.color,
-        collapsed: group.collapsed,
-        windowId: group.windowId,
-      });
-    });
-  };
-
-  const handleRename = async () => {
-    const nextTitle = titleDraft.trim();
-    await runGroupAction(async () => {
-      const group = await updateTabGroup(groupId, { title: nextTitle });
-      swBroadcast("tab-group-updated", {
-        id: group.id,
-        title: group.title,
-        color: group.color,
-        collapsed: group.collapsed,
-        windowId: group.windowId,
-      });
-      setRenaming(false);
-    }, "windowGroup.renamed");
-  };
-
-  const handleColorChange = (nextColor: TabGroupColor) => {
-    void runGroupAction(async () => {
-      const group = await updateTabGroup(groupId, { color: nextColor });
-      swBroadcast("tab-group-updated", {
-        id: group.id,
-        title: group.title,
-        color: group.color,
-        collapsed: group.collapsed,
-        windowId: group.windowId,
-      });
-    }, "windowGroup.colorChanged");
-  };
-
-  const handleMoveToNewWindow = () => {
-    void runGroupAction(async () => {
-      const [firstTab, ...restTabs] = tabs;
-      if (!firstTab) return;
-      const newWindow = await createWindowWithTab(firstTab.id);
-      if (!newWindow.id) throw new Error("new window has no id");
-      if (restTabs.length > 0) {
-        await moveTabs(
-          restTabs.map((tab) => tab.id),
-          newWindow.id,
-          -1,
-        );
+    if (busy) return;
+    void (async () => {
+      try {
+        const group = await updateTabGroup(groupId, { collapsed: !groupCollapsed });
+        swBroadcast("tab-group-updated", {
+          id: group.id,
+          title: group.title,
+          color: group.color,
+          collapsed: group.collapsed,
+          windowId: group.windowId,
+        });
+        onRefresh();
+      } catch (err) {
+        feedback.error(t("tabGroup.actionFailed"), err);
       }
-      const movedTabIds = tabs.map((tab) => tab.id);
-      const nextGroupId = await groupTabs({
-        tabIds: movedTabIds,
-        createProperties: { windowId: newWindow.id },
-      });
-      const group = await updateTabGroup(nextGroupId, { title, color, collapsed });
-      swBroadcast("tab-group-updated", {
-        id: group.id,
-        title: group.title,
-        color: group.color,
-        collapsed: group.collapsed,
-        windowId: group.windowId,
-      });
-    }, "windowGroup.movedToNewWindow");
+    })();
   };
 
-  const handleUngroup = () => {
-    void runGroupAction(async () => {
-      await ungroupTabs(tabs.map((tab) => tab.id));
-      swBroadcast("tab-ungrouped", { groupId, windowId: tabs[0]?.windowId });
-    }, "windowGroup.ungrouped");
-  };
-
-  const handleCloseGroup = () => {
-    Modal.confirm({
-      title: t('关闭该标签组？'),
-      content: t('将关闭该组内 {count} 个标签。', { count: tabs.length }),
-      okButtonProps: { danger: true },
-      onOk: () =>
-        runGroupAction(async () => {
-          await closeTabs(tabs.map((tab) => tab.id));
-        }, "windowGroup.closed"),
-    });
-  };
-
-  const handleDiscardGroup = () => {
-    void runGroupAction(async () => {
-      await Promise.all(tabs.filter((tab) => !tab.discarded).map((tab) => discardTab(tab.id)));
-    }, "windowGroup.discarded");
-  };
-
+  // 颜色选择器
   const colorPicker = (
     <Space wrap className={styles["app-window-group-color-grid"]}>
       {TAB_GROUP_COLORS.map((item) => (
@@ -238,18 +169,15 @@ export function TabGroupSection({
     {
       key: "rename",
       icon: <Pencil size={ICON_SIZE.SMALL} />,
-      label: t('重命名'),
-      onClick: () => {
-        setTitleDraft(title);
-        setRenaming(true);
-      },
+      label: t("tabGroup.rename"),
+      onClick: startRename,
     },
     {
       key: "color",
       icon: <Palette size={ICON_SIZE.SMALL} />,
       label: (
         <Popover trigger="click" placement="right" content={colorPicker}>
-          {t('更换颜色')}
+          {t("tabGroup.changeColor")}
         </Popover>
       ),
     },
@@ -257,26 +185,26 @@ export function TabGroupSection({
     {
       key: "ungroup",
       icon: <Ungroup size={ICON_SIZE.SMALL} />,
-      label: t('解散分组'),
+      label: t("tabGroup.dissolve"),
       onClick: handleUngroup,
     },
     {
       key: "discard",
       icon: <Moon size={ICON_SIZE.SMALL} />,
-      label: t('休眠组内标签'),
+      label: t("tabGroup.discard"),
       onClick: handleDiscardGroup,
     },
     {
       key: "move-new-window",
       icon: <ExternalLink size={ICON_SIZE.SMALL} />,
-      label: t('移动到新窗口'),
+      label: t("tabGroup.moveToWindow"),
       onClick: handleMoveToNewWindow,
     },
     {
       key: "close",
       danger: true,
       icon: <X size={ICON_SIZE.SMALL} />,
-      label: t('关闭分组'),
+      label: t("tabGroup.closeGroup"),
       onClick: handleCloseGroup,
     },
   ];
@@ -301,12 +229,12 @@ export function TabGroupSection({
         <Button
           type="text"
           className={styles["app-window-group-trigger"]}
-          aria-expanded={!collapsed}
+          aria-expanded={!groupCollapsed}
           onClick={handleToggleCollapsed}
           disabled={busy}
         >
           <ChevronDown
-            className={`${styles["app-window-group-chevron"]}${collapsed ? ` ${styles["is-collapsed"]}` : ""}`}
+            className={`${styles["app-window-group-chevron"]}${groupCollapsed ? ` ${styles["is-collapsed"]}` : ""}`}
             size={ICON_SIZE.TINY}
           />
           <Typography.Text className={styles["app-window-group-dot"]} />
@@ -332,20 +260,20 @@ export function TabGroupSection({
         </Button>
 
         <Dropdown menu={{ items: menuItems }} trigger={["click"]} placement="bottomRight">
-          <Tooltip title={t('更多')}>
+          <Tooltip title={t("更多")}>
             <Button
               type="text"
               size="small"
               loading={busy}
               icon={busy ? undefined : <MoreHorizontal size={ICON_SIZE.SMALL} />}
-              aria-label={t('更多')}
+              aria-label={t("更多")}
               className={styles["app-window-group-action"]}
             />
           </Tooltip>
         </Dropdown>
       </Space>
 
-      {!collapsed && (
+      {!groupCollapsed && (
         <List className={styles["app-window-group-list"]}>
           {tabs.map((tab) => (
             <DraggableTab

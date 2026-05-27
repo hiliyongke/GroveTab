@@ -866,6 +866,7 @@ const en: Record<string, string> = {
   "window.closeConfirmTitle": "Close this window?",
   "window.closeConfirmContent":
     "This window contains {count} tabs. You can restore it from recently closed items.",
+  "window.searchPlaceholder": "Search windows or tabs...",
   "window.summary": "{count} tabs / {groups} groups",
   "windowGroup.untitled": "Unnamed group",
   "windowGroup.ungroupedTabs": "Ungrouped tabs",

@@ -833,6 +833,7 @@ const zhCN: Record<string, string> = {
   "window.closed": "窗口已关闭",
   "window.closeConfirmTitle": "关闭该窗口？",
   "window.closeConfirmContent": "此窗口包含 {count} 个标签，关闭后可在最近关闭中恢复。",
+  "window.searchPlaceholder": "搜索窗口或标签...",
   "window.summary": "{count} 个标签 / {groups} 个分组",
   "windowGroup.untitled": "未命名分组",
   "windowGroup.ungroupedTabs": "未分组标签",

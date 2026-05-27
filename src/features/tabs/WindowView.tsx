@@ -2,18 +2,15 @@
  * WindowView — 多窗口管理视图
  *
  * 按窗口分组展示标签页，支持：
+ *   - 搜索过滤（按标签标题/URL）
  *   - 查看每个窗口的标签数量和焦点状态
  *   - 将标签移动到其他窗口
  *   - 合并所有窗口到一个窗口
  *   - 关闭整个窗口
- *
- * 设计：
- *   - 使用 antd Card 展示每个窗口
- *   - 当前窗口高亮显示
- *   - 标签列表可展开/折叠
+ *   - 拖拽排序窗口卡片 / 跨窗口拖拽标签
  */
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Empty, Flex } from "antd";
 import {
   DndContext,
@@ -94,6 +91,21 @@ function shouldCollapseWindow(
   }
 }
 
+/**
+ * 按搜索关键词过滤标签列表（标题/URL 模糊匹配）。
+ * 空关键词返回原始列表。
+ */
+function filterTabs(tabs: LiveTab[], query: string): LiveTab[] {
+  if (!query.trim()) return tabs;
+  const q = query.trim().toLowerCase();
+  return tabs.filter(
+    (tab) =>
+      tab.title?.toLowerCase().includes(q) ||
+      tab.url?.toLowerCase().includes(q) ||
+      tab.hostname?.toLowerCase().includes(q),
+  );
+}
+
 export function WindowView() {
   const tabs = useTabsStore((s) => s.tabs);
   const windows = useTabsStore((s) => s.windows);
@@ -123,12 +135,29 @@ export function WindowView() {
   }, [rawWindowCardColumns]);
   const { t } = useT();
 
+  // ── 搜索过滤 ──────────────────────────────
+  const [filterQuery, setFilterQuery] = useState("");
+
   const windowGroups = useMemo(() => groupTabsByWindow(tabs), [tabs]);
+
+  // 搜索时过滤每个窗口内的标签，无匹配则不渲染该窗口
+  const filteredWindowGroups = useMemo(() => {
+    if (!filterQuery.trim()) return windowGroups;
+    const result = new Map<number, LiveTab[]>();
+    for (const [windowId, windowTabs] of windowGroups) {
+      const filtered = filterTabs(windowTabs, filterQuery);
+      if (filtered.length > 0) {
+        result.set(windowId, filtered);
+      }
+    }
+    return result;
+  }, [windowGroups, filterQuery]);
+
   const visibleTabIds = useMemo(() => tabs.map((tab) => tab.id), [tabs]);
 
   const sortedWindowIds = useMemo(() => {
     const orderIndex = new Map(windowCardOrder.map((id, index) => [id, index]));
-    return [...windowGroups.keys()].sort((a, b) => {
+    return [...filteredWindowGroups.keys()].sort((a, b) => {
       if (a === currentWindowId) return -1;
       if (b === currentWindowId) return 1;
 
@@ -145,7 +174,7 @@ export function WindowView() {
 
       return a - b;
     });
-  }, [currentWindowId, windowCardOrder, windowGroups, windows]);
+  }, [currentWindowId, windowCardOrder, filteredWindowGroups, windows]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -234,7 +263,7 @@ export function WindowView() {
 
   return (
     <Flex vertical gap="middle">
-      <WindowToolbar />
+      <WindowToolbar filterQuery={filterQuery} onFilterChange={setFilterQuery} />
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
@@ -248,7 +277,7 @@ export function WindowView() {
         >
           <div className={styles["app-window-grid"]} style={getColumnVars(forcedColumns)}>
             {sortedWindowIds.map((windowId) => {
-              const windowTabs = windowGroups.get(windowId) ?? [];
+              const windowTabs = filteredWindowGroups.get(windowId) ?? [];
               return (
                 <SortableWindowCard key={windowId} windowId={windowId}>
                   <WindowCard

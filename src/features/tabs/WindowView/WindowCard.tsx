@@ -1,39 +1,25 @@
-import { useMemo, useState } from "react";
-import { Button, Dropdown, Input, Modal, Tag, Tooltip, theme, Typography, Flex, List } from "antd";
-import type { MenuProps } from "antd";
-import {
-  ChevronDown,
-  Edit3,
-  EyeOff,
-  Layers,
-  Merge,
-  Monitor,
-  MoreHorizontal,
-  Plus,
-  Shield,
-  X,
-  Columns2,
-} from "lucide-react";
+/**
+ * WindowCard — 窗口卡片
+ *
+ * 使用 GroupCardShell 作为卡片骨架，视觉与其他视图对齐：
+ *   - 左侧/顶部身份色条
+ *   - 头部：窗口图标 + 标题（支持别名编辑）+ 标签 + 更多操作
+ *   - 内容区：TabGroupSection + 未分组标签
+ *   - Ghost Drop Zone：快速创建分组
+ */
+
+import { useMemo } from "react";
+import { Button, Dropdown, Input, Tag, Tooltip, Typography, Flex, List, theme } from "antd";
+import { ChevronDown, EyeOff, Layers, Monitor, MoreHorizontal, Plus, Shield } from "lucide-react";
 
 import type { LiveTab, WindowInfo } from "@/shared/types";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { cssVars } from "@/shared/utils/css-vars";
 import { useT } from "@/shared/i18n";
-import { translate } from "@/shared/i18n/core";
-import { feedback } from "@/shared/ui/feedback";
-import {
-  arrangeWindows,
-  moveTabs,
-  closeWindow,
-  createTabGroup,
-  snapWindow,
-  type SplitLayout,
-  type WindowSnapAction,
-} from "@/chrome";
-import { useMetadataStore, useSettingsStore, useTabsStore } from "@/store";
-import { swBroadcast } from "@/shared/utils/sw-broadcast";
+import { useSettingsStore } from "@/store";
 import { GroupCardShell } from "../components/GroupCardShell";
 import { useCardCollapse } from "../hooks/useCardCollapse";
+import { useWindowActions } from "../hooks/useWindowActions";
 import { DraggableTab } from "./DraggableTab";
 import { DroppableZone } from "./DroppableZone";
 import { TabGroupSection } from "./TabGroupSection";
@@ -55,8 +41,6 @@ interface WindowCardProps {
   onCloseTab: (tabId: number) => void;
   onRefresh: () => void;
 }
-
-const BATCH = 10;
 
 function buildGroupedTabs(tabs: LiveTab[]): { groups: GroupedTabs; ungroupedTabs: LiveTab[] } {
   const groupMap = new Map<number, LiveTab[]>();
@@ -85,7 +69,7 @@ function getWindowTitle(
   alias?: string,
 ): string {
   if (alias && alias.trim().length > 0) return alias.trim();
-  return isCurrent ? t("当前窗口") : t("窗口 {id}", { id: windowId });
+  return isCurrent ? t("window.current") : t("window.otherWithId", { id: windowId });
 }
 
 export function WindowCard({
@@ -102,8 +86,6 @@ export function WindowCard({
   const { t } = useT();
   const { token } = theme.useToken();
   const { collapsed, toggleCollapse } = useCardCollapse({ initialCollapsed });
-  const alias = useMetadataStore((state) => state.windowAliases[windowId]);
-  const setWindowAlias = useMetadataStore((state) => state.setWindowAlias);
   const showGroupSection = useSettingsStore(
     (state) => state.settings.windowCardShowGroupSection ?? true,
   );
@@ -113,24 +95,37 @@ export function WindowCard({
   const accentBarPosition = useSettingsStore(
     (state) => state.settings.windowCardAccentBarPosition ?? "left",
   );
-  const closeConfirmThreshold = useSettingsStore(
-    (state) => state.settings.closeConfirmThreshold ?? 20,
-  );
-  const [aliasEditing, setAliasEditing] = useState(false);
-  const [aliasDraft, setAliasDraft] = useState(alias ?? "");
-  const [busy, setBusy] = useState(false);
 
   const isCurrent = windowId === currentWindowId;
   const isFocused = windowInfo?.focused ?? false;
   const isIncognito = windowInfo?.incognito ?? tabs.some((tab) => tab.incognito);
   const { groups, ungroupedTabs } = useMemo(() => buildGroupedTabs(tabs), [tabs]);
-  const title = getWindowTitle(t, windowId, isCurrent, alias);
   const groupCount = groups.length;
   const splitViewCount = useMemo(
     () =>
       new Set(tabs.map((tab) => tab.splitViewId).filter((id) => id !== undefined && id >= 0)).size,
     [tabs],
   );
+
+  const {
+    alias,
+    aliasEditing,
+    aliasDraft,
+    setAliasDraft,
+    busy,
+    handleSaveAlias,
+    menuItems,
+    handleCreateGroupFromUngrouped,
+  } = useWindowActions({
+    windowId,
+    tabs,
+    isCurrent,
+    isIncognito,
+    ungroupedTabs,
+    onRefresh,
+  });
+
+  const title = getWindowTitle(t, windowId, isCurrent, alias);
 
   const cardStyle = useMemo<React.CSSProperties>(
     () =>
@@ -150,204 +145,6 @@ export function WindowCard({
     [collapsed, isFocused, isIncognito, token],
   );
 
-  const runWindowAction = async (action: () => Promise<void>, successMessage?: string) => {
-    if (busy) return;
-    setBusy(true);
-    try {
-      await action();
-      if (successMessage) feedback.success(successMessage);
-      onRefresh();
-    } catch (err) {
-      feedback.error(t("窗口操作失败，请重试"), err);
-      onRefresh();
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const handleSaveAlias = () => {
-    void setWindowAlias(windowId, aliasDraft);
-    setAliasEditing(false);
-  };
-
-  const handleMergeToCurrent = () => {
-    if (isCurrent) return;
-    void runWindowAction(
-      async () => {
-        const tabIds = tabs.map((tab) => tab.id);
-        for (let i = 0; i < tabIds.length; i += BATCH) {
-          await moveTabs(tabIds.slice(i, i + BATCH), currentWindowId, -1);
-        }
-        swBroadcast("tab-moved", { windowId: currentWindowId, count: tabIds.length });
-      },
-      translate("已将 {count} 个标签合并到当前窗口", { count: tabs.length }),
-    );
-  };
-
-  const handleCloseWindow = () => {
-    const execute = () =>
-      runWindowAction(async () => {
-        await closeWindow(windowId);
-        swBroadcast("tab-removed", { windowId, isWindowClosing: true });
-      }, t("窗口已关闭"));
-
-    if (tabs.length > closeConfirmThreshold) {
-      Modal.confirm({
-        title: t("关闭该窗口？"),
-        content: t("此窗口包含 {count} 个标签，关闭后可在最近关闭中恢复。", { count: tabs.length }),
-        okButtonProps: { danger: true },
-        onOk: execute,
-      });
-      return;
-    }
-
-    void execute();
-  };
-
-  const handleCreateGroupFromUngrouped = () => {
-    if (ungroupedTabs.length === 0) return;
-    void runWindowAction(async () => {
-      const group = await createTabGroup(
-        ungroupedTabs.map((tab) => tab.id),
-        { windowId },
-        {
-          title: t("新分组"),
-          color: "blue",
-        },
-      );
-      swBroadcast("tab-grouped", { groupId: group.id, windowId });
-    }, t("已创建分组"));
-  };
-
-  /** 贴边/最大化/居中 —— 单窗口快捷动作。 */
-  const handleSnap = (action: WindowSnapAction) => {
-    void runWindowAction(async () => {
-      await snapWindow(windowId, action);
-    });
-  };
-
-  const handleArrangeAllWindows = (layout: SplitLayout) => {
-    const windows = [
-      windowId,
-      ...[...useTabsStore.getState().windows.values()]
-        .filter(
-          (item) =>
-            item.id !== windowId && item.type === "normal" && item.incognito === isIncognito,
-        )
-        .map((item) => item.id),
-    ];
-    void runWindowAction(async () => {
-      await arrangeWindows(windows, layout);
-    });
-  };
-
-  const menuItems: MenuProps["items"] = [
-    {
-      key: "alias",
-      icon: <Edit3 size={ICON_SIZE.SMALL} />,
-      label: t("重命名窗口"),
-      onClick: () => {
-        setAliasDraft(alias ?? "");
-        setAliasEditing(true);
-      },
-    },
-    {
-      key: "merge",
-      icon: <Merge size={ICON_SIZE.SMALL} />,
-      label: t("合并到当前窗口"),
-      disabled:
-        isCurrent ||
-        isIncognito !== (useTabsStore.getState().windows.get(currentWindowId)?.incognito ?? false),
-      onClick: handleMergeToCurrent,
-    },
-    {
-      key: "create-group",
-      icon: <Plus size={ICON_SIZE.SMALL} />,
-      label: t("将未分组标签创建为分组"),
-      disabled: ungroupedTabs.length === 0,
-      onClick: handleCreateGroupFromUngrouped,
-    },
-    {
-      key: "snap",
-      icon: <Columns2 size={ICON_SIZE.SMALL} />,
-      label: t("窗口贴边"),
-      children: [
-        {
-          key: "snap-left",
-          label: t("贴左半屏"),
-          onClick: () => handleSnap("snap-left"),
-        },
-        {
-          key: "snap-right",
-          label: t("贴右半屏"),
-          onClick: () => handleSnap("snap-right"),
-        },
-        {
-          key: "snap-top",
-          label: t("贴上半屏"),
-          onClick: () => handleSnap("snap-top"),
-        },
-        {
-          key: "snap-bottom",
-          label: t("贴下半屏"),
-          onClick: () => handleSnap("snap-bottom"),
-        },
-        { type: "divider" },
-        {
-          key: "snap-center",
-          label: t("居中 80%"),
-          onClick: () => handleSnap("center"),
-        },
-        {
-          key: "snap-restore",
-          label: t("还原普通窗口"),
-          onClick: () => handleSnap("restore"),
-        },
-        {
-          key: "snap-maximize",
-          label: t("最大化"),
-          onClick: () => handleSnap("maximize"),
-        },
-      ],
-    },
-    {
-      key: "arrange-all",
-      icon: <Monitor size={ICON_SIZE.SMALL} />,
-      label: t("排列所有窗口"),
-      children: [
-        {
-          key: "arrange-balanced-grid",
-          label: t("自适应网格"),
-          onClick: () => handleArrangeAllWindows("balanced-grid"),
-        },
-        {
-          key: "arrange-side-by-side",
-          label: t("左右分栏"),
-          onClick: () => handleArrangeAllWindows("side-by-side"),
-        },
-        {
-          key: "arrange-stacked",
-          label: t("上下堆叠"),
-          onClick: () => handleArrangeAllWindows("stacked"),
-        },
-        {
-          key: "arrange-main-side",
-          label: t("主区 + 侧栏"),
-          onClick: () => handleArrangeAllWindows("main-side"),
-        },
-      ],
-    },
-    { type: "divider" },
-    {
-      key: "close",
-      danger: true,
-      icon: <X size={ICON_SIZE.SMALL} />,
-      label: t("关闭窗口"),
-      disabled: isCurrent,
-      onClick: handleCloseWindow,
-    },
-  ];
-
   return (
     <GroupCardShell
       style={cardStyle}
@@ -355,7 +152,7 @@ export function WindowCard({
       collapsed={collapsed}
       collapsedSummary={
         <Typography.Text className={styles["app-window-card-summary"]}>
-          {t("{count} 个标签 / {groups} 个分组", { count: tabs.length, groups: groupCount })}
+          {t("window.summary", { count: tabs.length, groups: groupCount })}
         </Typography.Text>
       }
       header={
@@ -383,7 +180,7 @@ export function WindowCard({
                   size="small"
                   autoFocus
                   value={aliasDraft}
-                  placeholder={t("输入窗口别名")}
+                  placeholder={t("window.aliasPlaceholder")}
                   onChange={(event) => setAliasDraft(event.target.value)}
                   onClick={(event) => event.stopPropagation()}
                   onPressEnter={handleSaveAlias}
@@ -396,17 +193,17 @@ export function WindowCard({
                 </Typography.Text>
               )}
               <Typography.Text className={styles["app-window-card-meta"]}>
-                {t("{count} 个标签 / {groups} 个分组", { count: tabs.length, groups: groupCount })}
+                {t("window.summary", { count: tabs.length, groups: groupCount })}
               </Typography.Text>
             </Flex>
             {isCurrent && (
               <Tag color="blue" className={styles["app-window-card-tag"]}>
-                {t("当前窗口")}
+                {t("window.current")}
               </Tag>
             )}
-            {isFocused && (
+            {isFocused && !isCurrent && (
               <Tag color="green" className={styles["app-window-card-tag"]}>
-                {t("活跃")}
+                {t("window.focused")}
               </Tag>
             )}
             {splitViewCount > 0 && (
@@ -419,7 +216,7 @@ export function WindowCard({
                 className={styles["app-window-card-tag"]}
                 icon={<EyeOff size={ICON_SIZE.MICRO} />}
               >
-                {t("隐身")}
+                {t("window.incognito")}
               </Tag>
             )}
           </Button>
@@ -446,7 +243,9 @@ export function WindowCard({
             disabled={ungroupedTabs.length === 0}
           >
             <Plus size={ICON_SIZE.SMALL} />
-            {ungroupedTabs.length > 0 ? t("将未分组标签创建为分组") : t("拖到此处")}
+            {ungroupedTabs.length > 0
+              ? t("windowGroup.createFromUngrouped")
+              : t("windowDrag.dropHere")}
           </Button>
         ) : undefined
       }
@@ -478,7 +277,7 @@ export function WindowCard({
             >
               <Flex className={styles["app-window-ungrouped-header"]}>
                 <Layers size={ICON_SIZE.SMALL} />
-                <Typography.Text>{t("未分组标签")}</Typography.Text>
+                <Typography.Text>{t("windowGroup.ungroupedTabs")}</Typography.Text>
                 <Tag className={styles["app-window-group-count"]}>{ungroupedTabs.length}</Tag>
               </Flex>
               <List className={styles["app-window-group-list"]}>
