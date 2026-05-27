@@ -137,7 +137,7 @@ export function AppWorkspace({
             hints={[
               t("按 Cmd+K 可快速搜索标签"),
               t("点击归档按钮可保存当前所有标签"),
-              t("支持 9 种不同视图浏览方式"),
+              t("tabs.emptyHint3"),
             ]}
             actions={[
               { text: t("查看归档列表"), onClick: onOpenArchive, type: "primary" },
@@ -157,7 +157,7 @@ export function AppWorkspace({
             </Suspense>
           </div>
         ) : (
-          <div key="domain-group" className="app-view-transition">
+          <div key="tabs-fallback" className="app-view-transition">
             <DomainGroupView />
           </div>
         )}

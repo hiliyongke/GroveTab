@@ -74,6 +74,23 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
         />
       </Field>
 
+      {settings.defaultView === "tabs" && (
+        <Field label={t("标签页布局")} hint={t("切换标签页主视图的具体呈现方式")}>
+          <Segmented
+            block
+            value={settings.tabsLayout ?? "masonry"}
+            onChange={(value) =>
+              handleSetting({ tabsLayout: value as "masonry" | "compact" | "grid" })
+            }
+            options={[
+              { value: "masonry", label: t("view.domain") },
+              { value: "compact", label: t("view.compact") },
+              { value: "grid", label: t("view.grid") },
+            ]}
+          />
+        </Field>
+      )}
+
       <Field
         label={t("视图标签位置")}
         hint={t("视图切换标签的排列方式：顶部/底部水平，左侧/右侧垂直侧栏")}

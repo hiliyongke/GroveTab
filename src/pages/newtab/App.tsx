@@ -18,10 +18,10 @@ import { AppHeader } from "@/features/workspace/AppHeader";
 import { HeroBar } from "@/features/workspace/HeroBar";
 import { ViewSidebar } from "@/features/workspace/ViewSidebar";
 import { ViewBottomBar } from "@/features/workspace/ViewBottomBar";
-import { DomainGroupView } from "@/features/tabs/DomainGroupView";
 import { track } from "@/shared/utils/metrics";
 import type { NewtabPageMode } from "@/shared/types";
-import { VALID_VIEWS, VIEW_CONFIGS, type ViewMode } from "@/shared/config/views";
+import { VALID_VIEWS, VIEW_CONFIGS, LEGACY_VIEW_MAP, type ViewMode } from "@/shared/config/views";
+import { TabsView } from "@/features/tabs/TabsView";
 import { registerViews } from "@/shared/config/view-registry";
 import { findDuplicates } from "@/shared/utils/dedupe";
 import { detectIdleTabs } from "@/shared/utils/idle-detect";
@@ -42,12 +42,6 @@ const DeveloperToolsPage = lazy(() =>
 /** 懒加载非默认视图——直接导入文件而非 barrel，确保每个视图独立拆 chunk */
 const TimelineView = lazy(() =>
   import("@/features/tabs/TimelineView").then((m) => ({ default: m.TimelineView })),
-);
-const CompactView = lazy(() =>
-  import("@/features/tabs/CompactView").then((m) => ({ default: m.CompactView })),
-);
-const GridView = lazy(() =>
-  import("@/features/tabs/GridView").then((m) => ({ default: m.GridView })),
 );
 const FrequencyView = lazy(() =>
   import("@/features/tabs/FrequencyView").then((m) => ({ default: m.FrequencyView })),
@@ -88,14 +82,12 @@ const VideoBackground = lazy(() =>
 
 /** 注册所有视图到 ViewRegistry —— 新增视图只需在此添加一条 */
 registerViews([
-  { id: "domain", component: DomainGroupView, order: 1 },
-  { id: "compact", component: CompactView, order: 2 },
-  { id: "timeline", component: TimelineView, order: 3 },
-  { id: "tabgroup", component: TabGroupView, order: 4 },
-  { id: "window", component: WindowView, order: 5 },
-  { id: "kanban", component: KanbanView, order: 6 },
-  { id: "frequency", component: FrequencyView, order: 7 },
-  { id: "grid", component: GridView, order: 8 },
+  { id: "tabs", component: TabsView, order: 1 },
+  { id: "timeline", component: TimelineView, order: 2 },
+  { id: "tabgroup", component: TabGroupView, order: 3 },
+  { id: "window", component: WindowView, order: 4 },
+  { id: "kanban", component: KanbanView, order: 5 },
+  { id: "frequency", component: FrequencyView, order: 6 },
   // archive 作为隐藏视图，不在 ViewDock 显示，但可通过程序切换
   { id: "archive", component: ArchiveView, order: 99 },
 ]);
@@ -127,6 +119,18 @@ function AppContent() {
   useMemoryGovernance();
   // 存储自动清理：使用率超过阈值时清理非核心数据
   useAutoCleanup();
+
+  /** 旧版视图设置自动迁移（domain/compact/grid → tabs + tabsLayout），仅执行一次 */
+  useEffect(() => {
+    const settings = useSettingsStore.getState().settings;
+    const legacy = LEGACY_VIEW_MAP[settings.defaultView];
+    if (legacy) {
+      void useSettingsStore.getState().updateSettings({
+        defaultView: legacy.view,
+        tabsLayout: legacy.layout,
+      });
+    }
+  }, []);
 
   /** 全局禁止浏览器原生右键菜单，打造纯 App 体验 */
   useEffect(() => {
@@ -182,7 +186,10 @@ function AppContent() {
   const showHeroTitle = uiVisibility?.heroTitle !== false;
   const showHeroSlogan = uiVisibility?.heroSlogan !== false;
   const showHeroSearch = uiVisibility?.heroSearch !== false;
-  const viewMode: ViewMode = VALID_VIEWS.includes(defaultView) ? defaultView : "domain";
+  const viewMode: ViewMode = useMemo(() => {
+    if (VALID_VIEWS.includes(defaultView as ViewMode)) return defaultView as ViewMode;
+    return LEGACY_VIEW_MAP[defaultView]?.view ?? "tabs";
+  }, [defaultView]);
 
   // ── 面板状态管理 ───────────────────────────────────────────────────────────
   const {

@@ -9,15 +9,13 @@ import type { LucideIcon } from 'lucide-react';
 import {
   LayoutGrid,
   Clock,
-  List,
-  Table2,
   Flame,
   Layers,
   Monitor,
   Columns,
 } from 'lucide-react';
 
-export type ViewMode = 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'kanban' | 'archive';
+export type ViewMode = 'tabs' | 'timeline' | 'frequency' | 'tabgroup' | 'window' | 'kanban' | 'archive';
 
 export interface ViewConfig {
   id: ViewMode;
@@ -27,15 +25,23 @@ export interface ViewConfig {
 }
 
 export const VIEW_CONFIGS: ViewConfig[] = [
-  { id: 'domain', Icon: LayoutGrid, labelKey: 'view.domain' },
-  { id: 'compact', Icon: List, labelKey: 'view.compact' },
+  { id: 'tabs', Icon: LayoutGrid, labelKey: 'view.tabs' },
   { id: 'timeline', Icon: Clock, labelKey: 'view.timeline' },
   { id: 'tabgroup', Icon: Layers, labelKey: 'view.tabgroup' },
   { id: 'window', Icon: Monitor, labelKey: 'view.window' },
   { id: 'kanban', Icon: Columns, labelKey: 'view.kanban' },
   { id: 'frequency', Icon: Flame, labelKey: 'view.frequency' },
-  { id: 'grid', Icon: Table2, labelKey: 'view.grid' },
 ];
 
 /** 合法的 ViewMode 值数组，用于防御旧版残留值 */
 export const VALID_VIEWS: ViewMode[] = VIEW_CONFIGS.map((v) => v.id);
+
+/**
+ * 旧版视图 → 新版视图 + 布局 的兼容映射表。
+ * 运行期检测到 legacy defaultView 时自动迁移。
+ */
+export const LEGACY_VIEW_MAP: Record<string, { view: ViewMode; layout: 'masonry' | 'compact' | 'grid' }> = {
+  domain: { view: 'tabs', layout: 'masonry' },
+  compact: { view: 'tabs', layout: 'compact' },
+  grid: { view: 'tabs', layout: 'grid' },
+};

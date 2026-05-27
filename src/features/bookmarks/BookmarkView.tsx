@@ -45,7 +45,7 @@ import { isSafeExternalUrl } from "@/shared/utils/url-safety";
 import { useAccent } from "@/shared/hooks/use-accent";
 import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
 import { BookmarkTreeView } from "./BookmarkTreeView";
-import styles from "./styles/views.module.less";
+import styles from "@/features/tabs/styles/views.module.less";
 
 function cx(...classNames: Array<string | false | undefined>) {
   return classNames.filter(Boolean).join(" ");

@@ -235,13 +235,16 @@ const zhCN: Record<string, string> = {
   "onboarding.tour.done": "开始使用",
   "onboarding.tour.overviewTitle": "工作台总览",
   "onboarding.tour.overviewDesc":
-    "HeroBar 下的概览卡片会呈现当前标签数、域名数、窗口数、重复和闲置标签、最近归档；点击每个卡片可直达对应的视图或面板。",
-  "onboarding.tour.archiveTitle": "归档与恢复",
+    "HeroBar 下的概览卡片呈现标签数、域名数、重复和闲置标签；点击卡片可直达对应视图。按 Cmd/Ctrl+K 随时唤起全局搜索，3 秒内找到任何标签。",
+  "onboarding.tour.archiveTitle": "归档与回收站",
   "onboarding.tour.archiveDesc":
-    "点顶栏的 💾 归档，即可把所有标签一键收红为一个会话。归档后可需要时按 新窗口 / 当前窗口 / 部分恢复 三种策略快速拉回。",
+    "点顶栏 💾 归档按钮一键收纳所有标签为会话；误关的标签可在回收站中找回，7 天内随时恢复。",
+  "onboarding.tour.tidyTitle": "智能整理",
+  "onboarding.tour.tidyDesc":
+    "自动检测重复标签和长期闲置页，一键清理释放内存；存储空间紧张时自动清理非核心数据，保持轻盈。",
   "onboarding.tour.shortcutsTitle": "快捷键帮助",
   "onboarding.tour.shortcutsDesc":
-    "⌘K / Ctrl+K 打开命令中心；Alt+Shift+S 归档当前窗口；Alt+C 随时唤回工作台。所有快捷键可在 设置 → 快捷键 中自定义。",
+    "⌘K / Ctrl+K 打开全局搜索；Alt+Shift+S 归档当前窗口；Alt+C 随时唤回工作台。所有快捷键可在 设置 → 行为 中自定义。",
   // Activity Strip
   "activity.title": "最近操作",
   "activity.undo": "撤销",
@@ -474,7 +477,8 @@ const zhCN: Record<string, string> = {
   "devtools.leftText": "左侧文本",
   "devtools.rightText": "右侧文本",
   "devtools.sameText": "文本完全相同",
-  "view.domain": "域名分组",
+  "view.tabs": "标签页",
+  "view.domain": "瀑布流",
   "view.timeline": "时间轴",
   "view.compact": "紧凑列表",
   "view.grid": "网格",
@@ -504,7 +508,7 @@ const zhCN: Record<string, string> = {
   "tabs.empty": "没有打开的标签页",
   "tabs.emptyHint1": "按 Cmd+K 可快速搜索标签",
   "tabs.emptyHint2": "点击归档按钮可保存当前所有标签",
-  "tabs.emptyHint3": "支持 9 种不同视图浏览方式",
+  "tabs.emptyHint3": "支持 6 种不同视图浏览方式",
   "dedup.found": "发现 {count} 组重复标签页（{tabs} 个可合并）",
   "dedup.mergeAll": "全部合并",
   "dedup.merge": "合并",

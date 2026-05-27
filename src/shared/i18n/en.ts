@@ -239,13 +239,16 @@ const en: Record<string, string> = {
   "onboarding.tour.done": "Start using",
   "onboarding.tour.overviewTitle": "Workspace overview",
   "onboarding.tour.overviewDesc":
-    "Below the HeroBar, six cards summarize your tabs/domains/windows, duplicates, idle tabs and the latest archive. Click any card to jump straight to the relevant view.",
-  "onboarding.tour.archiveTitle": "Archive & restore",
+    "Below the HeroBar, cards summarize your tabs, domains, duplicates and idle tabs. Click any card to jump to the relevant view. Press Cmd/Ctrl+K anytime for global search — find any tab in 3 seconds.",
+  "onboarding.tour.archiveTitle": "Archive & Trash",
   "onboarding.tour.archiveDesc":
-    "Hit the 💾 Archive button to stash all tabs into a session. Restore later in a new window, the current window, or cherry-pick tabs.",
+    "Hit the 💾 Archive button to stash all tabs into a session. Accidentally closed tabs can be recovered from the Trash within 7 days.",
+  "onboarding.tour.tidyTitle": "Smart Tidy",
+  "onboarding.tour.tidyDesc":
+    "Auto-detect duplicate tabs and long-idle pages; clean them up in one click to free memory. When storage is tight, non-essential data is auto-cleaned to keep things light.",
   "onboarding.tour.shortcutsTitle": "Shortcut cheatsheet",
   "onboarding.tour.shortcutsDesc":
-    "⌘K / Ctrl+K opens the command center; Alt+Shift+S archives the current window; Alt+C reopens {brand} anytime. Customize shortcuts under Settings → Shortcuts.",
+    "⌘K / Ctrl+K opens global search; Alt+Shift+S archives the current window; Alt+C reopens {brand} anytime. Customize shortcuts under Settings → Behavior.",
   // Activity Strip
   "activity.title": "Recent activity",
   "activity.undo": "Undo",
@@ -485,7 +488,8 @@ const en: Record<string, string> = {
   "devtools.leftText": "Left text",
   "devtools.rightText": "Right text",
   "devtools.sameText": "Texts are identical",
-  "view.domain": "Domain Groups",
+  "view.tabs": "Tabs",
+  "view.domain": "Masonry",
   "view.timeline": "Timeline",
   "view.compact": "Compact",
   "view.grid": "Grid",
@@ -515,7 +519,7 @@ const en: Record<string, string> = {
   "tabs.empty": "No open tabs",
   "tabs.emptyHint1": "Press Cmd+K to quickly search tabs",
   "tabs.emptyHint2": "Click archive button to save all current tabs",
-  "tabs.emptyHint3": "Support 9 different view modes",
+  "tabs.emptyHint3": "Support 6 different view modes",
   "dedup.found": "Found {count} duplicate groups ({tabs} tabs can be merged)",
   "dedup.mergeAll": "Merge all",
   "dedup.merge": "Merge",

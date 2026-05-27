@@ -30,6 +30,7 @@ import {
   Zap,
   Keyboard,
   Archive as ArchiveIcon,
+  Sparkles,
   Check,
 } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
@@ -63,6 +64,11 @@ const TOUR_STEPS: TourStep[] = [
     icon: <ArchiveIcon size={ICON_SIZE.XXLARGE} />,
     titleKey: "onboarding.tour.archiveTitle",
     descKey: "onboarding.tour.archiveDesc",
+  },
+  {
+    icon: <Sparkles size={ICON_SIZE.XXLARGE} />,
+    titleKey: "onboarding.tour.tidyTitle",
+    descKey: "onboarding.tour.tidyDesc",
   },
   {
     icon: <Keyboard size={ICON_SIZE.XXLARGE} />,

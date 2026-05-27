@@ -28,15 +28,23 @@ export interface UserSettings {
   /** 视图标签栏位置：top（搜索栏下方水平）/ left / right（垂直侧栏）/ bottom（固定底部水平） */
   viewTabPosition?: ViewTabPosition;
   defaultView:
-    | "domain"
+    | "domain"   // legacy，运行期自动映射为 tabs + tabsLayout='masonry'
+    | "tabs"
     | "timeline"
-    | "compact"
-    | "grid"
+    | "compact"  // legacy，运行期自动映射为 tabs + tabsLayout='compact'
+    | "grid"     // legacy，运行期自动映射为 tabs + tabsLayout='grid'
     | "frequency"
     | "tabgroup"
     | "window"
     | "kanban"
     | "archive";
+  /**
+   * 标签页主视图的布局模式（仅 defaultView='tabs' 时生效）。
+   *   - 'masonry'（默认）：按域名分组的瀑布流多列布局（原 domain 视图）
+   *   - 'compact'        ：虚拟化紧凑列表（原 compact 视图）
+   *   - 'grid'           ：卡片网格（原 grid 视图）
+   */
+  tabsLayout?: "masonry" | "compact" | "grid";
   theme: "light" | "dark" | "system";
   /**
    * 皮肤预设：

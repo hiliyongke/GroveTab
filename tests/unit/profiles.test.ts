@@ -14,7 +14,7 @@ describe('SettingsProfile 类型约束', () => {
       id: 'abc123',
       name: '工作模式',
       createdAt: Date.now(),
-      settings: { theme: 'dark', defaultView: 'domain' },
+      settings: { theme: 'dark', defaultView: 'tabs' },
     };
     expect(profile.id).toBe('abc123');
     expect(profile.name).toBe('工作模式');

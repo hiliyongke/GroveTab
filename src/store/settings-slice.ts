@@ -46,7 +46,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     overrideNewTab: true,
     newtabPageMode: "workspace",
     viewTabPosition: "top",
-    defaultView: "domain",
+    defaultView: "tabs",
     theme: "system",
     gradientPreset: "default",
     skinPreset: "glassmorphism",
