@@ -82,6 +82,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   closeConfirmThreshold: 20,
   autoSnapshotFrequency: "12h",
   enableOgFetch: false,
+  trackTabFocusTime: true,
   // v1.2 新增默认值
   clickEffect: "off",
   videoBackground: { type: "none" },

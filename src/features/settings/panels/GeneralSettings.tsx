@@ -154,6 +154,17 @@ export function GeneralSettings({ settings, updateSettings }: GeneralSettingsPro
           }}
         />
       </Field>
+
+      {/* ── 标签页使用时长追踪 ── */}
+      <Field
+        label={t("标签页使用时长追踪")}
+        hint={t("开启后记录每个标签页的聚焦时长，在 TabItem 的悬停提示中展示今日使用时长。")}
+      >
+        <Switch
+          checked={settings.trackTabFocusTime !== false}
+          onChange={(value) => handleSetting({ trackTabFocusTime: value })}
+        />
+      </Field>
     </Flex>
   );
 }

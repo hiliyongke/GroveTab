@@ -92,6 +92,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     autoSnapshotFrequency: "12h",
     enableOgFetch: false,
     speedDialGroupEnabled: false,
+    trackTabFocusTime: true,
     // v1.4 插件原生历史记录默认值
     historyEnabled: true,
     historyRecordEvents: true,

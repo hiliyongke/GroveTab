@@ -603,6 +603,10 @@ const en: Record<string, string> = {
   "settings.enableOgFetch": "Fetch page descriptions (for richer search)",
   "settings.enableOgFetchHint":
     "Requires granting <all_urls>. Only reads meta description locally; no other network requests are made.",
+  "settings.trackTabFocusTime": "Tab focus time tracking",
+  "settings.trackTabFocusTimeHint":
+    "When enabled, records how long each tab stays in focus and shows today's usage in the TabItem tooltip.",
+  "common.today": "Today",
   "settings.domainGroupColumns": "Domain group columns",
   "settings.domainGroupColumnsHint": "Auto: adapt to window width; or lock to a fixed count",
   "settings.windowCardColumns": "Window card columns",

@@ -485,6 +485,13 @@ export interface UserSettings {
   // ── 内存治理（任务7）────────────────────────────────
 
   /**
+   * 标签页使用时长追踪（默认 true）。
+   * 开启后 Service Worker 会记录每个标签页的聚焦时长，按 URL × day 聚合。
+   * 数据在 TabItem 的 Tooltip 中展示。
+   */
+  trackTabFocusTime?: boolean;
+
+  /**
    * 内存治理主开关（默认 false）。
    * 开启后 Service Worker 会监听 chrome.system.memory，
    * 在内存压力达到阈值时自动 discard 或提示归档。

@@ -20,6 +20,7 @@ import { useMetadataStore, useSelectionStore, useSpeedDialStore } from "@/store"
 import { stringToColor } from "@/shared/utils/color";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { formatUrlForDisplay } from "@/shared/utils/url-display";
+import { useFocusTime } from "@/shared/hooks/use-focus-time";
 import { TabContextMenu } from "./TabContextMenu";
 import styles from "./styles/items.module.less";
 
@@ -119,6 +120,9 @@ export function TabItem({
 
   /** 友好展示串：路径 + 关键参数，失败回落到原 URL */
   const urlHint = showUrlHint ? formatUrlForDisplay(tab.url) : "";
+
+  /** 今日使用时长 */
+  const focusTime = useFocusTime(tab.url);
 
   /** 多选模式下点击逻辑：Ctrl/Cmd+点击 或 selectionMode 已开启时切换选中 */
   const handleClick = useCallback(
@@ -258,7 +262,12 @@ export function TabItem({
         <Flex vertical className={styles["app-tab-item-main"]}>
           {/* 上行：标题 + 标记 */}
           <Flex className={styles["app-tab-item-head"]} align="center" gap="small">
-            <Typography.Text className={styles["app-tab-item-title"]}>{tab.title}</Typography.Text>
+            <Tooltip
+              title={focusTime ? `${tab.title} · ${t("今日")} ${focusTime}` : tab.title}
+              mouseEnterDelay={0.4}
+            >
+              <Typography.Text className={styles["app-tab-item-title"]}>{tab.title}</Typography.Text>
+            </Tooltip>
             {showHostname && (
               <Typography.Text className={styles["app-tab-item-hostname"]}>
                 {tab.hostname}

@@ -55,6 +55,8 @@ export const STORAGE_KEYS = Object.freeze({
   trendingInterest: key("trending_interest_signals"),
   /** 回收站（TrashedItem[]） */
   trash: key("trash"),
+  /** 标签页使用时长（DailyFocusTime[]） */
+  focusTime: key("focus_time"),
 });
 
 /** 判断是否属于当前应用命名空间的存储键。 */

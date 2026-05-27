@@ -589,6 +589,10 @@ const zhCN: Record<string, string> = {
   "settings.enableOgFetch": "允许抓取网页描述（用于搜索增强）",
   "settings.enableOgFetchHint":
     "开启后需授予 <all_urls> 权限；仅读取 meta 描述，不发送任何额外网络请求。",
+  "settings.trackTabFocusTime": "标签页使用时长追踪",
+  "settings.trackTabFocusTimeHint":
+    "开启后记录每个标签页的聚焦时长，在 TabItem 的悬停提示中展示今日使用时长。",
+  "common.today": "今日",
   "settings.domainGroupColumns": "域名分组列数",
   "settings.domainGroupColumnsHint": "自动：随窗口宽度自适应；或手动锁定列数",
   "settings.windowCardColumns": "窗口卡片列数",

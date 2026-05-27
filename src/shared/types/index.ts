@@ -82,3 +82,6 @@ export type { StealthModeConfig } from "./stealth-mode";
 
 // ── 回收站 ────────────────────────────────────────
 export type { TrashedTab, TrashedItem } from "./trash";
+
+// ── 使用时长追踪 ────────────────────────────────────
+export type { DailyFocusTime, ActiveFocusSession, FocusTimeData } from "./focus-time";
