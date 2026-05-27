@@ -1386,5 +1386,9 @@ const en: Record<string, string> = {
   "motion.auto": "Auto",
   "motion.on": "Reduce",
   "motion.off": "On",
+
+  // ── AppHeader layout/density quick toggles ──
+  "headerLayout.title": "Layout mode",
+  "headerDensity.title": "Card density",
 };
 export default en;

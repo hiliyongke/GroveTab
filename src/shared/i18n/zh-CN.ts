@@ -1340,5 +1340,9 @@ const zhCN: Record<string, string> = {
   "motion.auto": "自动",
   "motion.on": "减弱",
   "motion.off": "开启",
+
+  // ── AppHeader 布局/密度快捷切换 ──
+  "headerLayout.title": "布局模式",
+  "headerDensity.title": "卡片密度",
 };
 export default zhCN;
