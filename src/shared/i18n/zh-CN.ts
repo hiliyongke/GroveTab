@@ -544,6 +544,7 @@ const zhCN: Record<string, string> = {
   "settings.close": "关闭设置",
   "settings.appearance": "外观",
   "settings.behavior": "行为",
+  "settings.system": "系统",
   "settings.data": "数据",
   "settings.language": "语言",
   "settings.defaultPageMode": "默认空间",

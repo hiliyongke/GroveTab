@@ -556,6 +556,7 @@ const en: Record<string, string> = {
   "settings.close": "Close settings",
   "settings.appearance": "Appearance",
   "settings.behavior": "Behavior",
+  "settings.system": "System",
   "settings.data": "Data",
   "settings.language": "Language",
   "settings.defaultPageMode": "Default space",

@@ -10,8 +10,7 @@ describe("settings-tab-keys", () => {
   it("识别合法设置页签", () => {
     expect(isSettingsTabKey("appearance")).toBe(true);
     expect(isSettingsTabKey("behavior")).toBe(true);
-    expect(isSettingsTabKey("data")).toBe(true);
-    expect(isSettingsTabKey("privacy")).toBe(true);
+    expect(isSettingsTabKey("system")).toBe(true);
     expect(isSettingsTabKey("about")).toBe(true);
   });
 

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Database, Info, Palette, Shield, SlidersHorizontal } from "lucide-react";
+import { Database, Info, Palette, SlidersHorizontal } from "lucide-react";
 
 import type { UserSettings } from "@/shared/types";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
@@ -7,8 +7,7 @@ import type { SettingsTabKey } from "./settings-tab-keys";
 import { AboutPanel } from "./panels/AboutPanel";
 import { AppearancePanel } from "./panels/AppearancePanel";
 import { BehaviorPanel } from "./panels/BehaviorPanel";
-import { DataPanel } from "./panels/DataPanel";
-import { PrivacyPanel } from "./panels/PrivacyPanel";
+import { SystemPanel } from "./panels/SystemPanel";
 
 export interface SettingsTabItem {
   key: SettingsTabKey;
@@ -40,16 +39,10 @@ export function createSettingsTabs({
       content: <BehaviorPanel settings={settings} updateSettings={updateSettings} />,
     },
     {
-      key: "data",
+      key: "system",
       icon: <Database size={ICON_SIZE.MEDIUM} />,
-      labelKey: "settings.data",
-      content: <DataPanel />,
-    },
-    {
-      key: "privacy",
-      icon: <Shield size={ICON_SIZE.MEDIUM} />,
-      labelKey: "settings.privacy",
-      content: <PrivacyPanel settings={settings} updateSettings={updateSettings} />,
+      labelKey: "settings.system",
+      content: <SystemPanel settings={settings} updateSettings={updateSettings} />,
     },
     {
       key: "about",
