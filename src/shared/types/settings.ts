@@ -28,11 +28,11 @@ export interface UserSettings {
   /** 视图标签栏位置：top（搜索栏下方水平）/ left / right（垂直侧栏）/ bottom（固定底部水平） */
   viewTabPosition?: ViewTabPosition;
   defaultView:
-    | "domain"   // legacy，运行期自动映射为 tabs + tabsLayout='masonry'
+    | "domain" // legacy，运行期自动映射为 tabs + tabsLayout='masonry'
     | "tabs"
     | "timeline"
-    | "compact"  // legacy，运行期自动映射为 tabs + tabsLayout='compact'
-    | "grid"     // legacy，运行期自动映射为 tabs + tabsLayout='grid'
+    | "compact" // legacy，运行期自动映射为 tabs + tabsLayout='compact'
+    | "grid" // legacy，运行期自动映射为 tabs + tabsLayout='grid'
     | "frequency"
     | "tabgroup"
     | "window"
@@ -398,6 +398,14 @@ export interface UserSettings {
     playbackRate?: number;
     muted?: boolean;
   };
+
+  /**
+   * 标签分组视图的排序方式：
+   *   - 'tabCount'（默认）：按组内标签数量降序
+   *   - 'name'：按分组名称字母升序
+   *   - 'recentAccess'：按组内最近访问时间降序
+   */
+  tabGroupSortBy?: "tabCount" | "name" | "recentAccess";
 
   // ── v1.0 封板新增字段 ──────────────────────────────
 

@@ -1,131 +1,288 @@
 /**
- * TabGroupView — Chrome 原生 Tab Group 视图
+ * TabGroupView — Chrome 原生 Tab Group 视图（重构版）
  *
- * 一级按 Chrome 原生分组，二级按域名展示标签页。
- * 未分组的标签归入"未分组"区域。
- *
- * 设计：
- *   - 使用 antd Card + Collapse 展示分组
- *   - 每个分组卡片显示组名（或颜色标记）、标签数量
- *   - 支持将域名分组同步到 Chrome Tab Group
+ * 一级按 Chrome 原生 Tab Group 分组，未分组标签归入"未分组"卡片。
+ * 对标 DomainGroupView 的成熟度：
+ *   - GroupCardShell 卡片 + masonry 多列布局
+ *   - 搜索过滤（组名 + 标签标题/URL）
+ *   - 排序（名称/数量/最近访问）
+ *   - 虚拟滚动（分组 > 20 时启用）
+ *   - Toolbar（搜索 + 排序 + 折叠开关）
  */
 
-import { useMemo } from "react";
-import { Tag, Collapse, Empty, Flex, Typography } from "antd";
-import { useTabsStore } from "@/store";
-import { TabItem } from "./TabItem";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { Empty, Flex } from "antd";
+import { useTabsStore, useSettingsStore } from "@/store";
+import type { ChromeTabGroupColor } from "@/chrome";
+import { cssVars } from "@/shared/utils/css-vars";
 import { useT } from "@/shared/i18n";
-import styles from "./styles/views.module.less";
+import { TabGroupCard, type TabGroupData } from "./components/TabGroupCard";
+import { TabGroupToolbar } from "./TabGroupToolbar";
+import styles from "./styles/items.module.less";
 
-/**
- * Chrome Tab Group 颜色映射到 antd Tag color
- */
-const GROUP_COLOR_MAP: Record<string, string> = {
-  grey: "default",
-  blue: "blue",
-  red: "red",
-  yellow: "gold",
-  green: "green",
-  pink: "magenta",
-  purple: "purple",
-  cyan: "cyan",
-  orange: "orange",
-};
+const DOMAIN_COLUMN_MIN_WIDTH = 320;
+const DOMAIN_COLUMN_GAP = 16;
+const DOMAIN_COLUMN_MAX_AUTO = 8;
+const VIRTUALIZATION_THRESHOLD = 20;
 
-interface TabGroupData {
-  /** 分组 ID（-1 表示未分组） */
-  groupId: number;
-  /** 分组标题 */
-  title: string;
-  /** 分组颜色 */
-  color: string;
-  /** 该组下的标签页 */
-  tabs: typeof useTabsStore extends { getState: () => { tabs: infer T } } ? T : never;
+function getAutoColumnCount(containerWidth: number, groupCount: number): number {
+  if (groupCount <= 0 || containerWidth <= 0) return 1;
+  const fitCount = Math.floor(
+    (containerWidth + DOMAIN_COLUMN_GAP) / (DOMAIN_COLUMN_MIN_WIDTH + DOMAIN_COLUMN_GAP),
+  );
+  return Math.min(groupCount, Math.max(1, fitCount), DOMAIN_COLUMN_MAX_AUTO);
+}
+
+function getColumnVars(columnCount: number): React.CSSProperties {
+  return cssVars({
+    "--app-domain-column-count": String(columnCount),
+  });
+}
+
+/** 按 Chrome 原生 Tab Group 分组 */
+function groupTabsByChromeGroup(
+  tabs: typeof useTabsStore extends { getState: () => { tabs: infer T } } ? T : never,
+  t: (key: string) => string,
+): TabGroupData[] {
+  const map = new Map<number, TabGroupData>();
+
+  for (const tab of tabs) {
+    const gid = tab.groupId ?? -1;
+    if (!map.has(gid)) {
+      // 同一个 groupId 可能跨窗口，拆分为独立的 key
+      const groupKey = gid === -1 ? -1 : gid;
+      map.set(groupKey, {
+        groupId: gid,
+        title: gid === -1 ? t("tabGroup.ungrouped") : (tab.groupTitle ?? t("tabGroup.unnamed")),
+        color: (gid === -1 ? "grey" : (tab.groupColor ?? "grey")) as ChromeTabGroupColor,
+        collapsed: gid === -1 ? false : tab.groupCollapsed === true,
+        windowId: tab.windowId,
+        tabs: [],
+      });
+    }
+    map.get(gid)!.tabs.push(tab);
+  }
+
+  // 未分组排最后
+  const result = Array.from(map.values());
+  const ungrouped = result.find((g) => g.groupId === -1);
+  const grouped = result.filter((g) => g.groupId !== -1);
+  return [...grouped, ...(ungrouped ? [ungrouped] : [])];
+}
+
+function splitIntoFlowColumns(groups: TabGroupData[], columnCount: number): TabGroupData[][] {
+  const safeColumnCount = Math.max(1, columnCount);
+  const columns = Array.from({ length: safeColumnCount }, () => [] as TabGroupData[]);
+  const columnHeights = Array.from({ length: safeColumnCount }, () => 0);
+
+  groups.forEach((group) => {
+    let targetColumnIndex = 0;
+    for (let index = 1; index < columnHeights.length; index += 1) {
+      if (columnHeights[index]! < columnHeights[targetColumnIndex]!) {
+        targetColumnIndex = index;
+      }
+    }
+    columns[targetColumnIndex]!.push(group);
+    columnHeights[targetColumnIndex]! += group.tabs.length + 1;
+  });
+
+  return columns;
+}
+
+/** 估算单个 TabGroupCard 的高度（展开状态） */
+function estimateGroupHeight(group: TabGroupData): number {
+  return 56 + group.tabs.length * 44 + 16;
+}
+
+/** 虚拟化列组件 */
+interface VirtualColumnProps {
+  groups: TabGroupData[];
+  useVirtual: boolean;
+  forceCollapsed: boolean;
+}
+
+function VirtualColumn({ groups, useVirtual, forceCollapsed }: VirtualColumnProps) {
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const virtualizer = useVirtualizer({
+    count: groups.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: (index) => estimateGroupHeight(groups[index]!),
+    overscan: 3,
+    measureElement: (el) => el.getBoundingClientRect().height,
+  });
+
+  const virtualItems = virtualizer.getVirtualItems();
+
+  if (!useVirtual) {
+    return (
+      <div className={styles["app-domain-masonry-column"]}>
+        {groups.map((group) => (
+          <div
+            key={`${group.groupId}-${group.windowId}`}
+            className={styles["app-domain-masonry-item"]}
+          >
+            <TabGroupCard group={group} forceCollapsed={forceCollapsed} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={parentRef}
+      className={styles["app-domain-masonry-column"]}
+      style={{ overflowY: "auto", maxHeight: "calc(100vh - 200px)" }}
+    >
+      <div
+        style={{
+          height: `${virtualizer.getTotalSize()}px`,
+          width: "100%",
+          position: "relative",
+        }}
+      >
+        {virtualItems.map((virtualItem) => {
+          const group = groups[virtualItem.index]!;
+          return (
+            <div
+              key={`${group.groupId}-${group.windowId}`}
+              data-index={virtualItem.index}
+              ref={virtualizer.measureElement}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                transform: `translateY(${virtualItem.start}px)`,
+              }}
+              className={styles["app-domain-masonry-item"]}
+            >
+              <TabGroupCard group={group} forceCollapsed={forceCollapsed} />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 /**
  * Chrome Tab Group 视图
  */
 export function TabGroupView() {
-  const tabs = useTabsStore((s) => s.tabs);
-  const jumpToTab = useTabsStore((s) => s.jumpToTab);
-  const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
   const { t } = useT();
+  const tabs = useTabsStore((s) => s.tabs);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [filterQuery, setFilterQuery] = useState("");
+  const [collapseAll, setCollapseAll] = useState(false);
 
-  /**
-   * 按 Chrome 原生 Tab Group 分组
-   *   - groupId === -1 或 undefined → 归入"未分组"
-   *   - 其他 → 按 groupId 分组，从 tab.groupTitle / tab.groupColor 取信息
-   */
-  const groups = useMemo(() => {
-    const map = new Map<number, TabGroupData>();
+  const forcedColumns = useSettingsStore((s) => {
+    const v = s.settings.domainGroupColumns;
+    return typeof v === "number" && v >= 1 && v <= 6 ? v : null;
+  });
+  const sortBy = useSettingsStore((s) => s.settings.tabGroupSortBy ?? "tabCount");
 
-    for (const tab of tabs) {
-      const gid = tab.groupId ?? -1;
-      if (!map.has(gid)) {
-        map.set(gid, {
-          groupId: gid,
-          title: gid === -1 ? t("未分组") : tab.groupTitle || t("未命名分组"),
-          color: gid === -1 ? "grey" : tab.groupColor || "grey",
-          tabs: [],
-        });
-      }
-      map.get(gid)!.tabs.push(tab);
+  // 按 Chrome 原生 Tab Group 分组
+  const groups = useMemo(() => groupTabsByChromeGroup(tabs, t), [tabs, t]);
+
+  useLayoutEffect(() => {
+    const node = containerRef.current;
+    if (!node || forcedColumns !== null) return;
+
+    const updateWidth = () => {
+      setContainerWidth(node.clientWidth);
+    };
+
+    updateWidth();
+
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", updateWidth);
+      return () => window.removeEventListener("resize", updateWidth);
     }
 
-    // 未分组排最后
-    const result = Array.from(map.values());
-    const ungrouped = result.find((g) => g.groupId === -1);
-    const grouped = result.filter((g) => g.groupId !== -1);
-    return [...grouped, ...(ungrouped ? [ungrouped] : [])];
-  }, [tabs, t]);
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      const width = entry?.contentRect.width ?? node.clientWidth;
+      setContainerWidth(width);
+    });
+    observer.observe(node);
+
+    return () => observer.disconnect();
+  }, [forcedColumns, groups.length]);
+
+  // 排序
+  const sortedGroups = useMemo(() => {
+    return [...groups].sort((a, b) => {
+      // 未分组始终排最后
+      if (a.groupId === -1) return 1;
+      if (b.groupId === -1) return -1;
+
+      switch (sortBy) {
+        case "name":
+          return a.title.localeCompare(b.title);
+        case "recentAccess": {
+          const aMax = Math.max(...a.tabs.map((tab) => tab.lastAccessed || 0));
+          const bMax = Math.max(...b.tabs.map((tab) => tab.lastAccessed || 0));
+          return bMax - aMax;
+        }
+        case "tabCount":
+        default:
+          return b.tabs.length - a.tabs.length;
+      }
+    });
+  }, [groups, sortBy]);
+
+  // 搜索过滤（组名 + 标签标题/URL）
+  const filteredGroups = useMemo(() => {
+    const query = filterQuery.trim().toLowerCase();
+    if (!query) return sortedGroups;
+    return sortedGroups.filter((group) => {
+      if (group.title.toLowerCase().includes(query)) return true;
+      return group.tabs.some(
+        (tab) => tab.title.toLowerCase().includes(query) || tab.url.toLowerCase().includes(query),
+      );
+    });
+  }, [sortedGroups, filterQuery]);
+
+  const columnCount = forcedColumns ?? getAutoColumnCount(containerWidth, filteredGroups.length);
+  const columns = splitIntoFlowColumns(filteredGroups, columnCount);
+  const useVirtualization = filteredGroups.length > VIRTUALIZATION_THRESHOLD;
 
   if (tabs.length === 0) {
     return <Empty description={t("没有打开的标签页")} className={styles["app-tab-group-empty"]} />;
   }
 
-  /** 为每个分组内的标签构造可见 ID 列表（用于多选） */
-  const allTabIds = tabs.map((t) => t.id);
-
   return (
-    <Collapse
-      defaultActiveKey={groups.map((g) => String(g.groupId))}
-      ghost
-      items={groups.map((group) => ({
-        key: String(group.groupId),
-        label: (
-          <Flex align="center" gap={8} className={styles["app-tab-group-label"]}>
-            <Tag
-              color={GROUP_COLOR_MAP[group.color] || "default"}
-              className={styles["app-tab-group-tag"]}
-            >
-              {group.title}
-            </Tag>
-            <Typography.Text className={styles["app-tab-group-count"]}>
-              {group.tabs.length}
-            </Typography.Text>
-          </Flex>
-        ),
-        children: (
-          <Flex vertical gap={2} className={styles["app-tab-group-list"]}>
-            {group.tabs.map((tab) => (
-              <TabItem
-                key={tab.id}
-                tab={tab}
-                onJump={(id, wid) => {
-                  void jumpToTab(id, wid);
-                }}
-                onClose={(id) => {
-                  void closeSingleTab(id);
-                }}
-                showHostname
-                selectable
-                visibleTabIds={allTabIds}
+    <Flex vertical gap="middle">
+      <TabGroupToolbar
+        filterQuery={filterQuery}
+        onFilterChange={setFilterQuery}
+        collapseAll={collapseAll}
+        onCollapseAllChange={setCollapseAll}
+      />
+      {sortedGroups.length === 0 ? null : (
+        <div
+          ref={containerRef}
+          className={styles["app-domain-masonry"]}
+          style={getColumnVars(columnCount)}
+        >
+          {filteredGroups.length === 0 ? (
+            <Empty description={t("tabGroup.noResults")} />
+          ) : (
+            columns.map((columnGroups, columnIndex) => (
+              <VirtualColumn
+                key={columnIndex}
+                groups={columnGroups}
+                useVirtual={useVirtualization}
+                forceCollapsed={collapseAll}
               />
-            ))}
-          </Flex>
-        ),
-      }))}
-    />
+            ))
+          )}
+        </div>
+      )}
+    </Flex>
   );
 }

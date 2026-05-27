@@ -12,7 +12,13 @@
 
 import { create } from "zustand";
 import type { UserSettings, AutomationRule, WorkspaceTemplate } from "@/shared/types";
-import { getSettings, saveSettings, removeData, getAutomationRules, getWorkspaceTemplates } from "@/repositories";
+import {
+  getSettings,
+  saveSettings,
+  removeData,
+  getAutomationRules,
+  getWorkspaceTemplates,
+} from "@/repositories";
 import { STORAGE_KEYS } from "@/shared/config/storage-keys";
 
 interface SettingsState {
@@ -92,6 +98,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       tidySuggestion: true,
       quickStart: true,
     },
+    // 标签分组视图排序
+    tabGroupSortBy: "tabCount",
     // v1.0 封板新增默认值
     dedupStrictness: "loose",
     idleThresholdMinutes: 1440,
