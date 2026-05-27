@@ -51,6 +51,8 @@ import { useUndoStore } from "./undo-slice";
 import { useSelectionStore } from "./selection-slice";
 import { useSettingsStore } from "./settings-slice";
 import { BRAND } from "@/shared/config/brand";
+import { addToTrash } from "@/repositories/trash-repo";
+import type { TrashedTab } from "@/shared/types";
 
 interface TabsState {
   /** All live tabs (filtered for display) */
@@ -141,6 +143,19 @@ function liveTabToSnapshot(tab: LiveTab): ClosedTabSnapshot {
     favIconUrl: tab.favIconUrl,
     windowId: tab.windowId,
     pinned: tab.pinned,
+  };
+}
+
+function liveTabToTrashedTab(tab: LiveTab): TrashedTab {
+  return {
+    id: tab.id,
+    url: tab.url,
+    title: tab.title,
+    favIconUrl: tab.favIconUrl,
+    hostname: tab.hostname,
+    pinned: tab.pinned,
+    windowId: tab.windowId,
+    groupId: tab.groupId ?? -1,
   };
 }
 
@@ -400,6 +415,10 @@ export const useTabsStore = create<TabsState>((set, get) => ({
 
     try {
       const snapshots = [liveTabToSnapshot(tab)];
+      // 放入回收站（fire-and-forget，不阻塞关闭）
+      void addToTrash([liveTabToTrashedTab(tab)]).catch((_err) => {
+        /* 回收站写入失败不阻塞关闭 */
+      });
       // Undo 写入失败不阻塞关闭（见 closeSingleTab 注释）
       void useUndoStore
         .getState()
@@ -433,6 +452,10 @@ export const useTabsStore = create<TabsState>((set, get) => ({
 
     try {
       const snapshots = targets.map(liveTabToSnapshot);
+      // 放入回收站（fire-and-forget，不阻塞关闭）
+      void addToTrash(targets.map(liveTabToTrashedTab)).catch((_err) => {
+        /* 回收站写入失败不阻塞关闭 */
+      });
       void useUndoStore
         .getState()
         .addRecord(snapshots, `关闭 ${targets.length} 个标签页`)
@@ -485,6 +508,10 @@ export const useTabsStore = create<TabsState>((set, get) => ({
 
     try {
       const snapshots = nonPinned.map(liveTabToSnapshot);
+      // 放入回收站（fire-and-forget，不阻塞关闭）
+      void addToTrash(nonPinned.map(liveTabToTrashedTab)).catch((_err) => {
+        /* 回收站写入失败不阻塞关闭 */
+      });
       void useUndoStore
         .getState()
         .addRecord(snapshots, `关闭 ${domain} 的 ${nonPinned.length} 个标签页`)
@@ -530,6 +557,10 @@ export const useTabsStore = create<TabsState>((set, get) => ({
 
     try {
       const snapshots = nonPinned.map(liveTabToSnapshot);
+      // 放入回收站（fire-and-forget，不阻塞关闭）
+      void addToTrash(nonPinned.map(liveTabToTrashedTab)).catch((_err) => {
+        /* 回收站写入失败不阻塞关闭 */
+      });
       void useUndoStore
         .getState()
         .addRecord(snapshots, `关闭全部 ${nonPinned.length} 个非固定标签页`)

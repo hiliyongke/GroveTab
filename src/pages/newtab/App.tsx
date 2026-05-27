@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback, useMemo, useRef, lazy, Suspense } from "react";
-import { Layout, Spin, Typography, FloatButton, Flex, Segmented } from "antd";
+import { Layout, Spin, Typography, FloatButton, Flex, Segmented, Drawer } from "antd";
 import { useTabsStore, useSettingsStore, useSelectionStore } from "@/store";
 import { useShallow } from "zustand/shallow";
-import { useSwBroadcast, useResolvedTheme, useAppInitialization } from "@/shared/hooks";
+import { useSwBroadcast, useResolvedTheme, useAppInitialization, useAutoCleanup } from "@/shared/hooks";
 import { useT } from "@/shared/i18n";
 import { useKeybinding } from "@/shared/hooks/use-keybinding";
 import { AntdThemeProvider } from "@/shared/ui/AntdThemeProvider";
@@ -77,6 +77,9 @@ const SettingsPanel = lazy(() =>
 const HistoryPanel = lazy(() =>
   import("@/features/history/HistoryPanel").then((m) => ({ default: m.HistoryPanel })),
 );
+const TrashView = lazy(() =>
+  import("@/features/sessions/TrashView").then((m) => ({ default: m.TrashView })),
+);
 /** 点击动效 Canvas 图层，默认 off 时不拉取 chunk */
 const ClickEffectLayer = lazy(() =>
   import("@/features/effects/ClickEffectLayer").then((m) => ({ default: m.ClickEffectLayer })),
@@ -125,6 +128,8 @@ function AppContent() {
   useSwBroadcast();
   // 内存治理（任务7）：监听内存压力，按策略自动 discard 或提示
   useMemoryGovernance();
+  // 存储自动清理：使用率超过阈值时清理非核心数据
+  useAutoCleanup();
 
   /** 全局禁止浏览器原生右键菜单，打造纯 App 体验 */
   useEffect(() => {
@@ -188,14 +193,17 @@ function AppContent() {
     showSettings,
     showInsights,
     showHistory,
+    showTrash,
     setShowSearch,
     setShowSettings,
     setShowInsights,
     setShowHistory,
+    setShowTrash,
     handleOpenSearch,
     handleOpenSettings,
     handleOpenInsights,
     handleOpenHistory,
+    handleOpenTrash,
     handlePageModeChange,
     handleOpenArchive,
   } = usePanelState({ openSettingsFromHash, initialSettingsTab, searchFromHash });
@@ -352,6 +360,7 @@ function AppContent() {
           onOpenSearch={handleOpenSearch}
           onInsights={handleOpenInsights}
           onOpenHistory={handleOpenHistory}
+          onOpenTrash={handleOpenTrash}
           onTidy={handleTidy}
         />
       )}
@@ -477,6 +486,15 @@ function AppContent() {
         {}
         <InsightsPanel open={showInsights} onClose={() => setShowInsights(false as boolean)} />
         <HistoryPanel open={showHistory} onClose={() => setShowHistory(false)} />
+        <Drawer
+          title={t("回收站")}
+          open={showTrash}
+          onClose={() => setShowTrash(false)}
+          width={560}
+          destroyOnClose
+        >
+          <TrashView />
+        </Drawer>
       </Suspense>
     </Layout>
   );

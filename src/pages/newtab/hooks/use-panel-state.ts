@@ -8,15 +8,18 @@ export interface PanelState {
   showSettings: boolean;
   showInsights: boolean;
   showHistory: boolean;
+  showTrash: boolean;
   /** 支持函数式更新，如 setShowSearch(v => !v) */
   setShowSearch: Dispatch<SetStateAction<boolean>>;
   setShowSettings: Dispatch<SetStateAction<boolean>>;
   setShowInsights: Dispatch<SetStateAction<boolean>>;
   setShowHistory: Dispatch<SetStateAction<boolean>>;
+  setShowTrash: Dispatch<SetStateAction<boolean>>;
   handleOpenSearch: () => void;
   handleOpenSettings: () => void;
   handleOpenInsights: () => void;
   handleOpenHistory: () => void;
+  handleOpenTrash: () => void;
   handlePageModeChange: (mode: NewtabPageMode) => void;
   handleOpenArchive: () => void;
 }
@@ -41,6 +44,7 @@ export function usePanelState(options: {
   const [showSettings, setShowSettings] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showTrash, setShowTrash] = useState(false);
 
   // hash 路由触发设置面板
   useEffect(() => {
@@ -79,6 +83,15 @@ export function usePanelState(options: {
     setShowSearch(false);
     setShowSettings(false);
     setShowInsights(false);
+    setShowTrash(false);
+  }, []);
+
+  const handleOpenTrash = useCallback(() => {
+    setShowTrash(true);
+    setShowSearch(false);
+    setShowSettings(false);
+    setShowInsights(false);
+    setShowHistory(false);
   }, []);
 
   const handlePageModeChange = useCallback((mode: NewtabPageMode) => {
@@ -87,6 +100,7 @@ export function usePanelState(options: {
     setShowSearch(false);
     setShowSettings(false);
     setShowInsights(false);
+    setShowTrash(false);
     void track("newtab_page_mode_switch", { from: prev, to: mode });
   }, []);
 
@@ -99,6 +113,7 @@ export function usePanelState(options: {
     setShowSearch(false);
     setShowSettings(false);
     setShowInsights(false);
+    setShowTrash(false);
   }, []);
 
   return {
@@ -106,14 +121,17 @@ export function usePanelState(options: {
     showSettings,
     showInsights,
     showHistory,
+    showTrash,
     setShowSearch,
     setShowSettings,
     setShowInsights,
     setShowHistory,
+    setShowTrash,
     handleOpenSearch,
     handleOpenSettings,
     handleOpenInsights,
     handleOpenHistory,
+    handleOpenTrash,
     handlePageModeChange,
     handleOpenArchive,
   };

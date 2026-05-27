@@ -79,3 +79,6 @@ export type {
 
 // ── 偷摸模式 ──────────────────────────────────────
 export type { StealthModeConfig } from "./stealth-mode";
+
+// ── 回收站 ────────────────────────────────────────
+export type { TrashedTab, TrashedItem } from "./trash";

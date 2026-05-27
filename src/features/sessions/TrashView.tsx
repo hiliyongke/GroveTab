@@ -1,0 +1,212 @@
+/**
+ * TrashView — 回收站面板
+ *
+ * 展示已关闭的标签页，支持恢复、删除、清空。
+ */
+
+import { useCallback, useEffect, useState } from "react";
+import {
+  Button,
+  Card,
+  Empty,
+  Popconfirm,
+  Space,
+  Spin,
+  Tag,
+  Tooltip,
+  Flex,
+  Typography,
+} from "antd";
+import { Trash2, RotateCcw, Clock, X } from "lucide-react";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useT } from "@/shared/i18n";
+import { feedback } from "@/shared/ui/feedback";
+import { getTrashItems, removeFromTrash, clearTrash } from "@/repositories/trash-repo";
+import { createTab } from "@/chrome";
+import type { TrashedItem, TrashedTab } from "@/shared/types";
+import styles from "./styles/trash.module.less";
+
+function formatRelativeTime(ts: number, tfn: (key: string, params?: Record<string, string | number>) => string): string {
+  const diff = Date.now() - ts;
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return tfn("trash.justNow");
+  if (minutes < 60) return tfn("trash.minutesAgo", { n: minutes });
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return tfn("trash.hoursAgo", { n: hours });
+  const days = Math.floor(hours / 24);
+  return tfn("trash.daysAgo", { n: days });
+}
+
+function TabFavicon({ tab }: { tab: TrashedTab }) {
+  if (tab.favIconUrl) {
+    return (
+      <img
+        src={tab.favIconUrl}
+        alt=""
+        className={styles["trash-tab-favicon"]}
+        onError={(e) => {
+          (e.target as HTMLImageElement).style.display = "none";
+        }}
+      />
+    );
+  }
+  return <div className={styles["trash-tab-favicon--placeholder"]} />;
+}
+
+export function TrashView() {
+  const { t } = useT();
+  const [items, setItems] = useState<TrashedItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await getTrashItems();
+      setItems(data);
+    } catch (err) {
+      feedback.error(t("trash.loadFailed"), err);
+    } finally {
+      setLoading(false);
+    }
+  }, [t]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  const handleRestore = useCallback(
+    async (trashedItem: TrashedItem) => {
+      try {
+        await Promise.all(trashedItem.tabs.map((tab) => createTab({ url: tab.url })));
+        await removeFromTrash(trashedItem.id);
+        await refresh();
+        feedback.success(t("trash.restoreSuccess", { count: trashedItem.tabs.length }));
+      } catch (err) {
+        feedback.error(t("trash.restoreFailed"), err);
+      }
+    },
+    [refresh, t],
+  );
+
+  const handleDelete = useCallback(
+    async (id: string) => {
+      try {
+        await removeFromTrash(id);
+        await refresh();
+      } catch (err) {
+        feedback.error(t("trash.deleteFailed"), err);
+      }
+    },
+    [refresh, t],
+  );
+
+  const handleClearAll = useCallback(async () => {
+    try {
+      await clearTrash();
+      await refresh();
+      feedback.success(t("trash.clearSuccess"));
+    } catch (err) {
+      feedback.error(t("trash.clearFailed"), err);
+    }
+  }, [refresh, t]);
+
+  if (loading) {
+    return (
+      <Flex justify="center" align="center" style={{ minHeight: 200 }}>
+        <Spin />
+      </Flex>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <Empty
+        image={Empty.PRESENTED_IMAGE_SIMPLE}
+        description={t("trash.empty")}
+        className={styles["trash-empty"]}
+      />
+    );
+  }
+
+  return (
+    <Flex vertical gap="middle" className={styles["trash-view"]}>
+      <Flex justify="space-between" align="center">
+        <Typography.Text type="secondary">
+          {t("trash.count", { count: items.length })}
+        </Typography.Text>
+        <Popconfirm
+          title={t("trash.clearConfirm")}
+          description={t("trash.clearDesc")}
+          onConfirm={() => void handleClearAll()}
+          okText={t("trash.clear")}
+          cancelText={t("取消")}
+          okButtonProps={{ danger: true }}
+        >
+          <Button danger size="small" icon={<Trash2 size={ICON_SIZE.SMALL} />}>
+            {t("trash.clear")}
+          </Button>
+        </Popconfirm>
+      </Flex>
+
+      {items.map((item) => (
+        <Card
+          key={item.id}
+          size="small"
+          className={styles["trash-card"]}
+          title={
+            <Flex align="center" gap="small">
+              <span className={styles["trash-card__title"]}>{item.name}</span>
+              <Tag color="blue">
+                {String(item.tabs.length)}
+              </Tag>
+            </Flex>
+          }
+          extra={
+            <Space size={4}>
+              <Tooltip title={t("trash.restore")}>
+                <Button
+                  size="small"
+                  type="primary"
+                  icon={<RotateCcw size={ICON_SIZE.SMALL} />}
+                  onClick={() => void handleRestore(item)}
+                >
+                  {t("trash.restore")}
+                </Button>
+              </Tooltip>
+              <Tooltip title={t("trash.delete")}>
+                <Button
+                  size="small"
+                  danger
+                  icon={<X size={ICON_SIZE.SMALL} />}
+                  onClick={() => void handleDelete(item.id)}
+                />
+              </Tooltip>
+            </Space>
+          }
+        >
+          <Flex vertical gap="small">
+            <Flex align="center" gap={4} className={styles["trash-card__meta"]}>
+              <Clock size={ICON_SIZE.XS} />
+              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                {formatRelativeTime(item.trashedAt, t)}
+              </Typography.Text>
+            </Flex>
+            <Flex wrap gap="small">
+              {item.tabs.slice(0, 8).map((tab) => (
+                <Tooltip key={tab.id} title={tab.title}>
+                  <Flex align="center" gap={4} className={styles["trash-tab-chip"]}>
+                    <TabFavicon tab={tab} />
+                    <span className={styles["trash-tab-chip__title"]}>{tab.title || tab.url}</span>
+                  </Flex>
+                </Tooltip>
+              ))}
+              {item.tabs.length > 8 && (
+                <Tag>{`+${item.tabs.length - 8}`}</Tag>
+              )}
+            </Flex>
+          </Flex>
+        </Card>
+      ))}
+    </Flex>
+  );
+}

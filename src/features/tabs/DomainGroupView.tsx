@@ -9,9 +9,13 @@
 
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { Input, Empty, Flex } from "antd";
+import { Search } from "lucide-react";
 import { useTabsStore, useMetadataStore, useSettingsStore } from "@/store";
 import { groupTabsByDomain, type DomainGroup } from "@/shared/utils/domain";
 import { cssVars } from "@/shared/utils/css-vars";
+import { useT } from "@/shared/i18n";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { DomainGroupCard } from "./DomainGroupCard";
 import styles from "./styles/items.module.less";
 
@@ -139,10 +143,12 @@ function VirtualColumn({ groups, useVirtual }: VirtualColumnProps) {
  * 域名分组视图
  */
 export function DomainGroupView() {
+  const { t } = useT();
   const tabs = useTabsStore((s) => s.tabs);
   const pinnedUrls = useMetadataStore((s) => s.pinnedUrls);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+  const [filterQuery, setFilterQuery] = useState("");
   // 仅当用户显式设置了 1–6 的有效数值时才锁定列数，'auto' 或 undefined 走响应式
   const forcedColumns = useSettingsStore((s) => {
     const v = s.settings.domainGroupColumns;
@@ -207,25 +213,53 @@ export function DomainGroupView() {
     });
   }, [groups, pinnedUrls, sortBy]);
 
+  // 搜索过滤
+  const filteredGroups = useMemo(() => {
+    const query = filterQuery.trim().toLowerCase();
+    if (!query) return sortedGroups;
+    return sortedGroups.filter((group) => {
+      if (group.domain.toLowerCase().includes(query)) return true;
+      return group.tabs.some(
+        (tab) =>
+          tab.title.toLowerCase().includes(query) ||
+          tab.url.toLowerCase().includes(query),
+      );
+    });
+  }, [sortedGroups, filterQuery]);
+
   if (sortedGroups.length === 0) {
     return null;
   }
 
-  const columnCount = forcedColumns ?? getAutoColumnCount(containerWidth, sortedGroups.length);
-  const columns = splitIntoFlowColumns(sortedGroups, columnCount);
+  const columnCount = forcedColumns ?? getAutoColumnCount(containerWidth, filteredGroups.length);
+  const columns = splitIntoFlowColumns(filteredGroups, columnCount);
 
   // 虚拟滚动阈值：超过 VIRTUALIZATION_THRESHOLD 个分组时启用
-  const useVirtualization = sortedGroups.length > VIRTUALIZATION_THRESHOLD;
+  const useVirtualization = filteredGroups.length > VIRTUALIZATION_THRESHOLD;
 
   return (
-    <div
-      ref={containerRef}
-      className={styles["app-domain-masonry"]}
-      style={getColumnVars(columnCount)}
-    >
-      {columns.map((columnGroups, columnIndex) => (
-        <VirtualColumn key={columnIndex} groups={columnGroups} useVirtual={useVirtualization} />
-      ))}
-    </div>
+    <Flex vertical gap="middle">
+      <Input
+        prefix={<Search size={ICON_SIZE.SMALL} />}
+        placeholder={t("search.domainFilter")}
+        value={filterQuery}
+        onChange={(e) => setFilterQuery(e.target.value)}
+        allowClear
+        style={{ maxWidth: 400 }}
+      />
+      {filteredGroups.length === 0 ? (
+        <Empty description={t("search.noDomainResults")} />
+      ) : (
+        <div
+          ref={containerRef}
+          className={styles["app-domain-masonry"]}
+          style={getColumnVars(columnCount)}
+        >
+          {columns.map((columnGroups, columnIndex) => (
+            <VirtualColumn key={columnIndex} groups={columnGroups} useVirtual={useVirtualization} />
+          ))}
+        </div>
+      )}
+    </Flex>
   );
 }

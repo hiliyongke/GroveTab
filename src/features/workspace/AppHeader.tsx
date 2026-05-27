@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { Layout, Space, Button, Tooltip, Tag, Flex } from "antd";
-import { Search, Settings, Sun, Moon, SunMoon, Globe, BarChart3, History } from "lucide-react";
+import { Search, Settings, Sun, Moon, SunMoon, Globe, BarChart3, History, Trash2 } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useSettingsStore } from "@/store";
 import { useT } from "@/shared/i18n";
@@ -35,6 +35,7 @@ export function AppHeader({
   onInsights,
   onTidy,
   onOpenHistory,
+  onOpenTrash,
 }: {
   tabCount: number;
   domainCount: number;
@@ -51,6 +52,8 @@ export function AppHeader({
   onTidy?: () => void;
   /** 打开「插件历史记录」面板 */
   onOpenHistory?: () => void;
+  /** 打开「回收站」面板 */
+  onOpenTrash?: () => void;
 }) {
   const theme = useSettingsStore((s) => s.settings.theme);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
@@ -191,6 +194,17 @@ export function AppHeader({
               icon={<History size={ICON_SIZE.SMALL} className="app-icon" />}
               onClick={onOpenHistory}
               aria-label={t('历史记录')}
+            />
+          </Tooltip>
+        )}
+        {onOpenTrash && (
+          <Tooltip title={t('回收站')}>
+            <Button
+              size="small"
+              type="text"
+              icon={<Trash2 size={ICON_SIZE.SMALL} className="app-icon" />}
+              onClick={onOpenTrash}
+              aria-label={t('回收站')}
             />
           </Tooltip>
         )}

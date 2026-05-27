@@ -53,6 +53,8 @@ export const STORAGE_KEYS = Object.freeze({
   bookmarkAutoRules: key("bookmark_auto_rules"),
   /** 热榜兴趣信号（Record<url, InterestSignal>） */
   trendingInterest: key("trending_interest_signals"),
+  /** 回收站（TrashedItem[]） */
+  trash: key("trash"),
 });
 
 /** 判断是否属于当前应用命名空间的存储键。 */
