@@ -236,17 +236,19 @@ export function DomainGroupView({ filterQuery }: DomainGroupViewProps) {
 
   return (
     <Flex vertical gap="middle">
-      {sortedGroups.length === 0 ? null : filteredGroups.length === 0 ? (
-        <Empty description={t("search.noDomainResults")} />
-      ) : (
+      {sortedGroups.length === 0 ? null : (
         <div
           ref={containerRef}
           className={styles["app-domain-masonry"]}
           style={getColumnVars(columnCount)}
         >
-          {columns.map((columnGroups, columnIndex) => (
-            <VirtualColumn key={columnIndex} groups={columnGroups} useVirtual={useVirtualization} />
-          ))}
+          {filteredGroups.length === 0 ? (
+            <Empty description={t("search.noDomainResults")} />
+          ) : (
+            columns.map((columnGroups, columnIndex) => (
+              <VirtualColumn key={columnIndex} groups={columnGroups} useVirtual={useVirtualization} />
+            ))
+          )}
         </div>
       )}
     </Flex>
