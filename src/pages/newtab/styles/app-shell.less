@@ -166,65 +166,11 @@
   opacity: 0.52;
 }
 
-/* ── 顶栏中部（搜索触发器 + 品牌） ── */
+/* ── 顶栏中部（搜索触发器） ── */
 .app-header-center {
   min-width: 280px;
   padding-inline: 18px;
   /* Antd Flex 通过 props 提供 flex, justify-content */
-}
-
-/* 布局/密度快捷切换控件 */
-.app-header-layout-controls {
-  flex-shrink: 0;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateX(-6px);
-  transition:
-    opacity 220ms ease,
-    transform 220ms ease;
-}
-
-.app-header-shell.is-scrolled .app-header-layout-controls {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateX(0);
-}
-
-/* Segmented 紧凑化 */
-.app-header-segmented {
-  --ant-segmented-item-selected-bg: color-mix(in srgb, var(--ant-color-bg-elevated) 82%, transparent);
-  background: color-mix(in srgb, var(--ant-color-bg-container) 58%, transparent);
-  border: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 56%, transparent);
-  border-radius: var(--app-radius-md, 8px);
-  backdrop-filter: blur(10px) saturate(var(--app-glass-saturate, 150%));
-  -webkit-backdrop-filter: blur(10px) saturate(var(--app-glass-saturate, 150%));
-}
-
-.app-header-segmented .ant-segmented-item {
-  min-height: 24px;
-  min-width: 28px;
-  padding: 0 6px;
-  border-radius: calc(var(--app-radius-md, 8px) - 2px);
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 24px;
-  transition: background 160ms ease, color 160ms ease;
-}
-
-.app-header-segmented .ant-segmented-item:hover {
-  color: var(--ant-color-text);
-}
-
-.app-header-segmented .ant-segmented-item-selected {
-  color: var(--ant-color-text);
-  font-weight: 600;
-  box-shadow: 0 1px 4px color-mix(in srgb, var(--ant-color-text) 8%, transparent);
-}
-
-.app-header-segmented .ant-segmented-thumb {
-  background: var(--ant-segmented-item-selected-bg);
-  border-radius: calc(var(--app-radius-md, 8px) - 2px);
-  box-shadow: 0 1px 4px color-mix(in srgb, var(--ant-color-text) 8%, transparent);
 }
 
 .app-header-search-trigger {

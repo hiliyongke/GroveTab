@@ -9,8 +9,8 @@
 
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { Input, Empty, Flex } from "antd";
-import { Search } from "lucide-react";
+import { Input, Empty, Flex, Segmented, Tooltip } from "antd";
+import { Search, LayoutGrid, List, Grip } from "lucide-react";
 import { useTabsStore, useMetadataStore, useSettingsStore } from "@/store";
 import { groupTabsByDomain, type DomainGroup } from "@/shared/utils/domain";
 import { cssVars } from "@/shared/utils/css-vars";
@@ -18,6 +18,9 @@ import { useT } from "@/shared/i18n";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { DomainGroupCard } from "./DomainGroupCard";
 import styles from "./styles/items.module.less";
+
+type TabsLayout = "masonry" | "compact" | "grid";
+type LayoutDensity = "compact" | "default" | "comfortable";
 
 const DOMAIN_COLUMN_MIN_WIDTH = 320;
 const DOMAIN_COLUMN_GAP = 16;
@@ -156,6 +159,9 @@ export function DomainGroupView() {
   });
   /** 分组排序方式（默认按标签数量降序） */
   const sortBy = useSettingsStore((s) => s.settings.domainGroupSortBy ?? "tabCount");
+  const tabsLayout = useSettingsStore((s) => s.settings.tabsLayout ?? "masonry");
+  const layoutDensity = useSettingsStore((s) => s.settings.layoutDensity ?? "default");
+  const updateSettings = useSettingsStore((s) => s.updateSettings);
 
   const groups = useMemo(() => groupTabsByDomain(tabs), [tabs]);
 
@@ -239,14 +245,43 @@ export function DomainGroupView() {
 
   return (
     <Flex vertical gap="middle">
-      <Input
-        prefix={<Search size={ICON_SIZE.SMALL} />}
-        placeholder={t("search.domainFilter")}
-        value={filterQuery}
-        onChange={(e) => setFilterQuery(e.target.value)}
-        allowClear
-        style={{ maxWidth: 400 }}
-      />
+      {/* 搜索栏 + 布局/密度快捷切换 */}
+      <Flex align="center" gap={8} className={styles["app-domain-toolbar"]}>
+        <Input
+          prefix={<Search size={ICON_SIZE.SMALL} />}
+          placeholder={t("search.domainFilter")}
+          value={filterQuery}
+          onChange={(e) => setFilterQuery(e.target.value)}
+          allowClear
+          style={{ maxWidth: 400, flex: "1 1 auto" }}
+        />
+        <Flex align="center" gap={4} className={styles["app-domain-toolbar-controls"]}>
+          <Tooltip title={t("headerLayout.title")}>
+            <Segmented
+              size="small"
+              value={tabsLayout}
+              onChange={(v) => void updateSettings({ tabsLayout: v as TabsLayout })}
+              options={[
+                { value: "masonry", icon: <LayoutGrid size={13} /> },
+                { value: "compact", icon: <List size={13} /> },
+                { value: "grid", icon: <Grip size={13} /> },
+              ]}
+            />
+          </Tooltip>
+          <Tooltip title={t("headerDensity.title")}>
+            <Segmented
+              size="small"
+              value={layoutDensity}
+              onChange={(v) => void updateSettings({ layoutDensity: v as LayoutDensity })}
+              options={[
+                { value: "compact", label: "S" },
+                { value: "default", label: "M" },
+                { value: "comfortable", label: "L" },
+              ]}
+            />
+          </Tooltip>
+        </Flex>
+      </Flex>
       {filteredGroups.length === 0 ? (
         <Empty description={t("search.noDomainResults")} />
       ) : (

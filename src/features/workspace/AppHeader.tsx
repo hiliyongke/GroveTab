@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
-import { Layout, Space, Button, Tooltip, Tag, Flex, Popover, Segmented } from "antd";
-import { Search, Settings, Sun, Moon, SunMoon, Globe, BarChart3, History, Trash2, SlidersHorizontal, LayoutGrid, List, Grip } from "lucide-react";
+import { Layout, Space, Button, Tooltip, Tag, Flex, Popover } from "antd";
+import { Search, Settings, Sun, Moon, SunMoon, Globe, BarChart3, History, Trash2, SlidersHorizontal } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useSettingsStore } from "@/store";
 import { useT } from "@/shared/i18n";
@@ -9,9 +9,6 @@ import { DropdownMenu } from "@/features/workspace/DropdownMenu";
 import { WorkspaceSwitcher } from "@/features/workspace/WorkspaceSwitcher";
 import { QuickTogglePanel } from "@/features/workspace/QuickTogglePanel";
 import type { NewtabPageMode } from "@/shared/types";
-
-type TabsLayout = "masonry" | "compact" | "grid";
-type LayoutDensity = "compact" | "default" | "comfortable";
 
 const { Header } = Layout;
 
@@ -60,8 +57,6 @@ export function AppHeader({
   onOpenTrash?: () => void;
 }) {
   const theme = useSettingsStore((s) => s.settings.theme);
-  const tabsLayout = useSettingsStore((s) => s.settings.tabsLayout ?? "masonry");
-  const layoutDensity = useSettingsStore((s) => s.settings.layoutDensity ?? "default");
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const { t } = useT();
   /** 循环切换 light → dark → system */
@@ -125,12 +120,12 @@ export function AppHeader({
       </Flex>
 
       {/*
-        中部吸附搜索触发器 + 布局/密度快捷切换
+        中部吸附搜索触发器
         ---------------------------------
         · flex:1 占满中间空间
         · Hero 搜索框在视野内时隐藏，滚出后渐显
       */}
-      <Flex flex="1 1 520px" justify="center" align="center" gap={8} className="app-header-center">
+      <Flex flex="1 1 520px" justify="center" className="app-header-center">
         <Button
           type="text"
           onClick={onOpenSearch}
@@ -146,35 +141,6 @@ export function AppHeader({
             ⌘K
           </span>
         </Button>
-        {/* 布局模式 + 卡片密度 快捷切换 */}
-        <Flex align="center" gap={4} className="app-header-layout-controls">
-          <Tooltip title={t('headerLayout.title')}>
-            <Segmented
-              size="small"
-              value={tabsLayout}
-              onChange={(v) => void updateSettings({ tabsLayout: v as TabsLayout })}
-              options={[
-                { value: "masonry", icon: <LayoutGrid size={13} /> },
-                { value: "compact", icon: <List size={13} /> },
-                { value: "grid", icon: <Grip size={13} /> },
-              ]}
-              className="app-header-segmented"
-            />
-          </Tooltip>
-          <Tooltip title={t('headerDensity.title')}>
-            <Segmented
-              size="small"
-              value={layoutDensity}
-              onChange={(v) => void updateSettings({ layoutDensity: v as LayoutDensity })}
-              options={[
-                { value: "compact", label: "S" },
-                { value: "default", label: "M" },
-                { value: "comfortable", label: "L" },
-              ]}
-              className="app-header-segmented"
-            />
-          </Tooltip>
-        </Flex>
       </Flex>
 
       <Space size={6} className="app-header-actions">

@@ -388,3 +388,45 @@
 .app-tab-item-action--favorite.is-active {
   color: var(--ant-color-warning);
 }
+
+/* ── 域名分组视图：搜索栏 + 布局/密度切换工具栏 ── */
+.app-domain-toolbar {
+  flex-wrap: nowrap;
+}
+
+.app-domain-toolbar-controls {
+  flex-shrink: 0;
+
+  :global(.ant-segmented) {
+    background: color-mix(in srgb, var(--ant-color-bg-container) 60%, transparent);
+    border: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 50%, transparent);
+    border-radius: var(--app-radius-md, 8px);
+    backdrop-filter: blur(8px) saturate(var(--app-glass-saturate, 150%));
+    -webkit-backdrop-filter: blur(8px) saturate(var(--app-glass-saturate, 150%));
+  }
+
+  :global(.ant-segmented-item) {
+    min-height: 26px;
+    min-width: 28px;
+    padding: 0 6px;
+    border-radius: calc(var(--app-radius-md, 8px) - 2px);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 26px;
+    transition: background 160ms ease, color 160ms ease;
+  }
+
+  :global(.ant-segmented-item:hover) {
+    color: var(--ant-color-text);
+  }
+
+  :global(.ant-segmented-item-selected) {
+    color: var(--ant-color-text);
+    font-weight: 600;
+  }
+
+  :global(.ant-segmented-thumb) {
+    background: color-mix(in srgb, var(--ant-color-bg-elevated) 85%, transparent);
+    border-radius: calc(var(--app-radius-md, 8px) - 2px);
+  }
+}
