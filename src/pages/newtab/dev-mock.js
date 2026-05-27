@@ -20,48 +20,72 @@
  * 生产构建会走 Chrome 扩展，不会加载本文件。
  */
 (function () {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   if (window.chrome && window.chrome.tabs) return; // 真实扩展环境，跳过
 
   const initialMockTabs = [
-    ['tencent.com', '模板注册、模板处理设置 - 云点播 - 控制台', 'https://console.cloud.tencent.com/vod'],
-    ['tencent.com', '概览', 'https://cloud.tencent.com/'],
-    ['tencent.com', '腾讯云 Tea Design', 'https://tea-design.tencent.com/'],
-    ['tencent.com', '腾讯云 - API 管理', 'https://console.cloud.tencent.com/cam'],
-    ['tencent.com', '变更管理 - 控制台 Buffer 系统', 'https://cbs.tencent.com/'],
-    ['tencent.com', '#60 VOC 控制台前端体验环境部署流水线', 'https://devops.tencent.com/p1'],
-    ['tencent.com', '[VOC] 点播播放、剪辑同步工坊、云点播及视频处理', 'https://devops.tencent.com/p2'],
-    ['reddit.com', 'Reddit – 全网生活地', 'https://reddit.com/'],
-    ['codebuddy.cn', '腾讯云代码助手 CodeBuddy - AI 时代的智能编程伙伴', 'https://codebuddy.cn/'],
-    ['127.0.0.1', 'Whistle Web Debugging Proxy', 'http://127.0.0.1:8899/'],
-    ['yudesk.dev', 'GSD 实践指南 | YuD 落地工坊', 'https://yudesk.dev/gsd'],
-    ['github.com', 'get-shit-done/README.zh-CN.md at main - gsd-build/get-shit-done', 'https://github.com/gsd-build'],
-    ['woa.com', '我的工作 - TAPD 平台', 'https://tapd.woa.com/mywork'],
-    ['woa.com', '边缘安全加速平台业务数据观测-API 文档-文档中心-腾讯云', 'https://docs.woa.com/'],
-    ['woa.com', '#60 VOC 控制台前端体验环境部署流水线', 'https://devops.woa.com/p'],
-    ['woa.com', '[VOC] 点播播放、剪辑同步工坊、云点播及视频处理-TAPD平台', 'https://tapd.woa.com/voc'],
-    ['woa.com', '腾讯云 - API 管理', 'https://cloud.woa.com/api'],
-    ['woa.com', '变更管理 - 控制台 Buffer 系统', 'https://cbs.woa.com/'],
-    ['woa.com', '[用周Bug] 修复页面渲染延迟导致标签页 tab 数量显示不准确-EdgeOne-TAPD平台', 'https://tapd.woa.com/bug'],
-    ['woa.com', '会并请求 - edgeone/tea-app-edgeone - 工蜂内网码', 'https://git.woa.com/ee'],
-    ['woa.com', 'feat(version-schedule-change-record) [141] - 会并请求 - cdn/fusion-admin', 'https://git.woa.com/fu'],
-    ['woa.com', 'AI助手-CodeWiki', 'https://codewiki.woa.com/'],
-    ['woa.com', 'Tokens 看板', 'https://tokens.woa.com/'],
-    ['woa.com', '变更管理 - 控制台 Buffer 系统', 'https://cbs.woa.com/2'],
-    ['woa.com', 'Knot - MCP 管理', 'https://knot.woa.com/'],
-    ['woa.com', 'LLM Chat', 'https://llm.woa.com/'],
+    [
+      "tencent.com",
+      "模板注册、模板处理设置 - 云点播 - 控制台",
+      "https://console.cloud.tencent.com/vod",
+    ],
+    ["tencent.com", "概览", "https://cloud.tencent.com/"],
+    ["tencent.com", "腾讯云 Tea Design", "https://tea-design.tencent.com/"],
+    ["tencent.com", "腾讯云 - API 管理", "https://console.cloud.tencent.com/cam"],
+    ["tencent.com", "变更管理 - 控制台 Buffer 系统", "https://cbs.tencent.com/"],
+    ["tencent.com", "#60 VOC 控制台前端体验环境部署流水线", "https://devops.tencent.com/p1"],
+    [
+      "tencent.com",
+      "[VOC] 点播播放、剪辑同步工坊、云点播及视频处理",
+      "https://devops.tencent.com/p2",
+    ],
+    ["reddit.com", "Reddit – 全网生活地", "https://reddit.com/"],
+    ["codebuddy.cn", "腾讯云代码助手 CodeBuddy - AI 时代的智能编程伙伴", "https://codebuddy.cn/"],
+    ["127.0.0.1", "Whistle Web Debugging Proxy", "http://127.0.0.1:8899/"],
+    ["yudesk.dev", "GSD 实践指南 | YuD 落地工坊", "https://yudesk.dev/gsd"],
+    [
+      "github.com",
+      "get-shit-done/README.zh-CN.md at main - gsd-build/get-shit-done",
+      "https://github.com/gsd-build",
+    ],
+    ["woa.com", "我的工作 - TAPD 平台", "https://tapd.woa.com/mywork"],
+    ["woa.com", "边缘安全加速平台业务数据观测-API 文档-文档中心-腾讯云", "https://docs.woa.com/"],
+    ["woa.com", "#60 VOC 控制台前端体验环境部署流水线", "https://devops.woa.com/p"],
+    [
+      "woa.com",
+      "[VOC] 点播播放、剪辑同步工坊、云点播及视频处理-TAPD平台",
+      "https://tapd.woa.com/voc",
+    ],
+    ["woa.com", "腾讯云 - API 管理", "https://cloud.woa.com/api"],
+    ["woa.com", "变更管理 - 控制台 Buffer 系统", "https://cbs.woa.com/"],
+    [
+      "woa.com",
+      "[用周Bug] 修复页面渲染延迟导致标签页 tab 数量显示不准确-EdgeOne-TAPD平台",
+      "https://tapd.woa.com/bug",
+    ],
+    ["woa.com", "会并请求 - edgeone/tea-app-edgeone - 工蜂内网码", "https://git.woa.com/ee"],
+    [
+      "woa.com",
+      "feat(version-schedule-change-record) [141] - 会并请求 - cdn/fusion-admin",
+      "https://git.woa.com/fu",
+    ],
+    ["woa.com", "AI助手-CodeWiki", "https://codewiki.woa.com/"],
+    ["woa.com", "Tokens 看板", "https://tokens.woa.com/"],
+    ["woa.com", "变更管理 - 控制台 Buffer 系统", "https://cbs.woa.com/2"],
+    ["woa.com", "Knot - MCP 管理", "https://knot.woa.com/"],
+    ["woa.com", "LLM Chat", "https://llm.woa.com/"],
   ];
 
   function shouldAvoidExternalFaviconProxy(hostname) {
-    const lower = String(hostname || '').toLowerCase();
+    const lower = String(hostname || "").toLowerCase();
     if (
-      lower === 'localhost' ||
-      lower === 'woa.com' ||
-      lower === 'oa.com' ||
-      lower.endsWith('.local') ||
-      lower.endsWith('.woa.com') ||
-      lower.endsWith('.oa.com') ||
-      !lower.includes('.')
+      lower === "localhost" ||
+      lower === "woa.com" ||
+      lower === "oa.com" ||
+      lower.endsWith(".local") ||
+      lower.endsWith(".woa.com") ||
+      lower.endsWith(".oa.com") ||
+      !lower.includes(".")
     ) {
       return true;
     }
@@ -74,7 +98,7 @@
   }
 
   function getMockFaviconUrl(hostname) {
-    if (shouldAvoidExternalFaviconProxy(hostname)) return '';
+    if (shouldAvoidExternalFaviconProxy(hostname)) return "";
     return `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`;
   }
 
@@ -94,7 +118,7 @@
     autoDiscardable: true,
     incognito: false,
     lastAccessed: now - i * 60_000,
-    status: 'complete',
+    status: "complete",
     mutedInfo: { muted: false },
     groupId: -1,
     selected: false,
@@ -110,10 +134,22 @@
   function createEvent() {
     const handlers = new Set();
     return {
-      addListener: (fn) => { if (typeof fn === 'function') handlers.add(fn); },
-      removeListener: (fn) => { handlers.delete(fn); },
+      addListener: (fn) => {
+        if (typeof fn === "function") handlers.add(fn);
+      },
+      removeListener: (fn) => {
+        handlers.delete(fn);
+      },
       hasListener: (fn) => handlers.has(fn),
-      dispatch: (...args) => { handlers.forEach((fn) => { try { fn(...args); } catch (e) { console.warn(e); } }); },
+      dispatch: (...args) => {
+        handlers.forEach((fn) => {
+          try {
+            fn(...args);
+          } catch (e) {
+            console.warn(e);
+          }
+        });
+      },
     };
   }
 
@@ -130,7 +166,7 @@
    * 与前端 `useSwBroadcast` 对齐的 channel，模拟 Service Worker 的广播行为。
    * —— 关键：前端是通过这个 channel 来增量更新 tabs 状态的
    */
-  const CHANNEL_NAME = 'app-sw-broadcast';
+  const CHANNEL_NAME = "app-sw-broadcast";
   let swChannel = null;
   try {
     swChannel = new BroadcastChannel(CHANNEL_NAME);
@@ -154,13 +190,15 @@
     const message = { type, payload };
     // 1. BroadcastChannel 方式（普通场景足够）
     if (swChannel) {
-      try { swChannel.postMessage(message); } catch (e) {}
+      try {
+        swChannel.postMessage(message);
+      } catch (e) {}
     }
     // 2. 同 window 也再广播一条 window 事件 —— use-sw-broadcast 对应的
     //    hook 现在只监听 BroadcastChannel，但为了兜底未来可能的独立 tab 预览，
     //    这里放一条自定义事件，方便外部探针。
     try {
-      window.dispatchEvent(new CustomEvent('app:sw-message', { detail: message }));
+      window.dispatchEvent(new CustomEvent("app:sw-message", { detail: message }));
     } catch (e) {}
   }
 
@@ -171,7 +209,7 @@
    * 内存旁路，让 mock 的 postMessage 也能送达前端监听器。
    */
   (function patchBroadcastChannel() {
-    if (typeof BroadcastChannel !== 'function') return;
+    if (typeof BroadcastChannel !== "function") return;
     const NativeBC = BroadcastChannel;
     /** name → Set<listener> 内存旁路表 */
     const inProcessChannels = new Map();
@@ -186,32 +224,38 @@
       bucket.add(instanceToken);
 
       // 公开与原生一致的接口
-      Object.defineProperty(this, 'name', { value: name, enumerable: true });
+      Object.defineProperty(this, "name", { value: name, enumerable: true });
 
       this.postMessage = (data) => {
         // 原生：跨 window/同 origin 仍旧正常广播（不会回投自己的 native 实例）
-        try { native.postMessage(data); } catch (e) {}
+        try {
+          native.postMessage(data);
+        } catch (e) {}
         // 旁路：投递到 **同 window 其他 BroadcastChannel 实例** 的 localListeners
-        const event = { data, type: 'message', origin: location.origin };
+        const event = { data, type: "message", origin: location.origin };
         bucket.forEach((token) => {
           if (token === instanceToken) return; // 跳过自己
           token.localListeners.forEach((fn) => {
-            try { fn(event); } catch (e) { console.warn(e); }
+            try {
+              fn(event);
+            } catch (e) {
+              console.warn(e);
+            }
           });
         });
       };
 
       this.addEventListener = (type, fn) => {
-        if (type !== 'message' || typeof fn !== 'function') {
+        if (type !== "message" || typeof fn !== "function") {
           native.addEventListener(type, fn);
           return;
         }
         localListeners.add(fn);
-        native.addEventListener('message', fn);
+        native.addEventListener("message", fn);
       };
 
       this.removeEventListener = (type, fn) => {
-        if (type === 'message') localListeners.delete(fn);
+        if (type === "message") localListeners.delete(fn);
         native.removeEventListener(type, fn);
       };
 
@@ -223,17 +267,17 @@
 
       /** onmessage setter —— 很多代码都用它 */
       let _onmessage = null;
-      Object.defineProperty(this, 'onmessage', {
+      Object.defineProperty(this, "onmessage", {
         get: () => _onmessage,
         set: (fn) => {
           if (_onmessage) {
             localListeners.delete(_onmessage);
-            native.removeEventListener('message', _onmessage);
+            native.removeEventListener("message", _onmessage);
           }
           _onmessage = fn;
-          if (typeof fn === 'function') {
+          if (typeof fn === "function") {
             localListeners.add(fn);
-            native.addEventListener('message', fn);
+            native.addEventListener("message", fn);
           }
         },
       });
@@ -264,7 +308,7 @@
     // 通知监听器 & 广播
     removed.forEach((tab) => {
       tabsOnRemoved.dispatch(tab.id, { windowId: tab.windowId, isWindowClosing: false });
-      broadcastSw('tab-removed', { id: tab.id, windowId: tab.windowId });
+      broadcastSw("tab-removed", { id: tab.id, windowId: tab.windowId });
     });
     return Promise.resolve();
   }
@@ -275,26 +319,31 @@
   function updateTab(id, props) {
     const tab = findTab(id);
     if (!tab) return Promise.resolve(undefined);
-    if (props && typeof props === 'object') {
+    if (props && typeof props === "object") {
       if (props.active === true) {
         // 模拟 activate
-        mockTabs.forEach((t) => { t.active = t.id === id; });
+        mockTabs.forEach((t) => {
+          t.active = t.id === id;
+        });
         tab.lastAccessed = Date.now();
         tabsOnActivated.dispatch({ tabId: id, windowId: tab.windowId });
-        broadcastSw('tab-activated', { id, windowId: tab.windowId });
+        broadcastSw("tab-activated", { id, windowId: tab.windowId });
       }
-      if (typeof props.pinned === 'boolean') {
+      if (typeof props.pinned === "boolean") {
         tab.pinned = props.pinned;
         const changeInfo = { pinned: props.pinned };
         tabsOnUpdated.dispatch(id, changeInfo, tab);
-        broadcastSw('tab-updated', { id, pinned: props.pinned });
+        broadcastSw("tab-updated", { id, pinned: props.pinned });
       }
-      if (typeof props.muted === 'boolean' || (props.mutedInfo && typeof props.mutedInfo.muted === 'boolean')) {
-        const muted = typeof props.muted === 'boolean' ? props.muted : props.mutedInfo.muted;
+      if (
+        typeof props.muted === "boolean" ||
+        (props.mutedInfo && typeof props.mutedInfo.muted === "boolean")
+      ) {
+        const muted = typeof props.muted === "boolean" ? props.muted : props.mutedInfo.muted;
         tab.mutedInfo = { muted };
         const changeInfo = { mutedInfo: { muted } };
         tabsOnUpdated.dispatch(id, changeInfo, tab);
-        broadcastSw('tab-updated', { id });
+        broadcastSw("tab-updated", { id });
       }
     }
     return Promise.resolve(tab);
@@ -320,9 +369,9 @@
           id,
           windowId: 1,
           index: mockTabs.length,
-          url: url || 'about:blank',
-          title: url || 'New Tab',
-          favIconUrl: '',
+          url: url || "about:blank",
+          title: url || "New Tab",
+          favIconUrl: "",
           active: false,
           pinned: false,
           audible: false,
@@ -330,15 +379,16 @@
           autoDiscardable: true,
           incognito: false,
           lastAccessed: Date.now(),
-          status: 'complete',
+          status: "complete",
           mutedInfo: { muted: false },
           groupId: -1,
+          splitViewId: -1,
           selected: false,
           highlighted: false,
         };
         mockTabs.push(newTab);
         tabsOnCreated.dispatch({ ...newTab });
-        broadcastSw('tab-created', { id: newTab.id });
+        broadcastSw("tab-created", { id: newTab.id });
         return Promise.resolve({ ...newTab });
       },
       move: (id, { index }) => {
@@ -346,8 +396,10 @@
         if (current < 0) return Promise.resolve(undefined);
         const [t] = mockTabs.splice(current, 1);
         mockTabs.splice(index, 0, t);
-        mockTabs.forEach((tab, i) => { tab.index = i; });
-        broadcastSw('tab-moved', { id, fromIndex: current, toIndex: index });
+        mockTabs.forEach((tab, i) => {
+          tab.index = i;
+        });
+        broadcastSw("tab-moved", { id, fromIndex: current, toIndex: index });
         return Promise.resolve(t);
       },
       onCreated: tabsOnCreated,
@@ -359,12 +411,61 @@
     windows: {
       WINDOW_ID_NONE: -1,
       WINDOW_ID_CURRENT: -2,
-      getCurrent: () => Promise.resolve({ id: 1, focused: true, type: 'normal', state: 'normal' }),
-      getAll: () => Promise.resolve([{ id: 1, focused: true, type: 'normal', state: 'normal', incognito: false, tabs: mockTabs.map((t) => ({ ...t })) }]),
-      get: () => Promise.resolve({ id: 1, focused: true, type: 'normal', state: 'normal', incognito: false }),
+      getCurrent: () => Promise.resolve({ id: 1, focused: true, type: "normal", state: "normal" }),
+      getAll: () =>
+        Promise.resolve([
+          {
+            id: 1,
+            focused: true,
+            type: "normal",
+            state: "normal",
+            incognito: false,
+            tabs: mockTabs.map((t) => ({ ...t })),
+          },
+        ]),
+      get: () =>
+        Promise.resolve({
+          id: 1,
+          focused: true,
+          type: "normal",
+          state: "normal",
+          incognito: false,
+          left: 0,
+          top: 0,
+          width: window.screen?.availWidth || 1440,
+          height: window.screen?.availHeight || 900,
+        }),
       update: () => Promise.resolve(),
-      create: () => Promise.resolve({ id: 2, focused: true, type: 'normal', state: 'normal', tabs: [] }),
+      create: () =>
+        Promise.resolve({ id: 2, focused: true, type: "normal", state: "normal", tabs: [] }),
       onFocusChanged: windowsOnFocusChanged,
+    },
+    permissions: {
+      contains: () => Promise.resolve(true),
+      request: () => Promise.resolve(true),
+    },
+    system: {
+      display: {
+        getInfo: () =>
+          Promise.resolve([
+            {
+              id: "mock-display",
+              isPrimary: true,
+              bounds: {
+                left: 0,
+                top: 0,
+                width: window.screen?.availWidth || 1440,
+                height: window.screen?.availHeight || 900,
+              },
+              workArea: {
+                left: 0,
+                top: 0,
+                width: window.screen?.availWidth || 1440,
+                height: window.screen?.availHeight || 900,
+              },
+            },
+          ]),
+      },
     },
     sessions: {
       getRecentlyClosed: () => Promise.resolve([]),
@@ -373,7 +474,7 @@
     storage: {
       local: {
         get: (key) => {
-          if (typeof key === 'string') {
+          if (typeof key === "string") {
             return Promise.resolve(storage.has(key) ? { [key]: storage.get(key) } : {});
           }
           if (Array.isArray(key)) {
@@ -389,7 +490,10 @@
           for (const [k, v] of Object.entries(obj)) storage.set(k, v);
           return Promise.resolve();
         },
-        remove: (key) => { storage.delete(key); return Promise.resolve(); },
+        remove: (key) => {
+          storage.delete(key);
+          return Promise.resolve();
+        },
         getBytesInUse: () => Promise.resolve(0),
       },
       onChanged: storageOnChanged,
@@ -397,12 +501,12 @@
     runtime: {
       sendMessage: () => Promise.resolve(),
       onMessage: runtimeOnMessage,
-      getManifest: () => ({ version: '0.0.0-dev' }),
+      getManifest: () => ({ version: "0.0.0-dev" }),
     },
     i18n: {
-      getUILanguage: () => 'zh-CN',
+      getUILanguage: () => "zh-CN",
     },
   };
 
-  console.warn('[DevMock] chrome.* API 为假数据，仅用于浏览器预览（关闭/更新/跳转均可实时生效）');
+  console.warn("[DevMock] chrome.* API 为假数据，仅用于浏览器预览（关闭/更新/跳转均可实时生效）");
 })();

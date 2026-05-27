@@ -5128,5 +5128,45 @@
     "key": "k_ghzglvo",
     "zh-CN": "默认空间",
     "en": "Default space"
+  },
+  {
+    "key": "k_x9a4p2q",
+    "zh-CN": "自适应网格",
+    "en": "Adaptive grid"
+  },
+  {
+    "key": "k_l8w2n6m",
+    "zh-CN": "排列所有窗口",
+    "en": "Arrange all windows"
+  },
+  {
+    "key": "k_r5p0c8v",
+    "zh-CN": "还原普通窗口",
+    "en": "Restore normal window"
+  },
+  {
+    "key": "k_s7v9q3a",
+    "zh-CN": "Split View {count}",
+    "en": "Split View {count}"
+  },
+  {
+    "key": "k_m2d8x4y",
+    "zh-CN": "最多支持分屏 {count} 个标签页",
+    "en": "Split layout supports up to {count} tabs"
+  },
+  {
+    "key": "k_c6n1t9z",
+    "zh-CN": "把选中的标签页拆成独立窗口并选择布局",
+    "en": "Move selected tabs into separate windows and choose a layout"
+  },
+  {
+    "key": "k_g4h7j2k",
+    "zh-CN": "左右分栏",
+    "en": "Left / right columns"
+  },
+  {
+    "key": "k_b8q3r6s",
+    "zh-CN": "上下堆叠",
+    "en": "Top / bottom stack"
   }
 ]

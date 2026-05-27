@@ -130,6 +130,7 @@ function tabToLiveTab(tab: chrome.tabs.Tab, currentWindowId: number): LiveTab | 
     hostname: extractHostname(url),
     isCurrentWindow: tab.windowId === currentWindowId,
     discarded: tab.discarded ?? false,
+    splitViewId: tab.splitViewId,
   };
 }
 

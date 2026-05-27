@@ -585,8 +585,21 @@ chrome.commands.onCommand.addListener((command) => {
 
     if (command === "toggle-search") {
       try {
-        const url = chrome.runtime.getURL("src/pages/newtab/index.html#search");
-        await chrome.tabs.create({ url });
+        // 尝试找到已打开的 GroveTab 窗口并聚焦
+        const groveTabs = await chrome.tabs.query({
+          url: chrome.runtime.getURL("src/pages/newtab/index.html"),
+        });
+        const existingTab = groveTabs.find((t) => !t.discarded && t.id !== undefined);
+        if (existingTab?.id !== undefined) {
+          // 已有窗口 → 聚焦 + 发送 toggle-search 信号
+          await chrome.tabs.update(existingTab.id, { active: true });
+          // 发消息让该窗口切换搜索框显隐（不走 hash，避免 URL 变化）
+          await chrome.tabs.sendMessage(existingTab.id, { type: "toggle-search" });
+        } else {
+          // 无窗口 → 创建新标签并自动聚焦搜索
+          const url = chrome.runtime.getURL("src/pages/newtab/index.html#search");
+          await chrome.tabs.create({ url, active: true });
+        }
       } catch (err) {
         console.error(`${SW_LOG_TAG} Toggle search failed:`, err);
       }

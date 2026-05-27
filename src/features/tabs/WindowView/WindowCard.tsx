@@ -21,7 +21,15 @@ import { cssVars } from "@/shared/utils/css-vars";
 import { useT } from "@/shared/i18n";
 import { translate } from "@/shared/i18n/core";
 import { feedback } from "@/shared/ui/feedback";
-import { moveTabs, closeWindow, createTabGroup, snapWindow, type WindowSnapAction } from "@/chrome";
+import {
+  arrangeWindows,
+  moveTabs,
+  closeWindow,
+  createTabGroup,
+  snapWindow,
+  type SplitLayout,
+  type WindowSnapAction,
+} from "@/chrome";
 import { useMetadataStore, useSettingsStore, useTabsStore } from "@/store";
 import { swBroadcast } from "@/shared/utils/sw-broadcast";
 import { GroupCardShell } from "../components/GroupCardShell";
@@ -118,6 +126,11 @@ export function WindowCard({
   const { groups, ungroupedTabs } = useMemo(() => buildGroupedTabs(tabs), [tabs]);
   const title = getWindowTitle(t, windowId, isCurrent, alias);
   const groupCount = groups.length;
+  const splitViewCount = useMemo(
+    () =>
+      new Set(tabs.map((tab) => tab.splitViewId).filter((id) => id !== undefined && id >= 0)).size,
+    [tabs],
+  );
 
   const cardStyle = useMemo<React.CSSProperties>(
     () =>
@@ -213,6 +226,21 @@ export function WindowCard({
     });
   };
 
+  const handleArrangeAllWindows = (layout: SplitLayout) => {
+    const windows = [
+      windowId,
+      ...[...useTabsStore.getState().windows.values()]
+        .filter(
+          (item) =>
+            item.id !== windowId && item.type === "normal" && item.incognito === isIncognito,
+        )
+        .map((item) => item.id),
+    ];
+    void runWindowAction(async () => {
+      await arrangeWindows(windows, layout);
+    });
+  };
+
   const menuItems: MenuProps["items"] = [
     {
       key: "alias",
@@ -271,9 +299,41 @@ export function WindowCard({
           onClick: () => handleSnap("center"),
         },
         {
+          key: "snap-restore",
+          label: t("还原普通窗口"),
+          onClick: () => handleSnap("restore"),
+        },
+        {
           key: "snap-maximize",
           label: t("最大化"),
           onClick: () => handleSnap("maximize"),
+        },
+      ],
+    },
+    {
+      key: "arrange-all",
+      icon: <Monitor size={ICON_SIZE.SMALL} />,
+      label: t("排列所有窗口"),
+      children: [
+        {
+          key: "arrange-balanced-grid",
+          label: t("自适应网格"),
+          onClick: () => handleArrangeAllWindows("balanced-grid"),
+        },
+        {
+          key: "arrange-side-by-side",
+          label: t("左右分栏"),
+          onClick: () => handleArrangeAllWindows("side-by-side"),
+        },
+        {
+          key: "arrange-stacked",
+          label: t("上下堆叠"),
+          onClick: () => handleArrangeAllWindows("stacked"),
+        },
+        {
+          key: "arrange-main-side",
+          label: t("主区 + 侧栏"),
+          onClick: () => handleArrangeAllWindows("main-side"),
         },
       ],
     },
@@ -347,6 +407,11 @@ export function WindowCard({
             {isFocused && (
               <Tag color="green" className={styles["app-window-card-tag"]}>
                 {t("活跃")}
+              </Tag>
+            )}
+            {splitViewCount > 0 && (
+              <Tag color="purple" className={styles["app-window-card-tag"]}>
+                {t("Split View {count}", { count: splitViewCount })}
               </Tag>
             )}
             {isIncognito && (

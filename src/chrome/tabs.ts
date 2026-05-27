@@ -268,7 +268,55 @@ export type SplitLayout =
   | "stacked" // 上下各 50%
   | "grid-2x2" // 田字 2×2
   | "main-side" // 左 2/3 主 + 右 1/3 侧栏
-  | "thirds"; // 三等分横向
+  | "thirds" // 三等分横向
+  | "balanced-grid"; // 按数量自动生成接近正方形的网格
+
+interface ChromeDisplayInfo {
+  id: string;
+  isPrimary?: boolean;
+  bounds: WindowRect;
+  workArea?: WindowRect;
+}
+
+interface ChromeSystemDisplayApi {
+  getInfo?: () => Promise<ChromeDisplayInfo[]>;
+}
+
+interface ChromeWithSystemDisplay {
+  system?: {
+    display?: ChromeSystemDisplayApi;
+  };
+}
+
+function normalizeRect(rect: WindowRect): WindowRect {
+  return {
+    left: Math.round(rect.left),
+    top: Math.round(rect.top),
+    width: Math.max(120, Math.round(rect.width)),
+    height: Math.max(120, Math.round(rect.height)),
+  };
+}
+
+function createGridRects(count: number, bounds: WindowRect): WindowRect[] {
+  if (count <= 0) return [];
+  const columns = Math.ceil(Math.sqrt(count));
+  const rows = Math.ceil(count / columns);
+  const cellW = Math.floor(bounds.width / columns);
+  const cellH = Math.floor(bounds.height / rows);
+
+  return Array.from({ length: count }).map((_, i) => {
+    const col = i % columns;
+    const row = Math.floor(i / columns);
+    const isLastColumn = col === columns - 1;
+    const isLastRow = row === rows - 1;
+    return normalizeRect({
+      left: bounds.left + col * cellW,
+      top: bounds.top + row * cellH,
+      width: isLastColumn ? bounds.width - cellW * col : cellW,
+      height: isLastRow ? bounds.height - cellH * row : cellH,
+    });
+  });
+}
 
 /**
  * 计算给定屏幕区域下，N 个窗口按布局应分到的几何位置。
@@ -289,34 +337,31 @@ export function computeLayoutRects(
 
   switch (layout) {
     case "side-by-side": {
-      // 偶数：均分；奇数：先两两并排，最后一个占整行
-      const half = Math.floor(width / 2);
-      return Array.from({ length: count }).map((_, i) => ({
-        left: left + (i % 2 === 0 ? 0 : half),
-        top,
-        width: half,
-        height,
-      }));
+      const each = Math.floor(width / count);
+      return Array.from({ length: count }).map((_, i) =>
+        normalizeRect({
+          left: left + i * each,
+          top,
+          width: i === count - 1 ? width - each * i : each,
+          height,
+        }),
+      );
     }
     case "stacked": {
       const each = Math.floor(height / count);
-      return Array.from({ length: count }).map((_, i) => ({
-        left,
-        top: top + i * each,
-        width,
-        height: each,
-      }));
+      return Array.from({ length: count }).map((_, i) =>
+        normalizeRect({
+          left,
+          top: top + i * each,
+          width,
+          height: i === count - 1 ? height - each * i : each,
+        }),
+      );
     }
-    case "grid-2x2": {
-      const halfW = Math.floor(width / 2);
-      const halfH = Math.floor(height / 2);
-      return Array.from({ length: Math.min(count, 4) }).map((_, i) => ({
-        left: left + (i % 2 === 0 ? 0 : halfW),
-        top: top + (i < 2 ? 0 : halfH),
-        width: halfW,
-        height: halfH,
-      }));
-    }
+    case "grid-2x2":
+      return createGridRects(Math.min(count, 4), bounds);
+    case "balanced-grid":
+      return createGridRects(count, bounds);
     case "main-side": {
       const mainW = Math.floor((width * 2) / 3);
       const sideW = width - mainW;
@@ -325,58 +370,141 @@ export function computeLayoutRects(
       const sideH = Math.floor(height / sideCount);
       return Array.from({ length: count }).map((_, i) => {
         if (i === 0) {
-          return { left, top, width: mainW, height };
+          return normalizeRect({ left, top, width: mainW, height });
         }
-        return {
+        return normalizeRect({
           left: left + mainW,
           top: top + (i - 1) * sideH,
           width: sideW,
-          height: sideH,
-        };
+          height: i === count - 1 ? height - sideH * (i - 1) : sideH,
+        });
       });
     }
     case "thirds": {
-      const each = Math.floor(width / 3);
-      return Array.from({ length: count }).map((_, i) => ({
-        left: left + (i % 3) * each,
-        top: top + Math.floor(i / 3) * height,
-        width: each,
-        height,
-      }));
+      const visibleCount = Math.min(count, 3);
+      const each = Math.floor(width / visibleCount);
+      return Array.from({ length: visibleCount }).map((_, i) =>
+        normalizeRect({
+          left: left + i * each,
+          top,
+          width: i === visibleCount - 1 ? width - each * i : each,
+          height,
+        }),
+      );
     }
     default:
-      return Array.from({ length: count }).map(() => ({ left, top, width, height }));
+      return Array.from({ length: count }).map(() => normalizeRect({ left, top, width, height }));
   }
+}
+
+function getFallbackScreenBounds(): WindowRect {
+  const screenLike = globalThis.screen;
+  return {
+    left: 0,
+    top: 0,
+    width: screenLike?.availWidth ?? 1440,
+    height: screenLike?.availHeight ?? 900,
+  };
+}
+
+async function ensureOptionalPermission(
+  permission: chrome.runtime.ManifestPermissions,
+): Promise<boolean> {
+  if (chrome.permissions === undefined) return false;
+  try {
+    const granted = await safeCall("permissions.contains", () =>
+      chrome.permissions.contains({ permissions: [permission] }),
+    );
+    if (granted) return true;
+    return await safeCall("permissions.request", () =>
+      chrome.permissions.request({ permissions: [permission] }),
+    );
+  } catch {
+    return false;
+  }
+}
+
+async function queryDisplayWorkAreas(): Promise<ChromeDisplayInfo[]> {
+  const displayApi = (chrome as unknown as ChromeWithSystemDisplay).system?.display;
+  if (displayApi?.getInfo === undefined) return [];
+  const granted = await ensureOptionalPermission("system.display");
+  if (!granted) return [];
+  try {
+    return await safeCall(
+      "system.display.getInfo",
+      () => displayApi.getInfo?.() ?? Promise.resolve([]),
+    );
+  } catch {
+    return [];
+  }
+}
+
+function pickDisplayBounds(
+  displays: ChromeDisplayInfo[],
+  referenceWindow?: chrome.windows.Window,
+): WindowRect | null {
+  if (displays.length === 0) return null;
+  const refLeft = referenceWindow?.left;
+  const refTop = referenceWindow?.top;
+  const refWidth = referenceWindow?.width;
+  const refHeight = referenceWindow?.height;
+
+  if (
+    typeof refLeft === "number" &&
+    typeof refTop === "number" &&
+    typeof refWidth === "number" &&
+    typeof refHeight === "number"
+  ) {
+    const centerX = refLeft + refWidth / 2;
+    const centerY = refTop + refHeight / 2;
+    const matched = displays.find((display) => {
+      const bounds = display.bounds;
+      return (
+        centerX >= bounds.left &&
+        centerX <= bounds.left + bounds.width &&
+        centerY >= bounds.top &&
+        centerY <= bounds.top + bounds.height
+      );
+    });
+    if (matched) return normalizeRect(matched.workArea ?? matched.bounds);
+  }
+
+  const primary = displays.find((display) => display.isPrimary);
+  const fallback = primary ?? displays[0];
+  return fallback ? normalizeRect(fallback.workArea ?? fallback.bounds) : null;
 }
 
 /**
  * 取屏幕可用区域作为默认布局边界。
  *
- * 注意：Chrome 扩展无法直接读取多显示器拓扑（除非用 system.display API），
- * 这里用首个窗口的位置近似当前用户所在显示器；如果没有任何窗口，回退到 `screen.availWidth/Height`。
+ * 优先使用 Chrome 官方 `system.display.getInfo()` 的 `workArea`，这样多显示器、Dock、任务栏
+ * 都能得到更准确的可用区域；权限缺失或浏览器不支持时再回退到窗口几何和 `screen.avail*`。
  */
 async function resolveScreenBounds(referenceWindowId?: number): Promise<WindowRect> {
+  let referenceWindow: chrome.windows.Window | undefined;
   if (referenceWindowId !== undefined) {
     try {
-      const ref = await safeCall("windows.get(reference)", () =>
+      referenceWindow = await safeCall("windows.get(reference)", () =>
         chrome.windows.get(referenceWindowId),
       );
-      return {
-        left: ref.left ?? 0,
-        top: ref.top ?? 0,
-        width: ref.width ?? screen.availWidth,
-        height: ref.height ?? screen.availHeight,
-      };
     } catch {
       // fall through
     }
   }
-  return {
-    left: 0,
-    top: 0,
-    width: screen.availWidth,
-    height: screen.availHeight,
-  };
+
+  const displayBounds = pickDisplayBounds(await queryDisplayWorkAreas(), referenceWindow);
+  if (displayBounds) return displayBounds;
+
+  if (referenceWindow !== undefined) {
+    return normalizeRect({
+      left: referenceWindow.left ?? 0,
+      top: referenceWindow.top ?? 0,
+      width: referenceWindow.width ?? getFallbackScreenBounds().width,
+      height: referenceWindow.height ?? getFallbackScreenBounds().height,
+    });
+  }
+
+  return normalizeRect(getFallbackScreenBounds());
 }
 
 /**
@@ -427,6 +555,7 @@ export type WindowSnapAction =
   | "snap-top" // 上半屏
   | "snap-bottom" // 下半屏
   | "maximize" // 最大化
+  | "restore" // 还原为普通窗口
   | "center"; // 居中 80%
 
 /**
@@ -439,6 +568,13 @@ export async function snapWindow(windowId: number, action: WindowSnapAction): Pr
   if (action === "maximize") {
     await safeCall("windows.update(maximize)", () =>
       chrome.windows.update(windowId, { state: "maximized", focused: true }),
+    );
+    return;
+  }
+
+  if (action === "restore") {
+    await safeCall("windows.update(restore)", () =>
+      chrome.windows.update(windowId, { state: "normal", focused: true }),
     );
     return;
   }
@@ -478,7 +614,7 @@ export async function snapWindow(windowId: number, action: WindowSnapAction): Pr
 
   await safeCall(`windows.update(${action})`, () =>
     chrome.windows.update(windowId, {
-      ...rect,
+      ...normalizeRect(rect),
       state: "normal",
       focused: true,
     }),
@@ -489,10 +625,9 @@ export async function snapWindow(windowId: number, action: WindowSnapAction): Pr
  * 把指定的若干 tabs（可来自不同窗口）拆分到独立窗口并按布局排版。
  *
  * 流程：
- *   1. 对每个 tabId 调 `windows.create({ tabId })` 拆出新窗口
- *   2. 调 `arrangeWindows` 把新窗口（含原 tab 所属窗口）一起排版
- *
- * 第一个 tab 的"原窗口"会保留作为锚点，避免一个窗口下的最后一个 tab 被拆走导致原窗口被销毁。
+ *   1. 先读取第一个标签所在显示器的可用工作区
+ *   2. 对每个 tabId 调 `windows.create({ tabId })` 拆出独立窗口
+ *   3. 调 `arrangeWindows` 把新窗口按目标布局排版
  *
  * @returns 排版后的窗口 ID 数组（与传入 tabId 顺序一致）
  */
@@ -503,20 +638,19 @@ export async function splitTabsToLayout(tabIds: number[], layout: SplitLayout): 
     tabIds.map((id) => safeCall("tabs.get(split)", () => chrome.tabs.get(id))),
   );
 
-  // 第一个 tab 留在原窗口；其余拆到新窗口
-  const [firstTab, ...restTabs] = tabs;
+  const [firstTab] = tabs;
   if (!firstTab) return [];
-  const firstWindowId = firstTab.windowId;
+  const bounds = await resolveScreenBounds(firstTab.windowId);
 
-  const newIds: number[] = [firstWindowId];
-  for (const rt of restTabs) {
+  const newIds: number[] = [];
+  for (const tab of tabs) {
     const win = await safeCall("windows.create(split)", () =>
-      chrome.windows.create({ tabId: rt.id, focused: false }),
+      chrome.windows.create({ tabId: tab.id, focused: false }),
     );
     if (win?.id !== undefined) newIds.push(win.id);
   }
 
-  await arrangeWindows(newIds, layout);
+  await arrangeWindows(newIds, layout, bounds);
   return newIds;
 }
 

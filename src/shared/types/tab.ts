@@ -21,6 +21,8 @@ export interface LiveTab {
   isCurrentWindow: boolean;
   /** 标签页是否已被丢弃（休眠），丢弃后释放内存但保留位置 */
   discarded?: boolean;
+  /** Chrome 原生 Split View ID（Chrome 140+；-1 或 undefined 表示不在原生拆分视图中） */
+  splitViewId?: number;
   /** Chrome 原生 Tab Group 标题（仅当 groupId !== -1 时有值） */
   groupTitle?: string;
   /** Chrome 原生 Tab Group 颜色（仅当 groupId !== -1 时有值） */

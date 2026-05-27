@@ -1,14 +1,14 @@
 /**
  * DomainGroupView — 默认视图：按域名分组（antd 版）
  *
- * 设计：
- *   - 外层 CSS Grid 负责按列等分铺满可用宽度
- *   - 每一列内部纵向流动，避免普通 Grid/Ant Row 的固定行高问题
- *   - settings 里的 domainGroupColumns 仍作"是否固定列数"的可选 override
- *   - 列间距 16px、卡片垂直间距 14px
+ * 虚拟滚动优化：
+ *   - 当域名分组数量超过 20 时，对 masonry 列启用 @tanstack/react-virtual 虚拟滚动
+ *   - 每列独立虚拟化，避免海量 DOM 节点导致的内存/渲染性能问题
+ *   - 折叠/展开状态变化通过 measureElement 实时更新虚拟高度
  */
 
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { useTabsStore, useMetadataStore, useSettingsStore } from "@/store";
 import { groupTabsByDomain, type DomainGroup } from "@/shared/utils/domain";
 import { cssVars } from "@/shared/utils/css-vars";
@@ -18,6 +18,7 @@ import styles from "./styles/items.module.less";
 const DOMAIN_COLUMN_MIN_WIDTH = 320;
 const DOMAIN_COLUMN_GAP = 16;
 const DOMAIN_COLUMN_MAX_AUTO = 8;
+const VIRTUALIZATION_THRESHOLD = 20; // 超过此数量才启用虚拟滚动
 
 function getAutoColumnCount(containerWidth: number, groupCount: number): number {
   if (groupCount <= 0 || containerWidth <= 0) return 1;
@@ -54,6 +55,84 @@ function splitIntoFlowColumns(groups: DomainGroup[], columnCount: number): Domai
   });
 
   return columns;
+}
+
+/** 估算单个 DomainGroupCard 的高度（展开状态） */
+function estimateGroupHeight(group: DomainGroup): number {
+  // 卡片头部 + 每个子项约 44px（+ padding/gap）
+  return 56 + group.tabs.length * 44 + 16;
+}
+
+/**
+ * 虚拟化列组件：独立管理内部虚拟滚动
+ */
+interface VirtualColumnProps {
+  groups: DomainGroup[];
+  useVirtual: boolean;
+}
+
+function VirtualColumn({ groups, useVirtual }: VirtualColumnProps) {
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const virtualizer = useVirtualizer({
+    count: groups.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: (index) => estimateGroupHeight(groups[index]!),
+    overscan: 3,
+    measureElement: (el) => el.getBoundingClientRect().height,
+  });
+
+  const virtualItems = virtualizer.getVirtualItems();
+
+  if (!useVirtual) {
+    // 非虚拟模式：直接渲染所有卡片
+    return (
+      <div className={styles["app-domain-masonry-column"]}>
+        {groups.map((group) => (
+          <div key={group.domain} className={styles["app-domain-masonry-item"]}>
+            <DomainGroupCard group={group} initialCollapsed={false} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={parentRef}
+      className={styles["app-domain-masonry-column"]}
+      style={{ overflowY: "auto", maxHeight: "calc(100vh - 200px)" }}
+    >
+      <div
+        style={{
+          height: `${virtualizer.getTotalSize()}px`,
+          width: "100%",
+          position: "relative",
+        }}
+      >
+        {virtualItems.map((virtualItem) => {
+          const group = groups[virtualItem.index]!;
+          return (
+            <div
+              key={group.domain}
+              data-index={virtualItem.index}
+              ref={virtualizer.measureElement}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                transform: `translateY(${virtualItem.start}px)`,
+              }}
+              className={styles["app-domain-masonry-item"]}
+            >
+              <DomainGroupCard group={group} initialCollapsed={false} />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 /**
@@ -135,20 +214,17 @@ export function DomainGroupView() {
   const columnCount = forcedColumns ?? getAutoColumnCount(containerWidth, sortedGroups.length);
   const columns = splitIntoFlowColumns(sortedGroups, columnCount);
 
+  // 虚拟滚动阈值：超过 VIRTUALIZATION_THRESHOLD 个分组时启用
+  const useVirtualization = sortedGroups.length > VIRTUALIZATION_THRESHOLD;
+
   return (
     <div
       ref={containerRef}
       className={styles["app-domain-masonry"]}
       style={getColumnVars(columnCount)}
     >
-      {columns.map((column, columnIndex) => (
-        <div key={columnIndex} className={styles["app-domain-masonry-column"]}>
-          {column.map((group) => (
-            <div key={group.domain} className={styles["app-domain-masonry-item"]}>
-              <DomainGroupCard group={group} initialCollapsed={false} />
-            </div>
-          ))}
-        </div>
+      {columns.map((columnGroups, columnIndex) => (
+        <VirtualColumn key={columnIndex} groups={columnGroups} useVirtual={useVirtualization} />
       ))}
     </div>
   );

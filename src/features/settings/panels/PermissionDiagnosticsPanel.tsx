@@ -63,10 +63,23 @@ const PERMISSION_DEFS: Array<Omit<PermissionEntry, "status">> = [
     features: ["内存压力感知", "智能标签治理"],
     impact: "无法获取内存使用率，内存治理功能失效",
   },
+  {
+    permission: "system.display",
+    label: "system.display",
+    // eslint-disable-next-line i18n-zh/no-bare-zh-in-js
+    features: ["多显示器识别", "窗口贴边", "分屏布局"],
+    // eslint-disable-next-line i18n-zh/no-bare-zh-in-js
+    impact: "无法读取显示器工作区，窗口布局将回退到浏览器窗口尺寸",
+  },
 ];
 
 /** 可以通过 chrome.permissions.request 申请的可选权限列表 */
-const REQUESTABLE_PERMISSIONS = new Set(["history", "bookmarks", "system.memory"]);
+const REQUESTABLE_PERMISSIONS = new Set([
+  "history",
+  "bookmarks",
+  "system.memory",
+  "system.display",
+]);
 
 async function checkPermission(permission: string): Promise<"granted" | "denied" | "unsupported"> {
   try {

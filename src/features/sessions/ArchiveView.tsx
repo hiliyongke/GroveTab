@@ -12,28 +12,20 @@
  * 业务逻辑保留：搜索 / 批量选择 / 合并 / 恢复 / 重命名 / 分享 / 归档当前。
  */
 
-import { useState, useSyncExternalStore, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Plus, Save, Inbox, ArrowDownUp } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { Button, Spin, Input, Modal, Typography, Select, Empty, Flex } from "antd";
 import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
 import type { ArchivedSession } from "@/shared/types";
-import {
-  getArchivedSessions,
-  deleteSession,
-  renameSession,
-  archiveAllTabs,
-  mergeSessions,
-  exportSingleSession,
-} from "@/services";
+import { archiveAllTabs } from "@/services";
 import type { RestoreOutcome } from "@/services/archive";
 import { createTab, getCurrentWindow } from "@/chrome";
 import { useT } from "@/shared/i18n";
 import { track } from "@/shared/utils/metrics";
-import { useTabsStore, useUndoStore, useMetadataStore, useSettingsStore } from "@/store";
+import { useTabsStore, useUndoStore, useMetadataStore, useSettingsStore, useSessionsStore } from "@/store";
 import { feedback } from "@/shared/ui/feedback";
 import { appendHistoryEvent } from "@/repositories";
-import { registerHistoryUndoHandler } from "@/services/history/undo-bus";
 import { SessionCard } from "./components/SessionCard";
 import { ArchiveStats, type ArchiveFilterId } from "./components/ArchiveStats";
 import { ArchiveSidebar } from "./components/ArchiveSidebar";
@@ -43,42 +35,6 @@ import { EnhancedRenameDialog } from "./components/EnhancedRenameDialog";
 import { APP_EVENTS } from "@/shared/config/storage-keys";
 import { isSafeExternalUrl } from "@/shared/utils/url-safety";
 import styles from "./styles/archive.module.less";
-
-/* ---------- 简易外部 store 同步归档列表 ---------- */
-let sessionsCache: ArchivedSession[] = [];
-let sessionsInitialized = false;
-let sessionsListeners: Array<() => void> = [];
-
-function subscribeSessions(listener: () => void) {
-  sessionsListeners.push(listener);
-  return () => {
-    sessionsListeners = sessionsListeners.filter((l) => l !== listener);
-  };
-}
-function getSessionsSnapshot() {
-  return sessionsCache;
-}
-function getSessionsInitialized() {
-  return sessionsInitialized;
-}
-function notifySessionsListeners() {
-  sessionsListeners.forEach((l) => l());
-}
-async function refreshSessions() {
-  sessionsCache = await getArchivedSessions();
-  sessionsInitialized = true;
-  notifySessionsListeners();
-}
-
-void refreshSessions();
-
-registerHistoryUndoHandler("archive_create", async (event) => {
-  const sessionId = (event.undoContext as { sessionId?: string } | undefined)?.sessionId;
-  if (sessionId === undefined || sessionId === "") return false;
-  await deleteSession(sessionId);
-  await refreshSessions();
-  return true;
-});
 
 /** Sidebar 选中的扩展过滤标识，比 ArchiveFilterId 多一个 earlier。 */
 type ArchiveScopeId = ArchiveFilterId | "earlier";
@@ -107,9 +63,12 @@ function bucketOf(
 }
 
 export function ArchiveView() {
-  const sessions = useSyncExternalStore(subscribeSessions, getSessionsSnapshot);
-  const initialized = useSyncExternalStore(subscribeSessions, getSessionsInitialized);
-  const loading = !initialized;
+  const sessions = useSessionsStore((s) => s.sessions);
+  const loading = useSessionsStore((s) => s.loading);
+  const refreshSessions = useSessionsStore((s) => s.refreshSessions);
+  const deleteSessionSlice = useSessionsStore((s) => s.deleteSession);
+  const mergeSessionsSlice = useSessionsStore((s) => s.mergeSessions);
+  const exportSessionSlice = useSessionsStore((s) => s.exportSession);
   const [archivingCurrent, setArchivingCurrent] = useState(false);
   /** 多选 */
   const [selectable, setSelectable] = useState(false);
@@ -320,33 +279,18 @@ export function ArchiveView() {
 
   const handleDelete = async (id: string) => {
     try {
-      await deleteSession(id);
+      await deleteSessionSlice(id);
       void track("archive_delete");
-      await refreshSessions();
     } catch (err) {
       feedback.error(t("删除失败，请重试"), err);
     }
   };
 
   const handleShare = async (id: string) => {
-    const payload = await exportSingleSession(id);
-    if (payload === null) {
-      feedback.error(t("分享失败，请重试"));
-      return;
-    }
     try {
-      const blob = new Blob([payload.content], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = payload.filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      feedback.success(t("已下载会话 JSON"));
-    } catch (err) {
-      feedback.error(t("分享失败，请重试"), err);
+      await exportSessionSlice(id);
+    } catch {
+      /* exportSessionSlice 内部已经 feedback.error */
     }
   };
 
@@ -384,9 +328,12 @@ export function ArchiveView() {
 
   const handleConfirmMerge = async () => {
     try {
-      const newSession = await mergeSessions(Array.from(selectedIds), mergeName);
+      const newSession = await mergeSessionsSlice(Array.from(selectedIds), mergeName);
+      if (newSession === null) {
+        feedback.error(t("合并失败，请重试"));
+        return;
+      }
       void track("archive_merge", { count: selectedIds.size });
-      await refreshSessions();
       setMergeOpen(false);
       cancelSelect();
       feedback.success(t("已合并为 1 个会话，共 {count} 个标签", { count: newSession.tabCount }));
@@ -743,8 +690,7 @@ export function ArchiveView() {
           }}
           onRenameConfirm={async (id, newName) => {
             try {
-              await renameSession(id, newName);
-              await refreshSessions();
+              await useSessionsStore.getState().renameSession(id, newName);
               feedback.success(t("重命名成功"));
             } catch (err) {
               feedback.error(t("重命名"), err);

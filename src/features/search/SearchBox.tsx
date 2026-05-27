@@ -31,7 +31,7 @@ import {
 import { iconColor } from "@/shared/utils/icon-colors";
 import { SearchResultItem } from "./components/SearchResultItem";
 import { useSearchData } from "./hooks/use-search-data";
-import { useSearchIndex } from "./hooks/use-search-index";
+import { useSearchBridgeSync } from "./hooks/use-search-bridge";
 import { useSearchResults } from "./hooks/use-search-results";
 import { useKeyboardNav } from "./hooks/use-keyboard-nav";
 import styles from "./SearchBox.module.less";
@@ -108,21 +108,7 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
   const searchText = isTagScopedQuery ? tagScopedQuery : normalizedQuery;
   const lowerSearchText = searchText.trim().toLowerCase();
 
-  // ── 索引构建 ──────────────────────────────────────────────────────────────
-  const tabsIndexSignature = useMemo(
-    () =>
-      `${tabs.length}|${tabs.map((t) => `${t.id}:${t.title}:${t.hostname}:${t.url}`).join("\u0001")}`,
-    [tabs],
-  );
-  const { searchIndex, pinyinMatchFn } = useSearchIndex({
-    open,
-    tabs,
-    tabsIndexSignature,
-    searchScope,
-    enablePinyin,
-  });
-
-  // ── 数据加载 ──────────────────────────────────────────────────────────────
+  // ── 数据加载（先获取 archiveSessions 再构建索引）───────────────────────────
   const {
     recentSearches,
     setRecentSearches,
@@ -142,6 +128,14 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
     effectiveHotSource,
     useHistorySuggestions,
     historyEnabled,
+  });
+
+  // ── 索引构建（使用 Web Worker 后台索引，避免主线程阻塞）─────────────────────
+  const { searchIndex, pinyinMatchFn } = useSearchBridgeSync({
+    active: open,
+    tabs,
+    archiveSessions,
+    normalizedQuery,
   });
 
   // ── 结果计算 ──────────────────────────────────────────────────────────────

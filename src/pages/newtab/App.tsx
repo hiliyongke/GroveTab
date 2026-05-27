@@ -222,9 +222,12 @@ function AppContent() {
   useKeybinding("search", handleToggleSearch);
   useKeybinding("openHistory", handleToggleHistory);
 
-  /** 同时响应来自 sw 的「operation:open-history」广播（chrome.commands 接入点） */
+  /** 同时响应来自 sw 的「toggle-search」广播（chrome.commands 接入点） */
   useEffect(() => {
     const onMessage = (msg: { type?: string }) => {
+      if (msg.type === "toggle-search") {
+        setShowSearch((v) => !v);
+      }
       if (msg.type === "open-history") {
         setShowHistory(true);
       }
@@ -233,7 +236,7 @@ function AppContent() {
     return () => {
       chrome.runtime?.onMessage?.removeListener?.(onMessage);
     };
-  }, [setShowHistory]);
+  }, [setShowSearch, setShowHistory]);
 
   useKeybinding(
     "exitSelection",
