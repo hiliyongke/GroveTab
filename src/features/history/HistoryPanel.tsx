@@ -32,7 +32,6 @@ import {
   Popconfirm,
   Segmented,
   theme,
-  Image,
   Space,
   Flex,
   Typography,
@@ -562,21 +561,27 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
 
   const renderClosedItem = (rec: ClosedTabRecord) => (
     <Flex key={rec.id} align="center" gap={10} className={styles["history-item"]}>
-      {rec.favIconUrl !== "" ? (
-        <Image
-          src={rec.favIconUrl}
-          alt=""
-          className={styles["history-item-favicon"]}
-          preview={false}
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = "none";
-          }}
-        />
-      ) : (
-        <span className={styles["history-item-favicon-fallback"]}>
+      <span className={styles["history-item-favicon-wrap"]}>
+        {rec.favIconUrl !== "" ? (
+          <img
+            src={rec.favIconUrl}
+            alt=""
+            className={styles["history-item-favicon"]}
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = "none";
+              const fallback = (e.target as HTMLImageElement)
+                .nextElementSibling as HTMLElement;
+              if (fallback) fallback.style.display = "inline-flex";
+            }}
+          />
+        ) : null}
+        <span
+          className={styles["history-item-favicon-fallback"]}
+          style={rec.favIconUrl !== "" ? { display: "none" } : undefined}
+        >
           <Globe size={ICON_SIZE.SMALL} />
         </span>
-      )}
+      </span>
       <Flex
         vertical
         gap={2}
