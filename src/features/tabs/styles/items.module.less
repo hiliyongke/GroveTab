@@ -243,11 +243,20 @@
 
 .app-tab-item-checkbox {
   flex-shrink: 0;
-  visibility: hidden;
+  width: 0;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: width 0.18s ease, min-width 0.18s ease, margin 0.18s ease, opacity 0.18s ease;
 }
 
 .app-tab-item-checkbox.is-visible {
-  visibility: visible;
+  width: auto;
+  min-width: unset;
+  margin-right: -4px;
+  opacity: 1;
 }
 
 .app-tab-item-favicon {
