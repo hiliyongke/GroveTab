@@ -7,7 +7,6 @@
 
 import { useMemo } from "react";
 import { Inbox, Sun, CalendarDays, CalendarRange, Clock, Sparkles } from "lucide-react";
-import { Button } from "antd";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import type { ArchivedSession } from "@/shared/types";
 import { useT } from "@/shared/i18n";
@@ -76,9 +75,9 @@ export function ArchiveSidebar({ sessions, activeFilter, onSelectFilter }: Archi
           {FILTERS.map((filter) => {
             const isActive = activeFilter === filter.id;
             return (
-              <Button
+              <button
                 key={filter.id}
-                type="text"
+                type="button"
                 className={`${styles["archive-sidebar__item"]}${isActive ? " " + styles["is-active"] : ""}`}
                 onClick={() => onSelectFilter(filter.id)}
               >
@@ -87,7 +86,7 @@ export function ArchiveSidebar({ sessions, activeFilter, onSelectFilter }: Archi
                 </span>
                 <span className={styles["archive-sidebar__item-label"]}>{t(filter.labelKey)}</span>
                 <span className={styles["archive-sidebar__item-count"]}>{counts[filter.id]}</span>
-              </Button>
+              </button>
             );
           })}
         </div>
@@ -96,8 +95,8 @@ export function ArchiveSidebar({ sessions, activeFilter, onSelectFilter }: Archi
       <div className={styles["archive-sidebar__group"]}>
         <div className={styles["archive-sidebar__group-title"]}>{t('专项')}</div>
         <div className={styles["archive-sidebar__list"]}>
-          <Button
-            type="text"
+          <button
+            type="button"
             className={`${styles["archive-sidebar__item"]}${activeFilter === "auto" ? " " + styles["is-active"] : ""}`}
             onClick={() => onSelectFilter("auto")}
           >
@@ -108,7 +107,7 @@ export function ArchiveSidebar({ sessions, activeFilter, onSelectFilter }: Archi
               {t('自动快照')}
             </span>
             <span className={styles["archive-sidebar__item-count"]}>{counts.auto}</span>
-          </Button>
+          </button>
         </div>
       </div>
     </aside>

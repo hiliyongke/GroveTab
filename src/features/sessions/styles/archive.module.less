@@ -104,20 +104,27 @@
 }
 
 .archive-sidebar__item {
-  all: unset;
+  appearance: none;
   box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 10px;
   width: 100%;
+  min-height: 34px;
+  margin: 0;
   padding: 8px 12px;
+  border: 0;
   border-radius: var(--app-radius-md);
+  background: transparent;
   cursor: pointer;
   transition:
-    background 160ms ease,
+    background-color 160ms ease,
     color 160ms ease;
   color: var(--ant-color-text-secondary);
+  font: inherit;
   font-size: 13px;
+  line-height: 18px;
+  text-align: left;
 }
 
 .archive-sidebar__item:hover {
@@ -183,27 +190,28 @@
 }
 
 .archive-stat-card {
-  all: unset;
+  appearance: none;
   box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
+  margin: 0;
   padding: 14px 16px;
   border-radius: var(--app-radius-lg);
   background: var(--ant-color-bg-container);
   border: 1px solid var(--app-hairline);
+  color: inherit;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
-  /* 预创建合成层 + 隔离重绘，防止 hover 时合成层重建导致相邻元素抖动 */
-  will-change: transform;
   contain: layout style paint;
   transition:
-    transform 180ms ease,
     box-shadow 180ms ease,
     border-color 180ms ease;
 }
 
 .archive-stat-card:hover {
-  transform: translateY(-2px);
   box-shadow: var(--app-shadow-sm);
   border-color: color-mix(in srgb, var(--ant-color-primary) 40%, var(--app-hairline));
 }
