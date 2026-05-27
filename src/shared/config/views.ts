@@ -14,12 +14,10 @@ import {
   Flame,
   Layers,
   Monitor,
-  BookOpen,
   Columns,
-  Archive,
 } from 'lucide-react';
 
-export type ViewMode = 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'bookmarks' | 'kanban' | 'archive';
+export type ViewMode = 'domain' | 'timeline' | 'compact' | 'grid' | 'frequency' | 'tabgroup' | 'window' | 'kanban' | 'archive';
 
 export interface ViewConfig {
   id: ViewMode;
@@ -35,10 +33,8 @@ export const VIEW_CONFIGS: ViewConfig[] = [
   { id: 'tabgroup', Icon: Layers, labelKey: 'view.tabgroup' },
   { id: 'window', Icon: Monitor, labelKey: 'view.window' },
   { id: 'kanban', Icon: Columns, labelKey: 'view.kanban' },
-  { id: 'bookmarks', Icon: BookOpen, labelKey: 'view.bookmarks' },
   { id: 'frequency', Icon: Flame, labelKey: 'view.frequency' },
   { id: 'grid', Icon: Table2, labelKey: 'view.grid' },
-  { id: 'archive', Icon: Archive, labelKey: 'view.archive' },
 ];
 
 /** 合法的 ViewMode 值数组，用于防御旧版残留值 */

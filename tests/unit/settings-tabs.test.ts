@@ -12,7 +12,6 @@ describe("settings-tab-keys", () => {
     expect(isSettingsTabKey("behavior")).toBe(true);
     expect(isSettingsTabKey("data")).toBe(true);
     expect(isSettingsTabKey("privacy")).toBe(true);
-    expect(isSettingsTabKey("shortcuts")).toBe(true);
     expect(isSettingsTabKey("about")).toBe(true);
   });
 

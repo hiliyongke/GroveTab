@@ -16,6 +16,7 @@ import { ViewLayoutSettings } from "./ViewLayoutSettings";
 import { TimelineSettings } from "./TimelineSettings";
 import { SearchSettings } from "./SearchSettings";
 import { MemoryGovernanceSettings } from "./MemoryGovernanceSettings";
+import { ShortcutsPanel } from "./ShortcutsPanel";
 
 interface BehaviorPanelProps {
   settings: UserSettings;
@@ -54,6 +55,11 @@ export function BehaviorPanel({ settings, updateSettings }: BehaviorPanelProps) 
       key: "memory-governance",
       title: t("内存治理"),
       content: <MemoryGovernanceSettings settings={settings} updateSettings={updateSettings} />,
+    },
+    {
+      key: "shortcuts",
+      title: t("快捷键"),
+      content: <ShortcutsPanel />,
     },
   ];
 

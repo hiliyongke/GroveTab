@@ -58,9 +58,6 @@ const TabGroupView = lazy(() =>
 const WindowView = lazy(() =>
   import("@/features/tabs/WindowView").then((m) => ({ default: m.WindowView })),
 );
-const BookmarkView = lazy(() =>
-  import("@/features/tabs/BookmarkView").then((m) => ({ default: m.BookmarkView })),
-);
 const KanbanView = lazy(() =>
   import("@/features/tabs/KanbanView").then((m) => ({ default: m.KanbanView })),
 );
@@ -97,10 +94,10 @@ registerViews([
   { id: "tabgroup", component: TabGroupView, order: 4 },
   { id: "window", component: WindowView, order: 5 },
   { id: "kanban", component: KanbanView, order: 6 },
-  { id: "bookmarks", component: BookmarkView, order: 7 },
-  { id: "frequency", component: FrequencyView, order: 8 },
-  { id: "grid", component: GridView, order: 9 },
-  { id: "archive", component: ArchiveView, order: 10 },
+  { id: "frequency", component: FrequencyView, order: 7 },
+  { id: "grid", component: GridView, order: 8 },
+  // archive 作为隐藏视图，不在 ViewDock 显示，但可通过程序切换
+  { id: "archive", component: ArchiveView, order: 99 },
 ]);
 
 const { Content } = Layout;

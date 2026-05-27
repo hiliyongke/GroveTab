@@ -35,7 +35,6 @@ export interface UserSettings {
     | "frequency"
     | "tabgroup"
     | "window"
-    | "bookmarks"
     | "kanban"
     | "archive";
   theme: "light" | "dark" | "system";
