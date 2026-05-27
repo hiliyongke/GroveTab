@@ -213,7 +213,10 @@
   border-radius: var(--ant-border-radius-sm);
   cursor: pointer;
   outline: none;
-  transition: opacity 0.18s ease, transform 0.18s ease, max-height 0.25s ease;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease,
+    max-height 0.25s ease;
 }
 
 .app-tab-item.is-closing {
@@ -249,7 +252,11 @@
   padding: 0;
   overflow: hidden;
   opacity: 0;
-  transition: width 0.18s ease, min-width 0.18s ease, margin 0.18s ease, opacity 0.18s ease;
+  transition:
+    width 0.18s ease,
+    min-width 0.18s ease,
+    margin 0.18s ease,
+    opacity 0.18s ease;
 }
 
 .app-tab-item-checkbox.is-visible {
@@ -407,6 +414,9 @@
   flex-shrink: 0;
 
   :global(.ant-segmented) {
+    min-height: 32px;
+    display: flex;
+    align-items: center;
     background: color-mix(in srgb, var(--ant-color-bg-container) 60%, transparent);
     border: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 50%, transparent);
     border-radius: var(--app-radius-md, 8px);
@@ -415,14 +425,19 @@
   }
 
   :global(.ant-segmented-item) {
-    min-height: 26px;
-    min-width: 28px;
-    padding: 0 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    min-width: 30px;
+    padding: 0 8px;
     border-radius: calc(var(--app-radius-md, 8px) - 2px);
     font-size: 11px;
     font-weight: 500;
-    line-height: 26px;
-    transition: background 160ms ease, color 160ms ease;
+    line-height: 1;
+    transition:
+      background 160ms ease,
+      color 160ms ease;
   }
 
   :global(.ant-segmented-item-label) {
