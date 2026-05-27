@@ -414,6 +414,9 @@
     font-weight: 500;
     line-height: 26px;
     transition: background 160ms ease, color 160ms ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   :global(.ant-segmented-item:hover) {
@@ -429,4 +432,13 @@
     background: color-mix(in srgb, var(--ant-color-bg-elevated) 85%, transparent);
     border-radius: calc(var(--app-radius-md, 8px) - 2px);
   }
+}
+
+/* Segmented icon 居中容器 */
+.app-segmented-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
 }

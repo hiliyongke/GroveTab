@@ -233,10 +233,6 @@ export function DomainGroupView() {
     });
   }, [sortedGroups, filterQuery]);
 
-  if (sortedGroups.length === 0) {
-    return null;
-  }
-
   const columnCount = forcedColumns ?? getAutoColumnCount(containerWidth, filteredGroups.length);
   const columns = splitIntoFlowColumns(filteredGroups, columnCount);
 
@@ -245,7 +241,7 @@ export function DomainGroupView() {
 
   return (
     <Flex vertical gap="middle">
-      {/* 搜索栏 + 布局/密度快捷切换 */}
+      {/* 搜索栏 + 布局/密度快捷切换 —— 始终常驻 */}
       <Flex align="center" gap={8} className={styles["app-domain-toolbar"]}>
         <Input
           prefix={<Search size={ICON_SIZE.SMALL} />}
@@ -262,9 +258,9 @@ export function DomainGroupView() {
               value={tabsLayout}
               onChange={(v) => void updateSettings({ tabsLayout: v as TabsLayout })}
               options={[
-                { value: "masonry", icon: <LayoutGrid size={13} /> },
-                { value: "compact", icon: <List size={13} /> },
-                { value: "grid", icon: <Grip size={13} /> },
+                { value: "masonry", icon: <span className={styles["app-segmented-icon"]}><LayoutGrid size={13} /></span> },
+                { value: "compact", icon: <span className={styles["app-segmented-icon"]}><List size={13} /></span> },
+                { value: "grid", icon: <span className={styles["app-segmented-icon"]}><Grip size={13} /></span> },
               ]}
             />
           </Tooltip>
@@ -282,7 +278,7 @@ export function DomainGroupView() {
           </Tooltip>
         </Flex>
       </Flex>
-      {filteredGroups.length === 0 ? (
+      {sortedGroups.length === 0 ? null : filteredGroups.length === 0 ? (
         <Empty description={t("search.noDomainResults")} />
       ) : (
         <div
