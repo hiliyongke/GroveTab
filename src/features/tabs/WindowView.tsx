@@ -14,7 +14,7 @@
  */
 
 import { useMemo } from "react";
-import { Empty } from "antd";
+import { Empty, Flex } from "antd";
 import {
   DndContext,
   KeyboardSensor,
@@ -40,6 +40,7 @@ import { swBroadcast } from "@/shared/utils/sw-broadcast";
 import { feedback } from "@/shared/ui/feedback";
 import { useTabsStore, useSettingsStore } from "@/store";
 import { useT } from "@/shared/i18n";
+import { WindowToolbar } from "./WindowToolbar";
 import { WindowCard } from "./WindowView/WindowCard";
 import { SortableWindowCard } from "./WindowView/SortableWindowCard";
 import type { WindowDragData, WindowDropData } from "./WindowView/dragTypes";
@@ -232,48 +233,51 @@ export function WindowView() {
   }
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCorners}
-      onDragEnd={(event) => {
-        void handleDragEnd(event);
-      }}
-    >
-      <SortableContext
-        items={sortedWindowIds.map((id) => `window-sort:${id}`)}
-        strategy={rectSortingStrategy}
+    <Flex vertical gap="middle">
+      <WindowToolbar />
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragEnd={(event) => {
+          void handleDragEnd(event);
+        }}
       >
-        <div className={styles["app-window-grid"]} style={getColumnVars(forcedColumns)}>
-          {sortedWindowIds.map((windowId) => {
-            const windowTabs = windowGroups.get(windowId) ?? [];
-            return (
-              <SortableWindowCard key={windowId} windowId={windowId}>
-                <WindowCard
-                  windowId={windowId}
-                  tabs={windowTabs}
-                  windowInfo={windows.get(windowId)}
-                  currentWindowId={currentWindowId}
-                  initialCollapsed={shouldCollapseWindow(
-                    defaultCollapsed,
-                    windowId,
-                    currentWindowId,
-                  )}
-                  visibleTabIds={visibleTabIds}
-                  onJump={(tabId, targetWindowId) => {
-                    void jumpToTab(tabId, targetWindowId);
-                  }}
-                  onCloseTab={(tabId) => {
-                    void closeSingleTab(tabId);
-                  }}
-                  onRefresh={() => {
-                    void loadAllTabs({ silent: true });
-                  }}
-                />
-              </SortableWindowCard>
-            );
-          })}
-        </div>
-      </SortableContext>
-    </DndContext>
+        <SortableContext
+          items={sortedWindowIds.map((id) => `window-sort:${id}`)}
+          strategy={rectSortingStrategy}
+        >
+          <div className={styles["app-window-grid"]} style={getColumnVars(forcedColumns)}>
+            {sortedWindowIds.map((windowId) => {
+              const windowTabs = windowGroups.get(windowId) ?? [];
+              return (
+                <SortableWindowCard key={windowId} windowId={windowId}>
+                  <WindowCard
+                    windowId={windowId}
+                    tabs={windowTabs}
+                    windowInfo={windows.get(windowId)}
+                    currentWindowId={currentWindowId}
+                    initialCollapsed={shouldCollapseWindow(
+                      defaultCollapsed,
+                      windowId,
+                      currentWindowId,
+                    )}
+                    visibleTabIds={visibleTabIds}
+                    onJump={(tabId, targetWindowId) => {
+                      void jumpToTab(tabId, targetWindowId);
+                    }}
+                    onCloseTab={(tabId) => {
+                      void closeSingleTab(tabId);
+                    }}
+                    onRefresh={() => {
+                      void loadAllTabs({ silent: true });
+                    }}
+                  />
+                </SortableWindowCard>
+              );
+            })}
+          </div>
+        </SortableContext>
+      </DndContext>
+    </Flex>
   );
 }

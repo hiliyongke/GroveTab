@@ -1344,5 +1344,14 @@ const zhCN: Record<string, string> = {
   // ── AppHeader 布局/密度快捷切换 ──
   "headerLayout.title": "布局模式",
   "headerDensity.title": "卡片密度",
+  // ── 视图工具栏快捷开关 ──
+  "toolbar.granularity.title": "分组粒度",
+  "toolbar.granularity.day": "按天",
+  "toolbar.granularity.hour": "按小时",
+  "toolbar.exactTime": "精确时间",
+  "toolbar.collapseStrategy.title": "折叠策略",
+  "toolbar.collapseStrategy.currentOnly": "仅当前",
+  "toolbar.collapseStrategy.allExpanded": "全部展开",
+  "toolbar.collapseStrategy.allCollapsed": "全部折叠",
 };
 export default zhCN;

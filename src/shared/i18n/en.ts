@@ -1390,5 +1390,14 @@ const en: Record<string, string> = {
   // ── AppHeader layout/density quick toggles ──
   "headerLayout.title": "Layout mode",
   "headerDensity.title": "Card density",
+  // ── View toolbar quick toggles ──
+  "toolbar.granularity.title": "Granularity",
+  "toolbar.granularity.day": "Day",
+  "toolbar.granularity.hour": "Hour",
+  "toolbar.exactTime": "Exact time",
+  "toolbar.collapseStrategy.title": "Collapse strategy",
+  "toolbar.collapseStrategy.currentOnly": "Current only",
+  "toolbar.collapseStrategy.allExpanded": "All expanded",
+  "toolbar.collapseStrategy.allCollapsed": "All collapsed",
 };
 export default en;

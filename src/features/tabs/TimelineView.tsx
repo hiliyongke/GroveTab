@@ -26,6 +26,7 @@ import { useTabsStore, useSettingsStore } from "@/store";
 import { useT } from "@/shared/i18n";
 import { findAmbiguousTitleIds } from "@/shared/utils/url-display";
 import { TabItem } from "./TabItem";
+import { TimelineToolbar } from "./TimelineToolbar";
 import type { LiveTab } from "@/shared/types";
 import styles from "./styles/views.module.less";
 
@@ -376,7 +377,8 @@ export function TimelineView() {
   }));
 
   return (
-    <Flex vertical className={styles["app-timeline-view"]}>
+    <Flex vertical gap="middle" className={styles["app-timeline-view"]}>
+      <TimelineToolbar />
       <Timeline items={items} />
     </Flex>
   );
