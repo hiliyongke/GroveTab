@@ -333,17 +333,18 @@ export interface UserSettings {
 
   /**
    * 常用站点卡片尺寸档位（v1.3）。
-   *   - 'sm'   ：紧凑（站点多时使用，单卡 ~120px）
-   *   - 'md'   ：默认（单卡 ~160px，与 v1.3 行为一致）
-   *   - 'lg'   ：宽松（站点少时使用，单卡 ~200px）
-   *   - 'auto' ：根据站点数量自动适配（≤6 用 lg，7-14 用 md，>14 用 sm）
+   *   - 'sm'     ：紧凑（站点多时使用，单卡 ~120px）
+   *   - 'md'     ：默认（单卡 ~160px，与 v1.3 行为一致）
+   *   - 'lg'     ：宽松（站点少时使用，单卡 ~200px）
+   *   - 'auto'   ：根据站点数量自动适配（≤6 用 lg，7-14 用 md，>14 用 sm）
+   *   - 'custom' ：使用 quickStartCardExactWidth 手动设置宽度
    */
-  quickStartCardSize?: "sm" | "md" | "lg" | "auto";
+  quickStartCardSize?: "sm" | "md" | "lg" | "auto" | "custom";
 
   /**
-   * 常用站点卡片精确宽度（px）。
-   * 设置后覆盖 quickStartCardSize 的默认宽度，实现连续微调。
-   * 范围：80–280，步长 8。设为 undefined 则跟随 quickStartCardSize 预设。
+   * 常用站点卡片自定义宽度（px）。
+   * 仅 quickStartCardSize 为 'custom' 时生效；离开 custom 后保留数值但不覆盖预设。
+   * 范围：80–280，步长 8。
    */
   quickStartCardExactWidth?: number;
 

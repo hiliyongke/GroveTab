@@ -1102,7 +1102,7 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                   checked={settings.quickStartFabAddButton ?? false}
                   onChange={(v) => void updateSettings({ quickStartFabAddButton: v })}
                 />
-                {/* 卡片尺寸：sm / md / lg / auto，便于适应不同站点数量与屏幕宽度 */}
+                {/* 卡片尺寸：sm / md / lg / auto / custom，便于适应不同站点数量与屏幕宽度 */}
                 <div className={styles["appearance-visibility-row"]}>
                   <div>
                     <div className={styles["appearance-visibility-title"]}>{t("卡片大小")}</div>
@@ -1120,23 +1120,23 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
                       { value: "md", label: t("默认") },
                       { value: "lg", label: t("宽松") },
                       { value: "auto", label: t("自适应") },
+                      { value: "custom", label: t("自定义") },
                     ]}
                   />
                 </div>
-                {/* 卡片精确宽度：在预设档位基础上微调 */}
-                <SliderField
-                  label={t("卡片宽度微调")}
-                  value={settings.quickStartCardExactWidth ?? 0}
-                  min={80}
-                  max={280}
-                  step={8}
-                  hint={t("在预设基础上连续微调卡片宽度（80–280px）；设为 0 则跟随预设")}
-                  onChange={(value) => {
-                    void updateSettings({
-                      quickStartCardExactWidth: value === 0 ? undefined : value,
-                    });
-                  }}
-                />
+                {(settings.quickStartCardSize ?? "md") === "custom" && (
+                  <SliderField
+                    label={t("卡片宽度")}
+                    value={settings.quickStartCardExactWidth ?? 160}
+                    min={80}
+                    max={280}
+                    step={8}
+                    hint={t("仅在卡片大小选择自定义时生效（80–280px）")}
+                    onChange={(value) => {
+                      void updateSettings({ quickStartCardExactWidth: value });
+                    }}
+                  />
+                )}
                 {/* 网格间距：控制卡片之间的水平与垂直间距 */}
                 <SliderField
                   label={t("网格间距")}

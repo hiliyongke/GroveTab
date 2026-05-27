@@ -107,25 +107,21 @@ export function SpeedDialGrid({ sites, onAdd }: SpeedDialGridProps) {
   const [editingSite, setEditingSite] = useState<SpeedDialSite | null>(null);
 
   /**
-   * 根据卡片尺寸档位或精确宽度计算实际的卡片最小宽度。
-   *   - 若设置了 quickStartCardExactWidth，直接使用精确值（80–280px）
-   *   - 否则使用 sm/md/lg/auto 预设档位
-   *     - auto 档位根据站点数量自适应：
-   *       - 站点数 ≤ lgThreshold → lg
-   *       - 站点数 ≤ mdThreshold → md
-   *       - 站点数 > mdThreshold → sm
+   * 根据卡片尺寸档位计算实际的卡片最小宽度。
+   *   - auto 档位根据站点数量自适应
+   *   - custom 档位使用滑动条设置的精确宽度
+   *   - sm/md/lg 档位始终使用预设宽度，避免被历史滑动条值覆盖
    */
   const cardMinWidth = useMemo(() => {
-    // 1. 优先使用精确宽度
-    if (exactWidth) return `${exactWidth}px`;
-    // 2. auto 档位：根据站点数量自适应
     if (cardSize === "auto") {
       const count = sites.length;
       if (count <= autoLgThreshold) return "208px";
       if (count <= autoMdThreshold) return "160px";
       return "120px";
     }
-    // 3. 固定档位
+
+    if (cardSize === "custom") return `${exactWidth ?? 160}px`;
+
     const SIZE_MAP = { sm: "120px", md: "160px", lg: "208px" } as const;
     return SIZE_MAP[cardSize] ?? "160px";
   }, [cardSize, sites.length, exactWidth, autoLgThreshold, autoMdThreshold]);

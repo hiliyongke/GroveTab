@@ -1275,6 +1275,11 @@
     "en": "Card Width Fine-tune"
   },
   {
+    "key": "k_8r7wq2m",
+    "zh-CN": "卡片宽度",
+    "en": "Card Width"
+  },
+  {
     "key": "k_qx5mb7c",
     "zh-CN": "危险区",
     "en": "Danger zone"
@@ -1588,6 +1593,11 @@
     "key": "k_lb6v3h3",
     "zh-CN": "在预设基础上连续微调卡片宽度（80–280px）；设为 0 则跟随预设",
     "en": "Fine-tune card width continuously (80–280px) on top of preset; set to 0 to follow preset"
+  },
+  {
+    "key": "k_z4n9p2v",
+    "zh-CN": "仅在卡片大小选择自定义时生效（80–280px）",
+    "en": "Only applies when Card Size is set to Custom (80–280px)"
   },
   {
     "key": "k_qqdqkp3",

@@ -415,7 +415,7 @@
 
 .app-view-switcher-wrap {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   max-width: 100%;
   margin: calc(var(--app-space-5, 24px) * -0.35) 0 var(--app-space-5, 24px);
   padding: 2px 0;
@@ -429,12 +429,52 @@
 }
 
 .app-view-switcher {
+  --app-view-switcher-bg: color-mix(in srgb, var(--ant-color-bg-container) 58%, transparent);
+  --app-view-switcher-border: color-mix(
+    in srgb,
+    var(--ant-color-border-secondary) 58%,
+    transparent
+  );
+  --app-view-switcher-hover-bg: color-mix(
+    in srgb,
+    var(--app-color-primary, var(--ant-color-primary)) 8%,
+    transparent
+  );
+  --app-view-switcher-selected-bg: color-mix(
+    in srgb,
+    var(--ant-color-bg-elevated) 82%,
+    transparent
+  );
+  --app-view-switcher-selected-shadow: color-mix(in srgb, var(--ant-color-text) 10%, transparent);
+
   flex: 0 0 auto;
   max-width: 100%;
-  background: var(--ant-color-fill-quaternary);
-  border: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 68%, transparent);
+  background: var(--app-view-switcher-bg);
+  border: 1px solid var(--app-view-switcher-border);
   border-radius: var(--app-radius-md);
   box-shadow: none;
+  backdrop-filter: blur(14px) saturate(var(--app-glass-saturate, 150%));
+  -webkit-backdrop-filter: blur(14px) saturate(var(--app-glass-saturate, 150%));
+}
+
+[data-theme="dark"] .app-view-switcher {
+  --app-view-switcher-bg: color-mix(in srgb, var(--ant-color-bg-container) 34%, transparent);
+  --app-view-switcher-border: color-mix(
+    in srgb,
+    var(--ant-color-border-secondary) 46%,
+    transparent
+  );
+  --app-view-switcher-hover-bg: color-mix(
+    in srgb,
+    var(--app-color-primary, var(--ant-color-primary)) 14%,
+    transparent
+  );
+  --app-view-switcher-selected-bg: color-mix(
+    in srgb,
+    var(--ant-color-bg-elevated) 62%,
+    transparent
+  );
+  --app-view-switcher-selected-shadow: color-mix(in srgb, #000 32%, transparent);
 }
 
 .app-view-switcher__item {
@@ -449,11 +489,13 @@
 
 .app-view-switcher__item:hover {
   color: var(--ant-color-text);
+  background: var(--app-view-switcher-hover-bg);
 }
 
 .app-view-switcher .ant-segmented-thumb,
 .app-view-switcher .ant-segmented-item-selected {
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--ant-color-text) 8%, transparent);
+  background: var(--app-view-switcher-selected-bg);
+  box-shadow: 0 2px 8px var(--app-view-switcher-selected-shadow);
 }
 
 /* ─── 主体区包裹层（侧边栏 + 内容并排） ──────────────────────── */

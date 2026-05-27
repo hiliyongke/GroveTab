@@ -1203,6 +1203,8 @@ const zhCN: Record<string, string> = {
   "quickStart.cardSizeMd": "默认",
   "quickStart.cardSizeLg": "宽松",
   "quickStart.cardSizeAuto": "自适应",
+  "quickStart.cardCustomWidth": "卡片宽度",
+  "quickStart.cardCustomWidthHint": "仅在卡片大小选择自定义时生效（80–280px）",
   "quickStart.cardExactWidth": "卡片宽度微调",
   "quickStart.cardExactWidthHint": "在预设基础上连续微调卡片宽度（80–280px）；设为 0 则跟随预设",
   "quickStart.gridGap": "网格间距",

@@ -1243,6 +1243,8 @@ const en: Record<string, string> = {
   "quickStart.cardSizeMd": "Default",
   "quickStart.cardSizeLg": "Roomy",
   "quickStart.cardSizeAuto": "Adaptive",
+  "quickStart.cardCustomWidth": "Card Width",
+  "quickStart.cardCustomWidthHint": "Only applies when Card Size is set to Custom (80–280px)",
   "quickStart.cardExactWidth": "Card Width Fine-tune",
   "quickStart.cardExactWidthHint":
     "Fine-tune card width continuously (80–280px) on top of preset; set to 0 to follow preset",
