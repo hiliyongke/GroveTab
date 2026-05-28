@@ -22,43 +22,98 @@
 - **悬停预览卡片**：TabPreviewCard（Popover），含 URL/时长/域名/操作
 - **关闭退场动画**：is-closing class + CSS transition
 
-## 近期动态（2026-05-27）
+## 近期动态（2026-05-28）
 
-### GroveTab 产品分析 & 改进规划
+### UI 设计体系修复
 
-#### 已完成改进
+1. **浮层覆盖提取（P0 ✅）**
+   - 新建 `shared/styles/_floating-overrides.less`，newtab 和 popup 共享
+   - 配置 Vite `css.preprocessorOptions.less.paths` 支持 `@import '@/...'`
 
-1. **搜索索引修复（高优先级 ✅）**
-   - 问题：SearchBox 使用 useSearchIndex（主线程同步构建），每次打开卡 200-500ms
-   - 发现：已有 `unified-search.worker.ts`（Web Worker 实现）+ `use-unified-search-index.ts`
-   - 修复：新建 `use-search-bridge.ts`，将 Worker 异步结果适配为同步接口给 `useSearchResults`
-   - 改动：SearchBox 第 34 行 import 切换，约 50 行适配代码
+2. **间距 token 补齐（P1 ✅）**
+   - 修正编号：space-5 从 24px→20px（线性编号：5×4px=20px）
+   - 新增 space-5(20px)/7(28px)/8(32px)/10(40px)/12(48px)/16(64px)
+   - 迁移所有旧引用：space-5(24px旧)→space-6(24px新)，space-6(32px旧)→space-8(32px新)
 
-2. **全局 Cmd/Ctrl+K 快捷键（高优先级 ✅）**
-   - 问题：SW 的 toggle-search 每次创建新 tab，体验差
-   - 修复：
-     - manifest.json: `"Command+K"` for macOS（Alt+K 保留给 Windows/Linux）
-     - SW index.ts: 先查找已打开的 GroveTab 窗口 → 聚焦 → 发 `toggle-search` 消息
-     - App.tsx: 新增 `toggle-search` 消息监听
+3. **newtab/index.less 拆分（P0 ✅）**
+   - 1422 行 → 20 行入口 + 6 个职责文件
 
-3. **ArchiveView 重构（P1 ✅）**
-   - 问题：ArchiveView 使用 `useSyncExternalStore` + 模块级 cache，绕开 Zustand
-   - 修复：新建 `store/sessions-slice.ts`（Zustand）+ `useSessionsStore`
-   - ArchiveView 全部改用 `useSessionsStore` 订阅
-   - 删除了模块级 sessionsCache/listeners，删除了 registerHistoryUndoHandler
+4. **SiteIcon CSS Module 迁移（P1 ✅）**
+   - 消除内联样式，CSS 变量 --site-icon-size 驱动尺寸
 
-4. **DomainGroupView 虚拟滚动（P1 ✅）**
-   - 问题：DomainGroupView 无虚拟滚动，500+ 标签时 DOM 超 2000+ 节点
-   - 修复：引入 `@tanstack/react-virtual`，超过 20 个分组时启用
-   - 每列独立虚拟化，`measureElement` 实时更新折叠/展开高度
+5. **硬编码间距/圆角 token 化（P1 ✅）**
+6. **manifest.json minimum_chrome_version: "111"**（P2 ✅）
+7. **app-shell.less 拆分（P0 ✅）**：1336 行 → 6 个职责文件
+8. **TSX 内联样式清零（P1 ✅）**：34→23 处，剩余均为动态值
+9. **!important 策略分析（P1 ✅）**：124 处中 90% 为 antd v6 必要覆盖
 
-#### 技术笔记
+### 技术债务清理（2026-05-28）
 
-- `@tanstack/react-virtual` 3.13.24 已安装（package.json）
-- `useUnifiedSearchIndex` 的 Worker `ready` 信号表示索引已构建完成可搜索
-- sessions-slice 的 `refreshSessions` 可被 undo-bus 的 `archive_create` 事件触发
-- VirtualColumn 组件的 `useVirtualizer` 需要稳定的列数组引用（由 DomainGroupView 提供）
+- 删除 15 个 .DS_Store + 2 个空目录
+- 删除未使用的 `use-settings-draft.ts`
+- 迁移孤儿 `effects.module.less` 到 `_layout.less`（全局样式不应放在 CSS Module 中）
+- 清理 console.log：迁移日志精简为 console.info（DEV only）
+- inline style → CSS：3 个 Toolbar 搜索框 + TabGroupCard/DomainGroupCard flex + HistoryPanel 3 处 + PermissionDiagnostics 3 处 + MemoryGovernance 1 处
+- 删除项目根 .pnpm-store（19MB）
+- .gitignore 新增 .pnpm-store/、.workbuddy/、deliverables/
+
+### 关键经验
+
+- Less `@import '~@/...'` 不被 Vite 支持，需配置 paths 并用 `@import '@/...'`
+- antd v6 Modal 不支持 padding token，!important 覆盖暂无法消除
+- 间距 token 编号变更是破坏性操作，需全项目 grep 迁移
+- 同一 TSX 文件 import 两个 CSS Module 时变量名不能重复，需用不同名
+- antd 组件 style prop 是官方布局用法，与内联样式滥用不同，保留合理
+
+## 产品规划（2026-05-29）
+
+- 完成窗口模式模块产品能力与 UX 优化完整规划
+- PRD + 路线图落盘：`deliverables/product-strategy/prd-window-mode-optimization-2026-05-29.md`
+- 3 大目标：操作直达、信息保真、批量提效
+- P0（5项）/P1（7项）/P2（5项），总工期 ~12 周
+- 关键复用：selection-slice→P0-3、archive-operations→P0-4、useWindowActions→P0-1
+- 待确认 7 个决策问题
 
 ## 踩坑经验
 
 （以下由 AI 在实际调用中自动积累，请勿手动删除）
+
+### 2026-05-29 产品审计修复
+
+**P0-2 ArchiveView useReducer 重构**
+- ArchiveView.tsx 有 15 个 useState，合并为一个 `useReducer(archiveReducer, INITIAL_STATE)`
+- `pinyinMatchFn` 是异步加载的回调函数，也放入 reducer state，通过 `SET_PINYIN_MATCH_FN` action 更新
+- ArchiveState 包含所有 15 个状态字段 + `pinyinMatchFn`
+- ArchiveAction 用 discriminated union (type + payload) 模式，支持 19 种 action
+
+**P1-6 SearchBox handleActivate 重构**
+- 原 9 个分支各有重复的 try/catch/window.open 降级逻辑
+- 提取 `openUrlSafely(url, active, options?)` 统一辅助函数，内部处理 `createTab → window.open` 降级
+- 重构后 `handleActivate` 变为简洁的 switch-case 结构，代码行数 ~130→~50
+
+**P1-7 Insights 内存估算权重模型**
+- 基础：80 MB/标签，+ 视频/媒体(300MB)、+ 图片(150MB)、+ JS应用(200MB)
+- 通过 URL 路径特征（/watch/, /image/, /doc/）分类估算
+
+**P2-14 bookmark-tools 速率限制**
+- 新增 `RateLimiter` 类，按域名隔离 token bucket，每秒 5 请求，并发 3
+- `checkOne` 发请求前先 `await rateLimiter.acquire(domain)`
+
+**P2-13 Insights 时间范围选择**
+- 导出 `InsightsTimeRange` 类型 `7 | 14 | 30`
+- 添加 `Segmented` UI 控件（7d/14d/30d）
+- `dailyOpens` useMemo 依赖 `timeRange` 动态计算
+
+**P2-10 getViewComponentMap 缓存**
+- module-level `componentMapCache` 变量，只在 register/unregister 时重建
+- `invalidateCache()` 在所有修改操作后调用
+
+**P2-11 HistoryAnalysisView 提取**
+- 从 HistoryPanel.tsx 提取 ~160 行到 `components/HistoryAnalysisView.tsx`
+- 同步清理未使用 import（Select, Spin, Download from antd/lucide-react）
+- 修复 `Typography.Empty` → `Empty`（antd v6 正确用法）
+
+**P1-8 trending chrome API 封装**
+- TrendingPage 直接调用 `chrome.bookmarks.create`/`chrome.tabs.create`
+- 替换为 `createBookmark`/`createTab`（已有抽象层）
+- 同时修复了 `.then()` 嵌套地狱，改为 async/await

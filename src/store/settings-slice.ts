@@ -12,6 +12,7 @@
 
 import { create } from "zustand";
 import type { UserSettings, AutomationRule, WorkspaceTemplate } from "@/shared/types";
+import { CLOSE_CONFIRM_THRESHOLD } from "@/shared/types/settings";
 import {
   getSettings,
   saveSettings,
@@ -73,6 +74,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     windowCardShowGhostDropZone: true,
     windowCardAccentBarPosition: "left",
     windowCardOrder: [],
+    windowShowIdleTime: true,
+    windowShowHealthIndicator: true,
     timelineGranularity: "day",
     timelineShowExactTime: false,
     searchScope: ["title", "hostname", "url"],
@@ -104,7 +107,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     dedupStrictness: "loose",
     idleThresholdMinutes: 1440,
     undoWindowSeconds: 5,
-    closeConfirmThreshold: 20,
+    closeConfirmThreshold: CLOSE_CONFIRM_THRESHOLD,
     autoSnapshotFrequency: "12h",
     enableOgFetch: false,
     speedDialGroupEnabled: false,

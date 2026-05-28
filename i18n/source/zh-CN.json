@@ -45,6 +45,11 @@
     "en": "{domain} · All tabs"
   },
   {
+    "key": "k_41ch9tq",
+    "zh-CN": "{n} 分钟",
+    "en": ""
+  },
+  {
     "key": "k_gzoikto",
     "zh-CN": "{n} 分钟前",
     "en": "{n}m ago"
@@ -100,6 +105,16 @@
     "en": "1 day"
   },
   {
+    "key": "k_hs0t3n9",
+    "zh-CN": "1.1 完成用户认证模块重构，测试覆盖率达到 92%",
+    "en": ""
+  },
+  {
+    "key": "k_5klrlik",
+    "zh-CN": "1.2 修复 3 个 P1 级线上问题，优化查询性能提升 40%",
+    "en": ""
+  },
+  {
     "key": "k_f0ow99w",
     "zh-CN": "100% 本地优先 · 零数据上传",
     "en": "100% local-first · zero data upload"
@@ -110,6 +125,16 @@
     "en": "12 hours"
   },
   {
+    "key": "k_3cym0jf",
+    "zh-CN": "2.1 启动数据分析模块开发",
+    "en": ""
+  },
+  {
+    "key": "k_0pu2d2l",
+    "zh-CN": "2.2 完成技术方案评审与排期",
+    "en": ""
+  },
+  {
     "key": "k_ggc0r9y",
     "zh-CN": "24 小时（默认）",
     "en": "24 hours (default)"
@@ -118,6 +143,11 @@
     "key": "k_gdtc95n",
     "zh-CN": "3 天",
     "en": "3 days"
+  },
+  {
+    "key": "k_pp2wxw8",
+    "zh-CN": "3.1 第三方 API 响应延迟需跟进",
+    "en": ""
   },
   {
     "key": "k_pj2dpoh",
@@ -183,6 +213,11 @@
     "key": "k_cucapaz",
     "zh-CN": "camelCase、PascalCase、snake_case、kebab-case 互转",
     "en": "Convert camelCase, PascalCase, snake_case and kebab-case"
+  },
+  {
+    "key": "k_pszhx3h",
+    "zh-CN": "chrome.storage 占用",
+    "en": ""
   },
   {
     "key": "k_voia0pj",
@@ -305,9 +340,24 @@
     "en": "Nord"
   },
   {
+    "key": "k_031le43",
+    "zh-CN": "OPFS 存储占用",
+    "en": ""
+  },
+  {
     "key": "k_eintf14",
     "zh-CN": "px、rem、em 按基准字号互转",
     "en": "Convert px, rem and em using a base font size"
+  },
+  {
+    "key": "k_9s3uolf",
+    "zh-CN": "Q2 季度预算表",
+    "en": ""
+  },
+  {
+    "key": "k_f77u24g",
+    "zh-CN": "Re: 新项目技术方案评审",
+    "en": ""
   },
   {
     "key": "k_w3dt4h2",
@@ -318,6 +368,11 @@
     "key": "k_v72u8r4",
     "zh-CN": "Solarized 太阳化",
     "en": "Solarized"
+  },
+  {
+    "key": "k_s7v9q3a",
+    "zh-CN": "Split View {count}",
+    "en": "Split View {count}"
   },
   {
     "key": "k_cfwd206",
@@ -350,6 +405,21 @@
     "en": "URL Query Tool"
   },
   {
+    "key": "k_q2xe7ei",
+    "zh-CN": "URL 匹配模式（可选，留空匹配所有）",
+    "en": ""
+  },
+  {
+    "key": "k_lm059yk",
+    "zh-CN": "URL 匹配模式（支持 * 通配符）",
+    "en": ""
+  },
+  {
+    "key": "k_4xj03wv",
+    "zh-CN": "URL 匹配规则（URLPattern）",
+    "en": ""
+  },
+  {
     "key": "k_afstzm7",
     "zh-CN": "URL 参数解析为 JSON，或由 JSON 构建查询串",
     "en": "Parse URL query into JSON or build query strings from JSON"
@@ -375,6 +445,11 @@
     "en": "URL block list"
   },
   {
+    "key": "k_q9fcxsv",
+    "zh-CN": "URLPattern 格式无效",
+    "en": ""
+  },
+  {
     "key": "k_8hfxfmt",
     "zh-CN": "User-Agent 解析",
     "en": "User-Agent Parser"
@@ -388,6 +463,11 @@
     "key": "k_zfky3m5",
     "zh-CN": "YAML 与 JSON 格式互转",
     "en": "Convert between YAML and JSON formats"
+  },
+  {
+    "key": "k_vftautd",
+    "zh-CN": "一、本周工作进展",
+    "en": ""
   },
   {
     "key": "k_ykgy6b1",
@@ -430,6 +510,11 @@
     "en": "Sweep away empty folders in one click"
   },
   {
+    "key": "k_2untw5s",
+    "zh-CN": "三、风险与依赖",
+    "en": ""
+  },
+  {
     "key": "k_h5qgmkm",
     "zh-CN": "上一步",
     "en": "Back"
@@ -438,6 +523,11 @@
     "key": "k_yr3b6mo",
     "zh-CN": "上下半屏",
     "en": "Top + Bottom halves"
+  },
+  {
+    "key": "k_b8q3r6s",
+    "zh-CN": "上下堆叠",
+    "en": "Top / bottom stack"
   },
   {
     "key": "k_7xiv0ks",
@@ -480,6 +570,11 @@
     "en": "Domains"
   },
   {
+    "key": "k_vjrua8g",
+    "zh-CN": "不支持",
+    "en": ""
+  },
+  {
     "key": "k_h2h93tm",
     "zh-CN": "不记录的域名",
     "en": "Hostnames to ignore"
@@ -505,14 +600,29 @@
     "en": "Same set of sites as yesterday ✨"
   },
   {
+    "key": "k_8ojhkr1",
+    "zh-CN": "两次治理动作之间的最小间隔，防止内存抖动时频繁触发，默认 10 分钟。",
+    "en": ""
+  },
+  {
     "key": "k_0z5tcee",
     "zh-CN": "严格",
     "en": "Strict"
   },
   {
+    "key": "k_lwctdau",
+    "zh-CN": "个标签页",
+    "en": ""
+  },
+  {
     "key": "k_ihb90vr",
     "zh-CN": "中午",
     "en": "Noon"
+  },
+  {
+    "key": "k_kz8goe0",
+    "zh-CN": "中文",
+    "en": ""
   },
   {
     "key": "k_rgxqhic",
@@ -540,6 +650,11 @@
     "en": "Bookmarks"
   },
   {
+    "key": "k_y6by2br",
+    "zh-CN": "书签权限不可用",
+    "en": ""
+  },
+  {
     "key": "k_33xnbez",
     "zh-CN": "书签权限被拒绝",
     "en": "Bookmark permission denied"
@@ -548,6 +663,21 @@
     "key": "k_f4qhwxl",
     "zh-CN": "书签栏",
     "en": "Bookmarks Bar"
+  },
+  {
+    "key": "k_90yv8gc",
+    "zh-CN": "书签添加失败",
+    "en": ""
+  },
+  {
+    "key": "k_zdsr6a7",
+    "zh-CN": "事件触发（打开/访问页面时）",
+    "en": ""
+  },
+  {
+    "key": "k_0cpig2c",
+    "zh-CN": "二、下周计划",
+    "en": ""
   },
   {
     "key": "k_ldh8e2f",
@@ -560,6 +690,16 @@
     "en": "Swap"
   },
   {
+    "key": "k_n6c47d2",
+    "zh-CN": "产品经理",
+    "en": ""
+  },
+  {
+    "key": "k_z4n9p2v",
+    "zh-CN": "仅在卡片大小选择自定义时生效（80–280px）",
+    "en": "Only applies when Card Size is set to Custom (80–280px)"
+  },
+  {
     "key": "k_r4tdxlc",
     "zh-CN": "仅工具栏按钮",
     "en": "Toolbar popup only"
@@ -568,6 +708,11 @@
     "key": "k_bzo7u1k",
     "zh-CN": "仅当前窗口",
     "en": "Current window only"
+  },
+  {
+    "key": "k_gv1jyks",
+    "zh-CN": "仅通知（默认）",
+    "en": ""
   },
   {
     "key": "k_9o289zu",
@@ -580,9 +725,19 @@
     "en": "No longer active"
   },
   {
+    "key": "k_m3f80rd",
+    "zh-CN": "今日",
+    "en": ""
+  },
+  {
     "key": "k_x3ojj02",
     "zh-CN": "仍有 {count} 个标签页休眠失败，请重试",
     "en": "{count} tab(s) could not be discarded"
+  },
+  {
+    "key": "k_7as1e1l",
+    "zh-CN": "从剪贴板导入 URL",
+    "en": ""
   },
   {
     "key": "k_bbmasmz",
@@ -593,6 +748,11 @@
     "key": "k_x9952h7",
     "zh-CN": "代码",
     "en": "Code"
+  },
+  {
+    "key": "k_jmsw5gi",
+    "zh-CN": "休眠",
+    "en": ""
   },
   {
     "key": "k_rkw919b",
@@ -645,6 +805,11 @@
     "en": "Where your tabs find their place."
   },
   {
+    "key": "k_luohnad",
+    "zh-CN": "使用 URLPattern 语法匹配书签 URL，自动移动到指定文件夹。",
+    "en": ""
+  },
+  {
     "key": "k_19i6lh7",
     "zh-CN": "使用小贴士",
     "en": "Tips"
@@ -680,6 +845,26 @@
     "en": "Top 5 actions"
   },
   {
+    "key": "k_e1ynqfd",
+    "zh-CN": "例外白名单（域名）",
+    "en": ""
+  },
+  {
+    "key": "k_zi2tjhg",
+    "zh-CN": "例如：Dev",
+    "en": ""
+  },
+  {
+    "key": "k_v5p2n5t",
+    "zh-CN": "例如：晨会模板",
+    "en": ""
+  },
+  {
+    "key": "k_psvbfo1",
+    "zh-CN": "例如：清理闲置标签",
+    "en": ""
+  },
+  {
     "key": "k_o7m85i8",
     "zh-CN": "依据当前去重严格度：{mode}。默认保留每组第一个书签，删除其余重复项。",
     "en": "Using current dedup strictness: {mode}. Merging keeps the first bookmark of each group and removes the rest."
@@ -695,9 +880,29 @@
     "en": "Stored in-browser (IndexedDB); nothing is uploaded."
   },
   {
+    "key": "k_2c1n840",
+    "zh-CN": "保存在浏览器内部（OPFS），不会上传任何数据。",
+    "en": ""
+  },
+  {
+    "key": "k_r7bpw9p",
+    "zh-CN": "保存当前标签为模板",
+    "en": ""
+  },
+  {
+    "key": "k_ewbc4fy",
+    "zh-CN": "保存当前窗口快照",
+    "en": ""
+  },
+  {
     "key": "k_890f7ok",
     "zh-CN": "保存当前配置为预设，一键切换不同的使用场景",
     "en": "Save current settings as a profile and switch between different usage scenarios"
+  },
+  {
+    "key": "k_cd977op",
+    "zh-CN": "保存快照失败",
+    "en": ""
   },
   {
     "key": "k_m4x467p",
@@ -825,6 +1030,11 @@
     "en": "{count} duplicates"
   },
   {
+    "key": "k_0pt3j8e",
+    "zh-CN": "共 {n} 条记录",
+    "en": ""
+  },
+  {
     "key": "k_vsrnf3x",
     "zh-CN": "关于",
     "en": "About"
@@ -833,6 +1043,11 @@
     "key": "k_j82c27z",
     "zh-CN": "关于 {brand}",
     "en": "About {brand}"
+  },
+  {
+    "key": "k_x8695vr",
+    "zh-CN": "关于 Q2 季度 OKR 对齐会议的邀请",
+    "en": ""
   },
   {
     "key": "k_f7fzu8h",
@@ -950,9 +1165,44 @@
     "en": "Elegant"
   },
   {
+    "key": "k_pkhy9ya",
+    "zh-CN": "内存使用率已达 {pct}%，建议关闭或休眠部分标签页以释放内存。",
+    "en": ""
+  },
+  {
+    "key": "k_banolnl",
+    "zh-CN": "内存压力（{pct}%）：已自动休眠 {count} 个标签页。",
+    "en": ""
+  },
+  {
+    "key": "k_mvfis1m",
+    "zh-CN": "内存压力（{pct}%）：建议将 {count} 个闲置标签页归档以释放内存。",
+    "en": ""
+  },
+  {
+    "key": "k_0plh5pm",
+    "zh-CN": "内存压力阈值（%）",
+    "en": ""
+  },
+  {
+    "key": "k_5o97e1g",
+    "zh-CN": "内存治理",
+    "en": ""
+  },
+  {
     "key": "k_jt4uouy",
     "zh-CN": "内容区最大宽度",
     "en": "Content max width"
+  },
+  {
+    "key": "k_nksmis6",
+    "zh-CN": "内容运营",
+    "en": ""
+  },
+  {
+    "key": "k_m2d8x4y",
+    "zh-CN": "最多支持分屏 {count} 个标签页",
+    "en": "Split layout supports up to {count} tabs"
   },
   {
     "key": "k_v8tvm1n",
@@ -1035,6 +1285,11 @@
     "en": "Recent access"
   },
   {
+    "key": "k_y0isose",
+    "zh-CN": "冷却时间（分钟）",
+    "en": ""
+  },
+  {
     "key": "k_i098c53",
     "zh-CN": "冷静的青蓝体系，长时间使用护眼",
     "en": "Cold blue palette, easy on long sessions"
@@ -1080,14 +1335,29 @@
     "en": "Split screen"
   },
   {
+    "key": "k_u8hxeoh",
+    "zh-CN": "分析",
+    "en": ""
+  },
+  {
     "key": "k_1op2r0h",
     "zh-CN": "分组",
     "en": "Group"
   },
   {
+    "key": "k_6vzh0ic",
+    "zh-CN": "分组到 {name}",
+    "en": ""
+  },
+  {
     "key": "k_rw7hdjk",
     "zh-CN": "分组可折叠",
     "en": "Collapsible Groups"
+  },
+  {
+    "key": "k_i1n5m7w",
+    "zh-CN": "分组名称",
+    "en": ""
   },
   {
     "key": "k_bxpv1hv",
@@ -1125,6 +1395,11 @@
     "en": "Switched workspace"
   },
   {
+    "key": "k_vk4xybk",
+    "zh-CN": "切换标签页主视图的具体呈现方式",
+    "en": ""
+  },
+  {
     "key": "k_w96eorq",
     "zh-CN": "切换视图",
     "en": "Switch view"
@@ -1150,9 +1425,24 @@
     "en": "Created archive"
   },
   {
+    "key": "k_khj2639",
+    "zh-CN": "创建分组",
+    "en": ""
+  },
+  {
+    "key": "k_rydg0yh",
+    "zh-CN": "创建分组失败",
+    "en": ""
+  },
+  {
     "key": "k_zi427uv",
     "zh-CN": "创建归档",
     "en": "Create archive"
+  },
+  {
+    "key": "k_gs1hjod",
+    "zh-CN": "创建目标文件夹失败",
+    "en": ""
   },
   {
     "key": "k_sfsonao",
@@ -1185,6 +1475,11 @@
     "en": "This action cannot be undone. Are you sure you want to delete this session?"
   },
   {
+    "key": "k_xee5op4",
+    "zh-CN": "删除失败",
+    "en": ""
+  },
+  {
     "key": "k_viyipzr",
     "zh-CN": "删除失败，请重试",
     "en": "Delete failed, please retry"
@@ -1213,6 +1508,11 @@
     "key": "k_vmbs9as",
     "zh-CN": "加了标签",
     "en": "Tagged"
+  },
+  {
+    "key": "k_ghnjnuo",
+    "zh-CN": "加入书签",
+    "en": ""
   },
   {
     "key": "k_h9gh2zj",
@@ -1260,6 +1560,11 @@
     "en": "Midnight"
   },
   {
+    "key": "k_ta6g61n",
+    "zh-CN": "单次最多操作标签数",
+    "en": ""
+  },
+  {
     "key": "k_07cz0ny",
     "zh-CN": "卡片圆角",
     "en": "Card corner radius"
@@ -1270,14 +1575,14 @@
     "en": "Card Size"
   },
   {
-    "key": "k_uo75dmn",
-    "zh-CN": "卡片宽度微调",
-    "en": "Card Width Fine-tune"
-  },
-  {
     "key": "k_8r7wq2m",
     "zh-CN": "卡片宽度",
     "en": "Card Width"
+  },
+  {
+    "key": "k_uo75dmn",
+    "zh-CN": "卡片宽度微调",
+    "en": "Card Width Fine-tune"
   },
   {
     "key": "k_qx5mb7c",
@@ -1445,6 +1750,16 @@
     "en": "Backend"
   },
   {
+    "key": "k_csv9n8o",
+    "zh-CN": "启用",
+    "en": ""
+  },
+  {
+    "key": "k_6mn7v96",
+    "zh-CN": "启用内存治理",
+    "en": ""
+  },
+  {
     "key": "k_vt8jnpp",
     "zh-CN": "启用历史建议",
     "en": "Enable history suggestions"
@@ -1468,6 +1783,11 @@
     "key": "k_zib033k",
     "zh-CN": "启用遮罩层",
     "en": "Enable overlay"
+  },
+  {
+    "key": "k_s0w0a0w",
+    "zh-CN": "周一",
+    "en": ""
   },
   {
     "key": "k_jlbkk46",
@@ -1500,6 +1820,11 @@
     "en": "Brand subtitle"
   },
   {
+    "key": "k_tdnu5lz",
+    "zh-CN": "品牌推广",
+    "en": ""
+  },
+  {
     "key": "k_69g0bd9",
     "zh-CN": "品牌标识 + 归档/主题/设置按钮",
     "en": "Brand + archive/theme/settings buttons"
@@ -1515,6 +1840,11 @@
     "en": "Hash Digest"
   },
   {
+    "key": "k_m4jt5ej",
+    "zh-CN": "回收站",
+    "en": ""
+  },
+  {
     "key": "k_6r713fo",
     "zh-CN": "回看你在插件里做过什么，并一键恢复关闭的标签页",
     "en": "See what you did in the extension, and restore closed tabs in one click"
@@ -1528,6 +1858,11 @@
     "key": "k_hqlbp3h",
     "zh-CN": "固定",
     "en": "Pin"
+  },
+  {
+    "key": "k_7yqf9qt",
+    "zh-CN": "固定标签页",
+    "en": ""
   },
   {
     "key": "k_dmya664",
@@ -1595,11 +1930,6 @@
     "en": "Fine-tune card width continuously (80–280px) on top of preset; set to 0 to follow preset"
   },
   {
-    "key": "k_z4n9p2v",
-    "zh-CN": "仅在卡片大小选择自定义时生效（80–280px）",
-    "en": "Only applies when Card Size is set to Custom (80–280px)"
-  },
-  {
     "key": "k_qqdqkp3",
     "zh-CN": "域名",
     "en": "Domains"
@@ -1640,9 +1970,19 @@
     "en": "Copy"
   },
   {
+    "key": "k_bulci4a",
+    "zh-CN": "复制URL",
+    "en": ""
+  },
+  {
     "key": "k_dpwlml7",
     "zh-CN": "复制失败",
     "en": "Copy failed"
+  },
+  {
+    "key": "k_xdbtrlm",
+    "zh-CN": "复制链接",
+    "en": ""
   },
   {
     "key": "k_vflvg8l",
@@ -1695,6 +2035,16 @@
     "en": "Health check"
   },
   {
+    "key": "k_9u517nm",
+    "zh-CN": "如：GitHub",
+    "en": ""
+  },
+  {
+    "key": "k_lng0o2l",
+    "zh-CN": "如：GitHub 书签",
+    "en": ""
+  },
+  {
     "key": "k_8qlgqca",
     "zh-CN": "始终减弱",
     "en": "Always reduce"
@@ -1740,9 +2090,19 @@
     "en": "Contain (fit)"
   },
   {
+    "key": "k_l8oabaw",
+    "zh-CN": "定时清理（闲置检查）",
+    "en": ""
+  },
+  {
     "key": "k_ajrrjg8",
     "zh-CN": "实时",
     "en": "Live"
+  },
+  {
+    "key": "k_5mqbb4d",
+    "zh-CN": "实际支出",
+    "en": ""
   },
   {
     "key": "k_4wiukxy",
@@ -1765,6 +2125,11 @@
     "en": "Encode or decode URL components"
   },
   {
+    "key": "k_nbaowyo",
+    "zh-CN": "对全部书签应用规则",
+    "en": ""
+  },
+  {
     "key": "k_j52j4tw",
     "zh-CN": "对文本进行 Base64 编码或解码，支持 Unicode",
     "en": "Encode or decode Base64, with Unicode support"
@@ -1785,9 +2150,34 @@
     "en": "Import file is too large. Keep it within {size}"
   },
   {
+    "key": "k_2cc9soz",
+    "zh-CN": "导出",
+    "en": ""
+  },
+  {
+    "key": "k_btij2pq",
+    "zh-CN": "导出 JSON",
+    "en": ""
+  },
+  {
+    "key": "k_hok1psj",
+    "zh-CN": "导出失败",
+    "en": ""
+  },
+  {
     "key": "k_kqa2v98",
     "zh-CN": "导出归档数据",
     "en": "Export archive"
+  },
+  {
+    "key": "k_24yxdl1",
+    "zh-CN": "导出成功",
+    "en": ""
+  },
+  {
+    "key": "k_s4aat0h",
+    "zh-CN": "导出数据",
+    "en": ""
   },
   {
     "key": "k_u8un2dr",
@@ -1823,6 +2213,11 @@
     "key": "k_9q5r82r",
     "zh-CN": "将合并 {count} 个会话为一个新会话，并按 URL 去重。原会话将被删除。",
     "en": "Merge {count} sessions into one, deduping by URL. The originals will be deleted."
+  },
+  {
+    "key": "k_7yjn63d",
+    "zh-CN": "将当前 {count} 个标签页保存为模板，方便日后一键恢复",
+    "en": ""
   },
   {
     "key": "k_8ixqii1",
@@ -1915,6 +2310,11 @@
     "en": "Workspace overview"
   },
   {
+    "key": "k_rdjthht",
+    "zh-CN": "工作区模板",
+    "en": ""
+  },
+  {
     "key": "k_vidawal",
     "zh-CN": "工作台",
     "en": "Workspace"
@@ -1943,6 +2343,11 @@
     "key": "k_d5x73nf",
     "zh-CN": "左侧文本",
     "en": "Left text"
+  },
+  {
+    "key": "k_g4h7j2k",
+    "zh-CN": "左右分栏",
+    "en": "Left / right columns"
   },
   {
     "key": "k_kij7sdq",
@@ -1975,6 +2380,11 @@
     "en": "Tab discarded, memory freed"
   },
   {
+    "key": "k_o2mfa97",
+    "zh-CN": "已关闭 {count} 个标签",
+    "en": ""
+  },
+  {
     "key": "k_3apxsi0",
     "zh-CN": "已关闭 {count} 个标签页",
     "en": "Closed {count} tabs"
@@ -2003,6 +2413,11 @@
     "key": "k_z2cc24m",
     "zh-CN": "已删除 {count} 个失效书签",
     "en": "Removed {count} broken bookmark(s)"
+  },
+  {
+    "key": "k_omu38af",
+    "zh-CN": "已加入书签",
+    "en": ""
   },
   {
     "key": "k_2gv044s",
@@ -2050,6 +2465,11 @@
     "en": "Merged all {count} duplicate tabs"
   },
   {
+    "key": "k_obxd8cw",
+    "zh-CN": "已在后台打开",
+    "en": ""
+  },
+  {
     "key": "k_mxg9jfc",
     "zh-CN": "已在常用站点中",
     "en": "Already in Quick Access"
@@ -2068,6 +2488,11 @@
     "key": "k_yg4xlgf",
     "zh-CN": "已导入 {count} 个归档，并恢复工作台配置",
     "en": "Imported {count} archives and restored workspace config"
+  },
+  {
+    "key": "k_vep015p",
+    "zh-CN": "已导入 {count} 个标签",
+    "en": ""
   },
   {
     "key": "k_rrf0btv",
@@ -2108,6 +2533,11 @@
     "key": "k_zwib19w",
     "zh-CN": "已应用预设「{name}」",
     "en": "Applied preset \"{name}\""
+  },
+  {
+    "key": "k_kq1nftq",
+    "zh-CN": "已归档 {count} 个标签",
+    "en": ""
   },
   {
     "key": "k_rn3vgv1",
@@ -2153,6 +2583,11 @@
     "key": "k_0af0phs",
     "zh-CN": "已恢复默认设置",
     "en": "Reset to defaults"
+  },
+  {
+    "key": "k_ljv61h8",
+    "zh-CN": "已授权",
+    "en": ""
   },
   {
     "key": "k_sltykh2",
@@ -2210,6 +2645,16 @@
     "en": "All local stats cleared"
   },
   {
+    "key": "k_4xj5195",
+    "zh-CN": "已用内存占总内存的比例达到此值时触发治理动作，默认 80%。",
+    "en": ""
+  },
+  {
+    "key": "k_bx2fiz2",
+    "zh-CN": "已禁用",
+    "en": ""
+  },
+  {
     "key": "k_e7et2h3",
     "zh-CN": "已禁用；Dashboard / TidySuggestionBar 不会提示重复标签。",
     "en": "Disabled. Dashboard / TidySuggestionBar will not surface duplicates."
@@ -2218,6 +2663,16 @@
     "key": "k_rraba4u",
     "zh-CN": "已离线（点击重新打开）",
     "en": "Offline (click to reopen)"
+  },
+  {
+    "key": "k_9yxgvya",
+    "zh-CN": "已移动 {count} 个书签",
+    "en": ""
+  },
+  {
+    "key": "k_3rkawhl",
+    "zh-CN": "已移动 {count} 个标签",
+    "en": ""
   },
   {
     "key": "k_tnm5lj7",
@@ -2243,6 +2698,11 @@
     "key": "k_aiufr1d",
     "zh-CN": "已选 {count} 个标签（{domains} 个域名 / {windows} 个窗口）",
     "en": "{count} tab(s) selected ({domains} domains / {windows} windows)"
+  },
+  {
+    "key": "k_kptgc5i",
+    "zh-CN": "已选 {count} 项",
+    "en": ""
   },
   {
     "key": "k_hl3ni7t",
@@ -2280,6 +2740,11 @@
     "en": "Apply this profile"
   },
   {
+    "key": "k_4r7wmw5",
+    "zh-CN": "应用规则失败",
+    "en": ""
+  },
+  {
     "key": "k_yiqj49k",
     "zh-CN": "底部",
     "en": "Bottom"
@@ -2295,6 +2760,11 @@
     "en": "When enabled, the search box highlights the web action first if no open tab matches"
   },
   {
+    "key": "k_y3i7s0s",
+    "zh-CN": "开启后定期检测内存压力，在达到阈值时自动执行治理动作。需要 system.memory 权限。",
+    "en": ""
+  },
+  {
     "key": "k_rfrkq5c",
     "zh-CN": "开启后支持用拼音首字母或全拼搜索中文标题；对非中文用户可关闭以节省性能",
     "en": "When on, search Chinese titles by pinyin initials or full spelling; non-Chinese users can turn this off to save performance"
@@ -2303,6 +2773,11 @@
     "key": "k_hemrij3",
     "zh-CN": "开启后每次新建标签页都显示 {brand} 工作台；关闭后使用浏览器默认页。",
     "en": "When on, every new tab opens the {brand} workspace; when off, the browser default is used."
+  },
+  {
+    "key": "k_q6o95do",
+    "zh-CN": "开启后记录每个标签页的聚焦时长，在 TabItem 的悬停提示中展示今日使用时长。",
+    "en": ""
   },
   {
     "key": "k_9mbie49",
@@ -2363,6 +2838,11 @@
     "key": "k_nugbrnn",
     "zh-CN": "归档保存失败",
     "en": "Failed to save as archive"
+  },
+  {
+    "key": "k_mm14ceg",
+    "zh-CN": "归档失败",
+    "en": ""
   },
   {
     "key": "k_o0mcnwg",
@@ -2450,6 +2930,16 @@
     "en": "Shortcut cheatsheet"
   },
   {
+    "key": "k_oxsznf7",
+    "zh-CN": "快照已保存",
+    "en": ""
+  },
+  {
+    "key": "k_z8o1mnw",
+    "zh-CN": "快照已删除",
+    "en": ""
+  },
+  {
     "key": "k_3bt6way",
     "zh-CN": "忽略",
     "en": "Dismiss"
@@ -2505,6 +2995,11 @@
     "en": "Factory reset"
   },
   {
+    "key": "k_ep4u4tv",
+    "zh-CN": "恢复到新窗口",
+    "en": ""
+  },
+  {
     "key": "k_17gm3l5",
     "zh-CN": "恢复失败，请重试",
     "en": "Restore failed, please retry"
@@ -2518,6 +3013,11 @@
     "key": "k_5sr9vxm",
     "zh-CN": "恢复归档",
     "en": "Restore archive"
+  },
+  {
+    "key": "k_unfz5e0",
+    "zh-CN": "恢复快照失败",
+    "en": ""
   },
   {
     "key": "k_98zlrnu",
@@ -2595,6 +3095,11 @@
     "en": "All data is computed locally and never uploaded"
   },
   {
+    "key": "k_e1pwo19",
+    "zh-CN": "手动",
+    "en": ""
+  },
+  {
     "key": "k_ag4d840",
     "zh-CN": "打开",
     "en": "open"
@@ -2623,6 +3128,11 @@
     "key": "k_rwzd4d1",
     "zh-CN": "打开了",
     "en": "Opened"
+  },
+  {
+    "key": "k_x9p1iom",
+    "zh-CN": "打开匹配 {pattern} 的页面时",
+    "en": ""
   },
   {
     "key": "k_cuxkufn",
@@ -2655,6 +3165,11 @@
     "en": "Execute"
   },
   {
+    "key": "k_l5x00j6",
+    "zh-CN": "执行动作",
+    "en": ""
+  },
+  {
     "key": "k_1edp5wb",
     "zh-CN": "扩展名与 Content-Type / MIME 类型互查",
     "en": "Look up file extensions and Content-Type / MIME values"
@@ -2673,6 +3188,11 @@
     "key": "k_ia1ewor",
     "zh-CN": "批量关闭",
     "en": "Close (batch)"
+  },
+  {
+    "key": "k_dh7lzt3",
+    "zh-CN": "批量关闭失败",
+    "en": ""
   },
   {
     "key": "k_gf0ondf",
@@ -2715,6 +3235,11 @@
     "en": "Batch"
   },
   {
+    "key": "k_fgcainm",
+    "zh-CN": "批量选择",
+    "en": ""
+  },
+  {
     "key": "k_rjzqcnw",
     "zh-CN": "找到 {count} / 共 {total} 个会话",
     "en": "Found {count} / {total} sessions"
@@ -2728,6 +3253,16 @@
     "key": "k_6d38llt",
     "zh-CN": "找到 {count} 个匹配书签",
     "en": "{count} bookmarks found"
+  },
+  {
+    "key": "k_6hlwfvj",
+    "zh-CN": "技术主管",
+    "en": ""
+  },
+  {
+    "key": "k_meipyax",
+    "zh-CN": "技术基建",
+    "en": ""
   },
   {
     "key": "k_9jowrpy",
@@ -2750,6 +3285,11 @@
     "en": "Move selected tabs into separate windows arranged side by side"
   },
   {
+    "key": "k_c6n1t9z",
+    "zh-CN": "把选中的标签页拆成独立窗口并选择布局",
+    "en": "Move selected tabs into separate windows and choose a layout"
+  },
+  {
     "key": "k_h078nsk",
     "zh-CN": "折叠",
     "en": "Collapse"
@@ -2760,9 +3300,19 @@
     "en": "Break down URL into protocol, host, path, query and hash"
   },
   {
+    "key": "k_uvbefyy",
+    "zh-CN": "拖入标签创建分组",
+    "en": ""
+  },
+  {
     "key": "k_if79aqt",
     "zh-CN": "拖到此处",
     "en": "Drop here"
+  },
+  {
+    "key": "k_c381ecy",
+    "zh-CN": "拖动列",
+    "en": ""
   },
   {
     "key": "k_y8blex5",
@@ -2870,6 +3420,11 @@
     "en": "Try a different time range or clear your search"
   },
   {
+    "key": "k_rhubeb5",
+    "zh-CN": "授权",
+    "en": ""
+  },
+  {
     "key": "k_0m1wifx",
     "zh-CN": "授权后可在搜索框中显示浏览历史与最近访问页面",
     "en": "Grant permission to show browsing history and recently visited pages in search"
@@ -2878,6 +3433,11 @@
     "key": "k_whnh73b",
     "zh-CN": "授权访问书签",
     "en": "Grant bookmark access"
+  },
+  {
+    "key": "k_l8w2n6m",
+    "zh-CN": "排列所有窗口",
+    "en": "Arrange all windows"
   },
   {
     "key": "k_ucyfsgh",
@@ -2918,6 +3478,11 @@
     "key": "k_uawz2sh",
     "zh-CN": "推荐名称",
     "en": "Suggestions"
+  },
+  {
+    "key": "k_ng1x21f",
+    "zh-CN": "提示归档标签页",
+    "en": ""
   },
   {
     "key": "k_d1tctl7",
@@ -2978,6 +3543,11 @@
     "key": "k_abdqej3",
     "zh-CN": "搜索框",
     "en": "Search bar"
+  },
+  {
+    "key": "k_cf0ear3",
+    "zh-CN": "搜索窗口...",
+    "en": ""
   },
   {
     "key": "k_hgbcvfr",
@@ -3043,6 +3613,11 @@
     "key": "k_gt23bb2",
     "zh-CN": "支持整组恢复或选择性恢复，不丢失任何进度",
     "en": "Support full or partial restore, never lose any progress"
+  },
+  {
+    "key": "k_vczmf3w",
+    "zh-CN": "收件箱",
+    "en": ""
   },
   {
     "key": "k_tv635xv",
@@ -3150,6 +3725,16 @@
     "en": "Create workspace"
   },
   {
+    "key": "k_jx0yamw",
+    "zh-CN": "新建工作区模板",
+    "en": ""
+  },
+  {
+    "key": "k_ewm8j0d",
+    "zh-CN": "新建规则",
+    "en": ""
+  },
+  {
     "key": "k_xxo0mzo",
     "zh-CN": "新开始访问",
     "en": "Newly visited"
@@ -3168,6 +3753,11 @@
     "key": "k_442wwi2",
     "zh-CN": "新闻",
     "en": "News"
+  },
+  {
+    "key": "k_16qoxkk",
+    "zh-CN": "无法读取剪贴板，请手动粘贴",
+    "en": ""
   },
   {
     "key": "k_km57y3m",
@@ -3265,6 +3855,11 @@
     "en": "Smart workspace"
   },
   {
+    "key": "k_pnayk7k",
+    "zh-CN": "智能建议",
+    "en": ""
+  },
+  {
     "key": "k_98hpoxz",
     "zh-CN": "智能整理",
     "en": "Smart organize"
@@ -3280,6 +3875,11 @@
     "en": "No recent tabs"
   },
   {
+    "key": "k_1psub09",
+    "zh-CN": "暂无工作区模板",
+    "en": ""
+  },
+  {
     "key": "k_p6b7zp5",
     "zh-CN": "暂无归档会话",
     "en": "No archived sessions"
@@ -3290,9 +3890,24 @@
     "en": "No archives yet"
   },
   {
+    "key": "k_0xltoke",
+    "zh-CN": "暂无快照",
+    "en": ""
+  },
+  {
     "key": "k_ofp48r4",
     "zh-CN": "暂无数据",
     "en": "No data yet"
+  },
+  {
+    "key": "k_b5y061q",
+    "zh-CN": "暂无自动化规则，点击「新建规则」创建",
+    "en": ""
+  },
+  {
+    "key": "k_1flxvwc",
+    "zh-CN": "暂无规则，添加后书签将自动分类",
+    "en": ""
   },
   {
     "key": "k_7dc3cvb",
@@ -3340,6 +3955,11 @@
     "en": "Earlier"
   },
   {
+    "key": "k_4puh6p1",
+    "zh-CN": "服务器维护通知 - 本周六凌晨",
+    "en": ""
+  },
+  {
     "key": "k_tqddghp",
     "zh-CN": "未分组",
     "en": "Ungrouped"
@@ -3365,6 +3985,11 @@
     "en": "Unnamed Folder"
   },
   {
+    "key": "k_3r70ecn",
+    "zh-CN": "未授权",
+    "en": ""
+  },
+  {
     "key": "k_gf3lndx",
     "zh-CN": "未注册撤销处理",
     "en": "Undo handler not registered"
@@ -3378,6 +4003,11 @@
     "key": "k_a6of292",
     "zh-CN": "本周",
     "en": "This week"
+  },
+  {
+    "key": "k_79c3f93",
+    "zh-CN": "本周五下午团建活动通知",
+    "en": ""
   },
   {
     "key": "k_q4jyc6b",
@@ -3423,6 +4053,16 @@
     "key": "k_zcd4knf",
     "zh-CN": "本月新增",
     "en": "This month"
+  },
+  {
+    "key": "k_55ln5ep",
+    "zh-CN": "权限状态",
+    "en": ""
+  },
+  {
+    "key": "k_cab56m3",
+    "zh-CN": "权限诊断",
+    "en": ""
   },
   {
     "key": "k_gw0slgd",
@@ -3520,6 +4160,11 @@
     "en": "Tabs"
   },
   {
+    "key": "k_u7zd3yq",
+    "zh-CN": "标签数",
+    "en": ""
+  },
+  {
     "key": "k_bxcitdu",
     "zh-CN": "标签数量",
     "en": "Tab count"
@@ -3538,6 +4183,16 @@
     "key": "k_f0fnift",
     "zh-CN": "标签页",
     "en": "Tabs"
+  },
+  {
+    "key": "k_xnmkbe8",
+    "zh-CN": "标签页使用时长追踪",
+    "en": ""
+  },
+  {
+    "key": "k_isca7w3",
+    "zh-CN": "标签页布局",
+    "en": ""
   },
   {
     "key": "k_kl0znxr",
@@ -3675,6 +4330,11 @@
     "en": "Each domain card shows a solid accent bar as its identity mark — pick where you want it."
   },
   {
+    "key": "k_859ouny",
+    "zh-CN": "每日活动趋势（近 14 天）",
+    "en": ""
+  },
+  {
     "key": "k_45sftby",
     "zh-CN": "每次打开新标签页，一键直达你的工作入口",
     "en": "One click to your favorite sites every time you open a new tab"
@@ -3683,6 +4343,11 @@
     "key": "k_2yvexlh",
     "zh-CN": "每次打开新标签页，所有已打开的网页都会在这里展示。按域名分组、搜索、归档—3 秒内找到任何标签。",
     "en": "Every new tab shows all your open pages. Grouped by domain, searchable, archivable — find any tab in 3 seconds."
+  },
+  {
+    "key": "k_rhyklil",
+    "zh-CN": "每次触发治理时最多操作的标签页数量，默认 5，避免一次性操作过多。",
+    "en": ""
   },
   {
     "key": "k_wg9b6dx",
@@ -3725,9 +4390,24 @@
     "en": "No duplicate groups to preview."
   },
   {
+    "key": "k_t7pg0m2",
+    "zh-CN": "治理动作",
+    "en": ""
+  },
+  {
     "key": "k_onkk272",
     "zh-CN": "活跃",
     "en": "Active"
+  },
+  {
+    "key": "k_1otzgcx",
+    "zh-CN": "活跃度",
+    "en": ""
+  },
+  {
+    "key": "k_05v77dg",
+    "zh-CN": "活跃时段分布（24 小时）",
+    "en": ""
   },
   {
     "key": "k_ntwinj3",
@@ -3818,6 +4498,16 @@
     "key": "k_ky3re7l",
     "zh-CN": "添加色标",
     "en": "Add color stop"
+  },
+  {
+    "key": "k_ii6vmed",
+    "zh-CN": "添加规则",
+    "en": ""
+  },
+  {
+    "key": "k_va8sq7m",
+    "zh-CN": "添加规则失败",
+    "en": ""
   },
   {
     "key": "k_d16sglt",
@@ -3970,6 +4660,11 @@
     "en": "Generator"
   },
   {
+    "key": "k_hj9d020",
+    "zh-CN": "用户增长",
+    "en": ""
+  },
+  {
     "key": "k_e25wskv",
     "zh-CN": "田字 2 × 2",
     "en": "2 × 2 grid"
@@ -3980,6 +4675,11 @@
     "en": "Canvas zoom"
   },
   {
+    "key": "k_pzgrkko",
+    "zh-CN": "白名单内的域名不会被自动休眠或归档。固定标签和正在播放媒体的标签始终豁免。",
+    "en": ""
+  },
+  {
     "key": "k_bxk41ts",
     "zh-CN": "皮肤与极客定制",
     "en": "Skins & geek tokens"
@@ -3988,6 +4688,11 @@
     "key": "k_mjoc7ab",
     "zh-CN": "皮肤风格",
     "en": "Skin Style"
+  },
+  {
+    "key": "k_clrr911",
+    "zh-CN": "目标文件夹",
+    "en": ""
   },
   {
     "key": "k_ctn2jir",
@@ -4018,6 +4723,16 @@
     "key": "k_09z4k4f",
     "zh-CN": "石板灰",
     "en": "Slate"
+  },
+  {
+    "key": "k_9piohvo",
+    "zh-CN": "确定删除此模板？",
+    "en": ""
+  },
+  {
+    "key": "k_q7jk83u",
+    "zh-CN": "确定删除此规则？",
+    "en": ""
   },
   {
     "key": "k_0c5xics",
@@ -4075,6 +4790,11 @@
     "en": "Example"
   },
   {
+    "key": "k_tu92o2w",
+    "zh-CN": "示例：",
+    "en": ""
+  },
+  {
     "key": "k_fbwcni0",
     "zh-CN": "社区",
     "en": "Community"
@@ -4105,9 +4825,19 @@
     "en": "Video URL"
   },
   {
+    "key": "k_w66zp25",
+    "zh-CN": "视频不能超过 50MB",
+    "en": ""
+  },
+  {
     "key": "k_5cct7v5",
     "zh-CN": "视频背景",
     "en": "Video background"
+  },
+  {
+    "key": "k_bctptjl",
+    "zh-CN": "禁用",
+    "en": ""
   },
   {
     "key": "k_x93zvsc",
@@ -4130,6 +4860,16 @@
     "en": "Move to new window"
   },
   {
+    "key": "k_by7d2m0",
+    "zh-CN": "移动到窗口",
+    "en": ""
+  },
+  {
+    "key": "k_eabdal8",
+    "zh-CN": "移动失败",
+    "en": ""
+  },
+  {
     "key": "k_gqghvos",
     "zh-CN": "移动失败，请重试",
     "en": "Move failed, please retry"
@@ -4148,6 +4888,11 @@
     "key": "k_soywoxy",
     "zh-CN": "移除卡片失败",
     "en": "Failed to remove card"
+  },
+  {
+    "key": "k_o71g91d",
+    "zh-CN": "稍后阅读",
+    "en": ""
   },
   {
     "key": "k_kjjcktv",
@@ -4170,6 +4915,11 @@
     "en": "Window {id}"
   },
   {
+    "key": "k_nriooco",
+    "zh-CN": "窗口健康度",
+    "en": ""
+  },
+  {
     "key": "k_ce2bt2c",
     "zh-CN": "窗口卡片列数",
     "en": "Window card columns"
@@ -4190,6 +4940,11 @@
     "en": "Window closed"
   },
   {
+    "key": "k_u1b1017",
+    "zh-CN": "窗口快照",
+    "en": ""
+  },
+  {
     "key": "k_cn1xedu",
     "zh-CN": "窗口操作失败，请重试",
     "en": "Window action failed, please retry"
@@ -4203,6 +4958,11 @@
     "key": "k_5c7jcot",
     "zh-CN": "窗口贴边",
     "en": "Snap window"
+  },
+  {
+    "key": "k_wglqdee",
+    "zh-CN": "窗口颜色",
+    "en": ""
   },
   {
     "key": "k_51t1oxj",
@@ -4220,6 +4980,11 @@
     "en": "Use md card size when site count ≤ this value (default 14); otherwise sm"
   },
   {
+    "key": "k_1t6gvi2",
+    "zh-CN": "站点访问排行",
+    "en": ""
+  },
+  {
     "key": "k_mcaw57o",
     "zh-CN": "第 {current} / {total} 步",
     "en": "Step {current} / {total}"
@@ -4233,6 +4998,16 @@
     "key": "k_756gpwj",
     "zh-CN": "粉色",
     "en": "Pink"
+  },
+  {
+    "key": "k_453aazf",
+    "zh-CN": "粘贴 URL 列表，每行一个...",
+    "en": ""
+  },
+  {
+    "key": "k_uzd76zw",
+    "zh-CN": "粘贴剪贴板",
+    "en": ""
   },
   {
     "key": "k_ae4l8nt",
@@ -4330,6 +5105,11 @@
     "en": "Edit Quick Access site"
   },
   {
+    "key": "k_qrepnsh",
+    "zh-CN": "编辑规则",
+    "en": ""
+  },
+  {
     "key": "k_3rz35ea",
     "zh-CN": "缩小",
     "en": "Zoom out"
@@ -4420,6 +5200,31 @@
     "en": "Auto: adapt to window width; or lock to a fixed count"
   },
   {
+    "key": "k_no3ls3a",
+    "zh-CN": "自动休眠标签页",
+    "en": ""
+  },
+  {
+    "key": "k_q4keliq",
+    "zh-CN": "自动分类",
+    "en": ""
+  },
+  {
+    "key": "k_27lb0y5",
+    "zh-CN": "自动分类规则",
+    "en": ""
+  },
+  {
+    "key": "k_cedihtg",
+    "zh-CN": "自动分组",
+    "en": ""
+  },
+  {
+    "key": "k_uiwzqep",
+    "zh-CN": "自动化规则",
+    "en": ""
+  },
+  {
     "key": "k_1dbllyr",
     "zh-CN": "自动快照",
     "en": "Auto snapshot"
@@ -4460,6 +5265,11 @@
     "en": "Auto"
   },
   {
+    "key": "k_x9a4p2q",
+    "zh-CN": "自适应网格",
+    "en": "Adaptive grid"
+  },
+  {
     "key": "k_n5qkogl",
     "zh-CN": "蓝色",
     "en": "Blue"
@@ -4483,6 +5293,16 @@
     "key": "k_h6ucus5",
     "zh-CN": "覆盖皮肤预设的主色；用于按钮、链接、选中态",
     "en": "Overrides the skin preset primary color; applies to buttons, links, and selection"
+  },
+  {
+    "key": "k_rvp60eq",
+    "zh-CN": "规则名称",
+    "en": ""
+  },
+  {
+    "key": "k_kchnv1n",
+    "zh-CN": "规则已添加",
+    "en": ""
   },
   {
     "key": "k_z9tqkks",
@@ -4515,6 +5335,11 @@
     "en": "Explain standard 5-field Cron expressions"
   },
   {
+    "key": "k_i3y95fr",
+    "zh-CN": "触发条件类型",
+    "en": ""
+  },
+  {
     "key": "k_ychjrmn",
     "zh-CN": "计算 SHA-1 / SHA-256 / SHA-512 哈希值",
     "en": "Compute SHA-1 / SHA-256 / SHA-512 hashes"
@@ -4533,6 +5358,26 @@
     "key": "k_oljvj22",
     "zh-CN": "设置",
     "en": "Settings"
+  },
+  {
+    "key": "k_sgfmoum",
+    "zh-CN": "设计团队",
+    "en": ""
+  },
+  {
+    "key": "k_wfksuuc",
+    "zh-CN": "设计稿已更新，请查阅 Figma",
+    "en": ""
+  },
+  {
+    "key": "k_dtuk1hs",
+    "zh-CN": "访问匹配 {pattern} 的页面时",
+    "en": ""
+  },
+  {
+    "key": "k_uehoqh7",
+    "zh-CN": "识别到 {count} 个有效 URL",
+    "en": ""
   },
   {
     "key": "k_9c47m4a",
@@ -4568,6 +5413,26 @@
     "key": "k_2is8y9y",
     "zh-CN": "请输入 RESET 以确认",
     "en": "Please type RESET to confirm"
+  },
+  {
+    "key": "k_vxl6tgk",
+    "zh-CN": "请输入 URL 匹配规则",
+    "en": ""
+  },
+  {
+    "key": "k_ep07rt7",
+    "zh-CN": "请输入目标文件夹名",
+    "en": ""
+  },
+  {
+    "key": "k_fo6my2u",
+    "zh-CN": "请输入规则名称",
+    "en": ""
+  },
+  {
+    "key": "k_1jet3pk",
+    "zh-CN": "请选择 MP4 或 WebM 视频",
+    "en": ""
   },
   {
     "key": "k_dmde3rx",
@@ -4628,6 +5493,11 @@
     "key": "k_lvbl1ll",
     "zh-CN": "跳过",
     "en": "Skipped"
+  },
+  {
+    "key": "k_jc0hpdv",
+    "zh-CN": "跳过 {count} 个非法 URL",
+    "en": ""
   },
   {
     "key": "k_tlxn0vj",
@@ -4715,6 +5585,11 @@
     "en": "Border width"
   },
   {
+    "key": "k_0dd4iwx",
+    "zh-CN": "达到阈值时执行的操作：仅通知 / 自动休眠最久未访问的标签 / 提示归档。",
+    "en": ""
+  },
+  {
     "key": "k_srmk5uq",
     "zh-CN": "过滤 tag（逗号分隔）",
     "en": "Filter tags (comma separated)"
@@ -4723,6 +5598,11 @@
     "key": "k_7axm8ih",
     "zh-CN": "过滤域名（逗号分隔）",
     "en": "Filter domains (comma separated)"
+  },
+  {
+    "key": "k_dnwd7k7",
+    "zh-CN": "运维",
+    "en": ""
   },
   {
     "key": "k_tpu9oib",
@@ -4738,6 +5618,11 @@
     "key": "k_jsbo3rk",
     "zh-CN": "还原最大化",
     "en": "Restore to fullscreen"
+  },
+  {
+    "key": "k_r5p0c8v",
+    "zh-CN": "还原普通窗口",
+    "en": "Restore normal window"
   },
   {
     "key": "k_05t2upn",
@@ -4778,6 +5663,11 @@
     "key": "k_t91jhfs",
     "zh-CN": "退出多选模式",
     "en": "Exit multi-select"
+  },
+  {
+    "key": "k_jpv5gwd",
+    "zh-CN": "退出批量模式",
+    "en": ""
   },
   {
     "key": "k_jwzcfrh",
@@ -4828,6 +5718,11 @@
     "key": "k_iae3o7u",
     "zh-CN": "选择热词从哪里来；本地来源完全离线，不产生任何网络请求",
     "en": "Pick where trending keywords come from; local aggregation is fully offline"
+  },
+  {
+    "key": "k_3ym6gg7",
+    "zh-CN": "选择目标窗口",
+    "en": ""
   },
   {
     "key": "k_ou7xuk4",
@@ -4895,6 +5790,16 @@
     "en": "Rename session"
   },
   {
+    "key": "k_lj6x8jk",
+    "zh-CN": "重命名失败，请重试",
+    "en": ""
+  },
+  {
+    "key": "k_4xvoah7",
+    "zh-CN": "重命名快照",
+    "en": ""
+  },
+  {
     "key": "k_6m6hcta",
     "zh-CN": "重命名成功",
     "en": "Renamed"
@@ -4935,6 +5840,11 @@
     "en": "Replay the welcome tour next time you open a new tab?"
   },
   {
+    "key": "k_rreptgq",
+    "zh-CN": "重新检测",
+    "en": ""
+  },
+  {
     "key": "k_gly1uh1",
     "zh-CN": "重置缩放",
     "en": "Reset zoom"
@@ -4948,6 +5858,11 @@
     "key": "k_xumwl1e",
     "zh-CN": "铺满裁切",
     "en": "Cover (crop)"
+  },
+  {
+    "key": "k_2b4eayv",
+    "zh-CN": "链接已复制",
+    "en": ""
   },
   {
     "key": "k_e7u86q4",
@@ -4975,9 +5890,19 @@
     "en": "Idle"
   },
   {
+    "key": "k_wu0rhqg",
+    "zh-CN": "闲置天数阈值",
+    "en": ""
+  },
+  {
     "key": "k_7015usk",
     "zh-CN": "闲置标签",
     "en": "Idle"
+  },
+  {
+    "key": "k_a0xfx5w",
+    "zh-CN": "闲置超过 {days} 天的标签页",
+    "en": ""
   },
   {
     "key": "k_6usqz7r",
@@ -5065,6 +5990,21 @@
     "en": "Top"
   },
   {
+    "key": "k_ipbbdjr",
+    "zh-CN": "项目名称",
+    "en": ""
+  },
+  {
+    "key": "k_q0ohmc2",
+    "zh-CN": "项目周报 - 第 17 周",
+    "en": ""
+  },
+  {
+    "key": "k_oxkekbi",
+    "zh-CN": "预算金额（万元）",
+    "en": ""
+  },
+  {
     "key": "k_fiwb7mz",
     "zh-CN": "预览",
     "en": "Preview"
@@ -5128,45 +6068,5 @@
     "key": "k_ghzglvo",
     "zh-CN": "默认空间",
     "en": "Default space"
-  },
-  {
-    "key": "k_x9a4p2q",
-    "zh-CN": "自适应网格",
-    "en": "Adaptive grid"
-  },
-  {
-    "key": "k_l8w2n6m",
-    "zh-CN": "排列所有窗口",
-    "en": "Arrange all windows"
-  },
-  {
-    "key": "k_r5p0c8v",
-    "zh-CN": "还原普通窗口",
-    "en": "Restore normal window"
-  },
-  {
-    "key": "k_s7v9q3a",
-    "zh-CN": "Split View {count}",
-    "en": "Split View {count}"
-  },
-  {
-    "key": "k_m2d8x4y",
-    "zh-CN": "最多支持分屏 {count} 个标签页",
-    "en": "Split layout supports up to {count} tabs"
-  },
-  {
-    "key": "k_c6n1t9z",
-    "zh-CN": "把选中的标签页拆成独立窗口并选择布局",
-    "en": "Move selected tabs into separate windows and choose a layout"
-  },
-  {
-    "key": "k_g4h7j2k",
-    "zh-CN": "左右分栏",
-    "en": "Left / right columns"
-  },
-  {
-    "key": "k_b8q3r6s",
-    "zh-CN": "上下堆叠",
-    "en": "Top / bottom stack"
   }
 ]

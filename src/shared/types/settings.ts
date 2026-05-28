@@ -3,6 +3,10 @@
  * 用户设置相关类型
  */
 
+/** 标签页关闭确认阈值常量（多窗口合并/批量关闭前二次确认的阈值） */
+export const CLOSE_CONFIRM_THRESHOLD = 20 as const;
+export type CloseConfirmThreshold = typeof CLOSE_CONFIRM_THRESHOLD;
+
 /** User settings */
 export type SearchScopeField = "title" | "hostname" | "url";
 export type SearchSortMode = "relevance" | "recentAccess";
@@ -147,6 +151,10 @@ export interface UserSettings {
   windowCardAccentBarPosition?: "left" | "top" | "none";
   /** 用户自定义的窗口卡片 UI 排序，仅影响 NewTab 内展示，不改变 Chrome 窗口顺序。 */
   windowCardOrder?: number[];
+  /** 窗口视图中是否显示标签闲置时长指示器 */
+  windowShowIdleTime?: boolean;
+  /** 窗口视图中是否显示窗口健康度指示器 */
+  windowShowHealthIndicator?: boolean;
   /**
    * 时间轴分组粒度：
    *   - 'day' ：今天/昨天/本周/更早（默认，简洁）
@@ -429,7 +437,7 @@ export interface UserSettings {
   undoWindowSeconds?: number;
 
   /**
-   * 标签页关闭阈值（多窗口合并/批量关闭前二次确认的阈值），默认 20。
+   * 标签页关闭阈值（多窗口合并/批量关闭前二次确认的阈值），默认 {@link CLOSE_CONFIRM_THRESHOLD}。
    */
   closeConfirmThreshold?: number;
 

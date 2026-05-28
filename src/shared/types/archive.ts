@@ -55,7 +55,7 @@ export interface ArchivedSession {
   /**
    * 会话来源类型，默认 'manual'。'auto' 表示由自动快照创建。
    */
-  source?: "manual" | "auto" | "import" | "kanban";
+  source?: "manual" | "auto" | "import" | "kanban" | "snapshot";
   /**
    * 归档时的 TabGroup 快照列表（任务4：高保真结构化归档）。
    * 恢复时按此列表重建 chrome.tabGroups。

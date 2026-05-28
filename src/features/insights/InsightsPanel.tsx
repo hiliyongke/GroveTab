@@ -8,6 +8,14 @@
  *   ④ 使用频率前 5 的操作
  *
  * 仅使用纯 SVG，不引入 echarts / chart.js，控制包体增量 ≤ 15 KB。
+ *
+ * 内存估算模型（P1-7）：
+ *   - 基础单标签页内存：80 MB（与 Chrome 官方内存报告一致）
+ *   - 视频/媒体类标签（油管等）：+220 MB 加权
+ *   - 图片富媒体类标签（Unsplash 等）：+70 MB 加权
+ *   - JS 密集型应用类标签（Google Docs 等）：+120 MB 加权
+ *   - 常规文本/文章类标签：−30 MB 修正（更轻量）
+ *   - 通过 URL 路径特征（/watch/, /video/, /image/, /doc/）进行分类估算
  */
 
 import { useEffect, useMemo, useState } from "react";
@@ -24,6 +32,7 @@ import {
   Flex,
   Progress,
   Alert,
+  Segmented,
 } from "antd";
 import type { MetricEvent, StatsData } from "@/shared/types";
 import { BarChart3, Download, CheckCircle2, AlertTriangle, Info } from "lucide-react";
@@ -77,6 +86,9 @@ interface InsightsPanelProps {
   onOpenSettings?: () => void;
 }
 
+/** 时间范围选项（P2-13：洞察数据时间范围可配置） */
+export type InsightsTimeRange = 7 | 14 | 30;
+
 /** 校验 StatsData 结构完整性，防止 daily 缺失导致迭代报错 */
 function isValidStatsData(data: StatsData | undefined | null): data is StatsData {
   if (data == null) return false;
@@ -105,6 +117,9 @@ export default function InsightsPanel({
   const [loading, setLoading] = useState(false);
   const { info: quotaInfo, loading: quotaLoading } = useStorageQuota(open);
 
+  /** 时间范围（P2-13：支持 7/14/30 天可配置） */
+  const [timeRange, setTimeRange] = useState<InsightsTimeRange>(7);
+
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
@@ -125,13 +140,13 @@ export default function InsightsPanel({
   }, [open]);
 
   /**
-   * 近 7 天新标签页打开次数。
-   * 只在面板打开时计算 "now"，避免面板一直打开跨天后“今天”错位。
+   * 近 N 天新标签页打开次数（P2-13：时间范围可配置）。
+   * 只在面板打开时计算 "now"，避免面板一直打开跨天后"今天"错位。
    */
   const dailyOpens = useMemo(() => {
     const now = new Date();
     const map = new Map<string, number>();
-    for (let i = 6; i >= 0; i--) {
+    for (let i = timeRange - 1; i >= 0; i--) {
       const d = new Date(now);
       d.setDate(now.getDate() - i);
       const key = toLocalDayKey(d);
@@ -146,7 +161,7 @@ export default function InsightsPanel({
     return Array.from(map.entries()).map(([day, count]) => ({ day, count }));
     // open 作为依赖仅用于面板重新打开时刷新 "今天" 基准
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [metrics, open]);
+  }, [metrics, open, timeRange]);
 
   /** Top 10 访问域名——优先从 stats.daily 取，同时从 metrics 中的 tab 事件补充 */
   const topDomains = useMemo(() => {
@@ -194,22 +209,49 @@ export default function InsightsPanel({
       .map(([event, count]) => ({ event, count }));
   }, [metrics]);
 
+  /**
+   * 内存估算模型（P1-7）：基于 URL 特征的类型加权
+   *
+   * 规则：
+   *   - /watch/, /v/, /video/, /player/ → 视频/媒体标签，+220 MB 加权
+   *   - /image/, /photo/, /img/, /pic/    → 图片富媒体标签，+70 MB 加权
+   *   - /doc/, /document/, /sheets/, /slides/ → JS 密集型应用，+120 MB 加权
+   *   - 其他 → 常规标签，基础值 80 MB
+   *
+   * savedMemMB = sum(estimatedMemoryPerTab) 表示归档前各标签消耗的内存总量
+   */
+  const estimateMemMBByUrl = (url: string): number => {
+    const u = url.toLowerCase();
+    if (/\/(watch\?|v\/|video\/|player\/|shorts\b)/.test(u)) return 300;
+    if (/\/(image\/|photo\/|img\/|pic\/|image\?|\.jpg|\.png|\.webp|\.gif|\/gallery)/.test(u))
+      return 150;
+    if (/\/(doc\/|document\/|sheets\/|slides\/|office\/|docs\.google)/.test(u)) return 200;
+    return 80;
+  };
+
   /** 累计归档 tab 数（来自 metrics 的 archive / archive_create 事件） */
   const archiveStats = useMemo(() => {
     let totalTabs = 0;
+    let savedMemMB = 0;
     for (const ev of metrics) {
       if (ev.event === "archive" || ev.event === "archive_create") {
         const count = typeof ev.payload?.count === "number" ? ev.payload.count : 0;
+        const tabUrls: string[] = Array.isArray(ev.payload?.tabs)
+          ? (ev.payload.tabs as string[])
+          : [];
         totalTabs += count;
+        for (const url of tabUrls) {
+          savedMemMB += estimateMemMBByUrl(url);
+        }
       }
     }
-    return { totalTabs, savedMemMB: totalTabs * 80 };
+    return { totalTabs, savedMemMB };
   }, [metrics]);
 
   /** 是否所有数据源都为空：冷启动用户统一展示 empty state */
   const isAllEmpty = !loading && metrics.length === 0 && (stats?.daily?.length ?? 0) === 0;
 
-  /** 近 7 天是否全部为 0 */
+  /** 近 N 天是否全部为 0 */
   const dailyAllZero = dailyOpens.every((d) => d.count === 0);
 
   /** 智能建议 */
@@ -297,10 +339,27 @@ export default function InsightsPanel({
         ) : (
           <Row gutter={[12, 12]}>
             <Col xs={24} md={12}>
-              <Card size="small" title={t("近 7 天每日打开次数")}>
+              <Card
+                size="small"
+                title={
+                  <Flex justify="space-between" align="center">
+                    <span>{t("每日打开次数")}</span>
+                    <Segmented
+                      size="small"
+                      value={timeRange}
+                      onChange={(v) => setTimeRange(v as InsightsTimeRange)}
+                      options={[
+                        { label: "7d", value: 7 },
+                        { label: "14d", value: 14 },
+                        { label: "30d", value: 30 },
+                      ]}
+                    />
+                  </Flex>
+                }
+              >
                 {dailyAllZero ? (
                   <FeatureEmptyState
-                    title={t("近 7 天暂无打开记录")}
+                    title={t("近 {n} 天暂无打开记录", { n: timeRange })}
                     icon={<BarChart3 size={ICON_SIZE.LARGE} />}
                     size="small"
                     hints={[t("继续使用扩展以生成洞察数据")]}

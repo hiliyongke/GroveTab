@@ -28,6 +28,7 @@
 
 import { create } from "zustand";
 import type { LiveTab, SwBroadcastMessage, WindowInfo, ClosedTabSnapshot } from "@/shared/types";
+import { CLOSE_CONFIRM_THRESHOLD } from "@/shared/types/settings";
 import {
   queryAllTabs,
   getAllWindows,
@@ -211,7 +212,9 @@ async function discardTabsBatch(
 
 function getCloseConfirmThreshold(): number {
   const value = useSettingsStore.getState().settings.closeConfirmThreshold;
-  return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : 20;
+  return typeof value === "number" && Number.isFinite(value) && value > 0
+    ? value
+    : CLOSE_CONFIRM_THRESHOLD;
 }
 
 export const useTabsStore = create<TabsState>((set, get) => ({

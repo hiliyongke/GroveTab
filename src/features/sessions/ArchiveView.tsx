@@ -12,7 +12,7 @@
  * 业务逻辑保留：搜索 / 批量选择 / 合并 / 恢复 / 重命名 / 分享 / 归档当前。
  */
 
-import { useState, useEffect, useMemo } from "react";
+import { useReducer, useEffect, useMemo } from "react";
 import { Plus, Save, Inbox, ArrowDownUp } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { Button, Spin, Input, Modal, Typography, Select, Empty, Flex } from "antd";
@@ -68,6 +68,142 @@ function bucketOf(
   return "earlier";
 }
 
+/** useReducer state */
+interface ArchiveState {
+  archivingCurrent: boolean;
+  selectable: boolean;
+  selectedIds: Set<string>;
+  highlightId: string | null;
+  mergeOpen: boolean;
+  mergeName: string;
+  restoreDialogOpen: boolean;
+  restoringSession: ArchivedSession | null;
+  renamingDialogOpen: boolean;
+  renamingSession: ArchivedSession | null;
+  expandedSessions: Set<string>;
+  searchQuery: string;
+  scope: ArchiveScopeId;
+  sortMode: SortMode;
+  pinyinMatchFn: ((text: string, query: string) => boolean) | null;
+}
+
+type ArchiveAction =
+  | { type: "SET_ARCHIVING"; payload: boolean }
+  | { type: "TOGGLE_SELECTABLE"; payload: boolean }
+  | { type: "TOGGLE_SELECT_ID"; payload: string }
+  | { type: "SET_SELECTED_IDS"; payload: Set<string> }
+  | { type: "CLEAR_SELECTION" }
+  | { type: "SET_HIGHLIGHT"; payload: string | null }
+  | { type: "OPEN_MERGE"; payload: { ids: string[]; name: string } }
+  | { type: "SET_MERGE_NAME"; payload: string }
+  | { type: "CLOSE_MERGE" }
+  | { type: "OPEN_RESTORE"; payload: ArchivedSession }
+  | { type: "CLOSE_RESTORE" }
+  | { type: "OPEN_RENAME"; payload: ArchivedSession }
+  | { type: "CLOSE_RENAME" }
+  | { type: "TOGGLE_EXPAND"; payload: string }
+  | { type: "SET_EXPANDED"; payload: Set<string> }
+  | { type: "SET_SEARCH_QUERY"; payload: string }
+  | { type: "SET_SCOPE"; payload: ArchiveScopeId }
+  | { type: "SET_SORT_MODE"; payload: SortMode }
+  | { type: "SET_PINYIN_MATCH_FN"; payload: ((text: string, query: string) => boolean) | null };
+
+function archiveReducer(state: ArchiveState, action: ArchiveAction): ArchiveState {
+  switch (action.type) {
+    case "SET_ARCHIVING":
+      return { ...state, archivingCurrent: action.payload };
+    case "TOGGLE_SELECTABLE":
+      return {
+        ...state,
+        selectable: action.payload,
+        ...(action.payload === false ? { selectedIds: new Set<string>() } : {}),
+      };
+    case "TOGGLE_SELECT_ID": {
+      const next = new Set(state.selectedIds);
+      if (next.has(action.payload)) next.delete(action.payload);
+      else next.add(action.payload);
+      return { ...state, selectedIds: next };
+    }
+    case "SET_SELECTED_IDS":
+      return { ...state, selectedIds: action.payload };
+    case "CLEAR_SELECTION":
+      return { ...state, selectable: false, selectedIds: new Set<string>() };
+    case "SET_HIGHLIGHT":
+      return { ...state, highlightId: action.payload };
+    case "OPEN_MERGE":
+      return {
+        ...state,
+        mergeOpen: true,
+        mergeName: action.payload.name,
+        selectedIds: new Set(action.payload.ids),
+      };
+    case "SET_MERGE_NAME":
+      return { ...state, mergeName: action.payload };
+    case "CLOSE_MERGE":
+      return { ...state, mergeOpen: false };
+    case "OPEN_RESTORE":
+      return {
+        ...state,
+        restoreDialogOpen: true,
+        restoringSession: action.payload,
+      };
+    case "CLOSE_RESTORE":
+      return {
+        ...state,
+        restoreDialogOpen: false,
+        restoringSession: null,
+      };
+    case "OPEN_RENAME":
+      return {
+        ...state,
+        renamingDialogOpen: true,
+        renamingSession: action.payload,
+      };
+    case "CLOSE_RENAME":
+      return {
+        ...state,
+        renamingDialogOpen: false,
+        renamingSession: null,
+      };
+    case "TOGGLE_EXPAND": {
+      const next = new Set(state.expandedSessions);
+      if (next.has(action.payload)) next.delete(action.payload);
+      else next.add(action.payload);
+      return { ...state, expandedSessions: next };
+    }
+    case "SET_EXPANDED":
+      return { ...state, expandedSessions: action.payload };
+    case "SET_SEARCH_QUERY":
+      return { ...state, searchQuery: action.payload };
+    case "SET_SCOPE":
+      return { ...state, scope: action.payload };
+    case "SET_SORT_MODE":
+      return { ...state, sortMode: action.payload };
+    case "SET_PINYIN_MATCH_FN":
+      return { ...state, pinyinMatchFn: action.payload };
+    default:
+      return state;
+  }
+}
+
+const INITIAL_STATE: ArchiveState = {
+  archivingCurrent: false,
+  selectable: false,
+  selectedIds: new Set<string>(),
+  highlightId: null,
+  mergeOpen: false,
+  mergeName: "",
+  restoreDialogOpen: false,
+  restoringSession: null,
+  renamingDialogOpen: false,
+  renamingSession: null,
+  expandedSessions: new Set<string>(),
+  searchQuery: "",
+  scope: "all",
+  sortMode: "newest",
+  pinyinMatchFn: null,
+};
+
 export function ArchiveView() {
   const sessions = useSessionsStore((s) => s.sessions);
   const loading = useSessionsStore((s) => s.loading);
@@ -75,27 +211,25 @@ export function ArchiveView() {
   const deleteSessionSlice = useSessionsStore((s) => s.deleteSession);
   const mergeSessionsSlice = useSessionsStore((s) => s.mergeSessions);
   const exportSessionSlice = useSessionsStore((s) => s.exportSession);
-  const [archivingCurrent, setArchivingCurrent] = useState(false);
-  /** 多选 */
-  const [selectable, setSelectable] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  /** 高亮（外部跳转） */
-  const [highlightId, setHighlightId] = useState<string | null>(null);
-  const [mergeOpen, setMergeOpen] = useState(false);
-  const [mergeName, setMergeName] = useState("");
-  /** 增强对话框 */
-  const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
-  const [restoringSession, setRestoringSession] = useState<ArchivedSession | null>(null);
-  const [renamingDialogOpen, setRenamingDialogOpen] = useState(false);
-  const [renamingSession, setRenamingSession] = useState<ArchivedSession | null>(null);
-  /** 卡片展开状态（详情 tab 列表） */
-  const [expandedSessions, setExpandedSessions] = useState<Set<string>>(new Set());
-  /** 搜索 */
-  const [searchQuery, setSearchQuery] = useState("");
-  /** 当前分类 */
-  const [scope, setScope] = useState<ArchiveScopeId>("all");
-  /** 排序 */
-  const [sortMode, setSortMode] = useState<SortMode>("newest");
+
+  const [state, dispatch] = useReducer(archiveReducer, INITIAL_STATE);
+  const {
+    archivingCurrent,
+    selectable,
+    selectedIds,
+    highlightId,
+    mergeOpen,
+    mergeName,
+    restoreDialogOpen,
+    restoringSession,
+    renamingDialogOpen,
+    renamingSession,
+    expandedSessions,
+    searchQuery,
+    scope,
+    sortMode,
+    pinyinMatchFn,
+  } = state;
 
   const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
   const tabCount = useTabsStore((s) => s.tabs.length);
@@ -113,8 +247,8 @@ export function ArchiveView() {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent<{ sessionId?: string }>).detail;
       if (detail?.sessionId !== undefined) {
-        setHighlightId(detail.sessionId);
-        window.setTimeout(() => setHighlightId(null), 3000);
+        dispatch({ type: "SET_HIGHLIGHT", payload: detail.sessionId });
+        window.setTimeout(() => dispatch({ type: "SET_HIGHLIGHT", payload: null }), 3000);
       }
     };
     window.addEventListener(APP_EVENTS.highlightSession, handler);
@@ -123,15 +257,12 @@ export function ArchiveView() {
 
   /** 拼音匹配 */
   const enablePinyin = useSettingsStore((s) => s.settings.searchEnablePinyin ?? true);
-  const [pinyinMatchFn, setPinyinMatchFn] = useState<
-    ((text: string, query: string) => boolean) | null
-  >(null);
 
   useEffect(() => {
     if (!enablePinyin || pinyinMatchFn !== null) return;
     void (async () => {
       const { pinyinMatch } = await import("@/shared/utils/pinyin");
-      setPinyinMatchFn(() => pinyinMatch);
+      dispatch({ type: "SET_PINYIN_MATCH_FN", payload: pinyinMatch });
     })();
   }, [enablePinyin, pinyinMatchFn]);
 
@@ -258,14 +389,13 @@ export function ArchiveView() {
     for (const s of sortedSessions) {
       if (matchedTabIndexes.has(s.id)) next.add(s.id);
     }
-    setExpandedSessions(next);
+    dispatch({ type: "SET_EXPANDED", payload: next });
   }, [isSearching, sortedSessions, matchedTabIndexes]);
 
   const handleRestore = (id: string) => {
     const session = sessions.find((s) => s.id === id);
     if (session) {
-      setRestoringSession(session);
-      setRestoreDialogOpen(true);
+      dispatch({ type: "OPEN_RESTORE", payload: session });
     }
   };
 
@@ -282,8 +412,7 @@ export function ArchiveView() {
         t("部分恢复成功，已恢复 {restored}/{total} 个标签", { restored: outcome.restored, total }),
       );
     }
-    setRestoreDialogOpen(false);
-    setRestoringSession(null);
+    dispatch({ type: "CLOSE_RESTORE" });
   };
 
   const handleDelete = async (id: string) => {
@@ -304,25 +433,15 @@ export function ArchiveView() {
   };
 
   const toggleSelect = (id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+    dispatch({ type: "TOGGLE_SELECT_ID", payload: id });
   };
 
   const cancelSelect = () => {
-    setSelectable(false);
-    setSelectedIds(new Set());
+    dispatch({ type: "CLEAR_SELECTION" });
   };
 
   const handleSelectModeChange = (enabled: boolean) => {
-    if (enabled) {
-      setSelectable(true);
-      return;
-    }
-    cancelSelect();
+    dispatch({ type: "TOGGLE_SELECTABLE", payload: enabled });
   };
 
   const handleOpenMerge = (ids: string[]) => {
@@ -330,9 +449,7 @@ export function ArchiveView() {
       feedback.warning(t("请至少选择 2 个会话"));
       return;
     }
-    setSelectedIds(new Set(ids));
-    setMergeName(t("合并会话"));
-    setMergeOpen(true);
+    dispatch({ type: "OPEN_MERGE", payload: { ids, name: t("合并会话") } });
   };
 
   const handleConfirmMerge = async () => {
@@ -343,7 +460,7 @@ export function ArchiveView() {
         return;
       }
       void track("archive_merge", { count: selectedIds.size });
-      setMergeOpen(false);
+      dispatch({ type: "CLOSE_MERGE" });
       cancelSelect();
       feedback.success(t("已合并为 1 个会话，共 {count} 个标签", { count: newSession.tabCount }));
       void pushActivity({
@@ -361,8 +478,7 @@ export function ArchiveView() {
   };
 
   const startRenaming = (session: ArchivedSession) => {
-    setRenamingSession(session);
-    setRenamingDialogOpen(true);
+    dispatch({ type: "OPEN_RENAME", payload: session });
   };
 
   const handleOpenSingle = async (tab: { url: string }) => {
@@ -380,7 +496,7 @@ export function ArchiveView() {
 
   const handleArchiveCurrent = async () => {
     if (archivingCurrent || tabCount === 0) return;
-    setArchivingCurrent(true);
+    dispatch({ type: "SET_ARCHIVING", payload: true });
     try {
       const result = await archiveAllTabs();
       void track("archive_create", { count: result.archivedCount });
@@ -431,22 +547,17 @@ export function ArchiveView() {
     } catch (err) {
       feedback.error(t("归档失败，请重试"), err);
     } finally {
-      setArchivingCurrent(false);
+      dispatch({ type: "SET_ARCHIVING", payload: false });
     }
   };
 
   /** Stats 卡片 → 同步切 sidebar scope */
   const handleSelectStatsFilter = (filter: ArchiveFilterId) => {
-    setScope(filter);
+    dispatch({ type: "SET_SCOPE", payload: filter });
   };
 
   const handleToggleCardExpand = (id: string) => {
-    setExpandedSessions((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+    dispatch({ type: "TOGGLE_EXPAND", payload: id });
   };
 
   const totalAfterFilter = sortedSessions.length;
@@ -470,7 +581,11 @@ export function ArchiveView() {
       </Flex>
 
       <div className={styles["archive-shell"]}>
-        <ArchiveSidebar sessions={sessions} activeFilter={scope} onSelectFilter={setScope} />
+        <ArchiveSidebar
+          sessions={sessions}
+          activeFilter={scope}
+          onSelectFilter={(filter) => dispatch({ type: "SET_SCOPE", payload: filter })}
+        />
 
         <Flex vertical gap={16} className={styles["archive-main"]}>
           <ArchiveStats
@@ -484,14 +599,14 @@ export function ArchiveView() {
               className={styles["archive-toolbar__search"]}
               placeholder={t("搜索归档会话...")}
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => dispatch({ type: "SET_SEARCH_QUERY", payload: e.target.value })}
               allowClear
             />
 
             <Select
               className={styles["archive-toolbar__sort"]}
               value={sortMode}
-              onChange={(value: SortMode) => setSortMode(value)}
+              onChange={(value: SortMode) => dispatch({ type: "SET_SORT_MODE", payload: value })}
               suffixIcon={<ArrowDownUp size={ICON_SIZE.TINY} />}
               options={[
                 { value: "newest", label: t("最近创建") },
@@ -650,7 +765,7 @@ export function ArchiveView() {
         open={mergeOpen}
         rootClassName={styles["app-archive-merge-modal"]}
         title={t("合并会话")}
-        onCancel={() => setMergeOpen(false)}
+        onCancel={() => dispatch({ type: "CLOSE_MERGE" })}
         onOk={() => void handleConfirmMerge()}
         okText={t("合并")}
         cancelText={t("取消")}
@@ -663,7 +778,7 @@ export function ArchiveView() {
         </Typography.Text>
         <Input
           value={mergeName}
-          onChange={(e) => setMergeName(e.target.value)}
+          onChange={(e) => dispatch({ type: "SET_MERGE_NAME", payload: e.target.value })}
           placeholder={t("新会话名")}
         />
       </Modal>
@@ -675,10 +790,7 @@ export function ArchiveView() {
           sessionId={restoringSession.id}
           sessionName={restoringSession.name}
           tabCount={restoringSession.tabCount}
-          onClose={() => {
-            setRestoreDialogOpen(false);
-            setRestoringSession(null);
-          }}
+          onClose={() => dispatch({ type: "CLOSE_RESTORE" })}
           onRestoreComplete={(outcome) => void handleEnhancedRestoreComplete(outcome)}
         />
       )}
@@ -691,10 +803,7 @@ export function ArchiveView() {
           currentName={renamingSession.name}
           tabCount={renamingSession.tabCount}
           tabUrls={renamingSession.tabs.map((tab) => tab.url)}
-          onClose={() => {
-            setRenamingDialogOpen(false);
-            setRenamingSession(null);
-          }}
+          onClose={() => dispatch({ type: "CLOSE_RENAME" })}
           onRenameConfirm={async (id, newName) => {
             try {
               await renameSessionAction(id, newName);

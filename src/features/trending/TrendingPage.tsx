@@ -44,6 +44,8 @@ import {
 } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
+import { createTab } from "@/chrome";
+import { createBookmark } from "@/chrome/bookmarks";
 import type {
   TrendingCategory,
   TrendingGroupMode,
@@ -114,63 +116,73 @@ function cssVars(vars: Record<string, string | undefined>): CSSProperties {
   return vars;
 }
 
-function StealthDisguise({ disguise }: { disguise: StealthModeConfig["disguise"] }) {
+function StealthDisguise({
+  disguise,
+  t,
+}: {
+  disguise: StealthModeConfig["disguise"];
+  t: (key: string) => string;
+}) {
   const content = useMemo(() => {
     switch (disguise) {
       case "email":
         return {
-          title: "收件箱",
+          title: t("收件箱"),
           items: [
-            { from: "产品经理", subject: "关于 Q2 季度 OKR 对齐会议的邀请", time: "10:32" },
-            { from: "HR", subject: "本周五下午团建活动通知", time: "09:15" },
-            { from: "技术主管", subject: "Re: 新项目技术方案评审", time: "昨天" },
-            { from: "设计团队", subject: "设计稿已更新，请查阅 Figma", time: "昨天" },
-            { from: "运维", subject: "服务器维护通知 - 本周六凌晨", time: "周一" },
+            {
+              from: t("产品经理"),
+              subject: t("关于 Q2 季度 OKR 对齐会议的邀请"),
+              time: t("10:32"),
+            },
+            { from: t("HR"), subject: t("本周五下午团建活动通知"), time: t("09:15") },
+            { from: t("技术主管"), subject: t("Re: 新项目技术方案评审"), time: t("昨天") },
+            { from: t("设计团队"), subject: t("设计稿已更新，请查阅 Figma"), time: t("昨天") },
+            { from: t("运维"), subject: t("服务器维护通知 - 本周六凌晨"), time: t("周一") },
           ],
         };
       case "doc":
         return {
-          title: "项目周报 - 第 17 周",
+          title: t("项目周报 - 第 17 周"),
           items: [
             {
-              from: "一、本周工作进展",
-              subject: "1.1 完成用户认证模块重构，测试覆盖率达到 92%",
+              from: t("一、本周工作进展"),
+              subject: t("1.1 完成用户认证模块重构，测试覆盖率达到 92%"),
               time: "",
             },
-            { from: "", subject: "1.2 修复 3 个 P1 级线上问题，优化查询性能提升 40%", time: "" },
-            { from: "二、下周计划", subject: "2.1 启动数据分析模块开发", time: "" },
-            { from: "", subject: "2.2 完成技术方案评审与排期", time: "" },
-            { from: "三、风险与依赖", subject: "3.1 第三方 API 响应延迟需跟进", time: "" },
+            { from: "", subject: t("1.2 修复 3 个 P1 级线上问题，优化查询性能提升 40%"), time: "" },
+            { from: t("二、下周计划"), subject: t("2.1 启动数据分析模块开发"), time: "" },
+            { from: "", subject: t("2.2 完成技术方案评审与排期"), time: "" },
+            { from: t("三、风险与依赖"), subject: t("3.1 第三方 API 响应延迟需跟进"), time: "" },
           ],
         };
       case "spreadsheet":
         return {
-          title: "Q2 季度预算表",
+          title: t("Q2 季度预算表"),
           items: [
-            { from: "项目名称", subject: "预算金额（万元）", time: "实际支出" },
-            { from: "用户增长", subject: "120.00", time: "98.50" },
-            { from: "内容运营", subject: "85.00", time: "72.30" },
-            { from: "品牌推广", subject: "200.00", time: "156.80" },
-            { from: "技术基建", subject: "150.00", time: "134.20" },
+            { from: t("项目名称"), subject: t("预算金额（万元）"), time: t("实际支出") },
+            { from: t("用户增长"), subject: "120.00", time: "98.50" },
+            { from: t("内容运营"), subject: "85.00", time: "72.30" },
+            { from: t("品牌推广"), subject: "200.00", time: "156.80" },
+            { from: t("技术基建"), subject: "150.00", time: "134.20" },
           ],
         };
       case "code":
         return {
-          title: "main.ts",
+          title: t("main.ts"),
           items: [
-            { from: " 1", subject: "import { createApp } from 'vue';", time: "" },
-            { from: " 2", subject: "import App from './App.vue';", time: "" },
-            { from: " 3", subject: "import router from './router';", time: "" },
-            { from: " 4", subject: "import { createPinia } from 'pinia';", time: "" },
+            { from: " 1", subject: t("import { createApp } from 'vue';"), time: "" },
+            { from: " 2", subject: t("import App from './App.vue';"), time: "" },
+            { from: " 3", subject: t("import router from './router';"), time: "" },
+            { from: " 4", subject: t("import { createPinia } from 'pinia';"), time: "" },
             { from: " 5", subject: "", time: "" },
-            { from: " 6", subject: "const app = createApp(App);", time: "" },
-            { from: " 7", subject: "app.use(createPinia());", time: "" },
-            { from: " 8", subject: "app.use(router);", time: "" },
-            { from: " 9", subject: 'app.mount("#app");', time: "" },
+            { from: " 6", subject: t("const app = createApp(App);"), time: "" },
+            { from: " 7", subject: t("app.use(createPinia());"), time: "" },
+            { from: " 8", subject: t("app.use(router);"), time: "" },
+            { from: " 9", subject: t('app.mount("#app");'), time: "" },
           ],
         };
     }
-  }, [disguise]);
+  }, [disguise, t]);
 
   return (
     <div className={styles["trending-stealth-content"]}>
@@ -507,21 +519,14 @@ export function TrendingPage() {
 
   /** 保存条目到书签 */
   const handleSaveItem = useCallback(
-    (item: HotBoardData["items"][0]) => {
-      void recordInterestSignal(item.url, "save").then(() => {
-        void getInterestSignals().then(setSignals);
-      });
-      if (typeof chrome !== "undefined" && chrome.bookmarks) {
-        void chrome.bookmarks
-          .create({ title: item.title, url: item.url })
-          .then(() => {
-            void message.success(t("已加入书签"), 1.5);
-          })
-          .catch(() => {
-            void message.error(t("书签添加失败"), 1.5);
-          });
-      } else {
-        void message.warning(t("书签权限不可用"), 1.5);
+    async (item: HotBoardData["items"][0]) => {
+      await recordInterestSignal(item.url, "save");
+      setSignals(await getInterestSignals());
+      try {
+        await createBookmark({ title: item.title, url: item.url });
+        void message.success(t("已加入书签"), 1.5);
+      } catch {
+        void message.error(t("书签添加失败"), 1.5);
       }
     },
     [t],
@@ -529,15 +534,13 @@ export function TrendingPage() {
 
   /** 加入稍后阅读（新建标签页后台打开） */
   const handleReadLaterItem = useCallback(
-    (item: HotBoardData["items"][0]) => {
-      void recordInterestSignal(item.url, "save").then(() => {
-        void getInterestSignals().then(setSignals);
-      });
-      if (typeof chrome !== "undefined" && chrome.tabs) {
-        void chrome.tabs.create({ url: item.url, active: false }).then(() => {
-          void message.success(t("已在后台打开"), 1.5);
-        });
-      } else {
+    async (item: HotBoardData["items"][0]) => {
+      await recordInterestSignal(item.url, "save");
+      setSignals(await getInterestSignals());
+      try {
+        await createTab({ url: item.url, active: false });
+        void message.success(t("已在后台打开"), 1.5);
+      } catch {
         window.open(item.url, "_blank", "noopener,noreferrer");
       }
     },
@@ -639,7 +642,7 @@ export function TrendingPage() {
             />
           </Space>
         </div>
-        <StealthDisguise disguise={stealthMode.disguise} />
+        <StealthDisguise disguise={stealthMode.disguise} t={t} />
       </section>
     );
   }
@@ -752,8 +755,12 @@ export function TrendingPage() {
                 board={board}
                 onRefresh={handleRefreshBoard}
                 signals={signals}
-                onSaveItem={handleSaveItem}
-                onReadLaterItem={handleReadLaterItem}
+                onSaveItem={(item) => {
+                  void handleSaveItem(item);
+                }}
+                onReadLaterItem={(item) => {
+                  void handleReadLaterItem(item);
+                }}
               />
             );
           })}

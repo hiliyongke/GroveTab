@@ -8,6 +8,11 @@
  *
  * 所有函数返回"预览数据"和"执行函数"两份，UI 层先展示再让用户点确认，
  * 保障可撤销与安全性（对书签的破坏性写操作必须显式二次确认）。
+ *
+ * 速率限制（P2-14）：
+ *   - HEALTH_RATE_LIMIT = 5：每秒最多发起 5 个请求，防止触发目标站点反爬虫机制
+ *   - HEALTH_CONCURRENCY = 3：并发池大小（配合速率限制双重保险）
+ *   - 实现方式：基于 token bucket 的简单速率限制器，按域名哈希分组隔离
  */
 
 import type { BookmarkNode } from "@/chrome/bookmarks";
@@ -82,19 +87,73 @@ export interface BookmarkHealth {
 }
 
 const HEALTH_TIMEOUT_MS = 6_000;
-const HEALTH_CONCURRENCY = 5;
+const HEALTH_CONCURRENCY = 3; // 并发数（配合速率限制双重保险）
+const HEALTH_RATE_LIMIT = 5; // 每秒每域名最多 5 请求（防止触发反爬虫）
+
+/**
+ * 简单速率限制器（token bucket 模式）
+ *
+ * 按域名隔离，每个域名独立一个 bucket，避免单域名请求过于集中。
+ * 每秒补充 RATE_LIMIT 个 token，上限为 CONCURRENCY。
+ */
+class RateLimiter {
+  private buckets = new Map<string, { tokens: number; lastRefill: number }>();
+
+  private getBucket(domain: string) {
+    const now = Date.now();
+    const entry = this.buckets.get(domain);
+    if (entry === undefined) {
+      return { tokens: HEALTH_CONCURRENCY, lastRefill: now };
+    }
+    // 每秒补充 HEALTH_RATE_LIMIT 个 token
+    const elapsed = now - entry.lastRefill;
+    if (elapsed >= 1000) {
+      const refills = Math.floor(elapsed / 1000);
+      entry.tokens = Math.min(HEALTH_RATE_LIMIT, entry.tokens + refills * HEALTH_RATE_LIMIT);
+      entry.lastRefill = now;
+    }
+    return entry;
+  }
+
+  /**
+   * 请求一个令箭。如果当前 token 不足，等待至下一秒补充后重试。
+   * 同步返回是否获准立即执行；实际等待由调用方处理。
+   */
+  async acquire(domain: string): Promise<boolean> {
+    const bucket = this.getBucket(domain);
+    if (bucket.tokens > 0) {
+      bucket.tokens -= 1;
+      this.buckets.set(domain, bucket);
+      return true;
+    }
+    // 等一个完整的下一秒
+    await new Promise((r) => setTimeout(r, 1000));
+    const refreshed = this.getBucket(domain);
+    refreshed.tokens = Math.min(HEALTH_RATE_LIMIT, refreshed.tokens - 1);
+    refreshed.lastRefill = Date.now();
+    this.buckets.set(domain, refreshed);
+    return true;
+  }
+}
+
+const rateLimiter = new RateLimiter();
 
 /**
  * 对单个 URL 发起健康检查。
  *   - 仅检查 http/https
  *   - 使用 `no-cors` 模式的 GET 请求（HEAD 有些站点禁用）
  *   - 响应 opaque 也视为可达（只要 fetch 没 reject）
+ *   - 每个请求前需通过速率限制器（按域名隔离）
  */
 async function checkOne(b: BookmarkNode): Promise<BookmarkHealth> {
   const url = b.url ?? "";
   if (!/^https?:\/\//.test(url)) {
     return { bookmark: b, status: "skipped" };
   }
+  // 速率限制：按域名哈希请求令牌，防止触发反爬虫
+  const domain = extractHostname(url) || url;
+  await rateLimiter.acquire(domain);
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), HEALTH_TIMEOUT_MS);
   try {

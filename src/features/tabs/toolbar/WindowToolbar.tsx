@@ -1,0 +1,164 @@
+/**
+ * WindowToolbar — 窗口视图增强工具栏
+ *
+ * 常驻显示在 WindowView 上方：
+ *   - 搜索过滤（按标签标题/URL）
+ *   - 排序切换（手动/标签数/名称/活跃度）
+ *   - 快照入口
+ *   - 批量模式入口
+ *   - 折叠策略切换
+ */
+
+import { Button, Flex, Input, Popover, Segmented, Select, Tooltip, Typography } from "antd";
+import { Camera, CheckSquare, Eye, EyeOff, Maximize2, Search } from "lucide-react";
+import { useSelectionStore, useSettingsStore, useTabsStore } from "@/store";
+import { useT } from "@/shared/i18n";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { WindowSnapshotPanel } from "../views/WindowView/WindowSnapshotPanel";
+import { ClipboardImport } from "../views/WindowView/ClipboardImport";
+import styles from "../styles/items.module.less";
+
+type WindowCardDefaultCollapsed = "current-only" | "all-expanded" | "all-collapsed";
+
+export type WindowSortMode = "manual" | "tabCount" | "name" | "activity";
+
+export interface WindowToolbarProps {
+  filterQuery: string;
+  onFilterChange: (query: string) => void;
+  sortMode?: WindowSortMode;
+  onSortModeChange?: (mode: WindowSortMode) => void;
+}
+
+export function WindowToolbar({
+  filterQuery,
+  onFilterChange,
+  sortMode = "manual",
+  onSortModeChange,
+}: WindowToolbarProps) {
+  const { t } = useT();
+  const defaultCollapsed = useSettingsStore(
+    (s) => s.settings.windowCardDefaultCollapsed ?? "current-only",
+  );
+  const updateSettings = useSettingsStore((s) => s.updateSettings);
+  const currentWindowId = useTabsStore((s) => s.currentWindowId);
+  const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
+  const selectionMode = useSelectionStore((s) => s.selectionMode);
+  const enterSelectionMode = useSelectionStore((s) => s.enterSelectionMode);
+  const exitSelectionMode = useSelectionStore((s) => s.exitSelectionMode);
+  const selectedCount = useSelectionStore((s) => s.selectedIds.size);
+
+  const normalize = (v: unknown): WindowCardDefaultCollapsed =>
+    v === "all-expanded" || v === "all-collapsed" || v === "current-only" ? v : "current-only";
+
+  return (
+    <Flex align="center" gap={8} className={styles["app-domain-toolbar"]}>
+      <Input
+        prefix={<Search size={ICON_SIZE.SMALL} />}
+        placeholder={t("window.searchPlaceholder")}
+        value={filterQuery}
+        onChange={(e) => onFilterChange(e.target.value)}
+        allowClear
+        className={styles["app-toolbar-search-input"]}
+      />
+
+      {/* 排序切换 */}
+      <Select
+        size="small"
+        value={sortMode}
+        onChange={(v) => onSortModeChange?.(v as WindowSortMode)}
+        options={[
+          { value: "manual", label: t("手动") },
+          { value: "tabCount", label: t("标签数") },
+          { value: "name", label: t("名称") },
+          { value: "activity", label: t("活跃度") },
+        ]}
+        style={{ minWidth: 80 }}
+        className={styles["app-toolbar-sort-select"]}
+      />
+
+      {/* 快照入口 */}
+      <Popover
+        trigger="click"
+        placement="bottomRight"
+        content={
+          <WindowSnapshotPanel
+            windowId={currentWindowId}
+            onRefresh={() => void loadAllTabs({ silent: true })}
+          />
+        }
+      >
+        <Tooltip title={t("窗口快照")}>
+          <Button type="text" size="small" icon={<Camera size={ICON_SIZE.SMALL} />} />
+        </Tooltip>
+      </Popover>
+
+      {/* 批量模式入口 */}
+      <Tooltip title={selectionMode ? t("退出批量模式") : t("批量选择")}>
+        <Button
+          type={selectionMode ? "primary" : "text"}
+          size="small"
+          icon={<CheckSquare size={ICON_SIZE.SMALL} />}
+          onClick={() => {
+            if (selectionMode) {
+              exitSelectionMode();
+            } else {
+              enterSelectionMode();
+            }
+          }}
+        />
+      </Tooltip>
+
+      {/* 剪贴板导入 */}
+      <ClipboardImport onRefresh={() => void loadAllTabs({ silent: true })} />
+
+      {/* 折叠策略切换 */}
+      <Flex align="center" gap={4} className={styles["app-domain-toolbar-controls"]}>
+        <Tooltip title={t("toolbar.collapseStrategy.title")}>
+          <Segmented
+            size="small"
+            value={normalize(defaultCollapsed)}
+            onChange={(v) =>
+              void updateSettings({ windowCardDefaultCollapsed: v as WindowCardDefaultCollapsed })
+            }
+            options={[
+              {
+                value: "current-only",
+                icon: (
+                  <span className={styles["app-segmented-icon"]}>
+                    <Maximize2 size={13} />
+                  </span>
+                ),
+                label: t("toolbar.collapseStrategy.currentOnly"),
+              },
+              {
+                value: "all-expanded",
+                icon: (
+                  <span className={styles["app-segmented-icon"]}>
+                    <Eye size={13} />
+                  </span>
+                ),
+                label: t("toolbar.collapseStrategy.allExpanded"),
+              },
+              {
+                value: "all-collapsed",
+                icon: (
+                  <span className={styles["app-segmented-icon"]}>
+                    <EyeOff size={13} />
+                  </span>
+                ),
+                label: t("toolbar.collapseStrategy.allCollapsed"),
+              },
+            ]}
+          />
+        </Tooltip>
+      </Flex>
+
+      {/* 批量模式状态提示 */}
+      {selectionMode && selectedCount > 0 && (
+        <Typography.Text style={{ fontSize: 12, color: "var(--ant-color-primary)", flexShrink: 0 }}>
+          {t("已选 {count} 项", { count: selectedCount })}
+        </Typography.Text>
+      )}
+    </Flex>
+  );
+}

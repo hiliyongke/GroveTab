@@ -54,6 +54,8 @@ interface MetadataState {
   workspaces: readonly Workspace[];
   /** 窗口自定义别名，仅影响 UI 展示；key 为 Chrome windowId。 */
   windowAliases: Record<number, string>;
+  /** 窗口自定义颜色，仅影响 UI 展示；key 为 Chrome windowId，value 为颜色 hex。 */
+  windowColors: Record<number, string>;
 
   loadMetadata: () => Promise<void>;
   addTag: (url: string, tag: string) => Promise<void>;
@@ -72,6 +74,7 @@ interface MetadataState {
   upsertWorkspace: (workspace: Workspace) => Promise<void>;
   removeWorkspace: (id: string) => Promise<void>;
   setWindowAlias: (windowId: number, alias: string) => Promise<void>;
+  setWindowColor: (windowId: number, color: string) => Promise<void>;
   gcWindowAliases: (activeWindowIds: readonly number[]) => Promise<void>;
 }
 
@@ -82,16 +85,19 @@ export const useMetadataStore = create<MetadataState>((set, get) => ({
   recentActivity: EMPTY_ACTIVITY,
   workspaces: EMPTY_WORKSPACES,
   windowAliases: {},
+  windowColors: {},
 
   loadMetadata: async () => {
-    const [tags, notes, pins, activity, workspaces, windowAliases] = await Promise.all([
-      getData<Record<string, string[]>>(TAGS_KEY),
-      getData<Record<string, string>>(NOTES_KEY),
-      getData<string[]>(PINS_KEY),
-      getRecentActivity(),
-      getWorkspaces(),
-      getWindowAliases(),
-    ]);
+    const [tags, notes, pins, activity, workspaces, windowAliases, windowColors] =
+      await Promise.all([
+        getData<Record<string, string[]>>(TAGS_KEY),
+        getData<Record<string, string>>(NOTES_KEY),
+        getData<string[]>(PINS_KEY),
+        getRecentActivity(),
+        getWorkspaces(),
+        getWindowAliases(),
+        getData<Record<number, string>>("grove_window_colors"),
+      ]);
     set({
       tags: tags ?? {},
       notes: notes ?? {},
@@ -99,6 +105,7 @@ export const useMetadataStore = create<MetadataState>((set, get) => ({
       recentActivity: activity.length > 0 ? activity : EMPTY_ACTIVITY,
       workspaces: workspaces.length > 0 ? workspaces : EMPTY_WORKSPACES,
       windowAliases,
+      windowColors: windowColors ?? {},
     });
   },
 
@@ -218,6 +225,17 @@ export const useMetadataStore = create<MetadataState>((set, get) => ({
     }
     set({ windowAliases });
     await saveWindowAliases(windowAliases);
+  },
+
+  setWindowColor: async (windowId, color) => {
+    const windowColors = { ...get().windowColors };
+    if (color === "") {
+      delete windowColors[windowId];
+    } else {
+      windowColors[windowId] = color;
+    }
+    set({ windowColors });
+    await setData("grove_window_colors", windowColors);
   },
 
   gcWindowAliases: async (activeWindowIds) => {

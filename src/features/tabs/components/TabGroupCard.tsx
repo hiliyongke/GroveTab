@@ -28,7 +28,7 @@ import { swBroadcast } from "@/shared/utils/sw-broadcast";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { cssVars } from "@/shared/utils/css-vars";
 import { useT } from "@/shared/i18n";
-import { TabItem } from "../TabItem";
+import { TabItem } from "./TabItem";
 import { GroupCardShell } from "./GroupCardShell";
 import { useCardCollapse } from "../hooks/useCardCollapse";
 import { useTabGroupActions } from "../hooks/useTabGroupActions";

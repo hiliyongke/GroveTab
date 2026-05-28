@@ -215,102 +215,68 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
     [close, currentEngine, customEngines, setRecentSearches],
   );
 
+  /**
+   * 统一的 URL 打开辅助函数：
+   * 1. 优先使用 chrome.tab.create（保留 opener 等上下文）
+   * 2. 失败时降级为 window.open（保证用户总能得到结果）
+   * 3. 统一记录错误日志
+   */
+  const openUrlSafely = useCallback(
+    async (url: string, active = true, options?: { pinned?: boolean }) => {
+      try {
+        await createTab({ url, active, ...options });
+        close();
+      } catch (err) {
+        try {
+          window.open(url, "_blank", "noopener,noreferrer");
+          close();
+        } catch {
+          /* 彻底失败时静默处理 */
+        }
+        console.error("[SearchBox] openUrlSafely failed:", err);
+      }
+    },
+    [close],
+  );
+
   const handleActivate = useCallback(
     (item: ReturnType<typeof useSearchResults>["flatItems"][number]) => {
-      if (item.type === "tab") {
-        void jumpToTab(item.tab.id, item.tab.windowId);
-        close();
-        return;
-      }
-      if (item.type === "history") {
-        void (async () => {
-          try {
-            await createTab({ url: item.entry.url, active: true });
-            close();
-          } catch (err) {
-            try {
-              window.open(item.entry.url, "_blank", "noopener,noreferrer");
-              close();
-            } catch {
-              /* 静默 */
-            }
-            console.error("[SearchBox] openHistoryEntry failed:", err);
-          }
-        })();
-        return;
-      }
-      if (item.type === "closed") {
-        void (async () => {
-          try {
-            await createTab({ url: item.record.url, active: true, pinned: item.record.pinned });
+      switch (item.type) {
+        case "tab":
+          void jumpToTab(item.tab.id, item.tab.windowId);
+          close();
+          break;
+        case "history":
+          void openUrlSafely(item.entry.url);
+          break;
+        case "closed":
+          void (async () => {
+            await openUrlSafely(item.record.url, true, { pinned: item.record.pinned });
             await deleteClosedTab(item.record.id);
             setClosedTabRecords((prev) => prev.filter((r) => r.id !== item.record.id));
+          })();
+          break;
+        case "archive":
+          void openUrlSafely(item.url);
+          break;
+        case "bookmark":
+          void openUrlSafely(item.url);
+          break;
+        case "suggestion":
+          void runWebSearch(item.keyword, currentEngine);
+          break;
+        case "web":
+          void runWebSearch(item.query, item.engineId);
+          break;
+        case "permission":
+          void enableHistorySuggestions();
+          break;
+        case "command":
+          if (item.commandId === "open-history" && onOpenHistory !== undefined) {
             close();
-          } catch (err) {
-            try {
-              window.open(item.record.url, "_blank");
-              close();
-            } catch {
-              /* 静默 */
-            }
-            console.error("[SearchBox] restoreClosedTab failed:", err);
+            onOpenHistory();
           }
-        })();
-        return;
-      }
-      if (item.type === "archive") {
-        void (async () => {
-          try {
-            await createTab({ url: item.url, active: true });
-            close();
-          } catch (err) {
-            try {
-              window.open(item.url, "_blank", "noopener,noreferrer");
-              close();
-            } catch {
-              /* 静默 */
-            }
-            console.error("[SearchBox] openArchiveTab failed:", err);
-          }
-        })();
-        return;
-      }
-      if (item.type === "bookmark") {
-        void (async () => {
-          try {
-            await createTab({ url: item.url, active: true });
-            close();
-          } catch (err) {
-            try {
-              window.open(item.url, "_blank", "noopener,noreferrer");
-              close();
-            } catch {
-              /* 静默 */
-            }
-            console.error("[SearchBox] openBookmark failed:", err);
-          }
-        })();
-        return;
-      }
-      if (item.type === "suggestion") {
-        void runWebSearch(item.keyword, currentEngine);
-        return;
-      }
-      if (item.type === "web") {
-        void runWebSearch(item.query, item.engineId);
-        return;
-      }
-      if (item.type === "permission") {
-        void enableHistorySuggestions();
-        return;
-      }
-      if (
-        item.type === "command" &&
-        item.commandId === "open-history" &&
-        onOpenHistory !== undefined
-      ) {
-        close();
-        onOpenHistory();
+          break;
       }
     },
     [
@@ -319,6 +285,7 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
       enableHistorySuggestions,
       jumpToTab,
       onOpenHistory,
+      openUrlSafely,
       runWebSearch,
       setClosedTabRecords,
     ],

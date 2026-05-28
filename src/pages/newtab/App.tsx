@@ -15,19 +15,29 @@ import { AntdThemeProvider } from "@/shared/ui/AntdThemeProvider";
 import { ErrorBoundary } from "@/shared/ui/ErrorBoundary";
 import { UndoToast } from "@/shared/ui/UndoToast";
 import { I18nProvider } from "@/shared/i18n";
-import { BatchActionBar } from "@/features/tabs/BatchActionBar";
+import { BatchActionBar } from "@/features/tabs/selection/BatchActionBar";
 import { AppWorkspace } from "@/features/workspace/AppWorkspace";
-import InsightsPanel from "@/features/insights/InsightsPanel";
+const InsightsPanel = lazy(() =>
+  import("@/features/insights/InsightsPanel").then((m) => ({ default: m.default })),
+);
 import { QuickStartLayer } from "@/features/quick-start/QuickStartLayer";
-import { TidySuggestionBar } from "@/features/tabs/TidySuggestionBar";
-import { AppHeader } from "@/features/workspace/AppHeader";
-import { HeroBar } from "@/features/workspace/HeroBar";
+const TidySuggestionBar = lazy(() =>
+  import("@/features/tabs/components/TidySuggestionBar").then((m) => ({
+    default: m.TidySuggestionBar,
+  })),
+);
+const AppHeader = lazy(() =>
+  import("@/features/workspace/AppHeader").then((m) => ({ default: m.AppHeader })),
+);
+const HeroBar = lazy(() =>
+  import("@/features/workspace/HeroBar").then((m) => ({ default: m.HeroBar })),
+);
 import { ViewSidebar } from "@/features/workspace/ViewSidebar";
 import { ViewBottomBar } from "@/features/workspace/ViewBottomBar";
 import { track } from "@/shared/utils/metrics";
 import type { NewtabPageMode } from "@/shared/types";
 import { VALID_VIEWS, VIEW_CONFIGS, LEGACY_VIEW_MAP, type ViewMode } from "@/shared/config/views";
-import { TabsView } from "@/features/tabs/TabsView";
+import { TabsView } from "@/features/tabs/views/TabsView";
 import { registerViews } from "@/shared/config/view-registry";
 import { findDuplicates } from "@/shared/utils/dedupe";
 import { detectIdleTabs } from "@/shared/utils/idle-detect";
@@ -47,19 +57,19 @@ const DeveloperToolsPage = lazy(() =>
 
 /** 懒加载非默认视图——直接导入文件而非 barrel，确保每个视图独立拆 chunk */
 const TimelineView = lazy(() =>
-  import("@/features/tabs/TimelineView").then((m) => ({ default: m.TimelineView })),
+  import("@/features/tabs/views/TimelineView").then((m) => ({ default: m.TimelineView })),
 );
 const FrequencyView = lazy(() =>
-  import("@/features/tabs/FrequencyView").then((m) => ({ default: m.FrequencyView })),
+  import("@/features/tabs/views/FrequencyView").then((m) => ({ default: m.FrequencyView })),
 );
 const TabGroupView = lazy(() =>
-  import("@/features/tabs/TabGroupView").then((m) => ({ default: m.TabGroupView })),
+  import("@/features/tabs/views/TabGroupView").then((m) => ({ default: m.TabGroupView })),
 );
 const WindowView = lazy(() =>
-  import("@/features/tabs/WindowView").then((m) => ({ default: m.WindowView })),
+  import("@/features/tabs/views/WindowView").then((m) => ({ default: m.WindowView })),
 );
 const KanbanView = lazy(() =>
-  import("@/features/tabs/KanbanView").then((m) => ({ default: m.KanbanView })),
+  import("@/features/tabs/views/KanbanView").then((m) => ({ default: m.KanbanView })),
 );
 const ArchiveView = lazy(() =>
   import("@/features/sessions/ArchiveView").then((m) => ({ default: m.ArchiveView })),

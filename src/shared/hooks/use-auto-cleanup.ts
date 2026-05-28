@@ -23,7 +23,7 @@ const CLEANUP_THRESHOLD_PERCENT = 80; // 使用率超过 80% 触发清理
 async function cleanupActivity(): Promise<number> {
   const { getData, setData } = await import("@/repositories/storage-repo");
   const { STORAGE_KEYS } = await import("@/shared/config/storage-keys");
-  const activity = (await getData<{ ts: number }[]>(STORAGE_KEYS.activity)) ?? [];
+  const activity = (await getData<Array<{ ts: number }>>(STORAGE_KEYS.activity)) ?? [];
   const cutoff = Date.now() - 72 * 3600 * 1000;
   const valid = activity.filter((r) => r.ts >= cutoff);
   if (valid.length < activity.length) {
@@ -36,7 +36,7 @@ async function cleanupActivity(): Promise<number> {
 async function cleanupHistoryEvents(): Promise<number> {
   const { getData, setData } = await import("@/repositories/storage-repo");
   const { STORAGE_KEYS } = await import("@/shared/config/storage-keys");
-  const events = (await getData<{ ts?: number }[]>(STORAGE_KEYS.historyEvents)) ?? [];
+  const events = (await getData<Array<{ ts?: number }>>(STORAGE_KEYS.historyEvents)) ?? [];
   const cutoff = Date.now() - 30 * 24 * 3600 * 1000;
   const valid = events.filter((e) => (e.ts ?? 0) >= cutoff);
   if (valid.length < events.length) {
@@ -49,7 +49,7 @@ async function cleanupHistoryEvents(): Promise<number> {
 async function cleanupSearchHistory(): Promise<number> {
   const { getData, setData } = await import("@/repositories/storage-repo");
   const { STORAGE_KEYS } = await import("@/shared/config/storage-keys");
-  const history = (await getData<{ ts?: number }[]>(STORAGE_KEYS.searchHistory)) ?? [];
+  const history = (await getData<Array<{ ts?: number }>>(STORAGE_KEYS.searchHistory)) ?? [];
   const maxKeep = 10;
   if (history.length > maxKeep) {
     const trimmed = history.slice(0, maxKeep);

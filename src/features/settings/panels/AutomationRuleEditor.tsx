@@ -5,7 +5,12 @@
 import { useState } from "react";
 import { Button, Flex, Input, InputNumber, Select, Typography, Space } from "antd";
 import { useT } from "@/shared/i18n";
-import type { AutomationRule, RuleAction, ScheduledCondition, OnEventCondition } from "@/shared/types";
+import type {
+  AutomationRule,
+  RuleAction,
+  ScheduledCondition,
+  OnEventCondition,
+} from "@/shared/types";
 
 interface AutomationRuleEditorProps {
   rule: AutomationRule | null;
@@ -19,21 +24,15 @@ export function AutomationRuleEditor({ rule, onSave, onCancel }: AutomationRuleE
   const { t } = useT();
   const [name, setName] = useState(rule?.name ?? "");
   const [conditionType, setConditionType] = useState<ConditionType>(
-    rule && rule.condition.kind === "onEvent" ? "onEvent" : "scheduled",
+    rule?.condition.kind === "onEvent" ? "onEvent" : "scheduled",
   );
   const [idleDays, setIdleDays] = useState(
-    rule && rule.condition.kind === "scheduled"
-      ? rule.condition.idleDays
-      : 7,
+    rule?.condition.kind === "scheduled" ? rule.condition.idleDays : 7,
   );
   const [urlPattern, setUrlPattern] = useState(
-    rule && rule.condition.kind === "onEvent"
-      ? rule.condition.urlPattern
-      : "",
+    rule?.condition.kind === "onEvent" ? rule.condition.urlPattern : "",
   );
-  const [actionType, setActionType] = useState<RuleAction["type"]>(
-    rule?.action.type ?? "close",
-  );
+  const [actionType, setActionType] = useState<RuleAction["type"]>(rule?.action.type ?? "close");
   const [groupName, setGroupName] = useState(
     rule?.action.type === "group" ? rule.action.groupName : "",
   );
@@ -43,7 +42,13 @@ export function AutomationRuleEditor({ rule, onSave, onCancel }: AutomationRuleE
 
     const condition: ScheduledCondition | OnEventCondition =
       conditionType === "scheduled"
-        ? { kind: "scheduled", idleDays, excludePinned: true, excludeAudible: true, urlPattern: urlPattern || undefined }
+        ? {
+            kind: "scheduled",
+            idleDays,
+            excludePinned: true,
+            excludeAudible: true,
+            urlPattern: urlPattern || undefined,
+          }
         : { kind: "onEvent", event: "tabCreated", urlPattern: urlPattern || "*" };
 
     const action: RuleAction =
@@ -75,9 +80,7 @@ export function AutomationRuleEditor({ rule, onSave, onCancel }: AutomationRuleE
 
   return (
     <Flex vertical gap="middle">
-      <Typography.Text strong>
-        {rule ? t("编辑规则") : t("新建规则")}
-      </Typography.Text>
+      <Typography.Text strong>{rule ? t("编辑规则") : t("新建规则")}</Typography.Text>
 
       <Flex vertical gap={4}>
         <Typography.Text type="secondary">{t("规则名称")}</Typography.Text>
@@ -103,12 +106,7 @@ export function AutomationRuleEditor({ rule, onSave, onCancel }: AutomationRuleE
       {conditionType === "scheduled" ? (
         <Flex vertical gap={4}>
           <Typography.Text type="secondary">{t("闲置天数阈值")}</Typography.Text>
-          <InputNumber
-            min={1}
-            max={365}
-            value={idleDays}
-            onChange={(v) => setIdleDays(v ?? 7)}
-          />
+          <InputNumber min={1} max={365} value={idleDays} onChange={(v) => setIdleDays(v ?? 7)} />
         </Flex>
       ) : (
         <Flex vertical gap={4}>
@@ -123,7 +121,9 @@ export function AutomationRuleEditor({ rule, onSave, onCancel }: AutomationRuleE
 
       {conditionType === "scheduled" && (
         <Flex vertical gap={4}>
-          <Typography.Text type="secondary">{t("URL 匹配模式（可选，留空匹配所有）")}</Typography.Text>
+          <Typography.Text type="secondary">
+            {t("URL 匹配模式（可选，留空匹配所有）")}
+          </Typography.Text>
           <Input
             value={urlPattern}
             onChange={(e) => setUrlPattern(e.target.value)}

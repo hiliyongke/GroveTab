@@ -1,11 +1,11 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { useSettingsStore, useTabsStore, useUndoStore, useMetadataStore } from '@/store';
-import { initArchiveStorage } from '@/services/archive';
-import { hasCompletedOnboarding } from '@/repositories/storage-repo';
-import { useT } from '@/shared/i18n';
-import { BRAND } from '@/shared/config/brand';
-import { recordMetric, recordFcpOnce, recordFpsSampleOnce } from '@/shared/utils/metrics';
-import { registerHistoryUndoHandler } from '@/services/history/undo-bus';
+import { useEffect, useState, useRef, useCallback } from "react";
+import { useSettingsStore, useTabsStore, useUndoStore, useMetadataStore } from "@/store";
+import { initArchiveStorage } from "@/services/archive";
+import { hasCompletedOnboarding } from "@/repositories/storage-repo";
+import { useT } from "@/shared/i18n";
+import { BRAND } from "@/shared/config/brand";
+import { recordMetric, recordFcpOnce, recordFpsSampleOnce } from "@/shared/utils/metrics";
+import { registerHistoryUndoHandler } from "@/services/history/undo-bus";
 
 /**
  * 全局只注册一次的「tab_tagged 撤销 handler」标记。
@@ -63,16 +63,16 @@ export function useAppInitialization(initRunId: number) {
 
   /** 全局快捷键通过 URL hash 传信号：#search → 自动聚焦搜索框 */
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     const hash = window.location.hash;
-    if (hash === '#search') {
+    if (hash === "#search") {
       setSearchFromHash(true);
     }
   }, []);
 
   useEffect(() => {
-    if (searchFromHash && typeof window !== 'undefined' && window.location.hash === '#search') {
-      history.replaceState(null, '', window.location.pathname);
+    if (searchFromHash && typeof window !== "undefined" && window.location.hash === "#search") {
+      history.replaceState(null, "", window.location.pathname);
     }
   }, [searchFromHash]);
 
@@ -87,43 +87,44 @@ export function useAppInitialization(initRunId: number) {
       try {
         await loadSettingsRef.current();
 
-        const [archiveInitResult, tabsResult, undoResult, metadataResult, onboardingResult] = await Promise.allSettled([
-          initArchiveStorage(),
-          loadAllTabsRef.current(),
-          loadUndoRecordsRef.current(),
-          loadMetadataRef.current(),
-          hasCompletedOnboarding(),
-        ]);
+        const [archiveInitResult, tabsResult, undoResult, metadataResult, onboardingResult] =
+          await Promise.allSettled([
+            initArchiveStorage(),
+            loadAllTabsRef.current(),
+            loadUndoRecordsRef.current(),
+            loadMetadataRef.current(),
+            hasCompletedOnboarding(),
+          ]);
 
         // 注册 tab_tagged 撤销 handler（仅首次）。
         // 注：archive_create 的 handler 在 ArchiveView 模块加载时自行注册，那里能直接拿到 deleteSession + refreshSessions
         if (!tagUndoRegistered) {
           tagUndoRegistered = true;
-          registerHistoryUndoHandler('tab_tagged', async (event) => {
+          registerHistoryUndoHandler("tab_tagged", async (event) => {
             const ctx = event.undoContext as { url?: string; tag?: string } | undefined;
-            if (ctx === undefined || ctx.url === undefined || ctx.tag === undefined) return false;
+            if (ctx?.url === undefined || ctx.tag === undefined) return false;
             await useMetadataStore.getState().removeTag(ctx.url, ctx.tag);
             return true;
           });
         }
 
-        if (archiveInitResult.status !== 'fulfilled') {
+        if (archiveInitResult.status !== "fulfilled") {
           console.warn(`${BRAND.logTag} initArchiveStorage failed`, archiveInitResult.reason);
         }
-        if (tabsResult.status === 'rejected') {
+        if (tabsResult.status === "rejected") {
           console.warn(`${BRAND.logTag} loadAllTabs failed`, tabsResult.reason);
           if (!cancelled) {
-            setInitError(tRef.current('tabs.loadFailed'));
+            setInitError(tRef.current("tabs.loadFailed"));
           }
         }
-        if (undoResult.status === 'rejected') {
+        if (undoResult.status === "rejected") {
           console.warn(`${BRAND.logTag} loadUndoRecords failed`, undoResult.reason);
         }
-        if (metadataResult.status === 'rejected') {
+        if (metadataResult.status === "rejected") {
           console.warn(`${BRAND.logTag} loadMetadata failed`, metadataResult.reason);
         }
         if (!cancelled) {
-          if (onboardingResult.status === 'fulfilled') {
+          if (onboardingResult.status === "fulfilled") {
             setShowOnboarding(!onboardingResult.value);
           } else {
             console.warn(`${BRAND.logTag} hasCompletedOnboarding failed`, onboardingResult.reason);
@@ -133,13 +134,13 @@ export function useAppInitialization(initRunId: number) {
       } catch (err) {
         console.warn(`${BRAND.logTag} app initialization failed`, err);
         if (!cancelled) {
-          setInitError(tRef.current('tabs.loadFailed'));
+          setInitError(tRef.current("tabs.loadFailed"));
         }
       } finally {
         if (!cancelled) {
           setChecked(true);
         }
-        void recordMetric('newtabOpens');
+        void recordMetric("newtabOpens");
         // v1.0 封板：首屏性能采样
         recordFcpOnce();
         recordFpsSampleOnce();
@@ -156,13 +157,13 @@ export function useAppInitialization(initRunId: number) {
   useEffect(() => {
     if (!checked) return;
     const node = heroSearchRef.current;
-    if (node === null || typeof IntersectionObserver === 'undefined') return;
+    if (node === null || typeof IntersectionObserver === "undefined") return;
     const io = new IntersectionObserver(
       ([entry]) => {
         if (!entry) return;
         setCompactSearchVisible(!entry.isIntersecting);
       },
-      { rootMargin: '-64px 0px 0px 0px', threshold: 0 },
+      { rootMargin: "-64px 0px 0px 0px", threshold: 0 },
     );
     io.observe(node);
     return () => io.disconnect();

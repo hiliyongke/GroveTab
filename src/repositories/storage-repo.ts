@@ -8,6 +8,7 @@
 import { storageGet, storageSet } from "@/chrome";
 import { storageRemove, storageGetAllKeys } from "@/chrome/tabs";
 import { STORAGE_KEYS } from "@/shared/config/storage-keys";
+import { CLOSE_CONFIRM_THRESHOLD } from "@/shared/types/settings";
 import type {
   ActivityRecord,
   AutoSnapshotMeta,
@@ -79,7 +80,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   dedupStrictness: "loose",
   idleThresholdMinutes: 1440,
   undoWindowSeconds: 5,
-  closeConfirmThreshold: 20,
+  closeConfirmThreshold: CLOSE_CONFIRM_THRESHOLD,
   autoSnapshotFrequency: "12h",
   enableOgFetch: false,
   trackTabFocusTime: true,
