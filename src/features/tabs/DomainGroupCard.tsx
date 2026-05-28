@@ -16,7 +16,7 @@
  *   - 子项 favicon 显示可通过设置 `domainGroupShowItemFavicon` 切换
  */
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, memo } from "react";
 import { Tag, Button, Tooltip, theme, Typography, Flex, Space } from "antd";
 import { ChevronDown, X, Globe, Moon } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
@@ -44,7 +44,10 @@ interface DomainGroupCardProps {
 /**
  * 域名分组卡片：头部（可折叠）+ 标签列表
  */
-export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroupCardProps) {
+export const DomainGroupCard = memo(function DomainGroupCard({
+  group,
+  initialCollapsed = false,
+}: DomainGroupCardProps) {
   const { collapsed, toggleCollapse } = useCardCollapse({ initialCollapsed });
   const [faviconError, setFaviconError] = useState(false);
   /** 关闭整个分组的 in-flight 标记，防止重复点击 + 驱动 Button loading */
@@ -299,4 +302,4 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
       </Space>
     </GroupCardShell>
   );
-}
+});

@@ -141,7 +141,7 @@ export function MemoryGovernanceSettings({
         hint={t("白名单内的域名不会被自动休眠或归档。固定标签和正在播放媒体的标签始终豁免。")}
       >
         <Flex vertical gap={8} className={mgStyles["allowlist-section"]}>
-          <Space.Compact style={{ width: "100%" }}>
+          <Space.Compact className={mgStyles["memory-governance-compact"]}>
             <Input
               placeholder="mail.google.com"
               value={allowlistInput}

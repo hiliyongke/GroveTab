@@ -133,14 +133,12 @@ function VirtualColumn({ groups, useVirtual, forceCollapsed }: VirtualColumnProp
   return (
     <div
       ref={parentRef}
-      className={styles["app-domain-masonry-column"]}
-      style={{ overflowY: "auto", maxHeight: "calc(100vh - 200px)" }}
+      className={`${styles["app-domain-masonry-column"]} ${styles["domain-group-scroll-area"]}`}
     >
       <div
+        className={styles["domain-group-virtual-container"]}
         style={{
           height: `${virtualizer.getTotalSize()}px`,
-          width: "100%",
-          position: "relative",
         }}
       >
         {virtualItems.map((virtualItem) => {
@@ -150,14 +148,10 @@ function VirtualColumn({ groups, useVirtual, forceCollapsed }: VirtualColumnProp
               key={`${group.groupId}-${group.windowId}`}
               data-index={virtualItem.index}
               ref={virtualizer.measureElement}
+              className={`${styles["app-domain-masonry-item"]} ${styles["domain-group-virtual-item"]}`}
               style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
                 transform: `translateY(${virtualItem.start}px)`,
               }}
-              className={styles["app-domain-masonry-item"]}
             >
               <TabGroupCard group={group} forceCollapsed={forceCollapsed} />
             </div>

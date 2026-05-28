@@ -23,7 +23,13 @@ import type { RestoreOutcome } from "@/services/archive";
 import { createTab, getCurrentWindow } from "@/chrome";
 import { useT } from "@/shared/i18n";
 import { track } from "@/shared/utils/metrics";
-import { useTabsStore, useUndoStore, useMetadataStore, useSettingsStore, useSessionsStore } from "@/store";
+import {
+  useTabsStore,
+  useUndoStore,
+  useMetadataStore,
+  useSettingsStore,
+  useSessionsStore,
+} from "@/store";
 import { feedback } from "@/shared/ui/feedback";
 import { appendHistoryEvent } from "@/repositories";
 import { SessionCard } from "./components/SessionCard";
@@ -93,6 +99,9 @@ export function ArchiveView() {
 
   const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
   const tabCount = useTabsStore((s) => s.tabs.length);
+  const pushActivity = useMetadataStore((s) => s.pushActivity);
+  const addUndoRecord = useUndoStore((s) => s.addRecord);
+  const renameSessionAction = useSessionsStore((s) => s.renameSession);
   const { t, locale } = useT();
 
   useEffect(() => {
@@ -337,7 +346,7 @@ export function ArchiveView() {
       setMergeOpen(false);
       cancelSelect();
       feedback.success(t("已合并为 1 个会话，共 {count} 个标签", { count: newSession.tabCount }));
-      void useMetadataStore.getState().pushActivity({
+      void pushActivity({
         id: `merge-${newSession.id}`,
         type: "archive",
         ts: Date.now(),
@@ -398,15 +407,13 @@ export function ArchiveView() {
         failCount > 0
           ? t("已有 {count} 个标签页未能关闭，可稍后手动处理", { count: failCount })
           : "";
-      void useUndoStore
-        .getState()
-        .addRecord(
-          snapshots,
-          t("已归档 {count} 个标签到「{name}」", { count: archivedCount, name: session.name }),
-          { archivedSessionId: session.id, subNote },
-        );
+      void addUndoRecord(
+        snapshots,
+        t("已归档 {count} 个标签到「{name}」", { count: archivedCount, name: session.name }),
+        { archivedSessionId: session.id, subNote },
+      );
 
-      void useMetadataStore.getState().pushActivity({
+      void pushActivity({
         id: `archive-${session.id}`,
         type: "archive",
         ts: Date.now(),
@@ -690,7 +697,7 @@ export function ArchiveView() {
           }}
           onRenameConfirm={async (id, newName) => {
             try {
-              await useSessionsStore.getState().renameSession(id, newName);
+              await renameSessionAction(id, newName);
               feedback.success(t("重命名成功"));
             } catch (err) {
               feedback.error(t("重命名"), err);

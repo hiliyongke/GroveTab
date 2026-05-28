@@ -5,7 +5,7 @@ import type { UserSettings } from "@/shared/types";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import type { SettingsTabKey } from "./settings-tab-keys";
 import { AboutPanel } from "./panels/AboutPanel";
-import { AppearancePanel } from "./panels/AppearancePanel";
+import { AppearancePanel } from "./panels/appearance/AppearancePanel";
 import { BehaviorPanel } from "./panels/BehaviorPanel";
 import { SystemPanel } from "./panels/SystemPanel";
 

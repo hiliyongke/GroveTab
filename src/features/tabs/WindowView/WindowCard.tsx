@@ -8,7 +8,7 @@
  *   - Ghost Drop Zone：快速创建分组
  */
 
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import { Button, Dropdown, Input, Tag, Tooltip, Typography, Flex, List, theme } from "antd";
 import { ChevronDown, EyeOff, Layers, Monitor, MoreHorizontal, Plus, Shield } from "lucide-react";
 
@@ -72,7 +72,7 @@ function getWindowTitle(
   return isCurrent ? t("window.current") : t("window.otherWithId", { id: windowId });
 }
 
-export function WindowCard({
+export const WindowCard = memo(function WindowCard({
   windowId,
   tabs,
   windowInfo,
@@ -297,4 +297,4 @@ export function WindowCard({
       )}
     </GroupCardShell>
   );
-}
+});

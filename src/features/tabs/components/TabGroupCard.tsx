@@ -7,7 +7,7 @@
  *   - 内容区：TabItem 列表，支持多选
  */
 
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import { Button, Dropdown, Input, Popover, Space, Tag, Tooltip, Typography, theme } from "antd";
 import type { MenuProps } from "antd";
 import {
@@ -75,7 +75,10 @@ interface TabGroupCardProps {
   forceCollapsed?: boolean;
 }
 
-export function TabGroupCard({ group, forceCollapsed }: TabGroupCardProps) {
+export const TabGroupCard = memo(function TabGroupCard({
+  group,
+  forceCollapsed,
+}: TabGroupCardProps) {
   const { t } = useT();
   const { token } = theme.useToken();
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
@@ -246,7 +249,7 @@ export function TabGroupCard({ group, forceCollapsed }: TabGroupCardProps) {
             <Typography.Text
               aria-hidden
               className={styles["app-tab-group-card-color-dot"]}
-              style={{ background: colorValue }}
+              style={{ "--tab-group-color": colorValue } as React.CSSProperties}
             />
             {renaming ? (
               <Input
@@ -305,4 +308,4 @@ export function TabGroupCard({ group, forceCollapsed }: TabGroupCardProps) {
       </Space>
     </GroupCardShell>
   );
-}
+});

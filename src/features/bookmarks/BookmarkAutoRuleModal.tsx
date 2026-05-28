@@ -28,6 +28,7 @@ import { useT } from "@/shared/i18n";
 import { feedback } from "@/shared/ui/feedback";
 import { translate } from "@/shared/i18n/core";
 import type { BookmarkAutoRule } from "./bookmark-auto-rules";
+import styles from "./BookmarkAutoRuleModal.module.less";
 import {
   getBookmarkAutoRules,
   addBookmarkAutoRule,
@@ -157,7 +158,7 @@ export function BookmarkAutoRuleModal({ open, onClose, onMutated }: BookmarkAuto
               name="name"
               label={t("规则名称")}
               rules={[{ required: true, message: t("请输入规则名称") }]}
-              style={{ flex: 1 }}
+              className={styles["bookmark-rule-field"]}
             >
               <Input placeholder={t("如：GitHub 书签")} />
             </Form.Item>
@@ -165,7 +166,7 @@ export function BookmarkAutoRuleModal({ open, onClose, onMutated }: BookmarkAuto
               name="targetFolderName"
               label={t("目标文件夹")}
               rules={[{ required: true, message: t("请输入目标文件夹名") }]}
-              style={{ flex: 1 }}
+              className={styles["bookmark-rule-field"]}
             >
               <Input placeholder={t("如：GitHub")} />
             </Form.Item>
@@ -242,7 +243,7 @@ export function BookmarkAutoRuleModal({ open, onClose, onMutated }: BookmarkAuto
                   }
                   description={
                     <Flex gap={8} align="center">
-                      <Typography.Text code style={{ fontSize: 12 }}>
+                      <Typography.Text code className={styles["bookmark-rule-value"]}>
                         {rule.pattern}
                       </Typography.Text>
                       <Typography.Text type="secondary">→</Typography.Text>

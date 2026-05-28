@@ -10,7 +10,7 @@
  *   - 所有交互走 antd Button + Tag + Tooltip 原生组件
  */
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, memo } from "react";
 import type { LiveTab } from "@/shared/types";
 import { Button, Tag, Tooltip, Checkbox, theme, Flex, Typography } from "antd";
 import { Globe, Volume2, Pin, MessageSquare, X, Pointer, Star } from "lucide-react";
@@ -68,7 +68,7 @@ interface TabItemProps {
 /**
  * 单条标签行
  */
-export function TabItem({
+export const TabItem = memo(function TabItem({
   tab,
   onJump,
   onClose,
@@ -276,7 +276,9 @@ export function TabItem({
                 void Promise.resolve(onClose(id)).catch(() => {});
               }}
             >
-              <Typography.Text className={styles["app-tab-item-title"]}>{tab.title}</Typography.Text>
+              <Typography.Text className={styles["app-tab-item-title"]}>
+                {tab.title}
+              </Typography.Text>
             </TabPreviewCard>
             {showHostname && (
               <Typography.Text className={styles["app-tab-item-hostname"]}>
@@ -313,12 +315,12 @@ export function TabItem({
         {/* 状态图标 */}
         <Flex className={styles["app-tab-item-status"]} align="center" gap="small">
           {tab.audible && (
-            <Tooltip title={t('正在播放')}>
+            <Tooltip title={t("正在播放")}>
               <Volume2 size={ICON_SIZE.SMALL} className={styles["app-tab-item-status-primary"]} />
             </Tooltip>
           )}
           {!tab.isCurrentWindow && (
-            <Tooltip title={t('其他窗口')}>
+            <Tooltip title={t("其他窗口")}>
               {/* 使用外链箭头图标表达「跳去另一个窗口」语义，避免与 favicon 兜底的 Global 图标混淆 */}
               <Pointer size={ICON_SIZE.SMALL} className={styles["app-tab-item-secondary-icon"]} />
             </Tooltip>
@@ -329,9 +331,7 @@ export function TabItem({
         {trailing}
 
         {/* 添加到常用站点——hover 时显示星标按钮，已添加则高亮常驻 */}
-        <Tooltip
-          title={isInQuickStart ? t('已在常用站点中') : t('添加到常用站点')}
-        >
+        <Tooltip title={isInQuickStart ? t("已在常用站点中") : t("添加到常用站点")}>
           <Button
             type="text"
             size="small"
@@ -348,7 +348,7 @@ export function TabItem({
                 createdAt: Date.now(),
               });
             }}
-            aria-label={t('添加到常用站点')}
+            aria-label={t("添加到常用站点")}
             className={[
               styles["app-tab-item-action"],
               styles["app-tab-item-action--favorite"],
@@ -358,14 +358,14 @@ export function TabItem({
         </Tooltip>
 
         {/* 关闭按钮（hover/focus 时显示，由父节点 .app-hover-reveal-host 驱动） */}
-        <Tooltip title={t('关闭标签页')}>
+        <Tooltip title={t("关闭标签页")}>
           <Button
             type="text"
             size="small"
             danger
             icon={<X size={ICON_SIZE.SMALL} />}
             onClick={handleClose}
-            aria-label={t('关闭标签页')}
+            aria-label={t("关闭标签页")}
             className={`app-hover-reveal ${styles["app-tab-item-action"]}`}
           />
         </Tooltip>
@@ -385,4 +385,4 @@ export function TabItem({
       )}
     </>
   );
-}
+});

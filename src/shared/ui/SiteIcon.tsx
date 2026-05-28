@@ -4,7 +4,7 @@
  * 用于书签、历史、搜索等场景统一展示站点图标。
  */
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, memo } from "react";
 import { Image } from "antd";
 import { getFaviconUrl } from "@/chrome";
 import styles from "./SiteIcon.module.less";
@@ -18,7 +18,7 @@ interface SiteIconProps {
   className?: string;
 }
 
-export function SiteIcon({ url, size = 18, className }: SiteIconProps) {
+export const SiteIcon = memo(function SiteIcon({ url, size = 18, className }: SiteIconProps) {
   const fav = getFaviconUrl(url);
   const [err, setErr] = useState(false);
 
@@ -55,4 +55,4 @@ export function SiteIcon({ url, size = 18, className }: SiteIconProps) {
       {letter}
     </span>
   );
-}
+});

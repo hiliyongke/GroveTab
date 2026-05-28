@@ -106,14 +106,12 @@ function VirtualColumn({ groups, useVirtual }: VirtualColumnProps) {
   return (
     <div
       ref={parentRef}
-      className={styles["app-domain-masonry-column"]}
-      style={{ overflowY: "auto", maxHeight: "calc(100vh - 200px)" }}
+      className={`${styles["app-domain-masonry-column"]} ${styles["domain-group-scroll-area"]}`}
     >
       <div
+        className={styles["domain-group-virtual-container"]}
         style={{
           height: `${virtualizer.getTotalSize()}px`,
-          width: "100%",
-          position: "relative",
         }}
       >
         {virtualItems.map((virtualItem) => {
@@ -123,14 +121,10 @@ function VirtualColumn({ groups, useVirtual }: VirtualColumnProps) {
               key={group.domain}
               data-index={virtualItem.index}
               ref={virtualizer.measureElement}
+              className={`${styles["app-domain-masonry-item"]} ${styles["domain-group-virtual-item"]}`}
               style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
                 transform: `translateY(${virtualItem.start}px)`,
               }}
-              className={styles["app-domain-masonry-item"]}
             >
               <DomainGroupCard group={group} initialCollapsed={false} />
             </div>
@@ -221,9 +215,7 @@ export function DomainGroupView({ filterQuery }: DomainGroupViewProps) {
     return sortedGroups.filter((group) => {
       if (group.domain.toLowerCase().includes(query)) return true;
       return group.tabs.some(
-        (tab) =>
-          tab.title.toLowerCase().includes(query) ||
-          tab.url.toLowerCase().includes(query),
+        (tab) => tab.title.toLowerCase().includes(query) || tab.url.toLowerCase().includes(query),
       );
     });
   }, [sortedGroups, filterQuery]);
@@ -246,7 +238,11 @@ export function DomainGroupView({ filterQuery }: DomainGroupViewProps) {
             <Empty description={t("search.noDomainResults")} />
           ) : (
             columns.map((columnGroups, columnIndex) => (
-              <VirtualColumn key={columnIndex} groups={columnGroups} useVirtual={useVirtualization} />
+              <VirtualColumn
+                key={columnIndex}
+                groups={columnGroups}
+                useVirtual={useVirtualization}
+              />
             ))
           )}
         </div>

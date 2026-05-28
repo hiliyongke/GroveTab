@@ -6,7 +6,7 @@
  */
 
 import { useState, useCallback } from "react";
-import { Button, Card, Flex, Switch, Typography, Tag, Popconfirm, Empty, theme } from "antd";
+import { Button, Card, Flex, Switch, Typography, Tag, Popconfirm, Empty } from "antd";
 import { Plus, Trash2, Edit3, Clock, Globe } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
@@ -18,10 +18,10 @@ import {
   deleteAutomationRule,
 } from "@/repositories/automation-rule-repo";
 import { AutomationRuleEditor } from "./AutomationRuleEditor";
+import styles from "./AutomationPanel.module.less";
 
 export function AutomationPanel() {
   const { t } = useT();
-  const { token } = theme.useToken();
   const rules = useSettingsStore((s) => s.automationRules ?? []);
   const setRules = useSettingsStore((s) => s.setAutomationRules);
   const [editingRule, setEditingRule] = useState<AutomationRule | null>(null);
@@ -84,11 +84,16 @@ export function AutomationPanel() {
 
   const getActionLabel = (action: RuleAction): string => {
     switch (action.type) {
-      case "close": return t("关闭");
-      case "discard": return t("休眠");
-      case "group": return t("分组到 {name}", { name: action.groupName });
-      case "pin": return t("固定");
-      case "unpin": return t("取消固定");
+      case "close":
+        return t("关闭");
+      case "discard":
+        return t("休眠");
+      case "group":
+        return t("分组到 {name}", { name: action.groupName });
+      case "pin":
+        return t("固定");
+      case "unpin":
+        return t("取消固定");
     }
   };
 
@@ -96,7 +101,9 @@ export function AutomationPanel() {
     return (
       <AutomationRuleEditor
         rule={editingRule}
-        onSave={handleSave}
+        onSave={(rule) => {
+          void handleSave(rule);
+        }}
         onCancel={() => {
           setShowEditor(false);
           setEditingRule(null);
@@ -129,17 +136,18 @@ export function AutomationPanel() {
           <Card
             key={rule.id}
             size="small"
-            style={{
-              opacity: rule.enabled ? 1 : 0.55,
-              borderColor: rule.enabled ? token.colorPrimary : token.colorBorderSecondary,
-            }}
+            className={
+              rule.enabled
+                ? styles["automation-rule-card--enabled"]
+                : styles["automation-rule-card--disabled"]
+            }
           >
             <Flex justify="space-between" align="center">
               <Flex align="center" gap="small">
                 {rule.condition.kind === "onEvent" ? (
-                  <Globe size={ICON_SIZE.SMALL} style={{ color: token.colorPrimary }} />
+                  <Globe size={ICON_SIZE.SMALL} className={styles["automation-icon-primary"]} />
                 ) : (
-                  <Clock size={ICON_SIZE.SMALL} style={{ color: token.colorTextTertiary }} />
+                  <Clock size={ICON_SIZE.SMALL} className={styles["automation-icon-tertiary"]} />
                 )}
                 <Typography.Text strong>{rule.name}</Typography.Text>
                 <Tag>{getConditionLabel(rule)}</Tag>

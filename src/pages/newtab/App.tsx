@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useMemo, useRef, lazy, Suspense } from "react";
 import { Layout, Spin, Typography, FloatButton, Flex, Segmented, Drawer } from "antd";
+import styles from "./App.module.less";
 import { useTabsStore, useSettingsStore, useSelectionStore } from "@/store";
 import { useShallow } from "zustand/shallow";
 import {
@@ -370,7 +371,7 @@ function AppContent() {
       )}
 
       {/* 主体区：侧边栏 + 内容 */}
-      <Flex flex={1} style={{ minHeight: 0 }}>
+      <Flex flex={1} className={styles["app-content-fill"]}>
         {pageMode === "workspace" && showViewSwitcher && viewTabPosition === "left" && (
           <ViewSidebar viewMode={viewMode} onViewChange={handleViewChange} position="left" />
         )}

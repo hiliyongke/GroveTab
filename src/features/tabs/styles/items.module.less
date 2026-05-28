@@ -483,10 +483,28 @@
   height: 10px;
   flex-shrink: 0;
   border-radius: 50%;
+  background: var(--tab-group-color);
 }
 
 /* Toolbar 搜索输入框 — 统一 max-width + flex 行为 */
 .app-toolbar-search-input {
   max-width: 400px;
   flex: 1 1 auto;
+}
+
+.domain-group-scroll-area {
+  overflow-y: auto;
+  max-height: calc(100vh - 200px);
+}
+
+.domain-group-virtual-container {
+  width: 100%;
+  position: relative;
+}
+
+.domain-group-virtual-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
 }
