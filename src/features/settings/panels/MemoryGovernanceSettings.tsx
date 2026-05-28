@@ -15,6 +15,7 @@ import { useState } from "react";
 import type { UserSettings } from "@/shared/types";
 import { useT } from "@/shared/i18n";
 import { Field } from "@/features/settings/components/Field";
+import mgStyles from "./MemoryGovernanceSettings.module.less";
 
 interface MemoryGovernanceSettingsProps {
   settings: UserSettings;
@@ -70,7 +71,7 @@ export function MemoryGovernanceSettings({
         label={t("内存压力阈值（%）")}
         hint={t("已用内存占总内存的比例达到此值时触发治理动作，默认 80%。")}
       >
-        <Flex align="center" gap={12} style={{ width: "100%" }}>
+        <Flex align="center" gap={12} className={mgStyles["threshold-row"]}>
           <Slider
             min={50}
             max={95}
@@ -78,9 +79,9 @@ export function MemoryGovernanceSettings({
             value={threshold}
             onChange={(v) => handle({ memoryPressureThreshold: v })}
             disabled={!enabled}
-            style={{ flex: 1 }}
+            className={mgStyles["threshold-slider"]}
           />
-          <span style={{ minWidth: 36, textAlign: "right" }}>{threshold}%</span>
+          <span className={mgStyles["threshold-value"]}>{threshold}%</span>
         </Flex>
       </Field>
 
@@ -113,7 +114,7 @@ export function MemoryGovernanceSettings({
           value={maxTabs}
           disabled={!enabled}
           onChange={(v) => v !== null && handle({ memoryGovernanceMaxTabs: v })}
-          style={{ width: 80 }}
+          className={mgStyles["max-tabs-input"]}
         />
       </Field>
 
@@ -139,7 +140,7 @@ export function MemoryGovernanceSettings({
         label={t("例外白名单（域名）")}
         hint={t("白名单内的域名不会被自动休眠或归档。固定标签和正在播放媒体的标签始终豁免。")}
       >
-        <Flex vertical gap={8} style={{ width: "100%" }}>
+        <Flex vertical gap={8} className={mgStyles["allowlist-section"]}>
           <Space.Compact style={{ width: "100%" }}>
             <Input
               placeholder="mail.google.com"
@@ -147,7 +148,7 @@ export function MemoryGovernanceSettings({
               disabled={!enabled}
               onChange={(e) => setAllowlistInput(e.target.value)}
               onPressEnter={addAllowlistHost}
-              style={{ flex: 1 }}
+              className={mgStyles["allowlist-input"]}
             />
             <Button disabled={!enabled || !allowlistInput.trim()} onClick={addAllowlistHost}>
               {t("添加")}

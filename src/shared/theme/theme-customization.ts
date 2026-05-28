@@ -461,8 +461,13 @@ export function buildAppThemeVars(
     "--app-space-2": `calc(8px * ${densityScale})`,
     "--app-space-3": `calc(12px * ${densityScale})`,
     "--app-space-4": `calc(16px * ${densityScale})`,
-    "--app-space-5": `calc(24px * ${densityScale})`,
-    "--app-space-6": `calc(32px * ${densityScale})`,
+    "--app-space-5": `calc(20px * ${densityScale})`,
+    "--app-space-6": `calc(24px * ${densityScale})`,
+    "--app-space-7": `calc(28px * ${densityScale})`,
+    "--app-space-8": `calc(32px * ${densityScale})`,
+    "--app-space-10": `calc(40px * ${densityScale})`,
+    "--app-space-12": `calc(48px * ${densityScale})`,
+    "--app-space-16": `calc(64px * ${densityScale})`,
 
     "--app-card-radius": `${skin.borderRadiusLG}px`,
     "--app-card-lift":

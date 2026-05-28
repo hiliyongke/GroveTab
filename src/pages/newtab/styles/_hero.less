@@ -1,0 +1,204 @@
+/* ── Hero 区 ──
+ *
+ * 承载：.app-hero 及子元素、搜索框、
+ * 视图切换器 .app-view-switcher 及子元素
+ */
+.app-hero {
+  /* Antd Flex 通过 props 提供 flex-direction: column, align-items: center, gap: 16px */
+  position: relative;
+  padding: 52px 0 36px;
+}
+
+.app-hero::before {
+  content: "";
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  width: min(820px, 86vw);
+  height: 230px;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at 24% 35%,
+      color-mix(in srgb, var(--app-color-primary, #2b6bff) 18%, transparent),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at 78% 22%,
+      color-mix(in srgb, var(--ant-color-info, #1677ff) 14%, transparent),
+      transparent 32%
+    );
+  filter: blur(24px);
+  opacity: 0.72;
+  transform: translateX(-50%);
+}
+
+.app-hero-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
+.app-hero-title {
+  font-size: clamp(24px, 3vw, 38px);
+  font-weight: 760;
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+  color: var(--app-text-primary);
+  text-wrap: balance;
+}
+
+.app-hero-slogan {
+  max-width: 560px;
+  font-size: 13px;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+  color: var(--ant-color-text-tertiary);
+  text-align: center;
+}
+
+.app-hero-search-wrap {
+  width: 100%;
+  max-width: 680px;
+}
+
+.app-hero-search {
+  height: var(--app-search-height);
+  cursor: pointer;
+  font-size: var(--app-search-font-size);
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--app-acrylic-highlight, #fff) 56%, transparent),
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 4%, transparent),
+      transparent 64%
+    ),
+    var(--app-acrylic-bg, var(--ant-color-bg-elevated));
+  border: 1px solid
+    var(
+      --app-acrylic-border,
+      color-mix(in srgb, var(--ant-color-border-secondary) 76%, transparent)
+    );
+  border-radius: calc(var(--app-search-radius) + 6px);
+  box-shadow:
+    0 24px 70px -38px
+      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 58%, transparent),
+    0 12px 40px -30px color-mix(in srgb, var(--ant-color-text) 55%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--app-acrylic-highlight, #fff) 56%, transparent);
+  backdrop-filter: blur(var(--app-glass-blur, 18px)) saturate(var(--app-glass-saturate, 160%));
+  -webkit-backdrop-filter: blur(var(--app-glass-blur, 18px))
+    saturate(var(--app-glass-saturate, 160%));
+}
+
+.app-hero-search:hover {
+  transform: translateY(-2px) scale(1.006);
+  border-color: color-mix(
+    in srgb,
+    var(--app-color-primary, var(--ant-color-primary)) 42%,
+    transparent
+  );
+  box-shadow:
+    0 30px 86px -42px
+      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 70%, transparent),
+    0 18px 46px -34px color-mix(in srgb, var(--ant-color-text) 62%, transparent),
+    0 0 0 5px
+      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 10%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 50%, transparent);
+}
+
+[data-theme="dark"] .app-hero-search:hover {
+  box-shadow:
+    0 10px 32px color-mix(in srgb, #000 40%, transparent),
+    0 0 0 4px
+      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 12%, transparent);
+}
+
+.app-view-switcher-wrap {
+  display: flex;
+  justify-content: flex-start;
+  max-width: 100%;
+  margin: calc(var(--app-space-6, 24px) * -0.35) 0 var(--app-space-6, 24px);
+  padding: 2px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.app-view-switcher-wrap::-webkit-scrollbar {
+  display: none;
+}
+
+.app-view-switcher {
+  --app-view-switcher-bg: color-mix(in srgb, var(--ant-color-bg-container) 58%, transparent);
+  --app-view-switcher-border: color-mix(
+    in srgb,
+    var(--ant-color-border-secondary) 58%,
+    transparent
+  );
+  --app-view-switcher-hover-bg: color-mix(
+    in srgb,
+    var(--app-color-primary, var(--ant-color-primary)) 8%,
+    transparent
+  );
+  --app-view-switcher-selected-bg: color-mix(
+    in srgb,
+    var(--ant-color-bg-elevated) 82%,
+    transparent
+  );
+  --app-view-switcher-selected-shadow: color-mix(in srgb, var(--ant-color-text) 10%, transparent);
+
+  flex: 0 0 auto;
+  max-width: 100%;
+  background: var(--app-view-switcher-bg);
+  border: 1px solid var(--app-view-switcher-border);
+  border-radius: var(--app-radius-md);
+  box-shadow: none;
+  backdrop-filter: blur(14px) saturate(var(--app-glass-saturate, 150%));
+  -webkit-backdrop-filter: blur(14px) saturate(var(--app-glass-saturate, 150%));
+}
+
+[data-theme="dark"] .app-view-switcher {
+  --app-view-switcher-bg: color-mix(in srgb, var(--ant-color-bg-container) 34%, transparent);
+  --app-view-switcher-border: color-mix(
+    in srgb,
+    var(--ant-color-border-secondary) 46%,
+    transparent
+  );
+  --app-view-switcher-hover-bg: color-mix(
+    in srgb,
+    var(--app-color-primary, var(--ant-color-primary)) 14%,
+    transparent
+  );
+  --app-view-switcher-selected-bg: color-mix(
+    in srgb,
+    var(--ant-color-bg-elevated) 62%,
+    transparent
+  );
+  --app-view-switcher-selected-shadow: color-mix(in srgb, #000 32%, transparent);
+}
+
+.app-view-switcher__item {
+  border-radius: calc(var(--app-radius-md) - 2px);
+}
+
+.app-view-switcher__item .ant-segmented-item-label {
+  min-height: 30px;
+  padding: 0 11px;
+  line-height: 30px;
+}
+
+.app-view-switcher__item:hover {
+  color: var(--ant-color-text);
+  background: var(--app-view-switcher-hover-bg);
+}
+
+.app-view-switcher .ant-segmented-thumb,
+.app-view-switcher .ant-segmented-item-selected {
+  background: var(--app-view-switcher-selected-bg);
+  box-shadow: 0 2px 8px var(--app-view-switcher-selected-shadow);
+}

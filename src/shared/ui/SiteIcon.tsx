@@ -4,9 +4,10 @@
  * 用于书签、历史、搜索等场景统一展示站点图标。
  */
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Image } from "antd";
 import { getFaviconUrl } from "@/chrome";
+import styles from "./SiteIcon.module.less";
 
 interface SiteIconProps {
   /** 站点 URL */
@@ -28,13 +29,19 @@ export function SiteIcon({ url, size = 18, className }: SiteIconProps) {
     // 保留原始 url
   }
 
+  /* 用 CSS 变量驱动尺寸，避免每次 size 变化都创建新 style 对象 */
+  const cssVars = useMemo(
+    () => ({ "--site-icon-size": `${size}px` }) as React.CSSProperties,
+    [size],
+  );
+
   if (fav && !err) {
     return (
       <Image
         src={fav}
         alt=""
-        className={className}
-        style={{ width: size, height: size, flexShrink: 0 }}
+        className={`${styles.image} ${className ?? ""}`.trim()}
+        style={cssVars}
         onError={() => setErr(true)}
         preview={false}
         fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
@@ -44,22 +51,7 @@ export function SiteIcon({ url, size = 18, className }: SiteIconProps) {
 
   const letter = (host.charAt(0) || "?").toUpperCase();
   return (
-    <span
-      className={className}
-      style={{
-        width: size,
-        height: size,
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexShrink: 0,
-        borderRadius: 4,
-        backgroundColor: "var(--ant-color-fill-secondary)",
-        fontSize: size * 0.6,
-        fontWeight: 600,
-        color: "var(--ant-color-text-secondary)",
-      }}
-    >
+    <span className={`${styles.fallback} ${className ?? ""}`.trim()} style={cssVars}>
       {letter}
     </span>
   );

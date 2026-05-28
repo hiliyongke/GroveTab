@@ -1,0 +1,139 @@
+/**
+ * _animations.less — 动画与聚焦态
+ *
+ * 职责：全局聚焦态优化、所有 @keyframes、动画触发类、皮肤纹理 body::before
+ */
+/* ─── 全局聚焦态优化 ──────────────────────────────
+ * 移除默认 outline，改用柔和的 brand shadow ring；
+ * 仅在键盘导航时显示（:focus-visible），鼠标点击不出现。
+ */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-color-primary) 35%, transparent);
+  border-radius: inherit;
+}
+
+/* ─── 主题切换图标动画 ─────────────────────────────
+ * 头部明暗切换按钮在 theme 变化时，icon 元素通过 key 被重建；
+ * 这里给它一个轻量的「旋转 + 渐入」效果，让切换可感知。
+ */
+@keyframes app-theme-icon-spin {
+  0% {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.6);
+  }
+  60% {
+    opacity: 1;
+    transform: rotate(10deg) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+}
+
+/** 热榜刷新按钮旋转动画 */
+@keyframes app-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ─── 页面入场动画 ─────────────────────────────────
+ * 首屏加载完成后，主内容区做一个柔和的上滑渐入。
+ */
+@keyframes app-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 主内容入场：由 [data-app-content] 元素触发 */
+[data-app-content] {
+  animation: app-fade-in-up 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ─── 视图切换动画 ─────────────────────────────────
+ * 路由/视图切换时的淡入淡出效果
+ */
+@keyframes app-view-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.app-view-transition {
+  animation: app-view-fade-in var(--app-motion-duration-slow, 0.3s) cubic-bezier(0.22, 1, 0.36, 1);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── 底部浮动操作栏入场 ───────────────────────────
+ * 上滑 + 渐入，配合 scale 让点击感更有物理性。
+ */
+@keyframes app-float-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+.app-batch-bar {
+  animation: app-float-in 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ─── Tidy 建议栏展开动画 ─────────────────────────── */
+@keyframes app-accordion-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.app-accordion-panel {
+  animation: app-accordion-in 0.22s ease-out;
+  transform-origin: top center;
+}
+
+/* ─── 皮肤纹理：噪点叠加 ──────────────────────────
+ * 当 <html> 上有 data-texture-noise 属性时，
+ * 通过 SVG filter 在 body 上叠加一层微弱噪点，增加纸张/实体质感。
+ * 由 AntdThemeProvider 动态控制此属性。
+ */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  filter: url(#app-noise);
+  transition: opacity 0.3s ease;
+}
+
+html[data-texture-noise] body::before {
+  opacity: var(--app-texture-noise-opacity, 0.03);
+}

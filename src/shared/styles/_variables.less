@@ -8,7 +8,7 @@
  *   4. 运行时动态值（颜色、主题色、皮肤色）继续使用 CSS -- 变量
  *
  * 用法：
- *   @import (reference) '~@/shared/styles/_variables.less';
+ *   @import (reference) '@/shared/styles/_variables.less';
  *   .my-component { padding: @app-space-3; }
  */
 
@@ -23,12 +23,17 @@
 @density-scale: 1;
 
 /* ── 语义间距（基础值，编译时常量） ── */
-@app-space-1: ceil(@spacing-unit * @density-scale); /* 4px  → 4px  (default) */
+@app-space-1: ceil(@spacing-unit * 1 * @density-scale); /* 4px  → 4px  (default) */
 @app-space-2: ceil(@spacing-unit * 2 * @density-scale); /* 8px  → 8px  */
 @app-space-3: ceil(@spacing-unit * 3 * @density-scale); /* 12px → 12px */
 @app-space-4: ceil(@spacing-unit * 4 * @density-scale); /* 16px → 16px */
-@app-space-5: ceil(@spacing-unit * 6 * @density-scale); /* 24px → 24px */
-@app-space-6: ceil(@spacing-unit * 8 * @density-scale); /* 32px → 32px */
+@app-space-5: ceil(@spacing-unit * 5 * @density-scale); /* 20px → 20px */
+@app-space-6: ceil(@spacing-unit * 6 * @density-scale); /* 24px → 24px */
+@app-space-7: ceil(@spacing-unit * 7 * @density-scale); /* 28px → 28px */
+@app-space-8: ceil(@spacing-unit * 8 * @density-scale); /* 32px → 32px */
+@app-space-10: ceil(@spacing-unit * 10 * @density-scale); /* 40px → 40px */
+@app-space-12: ceil(@spacing-unit * 12 * @density-scale); /* 48px → 48px */
+@app-space-16: ceil(@spacing-unit * 16 * @density-scale); /* 64px → 64px */
 
 /* ── 卡片间距 ── */
 @app-card-gap: ceil(16px * @density-scale); /* 16px */
@@ -164,4 +169,3 @@
   --app-modal-bg: var(--app-bg-glass);
   --app-modal-mask-bg: var(--app-bg-mask);
 }
-

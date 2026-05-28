@@ -2,7 +2,14 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { writeFileSync, mkdirSync, readFileSync, readdirSync, copyFileSync, existsSync } from "node:fs";
+import {
+  writeFileSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  copyFileSync,
+  existsSync,
+} from "node:fs";
 import { createHash } from "node:crypto";
 
 /**
@@ -54,7 +61,11 @@ function buildI18nLookup(locale: "zh-CN" | "en"): Record<string, string> {
   const keyMapping = JSON.parse(readFileSync(keyMappingPath, "utf-8")) as Record<string, string>;
 
   // source: [{ key: "k_xxx", "zh-CN": "...", en: "..." }]
-  type SourceEntry = { key: string; "zh-CN": string; en: string };
+  interface SourceEntry {
+    key: string;
+    "zh-CN": string;
+    en: string;
+  }
   const sourceEntries = JSON.parse(readFileSync(sourcePath, "utf-8")) as SourceEntry[];
 
   // 构建 k_xxx → 翻译文本 的映射
@@ -159,7 +170,9 @@ function writeBrandLocales() {
       item.locale === "zh-CN" ? `欢迎使用 ${BUILD_BRAND.name}` : `Welcome to ${BUILD_BRAND.name}`;
 
     writeFileSync(file, JSON.stringify(messages, null, 2));
-    console.log(`[i18n] _locales/${item.dir}/messages.json 已同步（${Object.keys(i18nLookup).length / 2} 条翻译可用）`);
+    console.log(
+      `[i18n] _locales/${item.dir}/messages.json 已同步（${Object.keys(i18nLookup).length / 2} 条翻译可用）`,
+    );
   }
 }
 
@@ -292,6 +305,12 @@ export default defineConfig({
       // .module.less 文件自动启用 CSS Modules
       // 生成格式：[name]_[local]_[hash:6]，与项目现有 CSS Modules 命名一致
       generateScopedName: "[name]_[local]_[hash:6]",
+    },
+    preprocessorOptions: {
+      less: {
+        // 让 Less @import 能解析 @/ 路径别名
+        paths: [resolve(__dirname, "src")],
+      },
     },
   },
 });

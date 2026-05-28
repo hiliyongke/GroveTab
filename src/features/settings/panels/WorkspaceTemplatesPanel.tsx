@@ -10,6 +10,7 @@ import { Button, Card, Flex, Typography, Popconfirm, Empty, Input, Modal, theme 
 import { Plus, Trash2, Play, LayoutTemplate } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
+import styles from "./WorkspaceTemplatesPanel.module.less";
 import { useSettingsStore, useTabsStore } from "@/store";
 import type { WorkspaceTemplate, TemplateTab } from "@/shared/types";
 import {
@@ -48,19 +49,20 @@ export function WorkspaceTemplatesPanel() {
     setTemplateName("");
   }, [templateName, tabs, setTemplates]);
 
-  const handleRestore = useCallback(
-    async (template: WorkspaceTemplate) => {
-      for (const tab of template.tabs) {
+  const handleRestore = useCallback(async (template: WorkspaceTemplate) => {
+    for (const tab of template.tabs) {
+      try {
+        await createTab({ url: tab.url, active: false });
+      } catch {
+        // fallback
         try {
-          await createTab({ url: tab.url, active: false });
+          window.open(tab.url, "_blank");
         } catch {
-          // fallback
-          try { window.open(tab.url, "_blank"); } catch { /* ignore */ }
+          /* ignore */
         }
       }
-    },
-    [],
-  );
+    }
+  }, []);
 
   const handleDelete = useCallback(
     async (templateId: string) => {
@@ -109,17 +111,10 @@ export function WorkspaceTemplatesPanel() {
       </Modal>
 
       {templates.length === 0 ? (
-        <Empty
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description={t("暂无工作区模板")}
-        />
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t("暂无工作区模板")} />
       ) : (
         templates.map((template) => (
-          <Card
-            key={template.id}
-            size="small"
-            style={{ borderColor: token.colorBorderSecondary }}
-          >
+          <Card key={template.id} className={styles["template-card"]} size="small">
             <Flex justify="space-between" align="center">
               <Flex align="center" gap="small">
                 <LayoutTemplate size={ICON_SIZE.SMALL} style={{ color: token.colorPrimary }} />

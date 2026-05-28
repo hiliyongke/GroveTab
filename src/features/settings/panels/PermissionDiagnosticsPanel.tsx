@@ -12,6 +12,7 @@ import { Badge, Button, Flex, Space, Tag, Tooltip, Typography } from "antd";
 import { CheckCircle, XCircle, AlertCircle, RefreshCw, ShieldCheck } from "lucide-react";
 import { useT } from "@/shared/i18n";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
+import permStyles from "./PermissionDiagnosticsPanel.module.less";
 
 interface PermissionEntry {
   /** Chrome 权限名称 */
@@ -166,14 +167,10 @@ export function PermissionDiagnosticsPanel() {
             key={entry.permission}
             align="flex-start"
             gap={10}
-            style={{
-              padding: "8px 10px",
-              borderRadius: 6,
-              background: "var(--color-fill-quaternary, rgba(0,0,0,0.04))",
-            }}
+            className={permStyles["entry-row"]}
           >
             {/* 状态图标 */}
-            <div style={{ paddingTop: 2, flexShrink: 0 }}>
+            <div className={permStyles["entry-icon"]}>
               {entry.status === "checking" && <Badge status="processing" />}
               {entry.status === "granted" && (
                 <CheckCircle size={ICON_SIZE.MEDIUM} color="var(--color-success, #52c41a)" />
@@ -189,31 +186,31 @@ export function PermissionDiagnosticsPanel() {
             </div>
 
             {/* 权限信息 */}
-            <Flex vertical gap={2} style={{ flex: 1, minWidth: 0 }}>
+            <Flex vertical gap={2} className={permStyles["entry-info"]}>
               <Flex align="center" gap={6} wrap="wrap">
-                <Typography.Text code style={{ fontSize: 12 }}>
+                <Typography.Text code className={permStyles["entry-perm-code"]}>
                   {entry.permission}
                 </Typography.Text>
                 {entry.status === "denied" && (
-                  <Tag color="error" style={{ fontSize: 11 }}>
+                  <Tag color="error" className={permStyles["entry-tag"]}>
                     {t("未授权")}
                   </Tag>
                 )}
                 {entry.status === "unsupported" && (
-                  <Tag color="warning" style={{ fontSize: 11 }}>
+                  <Tag color="warning" className={permStyles["entry-tag"]}>
                     {t("不支持")}
                   </Tag>
                 )}
               </Flex>
               <Flex gap={4} wrap="wrap">
                 {entry.features.map((f) => (
-                  <Tag key={f} style={{ fontSize: 11, margin: 0 }}>
+                  <Tag key={f} className={permStyles["feature-tag"]}>
                     {f}
                   </Tag>
                 ))}
               </Flex>
               {entry.status === "denied" && (
-                <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                <Typography.Text type="secondary" className={permStyles["impact-text"]}>
                   {entry.impact}
                 </Typography.Text>
               )}
@@ -229,7 +226,7 @@ export function PermissionDiagnosticsPanel() {
                 onClick={() => {
                   void handleRequest(entry.permission);
                 }}
-                style={{ flexShrink: 0, alignSelf: "center" }}
+                className={permStyles["auth-button"]}
               >
                 {t("授权")}
               </Button>

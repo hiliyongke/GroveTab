@@ -1,0 +1,27 @@
+/**
+ * SiteIcon 组件样式
+ *
+ * 替代内联 style={{ width, height, borderRadius, ... }}，
+ * 通过 CSS 变量驱动尺寸/圆角/背景色，修复 React.memo 优化失效问题。
+ */
+
+.fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--site-icon-size, 18px);
+  height: var(--site-icon-size, 18px);
+  border-radius: var(--app-radius-sm);
+  background-color: var(--ant-color-fill-secondary);
+  font-size: calc(var(--site-icon-size, 18px) * 0.6);
+  font-weight: 600;
+  color: var(--ant-color-text-secondary);
+  line-height: 1;
+}
+
+.image {
+  flex-shrink: 0;
+  width: var(--site-icon-size, 18px);
+  height: var(--site-icon-size, 18px);
+}

@@ -377,7 +377,7 @@ export default function InsightsPanel({
 
         {/* 存储占用卡片 */}
         {!quotaLoading && quotaInfo && (
-          <Row gutter={[12, 12]} style={{ marginTop: 12 }}>
+          <Row gutter={[12, 12]} className={styles["insights-storage-row"]}>
             <Col xs={24} md={12}>
               <Card size="small" title={t("chrome.storage 占用")}>
                 <Progress
@@ -391,7 +391,7 @@ export default function InsightsPanel({
                   }
                   size="small"
                 />
-                <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                <Typography.Text type="secondary" className={styles["insights-stat-label"]}>
                   {formatBytes(quotaInfo.chromeStorageUsed)} /{" "}
                   {formatBytes(quotaInfo.chromeStorageTotal)}
                 </Typography.Text>
@@ -404,7 +404,7 @@ export default function InsightsPanel({
                   status={quotaInfo.opfsRatio >= 0.9 ? "exception" : "normal"}
                   size="small"
                 />
-                <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                <Typography.Text type="secondary" className={styles["insights-stat-label"]}>
                   {formatBytes(quotaInfo.opfsUsed)}
                   {quotaInfo.opfsTotal > 0 ? ` / ${formatBytes(quotaInfo.opfsTotal)}` : ""}
                 </Typography.Text>
@@ -415,7 +415,7 @@ export default function InsightsPanel({
 
         {/* 智能建议区 */}
         {suggestions.length > 0 && (
-          <Card size="small" title={t("智能建议")} style={{ marginTop: 12 }}>
+          <Card size="small" title={t("智能建议")} className={styles["insights-suggestions-card"]}>
             <Flex vertical gap={8}>
               {suggestions.map((s) => (
                 <Alert

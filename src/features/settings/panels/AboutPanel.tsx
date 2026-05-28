@@ -165,7 +165,7 @@ export function AboutPanel() {
               t('在 "外观" Tab 可以尝试极客模式定制圆角、字号、主色等细节。'),
             ]}
             renderItem={(item) => (
-              <List.Item style={{ padding: "4px 0", borderBottom: "none" }}>{item}</List.Item>
+              <List.Item className={styles["about-panel__tip-item"]}>{item}</List.Item>
             )}
           />
         </Flex>

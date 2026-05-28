@@ -1,0 +1,296 @@
+/* ── 顶栏（Header） ──
+ *
+ * 承载：.app-header-shell 及其子元素、搜索触发器、操作区、
+ * 空间切换菜单、图标、一键整理链接
+ */
+.app-header-shell {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex; /* antd 组件内部微调整 */
+  align-items: center;
+  height: var(--app-header-height);
+  padding: 0 var(--app-space-5);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--app-acrylic-highlight, #fff) 42%, transparent),
+      transparent 120%
+    ),
+    color-mix(
+      in srgb,
+      var(--app-mica-surface, var(--ant-color-bg-container)) 96%,
+      var(--app-color-primary, var(--ant-color-primary)) 4%
+    );
+  border-bottom: 1px solid
+    var(
+      --app-acrylic-border,
+      color-mix(in srgb, var(--ant-color-border-secondary) 72%, transparent)
+    );
+  backdrop-filter: blur(18px) saturate(var(--app-glass-saturate, 160%));
+  -webkit-backdrop-filter: blur(18px) saturate(var(--app-glass-saturate, 160%));
+  box-shadow: 0 12px 36px -28px color-mix(in srgb, var(--ant-color-text) 42%, transparent);
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    backdrop-filter 0.3s ease;
+}
+
+.app-header-shell.is-scrolled {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--app-acrylic-highlight, #fff) 54%, transparent),
+      transparent 120%
+    ),
+    color-mix(
+      in srgb,
+      var(--app-acrylic-bg, var(--ant-color-bg-elevated)) 98%,
+      var(--app-color-primary, var(--ant-color-primary)) 2%
+    );
+  border-bottom: 1px solid
+    var(
+      --app-acrylic-border,
+      color-mix(in srgb, var(--ant-color-border-secondary) 86%, transparent)
+    );
+  backdrop-filter: blur(22px) saturate(var(--app-glass-saturate, 170%));
+  -webkit-backdrop-filter: blur(22px) saturate(var(--app-glass-saturate, 170%));
+  box-shadow: 0 18px 46px -30px color-mix(in srgb, var(--ant-color-text) 56%, transparent);
+}
+
+.app-header-left {
+  flex-shrink: 0;
+  /* Antd Flex 通过 props 提供 display: flex, align-items: center, gap */
+}
+
+.app-header-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.app-header-status-tag,
+.app-header-metrics {
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease;
+}
+
+.app-header-status-tag.is-hidden,
+.app-header-metrics.is-hidden {
+  opacity: 0;
+  transform: translateX(-4px);
+}
+
+.app-header-status-tag.is-hidden {
+  pointer-events: none;
+}
+
+.app-header-metrics {
+  font-size: 12px;
+  color: var(--ant-color-text-secondary);
+  white-space: nowrap;
+}
+
+.app-header-status-tag {
+  margin: 0;
+  font-size: 10.5px;
+  font-weight: 500;
+  border-radius: var(--app-radius-sm);
+}
+
+.app-header-metric-warning.is-warning {
+  color: var(--ant-color-warning);
+}
+
+.app-icon {
+  flex-shrink: 0;
+}
+
+.app-icon--theme {
+  color: var(--ant-color-warning);
+}
+
+.app-icon--search,
+.app-hero-search-icon {
+  color: var(--ant-color-primary);
+}
+
+.app-icon--insights {
+  color: var(--ant-color-info);
+}
+
+.app-icon--settings {
+  color: var(--ant-color-text-secondary);
+}
+
+.app-header-search-icon {
+  color: var(--ant-color-primary);
+}
+
+.app-header-metric-strong {
+  color: var(--ant-color-text);
+  font-weight: 500;
+}
+
+.app-header-metric-warning {
+  font-weight: 500;
+}
+
+.app-header-dot {
+  margin: 0 6px;
+  color: var(--ant-color-border);
+}
+
+/* 一键整理链接 */
+.app-header-tidy-link {
+  all: unset;
+  box-sizing: border-box;
+  margin-left: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ant-color-primary);
+  letter-spacing: -0.01em;
+  transition: opacity 160ms ease;
+}
+
+.app-header-tidy-link:hover {
+  opacity: 0.72;
+}
+
+.app-header-tidy-link:active {
+  opacity: 0.52;
+}
+
+/* ── 顶栏中部（搜索触发器） ── */
+.app-header-center {
+  min-width: 280px;
+  padding-inline: 18px;
+  /* Antd Flex 通过 props 提供 flex, justify-content */
+}
+
+.app-header-search-trigger {
+  all: unset;
+  box-sizing: border-box;
+  width: min(560px, 100%);
+  max-width: 560px;
+  height: 36px;
+  display: flex; /* antd 组件内部微调整 */
+  align-items: center;
+  gap: 9px;
+  padding: 0 14px;
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  font-size: 13px;
+  color: var(--ant-color-text-secondary);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--ant-color-bg-container) 86%, transparent),
+    color-mix(in srgb, var(--ant-color-bg-elevated) 66%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 72%, transparent);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 28%, transparent),
+    0 10px 32px color-mix(in srgb, var(--ant-color-text) 10%, transparent);
+  transform: translateY(-6px) scale(0.98);
+  visibility: hidden;
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease,
+    visibility 0s linear 220ms,
+    background 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.app-header-search-trigger.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease,
+    visibility 0s,
+    background 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.app-header-search-trigger-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+}
+
+/* 搜索触发器内快捷键徽章 */
+.app-header-search-trigger .app-kbd {
+  flex-shrink: 0;
+  min-width: 32px;
+  padding: 2px 6px;
+}
+
+/* ── 顶栏右侧操作区 ── */
+.app-header-actions {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* 统一所有按钮尺寸与图标对齐 */
+.app-header-actions .ant-btn {
+  height: 24px;
+  min-width: 24px;
+  padding-inline: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.app-header-actions .ant-btn-icon-only {
+  width: 24px;
+  padding: 0;
+}
+
+.app-header-actions .ant-btn .anticon,
+.app-header-actions .ant-btn > span,
+.app-header-actions .app-theme-icon,
+.app-header-actions svg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+
+/* ── 空间切换下拉菜单项 ── */
+.app-space-menu-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-theme-icon {
+  display: inline-flex;
+  animation: app-theme-icon-spin 260ms ease-out;
+}
+
+.app-view-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0 2px;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}

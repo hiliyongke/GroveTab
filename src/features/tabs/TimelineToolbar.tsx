@@ -9,6 +9,7 @@
 import { Flex, Segmented, Switch, Tooltip, Typography } from "antd";
 import { Clock, Clock3 } from "lucide-react";
 import { useSettingsStore } from "@/store";
+import toolbarStyles from "./TimelineToolbar.module.less";
 import { useT } from "@/shared/i18n";
 import styles from "./styles/items.module.less";
 
@@ -51,8 +52,8 @@ export function TimelineToolbar() {
             ]}
           />
         </Tooltip>
-        <Flex align="center" gap={4} style={{ marginLeft: 4 }}>
-          <Typography.Text style={{ fontSize: 12, color: "var(--ant-color-text-secondary)" }}>
+        <Flex align="center" gap={4} className={toolbarStyles["exact-time-toggle"]}>
+          <Typography.Text className={toolbarStyles["exact-time-label"]}>
             {t("toolbar.exactTime")}
           </Typography.Text>
           <Switch

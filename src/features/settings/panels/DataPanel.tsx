@@ -470,7 +470,7 @@ export function DataPanel() {
 
       {/* 任务8：权限诊断区 */}
       <section className="settings-section">
-        <Flex align="center" gap={6} style={{ marginBottom: 8 }}>
+        <Flex align="center" gap={6} className={styles["data-panel__quota-header"]}>
           <ShieldCheck size={ICON_SIZE.MEDIUM} />
           <Typography.Text strong>{t("权限状态")}</Typography.Text>
         </Flex>

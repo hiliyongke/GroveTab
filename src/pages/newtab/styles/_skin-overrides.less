@@ -1,0 +1,827 @@
+/**
+ * _skin-overrides.less — 皮肤覆盖样式
+ *
+ * 职责：所有皮肤的 CSS 变量覆盖与组件样式覆盖
+ *       （generic skin, pastel, apple, glassmorphism + dark variants）
+ */
+
+/* ─── Ant Design 浮层兜底 ─────────────
+ * 已提取到 shared/styles/_floating-overrides.less，
+ * newtab 和 popup 共享，避免重复。
+ */
+@import "@/shared/styles/_floating-overrides.less";
+
+[data-skin]:not([data-skin="apple"]):not([data-skin="glassmorphism"]) {
+  --app-card-bg: var(--app-mica-surface, var(--ant-color-bg-container));
+  --app-card-hover-bg: color-mix(
+    in srgb,
+    var(--app-color-primary, var(--ant-color-primary)) 7%,
+    var(--app-mica-surface, var(--ant-color-bg-container))
+  );
+  --app-list-item-hover-bg: color-mix(
+    in srgb,
+    var(--app-color-primary, var(--ant-color-primary)) 8%,
+    transparent
+  );
+
+  & .app-card-interactive,
+  & .app-widget-card,
+  & .app-accordion-panel {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 34%, transparent),
+        transparent 76%
+      ),
+      var(--app-mica-surface, var(--ant-color-bg-container));
+    border-color: var(--app-acrylic-border, var(--ant-color-border-secondary));
+    box-shadow: var(--app-shadow-card);
+  }
+
+  & .app-card-interactive:hover,
+  & .app-card-interactive:focus-within,
+  & .app-widget-card:hover {
+    border-color: color-mix(
+      in srgb,
+      var(--app-color-primary, var(--ant-color-primary)) 30%,
+      var(--app-acrylic-border, var(--ant-color-border-secondary))
+    );
+    box-shadow: var(--app-shadow-card-hover);
+  }
+
+  & .app-row-hover:hover,
+  & .app-row-hover:focus-within {
+    background-color: var(--app-list-item-hover-bg);
+  }
+
+  & .activity-strip__item {
+    background: color-mix(
+      in srgb,
+      var(--app-color-primary, var(--ant-color-primary)) 6%,
+      var(--app-mica-surface, var(--ant-color-bg-container))
+    );
+    border-color: var(--app-acrylic-border, var(--ant-color-border-secondary));
+  }
+
+  & .activity-strip__icon,
+  & .activity-strip__action-btn,
+  & a,
+  & .app-typography a {
+    color: var(--app-color-primary, var(--ant-color-primary));
+  }
+
+  & ::selection {
+    background-color: color-mix(
+      in srgb,
+      var(--app-color-primary, var(--ant-color-primary)) 22%,
+      transparent
+    );
+    color: inherit;
+  }
+}
+
+[data-theme="dark"][data-skin]:not([data-skin="apple"]):not([data-skin="glassmorphism"]) {
+  --app-card-hover-bg: color-mix(
+    in srgb,
+    var(--app-color-primary, var(--ant-color-primary)) 10%,
+    var(--app-mica-surface, var(--ant-color-bg-container))
+  );
+  --app-list-item-hover-bg: color-mix(
+    in srgb,
+    var(--app-color-primary, var(--ant-color-primary)) 13%,
+    transparent
+  );
+
+  & .app-card-interactive,
+  & .app-widget-card,
+  & .app-accordion-panel {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 20%, transparent),
+        transparent 78%
+      ),
+      var(--app-mica-surface, var(--ant-color-bg-container));
+  }
+
+  & .activity-strip__item {
+    background: color-mix(
+      in srgb,
+      var(--app-color-primary, var(--ant-color-primary)) 10%,
+      var(--app-mica-surface, var(--ant-color-bg-container))
+    );
+  }
+
+  & ::selection {
+    background-color: color-mix(
+      in srgb,
+      var(--app-color-primary, var(--ant-color-primary)) 34%,
+      transparent
+    );
+  }
+}
+
+/* ═════════════════════════════════════════════════════════
+ * Pastel 皮肤覆盖样式（data-skin="pastel"）
+ * 柔彩玻璃：奶油实底 + 粉紫蓝绿柔光 + 可读浮层
+ * ═════════════════════════════════════════════════════════ */
+[data-skin="pastel"] {
+  --app-pastel-lavender: #8a94e0;
+  --app-pastel-rose: #f0a8c0;
+  --app-pastel-mint: #99f6e4;
+  --app-card-hover-bg: color-mix(
+    in srgb,
+    var(--app-pastel-rose) 7%,
+    var(--app-mica-surface, #fffdfb)
+  );
+  --app-list-item-hover-bg: color-mix(in srgb, var(--app-pastel-lavender) 9%, transparent);
+
+  & body::before {
+    mix-blend-mode: soft-light;
+  }
+
+  & .app-header-shell,
+  & .app-view-dock--bottom,
+  & .app-view-dock__list {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--app-pastel-rose) 9%, transparent),
+        transparent 42%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 58%, transparent),
+        transparent 90%
+      ),
+      color-mix(in srgb, var(--app-acrylic-bg, #fff) 96%, var(--app-pastel-lavender) 4%);
+    border-color: color-mix(
+      in srgb,
+      var(--app-pastel-lavender) 18%,
+      var(--app-acrylic-border, rgba(138, 148, 224, 0.18))
+    );
+  }
+
+  & .app-hero-search,
+  & .app-card-interactive,
+  & .app-widget-card,
+  & .app-accordion-panel {
+    background:
+      radial-gradient(
+        circle at 0% 0%,
+        color-mix(in srgb, var(--app-pastel-lavender) 12%, transparent),
+        transparent 34%
+      ),
+      radial-gradient(
+        circle at 100% 0%,
+        color-mix(in srgb, var(--app-pastel-rose) 12%, transparent),
+        transparent 32%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 62%, transparent),
+        transparent 78%
+      ),
+      var(--app-mica-surface, #fffdfb);
+    border-color: color-mix(
+      in srgb,
+      var(--app-pastel-lavender) 22%,
+      var(--app-acrylic-border, rgba(138, 148, 224, 0.18))
+    );
+    box-shadow: var(--app-shadow-card);
+  }
+
+  & .app-card-interactive:hover,
+  & .app-card-interactive:focus-within,
+  & .app-widget-card:hover {
+    border-color: color-mix(in srgb, var(--app-pastel-rose) 34%, var(--app-pastel-lavender));
+    box-shadow: var(--app-shadow-card-hover);
+  }
+
+  & .activity-strip__item,
+  & .app-kbd {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 44%, transparent),
+        transparent 58%
+      ),
+      color-mix(in srgb, var(--app-pastel-lavender) 8%, var(--app-mica-surface, #fffdfb));
+    border-color: color-mix(
+      in srgb,
+      var(--app-pastel-lavender) 18%,
+      var(--app-acrylic-border, rgba(138, 148, 224, 0.18))
+    );
+  }
+
+  & .app-drawer__section,
+  & .search-box-container,
+  & .app-modal__container {
+    background:
+      radial-gradient(
+        circle at 0% 0%,
+        color-mix(in srgb, var(--app-pastel-lavender) 12%, transparent),
+        transparent 36%
+      ),
+      radial-gradient(
+        circle at 100% 0%,
+        color-mix(in srgb, var(--app-pastel-rose) 14%, transparent),
+        transparent 34%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 72%, transparent),
+        transparent 74%
+      ),
+      var(--app-acrylic-bg, #ffffff);
+    backdrop-filter: blur(var(--app-glass-blur, 42px)) saturate(var(--app-glass-saturate, 170%));
+    -webkit-backdrop-filter: blur(var(--app-glass-blur, 42px))
+      saturate(var(--app-glass-saturate, 170%));
+    border: 1px solid var(--app-acrylic-border, rgba(138, 148, 224, 0.18));
+    box-shadow: var(--app-shadow-floating);
+  }
+
+  & .app-drawer__header,
+  & .app-modal__header {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--app-acrylic-highlight, #fff) 52%, transparent),
+      transparent
+    ) !important;
+    border-bottom-color: color-mix(
+      in srgb,
+      var(--app-acrylic-border, rgba(138, 148, 224, 0.18)) 86%,
+      transparent
+    );
+  }
+
+  & .app-drawer__footer,
+  & .app-modal__footer {
+    background: linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--app-pastel-rose) 7%, transparent),
+      transparent
+    ) !important;
+    border-top-color: color-mix(
+      in srgb,
+      var(--app-acrylic-border, rgba(138, 148, 224, 0.18)) 86%,
+      transparent
+    );
+  }
+
+  & .app-drawer__mask,
+  & .search-box-mask,
+  & .app-modal__mask {
+    background: var(--app-overlay-mask-bg, rgba(97, 72, 118, 0.26));
+    backdrop-filter: blur(var(--app-overlay-blur, 14px));
+    -webkit-backdrop-filter: blur(var(--app-overlay-blur, 14px));
+  }
+}
+
+[data-theme="dark"][data-skin="pastel"] {
+  --app-card-hover-bg: color-mix(
+    in srgb,
+    var(--app-pastel-rose) 11%,
+    var(--app-mica-surface, #241a28)
+  );
+  --app-list-item-hover-bg: color-mix(in srgb, var(--app-pastel-rose) 13%, transparent);
+
+  & .app-hero-search,
+  & .app-card-interactive,
+  & .app-widget-card,
+  & .app-accordion-panel {
+    background:
+      radial-gradient(
+        circle at 0% 0%,
+        color-mix(in srgb, var(--app-pastel-lavender) 18%, transparent),
+        transparent 36%
+      ),
+      radial-gradient(
+        circle at 100% 0%,
+        color-mix(in srgb, var(--app-pastel-rose) 16%, transparent),
+        transparent 34%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 24%, transparent),
+        transparent 78%
+      ),
+      var(--app-mica-surface, #241a28);
+  }
+
+  & .app-drawer__section,
+  & .search-box-container,
+  & .app-modal__container {
+    background:
+      radial-gradient(
+        circle at 0% 0%,
+        color-mix(in srgb, var(--app-pastel-lavender) 20%, transparent),
+        transparent 38%
+      ),
+      radial-gradient(
+        circle at 100% 0%,
+        color-mix(in srgb, var(--app-pastel-rose) 18%, transparent),
+        transparent 36%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 22%, transparent),
+        transparent 76%
+      ),
+      var(--app-acrylic-bg, #302338);
+    border-color: var(--app-acrylic-border, rgba(255, 214, 235, 0.16));
+  }
+
+  & .app-drawer__mask,
+  & .search-box-mask,
+  & .app-modal__mask {
+    background: var(--app-overlay-mask-bg, rgba(18, 8, 22, 0.62));
+  }
+}
+
+/* ═════════════════════════════════════════════════════════
+ * Apple 皮肤覆盖样式（data-skin="apple"）
+ *
+ * 核心设计语言：
+ *   - 导航栏：深色半透明毛玻璃（rgba(0,0,0,0.8) + blur 20px）
+ *   - 按钮：pill 形（980px radius）、Apple Blue (#0071e3) 强调
+ *   - 卡片：无边框、无 hover 上浮、柔和阴影
+ *   - 排版：SF Pro Display/Text、紧凑行高、负字间距
+ *   - 背景：纯色无渐变，#f5f5f7 (light) / #000000 (dark)
+ * ═════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════
+ * Apple 皮肤扩展覆盖
+ *
+ * 注：导航栏、Hero 搜索框等核心覆盖在 app-shell.css 中
+ * 这里补充全局组件级覆盖
+ * ═══════════════════════════════════════════════════════════ */
+
+[data-skin="apple"] {
+  /* ── Apple 皮肤 CSS 变量 */
+  --app-apple-blue: #0071e3;
+
+  /* ── Apple 背景色覆盖 ── */
+  --app-card-bg: transparent;
+  --app-card-hover-bg: color-mix(in srgb, #000 3%, transparent);
+  --app-list-item-hover-bg: color-mix(in srgb, #000 3%, transparent);
+
+  /* ── Apple 卡片：无边框 ── */
+  & .app-card {
+    border: none;
+  }
+
+  & .app-card:hover {
+    transform: none;
+  }
+
+  /* ── Apple 按钮：pill 形 CTA ── */
+  & .app-button.ant-btn-primary {
+    border-radius: var(--app-radius-pill);
+  }
+
+  /* ── Apple 链接色 ── */
+  & a,
+  & .app-typography a {
+    color: var(--app-apple-link-light);
+  }
+
+  /* ── Apple 聚焦态 ── */
+  & :focus-visible {
+    outline: 2px solid var(--app-apple-blue, #0071e3);
+    outline-offset: 2px;
+  }
+
+  /* ── Apple DomainGroupCard：无边框、柔和阴影 ── */
+  & .app-card-interactive {
+    border: none;
+    border-radius: var(--app-card-radius, 12px);
+    box-shadow: 0 5px 30px color-mix(in srgb, #000 22%, transparent);
+  }
+
+  /* Apple：卡片 hover 不上浮，仅微调阴影 */
+  & .app-card-interactive:hover,
+  & .app-card-interactive:focus-within {
+    transform: none;
+    box-shadow: 0 8px 36px color-mix(in srgb, #000 26%, transparent);
+    border-color: transparent;
+  }
+
+  /* Apple：行级 hover 更柔 */
+  & .app-row-hover:hover,
+  & .app-row-hover:focus-within {
+    background-color: color-mix(in srgb, #000 3%, transparent);
+  }
+
+  /* ── Apple ActivityStrip：pill 胶囊风格 ── */
+  & .activity-strip__item {
+    border: none;
+    border-radius: var(--app-radius-pill);
+    background: color-mix(in srgb, #000 4%, transparent);
+    font-size: 13px;
+    letter-spacing: -0.01em;
+  }
+
+  & .activity-strip__icon {
+    color: var(--app-apple-blue, #0071e3);
+  }
+
+  & .activity-strip__action-btn {
+    color: var(--app-apple-blue, #0071e3);
+  }
+
+  /* ── Apple 域名分组头 ── */
+  & .app-domain-group-header {
+    letter-spacing: -0.01em;
+  }
+
+  /* Apple：分组内 favicon 徽章更圆润 */
+  & .app-domain-group-badge {
+    border-radius: var(--app-radius-sm);
+  }
+
+  /* ── Apple Tag 标签 ── */
+  & .app-tag {
+    border-radius: var(--app-radius-pill);
+    border: none;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  /* ── Apple Segmented 视图切换器 ── */
+  & .app-segmented {
+    border-radius: var(--app-radius-sm);
+  }
+
+  & .app-segmented .app-segmented__item.app-segmented__item-selected {
+    font-weight: 600;
+  }
+
+  /* ── Apple 空状态 ── */
+  & .app-empty-state-title {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.022em;
+  }
+
+  & .app-empty-state-actions .app-button.ant-btn-primary {
+    border-radius: var(--app-radius-pill);
+  }
+
+  /* ── Apple TidySuggestionBar ── */
+  & .app-accordion-panel {
+    border: none;
+    border-radius: var(--app-card-radius, 12px);
+    box-shadow: 0 4px 20px color-mix(in srgb, #000 12%, transparent);
+  }
+
+  /* ── Apple 选中态通知栏 ── */
+  & .app-alert {
+    border-radius: var(--app-card-radius, 12px);
+    border: none;
+  }
+
+  /* ── Apple WidgetCard 覆盖 ── */
+  & .app-widget-card {
+    border: none;
+    border-radius: var(--app-card-radius, 12px);
+    box-shadow: 0 5px 30px color-mix(in srgb, #000 22%, transparent);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  & .app-widget-card:hover {
+    transform: none;
+  }
+
+  /* ── Apple 滚动条 ── */
+  & ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, #000 15%, transparent);
+    border-radius: var(--app-radius-circle);
+  }
+
+  /* ── Apple 选中态文字 ── */
+  & ::selection {
+    background-color: color-mix(in srgb, var(--app-apple-blue, #0071e3) 18%, transparent);
+    color: inherit;
+  }
+}
+
+[data-theme="dark"][data-skin="apple"] {
+  /* ── Apple 暗色模式覆盖 */
+  --app-apple-blue: #2997ff;
+  --app-apple-blue-dark: #2997ff;
+  --app-card-hover-bg: color-mix(in srgb, #fff 5%, transparent);
+  --app-list-item-hover-bg: color-mix(in srgb, #fff 5%, transparent);
+
+  & a,
+  & .app-typography a {
+    color: var(--app-apple-link-dark, #2997ff);
+  }
+
+  & .app-card-interactive {
+    background: var(--app-mica-surface, #1c1c1e);
+    box-shadow: 0 5px 30px color-mix(in srgb, #000 44%, transparent);
+  }
+
+  & .app-card-interactive:hover,
+  & .app-card-interactive:focus-within {
+    box-shadow: 0 8px 36px color-mix(in srgb, #000 52%, transparent);
+  }
+
+  & .app-row-hover:hover,
+  & .app-row-hover:focus-within {
+    background-color: color-mix(in srgb, #fff 5%, transparent);
+  }
+
+  & .activity-strip__item {
+    background: color-mix(in srgb, #fff 8%, transparent);
+  }
+
+  & .activity-strip__icon,
+  & .activity-strip__action-btn {
+    color: var(--app-apple-blue-dark, #2997ff);
+  }
+
+  & .app-accordion-panel,
+  & .app-widget-card {
+    background: var(--app-mica-surface, #1c1c1e);
+    box-shadow: 0 5px 30px color-mix(in srgb, #000 44%, transparent);
+  }
+
+  & ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, #fff 15%, transparent);
+  }
+
+  & ::selection {
+    background-color: color-mix(in srgb, var(--app-apple-blue, #0071e3) 32%, transparent);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+ * Fluent Acrylic * Microsoft Fluent Design System —— Acrylic Material
+ * 核心视觉：
+ *   · 多层半透明叠加（tint → blur → noise → highlight）
+ *   · 显性噪点纹理（Fluent 标志性特征）
+ *   · 柔和的 inset 顶部高光线（模拟光线折射）
+ *   · Fluent Blue (#0078D4) 强调
+ *   · 圆角回归 Fluent 标准（8px）
+ * ═══════════════════════════════════════════════════════════ */
+
+[data-skin="glassmorphism"] {
+  /* ── Fluent 皮肤 CSS 变量 */
+  --app-fluent-blue: #0078d4;
+  --app-fluent-blue-hover: #2b88d8;
+  --app-fluent-blue-subtle: rgba(0, 120, 212, 0.12);
+
+  /* ── Fluent 背景色覆盖：Mica 负责窗口底板，Acrylic 只给浮层 */
+  --app-card-bg: var(--app-mica-surface, var(--ant-color-bg-container));
+  --app-card-hover-bg: color-mix(
+    in srgb,
+    var(--app-fluent-blue, #0078d4) 6%,
+    var(--app-mica-surface, var(--ant-color-bg-container))
+  );
+  --app-list-item-hover-bg: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 7%, transparent);
+
+  /* ── Fluent Header：Mica 顶栏，稳定不透底 */
+  & .app-header-shell {
+    background:
+      linear-gradient(180deg, var(--app-acrylic-highlight), transparent 120%),
+      color-mix(
+        in srgb,
+        var(--app-mica-surface, var(--ant-color-bg-container)) 96%,
+        var(--app-fluent-blue, #0078d4) 4%
+      );
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    border-bottom: 1px solid var(--app-acrylic-border, var(--ant-color-border-secondary));
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--app-acrylic-highlight) 58%, transparent);
+  }
+
+  /* ── Fluent 卡片：Mica surface + 顶部微高光，内容保持清晰 */
+  & .app-card-interactive {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-acrylic-highlight) 64%, transparent),
+        transparent 72%
+      ),
+      var(--app-mica-surface, var(--ant-color-bg-container));
+    border-color: var(--app-acrylic-border, var(--ant-color-border-secondary));
+    box-shadow: var(--app-shadow-card);
+    transition:
+      transform 0.367s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.367s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.25s ease,
+      background-color 0.25s ease;
+  }
+
+  & .app-card-interactive:hover,
+  & .app-card-interactive:focus-within {
+    border-color: color-mix(
+      in srgb,
+      var(--app-fluent-blue, #0078d4) 28%,
+      var(--app-acrylic-border, var(--ant-color-border-secondary))
+    );
+    box-shadow: var(--app-shadow-card-hover);
+  }
+
+  /* ── Fluent 行级 hover ── */
+  & .app-row-hover:hover,
+  & .app-row-hover:focus-within {
+    background-color: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 7%, transparent);
+  }
+
+  /* ── Fluent ActivityStrip ── */
+  & .activity-strip__item {
+    border-radius: var(--app-radius-sm);
+    border-color: color-mix(in srgb, #fff 6%, transparent);
+  }
+
+  & .activity-strip__icon {
+    color: var(--app-fluent-blue, #0078d4);
+  }
+
+  & .activity-strip__action-btn {
+    color: var(--app-fluent-blue, #0078d4);
+  }
+
+  /* ── Fluent 链接色 ── */
+  & a,
+  & .app-typography a {
+    color: var(--app-fluent-blue, #0078d4);
+  }
+
+  /* ── Fluent 按钮 ── */
+  & .app-button.ant-btn-primary {
+    background: var(--app-fluent-blue, #0078d4);
+    border-color: var(--app-fluent-blue, #0078d4);
+    border-radius: var(--app-radius-sm);
+  }
+
+  & .app-button.ant-btn-primary:hover {
+    background: var(--app-fluent-blue-hover, #2b88d8);
+    border-color: var(--app-fluent-blue-hover, #2b88d8);
+  }
+
+  /* ── Fluent 聚焦态 ── */
+  & :focus-visible {
+    outline: 2px solid var(--app-fluent-blue, #0078d4);
+    outline-offset: 1px;
+  }
+
+  /* ── Fluent WidgetCard ── */
+  & .app-widget-card {
+    border-color: color-mix(in srgb, #fff 6%, transparent);
+  }
+
+  /* ── Fluent 滚动条 ── */
+  & ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, #000 20%, transparent);
+    border-radius: var(--app-radius-xs);
+  }
+
+  /* ── Fluent 选中态 ── */
+  & ::selection {
+    background-color: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 20%, transparent);
+    color: inherit;
+  }
+
+  /* ── Fluent 噪点纹理：Acrylic 标志性特征 ──
+   * 增强噪点可见度（基础 skin 配置已设 noiseOpacity: 0.05，
+   * 这里通过 CSS 进一步增强 Acrylic 的液态质感）
+   */
+  & body::before {
+    mix-blend-mode: overlay;
+  }
+
+  /* ── Fluent Acrylic 浮层：抽屉/弹窗使用实底 tint + 高光 + 磨砂 */
+  & .app-drawer__section,
+  & .search-box-container,
+  & .app-modal__container {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--app-acrylic-highlight) 74%, transparent),
+        transparent 44%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-fluent-blue, #0078d4) 5%, transparent),
+        transparent 56%
+      ),
+      var(--app-acrylic-bg, var(--ant-color-bg-elevated));
+    backdrop-filter: blur(var(--app-glass-blur, 32px)) saturate(var(--app-glass-saturate, 180%));
+    -webkit-backdrop-filter: blur(var(--app-glass-blur, 32px))
+      saturate(var(--app-glass-saturate, 180%));
+    border: 1px solid var(--app-acrylic-border, var(--ant-color-border-secondary));
+    box-shadow: var(--app-shadow-floating);
+  }
+
+  & .app-drawer__section {
+    border-right: 0;
+    border-top: 0;
+    border-bottom: 0;
+    box-shadow:
+      -1px 0 0 color-mix(in srgb, var(--app-acrylic-highlight) 52%, transparent) inset,
+      var(--app-shadow-floating);
+  }
+
+  & .app-drawer__header,
+  & .app-modal__header {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--app-acrylic-highlight) 42%, transparent),
+      transparent
+    ) !important;
+    border-bottom-color: color-mix(
+      in srgb,
+      var(--app-acrylic-border, var(--ant-color-border-secondary)) 82%,
+      transparent
+    );
+  }
+
+  & .app-drawer__body,
+  & .app-modal__body {
+    background: transparent;
+  }
+
+  & .app-drawer__footer,
+  & .app-modal__footer {
+    background: linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--app-acrylic-highlight) 28%, transparent),
+      transparent
+    ) !important;
+    border-top-color: color-mix(
+      in srgb,
+      var(--app-acrylic-border, var(--ant-color-border-secondary)) 82%,
+      transparent
+    );
+  }
+
+  & .app-drawer__mask,
+  & .search-box-mask,
+  & .app-modal__mask {
+    background: color-mix(in srgb, #000 46%, transparent);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+}
+
+[data-theme="dark"][data-skin="glassmorphism"] {
+  /* ── Fluent 暗色模式 CSS 变量 */
+  --app-fluent-blue-dark: #60cdff;
+
+  /* ── Fluent 暗色背景色覆盖 ── */
+  --app-card-hover-bg: color-mix(in srgb, var(--app-color-primary, #0078d4) 8%, transparent);
+  --app-list-item-hover-bg: color-mix(in srgb, var(--app-color-primary, #0078d4) 8%, transparent);
+
+  & .app-card-interactive:hover,
+  & .app-card-interactive:focus-within {
+    border-color: color-mix(in srgb, #fff 12%, transparent);
+  }
+
+  & .app-row-hover:hover,
+  & .app-row-hover:focus-within {
+    background-color: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 8%, transparent);
+  }
+
+  & .activity-strip__icon {
+    color: var(--app-fluent-blue-dark, #60cdff);
+  }
+
+  & .activity-strip__action-btn {
+    color: var(--app-fluent-blue-dark, #60cdff);
+  }
+
+  & a,
+  & .app-typography a {
+    color: var(--app-fluent-blue-dark, #60cdff);
+  }
+
+  & .app-widget-card {
+    border-color: color-mix(in srgb, #fff 6%, transparent);
+  }
+
+  & ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, #fff 20%, transparent);
+  }
+
+  & ::selection {
+    background-color: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 36%, transparent);
+  }
+
+  & .app-drawer__section,
+  & .search-box-container,
+  & .app-modal__container {
+    border-color: color-mix(in srgb, #fff 12%, transparent);
+    box-shadow: var(--app-shadow-floating);
+  }
+
+  & .app-drawer__mask,
+  & .search-box-mask,
+  & .app-modal__mask {
+    background: color-mix(in srgb, #000 62%, transparent);
+  }
+}

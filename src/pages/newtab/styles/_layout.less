@@ -1,0 +1,252 @@
+/* ── 加载 / 空状态 / 布局壳 / 内容壳 / 视图切换动画 ──
+ *
+ * 承载：.app-page-loading, .app-layout-shell, .app-background-overlay,
+ * .app-content-shell, .app-workspace-section, .app-empty-state 等
+ */
+.app-page-loading {
+  min-height: 100vh;
+}
+
+/* ─── 优雅的加载微交互 ───────────────────────────── */
+@keyframes app-pulse-loading {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.98);
+  }
+}
+
+.app-page-loading-inner,
+.app-workspace-loading-inner {
+  animation: app-pulse-loading 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.app-page-loading-inner .ant-spin-dot,
+.app-workspace-loading-inner .ant-spin-dot {
+  font-size: 28px;
+}
+
+.app-page-loading-inner .ant-typography,
+.app-workspace-loading-inner .ant-typography {
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  color: var(--ant-color-text-tertiary);
+}
+
+/* ─── 布局外壳 ── */
+.app-layout-shell {
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  isolation: isolate;
+  /* Antd Layout 通过 props 提供 display: flex, flex-direction: column */
+}
+
+.app-layout-shell::before,
+.app-layout-shell::after {
+  content: "";
+  position: fixed;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(28px);
+  opacity: 0.46;
+}
+
+.app-layout-shell::before {
+  top: -160px;
+  right: -140px;
+  width: 420px;
+  height: 420px;
+  background: color-mix(in srgb, var(--app-color-primary, #2b6bff) 24%, transparent);
+}
+
+.app-layout-shell::after {
+  left: -180px;
+  bottom: -210px;
+  width: 520px;
+  height: 520px;
+  background: color-mix(in srgb, var(--ant-color-info, #1677ff) 14%, transparent);
+}
+
+.app-background-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--app-background-overlay-bg);
+  backdrop-filter: var(--app-background-overlay-filter, none);
+  -webkit-backdrop-filter: var(--app-background-overlay-filter, none);
+}
+
+.app-background-overlay-dimmer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--app-overlay-dimmer-bg, #000);
+  opacity: var(--app-background-overlay-opacity, 0);
+  transition: opacity 0.1s ease-out;
+}
+
+/* 全屏加载状态 */
+.app-loading-screen {
+  min-height: 100vh;
+}
+
+/* 页面内容 suspense fallback */
+.app-suspense-fallback-wrap {
+  padding: 40px 0;
+}
+
+/* FloatButton 定位 */
+.app-back-top-override {
+  right: 32px !important;
+  bottom: 32px !important;
+}
+
+.app-content-shell {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 32px 64px;
+  position: relative;
+  z-index: 1;
+  /* Antd Flex 通过 props 提供 flex: 1, min-height: 0, flex-direction: column */
+  overflow-y: auto;
+  overflow-x: hidden;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 18px,
+    #000 calc(100% - 18px),
+    transparent 100%
+  );
+}
+
+.app-layout-shell--view-bottom .app-content-shell {
+  padding-bottom: 108px;
+}
+
+.app-content-shell--bounded {
+  max-width: var(--app-content-max-width);
+}
+
+.app-content-shell--no-scroll {
+  overflow: hidden;
+}
+
+/* 书签树状视图画布模式：关闭外层滚动 + 去除底部 padding */
+.app-content-shell:has(.app-bookmark-shell .app-bookmark-result > .app-bm-tree) {
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+/* ─── Workspace 区域容器 ── */
+.app-workspace-section {
+  display: flex; /* antd 组件内部微调整 */
+  flex-direction: column;
+}
+
+.app-view-transition {
+  width: 100%;
+  min-width: 0;
+  transform-origin: top center;
+  animation: app-view-transition-in var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1)
+    both;
+}
+
+@keyframes app-view-transition-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(0.995);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-view-transition {
+    animation: none;
+  }
+}
+
+/* 树状视图：section 必须撑满剩余高度 */
+.app-workspace-section:has(.app-bookmark-result > .app-bm-tree) {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.app-init-alert {
+  margin-bottom: 16px;
+}
+
+.app-suspense-fallback {
+  padding: 40px 0;
+  text-align: center;
+}
+
+.app-workspace-loading,
+.app-empty-state {
+  padding: 80px 0;
+  text-align: center;
+}
+
+.app-empty-state-body {
+  display: flex; /* antd 组件内部微调整 */
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.app-empty-state-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ant-color-text);
+}
+
+.app-empty-state-hint {
+  font-size: 12.5px;
+}
+
+.app-empty-state-recovery {
+  margin-top: 2px;
+  font-size: 12px;
+}
+
+.app-empty-state-actions {
+  margin-top: 4px;
+}
+
+/* ── Effects 全局样式（从 effects.module.less 迁入）── */
+.app-video-background {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: -1;
+  pointer-events: none;
+  background: transparent;
+}
+
+.app-click-effect-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 50;
+}

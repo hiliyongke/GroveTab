@@ -5,18 +5,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import {
-  Button,
-  Card,
-  Empty,
-  Popconfirm,
-  Space,
-  Spin,
-  Tag,
-  Tooltip,
-  Flex,
-  Typography,
-} from "antd";
+import { Button, Card, Empty, Popconfirm, Space, Spin, Tag, Tooltip, Flex, Typography } from "antd";
 import { Trash2, RotateCcw, Clock, X } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
@@ -26,7 +15,10 @@ import { createTab } from "@/chrome";
 import type { TrashedItem, TrashedTab } from "@/shared/types";
 import styles from "./styles/trash.module.less";
 
-function formatRelativeTime(ts: number, tfn: (key: string, params?: Record<string, string | number>) => string): string {
+function formatRelativeTime(
+  ts: number,
+  tfn: (key: string, params?: Record<string, string | number>) => string,
+): string {
   const diff = Date.now() - ts;
   const minutes = Math.floor(diff / 60000);
   if (minutes < 1) return tfn("trash.justNow");
@@ -112,7 +104,7 @@ export function TrashView() {
 
   if (loading) {
     return (
-      <Flex justify="center" align="center" style={{ minHeight: 200 }}>
+      <Flex justify="center" align="center" className={styles["trash-loading"]}>
         <Spin />
       </Flex>
     );
@@ -156,9 +148,7 @@ export function TrashView() {
           title={
             <Flex align="center" gap="small">
               <span className={styles["trash-card__title"]}>{item.name}</span>
-              <Tag color="blue">
-                {String(item.tabs.length)}
-              </Tag>
+              <Tag color="blue">{String(item.tabs.length)}</Tag>
             </Flex>
           }
           extra={
@@ -187,7 +177,7 @@ export function TrashView() {
           <Flex vertical gap="small">
             <Flex align="center" gap={4} className={styles["trash-card__meta"]}>
               <Clock size={ICON_SIZE.XS} />
-              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              <Typography.Text type="secondary" className={styles["trash-card__meta"]}>
                 {formatRelativeTime(item.trashedAt, t)}
               </Typography.Text>
             </Flex>
@@ -200,9 +190,7 @@ export function TrashView() {
                   </Flex>
                 </Tooltip>
               ))}
-              {item.tabs.length > 8 && (
-                <Tag>{`+${item.tabs.length - 8}`}</Tag>
-              )}
+              {item.tabs.length > 8 && <Tag>{`+${item.tabs.length - 8}`}</Tag>}
             </Flex>
           </Flex>
         </Card>

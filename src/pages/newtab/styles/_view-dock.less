@@ -1,0 +1,437 @@
+/* ── 视图导航 Rail / Bottom Bar ──
+ *
+ * 承载：.app-view-dock 及所有变体 left/right/bottom、
+ * Workspace 切换器、响应式媒体查询、Apple 皮肤覆盖
+ */
+.app-view-dock {
+  position: relative;
+  z-index: 2;
+}
+
+.app-view-dock--left,
+.app-view-dock--right {
+  flex: 0 0 auto;
+  display: flex; /* antd 组件内部微调整 */
+  align-items: center;
+  justify-content: center;
+  padding: var(--app-space-5) var(--app-space-3);
+}
+
+.app-view-dock--left {
+  padding-left: 18px;
+}
+
+.app-view-dock--right {
+  padding-right: 18px;
+}
+
+.app-view-dock--bottom {
+  position: sticky;
+  bottom: 0;
+  z-index: 12;
+  display: flex; /* antd 组件内部微调整 */
+  justify-content: center;
+  padding: 10px var(--app-space-5) calc(var(--app-space-3) + env(safe-area-inset-bottom, 0px));
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-top: 1px solid
+    var(
+      --app-acrylic-border,
+      color-mix(in srgb, var(--ant-color-border-secondary) 72%, transparent)
+    );
+  background: color-mix(
+    in srgb,
+    var(--app-acrylic-bg, var(--ant-color-bg-elevated)) 98%,
+    var(--app-color-primary, var(--ant-color-primary)) 2%
+  );
+  backdrop-filter: blur(12px) saturate(var(--app-glass-saturate, 150%));
+  -webkit-backdrop-filter: blur(12px) saturate(var(--app-glass-saturate, 150%));
+  /* 抗闪白：预创建合成层 + 隔离重绘 + GPU 加速 */
+  will-change: transform;
+  contain: paint;
+  transform: translateZ(0);
+  scrollbar-width: none;
+}
+
+.app-view-dock--bottom::-webkit-scrollbar {
+  display: none;
+}
+
+.app-view-dock__list {
+  /* Antd Flex 通过 props 提供 display: inline-flex, align-items: center, gap */
+  padding: 6px;
+  border-radius: 22px;
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--app-acrylic-highlight, #fff) 46%, transparent),
+      transparent 46%
+    ),
+    color-mix(
+      in srgb,
+      var(--app-acrylic-bg, var(--ant-color-bg-elevated)) 96%,
+      var(--app-color-primary, var(--ant-color-primary)) 4%
+    );
+  border: 1px solid
+    var(
+      --app-acrylic-border,
+      color-mix(in srgb, var(--ant-color-border-secondary) 70%, transparent)
+    );
+  box-shadow:
+    0 18px 46px -34px color-mix(in srgb, var(--ant-color-text) 54%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--app-acrylic-highlight, #fff) 38%, transparent);
+  backdrop-filter: blur(16px) saturate(var(--app-glass-saturate, 165%));
+  -webkit-backdrop-filter: blur(16px) saturate(var(--app-glass-saturate, 165%));
+}
+
+.app-view-dock--vertical .app-view-dock__list {
+  width: fit-content;
+  max-width: min(100%, 220px);
+  flex-direction: column;
+  align-items: stretch;
+  border-radius: 20px;
+}
+
+.app-view-dock--horizontal .app-view-dock__list {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: max-content;
+  max-width: none;
+}
+
+.app-view-dock__item {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  min-width: 38px;
+  width: auto;
+  flex: 0 0 auto;
+  padding: 0 12px;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 16px;
+  color: var(--ant-color-text-secondary);
+  cursor: pointer;
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.app-view-dock__item:hover {
+  transform: translateY(-1px);
+  color: var(--ant-color-text);
+  background: var(--ant-color-fill-quaternary);
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.app-view-dock__item:active {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.app-view-dock__item:focus {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.app-view-dock__item:focus-visible {
+  outline: 2px solid
+    color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 50%, #fff);
+  outline-offset: 2px;
+}
+
+.app-view-dock__item.is-active {
+  color: var(--app-color-primary, var(--ant-color-primary));
+  background: linear-gradient(
+    135deg,
+    color-mix(
+      in srgb,
+      var(--app-color-primary, var(--ant-color-primary)) 18%,
+      var(--ant-color-bg-container)
+    ),
+    color-mix(
+      in srgb,
+      var(--app-color-primary, var(--ant-color-primary)) 8%,
+      var(--ant-color-bg-container)
+    )
+  );
+  box-shadow:
+    inset 0 0 0 1px
+      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 18%, transparent),
+    0 10px 22px -18px
+      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 72%, transparent) !important;
+}
+
+.app-view-dock__label {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-view-dock--bottom .app-view-dock__label {
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.app-view-dock--vertical .app-view-dock__item {
+  width: auto;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+[data-theme="dark"] .app-view-dock--bottom {
+  border-top-color: color-mix(in srgb, var(--ant-color-border-secondary) 56%, transparent);
+  background: color-mix(in srgb, var(--ant-color-bg-layout) 88%, transparent);
+}
+
+[data-theme="dark"] .app-view-dock__list {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, #fff 7%, transparent), transparent 48%),
+    color-mix(in srgb, var(--ant-color-bg-elevated) 84%, transparent);
+  border-color: color-mix(in srgb, var(--ant-color-border-secondary) 58%, transparent);
+  box-shadow:
+    0 18px 46px -34px color-mix(in srgb, #000 72%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 7%, transparent);
+}
+
+[data-theme="dark"] .app-view-dock__item:hover {
+  background: var(--ant-color-fill-tertiary);
+}
+
+[data-theme="dark"] .app-view-dock__item.is-active {
+  background: linear-gradient(
+    135deg,
+    color-mix(
+      in srgb,
+      var(--app-color-primary, var(--ant-color-primary)) 24%,
+      var(--ant-color-bg-elevated)
+    ),
+    color-mix(
+      in srgb,
+      var(--app-color-primary, var(--ant-color-primary)) 12%,
+      var(--ant-color-bg-elevated)
+    )
+  );
+  box-shadow:
+    inset 0 0 0 1px
+      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 24%, transparent),
+    0 10px 24px -18px
+      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 86%, transparent) !important;
+}
+
+/* ─── Workspace 切换器 ── */
+.app-workspace-switcher {
+  display: inline-flex;
+}
+
+.app-workspace-trigger,
+.app-workspace-clear {
+  border-radius: var(--app-radius-circle);
+}
+
+.app-workspace-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-workspace-trigger--active {
+  border-color: color-mix(
+    in srgb,
+    var(--app-color-primary, var(--ant-color-primary)) 22%,
+    var(--ant-color-border-secondary)
+  );
+  background: var(--ant-color-primary-bg);
+  color: var(--app-color-primary, var(--ant-color-primary));
+}
+
+.app-workspace-trigger--active:hover,
+.app-workspace-clear:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--app-color-primary, var(--ant-color-primary)) 30%,
+    var(--ant-color-border-secondary)
+  );
+}
+
+.app-workspace-clear {
+  color: var(--ant-color-text-tertiary);
+}
+
+@media (max-width: 768px) {
+  .app-view-dock--left,
+  .app-view-dock--right {
+    padding-inline: 8px;
+  }
+
+  .app-view-dock--bottom {
+    justify-content: flex-start;
+    padding-inline: 12px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .app-view-dock__list {
+    padding: 6px;
+    gap: 4px;
+    border-radius: 18px;
+  }
+
+  .app-view-dock--vertical .app-view-dock__list {
+    max-width: 100%;
+    align-items: center;
+  }
+
+  .app-view-dock--vertical .app-view-dock__item,
+  .app-view-dock--horizontal .app-view-dock__item {
+    min-width: 40px;
+    padding: 0 10px;
+    justify-content: center;
+  }
+
+  .app-view-dock--left .app-view-dock__label,
+  .app-view-dock--right .app-view-dock__label {
+    display: none;
+  }
+}
+
+/* ─── 响应式：中等偏大屏幕（1024px+）────────────────────── */
+@media (min-width: 1024px) {
+  .app-header-shell {
+    padding: 0 32px;
+  }
+
+  .app-content-shell {
+    padding: 0 48px 80px;
+  }
+
+  .app-hero {
+    padding: 48px 0 var(--app-space-6);
+  }
+}
+
+/* ─── 响应式：大屏幕（1440px+）────────────────────── */
+@media (min-width: 1440px) {
+  .app-header-shell {
+    padding: 0 48px;
+  }
+
+  .app-content-shell {
+    padding: 0 64px 96px;
+  }
+
+  .app-hero {
+    padding: var(--app-space-16) 0 var(--app-space-10);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+ * Apple 皮肤：Hero 区覆盖
+ * ═══════════════════════════════════════════════════════ */
+
+/* Apple ：Hero 区更大留白 */
+[data-skin="apple"] .app-hero {
+  gap: 20px;
+  padding: var(--app-space-12) 0 var(--app-space-8);
+}
+
+/* Apple ：品牌标题 Apple 风格 */
+[data-skin="apple"] .app-hero-title {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+}
+
+/* Apple ：slogan 更低调 */
+[data-skin="apple"] .app-hero-slogan {
+  font-size: 13px;
+  color: color-mix(in srgb, #000 48%, transparent);
+}
+
+[data-theme="dark"][data-skin="apple"] .app-hero-slogan {
+  color: color-mix(in srgb, #fff 48%, transparent);
+}
+
+/* Apple ：Hero 搜索框 - 改为 Apple Filter/Search 按钮风格 */
+[data-skin="apple"] .app-hero-search {
+  height: 44px;
+  border: 3px solid color-mix(in srgb, #000 4%, transparent);
+  border-radius: var(--app-radius-md);
+  background: var(--app-bg-container);
+  box-shadow: none;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+
+[data-skin="apple"] .app-hero-search:hover {
+  border-color: color-mix(in srgb, #000 6%, transparent);
+  box-shadow: none;
+  transform: none;
+}
+
+[data-theme="dark"][data-skin="apple"] .app-hero-search {
+  background: color-mix(in srgb, #fff 6%, transparent);
+  border-color: color-mix(in srgb, #fff 6%, transparent);
+}
+
+[data-theme="dark"][data-skin="apple"] .app-hero-search:hover {
+  border-color: color-mix(in srgb, #fff 10%, transparent);
+  box-shadow: none;
+  transform: none;
+}
+
+/* Apple ：搜索框图标色 */
+[data-skin="apple"] .app-hero-search-icon {
+  color: color-mix(in srgb, #000 48%, transparent);
+}
+
+[data-theme="dark"][data-skin="apple"] .app-hero-search-icon {
+  color: color-mix(in srgb, #fff 48%, transparent);
+}
+
+/* Apple ：搜索框 ⌘K 键帽 */
+[data-skin="apple"] .app-hero-search .app-kbd {
+  background: color-mix(in srgb, #000 4%, transparent);
+  border: 1px solid color-mix(in srgb, #000 6%, transparent);
+  border-radius: var(--app-radius-xs);
+  color: color-mix(in srgb, #000 48%, transparent);
+}
+
+[data-theme="dark"][data-skin="apple"] .app-hero-search .app-kbd {
+  background: color-mix(in srgb, #fff 8%, transparent);
+  border-color: color-mix(in srgb, #fff 10%, transparent);
+  color: color-mix(in srgb, #fff 48%, transparent);
+}
+
+/* Apple ：视图切换器 - 系统分段控件风格 */
+[data-skin="apple"] .app-view-switcher {
+  background: color-mix(in srgb, #000 4%, transparent);
+  border-color: color-mix(in srgb, #000 6%, transparent);
+  border-radius: var(--app-radius-md);
+}
+
+[data-theme="dark"][data-skin="apple"] .app-view-switcher {
+  background: color-mix(in srgb, #fff 8%, transparent);
+  border-color: color-mix(in srgb, #fff 10%, transparent);
+}
+
+[data-skin="apple"] .app-view-option {
+  font-size: 12px;
+  letter-spacing: -0.01em;
+}
+
+/* Apple ：Content 区更大呼吸感 */
+[data-skin="apple"] .app-content-shell {
+  padding-bottom: 80px;
+}

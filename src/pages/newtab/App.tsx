@@ -2,7 +2,12 @@ import { useEffect, useState, useCallback, useMemo, useRef, lazy, Suspense } fro
 import { Layout, Spin, Typography, FloatButton, Flex, Segmented, Drawer } from "antd";
 import { useTabsStore, useSettingsStore, useSelectionStore } from "@/store";
 import { useShallow } from "zustand/shallow";
-import { useSwBroadcast, useResolvedTheme, useAppInitialization, useAutoCleanup } from "@/shared/hooks";
+import {
+  useSwBroadcast,
+  useResolvedTheme,
+  useAppInitialization,
+  useAutoCleanup,
+} from "@/shared/hooks";
 import { useT } from "@/shared/i18n";
 import { useKeybinding } from "@/shared/hooks/use-keybinding";
 import { AntdThemeProvider } from "@/shared/ui/AntdThemeProvider";
@@ -315,7 +320,7 @@ function AppContent() {
 
   if (!checked) {
     return (
-      <Flex align="center" justify="center" style={{ minHeight: "100vh" }}>
+      <Flex align="center" justify="center" className="app-page-loading">
         <Flex vertical align="center" gap={12}>
           <Spin />
           <Text type="secondary">{t("加载标签页中...")}</Text>
@@ -336,15 +341,11 @@ function AppContent() {
           {/* 滚动时叠加的动态暗化层 */}
           <div
             className="app-background-overlay-dimmer"
-            style={{
-              position: "fixed",
-              inset: 0,
-              zIndex: 0,
-              pointerEvents: "none",
-              background: resolvedDark ? "#000" : "rgba(0,0,0,0.6)",
-              opacity: `var(--app-background-overlay-opacity, 0)`,
-              transition: "opacity 0.1s ease-out",
-            }}
+            style={
+              {
+                "--app-overlay-dimmer-bg": resolvedDark ? "#000" : "rgba(0,0,0,0.6)",
+              } as React.CSSProperties
+            }
           />
         </>
       )}
@@ -421,7 +422,7 @@ function AppContent() {
           {pageMode === "trending" && (
             <Suspense
               fallback={
-                <Flex align="center" justify="center" style={{ padding: "40px 0" }}>
+                <Flex align="center" justify="center" className="app-suspense-fallback-wrap">
                   <Spin />
                 </Flex>
               }
@@ -432,7 +433,7 @@ function AppContent() {
           {pageMode === "devtools" && (
             <Suspense
               fallback={
-                <Flex align="center" justify="center" style={{ padding: "40px 0" }}>
+                <Flex align="center" justify="center" className="app-suspense-fallback-wrap">
                   <Spin />
                 </Flex>
               }
@@ -466,7 +467,7 @@ function AppContent() {
       <FloatButton.BackTop
         target={() => document.querySelector(".app-content-shell") as HTMLElement}
         visibilityHeight={400}
-        style={{ right: 32, bottom: 32 }}
+        className="app-back-top-override"
       />
 
       <UndoToast />
