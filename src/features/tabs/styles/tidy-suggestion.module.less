@@ -86,13 +86,20 @@
   background: color-mix(in srgb, var(--app-color-primary) 12%, transparent);
   border-color: color-mix(in srgb, var(--app-color-primary) 28%, transparent);
   box-shadow: none;
+  /* 平滑过渡，避免 hover 时边框闪烁 */
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .tidy-suggestion__solid-action:hover,
 .tidy-suggestion__solid-action:focus-visible {
   color: var(--app-color-primary);
   background: color-mix(in srgb, var(--app-color-primary) 18%, transparent);
-  border-color: color-mix(in srgb, var(--app-color-primary) 40%, transparent);
+  border-color: color-mix(in srgb, var(--app-color-primary) 36%, transparent);
+  /* 移除 focus 时的 outline，使用 border 颜色变化作为视觉反馈 */
+  outline: none;
 }
 
 /* 次操作（chevron/X）：text 按钮 hover 弱化，避免在深色背景上产生明显白块 */
@@ -211,12 +218,25 @@
 
   .tidy-suggestion__solid-action {
     background: color-mix(in srgb, var(--ant-color-primary, #0078d4) 8%, transparent);
-    border-color: color-mix(in srgb, var(--ant-color-primary, #0078d4) 18%, var(--ant-color-border-secondary, rgba(255, 255, 255, 0.08)));
+    border-color: color-mix(
+      in srgb,
+      var(--ant-color-primary, #0078d4) 18%,
+      var(--ant-color-border-secondary, rgba(255, 255, 255, 0.08))
+    );
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease;
   }
 
   .tidy-suggestion__solid-action:hover,
   .tidy-suggestion__solid-action:focus-visible {
     background: color-mix(in srgb, var(--ant-color-primary, #0078d4) 14%, transparent);
-    border-color: color-mix(in srgb, var(--ant-color-primary, #0078d4) 26%, var(--ant-color-border-secondary, rgba(255, 255, 255, 0.12)));
+    border-color: color-mix(
+      in srgb,
+      var(--ant-color-primary, #0078d4) 26%,
+      var(--ant-color-border-secondary, rgba(255, 255, 255, 0.12))
+    );
+    outline: none;
   }
 }

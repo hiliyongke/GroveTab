@@ -81,6 +81,10 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  /* 使用 will-change 和 backface-visibility 确保 GPU 渲染，避免模糊 */
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* ─── 底部浮动操作栏入场 ───────────────────────────
