@@ -261,12 +261,7 @@ export function DomainGroupCard({ group, initialCollapsed = false }: DomainGroup
       }
     >
       {/* 标签列表 — 使用 motion Reorder 实现分组内拖拽排序 */}
-      <Space
-        size={4}
-        direction="vertical"
-        className={styles["app-domain-group-list"]}
-        style={{ display: "flex" }}
-      >
+      <Space size={4} direction="vertical" className={styles["app-domain-group-list--flex"]}>
         <Reorder.Group
           axis="y"
           values={tabOrder}

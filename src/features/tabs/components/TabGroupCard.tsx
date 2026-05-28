@@ -286,12 +286,7 @@ export function TabGroupCard({ group, forceCollapsed }: TabGroupCardProps) {
         </>
       }
     >
-      <Space
-        size={4}
-        direction="vertical"
-        className={styles["app-domain-group-list"]}
-        style={{ display: "flex" }}
-      >
+      <Space size={4} direction="vertical" className={styles["app-domain-group-list--flex"]}>
         {group.tabs.map((tab) => (
           <TabItem
             key={tab.id}

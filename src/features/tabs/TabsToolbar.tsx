@@ -33,18 +33,41 @@ export function TabsToolbar({ filterQuery, onFilterChange }: TabsToolbarProps) {
         value={filterQuery}
         onChange={(e) => onFilterChange(e.target.value)}
         allowClear
-        style={{ maxWidth: 400, flex: "1 1 auto" }}
+        className={styles["app-toolbar-search-input"]}
       />
       <Flex align="center" gap={4} className={styles["app-domain-toolbar-controls"]}>
         <Tooltip title={t("headerLayout.title")}>
           <Segmented
             size="small"
             value={tabsLayout}
-            onChange={(v) => void updateSettings({ tabsLayout: v as "masonry" | "compact" | "grid" })}
+            onChange={(v) =>
+              void updateSettings({ tabsLayout: v as "masonry" | "compact" | "grid" })
+            }
             options={[
-              { value: "masonry", icon: <span className={styles["app-segmented-icon"]}><LayoutGrid size={13} /></span> },
-              { value: "compact", icon: <span className={styles["app-segmented-icon"]}><List size={13} /></span> },
-              { value: "grid", icon: <span className={styles["app-segmented-icon"]}><Grip size={13} /></span> },
+              {
+                value: "masonry",
+                icon: (
+                  <span className={styles["app-segmented-icon"]}>
+                    <LayoutGrid size={13} />
+                  </span>
+                ),
+              },
+              {
+                value: "compact",
+                icon: (
+                  <span className={styles["app-segmented-icon"]}>
+                    <List size={13} />
+                  </span>
+                ),
+              },
+              {
+                value: "grid",
+                icon: (
+                  <span className={styles["app-segmented-icon"]}>
+                    <Grip size={13} />
+                  </span>
+                ),
+              },
             ]}
           />
         </Tooltip>
@@ -52,7 +75,9 @@ export function TabsToolbar({ filterQuery, onFilterChange }: TabsToolbarProps) {
           <Segmented
             size="small"
             value={layoutDensity}
-            onChange={(v) => void updateSettings({ layoutDensity: v as "compact" | "default" | "comfortable" })}
+            onChange={(v) =>
+              void updateSettings({ layoutDensity: v as "compact" | "default" | "comfortable" })
+            }
             options={[
               { value: "compact", label: "S" },
               { value: "default", label: "M" },

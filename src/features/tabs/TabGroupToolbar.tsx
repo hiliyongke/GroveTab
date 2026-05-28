@@ -39,7 +39,7 @@ export function TabGroupToolbar({
         value={filterQuery}
         onChange={(e) => onFilterChange(e.target.value)}
         allowClear
-        style={{ maxWidth: 400, flex: "1 1 auto" }}
+        className={styles["app-toolbar-search-input"]}
       />
       <Flex align="center" gap={4} className={styles["app-domain-toolbar-controls"]}>
         <Tooltip title={t("tabGroup.sortBy")}>

@@ -220,7 +220,8 @@ export async function loadDictionary(baseUrl?: string, force = false): Promise<b
     if (import.meta.env?.DEV) {
       const zhCount = zhCNData ? Object.keys(dictionaries["zh-CN"]).length : 0;
       const enCount = enData ? Object.keys(dictionaries.en).length : 0;
-      console.log(`[i18n] 字典加载完成：zh-CN ${zhCount} 条，en ${enCount} 条`);
+
+      console.info(`[i18n] 字典加载完成：zh-CN ${zhCount} 条，en ${enCount} 条`);
     }
 
     return true;

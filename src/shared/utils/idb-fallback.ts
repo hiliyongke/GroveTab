@@ -105,7 +105,7 @@ async function migrateSessionsToIDB(): Promise<number> {
   // 3. 从 chrome.storage.local 删除
   await removeStorageLocal(STORAGE_KEYS.sessions);
 
-  console.log(`[IDB Fallback] Migrated ${sessions.length} sessions to IndexedDB`);
+  // Migration complete — migrated ${sessions.length} sessions to IndexedDB
   return sessions.length;
 }
 

@@ -75,7 +75,7 @@ async function migrateToOPFS(): Promise<void> {
       await opfsWrite(OPFS_SESSIONS_PATH, sessions);
     }
     useOPFS = true;
-    console.log(`[Archive] Migrated ${sessions.length} sessions to OPFS`);
+    // Migration complete — migrated ${sessions.length} sessions to OPFS
   } catch (err) {
     console.error("[Archive] OPFS migration failed, falling back to IDB", err);
     await autoFallbackIfNeeded();

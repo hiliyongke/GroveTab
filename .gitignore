@@ -28,6 +28,9 @@ coverage/
 # Vite cache
 .vite/
 
+# pnpm store (should not exist in project root)
+.pnpm-store/
+
 # Auto-generated JS/DSL from TS configs
 vite.config.js
 vite.config.d.ts
@@ -36,3 +39,7 @@ vitest.config.d.ts
 
 # Husky（v9 仅忽略自动生成的内部目录）
 .husky/_/
+
+# AI tool artifacts
+.workbuddy/
+deliverables/

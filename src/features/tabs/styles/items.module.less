@@ -188,6 +188,10 @@
   padding: 6px;
 }
 
+.app-domain-group-list--flex {
+  display: flex; /* antd 组件内部微调整 */
+}
+
 .app-domain-group-sortable {
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
@@ -479,4 +483,10 @@
   height: 10px;
   flex-shrink: 0;
   border-radius: 50%;
+}
+
+/* Toolbar 搜索输入框 — 统一 max-width + flex 行为 */
+.app-toolbar-search-input {
+  max-width: 400px;
+  flex: 1 1 auto;
 }

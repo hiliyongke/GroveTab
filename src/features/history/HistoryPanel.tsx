@@ -569,8 +569,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
             className={styles["history-item-favicon"]}
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = "none";
-              const fallback = (e.target as HTMLImageElement)
-                .nextElementSibling as HTMLElement;
+              const fallback = (e.target as HTMLImageElement).nextElementSibling as HTMLElement;
               if (fallback) fallback.style.display = "inline-flex";
             }}
           />
@@ -958,7 +957,7 @@ function HistoryAnalysisView({
 }: HistoryAnalysisViewProps): ReactNode {
   if (loading) {
     return (
-      <Flex align="center" justify="center" style={{ padding: "40px 0" }}>
+      <Flex align="center" justify="center" className={styles["history-loading-center"]}>
         <Spin size="default" />
       </Flex>
     );
@@ -973,7 +972,7 @@ function HistoryAnalysisView({
             value={rangeMs}
             onChange={onRangeChange}
             options={RANGE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-            style={{ width: 110 }}
+            className={styles["history-date-picker"]}
           />
           <Button size="small" icon={<Download size={12} />} onClick={onExport}>
             {t("导出")}
@@ -999,9 +998,9 @@ function HistoryAnalysisView({
             value={rangeMs}
             onChange={onRangeChange}
             options={RANGE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-            style={{ width: 110 }}
+            className={styles["history-date-picker"]}
           />
-          <Typography.Text style={{ fontSize: 12, opacity: 0.6 }}>
+          <Typography.Text className={styles["history-stat-text"]}>
             {t("共 {n} 条记录", { n: analysis.totalEvents })}
           </Typography.Text>
         </Flex>

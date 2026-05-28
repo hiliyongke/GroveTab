@@ -94,15 +94,10 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
           const zhCount = Object.keys(dicts["zh-CN"]).length;
           const enCount = Object.keys(dicts.en).length;
           const missingEn = Object.keys(dicts["zh-CN"]).filter((k) => !dicts.en[k]).length;
-          console.groupCollapsed("[i18n] 翻译字典加载完成");
-          console.log(`  zh-CN：${zhCount} 条`);
-          console.log(`  en：${enCount} 条`);
-          if (missingEn > 0) {
-            console.warn(`  ⚠️  英文缺失：${missingEn} 条`);
-          } else {
-            console.log("  ✅ 英文翻译完整");
-          }
-          console.groupEnd();
+
+          console.info(
+            `[i18n] 翻译字典加载完成：zh-CN ${zhCount} 条，en ${enCount} 条${missingEn > 0 ? `，⚠️ 英文缺失 ${missingEn} 条` : "，✅ 英文翻译完整"}`,
+          );
         }
       } else {
         // 加载失败：内嵌字典仍可用，仅标记未就绪
