@@ -415,11 +415,9 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
                             alt=""
                             preview={false}
                             fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
-                            width={16}
-                            height={16}
                           />
                         ) : (
-                          option.label.slice(0, 1)
+                          option.label.slice(0, 1).toUpperCase()
                         )}
                       </span>
                       <span className={styles["search-box-engine-menu-label"]}>{option.label}</span>
@@ -462,11 +460,9 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
                     alt=""
                     preview={false}
                     fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
-                    width={16}
-                    height={16}
                   />
                 ) : (
-                  currentEngineOption.label.slice(0, 1)
+                  currentEngineOption.label.slice(0, 1).toUpperCase()
                 )}
               </span>
               <ChevronDown

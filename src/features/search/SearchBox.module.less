@@ -59,7 +59,12 @@
   color: var(--searchbox-search-icon);
 }
 
-/* ─── 引擎切换触发器（输入框左侧） ─── */
+/* ─── 引擎切换触发器（输入框左侧） ───
+ * 设计决策：
+ *   · logo 用浅色中性底 + 内边距，避免彩色圆形背景压过输入框
+ *   · object-fit: contain，完整呈现品牌 logo（Google G 不再被切靠边）
+ *   · 触发器与下拉项 logo 共用同一套规格，保证视觉一致
+ */
 .search-box-engine-trigger {
   all: unset;
   box-sizing: border-box;
@@ -68,7 +73,7 @@
   gap: 4px;
   align-items: center;
   height: 36px;
-  padding: 0 6px 0 8px;
+  padding: 0 6px;
   color: var(--searchbox-text-secondary);
   cursor: pointer;
   background: transparent;
@@ -96,7 +101,8 @@
 
 .search-box-engine-trigger-caret {
   flex-shrink: 0;
-  opacity: 0.6;
+  color: var(--searchbox-text-tertiary);
+  opacity: 0.7;
   transition: transform var(--searchbox-transition);
 }
 
@@ -109,21 +115,27 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
+  padding: 3px;
   overflow: hidden;
   font-size: 11px;
   font-weight: 700;
-  color: var(--ant-color-white, #ffffff);
-  background: var(--searchbox-engine-color, var(--searchbox-accent));
-  border-radius: 50%;
+  line-height: 1;
+  color: var(--searchbox-text);
+  background: var(--searchbox-fill-tertiary);
+  border-radius: var(--app-radius-sm, 6px);
+
+  /* 选中及 hover 状态下靠品牌色提供轻量提示 */
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--searchbox-engine-color, var(--searchbox-accent)) 18%, transparent);
 }
 
 .search-box-engine-logo img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  background: var(--ant-color-bg-container, #ffffff);
+  object-fit: contain;
+  background: transparent;
 }
 
 /* ─── 引擎切换 Popover 菜单 ─── */
@@ -146,12 +158,18 @@
   display: flex; /* antd 组件内部微调整 */
   gap: 10px;
   align-items: center;
-  padding: 6px 10px 6px 8px;
+  padding: 6px 10px 6px 6px;
   font-size: 13px;
   color: var(--searchbox-text);
   cursor: pointer;
   border-radius: var(--app-radius-sm, 6px);
   transition: background var(--searchbox-transition);
+}
+
+/* 下拉项中 logo 与触发器同规格，但额外提供选中态下的强化描边 */
+.search-box-engine-menu-item.is-active .search-box-engine-logo {
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--searchbox-engine-color, var(--searchbox-accent)) 45%, transparent);
 }
 
 .search-box-engine-menu-item:hover {
