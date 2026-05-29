@@ -1,27 +1,41 @@
+/**
+ * AppHeader v2 —— 4 区收敛结构
+ *
+ * UX-P0-03 + UX-P0-06 合并实现
+ *
+ * 区域划分：
+ *   1. 身份区（左）：Logo + 状态摘要 + 标签计数
+ *   2. 全局搜索（中）：吸附搜索触发器（⌘K / ⌘P）
+ *   3. 空间切换（中右）：SpaceSwitcher（3 个空间：workspace / trending / devtools）
+ *   4. 工具篮（右）：主题切换 + 溢出菜单（Insights/History/Trash/QuickToggle/Settings）
+ *
+ * 触发器从 11+ 收敛为 4 区：搜索 / 空间 / 主题 / 溢出菜单
+ */
+
 import { useCallback, useState } from "react";
-import { Layout, Space, Button, Tooltip, Tag, Flex, Popover } from "antd";
-import { Search, Settings, Sun, Moon, SunMoon, Globe, BarChart3, History, Trash2, SlidersHorizontal } from "lucide-react";
+import { Layout, Space, Button, Tooltip, Tag, Flex, Dropdown, Popover } from "antd";
+import {
+  Search,
+  Settings,
+  Sun,
+  Moon,
+  SunMoon,
+  BarChart3,
+  History,
+  Trash2,
+  SlidersHorizontal,
+  MoreHorizontal,
+} from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useSettingsStore } from "@/store";
 import { useT } from "@/shared/i18n";
 import { BRAND } from "@/shared/config/brand";
-import { DropdownMenu } from "@/features/workspace/DropdownMenu";
-import { WorkspaceSwitcher } from "@/features/workspace/WorkspaceSwitcher";
+import { SpaceSwitcher } from "@/features/workspace/SpaceSwitcher";
 import { QuickTogglePanel } from "@/features/workspace/QuickTogglePanel";
-import type { NewtabPageMode } from "@/shared/types";
+import type { SpaceId } from "@/shared/routing";
 
 const { Header } = Layout;
 
-/**
- * 顶栏：轻量工具条（标签计数 + 吸附搜索 + 操作按钮）
- *
- * 设计策略：
- *   - 不再放品牌 logo（已移到 HeroBar 居中展示），Header 仅作功能栏
- *   - 左侧：小型 logo 图标 + 标签计数，紧凑不抢视觉
- *   - 中部：滚动吸附搜索触发器（Hero 搜索框滚出视野时渐显）
- *   - 右侧：归档 / 明暗切换 / 设置
- *   - 整体更薄更轻，把视觉重心让给 Hero 区的品牌 + 搜索
- */
 export function AppHeader({
   tabCount,
   domainCount,
@@ -29,8 +43,8 @@ export function AppHeader({
   idleTabsCount,
   hasTidySuggestions,
   compactSearchVisible,
-  pageMode,
-  onPageModeChange,
+  currentSpaceId,
+  onSwitchSpace,
   onSettings,
   onOpenSearch,
   onInsights,
@@ -44,22 +58,19 @@ export function AppHeader({
   idleTabsCount: number;
   hasTidySuggestions: boolean;
   compactSearchVisible: boolean;
-  pageMode: NewtabPageMode;
-  onPageModeChange: (mode: NewtabPageMode) => void;
+  currentSpaceId: SpaceId | string;
+  onSwitchSpace: (spaceId: SpaceId) => void;
   onSettings: () => void;
   onOpenSearch: () => void;
   onInsights?: () => void;
-  /** 一键整理回调 */
   onTidy?: () => void;
-  /** 打开「插件历史记录」面板 */
   onOpenHistory?: () => void;
-  /** 打开「回收站」面板 */
   onOpenTrash?: () => void;
 }) {
   const theme = useSettingsStore((s) => s.settings.theme);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const { t } = useT();
-  /** 循环切换 light → dark → system */
+
   const toggleTheme = useCallback(() => {
     const next = theme === "light" ? "dark" : theme === "dark" ? "system" : "light";
     void updateSettings({ theme: next });
@@ -67,12 +78,6 @@ export function AppHeader({
 
   const [quickToggleOpen, setQuickToggleOpen] = useState(false);
 
-  /**
-   * 主题图标：三态分别用差异化强烈的图形，避免「点了看不出变化」
-   *   - light  → 太阳 ☀
-   *   - dark   → 月亮 🌙
-   *   - system → 日月同辉 ☀🌙
-   */
   const themeIcon =
     theme === "system" ? (
       <SunMoon key="sys" size={ICON_SIZE.MEDIUM} className="app-icon app-icon--theme" />
@@ -82,24 +87,59 @@ export function AppHeader({
       <Sun key="light" size={ICON_SIZE.MEDIUM} className="app-icon app-icon--theme" />
     );
 
+  // 溢出菜单项（QuickToggle 也收入此处）
+  const overflowItems = [
+    {
+      key: "insights",
+      icon: <BarChart3 size={ICON_SIZE.SMALL} />,
+      label: t("本地隐私洞察"),
+      onClick: onInsights,
+    },
+    {
+      key: "history",
+      icon: <History size={ICON_SIZE.SMALL} />,
+      label: t("历史记录"),
+      onClick: onOpenHistory,
+    },
+    {
+      key: "trash",
+      icon: <Trash2 size={ICON_SIZE.SMALL} />,
+      label: t("回收站"),
+      onClick: onOpenTrash,
+    },
+    { type: "divider" as const, key: "divider-tools" },
+    {
+      key: "quickToggle",
+      icon: <SlidersHorizontal size={ICON_SIZE.SMALL} />,
+      label: t("quickToggle.title"),
+      onClick: () => setQuickToggleOpen(true),
+    },
+    {
+      key: "settings",
+      icon: <Settings size={ICON_SIZE.SMALL} />,
+      label: t("设置"),
+      onClick: onSettings,
+    },
+  ].filter((item) => {
+    if ("onClick" in item) return !!item.onClick;
+    return true;
+  });
+
   return (
     <Header className={`app-header-shell${compactSearchVisible ? " is-scrolled" : ""}`}>
-      {/* 左侧：小 logo + 状态摘要 */}
+      {/* ZONE 1: 身份区 */}
       <Flex align="center" gap={8} className="app-header-left">
         <img src="/icons/logo.png" alt={BRAND.name} className="app-header-logo" />
-        {/* 状态徽标 */}
         <Tag
           color={hasTidySuggestions ? "gold" : "green"}
           className={`app-header-status-tag${compactSearchVisible ? " is-hidden" : ""}`}
         >
-          {hasTidySuggestions ? t('可整理') : t('状态良好')}
+          {hasTidySuggestions ? t("可整理") : t("状态良好")}
         </Tag>
-        {/* 核心计数 —— 仅在吸附搜索未激活时显示 */}
         <span className={`app-header-metrics${compactSearchVisible ? " is-hidden" : ""}`}>
-          <span className="app-header-metric-strong">{tabCount}</span> {t('标签页')}
+          <span className="app-header-metric-strong">{tabCount}</span> {t("标签页")}
           <span className="app-header-dot">·</span>
-          <span className="app-header-metric-strong">{domainCount}</span>{" "}
-          {t('域名')}
+          <span className="app-header-metric-strong">{domainCount}</span> {t("域名")}
           {(duplicateTabsCount > 0 || idleTabsCount > 0) && (
             <>
               <span className="app-header-dot">·</span>
@@ -108,10 +148,10 @@ export function AppHeader({
               >
                 {duplicateTabsCount + idleTabsCount}
               </span>{" "}
-              {t('待处理')}
+              {t("待处理")}
               {onTidy && (
                 <Button type="link" className="app-header-tidy-link" onClick={onTidy}>
-                  {t('一键整理')}
+                  {t("一键整理")}
                 </Button>
               )}
             </>
@@ -119,43 +159,30 @@ export function AppHeader({
         </span>
       </Flex>
 
-      {/*
-        中部吸附搜索触发器
-        ---------------------------------
-        · flex:1 占满中间空间
-        · Hero 搜索框在视野内时隐藏，滚出后渐显
-      */}
+      {/* ZONE 2: 全局搜索 */}
       <Flex flex="1 1 520px" justify="center" className="app-header-center">
         <Button
           type="text"
           onClick={onOpenSearch}
-          aria-label={t('搜索标签页...')}
+          aria-label={t("搜索标签页...")}
           className={`app-compact-search app-header-search-trigger${compactSearchVisible ? " is-visible" : ""}`}
         >
           <Search
             size={ICON_SIZE.DEFAULT}
             className="app-icon app-icon--search app-header-search-icon"
           />
-          <span className="app-header-search-trigger-text">{t('搜索标签页...')}</span>
+          <span className="app-header-search-trigger-text">{t("搜索标签页...")}</span>
           <span className="app-kbd" aria-hidden>
             ⌘K
           </span>
         </Button>
       </Flex>
 
+      {/* ZONE 3: 空间切换 */}
+      <SpaceSwitcher currentSpaceId={currentSpaceId} onSwitchSpace={onSwitchSpace} />
+
+      {/* ZONE 4: 工具篮 */}
       <Space size={6} className="app-header-actions">
-        {pageMode !== "workspace" && (
-          <Button
-            size="small"
-            type="text"
-            icon={<Globe size={ICON_SIZE.SMALL} />}
-            onClick={() => onPageModeChange("workspace")}
-          >
-            {t('工作台')}
-          </Button>
-        )}
-        <DropdownMenu currentPageMode={pageMode} onPageModeChange={onPageModeChange} />
-        <WorkspaceSwitcher />
         <Tooltip title={t(`theme.${theme}`)}>
           <Button
             size="small"
@@ -169,66 +196,33 @@ export function AppHeader({
             aria-label={t(`theme.${theme}`)}
           />
         </Tooltip>
-        <Popover
-          open={quickToggleOpen}
-          onOpenChange={setQuickToggleOpen}
-          trigger="click"
-          placement="bottomRight"
-          overlayClassName="app-quick-toggle-overlay"
-          content={<QuickTogglePanel onOpenSettings={onSettings} onClose={() => setQuickToggleOpen(false)} />}
-        >
-          <Tooltip title={t('quickToggle.title')}>
+        <Dropdown menu={{ items: overflowItems }} trigger={["click"]} placement="bottomRight">
+          <Tooltip title={t("更多操作")}>
             <Button
               size="small"
               type="text"
-              icon={<SlidersHorizontal size={ICON_SIZE.SMALL} className="app-icon" />}
-              aria-label={t('quickToggle.title')}
+              icon={<MoreHorizontal size={ICON_SIZE.SMALL} className="app-icon" />}
+              aria-label={t("更多操作")}
             />
           </Tooltip>
-        </Popover>
-        <Tooltip title={t('设置')}>
-          <Button
-            size="small"
-            type="text"
-            icon={<Settings size={ICON_SIZE.SMALL} className="app-icon app-icon--settings" />}
-            onClick={onSettings}
-            aria-label={t('设置')}
-          />
-        </Tooltip>
-        {onInsights && (
-          <Tooltip title={t('本地隐私洞察')}>
-            <Button
-              size="small"
-              type="text"
-              icon={<BarChart3 size={ICON_SIZE.SMALL} className="app-icon app-icon--insights" />}
-              onClick={onInsights}
-              aria-label={t('本地隐私洞察')}
-            />
-          </Tooltip>
-        )}
-        {onOpenHistory && (
-          <Tooltip title={t('历史记录')}>
-            <Button
-              size="small"
-              type="text"
-              icon={<History size={ICON_SIZE.SMALL} className="app-icon" />}
-              onClick={onOpenHistory}
-              aria-label={t('历史记录')}
-            />
-          </Tooltip>
-        )}
-        {onOpenTrash && (
-          <Tooltip title={t('回收站')}>
-            <Button
-              size="small"
-              type="text"
-              icon={<Trash2 size={ICON_SIZE.SMALL} className="app-icon" />}
-              onClick={onOpenTrash}
-              aria-label={t('回收站')}
-            />
-          </Tooltip>
-        )}
+        </Dropdown>
       </Space>
+
+      {/* QuickToggle 浮层（由溢出菜单触发） */}
+      <Popover
+        open={quickToggleOpen}
+        onOpenChange={setQuickToggleOpen}
+        trigger="click"
+        placement="bottomRight"
+        overlayClassName="app-quick-toggle-overlay"
+        content={<QuickTogglePanel onOpenSettings={onSettings} onClose={() => setQuickToggleOpen(false)} />}
+      >
+        {/* 隐藏的锚点，让 Popover 能正确定位 */}
+        <span
+          id="quick-toggle-anchor"
+          style={{ position: "fixed", right: 48, top: 48, pointerEvents: "none" }}
+        />
+      </Popover>
     </Header>
   );
 }

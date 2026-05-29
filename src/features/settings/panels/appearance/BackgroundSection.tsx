@@ -8,11 +8,12 @@
  */
 
 import { useState, useCallback } from "react";
-import { App, Button, Slider, ColorPicker, Switch, Input, Upload, Select, Space } from "antd";
+import { Button, Slider, ColorPicker, Switch, Input, Upload, Select, Space } from "antd";
 import { Image, Trash2 } from "lucide-react";
 import { cssVars } from "@/shared/utils/css-vars";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
+import { feedback } from "@/shared/ui/feedback";
 import { useResolvedTheme } from "@/shared/hooks";
 import { GRADIENT_PRESETS, buildGradient } from "@/shared/theme/gradient-presets";
 import { BRAND } from "@/shared/config/brand";
@@ -29,7 +30,6 @@ interface BackgroundSectionProps {
 
 export function BackgroundSection({ settings, updateSettings }: BackgroundSectionProps) {
   const { t } = useT();
-  const { message } = App.useApp();
   const isDark = useResolvedTheme() === "dark";
   const [showGradientEditor, setShowGradientEditor] = useState(false);
 
@@ -95,10 +95,10 @@ export function BackgroundSection({ settings, updateSettings }: BackgroundSectio
           console.warn(`${BRAND.logTag} background image optimize failed`, err);
           const raw = err instanceof Error ? err.message : String(err);
           const msg = raw.startsWith("i18n:") ? t(raw.slice(5)) : raw;
-          void message.warning(msg);
+          void feedback.warning(msg);
         });
     },
-    [message, updateBgImage],
+    [updateBgImage],
   );
 
   return (

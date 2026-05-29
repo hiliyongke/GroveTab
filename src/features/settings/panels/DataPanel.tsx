@@ -40,6 +40,7 @@ import {
 import { PermissionDiagnosticsPanel } from "./PermissionDiagnosticsPanel";
 
 import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { feedback } from "@/shared/ui/feedback";
 import { useT } from "@/shared/i18n";
 import { useSettingsStore } from "@/store";
 import { exportSessionsJSON, downloadFile, parseImportJSON } from "@/shared/utils/import-export";
@@ -63,7 +64,7 @@ const MAX_IMPORT_FILE_BYTES = 2 * 1024 * 1024;
 
 export function DataPanel() {
   const { t } = useT();
-  const { modal, message } = App.useApp();
+  const { modal } = App.useApp();
   const settings = useSettingsStore((s) => s.settings);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const resetSettings = useSettingsStore((s) => s.resetSettings);
@@ -86,15 +87,15 @@ export function DataPanel() {
     setProfileName("");
     const updated = await getProfiles();
     setProfiles(updated);
-    message.success(t("预设已保存"));
-  }, [profileName, settings, message, t]);
+    feedback.success(t("预设已保存"));
+  }, [profileName, settings, t]);
 
   const handleApplyProfile = useCallback(
     (profile: SettingsProfile) => {
       void updateSettings(profile.settings);
-      message.success(t("已应用预设「{name}」", { name: profile.name }));
+      feedback.success(t("已应用预设「{name}」", { name: profile.name }));
     },
-    [updateSettings, message, t],
+    [updateSettings, t],
   );
 
   const handleDeleteProfile = useCallback(
@@ -102,9 +103,9 @@ export function DataPanel() {
       await deleteProfile(id);
       const updated = await getProfiles();
       setProfiles(updated);
-      message.success(t("预设已删除"));
+      feedback.success(t("预设已删除"));
     },
-    [message, t],
+    [t],
   );
 
   const handleRenameProfile = useCallback(
@@ -115,9 +116,9 @@ export function DataPanel() {
       setEditingName("");
       const updated = await getProfiles();
       setProfiles(updated);
-      message.success(t("预设已重命名"));
+      feedback.success(t("预设已重命名"));
     },
-    [editingName, message, t],
+    [editingName, t],
   );
 
   const handleExport = async () => {
@@ -134,7 +135,7 @@ export function DataPanel() {
       JSON.stringify(bundle, null, 2),
       `${APP_RESOURCE_NAMES.backupFilePrefix}-${new Date().toISOString().slice(0, 10)}.json`,
     );
-    message.success(t("已导出归档 + 工作台配置"));
+    feedback.success(t("已导出归档 + 工作台配置"));
   };
 
   const handleImport = async (file: File) => {
@@ -179,7 +180,7 @@ export function DataPanel() {
       onOk: async () => {
         try {
           await saveSessions([]);
-          message.success(t("清空所有归档"));
+          feedback.success(t("清空所有归档"));
         } catch (err) {
           console.error("[DataPanel] clearAll failed:", err);
         }
@@ -377,10 +378,10 @@ export function DataPanel() {
             void (async () => {
               try {
                 await resetSettings();
-                message.success(t("配置已恢复默认，页面即将刷新"));
+                feedback.success(t("配置已恢复默认，页面即将刷新"));
               } catch (err) {
                 console.error("[DataPanel] resetSettings failed:", err);
-                message.error(t("恢复默认配置失败，请重试"));
+                feedback.error(t("恢复默认配置失败，请重试"));
               }
             })();
           }}
@@ -396,7 +397,7 @@ export function DataPanel() {
             void (async () => {
               try {
                 await removeData(STORAGE_KEYS.onboardingDone);
-                message.success(t("欢迎教程已重置"));
+                feedback.success(t("欢迎教程已重置"));
               } catch (err) {
                 console.error("[DataPanel] replayOnboarding failed:", err);
               }
@@ -441,7 +442,7 @@ export function DataPanel() {
               cancelText: t("取消"),
               onOk: async () => {
                 if (confirmText.trim().toUpperCase() !== "RESET") {
-                  message.error(t("请输入 RESET 以确认"));
+                  feedback.error(t("请输入 RESET 以确认"));
                   return Promise.reject(new Error("must type RESET"));
                 }
                 try {
@@ -452,11 +453,11 @@ export function DataPanel() {
                     }
                   }
                   await resetSettings();
-                  message.success(t("已恢复出厂设置，页面即将刷新"));
+                  feedback.success(t("已恢复出厂设置，页面即将刷新"));
                   setTimeout(() => window.location.reload(), 400);
                 } catch (err) {
                   console.error("[DataPanel] factoryReset failed:", err);
-                  message.error(t("请输入 RESET 以确认"));
+                  feedback.error(t("请输入 RESET 以确认"));
                   return Promise.reject(err instanceof Error ? err : new Error(String(err)));
                 }
                 return undefined;

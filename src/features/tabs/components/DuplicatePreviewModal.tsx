@@ -12,13 +12,14 @@
  */
 
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { App, Button, Modal, Radio, Space, Tag, Typography, theme, Flex, Image } from "antd";
+import { Button, Modal, Radio, Space, Tag, Typography, theme, Flex, Image } from "antd";
 import type { RadioChangeEvent } from "antd/es/radio/interface";
 import type { LiveTab } from "@/shared/types";
 import type { DupGroup } from "@/shared/utils/dedupe";
 import { useTabsStore, useMetadataStore } from "@/store";
 import { nanoid } from "nanoid";
 import { useT } from "@/shared/i18n";
+import { feedback } from "@/shared/ui/feedback";
 import styles from "../styles/views.module.less";
 
 const { Text } = Typography;
@@ -54,7 +55,6 @@ function formatOpenedAt(ts: number, locale: string): string {
 export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePreviewModalProps) {
   const { t, locale: currentLocale } = useT();
   const { token } = theme.useToken();
-  const { message } = App.useApp();
   const closeMultipleTabs = useTabsStore((s) => s.closeMultipleTabs);
   const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
   const pushActivity = useMetadataStore((s) => s.pushActivity);
@@ -122,7 +122,7 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
     try {
       await closeMultipleTabs(toClose);
       await loadAllTabs();
-      message.success(t("已合并 {count} 个重复标签", { count: toClose.length }));
+      feedback.success(t("已合并 {count} 个重复标签", { count: toClose.length }));
       await pushActivity({
         id: nanoid(6),
         type: "dedup_merge",
@@ -132,7 +132,7 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
       onClose();
     } catch (err) {
       console.warn("[DuplicatePreviewModal] merge failed", err);
-      message.error(t("合并失败，部分标签可能仍然存在"));
+      feedback.error(t("合并失败，部分标签可能仍然存在"));
     } finally {
       setBusy(false);
     }
@@ -142,7 +142,6 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
     keepers,
     closeMultipleTabs,
     loadAllTabs,
-    message,
     onClose,
     pushActivity,
     t,

@@ -1,9 +1,10 @@
 /* eslint-disable react-hooks/refs */
 
 import { useEffect, useMemo, useState } from "react";
-import { Button, Card, Input, Popconfirm, theme, App as AntApp, Typography, Flex } from "antd";
+import { Button, Card, Input, Popconfirm, theme, Typography, Flex } from "antd";
 import { Plus, Trash2, Save, PenLine, X, GripVertical } from "lucide-react";
 import { cssVars } from "@/shared/utils/css-vars";
+import { feedback } from "@/shared/ui/feedback";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import {
   DndContext,
@@ -47,7 +48,6 @@ interface ActiveDrag {
 export function KanbanView() {
   const { token } = theme.useToken();
   const { t } = useT();
-  const { message } = AntApp.useApp();
   const columns = useKanbanStore((s) => s.columns);
   const loaded = useKanbanStore((s) => s.loaded);
   const loadKanban = useKanbanStore((s) => s.loadKanban);
@@ -93,9 +93,9 @@ export function KanbanView() {
     try {
       await addColumn(name);
       setNewColumnName("");
-      message.success(t("已添加列「{name}」", { name }));
+      feedback.success(t("已添加列「{name}」", { name }));
     } catch (err) {
-      message.error(t("新增列失败，请重试"));
+      feedback.error(t("新增列失败，请重试"));
       console.warn("[kanban] addColumn failed", err);
     }
   };
@@ -103,14 +103,14 @@ export function KanbanView() {
   const handleSaveAsSession = async (col: KanbanColumn) => {
     const live = tabs.filter((t) => col.cards.some((c) => c.url === t.url));
     if (live.length === 0) {
-      message.warning(t("拖拽 Tab 到此列"));
+      feedback.warning(t("拖拽 Tab 到此列"));
       return;
     }
     try {
       await archiveSelectedTabs(live.map((t) => t.id));
-      message.success(t("已归档 {count} 个标签页", { count: live.length }));
+      feedback.success(t("已归档 {count} 个标签页", { count: live.length }));
     } catch (err) {
-      message.error(t("归档保存失败"));
+      feedback.error(t("归档保存失败"));
       console.warn("[kanban] archive failed", err);
     }
   };
@@ -186,7 +186,7 @@ export function KanbanView() {
         await reorderColumns(fromIndex, toIndex);
       }
     } catch (err) {
-      message.error(t("移动失败，请重试"));
+      feedback.error(t("移动失败，请重试"));
       console.warn("[kanban] drag operation failed", err);
     }
   };
@@ -236,14 +236,14 @@ export function KanbanView() {
                 onRename={(name) => void renameColumn(col.id, name)}
                 onRemove={() => {
                   removeColumn(col.id).catch((err) => {
-                    message.error(t("删除列失败"));
+                    feedback.error(t("删除列失败"));
                     console.warn("[kanban] removeColumn failed", err);
                   });
                 }}
                 onSaveAsSession={() => void handleSaveAsSession(col)}
                 onRemoveCard={(url) => {
                   removeCard(col.id, url).catch((err) => {
-                    message.error(t("移除卡片失败"));
+                    feedback.error(t("移除卡片失败"));
                     console.warn("[kanban] removeCard failed", err);
                   });
                 }}

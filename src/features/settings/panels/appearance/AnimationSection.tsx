@@ -7,10 +7,11 @@
  *   - 视频背景（URL / 本地文件 + 播放速率）
  */
 
-import { App, Button, Slider, Select, Input, Upload } from "antd";
+import { Button, Slider, Select, Input, Upload } from "antd";
 import { Image } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
+import { feedback } from "@/shared/ui/feedback";
 import type { UserSettings } from "@/shared/types";
 import { Field } from "@/features/settings/components/Field";
 
@@ -23,7 +24,6 @@ interface AnimationSectionProps {
 
 export function AnimationSection({ settings, updateSettings }: AnimationSectionProps) {
   const { t } = useT();
-  const { message } = App.useApp();
 
   return (
     <>
@@ -136,11 +136,11 @@ export function AnimationSection({ settings, updateSettings }: AnimationSectionP
               beforeUpload={(file) => {
                 void (async () => {
                   if (file.size > MAX_VIDEO_BACKGROUND_FILE_BYTES) {
-                    void message.warning(t("视频不能超过 50MB"));
+                    void feedback.warning(t("视频不能超过 50MB"));
                     return;
                   }
                   if (file.type !== "" && !["video/mp4", "video/webm"].includes(file.type)) {
-                    void message.warning(t("请选择 MP4 或 WebM 视频"));
+                    void feedback.warning(t("请选择 MP4 或 WebM 视频"));
                     return;
                   }
                   const old = settings.videoBackground?.fileKey;

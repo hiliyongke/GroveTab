@@ -12,7 +12,7 @@
  */
 
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { Alert, App, Button, List, Space, Tag, Tooltip, Typography, Flex } from "antd";
+import { Alert, Button, List, Space, Tag, Tooltip, Typography, Flex } from "antd";
 import { ChevronDown, X, Merge, Moon, Zap } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useTabsStore, useSettingsStore } from "@/store";
@@ -20,6 +20,7 @@ import { findDuplicates, type DupGroup } from "@/shared/utils/dedupe";
 import { detectIdleTabs, formatIdleTime, type IdleTabInfo } from "@/shared/utils/idle-detect";
 import { DuplicatePreviewModal } from "./DuplicatePreviewModal";
 import { useT } from "@/shared/i18n";
+import { feedback } from "@/shared/ui/feedback";
 import { LOCAL_CACHE_KEYS } from "@/shared/config/storage-keys";
 import {
   loadSessionString,
@@ -44,7 +45,6 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
   const [busy, setBusy] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const { t } = useT();
-  const { message } = App.useApp();
 
   const dedupStrictness = useSettingsStore((s) => s.settings.dedupStrictness ?? "loose");
   const idleThresholdMinutes = useSettingsStore((s) => s.settings.idleThresholdMinutes ?? 1440);
@@ -79,14 +79,14 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
       try {
         await action();
         await loadAllTabs({ silent: true });
-        message.success(successMsg);
+        feedback.success(successMsg);
       } catch {
         // store 已 toast
       } finally {
         setBusy(false);
       }
     },
-    [busy, loadAllTabs, message],
+    [busy, loadAllTabs],
   );
 
   const handleMergeGroup = useCallback(
@@ -116,14 +116,14 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
         const ids = items.map((item) => item.tab.id);
         await discardMultipleTabs(ids);
         await loadAllTabs({ silent: true });
-        message.success(t("已休眠 {count} 个闲置标签", { count: ids.length }));
+        feedback.success(t("已休眠 {count} 个闲置标签", { count: ids.length }));
       } catch {
         // store 已 toast
       } finally {
         setBusy(false);
       }
     },
-    [busy, discardMultipleTabs, loadAllTabs, message, t],
+    [busy, discardMultipleTabs, loadAllTabs, t],
   );
 
   const handleTidyAll = useCallback(async () => {
@@ -155,14 +155,14 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
     await loadAllTabs({ silent: true });
     setBusy(false);
     if (mergedCount > 0 || discardedCount > 0) {
-      message.success(
+      feedback.success(
         t("已合并 {merged} 个重复标签，休眠 {discarded} 个闲置标签", {
           merged: mergedCount,
           discarded: discardedCount,
         }),
       );
     }
-  }, [busy, closeMultipleTabs, discardMultipleTabs, dupGroups, idleTabs, loadAllTabs, message, t]);
+  }, [busy, closeMultipleTabs, discardMultipleTabs, dupGroups, idleTabs, loadAllTabs, t]);
 
   if (dismissed || !hasSuggestions) return null;
 

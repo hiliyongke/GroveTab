@@ -11,7 +11,8 @@ export type KeybindingAction =
   | 'search'
   | 'openHistory'
   | 'exitSelection'
-  | 'selectAll';
+  | 'selectAll'
+  | 'commandPalette';
 
 /** 单条快捷键绑定定义 */
 export interface KeybindingDef {
@@ -57,6 +58,12 @@ export const KEYBINDING_DEFS: KeybindingDef[] = [
     defaultKey: 'Mod+a',
     labelKey: 'shortcuts.selectAll',
     hintKey: 'shortcuts.selectAllHint',
+  },
+  {
+    action: 'commandPalette',
+    defaultKey: 'Mod+p',
+    labelKey: 'shortcuts.commandPalette',
+    hintKey: 'shortcuts.commandPaletteHint',
   },
 ];
 

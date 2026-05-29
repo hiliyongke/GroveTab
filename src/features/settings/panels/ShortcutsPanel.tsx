@@ -7,14 +7,18 @@
  */
 
 import { useState, useCallback, useEffect } from "react";
-import { Alert, Button, App, Flex, Typography } from "antd";
+import { Alert, Button, Flex, Typography } from "antd";
 import { RotateCcw } from "lucide-react";
 
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
+import { feedback } from "@/shared/ui/feedback";
 import { useSettingsStore } from "@/store";
 import { useResolvedKeybindings } from "@/shared/hooks/use-keybinding";
 import type { KeybindingAction } from "@/shared/config/keybindings";
+import {
+  setCustomKeybindings as setRegistryCustom,
+} from "@/shared/shortcuts/registry";
 import { Field } from "@/features/settings/components/Field";
 import { BRAND } from "@/shared/config/brand";
 
@@ -133,10 +137,16 @@ function KeybindingRecorder({
 
 export function ShortcutsPanel() {
   const { t } = useT();
-  const { message } = App.useApp();
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const customKeybindings = useSettingsStore((s) => s.settings.customKeybindings);
   const resolved = useResolvedKeybindings();
+
+  // 初始化时将现有自定义快捷键同步到 registry（UX-P0-13）
+  useEffect(() => {
+    if (customKeybindings && Object.keys(customKeybindings).length > 0) {
+      setRegistryCustom(customKeybindings);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- 仅初始化时同步一次
 
   /**
    * 冲突检测：把所有 key 字符串（归一化）映射到 action 列表，
@@ -176,9 +186,11 @@ export function ShortcutsPanel() {
     (action: KeybindingAction, keyStr: string) => {
       const updated = { ...customKeybindings, [action]: keyStr };
       void updateSettings({ customKeybindings: updated });
-      message.success(t("快捷键已保存"));
+      // 同步到 shortcuts registry（UX-P0-13）
+      setRegistryCustom(updated);
+      feedback.success(t("快捷键已保存"));
     },
-    [customKeybindings, updateSettings, message, t],
+    [customKeybindings, updateSettings, t],
   );
 
   const handleReset = useCallback(
@@ -188,9 +200,11 @@ export function ShortcutsPanel() {
       void updateSettings({
         customKeybindings: Object.keys(updated).length > 0 ? updated : undefined,
       });
-      message.success(t("已恢复默认快捷键"));
+      // 同步到 shortcuts registry（UX-P0-13）
+      setRegistryCustom(Object.keys(updated).length > 0 ? updated : {});
+      feedback.success(t("已恢复默认快捷键"));
     },
-    [customKeybindings, updateSettings, message, t],
+    [customKeybindings, updateSettings, t],
   );
 
   return (

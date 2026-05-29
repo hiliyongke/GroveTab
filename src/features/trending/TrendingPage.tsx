@@ -22,7 +22,6 @@ import {
   Tag,
   Tooltip,
   Typography,
-  message,
 } from "antd";
 import {
   RefreshCw,
@@ -43,6 +42,7 @@ import {
   Clock,
 } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { feedback } from "@/shared/ui/feedback";
 import { useT } from "@/shared/i18n";
 import { createTab } from "@/chrome";
 import { createBookmark } from "@/chrome/bookmarks";
@@ -305,7 +305,7 @@ function TrendingListItem({
               onClick={(e) => {
                 e.stopPropagation();
                 void navigator.clipboard.writeText(item.url).then(() => {
-                  void message.success(t("链接已复制"), 1.5);
+                  void feedback.success(t("链接已复制"));
                 });
               }}
             />
@@ -524,9 +524,9 @@ export function TrendingPage() {
       setSignals(await getInterestSignals());
       try {
         await createBookmark({ title: item.title, url: item.url });
-        void message.success(t("已加入书签"), 1.5);
+        void feedback.success(t("已加入书签"));
       } catch {
-        void message.error(t("书签添加失败"), 1.5);
+        void feedback.error(t("书签添加失败"));
       }
     },
     [t],
@@ -539,7 +539,7 @@ export function TrendingPage() {
       setSignals(await getInterestSignals());
       try {
         await createTab({ url: item.url, active: false });
-        void message.success(t("已在后台打开"), 1.5);
+        void feedback.success(t("已在后台打开"));
       } catch {
         window.open(item.url, "_blank", "noopener,noreferrer");
       }

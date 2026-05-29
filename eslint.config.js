@@ -272,7 +272,7 @@ export default tseslint.config(
       'tab/no-relative-cross-dir-import': ['error', { maxDepth: 1 }],
       'tab/no-direct-chrome-api': 'warn',
       'tab/no-direct-storage-api': 'error',
-      'tab/no-direct-feedback-api': 'warn',
+      'tab/no-direct-feedback-api': 'error',
       'tab/prefer-named-function-component': 'warn',
       'tab/no-default-export-anonymous-component': 'warn',
       'tab/no-large-component': ['warn', { max: 400 }],

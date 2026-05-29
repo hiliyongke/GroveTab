@@ -11,6 +11,7 @@ import {
 } from "@/shared/hooks";
 import { useT } from "@/shared/i18n";
 import { useKeybinding } from "@/shared/hooks/use-keybinding";
+import { useStatusBarStore } from "@/shared/store/status-bar-slice";
 import { AntdThemeProvider } from "@/shared/ui/AntdThemeProvider";
 import { ErrorBoundary } from "@/shared/ui/ErrorBoundary";
 import { UndoToast } from "@/shared/ui/UndoToast";
@@ -41,10 +42,20 @@ import { TabsView } from "@/features/tabs/views/TabsView";
 import { registerViews } from "@/shared/config/view-registry";
 import { findDuplicates } from "@/shared/utils/dedupe";
 import { detectIdleTabs } from "@/shared/utils/idle-detect";
-import { useHashNavigation } from "./hooks/use-hash-navigation";
+import { useUrlSync } from "@/shared/routing";
+import { usePanelStack } from "@/shared/panels";
+import {
+  CommandPalette,
+  registerCommands,
+  createViewCommands,
+  createPanelCommands,
+  createSettingsCommands,
+  createSpaceCommands,
+} from "@/features/command-palette";
+import { createTemplateCommands } from "@/features/workspace/quick-actions/SaveAsTemplateAction";
 import { useLayoutStyle } from "./hooks/use-layout-style";
-import { usePanelState } from "./hooks/use-panel-state";
 import { useMemoryGovernance } from "@/shared/hooks/use-memory-governance";
+import { StatusBar } from "@/shared/ui/StatusBar/StatusBar";
 
 const TrendingPage = lazy(() =>
   import("@/features/trending/TrendingPage").then((m) => ({ default: m.TrendingPage })),
@@ -104,16 +115,30 @@ registerViews([
   { id: "window", component: WindowView, order: 4 },
   { id: "kanban", component: KanbanView, order: 5 },
   { id: "frequency", component: FrequencyView, order: 6 },
-  // archive 作为隐藏视图，不在 ViewDock 显示，但可通过程序切换
-  { id: "archive", component: ArchiveView, order: 99 },
+  // UX-P0-10: archive 升级为一级视图
+  { id: "archive", component: ArchiveView, order: 7 },
 ]);
 
 const { Content } = Layout;
 const { Text } = Typography;
 
 function AppContent() {
-  // ── hash 路由处理 ──────────────────────────────────────────────────────────
-  const { initialSettingsTab, openSettingsFromHash } = useHashNavigation();
+  // ── URL Hash 路由 ──────────────────────────────────────────────────────────
+  const { route, switchView, switchSpace } = useUrlSync();
+
+  // ── 面板栈 ─────────────────────────────────────────────────────────────────
+  const panelStack = usePanelStack();
+
+  // ── CommandPalette 命令注册 ──────────────────────────────────────────────
+  useEffect(() => {
+    registerCommands([
+      ...createViewCommands(switchView),
+      ...createPanelCommands((panelId) => panelStack.push({ id: panelId })),
+      ...createSettingsCommands((subId) => panelStack.openSettings(subId)),
+      ...createSpaceCommands((spaceId) => switchSpace(spaceId as "workspace" | "trending" | "devtools")),
+      ...createTemplateCommands(),
+    ]);
+  }, [switchView, panelStack]);
 
   const [tidyExpandSignal, setTidyExpandSignal] = useState(0);
   const tidySectionRef = useRef<HTMLDivElement>(null);
@@ -123,7 +148,6 @@ function AppContent() {
     checked,
     initError,
     showOnboarding,
-    searchFromHash,
     compactSearchVisible,
     heroSearchRef,
     retry: retryInit,
@@ -131,9 +155,7 @@ function AppContent() {
   } = useAppInitialization(initRunId);
 
   useSwBroadcast();
-  // 内存治理（任务7）：监听内存压力，按策略自动 discard 或提示
   useMemoryGovernance();
-  // 存储自动清理：使用率超过阈值时清理非核心数据
   useAutoCleanup();
 
   /** 旧版视图设置自动迁移（domain/compact/grid → tabs + tabsLayout），仅执行一次 */
@@ -141,6 +163,11 @@ function AppContent() {
     const settings = useSettingsStore.getState().settings;
     const legacy = LEGACY_VIEW_MAP[settings.defaultView];
     if (legacy) {
+      if (import.meta.env.DEV) {
+        console.info(
+          `[LEGACY_MIGRATION] defaultView "${settings.defaultView}" → view: "${legacy.view}", layout: "${legacy.layout}"`,
+        );
+      }
       void useSettingsStore.getState().updateSettings({
         defaultView: legacy.view,
         tabsLayout: legacy.layout,
@@ -169,7 +196,6 @@ function AppContent() {
     backgroundOverlay,
     contentMaxWidth,
     defaultView,
-    newtabPageMode,
     viewTabPosition,
     uiVisibility,
     dedupStrictness,
@@ -182,14 +208,15 @@ function AppContent() {
       backgroundOverlay: s.settings.backgroundOverlay,
       contentMaxWidth: s.settings.contentMaxWidth ?? 0,
       defaultView: s.settings.defaultView,
-      newtabPageMode: s.settings.newtabPageMode ?? "workspace",
       viewTabPosition: s.settings.viewTabPosition ?? "top",
       uiVisibility: s.settings.uiVisibility,
       dedupStrictness: s.settings.dedupStrictness ?? "loose",
       idleThresholdMinutes: s.settings.idleThresholdMinutes ?? 1440,
     })),
   );
-  const pageMode: NewtabPageMode = newtabPageMode;
+  // 路由驱动显示：URL hash → pageMode / viewMode；无 hash 时 fallback 到用户设置
+  const pageMode: NewtabPageMode = route.spaceId === "trending" ? "trending" : route.spaceId === "devtools" ? "devtools" : "workspace";
+  const viewMode: ViewMode = route.viewId ?? (VALID_VIEWS.includes(defaultView as ViewMode) ? (defaultView as ViewMode) : "tabs");
 
   const resolvedDark = useResolvedTheme() === "dark";
   const showViewSwitcher = uiVisibility?.viewSwitcher !== false;
@@ -202,31 +229,6 @@ function AppContent() {
   const showHeroTitle = uiVisibility?.heroTitle !== false;
   const showHeroSlogan = uiVisibility?.heroSlogan !== false;
   const showHeroSearch = uiVisibility?.heroSearch !== false;
-  const viewMode: ViewMode = useMemo(() => {
-    if (VALID_VIEWS.includes(defaultView as ViewMode)) return defaultView as ViewMode;
-    return LEGACY_VIEW_MAP[defaultView]?.view ?? "tabs";
-  }, [defaultView]);
-
-  // ── 面板状态管理 ───────────────────────────────────────────────────────────
-  const {
-    showSearch,
-    showSettings,
-    showInsights,
-    showHistory,
-    showTrash,
-    setShowSearch,
-    setShowSettings,
-    setShowInsights,
-    setShowHistory,
-    setShowTrash,
-    handleOpenSearch,
-    handleOpenSettings,
-    handleOpenInsights,
-    handleOpenHistory,
-    handleOpenTrash,
-    handlePageModeChange,
-    handleOpenArchive,
-  } = usePanelState({ openSettingsFromHash, initialSettingsTab, searchFromHash });
 
   // ── 背景 / 布局样式 ────────────────────────────────────────────────────────
   const { layoutStyle, overlayStyle, contentShellStyle, setScrollProgress } = useLayoutStyle({
@@ -239,32 +241,51 @@ function AppContent() {
 
   // ── 快捷键 ─────────────────────────────────────────────────────────────────
   const handleViewChange = useCallback((view: ViewMode) => {
-    const prev = useSettingsStore.getState().settings.defaultView;
-    void useSettingsStore.getState().updateSettings({ defaultView: view });
-    void track("view_switch", { from: prev, to: view });
-  }, []);
+    switchView(view);
+    void track("view_switch", { to: view });
+  }, [switchView]);
 
-  const handleToggleSearch = useCallback(() => setShowSearch((v) => !v), [setShowSearch]);
-  const handleToggleHistory = useCallback(() => setShowHistory((v) => !v), [setShowHistory]);
+  const handleToggleSearch = useCallback(() => {
+    if (panelStack.isOpen("search")) {
+      panelStack.close("search");
+    } else {
+      panelStack.openSearch();
+    }
+  }, [panelStack]);
+
+  const handleToggleHistory = useCallback(() => {
+    if (panelStack.isOpen("history")) {
+      panelStack.close("history");
+    } else {
+      panelStack.openHistory();
+    }
+  }, [panelStack]);
 
   useKeybinding("search", handleToggleSearch);
   useKeybinding("openHistory", handleToggleHistory);
+  useKeybinding("commandPalette", useCallback(() => {
+    if (panelStack.isOpen("commandPalette")) {
+      panelStack.close("commandPalette");
+    } else {
+      panelStack.openCommandPalette();
+    }
+  }, [panelStack]));
 
   /** 同时响应来自 sw 的「toggle-search」广播（chrome.commands 接入点） */
   useEffect(() => {
     const onMessage = (msg: { type?: string }) => {
       if (msg.type === "toggle-search") {
-        setShowSearch((v) => !v);
+        handleToggleSearch();
       }
       if (msg.type === "open-history") {
-        setShowHistory(true);
+        panelStack.openHistory();
       }
     };
     chrome.runtime?.onMessage?.addListener?.(onMessage);
     return () => {
       chrome.runtime?.onMessage?.removeListener?.(onMessage);
     };
-  }, [setShowSearch, setShowHistory]);
+  }, [handleToggleSearch, panelStack]);
 
   useKeybinding(
     "exitSelection",
@@ -308,6 +329,44 @@ function AppContent() {
   const duplicateTabsCount = dupGroups.reduce((sum, group) => sum + group.tabs.length - 1, 0);
   const idleTabsCount = idleTabsArr.length;
   const hasTidySuggestions = duplicateTabsCount > 0 || idleTabsCount > 0;
+
+  // ── StatusBar 数据连接 ─────────────────────────────────────────────────────
+  const selectionMode = useSelectionStore((s) => s.selectionMode);
+  const selectedCount = useSelectionStore((s) => s.selectedIds.size);
+
+  // 选择模式 → StatusBar 持久消息
+  useEffect(() => {
+    const sb = useStatusBarStore.getState();
+    if (selectionMode && selectedCount > 0) {
+      sb.pushMessage({
+        content: t("已选 {count} 个标签页", { count: selectedCount }),
+        type: "info",
+        action: {
+          label: t("退出多选"),
+          onClick: () => useSelectionStore.getState().exitSelectionMode(),
+        },
+      });
+    }
+    // 清理：退出选择模式时移除消息
+    return () => {
+      // StatusBar 消息会自行管理生命周期
+    };
+  }, [selectionMode, selectedCount, t]);
+
+  // 整理建议 → StatusBar 持久消息（仅 workspace 空间下）
+  useEffect(() => {
+    const sb = useStatusBarStore.getState();
+    if (pageMode === "workspace" && hasTidySuggestions && !selectionMode) {
+      sb.pushMessage({
+        content: t("{count} 个待处理标签", { count: duplicateTabsCount + idleTabsCount }),
+        type: "warning",
+        action: {
+          label: t("一键整理"),
+          onClick: handleTidy,
+        },
+      });
+    }
+  }, [pageMode, hasTidySuggestions, selectionMode, duplicateTabsCount, idleTabsCount, handleTidy, t]);
 
   const viewSegmentedOptions = useMemo(
     () =>
@@ -369,13 +428,13 @@ function AppContent() {
           idleTabsCount={idleTabsCount}
           hasTidySuggestions={hasTidySuggestions}
           compactSearchVisible={compactSearchVisible}
-          pageMode={pageMode}
-          onPageModeChange={handlePageModeChange}
-          onSettings={handleOpenSettings}
-          onOpenSearch={handleOpenSearch}
-          onInsights={handleOpenInsights}
-          onOpenHistory={handleOpenHistory}
-          onOpenTrash={handleOpenTrash}
+          currentSpaceId={route.spaceId}
+          onSwitchSpace={(spaceId) => switchSpace(spaceId as "workspace" | "trending" | "devtools")}
+          onSettings={() => panelStack.openSettings()}
+          onOpenSearch={() => panelStack.openSearch()}
+          onInsights={() => panelStack.openInsights()}
+          onOpenHistory={() => panelStack.openHistory()}
+          onOpenTrash={() => panelStack.openTrash()}
           onTidy={handleTidy}
         />
       )}
@@ -398,7 +457,7 @@ function AppContent() {
         >
           {pageMode === "workspace" && showHeroBar && (
             <HeroBar
-              onOpenSearch={handleOpenSearch}
+              onOpenSearch={() => panelStack.openSearch()}
               sentinelRef={heroSearchRef}
               showLogo={showHeroLogo}
               showTitle={showHeroTitle}
@@ -415,7 +474,7 @@ function AppContent() {
               </div>
             )}
 
-          {pageMode === "workspace" && <QuickStartLayer onOpenSettings={handleOpenSettings} />}
+          {pageMode === "workspace" && <QuickStartLayer onOpenSettings={() => panelStack.openSettings()} />}
 
           {pageMode === "workspace" && showViewSwitcher && viewTabPosition === "top" && (
             <div className="app-view-switcher-wrap">
@@ -460,8 +519,8 @@ function AppContent() {
               viewMode={viewMode}
               onDismissOnboarding={dismissOnboarding}
               onRetryInit={handleRetryInit}
-              onOpenArchive={handleOpenArchive}
-              onOpenSettings={handleOpenSettings}
+              onOpenArchive={() => switchView("archive")}
+              onOpenSettings={() => panelStack.openSettings()}
             />
           )}
         </Content>
@@ -486,31 +545,32 @@ function AppContent() {
       {viewMode !== "archive" && <BatchActionBar />}
 
       <Suspense fallback={null}>
+        <CommandPalette />
         <SearchBox
-          open={showSearch}
-          onOpenChange={setShowSearch}
-          onOpenHistory={handleOpenHistory}
+          open={panelStack.isOpen("search")}
+          onOpenChange={(open) => { if (!open) panelStack.close("search"); }}
+          onOpenHistory={() => panelStack.openHistory()}
         />
         <SettingsPanel
-          open={showSettings}
+          open={panelStack.isOpen("settings")}
           onOpenChange={(open: boolean) => {
-            if (!open) setShowSettings(false as boolean);
+            if (!open) panelStack.close("settings");
           }}
-          defaultActiveTab={initialSettingsTab}
+          defaultActiveTab={route.subId === "about" ? "about" : "appearance"}
         />
-        {}
-        <InsightsPanel open={showInsights} onClose={() => setShowInsights(false as boolean)} />
-        <HistoryPanel open={showHistory} onClose={() => setShowHistory(false)} />
+        <InsightsPanel open={panelStack.isOpen("insights")} onClose={() => panelStack.close("insights")} />
+        <HistoryPanel open={panelStack.isOpen("history")} onClose={() => panelStack.close("history")} />
         <Drawer
           title={t("回收站")}
-          open={showTrash}
-          onClose={() => setShowTrash(false)}
+          open={panelStack.isOpen("trash")}
+          onClose={() => panelStack.close("trash")}
           width={560}
           destroyOnClose
         >
           <TrashView />
         </Drawer>
       </Suspense>
+      <StatusBar />
     </Layout>
   );
 }
