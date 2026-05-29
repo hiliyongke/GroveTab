@@ -7,10 +7,16 @@
  * 移除默认 outline，改用柔和的 brand shadow ring；
  * 仅在键盘导航时显示（:focus-visible），鼠标点击不出现。
  */
+/* 全局聚焦态 —— 亮色主题 */
 :focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-color-primary) 35%, transparent);
   border-radius: inherit;
+}
+
+/* 暗色主题聚焦态 —— 提升对比度至 WCAG AA（≥ 4.5:1 on #1f1f1f） */
+[data-theme="dark"] :focus-visible {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-color-primary) 55%, transparent);
 }
 
 /* ─── 主题切换图标动画 ─────────────────────────────

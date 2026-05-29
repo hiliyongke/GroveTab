@@ -51,16 +51,19 @@ import { DroppableZone } from "./DroppableZone";
 import { TabGroupSection } from "./TabGroupSection";
 import { CollapsedSummary } from "./CollapsedSummary";
 
-/** 窗口颜色色板（8 色，与 Chrome TabGroup 色板不同） */
+/** 窗口颜色色板（8 色，与 Chrome TabGroup ColorEnum 单源对齐）
+ * 顺序：grey → blue → red → yellow → green → pink → purple → cyan
+ * 对应 Chrome tabGroups.ColorEnum，用户心智模型从 16 色降至 8 色。
+ */
 const WINDOW_COLOR_PALETTE = [
-  "#3b82f6", // blue
-  "#ef4444", // red
-  "#22c55e", // green
-  "#f59e0b", // amber
-  "#8b5cf6", // violet
-  "#ec4899", // pink
-  "#06b6d4", // cyan
-  "#f97316", // orange
+  "#9aa0a6", // grey  (原 orange，改为 Chrome 第一色)
+  "#4285f4", // blue  (微调以更接近 Chrome 标准)
+  "#ea4335", // red   (对齐 Chrome)
+  "#fbbc04", // yellow (原 amber，明确为 yellow)
+  "#34a853", // green  (对齐 Chrome)
+  "#ff63ed", // pink   (对齐 Chrome)
+  "#9334e6", // purple (原 violet，明确为 purple)
+  "#00b4d8", // cyan   (对齐 Chrome)
 ];
 
 import styles from "@/features/tabs/styles/views.module.less";

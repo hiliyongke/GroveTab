@@ -13,7 +13,7 @@
  */
 
 import { useCallback, useState } from "react";
-import { Layout, Space, Button, Tooltip, Tag, Flex, Dropdown, Popover } from "antd";
+import { Layout, Space, Button, Tooltip, Tag, Flex, Dropdown, Modal } from "antd";
 import {
   Search,
   Settings,
@@ -208,21 +208,20 @@ export function AppHeader({
         </Dropdown>
       </Space>
 
-      {/* QuickToggle 浮层（由溢出菜单触发） */}
-      <Popover
+      {/* QuickToggle 面板 —— P1-5 重构：Popover+隐藏锚点 → Modal
+       * 原方案用 position:fixed 隐藏 span 做锚点，布局脆弱。
+       * Modal 无锚点依赖，更稳定，且面板内容较多，Modal 的聚焦管理更优。
+       */}
+      <Modal
         open={quickToggleOpen}
-        onOpenChange={setQuickToggleOpen}
-        trigger="click"
-        placement="bottomRight"
-        overlayClassName="app-quick-toggle-overlay"
-        content={<QuickTogglePanel onOpenSettings={onSettings} onClose={() => setQuickToggleOpen(false)} />}
+        onCancel={() => setQuickToggleOpen(false)}
+        footer={null}
+        title={t("quickToggle.title")}
+        width={360}
+        className="app-quick-toggle-modal"
       >
-        {/* 隐藏的锚点，让 Popover 能正确定位 */}
-        <span
-          id="quick-toggle-anchor"
-          style={{ position: "fixed", right: 48, top: 48, pointerEvents: "none" }}
-        />
-      </Popover>
+        <QuickTogglePanel onOpenSettings={onSettings} onClose={() => setQuickToggleOpen(false)} />
+      </Modal>
     </Header>
   );
 }

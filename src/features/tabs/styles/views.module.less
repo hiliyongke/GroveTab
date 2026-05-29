@@ -67,6 +67,10 @@
   display: flex; /* antd 组件内部微调整 */
 }
 
+/* WindowCard 头部按钮 —— 原生 <button> 重置
+ * P0-2 之后：antd Button token 已全局化，原生 button 不再需要 !important。
+ * 仅保留基础重置，移除全部 !important（共 8 处）。
+ */
 .app-window-card-header {
   align-items: center;
   gap: 8px;
@@ -74,10 +78,10 @@
   min-width: 120px;
   min-height: 48px;
   padding: 0 8px 0 12px;
-  border: none !important;
-  outline: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
+  border: none;
+  outline: none;
+  background: transparent;
+  box-shadow: none;
   border-radius: 0;
   cursor: pointer;
   text-align: left;
@@ -86,14 +90,13 @@
 }
 
 /* hover 背景由外层 app-domain-group-header-wrap::before 统一提供，
-   标题按钮自身不再叠加任何效果，避免"多一层"或"闪边框"。
-   antd Button type="text" 自带 hover border/outline，必须全量覆写。 */
+   标题按钮自身不再叠加任何效果，避免"多一层"或"闪边框"。 */
 .app-window-card-header:hover,
 .app-window-card-header:focus-visible {
-  background: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-  outline: none !important;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  outline: none;
 }
 
 /* 中间 Tags 区 */

@@ -319,6 +319,28 @@ export function buildAntdThemeConfig(
         contentFontSizeSM: Math.max(12, scaleHeadingFont(12, skin.fontSize)),
         contentFontSize: Math.max(13, skin.fontSize),
         controlHeight: scaleByDensity(skin.controlHeight, density),
+        /* ── 全局化 text button hover，消灭 132 处 !important ── */
+        textHoverBg: isDark
+          ? skinId === "apple"
+            ? "rgba(255, 255, 255, 0.08)"
+            : "rgba(98, 140, 255, 0.12)"
+          : skinId === "apple"
+            ? "rgba(0, 0, 0, 0.04)"
+            : "rgba(43, 107, 255, 0.08)",
+        textActiveBg: isDark
+          ? skinId === "apple"
+            ? "rgba(255, 255, 255, 0.12)"
+            : "rgba(98, 140, 255, 0.18)"
+          : skinId === "apple"
+            ? "rgba(0, 0, 0, 0.06)"
+            : "rgba(43, 107, 255, 0.12)",
+        textTextColor: isDark
+          ? skinId === "apple"
+            ? "rgba(255, 255, 255, 0.72)"
+            : "rgba(212, 223, 242, 0.82)"
+          : skinId === "apple"
+            ? "rgba(0, 0, 0, 0.72)"
+            : "#4a5568",
         primaryShadow: isDark
           ? `0 8px 18px ${skin.colorPrimary}45`
           : `0 8px 18px ${skin.colorPrimary}30`,

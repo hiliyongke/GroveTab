@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/refs */
 
 import { useEffect, useMemo, useState } from "react";
-import { Button, Card, Input, Popconfirm, theme, Typography, Flex } from "antd";
+import { Button, Card, Input, Popconfirm, theme, Typography, Flex, Empty } from "antd";
 import { Plus, Trash2, Save, PenLine, X, GripVertical } from "lucide-react";
 import { cssVars } from "@/shared/utils/css-vars";
 import { feedback } from "@/shared/ui/feedback";
@@ -190,6 +190,16 @@ export function KanbanView() {
       console.warn("[kanban] drag operation failed", err);
     }
   };
+
+  /* P1-3: 看板空状态 */
+  if (tabs.length === 0) {
+    return (
+      <Empty
+        description={t("没有打开的标签页")}
+        className={styles["app-window-empty"]}
+      />
+    );
+  }
 
   return (
     <DndContext

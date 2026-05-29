@@ -290,16 +290,16 @@ export function WindowHealthIndicator({
       {/* 健康度指示器 */}
       <Tooltip
         title={
-          <Flex vertical style={{ maxWidth: 240 }}>
+          <Flex vertical className={styles.tooltipWrap}>
             <Typography.Text strong>{t("health.tooltip.title")}</Typography.Text>
-            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+            <Typography.Text type="secondary" className={styles.tooltipScore}>
               {t("health.tooltip.score", { score: metrics.score })}
             </Typography.Text>
             {metrics.issues.length > 0 && (
               <>
                 <Typography.Text
                   type="secondary"
-                  style={{ fontSize: 11, marginTop: 8 }}
+                  className={styles.tooltipIssues}
                 >
                   {t("health.tooltip.issues", { count: metrics.issues.length })}
                 </Typography.Text>
@@ -307,7 +307,7 @@ export function WindowHealthIndicator({
                   size="small"
                   dataSource={metrics.issues.slice(0, 3)}
                   renderItem={(issue) => (
-                    <List.Item style={{ padding: "4px 0", fontSize: 11 }}>
+                    <List.Item className={styles.tooltipIssueItem}>
                       <Typography.Text type="danger">•</Typography.Text>{" "}
                       {issue.message}
                     </List.Item>
@@ -352,7 +352,7 @@ export function WindowHealthIndicator({
         footer={null}
         width={480}
       >
-        <Flex vertical gap={16} style={{ padding: "8px 0" }}>
+        <Flex vertical gap={16} className={styles.modalBody}>
           {/* 总评分 */}
           <Flex align="center" gap={16}>
             <Progress
@@ -361,18 +361,18 @@ export function WindowHealthIndicator({
               size={80}
               strokeColor={getStatusColor(metrics.status)}
               format={(percent) => (
-                <span style={{ fontSize: 20, fontWeight: "bold" }}>{percent}</span>
+                <span className={styles.scoreText}>{percent}</span>
               )}
             />
             <Flex vertical>
-              <Typography.Text strong style={{ fontSize: 16 }}>
+              <Typography.Text strong className={styles.statusText}>
                 {metrics.status === "good"
                   ? t("health.status.good")
                   : metrics.status === "warning"
                   ? t("health.status.warning")
                   : t("health.status.critical")}
               </Typography.Text>
-              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              <Typography.Text type="secondary" className={styles.summaryText}>
                 {t("health.summary", {
                   tabs: metrics.tabCount,
                   memory: metrics.estimatedMemory,
@@ -384,7 +384,7 @@ export function WindowHealthIndicator({
           {/* 问题列表 */}
           {metrics.issues.length > 0 && (
             <>
-              <Typography.Text strong style={{ marginTop: 8 }}>
+              <Typography.Text strong className={styles.issuesTitle}>
                 {t("health.issues.title")}
               </Typography.Text>
               <List
@@ -430,7 +430,7 @@ export function WindowHealthIndicator({
                                 ? "warning"
                                 : "default"
                             }
-                            style={{ fontSize: 10 }}
+                            className={styles.severityTag}
                           >
                             {t(`health.severity.${issue.severity}`)}
                           </Tag>

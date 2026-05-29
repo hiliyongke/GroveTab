@@ -179,6 +179,12 @@
   text-overflow: ellipsis;
 }
 
+/* P1-1: Tooltip 描述文字样式 */
+.app-view-dock__tooltip-desc {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
 .app-view-dock--bottom .app-view-dock__label {
   overflow: visible;
   text-overflow: clip;
@@ -303,6 +309,12 @@
   .app-view-dock--right .app-view-dock__label {
     display: none;
   }
+}
+
+/* P1-6: bottom 模式触控目标加大至 44px（WCAG 2.1 最小触控目标） */
+.app-view-dock--bottom .app-view-dock__item {
+  min-height: 44px;
+  min-width: 44px;
 }
 
 /* ─── 响应式：中等偏大屏幕（1024px+）────────────────────── */

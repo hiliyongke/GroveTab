@@ -53,7 +53,7 @@ export function ViewDock({ viewMode, onViewChange, orientation, placement }: Vie
           const tooltipTitle = (
             <Flex vertical gap={2}>
               <span>{item.label}</span>
-              <span style={{ fontSize: 11, opacity: 0.85 }}>
+              <span className="app-view-dock__tooltip-desc">
                 {t(`view.desc.${item.id}` as const)}
               </span>
             </Flex>

@@ -222,7 +222,7 @@ export function CommandPalette() {
         {/* 模式指示器 */}
         <Tag
           color={mode === "command" ? "blue" : "green"}
-          style={{ fontSize: 11, marginRight: 4, cursor: "pointer" }}
+          className={styles["command-palette__mode-tag"]}
           onClick={() => setMode((m) => (m === "command" ? "search" : "command"))}
         >
           {mode === "command" ? t("命令") : t("搜索")}
@@ -304,7 +304,7 @@ export function CommandPalette() {
                       alt=""
                       width={14}
                       height={14}
-                      style={{ borderRadius: 2 }}
+                      className={styles["command-palette__favicon"]}
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = "none";
                       }}
@@ -314,10 +314,10 @@ export function CommandPalette() {
                   )}
                 </span>
                 <Flex vertical flex={1} style={{ minWidth: 0, overflow: "hidden" }}>
-                  <Text ellipsis style={{ fontSize: 13 }}>
+                  <Text ellipsis className={styles["command-palette__tab-title"] + " app-text-primary"}>
                     {tab.title || tab.hostname}
                   </Text>
-                  <Text type="secondary" ellipsis style={{ fontSize: 11 }}>
+                  <Text type="secondary" ellipsis className={styles["command-palette__tab-url"] + " app-text-secondary"}>
                     {tab.url}
                   </Text>
                 </Flex>
@@ -339,7 +339,7 @@ export function CommandPalette() {
 
       {/* 底部提示 */}
       <div className={styles["command-palette__footer"]}>
-        <Text type="secondary" style={{ fontSize: 12 }}>
+        <Text type="secondary" className={styles["command-palette__footer-hint"] + " app-text-secondary"}>
           <kbd>↑↓</kbd> 导航 · <kbd>Enter</kbd> 执行 · <kbd>Tab</kbd>{" "}
           {mode === "command" ? t("搜索标签") : t("切回命令")} · <kbd>ESC</kbd> 关闭
         </Text>

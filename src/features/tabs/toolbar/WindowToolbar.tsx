@@ -72,7 +72,6 @@ export function WindowToolbar({
           { value: "name", label: t("名称") },
           { value: "activity", label: t("活跃度") },
         ]}
-        style={{ minWidth: 80 }}
         className={styles["app-toolbar-sort-select"]}
       />
 
