@@ -8,18 +8,34 @@
   text-align: center;
 }
 
+/* WindowView 网格布局
+   策略：响应式列数，优先保证卡片内容可读性
+   - 小屏 (<1024px): 1列，全宽
+   - 中屏 (1024-1439px): 2列
+   - 大屏 (>=1440px): 3列
+*/
 .app-window-grid {
-  --app-window-card-min-width: 520px;
-  --app-window-grid-template: repeat(
-    auto-fill,
-    minmax(min(100%, var(--app-window-card-min-width)), var(--app-window-card-min-width))
-  );
+  --app-window-grid-gap: 16px;
 
   display: grid;
-  grid-template-columns: var(--app-window-grid-template);
-  gap: 16px;
+  grid-template-columns: 1fr;
+  gap: var(--app-window-grid-gap);
   align-items: start;
   width: 100%;
+}
+
+/* 中屏：2列 */
+@media (min-width: 1024px) {
+  .app-window-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 大屏：3列 */
+@media (min-width: 1440px) {
+  .app-window-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .app-window-sortable-card {
@@ -55,7 +71,7 @@
   align-items: center;
   gap: 8px;
   flex: 1;
-  min-width: 0;
+  min-width: 120px;
   min-height: 48px;
   padding: 0 8px 0 12px;
   border: none !important;
@@ -86,8 +102,9 @@
   gap: 6px;
   flex: 0 1 auto;
   min-width: 0;
+  max-width: 120px;
   overflow: hidden;
-  padding: 0 8px;
+  padding: 0 4px;
 }
 
 .app-window-card-chevron,
@@ -116,7 +133,7 @@
 
 .app-window-card-title-wrap {
   flex: 1;
-  min-width: 0;
+  min-width: 140px;
   display: flex;
   align-items: baseline;
   gap: 8px;
@@ -137,14 +154,23 @@
 
 .app-window-card-meta,
 .app-window-card-summary {
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   min-width: 0;
-  overflow: hidden;
   color: var(--ant-color-text-tertiary);
   font-size: 11px;
   line-height: 1.3;
-  text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.app-window-card-meta {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-window-card-summary {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .app-window-card-summary {
@@ -333,9 +359,13 @@
 }
 
 .app-window-group-header {
+  display: flex;
+  width: 100%;
   align-items: center;
+  justify-content: space-between;
   min-height: 38px;
   padding: 0 4px 0 8px;
+  gap: 8px;
 }
 
 .app-window-group-trigger {

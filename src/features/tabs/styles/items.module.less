@@ -3,7 +3,7 @@
 
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(var(--app-domain-column-count), minmax(0, 1fr));
+  grid-template-columns: repeat(var(--app-domain-column-count), minmax(300px, 1fr));
   gap: 16px;
   align-items: start;
 }
@@ -297,8 +297,9 @@
 }
 
 .app-tab-item-main {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 auto;
+  min-width: 80px;
+  max-width: 60%;
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   justify-content: center;
@@ -337,7 +338,7 @@
 
 .app-tab-item-hostname {
   flex-shrink: 0;
-  max-width: 160px;
+  max-width: 100px;
   font-size: 11px;
 }
 
@@ -410,6 +411,21 @@
   color: var(--ant-color-warning);
 }
 
+/* 常驻操作按钮区域 */
+.app-tab-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  margin-left: 4px;
+  min-width: fit-content;
+}
+
+.app-tab-item-action.is-active {
+  color: var(--ant-color-primary);
+}
+
 /* ── 域名分组视图：搜索栏 + 布局/密度切换工具栏 ── */
 .app-domain-toolbar {
   flex-wrap: nowrap;
@@ -478,6 +494,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  vertical-align: -2px;
   width: 16px;
   height: 16px;
 }
@@ -511,5 +528,33 @@
   position: absolute;
   top: 0;
   left: 0;
+  width: 100%;
+}
+
+/* ========== 拖拽相关样式 ========== */
+
+/* 可拖拽标签项包装器 */
+.app-draggable-tab-wrapper {
+  width: 100%;
+  touch-action: none;
+  user-select: none;
+}
+
+/* 拖拽放置目标高亮 */
+.is-drag-over {
+  outline: 2px dashed var(--ant-color-primary);
+  outline-offset: 2px;
+  border-radius: var(--app-radius-md, 8px);
+  background: color-mix(in srgb, var(--ant-color-primary-bg) 50%, transparent);
+}
+
+/* 域名分组列表 */
+.app-domain-group-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.app-domain-group-list-item {
   width: 100%;
 }

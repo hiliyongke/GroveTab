@@ -73,8 +73,8 @@ function getColumnVars(forcedColumns: number | null): React.CSSProperties {
   if (forcedColumns && forcedColumns >= 1 && forcedColumns <= 6) {
     return cssVars({ "--app-window-grid-template": `repeat(${forcedColumns}, minmax(0, 1fr))` });
   }
-
-  return cssVars({ "--app-window-card-min-width": "360px" });
+  // 未设置强制列数时，使用 CSS 媒体查询的响应式布局
+  return {};
 }
 
 function shouldCollapseWindow(
@@ -325,6 +325,7 @@ export function WindowView() {
               return (
                 <SortableWindowCard key={windowId} windowId={windowId}>
                   <WindowCard
+                    key={`${windowId}-${defaultCollapsed}`}
                     windowId={windowId}
                     tabs={windowTabs}
                     windowInfo={windows.get(windowId)}

@@ -3,7 +3,7 @@
  *
  * 布局：
  *   archive-shell  ← 双栏 grid 容器
- *     ├ archive-sidebar  ← 左侧 240 固宽
+ *     ├ archive-sidebar  ← 左侧 220 固宽
  *     └ archive-main     ← 右侧弹性
  *
  * 视觉语言对齐 DeveloperToolsPage：
@@ -21,7 +21,7 @@
 
 .archive-shell {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 200px 1fr;
   gap: 20px;
   align-items: stretch;
   min-height: 100%;
@@ -66,6 +66,11 @@
   font-size: 12px;
   margin-top: 2px;
   font-weight: 400;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* ─── 左侧 Sidebar ────────────────────────────────────────────────── */
@@ -268,6 +273,9 @@
   font-size: 12px;
   color: var(--ant-color-text-tertiary);
   margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ─── Toolbar：搜索 + 排序 + 批量 ─────────────────────────────────── */
@@ -279,11 +287,12 @@
   border-radius: var(--app-radius-lg);
   background: var(--ant-color-bg-container);
   border: 1px solid var(--app-hairline);
+  flex-wrap: wrap;
 }
 
 .archive-toolbar__search {
-  flex: 1;
-  min-width: 200px;
+  flex: 1 1 200px;
+  max-width: 400px;
 }
 
 .archive-toolbar__sort {
@@ -291,19 +300,22 @@
 }
 
 .archive-toolbar__spacer {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 20px;
 }
 
 .archive-toolbar__primary-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   flex-shrink: 0;
 }
 
 .archive-search-result {
   color: var(--ant-color-text-tertiary);
   font-size: 12px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 /* ─── 时段分组标题 ────────────────────────────────────────────────── */
@@ -343,7 +355,7 @@
 /* ─── 卡片网格 ────────────────────────────────────────────────────── */
 .archive-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 12px;
 }
 
@@ -356,21 +368,19 @@
   border-radius: var(--app-radius-lg);
   background: var(--ant-color-bg-container);
   border: 1px solid var(--app-hairline);
-  /* 预创建合成层 + 隔离重绘，防止 hover 时合成层重建导致相邻元素抖动 */
-  will-change: transform, box-shadow, border-color;
   contain: layout style paint;
   transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
   position: relative;
 }
 
 .archive-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   box-shadow: var(--app-shadow-md);
   border-color: color-mix(in srgb, var(--ant-color-primary) 40%, var(--app-hairline));
 }
 
 .archive-card:active {
-  transform: translateY(-2px) scale(0.98);
+  transform: translateY(-1px) scale(0.99);
 }
 
 .archive-card.is-highlighted {
@@ -499,7 +509,6 @@
   padding: 6px 8px;
   border-radius: var(--app-radius-sm);
   cursor: pointer;
-  /* 隔离重绘范围，防止 hover 背景色变化导致相邻元素重绘 */
   contain: layout style paint;
   transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -617,11 +626,17 @@
   }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 720px) {
   .archive-stats {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
   .archive-card-grid {
     grid-template-columns: 1fr;
+  }
+  .archive-toolbar {
+    flex-wrap: wrap;
+  }
+  .archive-toolbar__spacer {
+    display: none;
   }
 }

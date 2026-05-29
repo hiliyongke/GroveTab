@@ -6,7 +6,7 @@
  */
 
 import { useState, useCallback, memo } from "react";
-import { Button, Flex, Input, Modal, Typography } from "antd";
+import { Button, Flex, Input, Modal, Tooltip, Typography } from "antd";
 import { ClipboardPaste, ExternalLink } from "lucide-react";
 
 import { ICON_SIZE } from "@/shared/utils/icon-size";
@@ -95,12 +95,16 @@ export const ClipboardImport = memo(function ClipboardImport({ onRefresh }: Clip
 
   return (
     <>
-      <Button
-        type="text"
-        size="small"
-        icon={<ClipboardPaste size={ICON_SIZE.SMALL} />}
-        onClick={() => setOpen(true)}
-      />
+      <Tooltip title={t("从剪贴板导入")}>
+        <span>
+          <Button
+            type="text"
+            size="small"
+            icon={<ClipboardPaste size={ICON_SIZE.SMALL} />}
+            onClick={() => setOpen(true)}
+          />
+        </span>
+      </Tooltip>
       <Modal
         title={t("从剪贴板导入 URL")}
         open={open}

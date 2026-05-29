@@ -43,42 +43,46 @@ export function TabGroupToolbar({
       />
       <Flex align="center" gap={4} className={styles["app-domain-toolbar-controls"]}>
         <Tooltip title={t("tabGroup.sortBy")}>
-          <Segmented
-            size="small"
-            value={sortBy}
-            onChange={(v) =>
-              void updateSettings({ tabGroupSortBy: v as "tabCount" | "name" | "recentAccess" })
-            }
-            options={[
-              {
-                value: "name",
-                icon: (
-                  <span className={styles["app-segmented-icon"]}>
-                    <ArrowDownAZ size={13} />
-                  </span>
-                ),
-              },
-              {
-                value: "tabCount",
-                icon: (
-                  <span className={styles["app-segmented-icon"]}>
-                    <Hash size={13} />
-                  </span>
-                ),
-              },
-              {
-                value: "recentAccess",
-                icon: (
-                  <span className={styles["app-segmented-icon"]}>
-                    <Clock size={13} />
-                  </span>
-                ),
-              },
-            ]}
-          />
+          <span>
+            <Segmented
+              size="small"
+              value={sortBy}
+              onChange={(v) =>
+                void updateSettings({ tabGroupSortBy: v as "tabCount" | "name" | "recentAccess" })
+              }
+              options={[
+                {
+                  value: "name",
+                  icon: (
+                    <span className={styles["app-segmented-icon"]}>
+                      <ArrowDownAZ size={13} />
+                    </span>
+                  ),
+                },
+                {
+                  value: "tabCount",
+                  icon: (
+                    <span className={styles["app-segmented-icon"]}>
+                      <Hash size={13} />
+                    </span>
+                  ),
+                },
+                {
+                  value: "recentAccess",
+                  icon: (
+                    <span className={styles["app-segmented-icon"]}>
+                      <Clock size={13} />
+                    </span>
+                  ),
+                },
+              ]}
+            />
+          </span>
         </Tooltip>
         <Tooltip title={collapseAll ? t("tabGroup.expandAll") : t("tabGroup.collapseAll")}>
-          <Switch size="small" checked={collapseAll} onChange={onCollapseAllChange} />
+          <span>
+            <Switch size="small" checked={collapseAll} onChange={onCollapseAllChange} />
+          </span>
         </Tooltip>
       </Flex>
     </Flex>

@@ -131,7 +131,7 @@ export function BatchOperationsMenu({
   ];
 
   return (
-    <Space size={8}>
+    <Space size={12}>
       {/* 选择模式切换 */}
       {!selectable ? (
         <Tooltip title={t('多选')}>

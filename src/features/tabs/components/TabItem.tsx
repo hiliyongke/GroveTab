@@ -12,17 +12,33 @@
 
 import { useState, useCallback, useMemo, memo } from "react";
 import type { LiveTab } from "@/shared/types";
-import { Button, Tag, Tooltip, Checkbox, theme, Flex, Typography } from "antd";
-import { Globe, Volume2, Pin, MessageSquare, X, Pointer, Star } from "lucide-react";
+import { Button, Tag, Tooltip, Checkbox, theme, Flex, Typography, Dropdown, Modal, Input } from "antd";
+import type { MenuProps } from "antd";
+import {
+  Globe,
+  Volume2,
+  VolumeX,
+  Pin,
+  MessageSquare,
+  X,
+  Pointer,
+  Star,
+  Copy,
+  Link,
+  AppWindow,
+  FolderPlus,
+  MoreHorizontal,
+  Plus,
+} from "lucide-react";
 import { cssVars } from "@/shared/utils/css-vars";
 import { useT } from "@/shared/i18n";
 import { useMetadataStore, useSelectionStore, useSpeedDialStore } from "@/store";
 import { stringToColor } from "@/shared/utils/color";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { formatUrlForDisplay } from "@/shared/utils/url-display";
-import { useFocusTime } from "@/chrome/use-focus-time";
+import { createWindowWithTab, createTab } from "@/chrome";
+import { groupTabs, queryTabGroups, type ChromeTabGroup } from "@/chrome/tabGroups";
 import { TabContextMenu } from "./TabContextMenu";
-import { TabPreviewCard } from "./TabPreviewCard";
 import styles from "../styles/items.module.less";
 
 interface TabItemProps {
@@ -93,8 +109,18 @@ export const TabItem = memo(function TabItem({
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [faviconError, setFaviconError] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [tabGroups, setTabGroups] = useState<ChromeTabGroup[]>([]);
+  const [newGroupModalOpen, setNewGroupModalOpen] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
   const speedDialSites = useSpeedDialStore((s) => s.sites);
   const addSite = useSpeedDialStore((s) => s.addSite);
+  const togglePin = useMetadataStore((s) => s.togglePin);
+
+  // 加载当前窗口的标签组列表
+  const loadTabGroups = useCallback(async () => {
+    const groups = await queryTabGroups(tab.windowId);
+    setTabGroups(groups.filter((g) => g.id >= 0));
+  }, [tab.windowId]);
   /** 标准化 URL：去掉协议前缀和常见跟踪参数，用于去重比较 */
   const normalizeUrl = (url: string): string => {
     try {
@@ -122,9 +148,6 @@ export const TabItem = memo(function TabItem({
 
   /** 友好展示串：路径 + 关键参数，失败回落到原 URL */
   const urlHint = showUrlHint ? formatUrlForDisplay(tab.url) : "";
-
-  /** 今日使用时长 */
-  const focusTime = useFocusTime(tab.url);
 
   /** 多选模式下点击逻辑：Ctrl/Cmd+点击 或 selectionMode 已开启时切换选中 */
   const handleClick = useCallback(
@@ -171,6 +194,66 @@ export const TabItem = memo(function TabItem({
         setIsClosing(false);
       });
     }, 180);
+  };
+
+  /** 固定/取消固定 */
+  const handleTogglePin = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    void togglePin(tab.url);
+  };
+
+  /** 复制链接 */
+  const handleCopyLink = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    void navigator.clipboard.writeText(tab.url);
+  };
+
+  /** Dropdown 菜单 handler —— 阻止事件冒泡避免触发 TabItem 跳转 */
+  const onMute: MenuProps["onClick"] = (e) => {
+    e.domEvent.stopPropagation();
+    void chrome.tabs.update(tab.id, { muted: !tab.mutedInfo?.muted });
+  };
+  const onDuplicate: MenuProps["onClick"] = (e) => {
+    e.domEvent.stopPropagation();
+    void createTab({ url: tab.url, windowId: tab.windowId, index: tab.index + 1 });
+  };
+  const onMoveToNewWindow: MenuProps["onClick"] = (e) => {
+    e.domEvent.stopPropagation();
+    void createWindowWithTab(tab.id);
+  };
+  const onAddToNewGroup: MenuProps["onClick"] = (e) => {
+    e.domEvent.stopPropagation();
+    setNewGroupName("");
+    setNewGroupModalOpen(true);
+  };
+
+  const handleCreateNewGroup = async () => {
+    // 先创建标签组
+    await groupTabs({ tabIds: tab.id });
+    
+    // 如果用户输入了名字，需要重命名新创建的组
+    if (newGroupName.trim()) {
+      try {
+        // 获取当前窗口的标签组，找到最新创建的那个
+        const groups = await queryTabGroups(tab.windowId);
+        const newGroup = groups
+          .filter((g) => g.id >= 0)
+          .sort((a, b) => b.id - a.id)[0]; // 取 ID 最大的（最新创建的）
+        
+        if (newGroup) {
+          await chrome.tabGroups.update(newGroup.id, { title: newGroupName.trim() });
+        }
+      } catch (err) {
+        console.error("Failed to rename new tab group:", err);
+      }
+    }
+    
+    setNewGroupModalOpen(false);
+    setNewGroupName("");
+  };
+  const onMoveToExistingGroup = (groupId: number): MenuProps["onClick"] => (e) => {
+    e.domEvent.stopPropagation();
+    void groupTabs({ tabIds: tab.id, groupId });
   };
 
   /** 选中态背景色 */
@@ -269,17 +352,9 @@ export const TabItem = memo(function TabItem({
         <Flex vertical className={styles["app-tab-item-main"]}>
           {/* 上行：标题 + 标记 */}
           <Flex className={styles["app-tab-item-head"]} align="center" gap="small">
-            <TabPreviewCard
-              tab={tab}
-              focusTimeLabel={focusTime || undefined}
-              onClose={(id) => {
-                void Promise.resolve(onClose(id)).catch(() => {});
-              }}
-            >
-              <Typography.Text className={styles["app-tab-item-title"]}>
-                {tab.title}
-              </Typography.Text>
-            </TabPreviewCard>
+            <Typography.Text className={styles["app-tab-item-title"]}>
+              {tab.title}
+            </Typography.Text>
             {showHostname && (
               <Typography.Text className={styles["app-tab-item-hostname"]}>
                 {tab.hostname}
@@ -327,48 +402,144 @@ export const TabItem = memo(function TabItem({
           )}
         </Flex>
 
-        {/* 行尾附加信息（如时间戳），放在状态图标和关闭按钮之间 */}
+        {/* 行尾附加信息（如时间戳），放在状态图标和操作按钮之间 */}
         {trailing}
 
-        {/* 添加到常用站点——hover 时显示星标按钮，已添加则高亮常驻 */}
-        <Tooltip title={isInQuickStart ? t("已在常用站点中") : t("添加到常用站点")}>
-          <Button
-            type="text"
-            size="small"
-            icon={<Star size={ICON_SIZE.SMALL} fill={isInQuickStart ? "currentColor" : "none"} />}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (isInQuickStart) return;
-              void addSite({
-                id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-                url: tab.url,
-                title: tab.title,
-                favIconUrl: tab.favIconUrl || undefined,
-                order: speedDialSites.length,
-                createdAt: Date.now(),
-              });
-            }}
-            aria-label={t("添加到常用站点")}
-            className={[
-              styles["app-tab-item-action"],
-              styles["app-tab-item-action--favorite"],
-              isInQuickStart ? styles["is-active"] : "app-hover-reveal",
-            ].join(" ")}
-          />
-        </Tooltip>
+        {/* === 常驻操作按钮区（4个常用 + 更多菜单） === */}
+        <Flex className={styles["app-tab-item-actions"]} align="center" gap={2}>
+          {/* 1. 固定/取消固定 */}
+          <Tooltip title={isPinned ? t("取消固定") : t("固定")}>
+            <Button
+              type="text"
+              size="small"
+              icon={<Pin size={ICON_SIZE.SMALL} fill={isPinned ? "currentColor" : "none"} />}
+              onClick={handleTogglePin}
+              className={[
+                styles["app-tab-item-action"],
+                isPinned ? styles["is-active"] : "",
+              ].join(" ")}
+            />
+          </Tooltip>
 
-        {/* 关闭按钮（hover/focus 时显示，由父节点 .app-hover-reveal-host 驱动） */}
-        <Tooltip title={t("关闭标签页")}>
-          <Button
-            type="text"
-            size="small"
-            danger
-            icon={<X size={ICON_SIZE.SMALL} />}
-            onClick={handleClose}
-            aria-label={t("关闭标签页")}
-            className={`app-hover-reveal ${styles["app-tab-item-action"]}`}
-          />
-        </Tooltip>
+          {/* 2. 复制链接 */}
+          <Tooltip title={t("复制链接")}>
+            <Button
+              type="text"
+              size="small"
+              icon={<Link size={ICON_SIZE.SMALL} />}
+              onClick={handleCopyLink}
+              className={styles["app-tab-item-action"]}
+            />
+          </Tooltip>
+
+          {/* 3. 添加到常用站点 */}
+          <Tooltip title={isInQuickStart ? t("已在常用站点中") : t("添加到常用站点")}>
+            <Button
+              type="text"
+              size="small"
+              icon={<Star size={ICON_SIZE.SMALL} fill={isInQuickStart ? "currentColor" : "none"} />}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isInQuickStart) return;
+                void addSite({
+                  id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+                  url: tab.url,
+                  title: tab.title,
+                  favIconUrl: tab.favIconUrl || undefined,
+                  order: speedDialSites.length,
+                  createdAt: Date.now(),
+                });
+              }}
+              className={[
+                styles["app-tab-item-action"],
+                styles["app-tab-item-action--favorite"],
+                isInQuickStart ? styles["is-active"] : "",
+              ].join(" ")}
+            />
+          </Tooltip>
+
+          {/* 4. 更多操作菜单 */}
+          <Dropdown
+            menu={{
+              items: [
+                {
+                  key: "mute",
+                  label: tab.mutedInfo?.muted ? t("取消静音") : t("静音"),
+                  icon: tab.mutedInfo?.muted ? (
+                    <VolumeX size={ICON_SIZE.SMALL} />
+                  ) : (
+                    <Volume2 size={ICON_SIZE.SMALL} />
+                  ),
+                  onClick: onMute,
+                },
+                {
+                  key: "duplicate",
+                  label: t("复制标签"),
+                  icon: <Copy size={ICON_SIZE.SMALL} />,
+                  onClick: onDuplicate,
+                },
+                {
+                  key: "move",
+                  label: t("移到新窗口"),
+                  icon: <AppWindow size={ICON_SIZE.SMALL} />,
+                  onClick: onMoveToNewWindow,
+                },
+                {
+                  key: "group",
+                  label: t("移动到标签组"),
+                  icon: <FolderPlus size={ICON_SIZE.SMALL} />,
+                  children: [
+                    {
+                      key: "new-group",
+                      label: t("新建标签组"),
+                      icon: <Plus size={ICON_SIZE.SMALL} />,
+                      onClick: onAddToNewGroup,
+                    },
+                    { type: "divider" },
+                    ...tabGroups.map((group) => ({
+                      key: `group-${group.id}`,
+                      icon: (
+                        <span
+                          className={styles["app-tab-group-menu-dot"]}
+                          style={{ backgroundColor: group.color }}
+                        />
+                      ),
+                      label: group.title || t("未命名标签组"),
+                      onClick: onMoveToExistingGroup(group.id),
+                    })),
+                  ],
+                },
+              ] satisfies MenuProps["items"],
+            }}
+            placement="bottomLeft"
+            trigger={["hover"]}
+            onOpenChange={(open) => {
+              if (open) void loadTabGroups();
+            }}
+          >
+            <Tooltip title={t("更多操作")}>
+              <Button
+                type="text"
+                size="small"
+                icon={<MoreHorizontal size={ICON_SIZE.SMALL} />}
+                className={styles["app-tab-item-action"]}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </Tooltip>
+          </Dropdown>
+
+          {/* 5. 关闭按钮 */}
+          <Tooltip title={t("关闭标签页")}>
+            <Button
+              type="text"
+              size="small"
+              danger
+              icon={<X size={ICON_SIZE.SMALL} />}
+              onClick={handleClose}
+              className={styles["app-tab-item-action"]}
+            />
+          </Tooltip>
+        </Flex>
       </Flex>
 
       {/* 右键菜单——仅非多选模式下显示完整菜单 */}
@@ -383,6 +554,25 @@ export const TabItem = memo(function TabItem({
           onClose={() => setContextMenu(null)}
         />
       )}
+
+      {/* 新建标签组命名弹窗 */}
+      <Modal
+        title={t("新建标签组")}
+        open={newGroupModalOpen}
+        onOk={handleCreateNewGroup}
+        onCancel={() => setNewGroupModalOpen(false)}
+        okText={t("创建")}
+        cancelText={t("取消")}
+        width={320}
+      >
+        <Input
+          placeholder={t("输入标签组名称（可选）")}
+          value={newGroupName}
+          onChange={(e) => setNewGroupName(e.target.value)}
+          onPressEnter={handleCreateNewGroup}
+          autoFocus
+        />
+      </Modal>
     </>
   );
 });

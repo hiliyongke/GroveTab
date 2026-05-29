@@ -37,6 +37,7 @@ import { useKeyboardNav } from "./hooks/use-keyboard-nav";
 import styles from "./SearchBox.module.less";
 
 const DEFAULT_SEARCH_SCOPE = ["title", "hostname", "url"] as const;
+const LAST_ENGINE_KEY = "grove:search:lastEngine";
 
 interface SearchBoxProps {
   open: boolean;
@@ -69,7 +70,6 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
   const searchScope = rawSearchScope ?? [...DEFAULT_SEARCH_SCOPE];
   const enablePinyin = useSettingsStore((s) => s.settings.searchEnablePinyin ?? true);
   const searchSortBy = useSettingsStore((s) => s.settings.searchSortBy ?? "relevance");
-  const defaultEngine = useSettingsStore((s) => s.settings.searchDefaultEngine ?? "google");
   const enabledEngineIds = useSettingsStore((s) => s.settings.searchEnabledEngines);
   const customEngines = useSettingsStore((s): CustomSearchEngine[] => {
     const settings = s.settings as SearchSettingsSnapshot;
@@ -95,9 +95,6 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
     () => enabledEngines.map((engineId) => getSearchEngineOption(engineId, customEngines)),
     [customEngines, enabledEngines],
   );
-  const resolvedDefaultEngine: SearchEngineId = enabledEngines.includes(defaultEngine)
-    ? defaultEngine
-    : (enabledEngines[0] ?? "google");
   const currentEngineOption = getSearchEngineOption(currentEngine, customEngines);
 
   const normalizedQuery = query.trim();
@@ -184,6 +181,18 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
       setCurrentEngine(enabledEngines[0] ?? "google");
     }
   }, [currentEngine, enabledEngines]);
+
+  // 从 localStorage 恢复上次选择的搜索引擎
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(LAST_ENGINE_KEY) as SearchEngineId | null;
+      if (saved && enabledEngines.includes(saved)) {
+        setCurrentEngine(saved);
+      }
+    } catch {
+      /* localStorage 不可用时不影响功能 */
+    }
+  }, [enabledEngines]);
 
   const close = useCallback(() => onOpenChange(false), [onOpenChange]);
 
@@ -313,11 +322,10 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
       setQuery("");
       setDebouncedQuery("");
       setActiveIndex(0);
-      setCurrentEngine(resolvedDefaultEngine);
       setEnginePopoverOpen(false);
       inputRef.current?.focus();
     },
-    [resolvedDefaultEngine, setDebouncedQuery],
+    [setDebouncedQuery],
   );
 
   const rootVars = useMemo(
@@ -395,6 +403,11 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
                       style={{ "--searchbox-engine-color": option.color } as React.CSSProperties}
                       onClick={() => {
                         setCurrentEngine(option.id);
+                        try {
+                          localStorage.setItem(LAST_ENGINE_KEY, option.id);
+                        } catch {
+                          /* localStorage 写失败静默处理 */
+                        }
                         setEnginePopoverOpen(false);
                         inputRef.current?.focus();
                       }}

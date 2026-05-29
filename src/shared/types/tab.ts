@@ -12,9 +12,13 @@ export interface LiveTab {
   title: string;
   favIconUrl: string;
   windowId: number;
+  /** 标签页在窗口中的索引位置 */
+  index: number;
   incognito: boolean;
   pinned: boolean;
   audible: boolean;
+  /** 标签页静音信息 */
+  mutedInfo?: { muted: boolean };
   groupId: number;
   lastAccessed: number;
   hostname: string;

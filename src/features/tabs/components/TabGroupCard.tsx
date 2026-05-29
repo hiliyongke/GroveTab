@@ -7,8 +7,8 @@
  *   - 内容区：TabItem 列表，支持多选
  */
 
-import { useMemo, memo } from "react";
-import { Button, Dropdown, Input, Popover, Space, Tag, Tooltip, Typography, theme } from "antd";
+import { useEffect, useMemo, memo } from "react";
+import { Button, Dropdown, Flex, Input, Popover, Space, Tag, Tooltip, Typography, theme } from "antd";
 import type { MenuProps } from "antd";
 import {
   ChevronDown,
@@ -36,6 +36,13 @@ import { useTabsStore, useSettingsStore } from "@/store";
 import styles from "../styles/items.module.less";
 
 type TabGroupColor = ChromeTabGroupColor;
+
+interface TabGroupCardProps {
+  group: TabGroupData;
+  forceCollapsed?: boolean;
+  /** 自定义标签项渲染器，用于拖拽集成 */
+  renderTabItem?: (tab: LiveTab) => React.ReactNode;
+}
 
 const TAB_GROUP_COLORS: TabGroupColor[] = [
   "grey",
@@ -70,14 +77,10 @@ export interface TabGroupData {
   tabs: LiveTab[];
 }
 
-interface TabGroupCardProps {
-  group: TabGroupData;
-  forceCollapsed?: boolean;
-}
-
 export const TabGroupCard = memo(function TabGroupCard({
   group,
   forceCollapsed,
+  renderTabItem,
 }: TabGroupCardProps) {
   const { t } = useT();
   const { token } = theme.useToken();
@@ -86,7 +89,7 @@ export const TabGroupCard = memo(function TabGroupCard({
   const barPosition = useSettingsStore((s) => s.settings.domainGroupAccentBarPosition ?? "left");
   const radiusPreset = useSettingsStore((s) => s.settings.domainGroupCardRadius ?? "default");
 
-  const { collapsed, setCollapsed } = useCardCollapse({
+  const { collapsed, setCollapsed, syncState } = useCardCollapse({
     initialCollapsed: group.collapsed,
     onChange: (next) => {
       if (group.groupId !== -1) {
@@ -103,7 +106,15 @@ export const TabGroupCard = memo(function TabGroupCard({
     },
   });
 
-  const isCollapsed = forceCollapsed ?? collapsed;
+  // 同步浏览器原生折叠状态到内部 state（不触发 onChange，避免重复调用 Chrome API）
+  useEffect(() => {
+    if (forceCollapsed === undefined) {
+      syncState(group.collapsed);
+    }
+  }, [group.collapsed, forceCollapsed, syncState]);
+
+  // 折叠状态优先级：forceCollapsed（全局按钮）> 内部 state（用户点击/浏览器同步）
+  const isCollapsed = forceCollapsed !== undefined ? forceCollapsed : collapsed;
   const colorValue = COLOR_HEX[group.color] ?? COLOR_HEX.grey;
 
   const {
@@ -235,9 +246,10 @@ export const TabGroupCard = memo(function TabGroupCard({
       collapsed={isCollapsed}
       header={
         <>
-          <Button
-            type="text"
-            onClick={() => setCollapsed((prev) => !prev)}
+          {/* eslint-disable-next-line no-restricted-syntax */}
+          <button
+            type="button"
+            onClick={() => setCollapsed((prev: boolean) => !prev)}
             aria-expanded={!isCollapsed}
             aria-label={isCollapsed ? t("展开") : t("折叠")}
             className={styles["app-domain-group-header"]}
@@ -246,7 +258,7 @@ export const TabGroupCard = memo(function TabGroupCard({
               size={ICON_SIZE.TINY}
               className={`${styles["app-domain-group-chevron"]}${isCollapsed ? ` ${styles["is-collapsed"]}` : ""}`}
             />
-            <Typography.Text
+            <span
               aria-hidden
               className={styles["app-tab-group-card-color-dot"]}
               style={{ "--tab-group-color": colorValue } as React.CSSProperties}
@@ -272,39 +284,49 @@ export const TabGroupCard = memo(function TabGroupCard({
               </Typography.Text>
             )}
             <Tag className={styles["app-domain-group-count"]}>{group.tabs.length}</Tag>
-          </Button>
+          </button>
 
-          <Dropdown menu={{ items: menuItems }} trigger={["click"]} placement="bottomRight">
-            <Tooltip title={t("更多")}>
-              <Button
-                type="text"
-                size="small"
-                loading={busy}
-                icon={busy ? undefined : <MoreHorizontal size={ICON_SIZE.SMALL} />}
-                aria-label={t("更多")}
-                className={`app-hover-reveal ${styles["app-domain-group-action"]}`}
-              />
-            </Tooltip>
-          </Dropdown>
+          <Flex className={styles["app-domain-group-actions"]}>
+            <Dropdown menu={{ items: menuItems }} trigger={["click"]} placement="bottomRight">
+              <Tooltip title={t("更多")}>
+                <Button
+                  type="text"
+                  size="small"
+                  loading={busy}
+                  icon={busy ? undefined : <MoreHorizontal size={ICON_SIZE.SMALL} />}
+                  aria-label={t("更多")}
+                  className={`app-hover-reveal ${styles["app-domain-group-action"]}`}
+                />
+              </Tooltip>
+            </Dropdown>
+          </Flex>
         </>
       }
     >
       <Space size={4} direction="vertical" className={styles["app-domain-group-list--flex"]}>
-        {group.tabs.map((tab) => (
-          <TabItem
-            key={tab.id}
-            tab={tab}
-            onJump={(id, wid) => {
-              void jumpToTab(id, wid);
-            }}
-            onClose={(id) => {
-              void closeSingleTab(id);
-            }}
-            showHostname
-            selectable
-            visibleTabIds={allTabIds}
-          />
-        ))}
+        {renderTabItem
+          ? // 自定义渲染模式（用于 @dnd-kit 拖拽集成）
+            group.tabs.map((tab) => (
+              <div key={tab.id} className={styles["app-domain-group-list-item"]}>
+                {renderTabItem(tab)}
+              </div>
+            ))
+          : // 默认渲染模式
+            group.tabs.map((tab) => (
+              <TabItem
+                key={tab.id}
+                tab={tab}
+                onJump={(id, wid) => {
+                  void jumpToTab(id, wid);
+                }}
+                onClose={(id) => {
+                  void closeSingleTab(id);
+                }}
+                showHostname
+                selectable
+                visibleTabIds={allTabIds}
+              />
+            ))}
       </Space>
     </GroupCardShell>
   );

@@ -26,31 +26,33 @@ export function TimelineToolbar() {
     <Flex align="center" gap={8} className={styles["app-domain-toolbar"]}>
       <Flex align="center" gap={4} className={styles["app-domain-toolbar-controls"]}>
         <Tooltip title={t("toolbar.granularity.title")}>
-          <Segmented
-            size="small"
-            value={granularity}
-            onChange={(v) => void updateSettings({ timelineGranularity: v as TimelineGranularity })}
-            options={[
-              {
-                value: "day",
-                icon: (
-                  <span className={styles["app-segmented-icon"]}>
-                    <Clock size={13} />
-                  </span>
-                ),
-                label: t("toolbar.granularity.day"),
-              },
-              {
-                value: "hour",
-                icon: (
-                  <span className={styles["app-segmented-icon"]}>
-                    <Clock3 size={13} />
-                  </span>
-                ),
-                label: t("toolbar.granularity.hour"),
-              },
-            ]}
-          />
+          <span>
+            <Segmented
+              size="small"
+              value={granularity}
+              onChange={(v) => void updateSettings({ timelineGranularity: v as TimelineGranularity })}
+              options={[
+                {
+                  value: "day",
+                  icon: (
+                    <span className={styles["app-segmented-icon"]}>
+                      <Clock size={13} />
+                    </span>
+                  ),
+                  label: t("toolbar.granularity.day"),
+                },
+                {
+                  value: "hour",
+                  icon: (
+                    <span className={styles["app-segmented-icon"]}>
+                      <Clock3 size={13} />
+                    </span>
+                  ),
+                  label: t("toolbar.granularity.hour"),
+                },
+              ]}
+            />
+          </span>
         </Tooltip>
         <Flex align="center" gap={4} className={toolbarStyles["exact-time-toggle"]}>
           <Typography.Text className={toolbarStyles["exact-time-label"]}>

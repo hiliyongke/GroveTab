@@ -13,6 +13,7 @@ import { useMemo } from "react";
 import {
   Button,
   Dropdown,
+  Flex,
   Input,
   Popover,
   Space,
@@ -227,7 +228,7 @@ export function TabGroupSection({
         "--app-window-group-border": `color-mix(in srgb, ${colorValue} 34%, ${token.colorBorderSecondary})`,
       })}
     >
-      <Space className={styles["app-window-group-header"]}>
+      <Flex align="center" className={styles["app-window-group-header"]}>
         <Button
           type="text"
           className={styles["app-window-group-trigger"]}
@@ -273,7 +274,7 @@ export function TabGroupSection({
             />
           </Tooltip>
         </Dropdown>
-      </Space>
+      </Flex>
 
       {!groupCollapsed && (
         <List className={styles["app-window-group-list"]}>

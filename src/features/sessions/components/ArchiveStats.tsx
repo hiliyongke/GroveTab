@@ -8,7 +8,6 @@
 
 import { useMemo } from "react";
 import { Archive, Layers, Calendar, Sparkles } from "lucide-react";
-import { Button } from "antd";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import type { ArchivedSession } from "@/shared/types";
 import { useT } from "@/shared/i18n";
@@ -83,11 +82,15 @@ export function ArchiveStats({ sessions, activeFilter, onSelectFilter }: Archive
         const value = stats[card.valueKey];
         const isActive = activeFilter === card.id && card.id !== "all";
         return (
-          <Button
+          <div
             key={`${card.id}-${idx}`}
-            type="text"
+            role="button"
+            tabIndex={0}
             className={`${styles["archive-stat-card"]} ${styles[`is-${card.tone}`]}${isActive ? " " + styles["is-active"] : ""}`}
             onClick={() => onSelectFilter(card.id)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") onSelectFilter(card.id);
+            }}
           >
             <span className={styles["archive-stat-card__icon"]}>
               <card.Icon size={ICON_SIZE.LARGE} />
@@ -96,7 +99,7 @@ export function ArchiveStats({ sessions, activeFilter, onSelectFilter }: Archive
               <span className={styles["archive-stat-card__value"]}>{value}</span>
               <span className={styles["archive-stat-card__label"]}>{t(card.labelKey)}</span>
             </span>
-          </Button>
+          </div>
         );
       })}
     </div>

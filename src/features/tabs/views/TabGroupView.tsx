@@ -8,17 +8,38 @@
  *   - 排序（名称/数量/最近访问）
  *   - 虚拟滚动（分组 > 20 时启用）
  *   - Toolbar（搜索 + 排序 + 折叠开关）
+ *
+ * 拖拽支持：
+ *   - 基于 @dnd-kit/core 实现标签跨分组拖放
+ *   - 支持拖到其他标签组、解分组、跨窗口移动
+ *   - 与浏览器实时同步
  */
 
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Empty, Flex } from "antd";
+import {
+  DndContext,
+  PointerSensor,
+  TouchSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  closestCorners,
+} from "@dnd-kit/core";
 import { useTabsStore, useSettingsStore } from "@/store";
 import type { ChromeTabGroupColor } from "@/chrome";
 import { cssVars } from "@/shared/utils/css-vars";
 import { useT } from "@/shared/i18n";
 import { TabGroupCard, type TabGroupData } from "../components/TabGroupCard";
+import { DraggableTabItem } from "../components/DraggableTabItem";
+import { DroppableGroupCard, type TabGroupDropData } from "../components/DroppableGroupCard";
 import { TabGroupToolbar } from "../toolbar/TabGroupToolbar";
+import { moveTabs } from "@/chrome/tabs";
+import { groupTabs, ungroupTabs } from "@/chrome/tabGroups";
+import { swBroadcast } from "@/shared/utils/sw-broadcast";
+import { feedback } from "@/shared/ui/feedback";
 import styles from "../styles/items.module.less";
 
 const DOMAIN_COLUMN_MIN_WIDTH = 320;
@@ -56,6 +77,7 @@ function groupTabsByChromeGroup(
         groupId: gid,
         title: gid === -1 ? t("tabGroup.ungrouped") : (tab.groupTitle ?? t("tabGroup.unnamed")),
         color: (gid === -1 ? "grey" : (tab.groupColor ?? "grey")) as ChromeTabGroupColor,
+        // 明确处理 undefined → false，避免 undefined 导致 React 渲染异常
         collapsed: gid === -1 ? false : tab.groupCollapsed === true,
         windowId: tab.windowId,
         tabs: [],
@@ -99,10 +121,20 @@ function estimateGroupHeight(group: TabGroupData): number {
 interface VirtualColumnProps {
   groups: TabGroupData[];
   useVirtual: boolean;
-  forceCollapsed: boolean;
+  forceCollapsed?: boolean;
+  visibleTabIds: number[];
+  onJump: (tabId: number, windowId: number) => void;
+  onClose: (tabId: number) => void;
 }
 
-function VirtualColumn({ groups, useVirtual, forceCollapsed }: VirtualColumnProps) {
+function VirtualColumn({
+  groups,
+  useVirtual,
+  forceCollapsed,
+  visibleTabIds,
+  onJump,
+  onClose,
+}: VirtualColumnProps) {
   const parentRef = useRef<HTMLDivElement>(null);
 
   const virtualizer = useVirtualizer({
@@ -115,16 +147,41 @@ function VirtualColumn({ groups, useVirtual, forceCollapsed }: VirtualColumnProp
 
   const virtualItems = virtualizer.getVirtualItems();
 
+  const renderGroupCard = (group: TabGroupData) => (
+    <DroppableGroupCard
+      id={`tab-group:${group.groupId}`}
+      data={
+        {
+          kind: "tab-group",
+          groupId: group.groupId,
+          windowId: group.windowId,
+        } satisfies TabGroupDropData
+      }
+      className={styles["app-domain-masonry-item"]}
+    >
+      <TabGroupCard
+        group={group}
+        forceCollapsed={forceCollapsed}
+        renderTabItem={(tab) => (
+          <DraggableTabItem
+            key={tab.id}
+            tab={tab}
+            visibleTabIds={visibleTabIds}
+            onJump={onJump}
+            onClose={onClose}
+            showHostname
+            selectable
+          />
+        )}
+      />
+    </DroppableGroupCard>
+  );
+
   if (!useVirtual) {
     return (
       <div className={styles["app-domain-masonry-column"]}>
         {groups.map((group) => (
-          <div
-            key={`${group.groupId}-${group.windowId}`}
-            className={styles["app-domain-masonry-item"]}
-          >
-            <TabGroupCard group={group} forceCollapsed={forceCollapsed} />
-          </div>
+          <div key={`${group.groupId}-${group.windowId}`}>{renderGroupCard(group)}</div>
         ))}
       </div>
     );
@@ -153,7 +210,7 @@ function VirtualColumn({ groups, useVirtual, forceCollapsed }: VirtualColumnProp
                 transform: `translateY(${virtualItem.start}px)`,
               }}
             >
-              <TabGroupCard group={group} forceCollapsed={forceCollapsed} />
+              {renderGroupCard(group)}
             </div>
           );
         })}
@@ -178,6 +235,9 @@ export function TabGroupView() {
     return typeof v === "number" && v >= 1 && v <= 6 ? v : null;
   });
   const sortBy = useSettingsStore((s) => s.settings.tabGroupSortBy ?? "tabCount");
+  const jumpToTab = useTabsStore((s) => s.jumpToTab);
+  const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
+  const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
 
   // 按 Chrome 原生 Tab Group 分组
   const groups = useMemo(() => groupTabsByChromeGroup(tabs, t), [tabs, t]);
@@ -245,38 +305,116 @@ export function TabGroupView() {
   const columns = splitIntoFlowColumns(filteredGroups, columnCount);
   const useVirtualization = filteredGroups.length > VIRTUALIZATION_THRESHOLD;
 
+  const visibleTabIds = useMemo(() => tabs.map((tab) => tab.id), [tabs]);
+
+  // 拖拽传感器配置
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 5 } }),
+    useSensor(KeyboardSensor),
+  );
+
+  // 处理拖放结束
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const dragId = String(active.id);
+    const dropId = String(over.id);
+
+    // 只处理标签拖放
+    if (!dragId.startsWith("tab:")) return;
+
+    const tabId = Number(dragId.replace("tab:", ""));
+    const tab = tabs.find((t) => t.id === tabId);
+    if (!tab) return;
+
+    // 解析放置目标
+    if (!dropId.startsWith("tab-group:")) return;
+
+    const targetGroupId = Number(dropId.replace("tab-group:", ""));
+
+    // 如果已经在同一分组，不需要操作
+    if (tab.groupId === targetGroupId) return;
+
+    try {
+      // 找到目标分组的窗口 ID
+      const targetGroup = groups.find((g) => g.groupId === targetGroupId);
+      const targetWindowId = targetGroup?.windowId ?? tab.windowId;
+
+      if (targetGroupId === -1) {
+        // 拖到未分组 - 解分组
+        if (tab.groupId !== -1) {
+          await ungroupTabs(tabId);
+          // 如果需要跨窗口移动
+          if (tab.windowId !== targetWindowId) {
+            await moveTabs([tabId], targetWindowId, -1);
+          }
+          swBroadcast("tab-ungrouped", {
+            id: tabId,
+            windowId: targetWindowId,
+            previousGroupId: tab.groupId,
+          });
+          feedback.success(t("标签已移出分组"));
+        }
+      } else {
+        // 拖到其他分组 - 移动并分组
+        if (tab.windowId !== targetWindowId) {
+          await moveTabs([tabId], targetWindowId, -1);
+        }
+        await groupTabs({ tabIds: tabId, groupId: targetGroupId });
+        swBroadcast("tab-grouped", {
+          id: tabId,
+          windowId: targetWindowId,
+          groupId: targetGroupId,
+        });
+        feedback.success(t("标签已移动到分组"));
+      }
+
+      void loadAllTabs({ silent: true });
+    } catch (err) {
+      feedback.error(t("标签移动失败"), err);
+      void loadAllTabs({ silent: true });
+    }
+  };
+
   if (tabs.length === 0) {
     return <Empty description={t("没有打开的标签页")} className={styles["app-tab-group-empty"]} />;
   }
 
   return (
-    <Flex vertical gap="middle">
-      <TabGroupToolbar
-        filterQuery={filterQuery}
-        onFilterChange={setFilterQuery}
-        collapseAll={collapseAll}
-        onCollapseAllChange={setCollapseAll}
-      />
-      {sortedGroups.length === 0 ? null : (
-        <div
-          ref={containerRef}
-          className={styles["app-domain-masonry"]}
-          style={getColumnVars(columnCount)}
-        >
-          {filteredGroups.length === 0 ? (
-            <Empty description={t("tabGroup.noResults")} />
-          ) : (
-            columns.map((columnGroups, columnIndex) => (
-              <VirtualColumn
-                key={columnIndex}
-                groups={columnGroups}
-                useVirtual={useVirtualization}
-                forceCollapsed={collapseAll}
-              />
-            ))
-          )}
-        </div>
-      )}
-    </Flex>
+    <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
+      <Flex vertical gap="middle">
+        <TabGroupToolbar
+          filterQuery={filterQuery}
+          onFilterChange={setFilterQuery}
+          collapseAll={collapseAll}
+          onCollapseAllChange={setCollapseAll}
+        />
+        {sortedGroups.length === 0 ? null : (
+          <div
+            ref={containerRef}
+            className={styles["app-domain-masonry"]}
+            style={getColumnVars(columnCount)}
+          >
+            {filteredGroups.length === 0 ? (
+              <Empty description={t("tabGroup.noResults")} />
+            ) : (
+              columns.map((columnGroups, columnIndex) => (
+                <VirtualColumn
+                  key={columnIndex}
+                  groups={columnGroups}
+                  useVirtual={useVirtualization}
+                  forceCollapsed={collapseAll ? true : undefined}
+                  visibleTabIds={visibleTabIds}
+                  onJump={(tabId, windowId) => void jumpToTab(tabId, windowId)}
+                  onClose={(tabId) => void closeSingleTab(tabId)}
+                />
+              ))
+            )}
+          </div>
+        )}
+      </Flex>
+    </DndContext>
   );
 }

@@ -61,6 +61,8 @@ export const STORAGE_KEYS = Object.freeze({
   automationRules: key("automation_rules"),
   /** 工作区模板（WorkspaceTemplateData） */
   workspaceTemplates: key("workspace_templates"),
+  /** 智能排序配置（SmartSortConfig） */
+  smartSort: key("smart_sort"),
 });
 
 /** 判断是否属于当前应用命名空间的存储键。 */

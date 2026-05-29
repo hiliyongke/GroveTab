@@ -21,7 +21,6 @@ export { SelectionModeNotice } from "./selection/SelectionModeNotice";
 
 // Components
 export { TabItem } from "./components/TabItem";
-export { TabPreviewCard } from "./components/TabPreviewCard";
 export { TabContextMenu } from "./components/TabContextMenu";
 export { DomainGroupCard } from "./components/DomainGroupCard";
 export { TabGroupCard } from "./components/TabGroupCard";

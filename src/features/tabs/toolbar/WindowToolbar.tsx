@@ -88,7 +88,9 @@ export function WindowToolbar({
         }
       >
         <Tooltip title={t("窗口快照")}>
-          <Button type="text" size="small" icon={<Camera size={ICON_SIZE.SMALL} />} />
+          <span>
+            <Button type="text" size="small" icon={<Camera size={ICON_SIZE.SMALL} />} />
+          </span>
         </Tooltip>
       </Popover>
 
@@ -114,42 +116,44 @@ export function WindowToolbar({
       {/* 折叠策略切换 */}
       <Flex align="center" gap={4} className={styles["app-domain-toolbar-controls"]}>
         <Tooltip title={t("toolbar.collapseStrategy.title")}>
-          <Segmented
-            size="small"
-            value={normalize(defaultCollapsed)}
-            onChange={(v) =>
-              void updateSettings({ windowCardDefaultCollapsed: v as WindowCardDefaultCollapsed })
-            }
-            options={[
-              {
-                value: "current-only",
-                icon: (
-                  <span className={styles["app-segmented-icon"]}>
-                    <Maximize2 size={13} />
-                  </span>
-                ),
-                label: t("toolbar.collapseStrategy.currentOnly"),
-              },
-              {
-                value: "all-expanded",
-                icon: (
-                  <span className={styles["app-segmented-icon"]}>
-                    <Eye size={13} />
-                  </span>
-                ),
-                label: t("toolbar.collapseStrategy.allExpanded"),
-              },
-              {
-                value: "all-collapsed",
-                icon: (
-                  <span className={styles["app-segmented-icon"]}>
-                    <EyeOff size={13} />
-                  </span>
-                ),
-                label: t("toolbar.collapseStrategy.allCollapsed"),
-              },
-            ]}
-          />
+          <span>
+            <Segmented
+              size="small"
+              value={normalize(defaultCollapsed)}
+              onChange={(v) =>
+                void updateSettings({ windowCardDefaultCollapsed: v as WindowCardDefaultCollapsed })
+              }
+              options={[
+                {
+                  value: "current-only",
+                  icon: (
+                    <span className={styles["app-segmented-icon"]}>
+                      <Maximize2 size={13} />
+                    </span>
+                  ),
+                  label: t("toolbar.collapseStrategy.currentOnly"),
+                },
+                {
+                  value: "all-expanded",
+                  icon: (
+                    <span className={styles["app-segmented-icon"]}>
+                      <Eye size={13} />
+                    </span>
+                  ),
+                  label: t("toolbar.collapseStrategy.allExpanded"),
+                },
+                {
+                  value: "all-collapsed",
+                  icon: (
+                    <span className={styles["app-segmented-icon"]}>
+                      <EyeOff size={13} />
+                    </span>
+                  ),
+                  label: t("toolbar.collapseStrategy.allCollapsed"),
+                },
+              ]}
+            />
+          </span>
         </Tooltip>
       </Flex>
 

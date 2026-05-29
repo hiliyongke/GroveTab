@@ -434,6 +434,10 @@ export function buildAppThemeVars(
     "--app-shadow-card-hover": isDark ? skin.shadow.cardHover.dark : skin.shadow.cardHover.light,
     "--app-shadow-floating": isDark ? skin.shadow.floating.dark : skin.shadow.floating.light,
     "--app-shadow-brand-glow": isDark ? skin.shadow.brandGlow.dark : skin.shadow.brandGlow.light,
+    "--app-shadow-sm": isDark ? "0 1px 2px 0 rgba(0,0,0,0.36)" : "0 1px 2px 0 rgba(0,0,0,0.06)",
+    "--app-shadow-md": isDark
+      ? "0 4px 12px -2px rgba(0,0,0,0.46), 0 2px 4px -2px rgba(0,0,0,0.28)"
+      : "0 4px 12px -2px rgba(0,0,0,0.10), 0 2px 4px -2px rgba(0,0,0,0.05)",
 
     "--app-logo-gradient": custom?.colorPrimary
       ? `linear-gradient(135deg, ${skin.colorPrimary}, ${skin.colorPrimaryHover})`

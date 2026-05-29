@@ -7,3 +7,4 @@ export { useStatsStore } from './stats-slice';
 export { useKanbanStore } from './kanban-slice';
 export { useSpeedDialStore } from './speed-dial-slice';
 export { useSessionsStore } from './sessions-slice';
+export { useSmartSortStore } from './smart-sort-slice';

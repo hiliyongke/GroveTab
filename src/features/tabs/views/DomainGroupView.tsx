@@ -5,25 +5,83 @@
  *   - 当域名分组数量超过 20 时，对 masonry 列启用 @tanstack/react-virtual 虚拟滚动
  *   - 每列独立虚拟化，避免海量 DOM 节点导致的内存/渲染性能问题
  *   - 折叠/展开状态变化通过 measureElement 实时更新虚拟高度
+ *
+ * 自动域名排序：
+ *   - 切换到域名分组视图时，自动按域名排序浏览器标签栏（同域名标签相邻）
+ *   - 切离域名分组视图时，自动恢复浏览器标签栏的原始顺序
  */
 
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Empty, Flex } from "antd";
 import { useTabsStore, useMetadataStore, useSettingsStore } from "@/store";
 import { groupTabsByDomain, type DomainGroup } from "@/shared/utils/domain";
 import { cssVars } from "@/shared/utils/css-vars";
 import { useT } from "@/shared/i18n";
+import { moveTabs } from "@/chrome/tabs";
+import { sortTabs } from "@/features/smart-sort/hooks/useSmartSort";
+import type { LiveTab } from "@/shared/types";
 import { DomainGroupCard } from "../components/DomainGroupCard";
 import styles from "../styles/items.module.less";
+
+/**
+ * 将排序后的标签顺序同步到浏览器标签栏
+ */
+async function syncSortToBrowser(sortedTabs: LiveTab[]): Promise<void> {
+  const currentWindow = await chrome.windows.getCurrent();
+  const windowId = currentWindow.id;
+  if (!windowId) return;
+
+  const windowTabIds = sortedTabs
+    .filter((t) => t.windowId === windowId)
+    .map((t) => t.id);
+
+  if (windowTabIds.length === 0) return;
+
+  const allWindowTabs = await chrome.tabs.query({ windowId });
+  const pinnedCount = allWindowTabs.filter((t) => t.pinned).length;
+
+  try {
+    await moveTabs(windowTabIds, windowId, pinnedCount);
+  } catch {
+    // 忽略移动失败
+  }
+}
+
+/**
+ * 恢复浏览器标签栏的原始顺序
+ */
+async function restoreBrowserOrder(originalTabIds: number[]): Promise<void> {
+  const currentWindow = await chrome.windows.getCurrent();
+  const windowId = currentWindow.id;
+  if (!windowId) return;
+
+  const allWindowTabs = await chrome.tabs.query({ windowId });
+  const currentTabIds = new Set(allWindowTabs.map((t) => t.id));
+  const validIds = originalTabIds.filter((id) => currentTabIds.has(id));
+  if (validIds.length === 0) return;
+
+  const pinnedCount = allWindowTabs.filter((t) => t.pinned).length;
+
+  try {
+    await moveTabs(validIds, windowId, pinnedCount);
+  } catch {
+    // 忽略恢复失败
+  }
+}
 
 interface DomainGroupViewProps {
   filterQuery: string;
 }
 
-const DOMAIN_COLUMN_MIN_WIDTH = 320;
+interface VirtualColumnProps {
+  groups: DomainGroup[];
+  useVirtual: boolean;
+}
+
+const DOMAIN_COLUMN_MIN_WIDTH = 380;
 const DOMAIN_COLUMN_GAP = 16;
-const DOMAIN_COLUMN_MAX_AUTO = 8;
+const DOMAIN_COLUMN_MAX_AUTO = 6;
 const VIRTUALIZATION_THRESHOLD = 20; // 超过此数量才启用虚拟滚动
 
 function getAutoColumnCount(containerWidth: number, groupCount: number): number {
@@ -72,11 +130,6 @@ function estimateGroupHeight(group: DomainGroup): number {
 /**
  * 虚拟化列组件：独立管理内部虚拟滚动
  */
-interface VirtualColumnProps {
-  groups: DomainGroup[];
-  useVirtual: boolean;
-}
-
 function VirtualColumn({ groups, useVirtual }: VirtualColumnProps) {
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -144,6 +197,37 @@ export function DomainGroupView({ filterQuery }: DomainGroupViewProps) {
   const pinnedUrls = useMetadataStore((s) => s.pinnedUrls);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+
+  // ── 自动域名排序：切换到域名分组视图时按域名排序浏览器标签栏 ──
+  const originalTabIdsRef = useRef<number[] | null>(null);
+
+  useEffect(() => {
+    // 保存原始顺序（仅首次进入域名分组视图时）
+    const currentTabs = useTabsStore.getState().tabs;
+    if (!originalTabIdsRef.current) {
+      originalTabIdsRef.current = currentTabs.map((t) => t.id);
+    }
+
+    // 按域名排序
+    const sorted = sortTabs(currentTabs, "domain", [], {});
+
+    // 立即更新 store（UI 马上生效）
+    useTabsStore.setState({ tabs: sorted });
+
+    // 后台异步同步到浏览器标签栏
+    void syncSortToBrowser(sorted).catch(() => {
+      // 忽略同步失败
+    });
+
+    // 卸载时恢复浏览器原始顺序
+    return () => {
+      const originalIds = originalTabIdsRef.current;
+      if (originalIds) {
+        void restoreBrowserOrder(originalIds);
+        originalTabIdsRef.current = null;
+      }
+    };
+  }, []);
   // 仅当用户显式设置了 1–6 的有效数值时才锁定列数，'auto' 或 undefined 走响应式
   const forcedColumns = useSettingsStore((s) => {
     const v = s.settings.domainGroupColumns;
