@@ -7,8 +7,11 @@
   position: sticky;
   top: 0;
   z-index: 20;
-  display: flex; /* antd 组件内部微调整 */
+  /* Grid 三列：左(1fr) 中(auto) 右(1fr) —— 保证搜索栏在 Header 中真正居中 */
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
+  gap: 8px;
   height: var(--app-header-height);
   padding: 0 var(--app-space-5);
   background:
@@ -60,7 +63,7 @@
 }
 
 .app-header-left {
-  flex-shrink: 0;
+  justify-self: start;
   /* Antd Flex 通过 props 提供 display: flex, align-items: center, gap */
 }
 
@@ -166,9 +169,14 @@
 
 /* ── 顶栏中部（搜索触发器） ── */
 .app-header-center {
-  min-width: 280px;
-  padding-inline: 18px;
-  /* Antd Flex 通过 props 提供 flex, justify-content */
+  justify-self: center;
+  /* Antd Flex 通过 props 提供 justify-content */
+}
+
+/* ── 顶栏右侧（空间切换 + 工具篮） ── */
+.app-header-right {
+  justify-self: end;
+  /* Antd Flex 通过 props 提供 display: flex, align-items: center, gap */
 }
 
 .app-header-search-trigger {

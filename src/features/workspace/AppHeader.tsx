@@ -58,7 +58,7 @@ export function AppHeader({
   idleTabsCount: number;
   hasTidySuggestions: boolean;
   compactSearchVisible: boolean;
-  currentSpaceId: SpaceId | string;
+  currentSpaceId: string;
   onSwitchSpace: (spaceId: SpaceId) => void;
   onSettings: () => void;
   onOpenSearch: () => void;
@@ -160,7 +160,7 @@ export function AppHeader({
       </Flex>
 
       {/* ZONE 2: 全局搜索 */}
-      <Flex flex="1 1 520px" justify="center" className="app-header-center">
+      <Flex justify="center" className="app-header-center">
         <Button
           type="text"
           onClick={onOpenSearch}
@@ -178,35 +178,35 @@ export function AppHeader({
         </Button>
       </Flex>
 
-      {/* ZONE 3: 空间切换 */}
-      <SpaceSwitcher currentSpaceId={currentSpaceId} onSwitchSpace={onSwitchSpace} />
-
-      {/* ZONE 4: 工具篮 */}
-      <Space size={6} className="app-header-actions">
-        <Tooltip title={t(`theme.${theme}`)}>
-          <Button
-            size="small"
-            type="text"
-            icon={
-              <span key={theme} className="app-theme-icon">
-                {themeIcon}
-              </span>
-            }
-            onClick={toggleTheme}
-            aria-label={t(`theme.${theme}`)}
-          />
-        </Tooltip>
-        <Dropdown menu={{ items: overflowItems }} trigger={["click"]} placement="bottomRight">
-          <Tooltip title={t("更多操作")}>
+      {/* ZONE 3+4: 空间切换 + 工具篮（合并到右侧列，与左侧等宽占位） */}
+      <Flex align="center" gap={8} className="app-header-right">
+        <SpaceSwitcher currentSpaceId={currentSpaceId} onSwitchSpace={onSwitchSpace} />
+        <Space size={6} className="app-header-actions">
+          <Tooltip title={t(`theme.${theme}`)}>
             <Button
               size="small"
               type="text"
-              icon={<MoreHorizontal size={ICON_SIZE.SMALL} className="app-icon" />}
-              aria-label={t("更多操作")}
+              icon={
+                <span key={theme} className="app-theme-icon">
+                  {themeIcon}
+                </span>
+              }
+              onClick={toggleTheme}
+              aria-label={t(`theme.${theme}`)}
             />
           </Tooltip>
-        </Dropdown>
-      </Space>
+          <Dropdown menu={{ items: overflowItems }} trigger={["click"]} placement="bottomRight">
+            <Tooltip title={t("更多操作")}>
+              <Button
+                size="small"
+                type="text"
+                icon={<MoreHorizontal size={ICON_SIZE.SMALL} className="app-icon" />}
+                aria-label={t("更多操作")}
+              />
+            </Tooltip>
+          </Dropdown>
+        </Space>
+      </Flex>
 
       {/* QuickToggle 面板 —— P1-5 重构：Popover+隐藏锚点 → Modal
        * 原方案用 position:fixed 隐藏 span 做锚点，布局脆弱。
