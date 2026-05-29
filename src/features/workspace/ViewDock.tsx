@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Button, Flex } from "antd";
+import { Button, Flex, Tooltip } from "antd";
 
 import { VIEW_CONFIGS, type ViewMode } from "@/shared/config/views";
 import { useT } from "@/shared/i18n";
@@ -25,11 +25,13 @@ export function ViewDock({ viewMode, onViewChange, orientation, placement }: Vie
 
   const items = useMemo(
     () =>
-      VIEW_CONFIGS.map((view) => ({
-        id: view.id,
-        Icon: view.Icon,
-        label: t(view.labelKey),
-      })),
+      // 从导航中过滤掉 archive 视图（归档功能通过其他入口访问）
+      VIEW_CONFIGS.filter((view) => view.id !== "archive")
+        .map((view) => ({
+          id: view.id,
+          Icon: view.Icon,
+          label: t(view.labelKey),
+        })),
     [t],
   );
 
@@ -48,19 +50,32 @@ export function ViewDock({ viewMode, onViewChange, orientation, placement }: Vie
       >
         {items.map((item) => {
           const isActive = viewMode === item.id;
+          const tooltipTitle = (
+            <Flex vertical gap={2}>
+              <span>{item.label}</span>
+              <span style={{ fontSize: 11, opacity: 0.85 }}>
+                {t(`view.desc.${item.id}` as const)}
+              </span>
+            </Flex>
+          );
           return (
-            <Button
+            <Tooltip
               key={item.id}
-              type="text"
-              role="tab"
-              className={`app-view-dock__item${isActive ? " is-active" : ""}`}
-              aria-selected={isActive}
-              onClick={() => onViewChange(item.id)}
-              title={item.label}
+              title={tooltipTitle}
+              placement={placement === "left" ? "right" : placement === "right" ? "left" : "top"}
             >
-              <item.Icon size={ICON_SIZE.MEDIUM} />
-              <span className="app-view-dock__label">{item.label}</span>
-            </Button>
+              <Button
+                type="text"
+                role="tab"
+                className={`app-view-dock__item${isActive ? " is-active" : ""}`}
+                aria-selected={isActive}
+                onClick={() => onViewChange(item.id)}
+                aria-label={item.label}
+              >
+                <item.Icon size={ICON_SIZE.MEDIUM} />
+                <span className="app-view-dock__label">{item.label}</span>
+              </Button>
+            </Tooltip>
           );
         })}
       </Flex>

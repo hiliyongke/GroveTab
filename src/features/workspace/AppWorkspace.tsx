@@ -20,8 +20,10 @@ import { TabsView } from "@/features/tabs/views/TabsView";
 import { SelectionModeNotice } from "@/features/tabs/selection/SelectionModeNotice";
 import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
 import { useT } from "@/shared/i18n";
+import { useViewOnboarding } from "@/shared/hooks";
 import type { ViewMode } from "@/shared/config/views";
 import { getViewComponentMap } from "@/shared/config/view-registry";
+import { ViewOnboardingModal } from "./ViewOnboardingModal";
 
 interface AppWorkspaceProps {
   /** 初始化是否完成 */
@@ -53,6 +55,9 @@ export function AppWorkspace({
   onOpenSettings,
 }: AppWorkspaceProps) {
   const { t } = useT();
+
+  // 视图引导弹窗状态
+  const { showViewOnboarding, dismissViewOnboarding } = useViewOnboarding(checked);
 
   /* ---------- Store 数据 ---------- */
   const loading = useTabsStore((s) => s.loading);
@@ -97,6 +102,12 @@ export function AppWorkspace({
   return (
     <>
       {showOnboarding && <OnboardingCard onDismiss={onDismissOnboarding} />}
+
+      {/* 视图引导弹窗 */}
+      <ViewOnboardingModal
+        open={showViewOnboarding}
+        onClose={dismissViewOnboarding}
+      />
 
       {initError !== null && (
         <Alert

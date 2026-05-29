@@ -1,0 +1,52 @@
+.thumbnailTooltip {
+  border-radius: var(--app-radius-lg, 8px);
+  overflow: hidden;
+  background: var(--app-floating-bg);
+  box-shadow: var(--app-floating-shadow);
+}
+
+.thumbnailImageContainer {
+  position: relative;
+  border-radius: var(--app-radius-md, 6px);
+  overflow: hidden;
+}
+
+.thumbnailImage {
+  display: block;
+  border-radius: var(--app-radius-md, 6px);
+  transition: transform 200ms ease;
+}
+
+.thumbnailImage:hover {
+  transform: scale(1.02);
+}
+
+.thumbnailPlaceholder {
+  border-radius: var(--app-radius-md, 6px);
+}
+
+.thumbnailCloseButton {
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.thumbnailTooltip:hover .thumbnailCloseButton {
+  opacity: 1;
+}
+
+.thumbnailInfo {
+  gap: 2px;
+}
+
+.thumbnailTooltipOverlay {
+  :global(.ant-tooltip-inner) {
+    padding: 0;
+    background: var(--app-floating-bg);
+    border-radius: var(--app-radius-lg, 8px);
+    box-shadow: var(--app-floating-shadow);
+  }
+
+  :global(.ant-tooltip-arrow) {
+    display: none;
+  }
+}

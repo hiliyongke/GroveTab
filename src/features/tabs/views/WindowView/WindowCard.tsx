@@ -8,7 +8,7 @@
  *   - Ghost Drop Zone：快速创建分组
  */
 
-import { useMemo, memo } from "react";
+import { useMemo, memo, useState, useEffect } from "react";
 import {
   Button,
   Dropdown,
@@ -143,6 +143,18 @@ export const WindowCard = memo(function WindowCard({
   const isCurrent = windowId === currentWindowId;
   const isFocused = windowInfo?.focused ?? false;
   const isIncognito = windowInfo?.incognito ?? tabs.some((tab) => tab.incognito);
+
+  // 响应式处理：<480px 时折叠部分操作按钮
+  const [isNarrow, setIsNarrow] = useState(false);
+  useEffect(() => {
+    const checkWidth = () => {
+      setIsNarrow(window.innerWidth < 480);
+    };
+    checkWidth();
+    window.addEventListener("resize", checkWidth);
+    return () => window.removeEventListener("resize", checkWidth);
+  }, []);
+
   const { groups, ungroupedTabs } = useMemo(() => buildGroupedTabs(tabs), [tabs]);
   const groupCount = groups.length;
   const splitViewCount = useMemo(
@@ -303,32 +315,37 @@ export const WindowCard = memo(function WindowCard({
 
           {/* 右侧：操作按钮组 */}
           <Flex align="center" gap={2} className={styles["app-window-card-actions"]}>
-            <Tooltip title={t("贴左半屏")}>
-              <Button
-                type="text"
-                size="small"
-                icon={<PanelLeft size={ICON_SIZE.SMALL} />}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleSnap("snap-left");
-                }}
-                aria-label={t("贴左半屏")}
-                className={styles["app-window-card-quick-btn"]}
-              />
-            </Tooltip>
-            <Tooltip title={t("贴右半屏")}>
-              <Button
-                type="text"
-                size="small"
-                icon={<PanelRight size={ICON_SIZE.SMALL} />}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleSnap("snap-right");
-                }}
-                aria-label={t("贴右半屏")}
-                className={styles["app-window-card-quick-btn"]}
-              />
-            </Tooltip>
+            {/* 宽屏显示全部按钮，窄屏（<480px）只显示最常用按钮，其余收进「更多」菜单 */}
+            {!isNarrow && (
+              <>
+                <Tooltip title={t("贴左半屏")}>
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<PanelLeft size={ICON_SIZE.SMALL} />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSnap("snap-left");
+                    }}
+                    aria-label={t("贴左半屏")}
+                    className={styles["app-window-card-quick-btn"]}
+                  />
+                </Tooltip>
+                <Tooltip title={t("贴右半屏")}>
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<PanelRight size={ICON_SIZE.SMALL} />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSnap("snap-right");
+                    }}
+                    aria-label={t("贴右半屏")}
+                    className={styles["app-window-card-quick-btn"]}
+                  />
+                </Tooltip>
+              </>
+            )}
             <Tooltip title={t("最大化")}>
               <Button
                 type="text"

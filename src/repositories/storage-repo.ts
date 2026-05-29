@@ -227,6 +227,15 @@ export async function markOnboardingDone(): Promise<void> {
   await setData(STORAGE_KEYS.onboardingDone, true);
 }
 
+export async function hasCompletedViewOnboarding(): Promise<boolean> {
+  const done = await getData<boolean>(STORAGE_KEYS.viewOnboardingDone);
+  return done ?? false;
+}
+
+export async function markViewOnboardingDone(): Promise<void> {
+  await setData(STORAGE_KEYS.viewOnboardingDone, true);
+}
+
 // ── Search History ─────────────────────────────────────
 
 const MAX_RECENT_SEARCHES = 20;

@@ -450,19 +450,29 @@ export function BatchActionBar() {
           </Button>
         </Tooltip>
 
-        <Tooltip title={t("归档所选")} placement="top">
+        {/* 归档按钮 - 突出显示作为主要操作之一 */}
+        <Tooltip
+          title={t("归档保存所选标签页，之后可在归档面板恢复。比关闭更安全，不会丢失页面。")}
+          placement="top"
+        >
           <Popconfirm
-            title={t("确认归档 {count} 个标签页？归档后可在归档面板中恢复。", { count })}
+            title={t("确认归档 {count} 个标签页？", { count })}
+            description={t("归档后标签页会被保存并关闭，随时可在左侧边栏的「归档」中恢复。")}
             onConfirm={() => {
               void handleBatchArchive();
             }}
-            okText={t("归档所选")}
+            okText={t("归档")}
             cancelText={t("取消")}
-            okButtonProps={{ size: "small" }}
+            okButtonProps={{ size: "small", type: "primary" }}
             cancelButtonProps={{ size: "small" }}
           >
-            <Button size="small" type="primary" icon={<Save size={ICON_SIZE.DEFAULT} />}>
-              {t("归档所选")}
+            <Button
+              size="small"
+              type="primary"
+              icon={<Save size={ICON_SIZE.DEFAULT} />}
+              className={styles["app-batch-bar__archive-btn"]}
+            >
+              {t("归档")}
             </Button>
           </Popconfirm>
         </Tooltip>

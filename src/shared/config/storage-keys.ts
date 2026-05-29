@@ -30,6 +30,7 @@ export const STORAGE_KEYS = Object.freeze({
   metrics: key("metrics"),
   metricCounters: key("metric_counters"),
   onboardingDone: key("onboarding_done"),
+  viewOnboardingDone: key("view_onboarding_done"),
   searchHistory: key("search_history"),
   activity: key("activity"),
   workspaces: key("workspaces"),

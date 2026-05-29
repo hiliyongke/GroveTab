@@ -25,6 +25,26 @@ const GLOBAL_SHORTCUTS = [
   { labelKey: "shortcuts.toggleSearch", keys: "Alt + K" },
 ];
 
+/** 视图切换快捷键（只读） */
+const VIEW_SHORTCUTS = [
+  { labelKey: "shortcuts.view.tabs", keys: "⌘1 / Ctrl+1", description: "标签视图" },
+  { labelKey: "shortcuts.view.timeline", keys: "⌘2 / Ctrl+2", description: "时间轴视图" },
+  { labelKey: "shortcuts.view.tabgroup", keys: "⌘3 / Ctrl+3", description: "标签组视图" },
+  { labelKey: "shortcuts.view.window", keys: "⌘4 / Ctrl+4", description: "窗口视图" },
+  { labelKey: "shortcuts.view.kanban", keys: "⌘5 / Ctrl+5", description: "看板视图" },
+  { labelKey: "shortcuts.view.frequency", keys: "⌘6 / Ctrl+6", description: "频率视图" },
+  { labelKey: "shortcuts.view.archive", keys: "⌘7 / Ctrl+7", description: "归档视图" },
+];
+
+/** 键盘导航快捷键（只读） */
+const NAVIGATION_SHORTCUTS = [
+  { labelKey: "shortcuts.navigation.up", keys: "↑", description: "导航到上一个标签" },
+  { labelKey: "shortcuts.navigation.down", keys: "↓", description: "导航到下一个标签" },
+  { labelKey: "shortcuts.navigation.select", keys: "Space", description: "勾选/取消勾选标签" },
+  { labelKey: "shortcuts.navigation.close", keys: "Delete", description: "关闭选中标签" },
+  { labelKey: "shortcuts.navigation.cancel", keys: "Esc", description: "取消选择/关闭弹窗" },
+];
+
 /**
  * 快捷键录制器：用户按下组合键后自动识别并显示
  */
@@ -175,6 +195,52 @@ export function ShortcutsPanel() {
 
   return (
     <Flex vertical className="settings-panel-stack">
+      {/* 视图切换快捷键（只读） */}
+      <section className="settings-section">
+        <Field label={t("视图切换")} hint={t("使用数字键 1-7 快速切换不同视图")}>
+          <Flex vertical className="settings-card-list">
+            {VIEW_SHORTCUTS.map((item) => (
+              <Flex
+                key={item.labelKey}
+                align="center"
+                justify="space-between"
+                className="settings-card-row"
+              >
+                <Flex vertical className="settings-card-row__main">
+                  <Typography.Text className="settings-card-row__title">
+                    {item.description}
+                  </Typography.Text>
+                </Flex>
+                <kbd className="app-kbd">{item.keys}</kbd>
+              </Flex>
+            ))}
+          </Flex>
+        </Field>
+      </section>
+
+      {/* 键盘导航快捷键（只读） */}
+      <section className="settings-section">
+        <Field label={t("键盘导航")} hint={t("在标签列表中使用键盘快速操作")}>
+          <Flex vertical className="settings-card-list">
+            {NAVIGATION_SHORTCUTS.map((item) => (
+              <Flex
+                key={item.labelKey}
+                align="center"
+                justify="space-between"
+                className="settings-card-row"
+              >
+                <Flex vertical className="settings-card-row__main">
+                  <Typography.Text className="settings-card-row__title">
+                    {item.description}
+                  </Typography.Text>
+                </Flex>
+                <kbd className="app-kbd">{item.keys}</kbd>
+              </Flex>
+            ))}
+          </Flex>
+        </Field>
+      </section>
+
       {/* Chrome 全局快捷键（只读） */}
       <section className="settings-section">
         <Field label={t("全局快捷键")}>
