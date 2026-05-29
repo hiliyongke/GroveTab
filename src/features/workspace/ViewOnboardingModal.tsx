@@ -9,6 +9,7 @@ import { Modal, Button, Flex, Typography, Card } from "antd";
 import { useT } from "@/shared/i18n";
 import { VIEW_CONFIGS } from "@/shared/config/views";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
+import styles from "./ViewOnboardingModal.module.less";
 
 const { Text, Title } = Typography;
 
@@ -40,30 +41,21 @@ export function ViewOnboardingModal({ open, onClose }: ViewOnboardingModalProps)
       }}
     >
       <Flex vertical align="center" gap={16}>
-        <Title level={4} style={{ margin: 0, textAlign: "center" }}>
+        <Title level={4} className={styles.onboardingTitle}>
           {t("onboarding.view.title")}
         </Title>
-        <Text type="secondary" style={{ textAlign: "center" }}>
+        <Text type="secondary" className={styles.onboardingSubtitle}>
           {t("onboarding.view.subtitle")}
         </Text>
 
-        <Flex
-          wrap="wrap"
-          gap={12}
-          justify="center"
-          style={{ marginTop: 8, width: "100%" }}
-        >
+        <Flex wrap="wrap" gap={12} justify="center" className={styles.onboardingGrid}>
           {VIEW_CONFIGS.map((view) => {
             const Icon = view.Icon;
             return (
               <Card
                 key={view.id}
                 size="small"
-                style={{
-                  width: "calc(50% - 6px)",
-                  minWidth: 260,
-                  flex: "1 1 calc(50% - 6px)",
-                }}
+                className={styles.onboardingCard}
                 styles={{
                   body: {
                     padding: 16,
@@ -73,31 +65,14 @@ export function ViewOnboardingModal({ open, onClose }: ViewOnboardingModalProps)
                   },
                 }}
               >
-                <Flex
-                  align="center"
-                  justify="center"
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 10,
-                    background: "var(--ant-color-primary-bg)",
-                    color: "var(--ant-color-primary)",
-                    flexShrink: 0,
-                  }}
-                >
+                <Flex align="center" justify="center" className={styles.onboardingIconWrap}>
                   <Icon size={ICON_SIZE.LARGE} />
                 </Flex>
                 <Flex vertical gap={4}>
-                  <Text strong style={{ fontSize: 14 }}>
+                  <Text strong className={styles.onboardingCardTitle}>
                     {t(view.labelKey)}
                   </Text>
-                  <Text
-                    type="secondary"
-                    style={{
-                      fontSize: 12,
-                      lineHeight: 1.5,
-                    }}
-                  >
+                  <Text type="secondary" className={styles.onboardingCardDesc}>
                     {t(`view.desc.${view.id}` as const)}
                   </Text>
                 </Flex>

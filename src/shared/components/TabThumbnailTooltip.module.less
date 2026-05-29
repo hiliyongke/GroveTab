@@ -1,4 +1,5 @@
 .thumbnailTooltip {
+  width: 220px;
   border-radius: var(--app-radius-lg, 8px);
   overflow: hidden;
   background: var(--app-floating-bg);
@@ -14,7 +15,7 @@
 .thumbnailImage {
   display: block;
   border-radius: var(--app-radius-md, 6px);
-  transition: transform 200ms ease;
+  transition: transform var(--app-motion-duration-fast, 150ms) ease;
 }
 
 .thumbnailImage:hover {
@@ -27,7 +28,7 @@
 
 .thumbnailCloseButton {
   opacity: 0;
-  transition: opacity 150ms ease;
+  transition: opacity var(--app-motion-duration-fast, 150ms) ease;
 }
 
 .thumbnailTooltip:hover .thumbnailCloseButton {
@@ -36,6 +37,32 @@
 
 .thumbnailInfo {
   gap: 2px;
+  padding: 8px 12px;
+}
+
+/* P1-1: 内联 style 迁移 */
+.thumbnailPlaceholderText {
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.thumbnailCloseBtn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border: none;
+}
+
+.thumbnailTitle {
+  font-size: 13px;
+  max-width: 196px;
+}
+
+.thumbnailUrl {
+  font-size: 11px;
+  max-width: 196px;
 }
 
 .thumbnailTooltipOverlay {

@@ -42,7 +42,7 @@ const ThumbnailContent = memo(function ThumbnailContent({
       e.stopPropagation();
       onClose?.(tab.id);
     },
-    [onClose, tab.id]
+    [onClose, tab.id],
   );
 
   // 截断标题和 URL
@@ -50,7 +50,7 @@ const ThumbnailContent = memo(function ThumbnailContent({
   const displayUrl = tab.url.replace(/^https?:\/\//, "").slice(0, 50);
 
   return (
-    <Flex vertical className={styles.thumbnailTooltip} style={{ width: 220 }}>
+    <Flex vertical className={styles.thumbnailTooltip}>
       {/* 缩略图区域 */}
       <div className={styles.thumbnailImageContainer}>
         {isLoading ? (
@@ -75,10 +75,7 @@ const ThumbnailContent = memo(function ThumbnailContent({
             }}
           >
             <ImageOff size={32} color={token.colorTextTertiary} />
-            <Typography.Text
-              type="secondary"
-              style={{ fontSize: 12, marginTop: 8 }}
-            >
+            <Typography.Text type="secondary" className={styles.thumbnailPlaceholderText}>
               {t("thumbnail.unavailable")}
             </Typography.Text>
           </Flex>
@@ -91,35 +88,17 @@ const ThumbnailContent = memo(function ThumbnailContent({
             size="small"
             icon={<X size={14} />}
             onClick={handleClose}
-            className={styles.thumbnailCloseButton}
-            style={{
-              position: "absolute",
-              top: 4,
-              right: 4,
-              background: "rgba(0, 0, 0, 0.5)",
-              color: "#fff",
-              border: "none",
-            }}
+            className={`${styles.thumbnailCloseButton} ${styles.thumbnailCloseBtn}`}
           />
         )}
       </div>
 
       {/* 信息区域 */}
-      <Flex vertical className={styles.thumbnailInfo} style={{ padding: "8px 12px" }}>
-        <Typography.Text
-          strong
-          ellipsis
-          style={{ fontSize: 13, maxWidth: 196 }}
-          title={title}
-        >
+      <Flex vertical className={styles.thumbnailInfo}>
+        <Typography.Text strong ellipsis className={styles.thumbnailTitle} title={title}>
           {title}
         </Typography.Text>
-        <Typography.Text
-          type="secondary"
-          ellipsis
-          style={{ fontSize: 11, maxWidth: 196 }}
-          title={tab.url}
-        >
+        <Typography.Text type="secondary" ellipsis className={styles.thumbnailUrl} title={tab.url}>
           {displayUrl}
         </Typography.Text>
       </Flex>
@@ -146,11 +125,11 @@ export const TabThumbnailTooltip = memo(function TabThumbnailTooltip({
       if (open && enabled && !hasThumbnail) {
         // 延迟加载，避免频繁触发
         setTimeout(() => {
-          loadThumbnail();
+          void loadThumbnail();
         }, 100);
       }
     },
-    [enabled, hasThumbnail, loadThumbnail]
+    [enabled, hasThumbnail, loadThumbnail],
   );
 
   if (!enabled) {
@@ -160,12 +139,7 @@ export const TabThumbnailTooltip = memo(function TabThumbnailTooltip({
   return (
     <Tooltip
       title={
-        <ThumbnailContent
-          tab={tab}
-          thumbnail={thumbnail}
-          isLoading={isLoading}
-          onClose={onClose}
-        />
+        <ThumbnailContent tab={tab} thumbnail={thumbnail} isLoading={isLoading} onClose={onClose} />
       }
       open={isOpen}
       onOpenChange={handleOpenChange}

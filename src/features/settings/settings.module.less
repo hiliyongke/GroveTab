@@ -310,7 +310,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: all 160ms ease;
+  transition: all var(--app-motion-duration-fast, 150ms) ease;
 }
 
 :global(.settings-keybinding-trigger:hover) {
@@ -402,7 +402,7 @@
   padding: 8px 16px;
   border-radius: 8px;
   margin: 0 8px 4px;
-  transition: all 160ms ease;
+  transition: all var(--app-motion-duration-fast, 150ms) ease;
 }
 
 :global(.behavior-panel__anchor .ant-anchor-link:hover) {
@@ -416,7 +416,7 @@
 :global(.behavior-panel__anchor .ant-anchor-link-title) {
   font-size: 13px;
   color: var(--ant-color-text-secondary);
-  transition: color 160ms ease;
+  transition: color var(--app-motion-duration-fast, 150ms) ease;
 }
 
 :global(.behavior-panel__anchor .ant-anchor-link-active .ant-anchor-link-title) {
