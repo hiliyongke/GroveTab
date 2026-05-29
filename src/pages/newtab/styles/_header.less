@@ -14,52 +14,10 @@
   gap: 8px;
   height: var(--app-header-height);
   padding: 0 var(--app-space-5);
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--app-acrylic-highlight, #fff) 42%, transparent),
-      transparent 120%
-    ),
-    color-mix(
-      in srgb,
-      var(--app-mica-surface, var(--ant-color-bg-container)) 96%,
-      var(--app-color-primary, var(--ant-color-primary)) 4%
-    );
-  border-bottom: 1px solid
-    var(
-      --app-acrylic-border,
-      color-mix(in srgb, var(--ant-color-border-secondary) 72%, transparent)
-    );
-  backdrop-filter: blur(18px) saturate(var(--app-glass-saturate, 160%));
-  -webkit-backdrop-filter: blur(18px) saturate(var(--app-glass-saturate, 160%));
-  box-shadow: 0 12px 36px -28px color-mix(in srgb, var(--ant-color-text) 42%, transparent);
-  transition:
-    background 0.3s ease,
-    border-color 0.3s ease,
-    box-shadow 0.3s ease,
-    backdrop-filter 0.3s ease;
-}
-
-.app-header-shell.is-scrolled {
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--app-acrylic-highlight, #fff) 54%, transparent),
-      transparent 120%
-    ),
-    color-mix(
-      in srgb,
-      var(--app-acrylic-bg, var(--ant-color-bg-elevated)) 98%,
-      var(--app-color-primary, var(--ant-color-primary)) 2%
-    );
-  border-bottom: 1px solid
-    var(
-      --app-acrylic-border,
-      color-mix(in srgb, var(--ant-color-border-secondary) 86%, transparent)
-    );
-  backdrop-filter: blur(22px) saturate(var(--app-glass-saturate, 170%));
-  -webkit-backdrop-filter: blur(22px) saturate(var(--app-glass-saturate, 170%));
-  box-shadow: 0 18px 46px -30px color-mix(in srgb, var(--ant-color-text) 56%, transparent);
+  /* 去掉背景色/毛玻璃，Header 融入页面背景 */
+  background: transparent;
+  border-bottom: none;
+  transition: opacity var(--app-motion-duration-fast, 150ms) ease;
 }
 
 .app-header-left {
@@ -235,7 +193,7 @@
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
-  text-align: left;
+  text-align: center;
   text-overflow: ellipsis;
 }
 
