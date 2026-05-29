@@ -10,7 +10,7 @@
  * 设计原则：纯渲染组件，所有状态由父组件 AppContent 通过 props 传入。
  */
 
-import { useMemo, useCallback, Suspense } from "react";
+import { useMemo, useCallback, useRef, useEffect, Suspense } from "react";
 import { Spin, Alert, Button, Typography } from "antd";
 import { Globe } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
@@ -81,6 +81,21 @@ export function AppWorkspace({
     return Comp !== undefined ? Comp : null;
   }, [viewMode]);
 
+  /* ---------- 视图切换动画重触发（替代 key={viewMode} 的 DOM 重建） ----------
+   * 原方案用 key={viewMode} 导致整个 wrapper div 被销毁重建，视觉上像"刷新"，
+   * 且丢失 app-content-shell 内的滚动位置。
+   * 新方案：保留 wrapper div，通过 force reflow 手动重启 CSS animation。
+   */
+  const viewTransitionRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = viewTransitionRef.current;
+    if (!el) return;
+    // 短暂移除动画类，下一帧恢复，触发重新播放
+    el.classList.remove("app-view-transition");
+    void el.offsetHeight; // force reflow
+    el.classList.add("app-view-transition");
+  }, [viewMode]);
+
   /* ---------- 事件处理 ---------- */
   const handleSelectAllTabs = useCallback(() => {
     selectAll(tabs.map((tab) => tab.id));
@@ -104,10 +119,7 @@ export function AppWorkspace({
       {showOnboarding && <OnboardingCard onDismiss={onDismissOnboarding} />}
 
       {/* 视图引导弹窗 */}
-      <ViewOnboardingModal
-        open={showViewOnboarding}
-        onClose={dismissViewOnboarding}
-      />
+      <ViewOnboardingModal open={showViewOnboarding} onClose={dismissViewOnboarding} />
 
       {initError !== null && (
         <Alert
@@ -156,7 +168,7 @@ export function AppWorkspace({
             ]}
           />
         ) : ViewComponent !== null ? (
-          <div key={viewMode} className="app-view-transition">
+          <div ref={viewTransitionRef} className="app-view-transition">
             <Suspense
               fallback={
                 <div className="app-suspense-fallback">
@@ -168,7 +180,7 @@ export function AppWorkspace({
             </Suspense>
           </div>
         ) : (
-          <div key="tabs-fallback" className="app-view-transition">
+          <div ref={viewTransitionRef} className="app-view-transition">
             <TabsView />
           </div>
         )}

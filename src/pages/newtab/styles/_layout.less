@@ -155,35 +155,7 @@
   flex-direction: column;
 }
 
-.app-view-transition {
-  width: 100%;
-  min-width: 0;
-  transform-origin: top center;
-  /* 使用 will-change 和 backface-visibility 确保 GPU 渲染，避免模糊 */
-  will-change: transform, opacity;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  animation: app-view-transition-in var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1)
-    both;
-}
-
-@keyframes app-view-transition-in {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 10px, 0);
-  }
-
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .app-view-transition {
-    animation: none;
-  }
-}
+/* .app-view-transition 定义已迁移至 _animations.less，避免重复 */
 
 /* 树状视图：section 必须撑满剩余高度 */
 .app-workspace-section:has(.app-bookmark-result > .app-bm-tree) {
