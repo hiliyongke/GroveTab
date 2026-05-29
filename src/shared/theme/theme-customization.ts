@@ -327,13 +327,6 @@ export function buildAntdThemeConfig(
           : skinId === "apple"
             ? "rgba(0, 0, 0, 0.04)"
             : "rgba(43, 107, 255, 0.08)",
-        textActiveBg: isDark
-          ? skinId === "apple"
-            ? "rgba(255, 255, 255, 0.12)"
-            : "rgba(98, 140, 255, 0.18)"
-          : skinId === "apple"
-            ? "rgba(0, 0, 0, 0.06)"
-            : "rgba(43, 107, 255, 0.12)",
         textTextColor: isDark
           ? skinId === "apple"
             ? "rgba(255, 255, 255, 0.72)"
