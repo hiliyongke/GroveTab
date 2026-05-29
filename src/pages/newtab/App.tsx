@@ -42,6 +42,8 @@ import { TabsView } from "@/features/tabs/views/TabsView";
 import { registerViews } from "@/shared/config/view-registry";
 import { findDuplicates } from "@/shared/utils/dedupe";
 import { detectIdleTabs } from "@/shared/utils/idle-detect";
+import { removeSessionString } from "@/shared/utils/storage-array";
+import { LOCAL_CACHE_KEYS } from "@/shared/config/storage-keys";
 import { useUrlSync } from "@/shared/routing";
 import { usePanelStack } from "@/shared/panels";
 import {
@@ -308,8 +310,13 @@ function AppContent() {
   );
 
   const handleTidy = useCallback(() => {
+    // 预清除 dismissed 标记，确保 TidySuggestionBar 能正确渲染并展开
+    removeSessionString(LOCAL_CACHE_KEYS.tidyDismissed);
     setTidyExpandSignal((s) => s + 1);
-    tidySectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    // 使用 setTimeout 确保 TidySuggestionBar 重新渲染后再滚动
+    window.setTimeout(() => {
+      tidySectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
   }, []);
 
   const handleRetryInit = useCallback(() => {

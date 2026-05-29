@@ -150,9 +150,9 @@ export function AppHeader({
               </span>{" "}
               {t("待处理")}
               {onTidy && (
-                <Button type="link" className="app-header-tidy-link" onClick={onTidy}>
+                <button type="button" className="app-header-tidy-link" onClick={onTidy}>
                   {t("一键整理")}
-                </Button>
+                </button>
               )}
             </>
           )}
