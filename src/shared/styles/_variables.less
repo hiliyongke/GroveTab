@@ -115,11 +115,27 @@
 /** 头部导航栏高度 */
 @app-header-height: 48px;
 
-/* ═══════════════════════════════════════════════════════
+/* ═════════════════════════════════════════════════════
  * 背景色 CSS 变量（运行时动态值，必须在 :root 内才能生效）
- * ═══════════════════════════════════════════════════════ */
+ * ═════════════════════════════════════════════════════ */
 
 :root {
+  /* ── 视觉重量分级：4 级阴影 token ──
+   * 0 = layout / borderless 底底
+   * 1 = card 默认阴影
+   * 2 = elevated / popover
+   * 3 = modal / floating */
+  --app-shadow-0: none;
+  --app-shadow-1: 0 1px 2px rgb(0 0 0 / 6%);
+  --app-shadow-2: 0 4px 12px rgb(0 0 0 / 8%);
+  --app-shadow-3: 0 12px 32px rgb(0 0 0 / 16%);
+
+  /* ── Motion tokens（语义化） ── */
+  --app-motion-fast: 120ms;
+  --app-motion-base: 200ms;
+  --app-motion-slow: 320ms;
+  --app-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+
   /* 基础背景色层级体系 */
   --app-bg-layout: var(--ant-color-bg-layout);
   --app-bg-container: var(--ant-color-bg-container);
@@ -147,7 +163,7 @@
 
   /* 特殊用途背景色 */
   --app-bg-glass: color-mix(in srgb, var(--app-bg-elevated) 85%, transparent);
-  --app-bg-mask: color-mix(in srgb, #000 45%, transparent);
+  --app-bg-mask: color-mix(in srgb, #000000 45%, transparent);
   --app-bg-error: var(--ant-color-error-bg);
   --app-bg-warning: var(--ant-color-warning-bg);
   --app-bg-success: var(--ant-color-success-bg);
@@ -168,4 +184,13 @@
   --app-newtab-card-bg: var(--app-bg-elevated);
   --app-modal-bg: var(--app-bg-glass);
   --app-modal-mask-bg: var(--app-bg-mask);
+}
+
+/* ── 减动效偏好：全局降级语义 motion token 为 0，同步取消各类运动 ── */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --app-motion-fast: 0ms;
+    --app-motion-base: 0ms;
+    --app-motion-slow: 0ms;
+  }
 }

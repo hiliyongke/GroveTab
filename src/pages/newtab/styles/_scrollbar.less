@@ -3,19 +3,23 @@
  *
  * 职责：webkit + Firefox 滚动条隐藏，打造沉浸式体验
  */
+
 /* ─── 自定义滚动条（webkit）──────────────────────── */
 ::-webkit-scrollbar {
-  width: 0px; /* 隐藏垂直滚动条，打造沉浸式体验 */
-  height: 0px;
   display: none;
+  width: 0; /* 隐藏垂直滚动条，打造沉浸式体验 */
+  height: 0;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: transparent;
   border-radius: var(--app-radius-xs);
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: transparent;
 }

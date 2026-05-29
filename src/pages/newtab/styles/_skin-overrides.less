@@ -11,7 +11,7 @@
  */
 @import "@/shared/styles/_floating-overrides.less";
 
-[data-skin]:not([data-skin="apple"]):not([data-skin="glassmorphism"]) {
+[data-skin]:not([data-skin="apple"], [data-skin="glassmorphism"]) {
   --app-card-bg: var(--app-mica-surface, var(--ant-color-bg-container));
   --app-card-hover-bg: color-mix(
     in srgb,
@@ -30,7 +30,7 @@
     background:
       linear-gradient(
         180deg,
-        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 34%, transparent),
+        color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 34%, transparent),
         transparent 76%
       ),
       var(--app-mica-surface, var(--ant-color-bg-container));
@@ -71,16 +71,16 @@
   }
 
   & ::selection {
+    color: inherit;
     background-color: color-mix(
       in srgb,
       var(--app-color-primary, var(--ant-color-primary)) 22%,
       transparent
     );
-    color: inherit;
   }
 }
 
-[data-theme="dark"][data-skin]:not([data-skin="apple"]):not([data-skin="glassmorphism"]) {
+[data-theme="dark"][data-skin]:not([data-skin="apple"], [data-skin="glassmorphism"]) {
   --app-card-hover-bg: color-mix(
     in srgb,
     var(--app-color-primary, var(--ant-color-primary)) 10%,
@@ -98,7 +98,7 @@
     background:
       linear-gradient(
         180deg,
-        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 20%, transparent),
+        color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 20%, transparent),
         transparent 78%
       ),
       var(--app-mica-surface, var(--ant-color-bg-container));
@@ -151,14 +151,14 @@
       ),
       linear-gradient(
         180deg,
-        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 58%, transparent),
+        color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 58%, transparent),
         transparent 90%
       ),
-      color-mix(in srgb, var(--app-acrylic-bg, #fff) 96%, var(--app-pastel-lavender) 4%);
+      color-mix(in srgb, var(--app-acrylic-bg, #ffffff) 96%, var(--app-pastel-lavender) 4%);
     border-color: color-mix(
       in srgb,
       var(--app-pastel-lavender) 18%,
-      var(--app-acrylic-border, rgba(138, 148, 224, 0.18))
+      var(--app-acrylic-border, rgb(138 148 224 / 18%))
     );
   }
 
@@ -179,14 +179,14 @@
       ),
       linear-gradient(
         180deg,
-        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 62%, transparent),
+        color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 62%, transparent),
         transparent 78%
       ),
       var(--app-mica-surface, #fffdfb);
     border-color: color-mix(
       in srgb,
       var(--app-pastel-lavender) 22%,
-      var(--app-acrylic-border, rgba(138, 148, 224, 0.18))
+      var(--app-acrylic-border, rgb(138 148 224 / 18%))
     );
     box-shadow: var(--app-shadow-card);
   }
@@ -203,14 +203,14 @@
     background:
       linear-gradient(
         135deg,
-        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 44%, transparent),
+        color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 44%, transparent),
         transparent 58%
       ),
       color-mix(in srgb, var(--app-pastel-lavender) 8%, var(--app-mica-surface, #fffdfb));
     border-color: color-mix(
       in srgb,
       var(--app-pastel-lavender) 18%,
-      var(--app-acrylic-border, rgba(138, 148, 224, 0.18))
+      var(--app-acrylic-border, rgb(138 148 224 / 18%))
     );
   }
 
@@ -230,27 +230,25 @@
       ),
       linear-gradient(
         180deg,
-        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 72%, transparent),
+        color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 72%, transparent),
         transparent 74%
       ),
       var(--app-acrylic-bg, #ffffff);
-    backdrop-filter: blur(var(--app-glass-blur, 42px)) saturate(var(--app-glass-saturate, 170%));
-    -webkit-backdrop-filter: blur(var(--app-glass-blur, 42px))
-      saturate(var(--app-glass-saturate, 170%));
-    border: 1px solid var(--app-acrylic-border, rgba(138, 148, 224, 0.18));
+    border: 1px solid var(--app-acrylic-border, rgb(138 148 224 / 18%));
     box-shadow: var(--app-shadow-floating);
+    backdrop-filter: blur(var(--app-glass-blur, 42px)) saturate(var(--app-glass-saturate, 170%));
   }
 
   & .app-drawer__header,
   & .app-modal__header {
     background: linear-gradient(
       180deg,
-      color-mix(in srgb, var(--app-acrylic-highlight, #fff) 52%, transparent),
+      color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 52%, transparent),
       transparent
     ) !important;
     border-bottom-color: color-mix(
       in srgb,
-      var(--app-acrylic-border, rgba(138, 148, 224, 0.18)) 86%,
+      var(--app-acrylic-border, rgb(138 148 224 / 18%)) 86%,
       transparent
     );
   }
@@ -264,7 +262,7 @@
     ) !important;
     border-top-color: color-mix(
       in srgb,
-      var(--app-acrylic-border, rgba(138, 148, 224, 0.18)) 86%,
+      var(--app-acrylic-border, rgb(138 148 224 / 18%)) 86%,
       transparent
     );
   }
@@ -272,9 +270,8 @@
   & .app-drawer__mask,
   & .search-box-mask,
   & .app-modal__mask {
-    background: var(--app-overlay-mask-bg, rgba(97, 72, 118, 0.26));
+    background: var(--app-overlay-mask-bg, rgb(97 72 118 / 26%));
     backdrop-filter: blur(var(--app-overlay-blur, 14px));
-    -webkit-backdrop-filter: blur(var(--app-overlay-blur, 14px));
   }
 }
 
@@ -303,7 +300,7 @@
       ),
       linear-gradient(
         180deg,
-        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 24%, transparent),
+        color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 24%, transparent),
         transparent 78%
       ),
       var(--app-mica-surface, #241a28);
@@ -325,17 +322,17 @@
       ),
       linear-gradient(
         180deg,
-        color-mix(in srgb, var(--app-acrylic-highlight, #fff) 22%, transparent),
+        color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 22%, transparent),
         transparent 76%
       ),
       var(--app-acrylic-bg, #302338);
-    border-color: var(--app-acrylic-border, rgba(255, 214, 235, 0.16));
+    border-color: var(--app-acrylic-border, rgb(255 214 235 / 16%));
   }
 
   & .app-drawer__mask,
   & .search-box-mask,
   & .app-modal__mask {
-    background: var(--app-overlay-mask-bg, rgba(18, 8, 22, 0.62));
+    background: var(--app-overlay-mask-bg, rgb(18 8 22 / 62%));
   }
 }
 
@@ -363,8 +360,8 @@
 
   /* ── Apple 背景色覆盖 ── */
   --app-card-bg: transparent;
-  --app-card-hover-bg: color-mix(in srgb, #000 3%, transparent);
-  --app-list-item-hover-bg: color-mix(in srgb, #000 3%, transparent);
+  --app-card-hover-bg: color-mix(in srgb, #000000 3%, transparent);
+  --app-list-item-hover-bg: color-mix(in srgb, #000000 3%, transparent);
 
   /* ── Apple 卡片：无边框 ── */
   & .app-card {
@@ -396,30 +393,30 @@
   & .app-card-interactive {
     border: none;
     border-radius: var(--app-card-radius, 12px);
-    box-shadow: 0 5px 30px color-mix(in srgb, #000 22%, transparent);
+    box-shadow: 0 5px 30px color-mix(in srgb, #000000 22%, transparent);
   }
 
   /* Apple：卡片 hover 不上浮，仅微调阴影 */
   & .app-card-interactive:hover,
   & .app-card-interactive:focus-within {
-    transform: none;
-    box-shadow: 0 8px 36px color-mix(in srgb, #000 26%, transparent);
     border-color: transparent;
+    box-shadow: 0 8px 36px color-mix(in srgb, #000000 26%, transparent);
+    transform: none;
   }
 
   /* Apple：行级 hover 更柔 */
   & .app-row-hover:hover,
   & .app-row-hover:focus-within {
-    background-color: color-mix(in srgb, #000 3%, transparent);
+    background-color: color-mix(in srgb, #000000 3%, transparent);
   }
 
   /* ── Apple ActivityStrip：pill 胶囊风格 ── */
   & .activity-strip__item {
-    border: none;
-    border-radius: var(--app-radius-pill);
-    background: color-mix(in srgb, #000 4%, transparent);
     font-size: 13px;
     letter-spacing: -0.01em;
+    background: color-mix(in srgb, #000000 4%, transparent);
+    border: none;
+    border-radius: var(--app-radius-pill);
   }
 
   & .activity-strip__icon {
@@ -442,10 +439,10 @@
 
   /* ── Apple Tag 标签 ── */
   & .app-tag {
-    border-radius: var(--app-radius-pill);
-    border: none;
     font-weight: 500;
     letter-spacing: -0.01em;
+    border: none;
+    border-radius: var(--app-radius-pill);
   }
 
   /* ── Apple Segmented 视图切换器 ── */
@@ -472,22 +469,21 @@
   & .app-accordion-panel {
     border: none;
     border-radius: var(--app-card-radius, 12px);
-    box-shadow: 0 4px 20px color-mix(in srgb, #000 12%, transparent);
+    box-shadow: 0 4px 20px color-mix(in srgb, #000000 12%, transparent);
   }
 
   /* ── Apple 选中态通知栏 ── */
   & .app-alert {
-    border-radius: var(--app-card-radius, 12px);
     border: none;
+    border-radius: var(--app-card-radius, 12px);
   }
 
   /* ── Apple WidgetCard 覆盖 ── */
   & .app-widget-card {
     border: none;
     border-radius: var(--app-card-radius, 12px);
-    box-shadow: 0 5px 30px color-mix(in srgb, #000 22%, transparent);
+    box-shadow: 0 5px 30px color-mix(in srgb, #000000 22%, transparent);
     backdrop-filter: none;
-    -webkit-backdrop-filter: none;
   }
 
   & .app-widget-card:hover {
@@ -496,14 +492,14 @@
 
   /* ── Apple 滚动条 ── */
   & ::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, #000 15%, transparent);
+    background: color-mix(in srgb, #000000 15%, transparent);
     border-radius: var(--app-radius-circle);
   }
 
   /* ── Apple 选中态文字 ── */
   & ::selection {
-    background-color: color-mix(in srgb, var(--app-apple-blue, #0071e3) 18%, transparent);
     color: inherit;
+    background-color: color-mix(in srgb, var(--app-apple-blue, #0071e3) 18%, transparent);
   }
 }
 
@@ -511,8 +507,8 @@
   /* ── Apple 暗色模式覆盖 */
   --app-apple-blue: #2997ff;
   --app-apple-blue-dark: #2997ff;
-  --app-card-hover-bg: color-mix(in srgb, #fff 5%, transparent);
-  --app-list-item-hover-bg: color-mix(in srgb, #fff 5%, transparent);
+  --app-card-hover-bg: color-mix(in srgb, #ffffff 5%, transparent);
+  --app-list-item-hover-bg: color-mix(in srgb, #ffffff 5%, transparent);
 
   & a,
   & .app-typography a {
@@ -521,21 +517,21 @@
 
   & .app-card-interactive {
     background: var(--app-mica-surface, #1c1c1e);
-    box-shadow: 0 5px 30px color-mix(in srgb, #000 44%, transparent);
+    box-shadow: 0 5px 30px color-mix(in srgb, #000000 44%, transparent);
   }
 
   & .app-card-interactive:hover,
   & .app-card-interactive:focus-within {
-    box-shadow: 0 8px 36px color-mix(in srgb, #000 52%, transparent);
+    box-shadow: 0 8px 36px color-mix(in srgb, #000000 52%, transparent);
   }
 
   & .app-row-hover:hover,
   & .app-row-hover:focus-within {
-    background-color: color-mix(in srgb, #fff 5%, transparent);
+    background-color: color-mix(in srgb, #ffffff 5%, transparent);
   }
 
   & .activity-strip__item {
-    background: color-mix(in srgb, #fff 8%, transparent);
+    background: color-mix(in srgb, #ffffff 8%, transparent);
   }
 
   & .activity-strip__icon,
@@ -546,11 +542,11 @@
   & .app-accordion-panel,
   & .app-widget-card {
     background: var(--app-mica-surface, #1c1c1e);
-    box-shadow: 0 5px 30px color-mix(in srgb, #000 44%, transparent);
+    box-shadow: 0 5px 30px color-mix(in srgb, #000000 44%, transparent);
   }
 
   & ::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, #fff 15%, transparent);
+    background: color-mix(in srgb, #ffffff 15%, transparent);
   }
 
   & ::selection {
@@ -572,7 +568,7 @@
   /* ── Fluent 皮肤 CSS 变量 */
   --app-fluent-blue: #0078d4;
   --app-fluent-blue-hover: #2b88d8;
-  --app-fluent-blue-subtle: rgba(0, 120, 212, 0.12);
+  --app-fluent-blue-subtle: rgb(0 120 212 / 12%);
 
   /* ── Fluent 背景色覆盖：Mica 负责窗口底板，Acrylic 只给浮层 */
   --app-card-bg: var(--app-mica-surface, var(--ant-color-bg-container));
@@ -592,10 +588,9 @@
         var(--app-mica-surface, var(--ant-color-bg-container)) 96%,
         var(--app-fluent-blue, #0078d4) 4%
       );
-    backdrop-filter: blur(18px) saturate(150%);
-    -webkit-backdrop-filter: blur(18px) saturate(150%);
     border-bottom: 1px solid var(--app-acrylic-border, var(--ant-color-border-secondary));
     box-shadow: 0 1px 0 color-mix(in srgb, var(--app-acrylic-highlight) 58%, transparent);
+    backdrop-filter: blur(18px) saturate(150%);
   }
 
   /* ── Fluent 卡片：Mica surface + 顶部微高光，内容保持清晰 */
@@ -634,8 +629,8 @@
 
   /* ── Fluent ActivityStrip ── */
   & .activity-strip__item {
+    border-color: color-mix(in srgb, #ffffff 6%, transparent);
     border-radius: var(--app-radius-sm);
-    border-color: color-mix(in srgb, #fff 6%, transparent);
   }
 
   & .activity-strip__icon {
@@ -672,19 +667,19 @@
 
   /* ── Fluent WidgetCard ── */
   & .app-widget-card {
-    border-color: color-mix(in srgb, #fff 6%, transparent);
+    border-color: color-mix(in srgb, #ffffff 6%, transparent);
   }
 
   /* ── Fluent 滚动条 ── */
   & ::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, #000 20%, transparent);
+    background: color-mix(in srgb, #000000 20%, transparent);
     border-radius: var(--app-radius-xs);
   }
 
   /* ── Fluent 选中态 ── */
   & ::selection {
-    background-color: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 20%, transparent);
     color: inherit;
+    background-color: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 20%, transparent);
   }
 
   /* ── Fluent 噪点纹理：Acrylic 标志性特征 ──
@@ -711,16 +706,14 @@
         transparent 56%
       ),
       var(--app-acrylic-bg, var(--ant-color-bg-elevated));
-    backdrop-filter: blur(var(--app-glass-blur, 32px)) saturate(var(--app-glass-saturate, 180%));
-    -webkit-backdrop-filter: blur(var(--app-glass-blur, 32px))
-      saturate(var(--app-glass-saturate, 180%));
     border: 1px solid var(--app-acrylic-border, var(--ant-color-border-secondary));
     box-shadow: var(--app-shadow-floating);
+    backdrop-filter: blur(var(--app-glass-blur, 32px)) saturate(var(--app-glass-saturate, 180%));
   }
 
   & .app-drawer__section {
-    border-right: 0;
     border-top: 0;
+    border-right: 0;
     border-bottom: 0;
     box-shadow:
       -1px 0 0 color-mix(in srgb, var(--app-acrylic-highlight) 52%, transparent) inset,
@@ -763,9 +756,8 @@
   & .app-drawer__mask,
   & .search-box-mask,
   & .app-modal__mask {
-    background: color-mix(in srgb, #000 46%, transparent);
+    background: color-mix(in srgb, #000000 46%, transparent);
     backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
   }
 }
 
@@ -779,7 +771,7 @@
 
   & .app-card-interactive:hover,
   & .app-card-interactive:focus-within {
-    border-color: color-mix(in srgb, #fff 12%, transparent);
+    border-color: color-mix(in srgb, #ffffff 12%, transparent);
   }
 
   & .app-row-hover:hover,
@@ -801,11 +793,11 @@
   }
 
   & .app-widget-card {
-    border-color: color-mix(in srgb, #fff 6%, transparent);
+    border-color: color-mix(in srgb, #ffffff 6%, transparent);
   }
 
   & ::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, #fff 20%, transparent);
+    background: color-mix(in srgb, #ffffff 20%, transparent);
   }
 
   & ::selection {
@@ -815,13 +807,13 @@
   & .app-drawer__section,
   & .search-box-container,
   & .app-modal__container {
-    border-color: color-mix(in srgb, #fff 12%, transparent);
+    border-color: color-mix(in srgb, #ffffff 12%, transparent);
     box-shadow: var(--app-shadow-floating);
   }
 
   & .app-drawer__mask,
   & .search-box-mask,
   & .app-modal__mask {
-    background: color-mix(in srgb, #000 62%, transparent);
+    background: color-mix(in srgb, #000000 62%, transparent);
   }
 }

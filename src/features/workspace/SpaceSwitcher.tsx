@@ -14,13 +14,13 @@ import { useT } from "@/shared/i18n";
 import type { SpaceId } from "@/shared/routing";
 
 interface SpaceSwitcherProps {
-  /** 当前空间 ID */
-  currentSpaceId: SpaceId | string;
+  /** 当前空间 ID（可能是已知 SpaceId 之一，也可能是兼容期的旧字符串） */
+  currentSpaceId: string;
   /** 切换空间回调 */
   onSwitchSpace: (spaceId: SpaceId) => void;
 }
 
-const SPACE_DEFS: { id: SpaceId; icon: typeof Monitor; labelKey: string }[] = [
+const SPACE_DEFS: Array<{ id: SpaceId; icon: typeof Monitor; labelKey: string }> = [
   { id: "workspace", icon: Monitor, labelKey: "工作台" },
   { id: "trending", icon: TrendingUp, labelKey: "热榜" },
   { id: "devtools", icon: Wrench, labelKey: "开发工具" },

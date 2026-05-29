@@ -319,6 +319,8 @@ export function buildAntdThemeConfig(
         contentFontSizeSM: Math.max(12, scaleHeadingFont(12, skin.fontSize)),
         contentFontSize: Math.max(13, skin.fontSize),
         controlHeight: scaleByDensity(skin.controlHeight, density),
+        paddingBlockSM: scaleByDensity(4, density),
+        paddingInlineSM: scaleByDensity(8, density),
         /* ── 全局化 text button hover，消灭 132 处 !important ── */
         textHoverBg: isDark
           ? skinId === "apple"
@@ -327,6 +329,20 @@ export function buildAntdThemeConfig(
           : skinId === "apple"
             ? "rgba(0, 0, 0, 0.04)"
             : "rgba(43, 107, 255, 0.08)",
+        textTextHoverColor: isDark
+          ? skinId === "apple"
+            ? "rgba(255, 255, 255, 0.92)"
+            : "rgba(244, 248, 255, 0.92)"
+          : skinId === "apple"
+            ? "rgba(0, 0, 0, 0.92)"
+            : "#1F2329",
+        textTextActiveColor: isDark
+          ? skinId === "apple"
+            ? "rgba(255, 255, 255, 0.96)"
+            : "rgba(255, 255, 255, 0.96)"
+          : skinId === "apple"
+            ? "rgba(0, 0, 0, 0.96)"
+            : "#1F2329",
         textTextColor: isDark
           ? skinId === "apple"
             ? "rgba(255, 255, 255, 0.72)"
@@ -406,6 +422,16 @@ export function buildAntdThemeConfig(
         contentBg: isDark ? skin.colorBgElevatedDark : skin.colorBgElevatedLight,
         headerBg: isDark ? skin.colorBgElevatedDark : skin.colorBgElevatedLight,
         footerBg: isDark ? skin.colorBgElevatedDark : skin.colorBgElevatedLight,
+        paddingContentHorizontalLG: scaleByDensity(24, density),
+        paddingMD: scaleByDensity(20, density),
+      },
+      Drawer: {
+        colorBgElevated: isDark ? skin.colorBgElevatedDark : skin.colorBgElevatedLight,
+        paddingLG: scaleByDensity(24, density),
+      },
+      Popover: {
+        borderRadiusLG: skin.borderRadiusLG,
+        colorBgElevated: isDark ? skin.colorBgElevatedDark : skin.colorBgElevatedLight,
       },
     },
   };

@@ -7,13 +7,15 @@
   position: sticky;
   top: 0;
   z-index: 20;
+
   /* Grid 三列：左(1fr) 中(auto) 右(1fr) —— 保证搜索栏在 Header 中真正居中 */
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-  align-items: center;
   gap: 8px;
+  align-items: center;
   height: var(--app-header-height);
   padding: 0 var(--app-space-5);
+
   /* 去掉背景色/毛玻璃，Header 融入页面背景 */
   background: transparent;
   border-bottom: none;
@@ -22,6 +24,7 @@
 
 .app-header-left {
   justify-self: start;
+
   /* Antd Flex 通过 props 提供 display: flex, align-items: center, gap */
 }
 
@@ -91,8 +94,8 @@
 }
 
 .app-header-metric-strong {
-  color: var(--ant-color-text);
   font-weight: 500;
+  color: var(--ant-color-text);
 }
 
 .app-header-metric-warning {
@@ -109,11 +112,11 @@
   all: unset;
   box-sizing: border-box;
   margin-left: 6px;
-  cursor: pointer;
   font-size: 12px;
   font-weight: 500;
   color: var(--ant-color-primary);
   letter-spacing: -0.01em;
+  cursor: pointer;
   transition: opacity var(--app-motion-duration-fast, 150ms) ease;
 }
 
@@ -128,32 +131,34 @@
 /* ── 顶栏中部（搜索触发器） ── */
 .app-header-center {
   justify-self: center;
+
   /* Antd Flex 通过 props 提供 justify-content */
 }
 
 /* ── 顶栏右侧（空间切换 + 工具篮） ── */
 .app-header-right {
   justify-self: end;
+
   /* Antd Flex 通过 props 提供 display: flex, align-items: center, gap */
 }
 
 .app-header-search-trigger {
   all: unset;
   box-sizing: border-box;
+  display: flex; /* antd 组件内部微调整 */
+  visibility: hidden;
+  gap: 9px;
+  align-items: center;
   width: min(560px, 100%);
   max-width: 560px;
   height: 36px;
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-  gap: 9px;
   padding: 0 14px;
   overflow: hidden;
-  white-space: nowrap;
-  cursor: pointer;
-  opacity: 0;
-  pointer-events: none;
   font-size: 13px;
   color: var(--ant-color-text-secondary);
+  white-space: nowrap;
+  pointer-events: none;
+  cursor: pointer;
   background: linear-gradient(
     135deg,
     color-mix(in srgb, var(--ant-color-bg-container) 86%, transparent),
@@ -162,10 +167,10 @@
   border: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 72%, transparent);
   border-radius: 999px;
   box-shadow:
-    inset 0 1px 0 color-mix(in srgb, #fff 28%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #ffffff 28%, transparent),
     0 10px 32px color-mix(in srgb, var(--ant-color-text) 10%, transparent);
+  opacity: 0;
   transform: translateY(-6px) scale(0.98);
-  visibility: hidden;
   transition:
     opacity 220ms ease,
     transform 220ms ease,
@@ -176,10 +181,10 @@
 }
 
 .app-header-search-trigger.is-visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
   visibility: visible;
   pointer-events: auto;
+  opacity: 1;
+  transform: translateY(0) scale(1);
   transition:
     opacity 220ms ease,
     transform 220ms ease,
@@ -193,8 +198,8 @@
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
-  text-align: center;
   text-overflow: ellipsis;
+  text-align: center;
 }
 
 /* 搜索触发器内快捷键徽章 */
@@ -206,19 +211,19 @@
 
 /* ── 顶栏右侧操作区 ── */
 .app-header-actions {
-  flex-shrink: 0;
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
 }
 
 /* 统一所有按钮尺寸与图标对齐 */
 .app-header-actions .ant-btn {
-  height: 24px;
-  min-width: 24px;
-  padding-inline: 6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding-inline: 6px;
   line-height: 1;
 }
 
@@ -240,8 +245,8 @@
 /* ── 空间切换下拉菜单项 ── */
 .app-space-menu-item {
   display: inline-flex;
-  align-items: center;
   gap: 6px;
+  align-items: center;
 }
 
 .app-theme-icon {

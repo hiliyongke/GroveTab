@@ -6,59 +6,59 @@
 
 .devtools-page {
   display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
-  padding: var(--app-space-6) 0 var(--app-space-2);
   flex: 1;
-  min-height: 0;
-  height: calc(100vh - var(--app-header-height, 56px) - 64px);
+  flex-direction: column;
   gap: var(--app-space-4);
+  height: calc(100vh - var(--app-header-height, 56px) - 64px);
+  min-height: 0;
+  padding: var(--app-space-6) 0 var(--app-space-2);
 }
 
 /* ===== Shell：整体卡片容器 ===== */
 .devtools-shell {
-  border: 1px solid var(--app-hairline);
-  border-radius: var(--app-radius-lg);
-  background: var(--app-glass-bg);
-  box-shadow: var(--app-shadow-card);
-  overflow: hidden;
-  flex: 1;
   display: flex; /* antd 组件内部微调整 */
+  flex: 1;
   flex-direction: row;
   min-height: 0;
+  overflow: hidden;
+  background: var(--app-glass-bg);
+  border: 1px solid var(--app-hairline);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow-card);
 }
 
 /* ===== Left Sidebar ===== */
 .devtools-sidebar {
-  width: 260px;
-  flex-shrink: 0;
   display: flex;
+  flex-shrink: 0;
   flex-direction: column;
-  border-right: 1px solid var(--app-hairline);
+  width: 260px;
   background: color-mix(in srgb, var(--ant-color-bg-layout) 30%, transparent);
+  border-right: 1px solid var(--app-hairline);
 }
 
 .devtools-sidebar-header {
-  padding: 16px 16px 12px;
   display: flex;
   align-items: center;
+  padding: 16px 16px 12px;
 }
 
 .devtools-brand {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
 
 .devtools-logo {
-  width: 28px;
-  height: 28px;
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  border-radius: var(--app-radius-md);
-  background: var(--ant-color-primary-bg);
+  width: 28px;
+  height: 28px;
   color: var(--ant-color-primary);
-  flex-shrink: 0;
+  background: var(--ant-color-primary-bg);
+  border-radius: var(--app-radius-md);
 }
 
 .devtools-title {
@@ -73,8 +73,8 @@
 
 .devtools-sidebar-menu {
   flex: 1;
-  overflow-y: auto;
   padding: 0 8px 12px;
+  overflow-y: auto;
 }
 
 .devtools-sidebar-group {
@@ -83,8 +83,8 @@
 
 .devtools-sidebar-group-title {
   display: flex;
-  align-items: center;
   gap: 6px;
+  align-items: center;
   padding: 0 8px;
   margin-bottom: 6px;
   font-size: 12px;
@@ -106,25 +106,25 @@
 
 .devtools-sidebar-item {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
   padding: 8px 10px;
-  border-radius: var(--app-radius-md);
-  cursor: pointer;
   color: var(--ant-color-text-secondary);
+  cursor: pointer;
+  border-radius: var(--app-radius-md);
   transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .devtools-sidebar-item:hover {
-  background: color-mix(in srgb, var(--ant-color-text) 4%, transparent);
   color: var(--ant-color-text);
+  background: color-mix(in srgb, var(--ant-color-text) 4%, transparent);
   transform: translateX(2px);
 }
 
 .devtools-sidebar-item.is-active {
-  background: var(--ant-color-primary-bg);
-  color: var(--ant-color-primary);
   font-weight: 500;
+  color: var(--ant-color-primary);
+  background: var(--ant-color-primary-bg);
 }
 
 .devtools-sidebar-item-icon {
@@ -143,8 +143,8 @@
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
   font-size: 13px;
+  white-space: nowrap;
 }
 
 .devtools-sidebar-item-fav {
@@ -168,21 +168,21 @@
 }
 
 .devtools-sidebar-footer {
-  padding: 12px 16px;
-  border-top: 1px solid var(--app-hairline);
   display: flex;
+  gap: 6px;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  color: var(--ant-color-text-tertiary);
+  padding: 12px 16px;
   font-size: 11px;
+  color: var(--ant-color-text-tertiary);
   background: color-mix(in srgb, var(--ant-color-bg-layout) 50%, transparent);
+  border-top: 1px solid var(--app-hairline);
 }
 
 /* ===== Right Main Content ===== */
 .devtools-main {
-  flex: 1;
   display: flex;
+  flex: 1;
   flex-direction: column;
   min-width: 0;
   background: var(--ant-color-bg-container);
@@ -195,20 +195,20 @@
 
 .devtools-main-title-row {
   display: flex;
-  align-items: center;
   gap: 12px;
+  align-items: center;
   margin-bottom: 8px;
 }
 
 .devtools-main-icon {
-  width: 36px;
-  height: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--app-radius-md);
-  background: var(--ant-color-primary-bg);
+  width: 36px;
+  height: 36px;
   color: var(--ant-color-primary);
+  background: var(--ant-color-primary-bg);
+  border-radius: var(--app-radius-md);
 }
 
 .devtools-main-title {
@@ -221,15 +221,15 @@
 }
 
 .devtools-main-fav-btn {
-  margin-left: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 28px;
   height: 28px;
-  border-radius: var(--app-radius-sm);
+  margin-left: auto;
   color: var(--ant-color-text-tertiary);
   cursor: pointer;
+  border-radius: var(--app-radius-sm);
   transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -244,15 +244,15 @@
 }
 
 .devtools-main-desc {
-  color: var(--ant-color-text-secondary);
   font-size: 13px;
   line-height: 1.5;
+  color: var(--ant-color-text-secondary);
 }
 
 .devtools-main-body {
   flex: 1;
-  overflow-y: auto;
   padding: 24px;
+  overflow-y: auto;
 }
 
 /* ===== 工具表单通用 ===== */
@@ -264,14 +264,14 @@
 
 .devtools-options {
   display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-  gap: 8px;
   flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
 }
 
 .devtools-option-arrow {
-  color: var(--ant-color-text-tertiary);
   flex-shrink: 0;
+  color: var(--ant-color-text-tertiary);
 }
 
 .devtools-two-col {
@@ -283,39 +283,39 @@
 .devtools-field-label {
   display: block;
   margin-bottom: 4px;
-  color: var(--ant-color-text-secondary);
   font-size: 11px;
+  color: var(--ant-color-text-secondary);
 }
 
 .devtools-actions {
   display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-  gap: 8px;
   flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
 }
 
 /* ===== 颜色预览 ===== */
 .devtools-color-preview {
   display: flex; /* antd 组件内部微调整 */
-  align-items: center;
   gap: 10px;
+  align-items: center;
 }
 
 .devtools-color-swatch {
-  background: var(--devtools-color-swatch-bg, transparent);
+  flex-shrink: 0;
   width: 42px;
   height: 42px;
+  background: var(--devtools-color-swatch-bg, transparent);
   border: 1px solid var(--app-hairline);
   border-radius: var(--app-card-radius, 12px);
-  flex-shrink: 0;
 }
 
 /* ===== 输出区域 ===== */
 .devtools-output {
+  overflow: hidden;
+  background: color-mix(in srgb, var(--ant-color-bg-container) 88%, transparent);
   border: 1px solid var(--app-hairline);
   border-radius: var(--app-card-radius, 12px);
-  background: color-mix(in srgb, var(--ant-color-bg-container) 88%, transparent);
-  overflow: hidden;
 }
 
 .devtools-output-head {
@@ -333,8 +333,8 @@
 .devtools-output-body {
   min-height: 120px;
   max-height: 55vh;
-  overflow: auto;
   padding: 10px;
+  overflow: auto;
 }
 
 .devtools-output-meta {
@@ -347,20 +347,20 @@
 
 .devtools-pre {
   margin: 0;
-  white-space: pre-wrap;
-  word-break: break-word;
-  color: var(--ant-color-text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 12px;
   line-height: 1.5;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: var(--ant-color-text);
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 
 /* ===== 错误提示 ===== */
 .devtools-error {
   padding: var(--app-space-2) var(--app-space-3);
+  background: var(--ant-color-error-bg);
   border: 1px solid var(--ant-color-error-border);
   border-radius: var(--app-radius-md);
-  background: var(--ant-color-error-bg);
 }
 
 .devtools-error-text {
@@ -370,22 +370,22 @@
 /* ===== 空状态 ===== */
 .devtools-empty-state {
   display: flex; /* antd 组件内部微调整 */
+  grid-column: 1 / -1;
   justify-content: center;
   padding: 32px 0;
-  grid-column: 1 / -1;
 }
 
 /* ===== 响应式 ===== */
-@media (max-width: 860px) {
+@media (width <= 860px) {
   .devtools-shell {
     flex-direction: column;
   }
 
   .devtools-sidebar {
     width: 100%;
+    max-height: 40vh;
     border-right: 0;
     border-bottom: 1px solid var(--app-hairline);
-    max-height: 40vh;
   }
 
   .devtools-main {
@@ -393,7 +393,7 @@
   }
 }
 
-@media (max-width: 540px) {
+@media (width <= 540px) {
   .devtools-main-header {
     padding: 16px;
   }

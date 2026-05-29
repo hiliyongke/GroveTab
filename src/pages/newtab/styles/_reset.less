@@ -7,6 +7,7 @@
 :root {
   color-scheme: light;
 }
+
 [data-theme="dark"] {
   color-scheme: dark;
 }
@@ -15,8 +16,9 @@ html,
 body,
 #root {
   height: 100%;
-  margin: 0;
   padding: 0;
+  margin: 0;
+
   /* 主应用严格按可视区高度铺满，不允许出现页面级滚动条；
      滚动条只允许出现在内容区容器（.app-content-shell）。 */
   overflow: hidden;
@@ -36,17 +38,17 @@ body,
 }
 
 body {
-  background-color: var(--app-page-bg, var(--ant-color-bg-layout, #f5f5f5));
-  background-image: var(--app-page-gradient, none);
-  color: var(--ant-color-text, #1f1f1f);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+  font-family: var(--ant-font-family);
+  font-weight: var(--app-font-weight-body, 400);
   font-feature-settings:
     "kern" 1,
     "liga" 1;
-  font-family: var(--ant-font-family);
-  font-weight: var(--app-font-weight-body, 400);
+  color: var(--ant-color-text, #1f1f1f);
+  background-color: var(--app-page-bg, var(--ant-color-bg-layout, #f5f5f5));
+  background-image: var(--app-page-gradient, none);
+  text-rendering: optimizelegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 h1,
@@ -69,9 +71,9 @@ h6 {
 }
 
 [data-theme="dark"] body {
+  color: var(--ant-color-text, #f5f5f5);
   background-color: var(--app-page-bg, var(--ant-color-bg-layout, #141414));
   background-image: var(--app-page-gradient, none);
-  color: var(--ant-color-text, #f5f5f5);
 }
 
 *,
@@ -82,9 +84,10 @@ h6 {
 
 /** 选中态：用品牌色低透明度，避免默认蓝的廉价感 */
 ::selection {
-  background-color: color-mix(in srgb, var(--app-color-primary) 18%, transparent);
   color: inherit;
+  background-color: color-mix(in srgb, var(--app-color-primary) 18%, transparent);
 }
+
 [data-theme="dark"] ::selection {
   background-color: color-mix(in srgb, var(--app-color-primary) 25%, transparent);
 }

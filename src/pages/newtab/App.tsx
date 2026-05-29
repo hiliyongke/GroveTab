@@ -11,6 +11,7 @@ import {
 } from "@/shared/hooks";
 import { useT } from "@/shared/i18n";
 import { useKeybinding } from "@/shared/hooks/use-keybinding";
+import { useKeyboardShortcuts } from "@/shared/hooks/use-keyboard-shortcuts";
 import { useStatusBarStore } from "@/shared/store/status-bar-slice";
 import { AntdThemeProvider } from "@/shared/ui/AntdThemeProvider";
 import { ErrorBoundary } from "@/shared/ui/ErrorBoundary";
@@ -137,7 +138,9 @@ function AppContent() {
       ...createViewCommands(switchView),
       ...createPanelCommands((panelId) => panelStack.push({ id: panelId })),
       ...createSettingsCommands((subId) => panelStack.openSettings(subId)),
-      ...createSpaceCommands((spaceId) => switchSpace(spaceId as "workspace" | "trending" | "devtools")),
+      ...createSpaceCommands((spaceId) =>
+        switchSpace(spaceId as "workspace" | "trending" | "devtools"),
+      ),
       ...createTemplateCommands(),
     ]);
   }, [switchView, panelStack]);
@@ -217,8 +220,15 @@ function AppContent() {
     })),
   );
   // 路由驱动显示：URL hash → pageMode / viewMode；无 hash 时 fallback 到用户设置
-  const pageMode: NewtabPageMode = route.spaceId === "trending" ? "trending" : route.spaceId === "devtools" ? "devtools" : "workspace";
-  const viewMode: ViewMode = route.viewId ?? (VALID_VIEWS.includes(defaultView as ViewMode) ? (defaultView as ViewMode) : "tabs");
+  const pageMode: NewtabPageMode =
+    route.spaceId === "trending"
+      ? "trending"
+      : route.spaceId === "devtools"
+        ? "devtools"
+        : "workspace";
+  const viewMode: ViewMode =
+    route.viewId ??
+    (VALID_VIEWS.includes(defaultView as ViewMode) ? (defaultView as ViewMode) : "tabs");
 
   const resolvedDark = useResolvedTheme() === "dark";
   const showViewSwitcher = uiVisibility?.viewSwitcher !== false;
@@ -242,10 +252,13 @@ function AppContent() {
   });
 
   // ── 快捷键 ─────────────────────────────────────────────────────────────────
-  const handleViewChange = useCallback((view: ViewMode) => {
-    switchView(view);
-    void track("view_switch", { to: view });
-  }, [switchView]);
+  const handleViewChange = useCallback(
+    (view: ViewMode) => {
+      switchView(view);
+      void track("view_switch", { to: view });
+    },
+    [switchView],
+  );
 
   const handleToggleSearch = useCallback(() => {
     if (panelStack.isOpen("search")) {
@@ -265,13 +278,16 @@ function AppContent() {
 
   useKeybinding("search", handleToggleSearch);
   useKeybinding("openHistory", handleToggleHistory);
-  useKeybinding("commandPalette", useCallback(() => {
-    if (panelStack.isOpen("commandPalette")) {
-      panelStack.close("commandPalette");
-    } else {
-      panelStack.openCommandPalette();
-    }
-  }, [panelStack]));
+  useKeybinding(
+    "commandPalette",
+    useCallback(() => {
+      if (panelStack.isOpen("commandPalette")) {
+        panelStack.close("commandPalette");
+      } else {
+        panelStack.openCommandPalette();
+      }
+    }, [panelStack]),
+  );
 
   /** 同时响应来自 sw 的「toggle-search」广播（chrome.commands 接入点） */
   useEffect(() => {
@@ -308,6 +324,13 @@ function AppContent() {
       selectionStore.selectAll(allIds);
     }, []),
   );
+
+  // ⌘1–7：按 VIEW_CONFIGS 顺序全局切换视图（输入框内仍生效——与 macOS 系统级一致）。
+  // Esc 交给 useKeybinding("exitSelection") 处理，这里不重复注册。
+  useKeyboardShortcuts({
+    activeView: viewMode,
+    onSwitchView: handleViewChange,
+  });
 
   const handleTidy = useCallback(() => {
     // 预清除 dismissed 标记，确保 TidySuggestionBar 能正确渲染并展开
@@ -373,7 +396,15 @@ function AppContent() {
         },
       });
     }
-  }, [pageMode, hasTidySuggestions, selectionMode, duplicateTabsCount, idleTabsCount, handleTidy, t]);
+  }, [
+    pageMode,
+    hasTidySuggestions,
+    selectionMode,
+    duplicateTabsCount,
+    idleTabsCount,
+    handleTidy,
+    t,
+  ]);
 
   const viewSegmentedOptions = useMemo(
     () =>
@@ -481,7 +512,9 @@ function AppContent() {
               </div>
             )}
 
-          {pageMode === "workspace" && <QuickStartLayer onOpenSettings={() => panelStack.openSettings()} />}
+          {pageMode === "workspace" && (
+            <QuickStartLayer onOpenSettings={() => panelStack.openSettings()} />
+          )}
 
           {pageMode === "workspace" && showViewSwitcher && viewTabPosition === "top" && (
             <div className="app-view-switcher-wrap">
@@ -555,7 +588,9 @@ function AppContent() {
         <CommandPalette />
         <SearchBox
           open={panelStack.isOpen("search")}
-          onOpenChange={(open) => { if (!open) panelStack.close("search"); }}
+          onOpenChange={(open) => {
+            if (!open) panelStack.close("search");
+          }}
           onOpenHistory={() => panelStack.openHistory()}
         />
         <SettingsPanel
@@ -565,8 +600,14 @@ function AppContent() {
           }}
           defaultActiveTab={route.subId === "about" ? "about" : "appearance"}
         />
-        <InsightsPanel open={panelStack.isOpen("insights")} onClose={() => panelStack.close("insights")} />
-        <HistoryPanel open={panelStack.isOpen("history")} onClose={() => panelStack.close("history")} />
+        <InsightsPanel
+          open={panelStack.isOpen("insights")}
+          onClose={() => panelStack.close("insights")}
+        />
+        <HistoryPanel
+          open={panelStack.isOpen("history")}
+          onClose={() => panelStack.close("history")}
+        />
         <Drawer
           title={t("回收站")}
           open={panelStack.isOpen("trash")}

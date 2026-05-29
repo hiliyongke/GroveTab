@@ -13,8 +13,8 @@
 .data-panel__profile-create {
   display: flex; /* antd 组件内部微调整 */
   gap: 8px;
-  margin-bottom: 10px;
   min-width: 0;
+  margin-bottom: 10px;
 }
 
 .data-panel__profile-input,
@@ -39,16 +39,16 @@
 .data-panel__profile-card,
 .data-panel__quota {
   padding: var(--app-space-3) var(--app-space-3);
+  background: var(--app-bg-surface);
   border: 1px solid var(--ant-color-border-secondary);
   border-radius: var(--app-radius-md);
-  background: var(--app-bg-surface);
 }
 
 .data-panel__profile-card {
   display: flex; /* antd 组件内部微调整 */
+  gap: 8px;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
   min-width: 0;
 }
 
@@ -59,10 +59,10 @@
 .data-panel__profile-name {
   flex: 1;
   min-width: 0;
-  font-size: 13px;
-  font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 13px;
+  font-weight: 500;
   white-space: nowrap;
 }
 
@@ -75,8 +75,8 @@
 
 .data-panel__quota-label {
   display: inline-flex;
-  align-items: center;
   gap: 6px;
+  align-items: center;
   font-size: 12px;
   font-weight: 500;
 }
@@ -86,9 +86,9 @@
 }
 
 .data-panel__quota-meta {
-  color: var(--ant-color-text-tertiary);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
+  color: var(--ant-color-text-tertiary);
 }
 
 .data-panel__quota-meta.is-warning {
@@ -112,14 +112,14 @@
 
 .data-panel__import-status {
   padding: 0 4px;
-  color: var(--ant-color-text-tertiary);
   font-size: 11px;
+  color: var(--ant-color-text-tertiary);
 }
 
 .data-panel__divider {
   margin: 4px 0;
-  color: var(--ant-color-text-tertiary);
   font-size: 11px;
+  color: var(--ant-color-text-tertiary);
 }
 
 .data-panel__factory-confirm {
@@ -129,16 +129,16 @@
 }
 
 .data-panel__factory-copy {
-  color: var(--ant-color-text-secondary);
   font-size: 12px;
+  color: var(--ant-color-text-secondary);
 }
 
-@media (max-width: 520px) {
+@media (width <= 520px) {
   .data-panel__profile-create,
   .data-panel__profile-card,
   .data-panel__quota-header {
-    align-items: stretch;
     flex-direction: column;
+    align-items: stretch;
   }
 
   .data-panel__profile-card :global(.ant-space) {

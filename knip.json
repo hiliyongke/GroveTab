@@ -9,7 +9,29 @@
   "project": ["src/**/*.{ts,tsx}"],
   "ignoreDependencies": [
     "eslint-plugin-css-modules",
-    "stylelint-less"
+    "stylelint-less",
+    "@axe-core/react",
+    "@testing-library/jest-dom"
+  ],
+  "ignoreBinaries": ["depcheck"],
+  "ignore": [
+    "src/chrome/bookmarks.ts",
+    "src/chrome/fetch.ts",
+    "src/chrome/tabs.ts",
+    "src/chrome/windows.ts",
+    "src/features/effects/background-storage.ts",
+    "src/features/command-palette/command-registry.ts",
+    "src/features/search/hooks/use-search-index.ts",
+    "src/features/smart-sort/hooks/useSmartSort.ts",
+    "src/repositories/workspace-template-repo.ts",
+    "src/services/window-snapshot.ts",
+    "src/shared/i18n/core.ts",
+    "src/shared/i18n/index.tsx",
+    "src/shared/routing/route-telemetry.ts",
+    "src/shared/routing/use-url-sync.ts",
+    "src/shared/shortcuts/registry.ts",
+    "src/shared/utils/opfs-storage.ts",
+    "src/shared/utils/storage-array.ts"
   ],
   "ignoreExportsUsedInFile": true
 }

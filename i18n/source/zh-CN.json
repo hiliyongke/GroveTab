@@ -15,6 +15,11 @@
     "en": "{count} bookmarks"
   },
   {
+    "key": "k_b77q4fk",
+    "zh-CN": "{count} 个待处理标签",
+    "en": ""
+  },
+  {
     "key": "k_1lss0pg",
     "zh-CN": "{count} 个标签 / {groups} 个分组",
     "en": "{count} tabs / {groups} groups"
@@ -735,6 +740,11 @@
     "en": "{count} tab(s) could not be discarded"
   },
   {
+    "key": "k_2vmle6x",
+    "zh-CN": "从剪贴板导入",
+    "en": ""
+  },
+  {
     "key": "k_7as1e1l",
     "zh-CN": "从剪贴板导入 URL",
     "en": ""
@@ -818,6 +828,11 @@
     "key": "k_ju0ll1v",
     "zh-CN": "使用工具箱去重、检测失效链接",
     "en": "Use toolbox to deduplicate or check dead links"
+  },
+  {
+    "key": "k_1o3dl23",
+    "zh-CN": "使用数字键 1-7 快速切换不同视图",
+    "en": ""
   },
   {
     "key": "k_2b2rj8c",
@@ -1385,6 +1400,11 @@
     "en": "jump to web search"
   },
   {
+    "key": "k_k3qvpsm",
+    "zh-CN": "切回命令",
+    "en": ""
+  },
+  {
     "key": "k_piec3y9",
     "zh-CN": "切换主题",
     "en": "Toggle theme"
@@ -1418,6 +1438,11 @@
     "key": "k_tcuuxxc",
     "zh-CN": "刚刚",
     "en": "just now"
+  },
+  {
+    "key": "k_87cabfo",
+    "zh-CN": "创建",
+    "en": ""
   },
   {
     "key": "k_0mp0gea",
@@ -1660,6 +1685,11 @@
     "en": "Clear selection"
   },
   {
+    "key": "k_pl846zk",
+    "zh-CN": "取消静音",
+    "en": ""
+  },
+  {
     "key": "k_qs7ju6w",
     "zh-CN": "另存为归档会话",
     "en": "Save as archive"
@@ -1800,6 +1830,11 @@
     "en": "Matched tags"
   },
   {
+    "key": "k_r9z2kd8",
+    "zh-CN": "命令",
+    "en": ""
+  },
+  {
     "key": "k_v2zkzn8",
     "zh-CN": "命名风格转换",
     "en": "Case Converter"
@@ -1910,6 +1945,11 @@
     "en": "Display precise access times (HH:mm) on segments and tab rows"
   },
   {
+    "key": "k_k8vqcv2",
+    "zh-CN": "在标签列表中使用键盘快速操作",
+    "en": ""
+  },
+  {
     "key": "k_nhgnix7",
     "zh-CN": "在窗口卡片内展示 Chrome 原生标签组；关闭后退化为普通标签列表",
     "en": "Show native Chrome tab groups inside each window card; turn off to fall back to a plain tab list"
@@ -1978,6 +2018,11 @@
     "key": "k_dpwlml7",
     "zh-CN": "复制失败",
     "en": "Copy failed"
+  },
+  {
+    "key": "k_k2zre4o",
+    "zh-CN": "复制标签",
+    "en": ""
   },
   {
     "key": "k_xdbtrlm",
@@ -2700,6 +2745,11 @@
     "en": "{count} tab(s) selected ({domains} domains / {windows} windows)"
   },
   {
+    "key": "k_7bm4aui",
+    "zh-CN": "已选 {count} 个标签页",
+    "en": ""
+  },
+  {
     "key": "k_kptgc5i",
     "zh-CN": "已选 {count} 项",
     "en": ""
@@ -2838,6 +2888,16 @@
     "key": "k_nugbrnn",
     "zh-CN": "归档保存失败",
     "en": "Failed to save as archive"
+  },
+  {
+    "key": "k_74wysmo",
+    "zh-CN": "归档保存所选标签页，之后可在归档面板恢复。比关闭更安全，不会丢失页面。",
+    "en": ""
+  },
+  {
+    "key": "k_uzix98l",
+    "zh-CN": "归档后标签页会被保存并关闭，随时可在左侧边栏的「归档」中恢复。",
+    "en": ""
   },
   {
     "key": "k_mm14ceg",
@@ -3520,6 +3580,11 @@
     "en": "Search archived sessions..."
   },
   {
+    "key": "k_g92tusn",
+    "zh-CN": "搜索标签",
+    "en": ""
+  },
+  {
     "key": "k_mlcoqf8",
     "zh-CN": "搜索标签页",
     "en": "Search tabs"
@@ -3533,6 +3598,11 @@
     "key": "k_qwg2r7t",
     "zh-CN": "搜索标签页...",
     "en": "Search tabs..."
+  },
+  {
+    "key": "k_qphmzk2",
+    "zh-CN": "搜索标签页（标题/URL/域名）...",
+    "en": ""
   },
   {
     "key": "k_ok0cw7l",
@@ -3563,6 +3633,11 @@
     "key": "k_li8fjk8",
     "zh-CN": "搜索行为",
     "en": "Search"
+  },
+  {
+    "key": "k_bym9tj3",
+    "zh-CN": "搜索设置",
+    "en": ""
   },
   {
     "key": "k_lgdtymo",
@@ -3727,6 +3802,11 @@
   {
     "key": "k_jx0yamw",
     "zh-CN": "新建工作区模板",
+    "en": ""
+  },
+  {
+    "key": "k_z3bic0g",
+    "zh-CN": "新建标签组",
     "en": ""
   },
   {
@@ -3935,6 +4015,11 @@
     "en": "More"
   },
   {
+    "key": "k_yzselq4",
+    "zh-CN": "更多操作",
+    "en": ""
+  },
+  {
     "key": "k_p5wqqj4",
     "zh-CN": "更换视频文件",
     "en": "Replace file"
@@ -3983,6 +4068,11 @@
     "key": "k_vhcwst5",
     "zh-CN": "未命名文件夹",
     "en": "Unnamed Folder"
+  },
+  {
+    "key": "k_4v5jre4",
+    "zh-CN": "未命名标签组",
+    "en": ""
   },
   {
     "key": "k_3r70ecn",
@@ -4150,6 +4240,16 @@
     "en": "Tab Groups"
   },
   {
+    "key": "k_32u9xl8",
+    "zh-CN": "标签已移出分组",
+    "en": ""
+  },
+  {
+    "key": "k_im1m8c0",
+    "zh-CN": "标签已移动到分组",
+    "en": ""
+  },
+  {
     "key": "k_aa6i5hc",
     "zh-CN": "标签总数",
     "en": "Total tabs"
@@ -4168,6 +4268,11 @@
     "key": "k_bxcitdu",
     "zh-CN": "标签数量",
     "en": "Tab count"
+  },
+  {
+    "key": "k_rduoij1",
+    "zh-CN": "标签移动失败",
+    "en": ""
   },
   {
     "key": "k_lh3eeak",
@@ -4330,6 +4435,11 @@
     "en": "Each domain card shows a solid accent bar as its identity mark — pick where you want it."
   },
   {
+    "key": "k_pagfexl",
+    "zh-CN": "每日打开次数",
+    "en": ""
+  },
+  {
     "key": "k_859ouny",
     "zh-CN": "每日活动趋势（近 14 天）",
     "en": ""
@@ -4353,6 +4463,21 @@
     "key": "k_wg9b6dx",
     "zh-CN": "永不过期",
     "en": "Never expire"
+  },
+  {
+    "key": "k_2r1sx8i",
+    "zh-CN": "没有匹配的命令",
+    "en": ""
+  },
+  {
+    "key": "k_nl8xyl3",
+    "zh-CN": "没有匹配的标签页",
+    "en": ""
+  },
+  {
+    "key": "k_4fjw3p1",
+    "zh-CN": "没有匹配的设置项",
+    "en": ""
   },
   {
     "key": "k_gajkyqj",
@@ -4543,6 +4668,11 @@
     "key": "k_0f56jv2",
     "zh-CN": "清空搜索",
     "en": "Clear search"
+  },
+  {
+    "key": "k_lqbll6f",
+    "zh-CN": "清除",
+    "en": ""
   },
   {
     "key": "k_st0xkfh",
@@ -4760,6 +4890,11 @@
     "en": "Delete this profile?"
   },
   {
+    "key": "k_1sz0u71",
+    "zh-CN": "确认归档 {count} 个标签页？",
+    "en": ""
+  },
+  {
     "key": "k_r07fez9",
     "zh-CN": "确认归档 {count} 个标签页？归档后可在归档面板中恢复。",
     "en": "Archive {count} tab(s)? You can restore them from the archive panel."
@@ -4858,6 +4993,11 @@
     "key": "k_a9e4yf1",
     "zh-CN": "移动到新窗口",
     "en": "Move to new window"
+  },
+  {
+    "key": "k_1u02gla",
+    "zh-CN": "移动到标签组",
+    "en": ""
   },
   {
     "key": "k_by7d2m0",
@@ -5525,6 +5665,11 @@
     "en": "Type RESET to confirm:"
   },
   {
+    "key": "k_kq6k04a",
+    "zh-CN": "输入关键词搜索所有标签页",
+    "en": ""
+  },
+  {
     "key": "k_2fu6q13",
     "zh-CN": "输入关键词搜索标签页标题、域名或 URL",
     "en": "Search tabs by title, domain, or URL"
@@ -5545,6 +5690,11 @@
     "en": "Type to switch quickly between local and web results"
   },
   {
+    "key": "k_bihyqfc",
+    "zh-CN": "输入命令或搜索...",
+    "en": ""
+  },
+  {
     "key": "k_m3mce6p",
     "zh-CN": "输入备注...",
     "en": "Enter note..."
@@ -5558,6 +5708,11 @@
     "key": "k_9zqzwg3",
     "zh-CN": "输入标签名...",
     "en": "Enter tag name..."
+  },
+  {
+    "key": "k_uayc44l",
+    "zh-CN": "输入标签组名称（可选）",
+    "en": ""
   },
   {
     "key": "k_2lvltiy",
@@ -5602,6 +5757,11 @@
   {
     "key": "k_dnwd7k7",
     "zh-CN": "运维",
+    "en": ""
+  },
+  {
+    "key": "k_u16o3yt",
+    "zh-CN": "近 {n} 天暂无打开记录",
     "en": ""
   },
   {
@@ -5875,6 +6035,11 @@
     "en": "Smartisan retro style"
   },
   {
+    "key": "k_6u0oyyr",
+    "zh-CN": "键盘导航",
+    "en": ""
+  },
+  {
     "key": "k_ddphfr1",
     "zh-CN": "长期未用",
     "en": "Stale"
@@ -5968,6 +6133,11 @@
     "key": "k_u7tybgh",
     "zh-CN": "青色",
     "en": "Cyan"
+  },
+  {
+    "key": "k_9s8du6v",
+    "zh-CN": "静音",
+    "en": ""
   },
   {
     "key": "k_5u0j8z2",

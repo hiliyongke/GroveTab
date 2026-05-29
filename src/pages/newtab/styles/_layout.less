@@ -14,6 +14,7 @@
     opacity: 1;
     transform: scale(1);
   }
+
   50% {
     opacity: 0.6;
     transform: scale(0.98);
@@ -22,11 +23,11 @@
 
 .app-page-loading-inner,
 .app-workspace-loading-inner {
-  animation: app-pulse-loading 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 16px;
+  align-items: center;
+  animation: app-pulse-loading 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 .app-page-loading-inner .ant-spin-dot,
@@ -37,28 +38,29 @@
 .app-page-loading-inner .ant-typography,
 .app-workspace-loading-inner .ant-typography {
   font-size: 14px;
-  letter-spacing: 0.02em;
   color: var(--ant-color-text-tertiary);
+  letter-spacing: 0.02em;
 }
 
 /* ─── 布局外壳 ── */
 .app-layout-shell {
+  position: relative;
   height: 100vh;
   overflow: hidden;
-  position: relative;
   isolation: isolate;
+
   /* Antd Layout 通过 props 提供 display: flex, flex-direction: column */
 }
 
 .app-layout-shell::before,
 .app-layout-shell::after {
-  content: "";
   position: fixed;
   z-index: 0;
   pointer-events: none;
+  content: "";
   border-radius: 999px;
-  filter: blur(28px);
   opacity: 0.46;
+  filter: blur(28px);
 }
 
 .app-layout-shell::before {
@@ -70,8 +72,8 @@
 }
 
 .app-layout-shell::after {
-  left: -180px;
   bottom: -210px;
+  left: -180px;
   width: 520px;
   height: 520px;
   background: color-mix(in srgb, var(--ant-color-info, #1677ff) 14%, transparent);
@@ -84,7 +86,6 @@
   pointer-events: none;
   background: var(--app-background-overlay-bg);
   backdrop-filter: var(--app-background-overlay-filter, none);
-  -webkit-backdrop-filter: var(--app-background-overlay-filter, none);
 }
 
 .app-background-overlay-dimmer {
@@ -92,7 +93,7 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: var(--app-overlay-dimmer-bg, #000);
+  background: var(--app-overlay-dimmer-bg, #000000);
   opacity: var(--app-background-overlay-opacity, 0);
   transition: opacity 0.1s ease-out;
 }
@@ -114,19 +115,19 @@
 }
 
 .app-content-shell {
-  width: 100%;
-  margin: 0 auto;
-  padding: 0 32px 64px;
   position: relative;
   z-index: 1;
+  width: 100%;
+  padding: 0 32px 64px;
+  margin: 0 auto;
+  overflow: hidden auto;
+
   /* Antd Flex 通过 props 提供 flex: 1, min-height: 0, flex-direction: column */
-  overflow-y: auto;
-  overflow-x: hidden;
   mask-image: linear-gradient(
     to bottom,
     transparent 0,
-    #000 18px,
-    #000 calc(100% - 18px),
+    #000000 18px,
+    #000000 calc(100% - 18px),
     transparent 100%
   );
 }
@@ -145,8 +146,8 @@
 
 /* 书签树状视图画布模式：关闭外层滚动 + 去除底部 padding */
 .app-content-shell:has(.app-bookmark-shell .app-bookmark-result > .app-bm-tree) {
-  overflow: hidden;
   padding-bottom: 0;
+  overflow: hidden;
 }
 
 /* ─── Workspace 区域容器 ── */
@@ -182,8 +183,8 @@
 .app-empty-state-body {
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
-  align-items: center;
   gap: 4px;
+  align-items: center;
 }
 
 .app-empty-state-title {
@@ -209,11 +210,11 @@
 .app-video-background {
   position: fixed;
   inset: 0;
+  z-index: -1;
   width: 100vw;
   height: 100vh;
-  object-fit: cover;
-  z-index: -1;
   pointer-events: none;
+  object-fit: cover;
   background: transparent;
 }
 
@@ -221,8 +222,8 @@
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 50;
   width: 100vw;
   height: 100vh;
   pointer-events: none;
-  z-index: 50;
 }

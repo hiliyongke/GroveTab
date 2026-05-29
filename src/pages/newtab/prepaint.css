@@ -12,22 +12,22 @@ body,
   height: 100%;
   margin: 0;
   overflow: hidden;
-  background: var(--app-bg-layout, #f5f5f5);
   color: var(--app-text-primary, #1f1f1f);
+  background: var(--app-bg-layout, #f5f5f5);
 }
 
 html[data-theme="dark"],
 html[data-theme="dark"] body,
 html[data-theme="dark"] #root {
-  background: var(--app-bg-layout, #141414);
   color: var(--app-text-primary, #f5f5f5);
+  background: var(--app-bg-layout, #141414);
 }
 
 @media (prefers-color-scheme: dark) {
   html:not([data-theme="light"]),
   html:not([data-theme="light"]) body,
   html:not([data-theme="light"]) #root {
-    background: var(--app-bg-layout, #141414);
     color: var(--app-text-primary, #f5f5f5);
+    background: var(--app-bg-layout, #141414);
   }
 }

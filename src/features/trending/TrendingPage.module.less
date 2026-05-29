@@ -10,11 +10,10 @@
 }
 
 .trending-surface-card {
-  border: 1px solid var(--app-hairline);
   background: var(--app-glass-bg);
+  border: 1px solid var(--app-hairline);
   box-shadow: var(--app-shadow-card);
   backdrop-filter: var(--app-glass-filter);
-  -webkit-backdrop-filter: var(--app-glass-filter);
 }
 
 .trending-toolbar-card {
@@ -68,8 +67,8 @@
 }
 
 .trending-toolbar-card__controls {
-  gap: 8px;
   flex-wrap: wrap;
+  gap: 8px;
 }
 
 .trending-toolbar-card__segment--categories {
@@ -82,15 +81,15 @@
 }
 
 .trending-toolbar-card__icon {
-  width: 32px;
-  height: 32px;
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  border-radius: var(--app-radius-md);
+  width: 32px;
+  height: 32px;
   color: var(--ant-color-primary);
   background: var(--ant-color-primary-bg);
+  border-radius: var(--app-radius-md);
 }
 
 .trending-toolbar-card__title {
@@ -125,9 +124,9 @@
 
 .trending-loading-state__inner,
 .trending-board-card__placeholder {
+  gap: 12px;
   align-items: center;
   justify-content: center;
-  gap: 12px;
 }
 
 .trending-empty-state {
@@ -136,8 +135,8 @@
 
 .trending-grid {
   display: grid;
-  gap: 14px;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 14px;
 }
 
 .trending-grid.is-compact {
@@ -150,8 +149,8 @@
 }
 
 .is-compact .trending-board-card:hover {
-  transform: none;
   box-shadow: var(--app-shadow-card);
+  transform: none;
 }
 
 .is-compact .trending-list-item__hot {
@@ -160,8 +159,8 @@
 }
 
 .is-compact .trending-list-item {
-  padding: var(--app-space-1) var(--app-space-2);
   gap: var(--app-space-1);
+  padding: var(--app-space-1) var(--app-space-2);
 }
 
 .is-compact .trending-list-item__title {
@@ -219,43 +218,43 @@
 }
 
 .trending-board-card:hover {
-  transform: translateY(calc(var(--app-card-lift) * -1));
   box-shadow: var(--app-shadow-card-hover);
+  transform: translateY(calc(var(--app-card-lift) * -1));
 }
 
 .trending-board-card__body {
-  height: 100%;
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
+  height: 100%;
   padding: 14px 16px;
 }
 
 .trending-board-card__header {
-  margin-bottom: 8px;
   gap: 12px;
+  margin-bottom: 8px;
 }
 
 .trending-board-card__meta {
-  min-width: 0;
   flex: 1;
+  min-width: 0;
 }
 
 .trending-board-card__dot {
+  flex-shrink: 0;
   width: 8px;
   height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
   background: var(--trending-platform-color);
+  border-radius: 50%;
 }
 
 .trending-board-card__name {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
   font-size: 14px;
   font-weight: 700;
   color: var(--ant-color-text);
+  white-space: nowrap;
 }
 
 .trending-board-card__tag {
@@ -267,8 +266,8 @@
 
 .trending-board-card__list {
   flex: 1;
-  overflow: auto;
   margin: 0 -8px;
+  overflow: auto;
 }
 
 .trending-board-card__empty {
@@ -300,8 +299,8 @@
 .trending-list-item {
   position: relative;
   display: flex;
-  align-items: center;
   gap: 0;
+  align-items: center;
   padding: var(--app-space-2) var(--app-space-2);
   border-radius: var(--app-radius-md);
   transition: background var(--app-motion-duration-fast, 0.15s) cubic-bezier(0.22, 1, 0.36, 1);
@@ -313,11 +312,11 @@
 
 /* 链接区域：占满剩余宽度 */
 .trending-list-item__link {
-  flex: 1;
-  min-width: 0;
   display: flex;
-  align-items: center;
+  flex: 1;
   gap: var(--app-space-2);
+  align-items: center;
+  min-width: 0;
   color: inherit;
   text-decoration: none;
   transition: transform var(--app-motion-duration-fast, 0.15s) cubic-bezier(0.22, 1, 0.36, 1);
@@ -328,22 +327,22 @@
 }
 
 .trending-list-item__title {
-  min-width: 0;
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
   font-size: 13px;
   line-height: 1.5;
   color: var(--ant-color-text);
+  white-space: nowrap;
 }
 
 .trending-list-item__hot {
-  width: 64px;
   flex-shrink: 0;
+  width: 64px;
   font-size: 11px;
-  text-align: right;
   color: var(--ant-color-text-tertiary);
+  text-align: right;
 }
 
 .trending-list-item__hot--empty {
@@ -357,17 +356,17 @@
 /* 操作按钮组：默认隐藏，hover 时显示 */
 .trending-list-item__actions {
   display: flex;
-  align-items: center;
-  gap: 0;
   flex-shrink: 0;
-  opacity: 0;
+  gap: 0;
+  align-items: center;
   pointer-events: none;
+  opacity: 0;
   transition: opacity var(--app-motion-duration-fast, 0.15s) ease;
 }
 
 .trending-list-item:hover .trending-list-item__actions {
-  opacity: 1;
   pointer-events: auto;
+  opacity: 1;
 }
 
 .trending-list-item__action-btn {
@@ -384,18 +383,18 @@
 }
 
 .trending-rank-badge {
-  justify-content: center;
   flex-shrink: 0;
+  justify-content: center;
   font-variant-numeric: tabular-nums;
 }
 
 .trending-rank-badge.is-top {
   width: 22px;
   height: 22px;
-  border-radius: var(--app-radius-sm);
   font-size: 11px;
   font-weight: 700;
-  color: var(--ant-color-text-inverse, #fff);
+  color: var(--ant-color-text-inverse, #ffffff);
+  border-radius: var(--app-radius-sm);
 }
 
 .trending-rank-badge.is-rank-1 {
@@ -417,12 +416,12 @@
 .trending-rank-badge.is-plain {
   min-width: 20px;
   padding: 2px 6px;
-  border-radius: var(--app-radius-sm);
   font-size: 11px;
   font-weight: 600;
   color: var(--ant-color-text-tertiary);
   text-align: center;
   background: var(--ant-color-fill-quaternary);
+  border-radius: var(--app-radius-sm);
 }
 
 .trending-stealth-toolbar {
@@ -455,8 +454,8 @@
 }
 
 .trending-stealth-toolbar__button--exit {
-  margin-left: 4px;
   padding-left: 8px;
+  margin-left: 4px;
   border-left: 1px solid var(--ant-color-border-secondary);
 }
 
@@ -484,13 +483,13 @@
 
 .trending-disguise-from {
   min-width: 80px;
-  color: var(--ant-color-text);
   font-weight: 500;
+  color: var(--ant-color-text);
 }
 
 .trending-disguise-subject {
-  min-width: 0;
   flex: 1;
+  min-width: 0;
   color: var(--ant-color-text);
 }
 
@@ -505,7 +504,7 @@
   text-align: center;
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .trending-page,
   .trending-page--stealth {
     padding-top: 20px;
@@ -513,13 +512,13 @@
 
   .trending-toolbar-card__topline {
     flex-direction: column;
-    align-items: flex-start;
     gap: 10px;
+    align-items: flex-start;
   }
 
   .trending-toolbar-card__actions {
-    width: 100%;
     justify-content: flex-end;
+    width: 100%;
   }
 
   .trending-toolbar-card__controls {

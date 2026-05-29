@@ -13,6 +13,7 @@
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -29,26 +30,26 @@
   justify-content: center;
   width: 72px;
   height: 72px;
-  border-radius: 50%;
-  background: var(--ant-color-primary-bg, #e6f4ff);
-  color: var(--ant-color-primary, #1677ff);
   font-size: 32px;
+  color: var(--ant-color-primary, #1677ff);
+  background: var(--ant-color-primary-bg, #e6f4ff);
+  border-radius: 50%;
 }
 
 .feature-empty__title {
   display: block;
+  margin-bottom: 4px;
   font-size: 16px;
   font-weight: 600;
-  color: var(--ant-color-text, rgba(0, 0, 0, 0.88));
-  margin-bottom: 4px;
+  color: var(--ant-color-text, rgb(0 0 0 / 88%));
 }
 
 .feature-empty__description {
   max-width: 360px;
+  margin: 0 0 16px;
   font-size: 13px;
   line-height: 1.6;
-  color: var(--ant-color-text-secondary, rgba(0, 0, 0, 0.45));
-  margin: 0 0 16px;
+  color: var(--ant-color-text-secondary, rgb(0 0 0 / 45%));
 }
 
 .feature-empty__hints {
@@ -62,8 +63,8 @@
 
 .feature-empty__hint-item {
   display: flex; /* antd 组件内部微调整 */
-  align-items: flex-start;
   gap: 8px;
+  align-items: flex-start;
 }
 
 .feature-empty__hint-dot {
@@ -71,13 +72,11 @@
   width: 6px;
   height: 6px;
   margin-top: 7px;
-  border-radius: 50%;
   background: var(--ant-color-primary, #1677ff);
+  border-radius: 50%;
 }
 
 .feature-empty__hint-text {
   font-size: 13px;
   line-height: 1.6;
 }
-
-

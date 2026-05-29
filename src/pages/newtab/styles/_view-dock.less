@@ -10,8 +10,8 @@
 
 .app-view-dock--left,
 .app-view-dock--right {
-  flex: 0 0 auto;
   display: flex; /* antd 组件内部微调整 */
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   padding: var(--app-space-5) var(--app-space-3);
@@ -32,25 +32,24 @@
   display: flex; /* antd 组件内部微调整 */
   justify-content: center;
   padding: 10px var(--app-space-5) calc(var(--app-space-3) + env(safe-area-inset-bottom, 0px));
-  overflow-x: auto;
-  overflow-y: hidden;
-  border-top: 1px solid
-    var(
-      --app-acrylic-border,
-      color-mix(in srgb, var(--ant-color-border-secondary) 72%, transparent)
-    );
+  contain: paint;
+  overflow: auto hidden;
+  scrollbar-width: none;
   background: color-mix(
     in srgb,
     var(--app-acrylic-bg, var(--ant-color-bg-elevated)) 98%,
     var(--app-color-primary, var(--ant-color-primary)) 2%
   );
+  border-top: 1px solid
+    var(
+      --app-acrylic-border,
+      color-mix(in srgb, var(--ant-color-border-secondary) 72%, transparent)
+    );
   backdrop-filter: blur(12px) saturate(var(--app-glass-saturate, 150%));
-  -webkit-backdrop-filter: blur(12px) saturate(var(--app-glass-saturate, 150%));
+  transform: translateZ(0);
+
   /* 抗闪白：预创建合成层 + 隔离重绘 + GPU 加速 */
   will-change: transform;
-  contain: paint;
-  transform: translateZ(0);
-  scrollbar-width: none;
 }
 
 .app-view-dock--bottom::-webkit-scrollbar {
@@ -60,11 +59,10 @@
 .app-view-dock__list {
   /* Antd Flex 通过 props 提供 display: inline-flex, align-items: center, gap */
   padding: 6px;
-  border-radius: 22px;
   background:
     linear-gradient(
       135deg,
-      color-mix(in srgb, var(--app-acrylic-highlight, #fff) 46%, transparent),
+      color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 46%, transparent),
       transparent 46%
     ),
     color-mix(
@@ -77,24 +75,23 @@
       --app-acrylic-border,
       color-mix(in srgb, var(--ant-color-border-secondary) 70%, transparent)
     );
+  border-radius: 22px;
   box-shadow:
     0 18px 46px -34px color-mix(in srgb, var(--ant-color-text) 54%, transparent),
-    inset 0 1px 0 color-mix(in srgb, var(--app-acrylic-highlight, #fff) 38%, transparent);
+    inset 0 1px 0 color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 38%, transparent);
   backdrop-filter: blur(16px) saturate(var(--app-glass-saturate, 165%));
-  -webkit-backdrop-filter: blur(16px) saturate(var(--app-glass-saturate, 165%));
 }
 
 .app-view-dock--vertical .app-view-dock__list {
-  width: fit-content;
-  max-width: min(100%, 220px);
   flex-direction: column;
   align-items: stretch;
+  width: fit-content;
+  max-width: min(100%, 220px);
   border-radius: 20px;
 }
 
 .app-view-dock--horizontal .app-view-dock__list {
-  flex-direction: row;
-  flex-wrap: nowrap;
+  flex-flow: row nowrap;
   width: max-content;
   max-width: none;
 }
@@ -103,21 +100,21 @@
   all: unset;
   box-sizing: border-box;
   display: inline-flex !important;
+  flex: 0 0 auto;
+  gap: 8px;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-height: 38px;
-  min-width: 38px;
   width: auto;
-  flex: 0 0 auto;
+  min-width: 38px;
+  min-height: 38px;
   padding: 0 12px;
-  border: 0 !important;
-  box-shadow: none !important;
-  border-radius: 16px;
-  color: var(--ant-color-text-secondary);
-  cursor: pointer;
   line-height: 1;
+  color: var(--ant-color-text-secondary);
   white-space: nowrap;
+  cursor: pointer;
+  border: 0 !important;
+  border-radius: 16px;
+  box-shadow: none !important;
   transition:
     transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
     background 160ms ease,
@@ -126,11 +123,11 @@
 }
 
 .app-view-dock__item:hover {
-  transform: translateY(-1px);
   color: var(--ant-color-text);
   background: var(--ant-color-fill-quaternary);
   border: 0 !important;
   box-shadow: none !important;
+  transform: translateY(-1px);
 }
 
 .app-view-dock__item:active {
@@ -145,7 +142,7 @@
 
 .app-view-dock__item:focus-visible {
   outline: 2px solid
-    color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 50%, #fff);
+    color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 50%, #ffffff);
   outline-offset: 2px;
 }
 
@@ -172,11 +169,11 @@
 }
 
 .app-view-dock__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 /* P1-1: Tooltip 描述文字样式 */
@@ -191,24 +188,24 @@
 }
 
 .app-view-dock--vertical .app-view-dock__item {
-  width: auto;
   justify-content: flex-start;
+  width: auto;
   min-width: 0;
 }
 
 [data-theme="dark"] .app-view-dock--bottom {
-  border-top-color: color-mix(in srgb, var(--ant-color-border-secondary) 56%, transparent);
   background: color-mix(in srgb, var(--ant-color-bg-layout) 88%, transparent);
+  border-top-color: color-mix(in srgb, var(--ant-color-border-secondary) 56%, transparent);
 }
 
 [data-theme="dark"] .app-view-dock__list {
   background:
-    linear-gradient(135deg, color-mix(in srgb, #fff 7%, transparent), transparent 48%),
+    linear-gradient(135deg, color-mix(in srgb, #ffffff 7%, transparent), transparent 48%),
     color-mix(in srgb, var(--ant-color-bg-elevated) 84%, transparent);
   border-color: color-mix(in srgb, var(--ant-color-border-secondary) 58%, transparent);
   box-shadow:
-    0 18px 46px -34px color-mix(in srgb, #000 72%, transparent),
-    inset 0 1px 0 color-mix(in srgb, #fff 7%, transparent);
+    0 18px 46px -34px color-mix(in srgb, #000000 72%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #ffffff 7%, transparent);
 }
 
 [data-theme="dark"] .app-view-dock__item:hover {
@@ -248,18 +245,18 @@
 
 .app-workspace-trigger {
   display: inline-flex;
-  align-items: center;
   gap: 6px;
+  align-items: center;
 }
 
 .app-workspace-trigger--active {
+  color: var(--app-color-primary, var(--ant-color-primary));
+  background: var(--ant-color-primary-bg);
   border-color: color-mix(
     in srgb,
     var(--app-color-primary, var(--ant-color-primary)) 22%,
     var(--ant-color-border-secondary)
   );
-  background: var(--ant-color-primary-bg);
-  color: var(--app-color-primary, var(--ant-color-primary));
 }
 
 .app-workspace-trigger--active:hover,
@@ -275,7 +272,7 @@
   color: var(--ant-color-text-tertiary);
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .app-view-dock--left,
   .app-view-dock--right {
     padding-inline: 8px;
@@ -288,21 +285,21 @@
   }
 
   .app-view-dock__list {
-    padding: 6px;
     gap: 4px;
+    padding: 6px;
     border-radius: 18px;
   }
 
   .app-view-dock--vertical .app-view-dock__list {
-    max-width: 100%;
     align-items: center;
+    max-width: 100%;
   }
 
   .app-view-dock--vertical .app-view-dock__item,
   .app-view-dock--horizontal .app-view-dock__item {
+    justify-content: center;
     min-width: 40px;
     padding: 0 10px;
-    justify-content: center;
   }
 
   .app-view-dock--left .app-view-dock__label,
@@ -313,12 +310,12 @@
 
 /* P1-6: bottom 模式触控目标加大至 44px（WCAG 2.1 最小触控目标） */
 .app-view-dock--bottom .app-view-dock__item {
-  min-height: 44px;
   min-width: 44px;
+  min-height: 44px;
 }
 
 /* ─── 响应式：中等偏大屏幕（1024px+）────────────────────── */
-@media (min-width: 1024px) {
+@media (width >= 1024px) {
   .app-header-shell {
     padding: 0 32px;
   }
@@ -333,7 +330,7 @@
 }
 
 /* ─── 响应式：大屏幕（1440px+）────────────────────── */
-@media (min-width: 1440px) {
+@media (width >= 1440px) {
   .app-header-shell {
     padding: 0 48px;
   }
@@ -368,74 +365,74 @@
 /* Apple ：slogan 更低调 */
 [data-skin="apple"] .app-hero-slogan {
   font-size: 13px;
-  color: color-mix(in srgb, #000 48%, transparent);
+  color: color-mix(in srgb, #000000 48%, transparent);
 }
 
 [data-theme="dark"][data-skin="apple"] .app-hero-slogan {
-  color: color-mix(in srgb, #fff 48%, transparent);
+  color: color-mix(in srgb, #ffffff 48%, transparent);
 }
 
 /* Apple ：Hero 搜索框 - 改为 Apple Filter/Search 按钮风格 */
 [data-skin="apple"] .app-hero-search {
   height: 44px;
-  border: 3px solid color-mix(in srgb, #000 4%, transparent);
-  border-radius: var(--app-radius-md);
-  background: var(--app-bg-container);
-  box-shadow: none;
   font-size: 15px;
   letter-spacing: -0.01em;
+  background: var(--app-bg-container);
+  border: 3px solid color-mix(in srgb, #000000 4%, transparent);
+  border-radius: var(--app-radius-md);
+  box-shadow: none;
 }
 
 [data-skin="apple"] .app-hero-search:hover {
-  border-color: color-mix(in srgb, #000 6%, transparent);
+  border-color: color-mix(in srgb, #000000 6%, transparent);
   box-shadow: none;
   transform: none;
 }
 
 [data-theme="dark"][data-skin="apple"] .app-hero-search {
-  background: color-mix(in srgb, #fff 6%, transparent);
-  border-color: color-mix(in srgb, #fff 6%, transparent);
+  background: color-mix(in srgb, #ffffff 6%, transparent);
+  border-color: color-mix(in srgb, #ffffff 6%, transparent);
 }
 
 [data-theme="dark"][data-skin="apple"] .app-hero-search:hover {
-  border-color: color-mix(in srgb, #fff 10%, transparent);
+  border-color: color-mix(in srgb, #ffffff 10%, transparent);
   box-shadow: none;
   transform: none;
 }
 
 /* Apple ：搜索框图标色 */
 [data-skin="apple"] .app-hero-search-icon {
-  color: color-mix(in srgb, #000 48%, transparent);
+  color: color-mix(in srgb, #000000 48%, transparent);
 }
 
 [data-theme="dark"][data-skin="apple"] .app-hero-search-icon {
-  color: color-mix(in srgb, #fff 48%, transparent);
+  color: color-mix(in srgb, #ffffff 48%, transparent);
 }
 
 /* Apple ：搜索框 ⌘K 键帽 */
 [data-skin="apple"] .app-hero-search .app-kbd {
-  background: color-mix(in srgb, #000 4%, transparent);
-  border: 1px solid color-mix(in srgb, #000 6%, transparent);
+  color: color-mix(in srgb, #000000 48%, transparent);
+  background: color-mix(in srgb, #000000 4%, transparent);
+  border: 1px solid color-mix(in srgb, #000000 6%, transparent);
   border-radius: var(--app-radius-xs);
-  color: color-mix(in srgb, #000 48%, transparent);
 }
 
 [data-theme="dark"][data-skin="apple"] .app-hero-search .app-kbd {
-  background: color-mix(in srgb, #fff 8%, transparent);
-  border-color: color-mix(in srgb, #fff 10%, transparent);
-  color: color-mix(in srgb, #fff 48%, transparent);
+  color: color-mix(in srgb, #ffffff 48%, transparent);
+  background: color-mix(in srgb, #ffffff 8%, transparent);
+  border-color: color-mix(in srgb, #ffffff 10%, transparent);
 }
 
 /* Apple ：视图切换器 - 系统分段控件风格 */
 [data-skin="apple"] .app-view-switcher {
-  background: color-mix(in srgb, #000 4%, transparent);
-  border-color: color-mix(in srgb, #000 6%, transparent);
+  background: color-mix(in srgb, #000000 4%, transparent);
+  border-color: color-mix(in srgb, #000000 6%, transparent);
   border-radius: var(--app-radius-md);
 }
 
 [data-theme="dark"][data-skin="apple"] .app-view-switcher {
-  background: color-mix(in srgb, #fff 8%, transparent);
-  border-color: color-mix(in srgb, #fff 10%, transparent);
+  background: color-mix(in srgb, #ffffff 8%, transparent);
+  border-color: color-mix(in srgb, #ffffff 10%, transparent);
 }
 
 [data-skin="apple"] .app-view-option {

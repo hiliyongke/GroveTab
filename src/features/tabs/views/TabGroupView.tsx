@@ -383,7 +383,13 @@ export function TabGroupView() {
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCorners}
+      onDragEnd={(event) => {
+        void handleDragEnd(event);
+      }}
+    >
       <Flex vertical gap="middle">
         <TabGroupToolbar
           filterQuery={filterQuery}

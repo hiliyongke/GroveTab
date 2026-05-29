@@ -1,157 +1,95 @@
 /**
- * useKeyboardShortcuts — 全局键盘快捷键管理 Hook
+ * useKeyboardShortcuts — 全局键盘快捷键管理 Hook（v1.4 收敛版）
  *
  * 提供统一的键盘快捷键支持：
- * - ⌘1-9：切换 7 个视图
- * - ↑↓：在标签列表中导航
- * - Space：勾选/取消勾选标签
- * - Delete：关闭选中标签
+ * - ⌘1..⌘7：按 VIEW_CONFIGS 顺序切换视图
  * - Esc：取消选择/关闭弹窗
+ * - 输入框 / contenteditable 焦点中自动跳过非 ⌘ / Ctrl 前缀的按键
+ *
+ * 注：tabs 列表光标导航（↑↓Space/Delete）不在此处实现 ——
+ * 它们需要列表层维护"游标 tab"状态，应由 list 组件本地处理（见 useKeyboardNav）。
  */
 
 import { useEffect, useCallback, useRef } from "react";
+import { VALID_VIEWS, type ViewMode } from "@/shared/config/views";
 
-export type ViewType = "tabs" | "timeline" | "tabgroup" | "window" | "kanban" | "frequency" | "archive";
+export type ViewType = ViewMode;
 
 export interface KeyboardShortcutsOptions {
   /** 当前激活的视图 */
   activeView: ViewType;
   /** 切换视图回调 */
   onSwitchView: (view: ViewType) => void;
-  /** 导航到上一个标签 */
-  onNavigateUp: () => void;
-  /** 导航到下一个标签 */
-  onNavigateDown: () => void;
-  /** 勾选/取消勾选当前标签 */
-  onToggleSelect: () => void;
-  /** 关闭选中标签 */
-  onCloseSelected: () => void;
-  /** 取消选择/关闭弹窗 */
-  onCancel: () => void;
-  /** 是否启用快捷键 */
+  /** 取消选择/关闭弹窗（Esc） */
+  onCancel?: () => void;
+  /** 是否启用快捷键（默认 true） */
   enabled?: boolean;
-  /** 当前是否正在编辑（如 Input 聚焦时禁用） */
-  isEditing?: boolean;
 }
 
-const VIEW_ORDER: ViewType[] = ["tabs", "timeline", "tabgroup", "window", "kanban", "frequency", "archive"];
-
 /**
- * 全局键盘快捷键管理 Hook
- *
- * @example
- * ```tsx
- * useKeyboardShortcuts({
- *   activeView: currentView,
- *   onSwitchView: setCurrentView,
- *   onNavigateUp: () => navigateTab(-1),
- *   onNavigateDown: () => navigateTab(1),
- *   onToggleSelect: toggleCurrentTab,
- *   onCloseSelected: closeSelectedTabs,
- *   onCancel: clearSelection,
- * });
- * ```
+ * 视图顺序 = VIEW_CONFIGS 单源
+ * ⌘1=tabs, ⌘2=timeline, ⌘3=tabgroup, ⌘4=window, ⌘5=kanban, ⌘6=frequency, ⌘7=archive
  */
+const VIEW_ORDER: readonly ViewType[] = VALID_VIEWS;
+
+function isEditingTarget(event: KeyboardEvent): boolean {
+  const target = event.target as HTMLElement | null;
+  if (!target) return false;
+  // window / document 等非 Element 节点上没有 tagName，直接判定为非输入区
+  const tag = target.tagName;
+  if (typeof tag !== "string") return false;
+  if (tag === "INPUT" || tag === "TEXTAREA") return true;
+  // jsdom 下 isContentEditable getter 不会根据 attribute 动态计算，
+  // 这里同时检查 attribute 作为傅锁。
+  if (target.isContentEditable === true) return true;
+  if (typeof target.getAttribute === "function") {
+    const ce = target.getAttribute("contenteditable");
+    if (ce !== null && ce !== "false") return true;
+  }
+  if (typeof target.closest === "function") {
+    return target.closest('[role="textbox"]') !== null;
+  }
+  return false;
+}
+
 export function useKeyboardShortcuts({
   activeView,
   onSwitchView,
-  onNavigateUp,
-  onNavigateDown,
-  onToggleSelect,
-  onCloseSelected,
   onCancel,
   enabled = true,
-  isEditing = false,
-}: KeyboardShortcutsOptions) {
-  const callbacksRef = useRef({
-    onSwitchView,
-    onNavigateUp,
-    onNavigateDown,
-    onToggleSelect,
-    onCloseSelected,
-    onCancel,
-  });
+}: KeyboardShortcutsOptions): void {
+  const callbacksRef = useRef({ onSwitchView, onCancel });
 
-  // 保持回调引用最新
   useEffect(() => {
-    callbacksRef.current = {
-      onSwitchView,
-      onNavigateUp,
-      onNavigateDown,
-      onToggleSelect,
-      onCloseSelected,
-      onCancel,
-    };
-  }, [onSwitchView, onNavigateUp, onNavigateDown, onToggleSelect, onCloseSelected, onCancel]);
+    callbacksRef.current = { onSwitchView, onCancel };
+  }, [onSwitchView, onCancel]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (!enabled || isEditing) return;
+      if (!enabled) return;
+      const { key, metaKey, ctrlKey } = event;
 
-      const { key, metaKey, ctrlKey, altKey, shiftKey } = event;
-      const hasModifier = metaKey || ctrlKey || altKey || shiftKey;
-
-      // 忽略在输入框、文本域中的按键
-      const target = event.target as HTMLElement;
-      if (
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.isContentEditable ||
-        target.closest('[role="textbox"]')
-      ) {
-        return;
-      }
-
-      // ⌘1-9：切换视图
+      // ⌘1..⌘7：切换视图（即使在输入框内也允许 —— 与 macOS 系统级一致）
       if ((metaKey || ctrlKey) && /^[1-7]$/.test(key)) {
         event.preventDefault();
         const viewIndex = parseInt(key, 10) - 1;
         const targetView = VIEW_ORDER[viewIndex];
-        if (targetView && targetView !== activeView) {
+        if (targetView !== undefined && targetView !== activeView) {
           callbacksRef.current.onSwitchView(targetView);
         }
         return;
       }
 
+      // 在输入框 / contenteditable 中跳过其他无修饰键
+      if (isEditingTarget(event)) return;
+
       // Esc：取消选择/关闭弹窗
       if (key === "Escape") {
-        event.preventDefault();
-        callbacksRef.current.onCancel();
-        return;
-      }
-
-      // 以下快捷键不需要修饰键
-      if (hasModifier) return;
-
-      // ↑：导航到上一个标签
-      if (key === "ArrowUp") {
-        event.preventDefault();
-        callbacksRef.current.onNavigateUp();
-        return;
-      }
-
-      // ↓：导航到下一个标签
-      if (key === "ArrowDown") {
-        event.preventDefault();
-        callbacksRef.current.onNavigateDown();
-        return;
-      }
-
-      // Space：勾选/取消勾选
-      if (key === " ") {
-        event.preventDefault();
-        callbacksRef.current.onToggleSelect();
-        return;
-      }
-
-      // Delete：关闭选中标签
-      if (key === "Delete" || key === "Backspace") {
-        event.preventDefault();
-        callbacksRef.current.onCloseSelected();
+        callbacksRef.current.onCancel?.();
         return;
       }
     },
-    [enabled, isEditing, activeView]
+    [enabled, activeView],
   );
 
   useEffect(() => {
@@ -161,18 +99,21 @@ export function useKeyboardShortcuts({
 }
 
 /**
- * 获取视图对应的快捷键编号
+ * 获取视图对应的快捷键编号（⌘N 中的 N，从 1 起）。
+ * 返回 0 表示该视图不在快捷键列表中（理论上不会发生）。
  */
 export function getViewShortcut(view: ViewType): number {
   return VIEW_ORDER.indexOf(view) + 1;
 }
 
 /**
- * 获取快捷键说明文本
+ * 获取快捷键说明文本（如 "⌘1" / "Ctrl+1"），用于 Tooltip / 帮助面板。
  */
 export function getShortcutDescription(view: ViewType): string {
   const num = getViewShortcut(view);
-  const isMac = navigator.platform.toLowerCase().includes("mac");
+  if (num === 0) return "";
+  const isMac =
+    typeof navigator !== "undefined" && navigator.platform.toLowerCase().includes("mac");
   const modifier = isMac ? "⌘" : "Ctrl+";
   return `${modifier}${num}`;
 }

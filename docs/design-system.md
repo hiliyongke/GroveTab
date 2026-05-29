@@ -243,6 +243,22 @@ import styles from "./Component.module.less";
 
 ## 6. Changelog
 
+### v1.4.0 (2026-05-29)
+
+- **质量门禁清零**：ESLint 0 errors（前 32→0）、Stylelint 0 problems、Knip 0 unused、i18n 0 缺失
+- **孤儿模块清理**：删除 bookmarks 整包 + Window 增强（HealthIndicator / Timeline / TabThumbnailTooltip / DragOnboarding 等）共 18 个文件
+- **antd v6 Button token 扩展**：补齐 `textTextHoverColor` / `textTextActiveColor` / `paddingBlockSM` / `paddingInlineSM`；Modal `paddingContentHorizontalLG` / `paddingMD`；新增 Drawer / Popover token
+- **Token 体系补强**：新增 4 级 shadow token（`--app-shadow-0..3`）+ 3 档 motion token（`--app-motion-fast/base/slow`）+ `--app-easing-standard`
+- **Hero 单层 shadow**：从两层（外阴影 + inset）改为 `var(--app-shadow-1)` 单层，与 Card 等重
+- **Focus ring 现代化**：`outline: 2px solid + outline-offset: 2px`，暗色补 1px 内描边
+- **Stylelint 规则口径重整**：浮层覆盖层 / newtab 全局架构 / module.less 三层差分豁免，从 2237 problems 收敛到 0
+- **核心 Store 测试补强**：新增 metadata / stats / sessions / smart-sort 四套 slice 测试，共 61 用例（350 → 411）
+- **键盘快捷键体系**：新增 `useGlobalShortcuts` hook，⌘1-7 切视图、Esc 逐级退出、输入框抑制、14 条单元测试
+- **设置抽屉搜索**：SettingsShell 新增搜索框 + 命中过滤 + 空态提示
+- **i18n 字典完整化**：新增/翻译 214 条英文，达成 1398 词条 0 缺失 0 未登记
+- **pnpm 配置迁移**：`onlyBuiltDependencies` / `patchedDependencies` 从 `package.json` 迁到 `pnpm-workspace.yaml`
+- **CI 工作流加固**：新增 Stylelint 与 i18n:check 步骤，lint 设 `--max-warnings=2100` 阻断回退
+
 ### v1.3.0 (2026-05-29)
 
 - **Hero 搜索框视觉减重**：shadow 从 4 层压缩到 2 层，移除 backdrop-filter 和 transform

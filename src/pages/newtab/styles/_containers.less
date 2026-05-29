@@ -12,24 +12,22 @@
 .app-modal__container {
   background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container));
   backdrop-filter: var(--app-glass-filter, blur(20px) saturate(180%));
-  -webkit-backdrop-filter: var(--app-glass-filter, blur(20px) saturate(180%));
 }
 
 /* Drawer 容器 */
 .app-drawer__section {
   background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container));
   backdrop-filter: var(--app-glass-filter, blur(20px) saturate(180%));
-  -webkit-backdrop-filter: var(--app-glass-filter, blur(20px) saturate(180%));
 }
 
 /* Popover 容器（通过 classNames: { container: 'app-popover__container' } 注入） */
 .app-popover__container .ant-popover-inner {
   background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container));
   backdrop-filter: var(--app-glass-filter, blur(16px) saturate(180%));
-  -webkit-backdrop-filter: var(--app-glass-filter, blur(16px) saturate(180%));
 }
 
 /* Dropdown 菜单（暂无法全局注入 classNames，保留全局选择器） */
+
 /* TODO: antd v6 后续版本若支持全局 classNames，应迁移至此 */
 .ant-dropdown-menu,
 .ant-select-dropdown,
@@ -39,13 +37,11 @@
 .ant-color-picker .ant-popover-inner {
   background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container));
   backdrop-filter: var(--app-glass-filter, blur(16px) saturate(180%));
-  -webkit-backdrop-filter: var(--app-glass-filter, blur(16px) saturate(180%));
 }
 
 /* Tooltip */
 .ant-tooltip-inner {
   backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -80,9 +76,6 @@
       transparent 58%
     ),
     var(--app-acrylic-bg, var(--ant-color-bg-elevated)) !important;
-  backdrop-filter: blur(var(--app-glass-blur, 18px)) saturate(var(--app-glass-saturate, 180%));
-  -webkit-backdrop-filter: blur(var(--app-glass-blur, 18px))
-    saturate(var(--app-glass-saturate, 180%));
   border-color: var(
     --app-acrylic-border,
     color-mix(in srgb, var(--ant-color-border-secondary) 85%, transparent)
@@ -91,6 +84,7 @@
     --app-shadow-floating,
     0 18px 52px color-mix(in srgb, #000000 24%, transparent)
   ) !important;
+  backdrop-filter: blur(var(--app-glass-blur, 18px)) saturate(var(--app-glass-saturate, 180%));
 }
 
 .app-drawer__header,
@@ -113,8 +107,6 @@
       transparent 48%
     ),
     var(--app-acrylic-bg, var(--ant-color-bg-elevated)) !important;
-  backdrop-filter: blur(14px) saturate(var(--app-glass-saturate, 180%));
-  -webkit-backdrop-filter: blur(14px) saturate(var(--app-glass-saturate, 180%));
   border: 1px solid
     var(
       --app-acrylic-border,
@@ -124,6 +116,7 @@
     --app-shadow-floating,
     0 12px 30px color-mix(in srgb, #000000 22%, transparent)
   ) !important;
+  backdrop-filter: blur(14px) saturate(var(--app-glass-saturate, 180%));
 }
 
 .ant-tooltip-arrow::before,
@@ -137,7 +130,6 @@
 .search-box-mask {
   background: color-mix(in srgb, #000000 52%, transparent) !important;
   backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
 }
 
 [data-theme="dark"] .app-drawer__section,

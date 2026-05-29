@@ -10,7 +10,6 @@
  *   4. Toast 反馈
  */
 
-import { Modal } from "antd";
 import { feedback } from "@/shared/ui/feedback";
 import { useSettingsStore } from "@/store";
 import { useTabsStore } from "@/store";
@@ -23,12 +22,12 @@ import type { WorkspaceTemplate, TemplateTab } from "@/shared/types/workspace-te
 export function saveAsTemplateAction(): void {
   const tabs = useTabsStore.getState().tabs;
 
-  Modal.confirm({
+  feedback.modal.confirm({
     title: "保存为工作区模板",
     content: `将当前 ${tabs.length} 个标签页保存为模板，稍后可一键恢复。`,
     okText: "保存",
     cancelText: "取消",
-    onOk: async () => {
+    onOk: () => {
       const name = `模板 ${new Date().toLocaleDateString()}`;
       const templateTabs: TemplateTab[] = tabs.map((tab) => ({
         url: tab.url,

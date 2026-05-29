@@ -24,7 +24,10 @@
 [data-theme="dark"] {
   --app-floating-glass-bg: var(--app-acrylic-bg, var(--ant-color-bg-elevated, #1f1f1f));
   --app-floating-glass-bg-strong: var(--app-acrylic-bg, var(--ant-color-bg-elevated, #1f1f1f));
-  --app-floating-glass-border: var(--app-acrylic-border, color-mix(in srgb, #fff 14%, transparent));
+  --app-floating-glass-border: var(
+    --app-acrylic-border,
+    color-mix(in srgb, #ffffff 14%, transparent)
+  );
 }
 
 /* ── 浮层内容区：高光渐变 + 磨砂 + 边框 + 阴影 ── */
@@ -41,7 +44,7 @@
   background:
     linear-gradient(
       135deg,
-      color-mix(in srgb, var(--app-acrylic-highlight, #fff) 68%, transparent),
+      color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 68%, transparent),
       transparent 42%
     ),
     linear-gradient(
@@ -50,13 +53,12 @@
       transparent 58%
     ),
     var(--app-floating-glass-bg-strong) !important;
-  backdrop-filter: var(--app-floating-glass-filter);
-  -webkit-backdrop-filter: var(--app-floating-glass-filter);
   border: 1px solid var(--app-floating-glass-border) !important;
   box-shadow: var(
     --app-shadow-floating,
-    0 16px 48px color-mix(in srgb, #000 18%, transparent)
+    0 16px 48px color-mix(in srgb, #000000 18%, transparent)
   ) !important;
+  backdrop-filter: var(--app-floating-glass-filter);
 }
 
 /* ── Tooltip 特殊处理：更轻量的阴影 ── */
@@ -65,17 +67,16 @@
   background:
     linear-gradient(
       135deg,
-      color-mix(in srgb, var(--app-acrylic-highlight, #fff) 54%, transparent),
+      color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 54%, transparent),
       transparent 48%
     ),
     var(--app-floating-glass-bg-strong) !important;
-  backdrop-filter: var(--app-floating-glass-filter);
-  -webkit-backdrop-filter: var(--app-floating-glass-filter);
   border: 1px solid var(--app-floating-glass-border);
   box-shadow: var(
     --app-shadow-floating,
-    0 10px 28px color-mix(in srgb, #000 16%, transparent)
+    0 10px 28px color-mix(in srgb, #000000 16%, transparent)
   ) !important;
+  backdrop-filter: var(--app-floating-glass-filter);
 }
 
 /* ── 浮层箭头背景 ── */
@@ -84,7 +85,6 @@
 .ant-popover-arrow::after {
   background: var(--app-floating-glass-bg-strong) !important;
   backdrop-filter: var(--app-floating-glass-filter);
-  -webkit-backdrop-filter: var(--app-floating-glass-filter);
 }
 
 /* ── 浮层内部区域透明：让渐变背景从外壳透出 ── */
@@ -102,9 +102,8 @@
 /* ── 遮罩层：半透明 + 模糊 ── */
 .ant-modal-mask,
 .ant-drawer-mask {
-  background: color-mix(in srgb, #000 42%, transparent) !important;
+  background: color-mix(in srgb, #000000 42%, transparent) !important;
   backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
 }
 
 /* ── 暗色模式浮层覆盖 ── */
@@ -121,8 +120,8 @@
   background:
     linear-gradient(
       135deg,
-      color-mix(in srgb, #fff 8%, transparent),
-      color-mix(in srgb, #fff 0%, transparent) 42%
+      color-mix(in srgb, #ffffff 8%, transparent),
+      color-mix(in srgb, #ffffff 0%, transparent) 42%
     ),
     var(--app-floating-glass-bg-strong) !important;
 }
@@ -133,5 +132,5 @@
 
 [data-theme="dark"] .ant-modal-mask,
 [data-theme="dark"] .ant-drawer-mask {
-  background: color-mix(in srgb, #000 55%, transparent) !important;
+  background: color-mix(in srgb, #000000 55%, transparent) !important;
 }

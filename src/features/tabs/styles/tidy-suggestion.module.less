@@ -86,6 +86,7 @@
   background: color-mix(in srgb, var(--app-color-primary) 12%, transparent);
   border-color: color-mix(in srgb, var(--app-color-primary) 28%, transparent);
   box-shadow: none;
+
   /* 平滑过渡，避免 hover 时边框闪烁 */
   transition:
     background-color 0.2s ease,
@@ -96,10 +97,11 @@
 .tidy-suggestion__solid-action:hover,
 .tidy-suggestion__solid-action:focus-visible {
   color: var(--app-color-primary);
-  background: color-mix(in srgb, var(--app-color-primary) 18%, transparent);
-  border-color: color-mix(in srgb, var(--app-color-primary) 36%, transparent);
+
   /* 移除 focus 时的 outline，使用 border 颜色变化作为视觉反馈 */
   outline: none;
+  background: color-mix(in srgb, var(--app-color-primary) 18%, transparent);
+  border-color: color-mix(in srgb, var(--app-color-primary) 36%, transparent);
 }
 
 /* 次操作（chevron/X）：text 按钮 hover 弱化，避免在深色背景上产生明显白块 */
@@ -119,8 +121,8 @@
 
 /* ── 展开面板 ── */
 .tidy-suggestion__panel {
-  margin-top: 0;
   padding: 8px 12px 10px;
+  margin-top: 0;
   background: var(--ant-color-bg-container);
   border: 1px solid var(--app-hairline);
   border-top: none;
@@ -182,15 +184,15 @@
 }
 
 /* ── 响应式 ── */
-@media (max-width: 720px) {
+@media (width <= 720px) {
   .tidy-suggestion__summary {
-    align-items: flex-start;
     flex-direction: column;
+    align-items: flex-start;
   }
 
   .tidy-suggestion__summary-actions {
-    width: 100%;
     justify-content: flex-end;
+    width: 100%;
   }
 
   .tidy-suggestion__section-header {
@@ -204,16 +206,14 @@
 [data-skin="glassmorphism"] {
   .tidy-suggestion__alert {
     background: color-mix(in srgb, var(--app-glass-bg) 88%, var(--app-color-primary) 4%);
+    border-color: rgb(255 255 255 / 8%);
     backdrop-filter: var(--app-glass-filter);
-    -webkit-backdrop-filter: var(--app-glass-filter);
-    border-color: rgba(255, 255, 255, 0.08);
   }
 
   .tidy-suggestion__panel {
     background: color-mix(in srgb, var(--app-glass-bg) 92%, transparent);
+    border-color: rgb(255 255 255 / 8%);
     backdrop-filter: var(--app-glass-filter);
-    -webkit-backdrop-filter: var(--app-glass-filter);
-    border-color: rgba(255, 255, 255, 0.08);
   }
 
   .tidy-suggestion__solid-action {
@@ -221,7 +221,7 @@
     border-color: color-mix(
       in srgb,
       var(--ant-color-primary, #0078d4) 18%,
-      var(--ant-color-border-secondary, rgba(255, 255, 255, 0.08))
+      var(--ant-color-border-secondary, rgb(255 255 255 / 8%))
     );
     transition:
       background-color 0.2s ease,
@@ -231,12 +231,12 @@
 
   .tidy-suggestion__solid-action:hover,
   .tidy-suggestion__solid-action:focus-visible {
+    outline: none;
     background: color-mix(in srgb, var(--ant-color-primary, #0078d4) 14%, transparent);
     border-color: color-mix(
       in srgb,
       var(--ant-color-primary, #0078d4) 26%,
-      var(--ant-color-border-secondary, rgba(255, 255, 255, 0.12))
+      var(--ant-color-border-secondary, rgb(255 255 255 / 12%))
     );
-    outline: none;
   }
 }

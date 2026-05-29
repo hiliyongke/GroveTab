@@ -16,7 +16,6 @@ import {
   Popconfirm,
   Divider,
   theme,
-  Modal,
   Input,
   Select,
   Flex,
@@ -166,7 +165,7 @@ export function BatchActionBar() {
   const handleCreateGroup = useCallback(() => {
     if (!ensureSameProfile()) return;
     let groupName = t("新分组");
-    Modal.confirm({
+    feedback.modal.confirm({
       title: t("新建分组"),
       content: (
         <Input
@@ -283,7 +282,7 @@ export function BatchActionBar() {
   const handleJoinExistingGroup = useCallback(() => {
     if (selectedTabs.length === 0 || existingGroups.length === 0) return;
     let targetGroupId = existingGroups[0]?.groupId;
-    Modal.confirm({
+    feedback.modal.confirm({
       title: t("加入现有分组"),
       content: (
         <Select

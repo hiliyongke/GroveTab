@@ -25,11 +25,13 @@
 
 /* 权重面板下拉菜单 */
 .weightPanelDropdown {
-  padding: 12px;
   min-width: 220px;
+  padding: 12px;
   background: var(--ant-color-bg-elevated);
   border-radius: var(--ant-border-radius-lg, 8px);
-  box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12);
+  box-shadow:
+    0 6px 16px 0 rgb(0 0 0 / 8%),
+    0 3px 6px -4px rgb(0 0 0 / 12%);
 }
 
 .weightGrid {
@@ -40,9 +42,9 @@
 
 .weightItem {
   display: flex;
+  gap: 16px;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
 }
 
 .weightLabel {
@@ -51,16 +53,16 @@
 }
 
 .weightValue {
-  font-size: 13px;
-  color: var(--ant-color-text-secondary);
-  font-variant-numeric: tabular-nums;
   min-width: 36px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ant-color-text-secondary);
   text-align: right;
 }
 
 .weightFooter {
-  margin-top: 12px;
   padding-top: 12px;
+  margin-top: 12px;
   border-top: 1px dashed var(--ant-color-border-secondary);
 }
 
@@ -72,7 +74,9 @@
 /* 置顶按钮 */
 .pinButton {
   opacity: 0.5;
-  transition: opacity 0.2s, color 0.2s;
+  transition:
+    opacity 0.2s,
+    color 0.2s;
 
   &:hover {
     opacity: 1;
@@ -85,7 +89,7 @@
 }
 
 /* 响应式 */
-@media (max-width: 600px) {
+@media (width <= 600px) {
   .ruleSelector {
     :global {
       .ant-segmented-item {

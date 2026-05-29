@@ -14,16 +14,9 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Modal, Typography, Tag, Divider, Flex } from "antd";
-import {
-  Search,
-  LayoutGrid,
-  Settings,
-  Monitor,
-  X,
-  Globe,
-  Zap,
-} from "lucide-react";
+import { Modal, Typography, Tag, Divider, Flex, Input, Button } from "antd";
+import type { InputRef } from "antd";
+import { Search, LayoutGrid, Settings, Monitor, X, Globe, Zap } from "lucide-react";
 import { useCommandSearch, type SearchResult } from "./use-command-search";
 import type { CommandDef, CommandCategory } from "./command-registry";
 import { usePanelStackStore } from "@/shared/panels/panel-stack-store";
@@ -72,7 +65,7 @@ export function CommandPalette() {
   const { query, setQuery, results, clearQuery } = useCommandSearch();
   const [mode, setMode] = useState<PaletteMode>("command");
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<InputRef>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const { t } = useT();
 
@@ -211,12 +204,13 @@ export function CommandPalette() {
         ) : (
           <Search size={16} className={styles["command-palette__search-icon"]} />
         )}
-        <input
-          ref={inputRef as React.RefObject<HTMLInputElement>}
+        <Input
+          ref={inputRef}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
+          variant="borderless"
           className={styles["command-palette__input"]}
         />
         {/* 模式指示器 */}
@@ -228,9 +222,14 @@ export function CommandPalette() {
           {mode === "command" ? t("命令") : t("搜索")}
         </Tag>
         {query && (
-          <button className={styles["command-palette__clear"]} onClick={clearQuery}>
-            <X size={14} />
-          </button>
+          <Button
+            type="text"
+            size="small"
+            className={styles["command-palette__clear"]}
+            onClick={clearQuery}
+            icon={<X size={14} />}
+            aria-label={t("清除")}
+          />
         )}
       </div>
 
@@ -246,9 +245,7 @@ export function CommandPalette() {
               if (!items?.length) return null;
               return (
                 <div key={cat}>
-                  <div className={styles["command-palette__category"]}>
-                    {CATEGORY_LABEL[cat]}
-                  </div>
+                  <div className={styles["command-palette__category"]}>{CATEGORY_LABEL[cat]}</div>
                   {items.map((result) => {
                     const globalIndex = results.indexOf(result);
                     return (
@@ -314,10 +311,17 @@ export function CommandPalette() {
                   )}
                 </span>
                 <Flex vertical flex={1} style={{ minWidth: 0, overflow: "hidden" }}>
-                  <Text ellipsis className={styles["command-palette__tab-title"] + " app-text-primary"}>
+                  <Text
+                    ellipsis
+                    className={styles["command-palette__tab-title"] + " app-text-primary"}
+                  >
                     {tab.title || tab.hostname}
                   </Text>
-                  <Text type="secondary" ellipsis className={styles["command-palette__tab-url"] + " app-text-secondary"}>
+                  <Text
+                    type="secondary"
+                    ellipsis
+                    className={styles["command-palette__tab-url"] + " app-text-secondary"}
+                  >
                     {tab.url}
                   </Text>
                 </Flex>
@@ -339,7 +343,10 @@ export function CommandPalette() {
 
       {/* 底部提示 */}
       <div className={styles["command-palette__footer"]}>
-        <Text type="secondary" className={styles["command-palette__footer-hint"] + " app-text-secondary"}>
+        <Text
+          type="secondary"
+          className={styles["command-palette__footer-hint"] + " app-text-secondary"}
+        >
           <kbd>↑↓</kbd> 导航 · <kbd>Enter</kbd> 执行 · <kbd>Tab</kbd>{" "}
           {mode === "command" ? t("搜索标签") : t("切回命令")} · <kbd>ESC</kbd> 关闭
         </Text>

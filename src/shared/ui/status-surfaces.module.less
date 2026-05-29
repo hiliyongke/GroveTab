@@ -5,17 +5,17 @@
   z-index: 1100;
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
-  align-items: center;
   gap: var(--app-space-1);
+  align-items: center;
   max-width: 520px;
   padding: var(--app-space-2) var(--app-space-2) var(--app-space-2) var(--app-space-4);
-  transform: translateX(-50%) translateY(20px);
+  background: var(--ant-color-bg-elevated);
   border: 1px solid var(--ant-color-border-secondary);
   border-radius: var(--app-radius-lg);
-  background: var(--ant-color-bg-elevated);
   box-shadow: var(--ant-box-shadow);
-  backdrop-filter: blur(16px);
   opacity: 0;
+  backdrop-filter: blur(16px);
+  transform: translateX(-50%) translateY(20px);
   animation: undo-toast-slide-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
@@ -24,6 +24,7 @@
     opacity: 0;
     transform: translateX(-50%) translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
@@ -36,36 +37,36 @@
 
 .app-undo-toast__row {
   display: flex; /* antd 组件内部微调整 */
-  align-items: center;
   gap: 12px;
+  align-items: center;
 }
 
 .app-undo-toast__title {
   max-width: 320px;
   overflow: hidden;
-  color: var(--ant-color-text);
+  text-overflow: ellipsis;
   font-size: 13px;
   font-weight: 500;
-  text-overflow: ellipsis;
+  color: var(--ant-color-text);
   white-space: nowrap;
 }
 
 .app-undo-toast__note {
   padding-left: 4px;
-  color: var(--ant-color-warning);
   font-size: 11.5px;
+  color: var(--ant-color-warning);
 }
 
 .app-error-boundary {
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
-  align-items: flex-start;
   gap: var(--app-space-2);
+  align-items: flex-start;
   padding: var(--app-space-4);
-  border-radius: var(--app-radius-md);
-  background: var(--ant-color-error-bg, #fff2f0);
-  color: var(--ant-color-error-text, #cf1322);
   font-size: 12px;
+  color: var(--ant-color-error-text, #cf1322);
+  background: var(--ant-color-error-bg, #fff2f0);
+  border-radius: var(--app-radius-md);
 }
 
 .app-error-boundary__title {
@@ -73,15 +74,15 @@
 }
 
 .app-error-boundary__message {
-  opacity: 0.8;
   word-break: break-word;
+  opacity: 0.8;
 }
 
 .app-error-boundary__retry {
   all: unset;
   padding: var(--app-space-1) var(--app-space-3);
-  border: 1px solid currentColor;
-  border-radius: var(--app-radius-sm);
-  cursor: pointer;
   font-size: 11px;
+  cursor: pointer;
+  border: 1px solid currentcolor;
+  border-radius: var(--app-radius-sm);
 }

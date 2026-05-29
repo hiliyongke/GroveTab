@@ -1,0 +1,14 @@
+# pnpm 设置（pnpm v10+ 不再读取 package.json 的 "pnpm" 字段，迁移到此文件）
+# 参考：https://pnpm.io/settings
+
+# 单包仓库占位，避免 pnpm 在 v9 下报 "packages field missing"
+packages:
+  - "."
+
+# 仅允许这些依赖在安装时执行 build 脚本，避免任意 postinstall 风险
+onlyBuiltDependencies:
+  - esbuild
+
+# eslint-plugin-css-modules 2.12.0 上游有残留 bug，靠 patch 修复
+patchedDependencies:
+  eslint-plugin-css-modules@2.12.0: patches/eslint-plugin-css-modules@2.12.0.patch

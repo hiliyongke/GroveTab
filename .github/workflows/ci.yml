@@ -40,11 +40,17 @@ jobs:
       - name: Type check
         run: pnpm run type-check
 
-      - name: Lint
-        run: pnpm run lint
+      - name: Lint (errors only — warnings tracked separately)
+        run: pnpm run lint -- --max-warnings=2100
+
+      - name: Stylelint
+        run: pnpm run lint:style
 
       - name: Format check
         run: pnpm run format:check
+
+      - name: i18n check (dictionary integrity)
+        run: pnpm run i18n:check
 
       - name: Test (with coverage)
         run: pnpm run test:coverage

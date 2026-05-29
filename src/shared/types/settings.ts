@@ -5,7 +5,6 @@
 
 /** 标签页关闭确认阈值常量（多窗口合并/批量关闭前二次确认的阈值） */
 export const CLOSE_CONFIRM_THRESHOLD = 20 as const;
-export type CloseConfirmThreshold = typeof CLOSE_CONFIRM_THRESHOLD;
 
 /** User settings */
 export type SearchScopeField = "title" | "hostname" | "url";

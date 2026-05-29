@@ -12,6 +12,7 @@
  */
 
 import type { RouteChangeEvent, RouteDescriptor } from "./hash-router";
+import { getStorageLocal, setStorageLocal, removeStorageLocal } from "@/chrome/storage";
 
 // ── 类型 ──────────────────────────────────────────────────────────────────────
 
@@ -51,9 +52,7 @@ function logDevTelemetry(event: RouteChangeEvent): void {
   const to = `${event.route.spaceId}${event.route.viewId ? `/${event.route.viewId}` : ""}${event.route.panelId ? `/${event.route.panelId}` : ""}`;
   const src = event.source;
 
-  console.info(
-    `[RouteTelemetry] ${from} → ${to} (${src})`,
-  );
+  console.info(`[RouteTelemetry] ${from} → ${to} (${src})`);
 }
 
 // ── Prod Mode 埋点 ────────────────────────────────────────────────────────────
@@ -64,7 +63,7 @@ async function persistStats(route: RouteDescriptor): Promise<void> {
     const now = new Date().toISOString();
 
     // 读取现有统计
-    const stored = await chrome.storage.local.get(STORAGE_KEY);
+    const stored = await getStorageLocal(STORAGE_KEY);
     const stats: RouteStats = (stored[STORAGE_KEY] as RouteStats) ?? {};
 
     // 更新条目
@@ -89,7 +88,7 @@ async function persistStats(route: RouteDescriptor): Promise<void> {
       }
     }
 
-    await chrome.storage.local.set({ [STORAGE_KEY]: stats });
+    await setStorageLocal({ [STORAGE_KEY]: stats });
   } catch {
     // 静默失败，不影响路由功能
   }
@@ -117,7 +116,7 @@ export function handleRouteTelemetry(event: RouteChangeEvent): void {
  */
 export async function getRouteStats(): Promise<RouteStats> {
   try {
-    const stored = await chrome.storage.local.get(STORAGE_KEY);
+    const stored = await getStorageLocal(STORAGE_KEY);
     return (stored[STORAGE_KEY] as RouteStats) ?? {};
   } catch {
     return {};
@@ -129,7 +128,7 @@ export async function getRouteStats(): Promise<RouteStats> {
  */
 export async function clearRouteStats(): Promise<void> {
   try {
-    await chrome.storage.local.remove(STORAGE_KEY);
+    await removeStorageLocal(STORAGE_KEY);
   } catch {
     // 静默失败
   }

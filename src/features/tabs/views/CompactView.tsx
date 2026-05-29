@@ -96,9 +96,7 @@ async function syncSortToBrowser(sortedTabs: LiveTab[]): Promise<void> {
   const windowId = currentWindow.id;
   if (!windowId) return;
 
-  const windowTabIds = sortedTabs
-    .filter((t) => t.windowId === windowId)
-    .map((t) => t.id);
+  const windowTabIds = sortedTabs.filter((t) => t.windowId === windowId).map((t) => t.id);
 
   if (windowTabIds.length === 0) return;
 
@@ -178,8 +176,7 @@ export function CompactView({ filterQuery = "" }: CompactViewProps) {
     const query = filterQuery.trim().toLowerCase();
     const filtered = query
       ? tabs.filter(
-          (tab) =>
-            tab.title.toLowerCase().includes(query) || tab.url.toLowerCase().includes(query),
+          (tab) => tab.title.toLowerCase().includes(query) || tab.url.toLowerCase().includes(query),
         )
       : tabs;
 
@@ -274,7 +271,9 @@ export function CompactView({ filterQuery = "" }: CompactViewProps) {
         <Segmented<string>
           size="small"
           value={sortMode}
-          onChange={handleSortChange}
+          onChange={(value) => {
+            void handleSortChange(value);
+          }}
           options={SORT_RULES.map((rule) => ({
             value: rule.value,
             label: (

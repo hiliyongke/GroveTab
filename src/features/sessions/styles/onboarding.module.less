@@ -17,8 +17,8 @@
 
 .onboarding-card__body {
   position: relative;
-  align-items: center;
   gap: 16px;
+  align-items: center;
   padding: 28px 28px 24px;
   text-align: center;
 }
@@ -29,9 +29,9 @@
   right: -48px;
   width: 192px;
   height: 192px;
-  border-radius: 50%;
   pointer-events: none;
   background: radial-gradient(closest-side, var(--onboarding-card-primary-bg), transparent);
+  border-radius: 50%;
 }
 
 .onboarding-card__badge,
@@ -55,14 +55,14 @@
 
 .onboarding-card__title {
   display: flex; /* antd 组件内部微调整 */
+  gap: 8px;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   margin: 0;
   font-size: 22px;
   font-weight: 600;
-  letter-spacing: -0.01em;
   color: var(--onboarding-card-text);
+  letter-spacing: -0.01em;
 }
 
 .onboarding-card__title-icon {
@@ -90,10 +90,10 @@
 }
 
 .onboarding-card__actions {
-  width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  width: 100%;
   margin-top: 4px;
 }
 
@@ -102,9 +102,9 @@
 }
 
 .onboarding-card__cta--primary {
-  border: none;
   font-weight: 600;
   background: var(--app-logo-gradient);
+  border: none;
   box-shadow: var(--app-logo-glow);
 }
 
@@ -131,10 +131,10 @@
 }
 
 .onboarding-tour__step-badge {
+  flex-shrink: 0;
   width: 44px;
   height: 44px;
   border-radius: var(--app-card-radius, 12px);
-  flex-shrink: 0;
 }
 
 .onboarding-tour__step-copy {
@@ -163,14 +163,14 @@
   color: var(--onboarding-tour-text-tertiary);
 }
 
-@media (max-width: 640px) {
+@media (width <= 640px) {
   .onboarding-card__actions {
     grid-template-columns: 1fr;
   }
 
   .onboarding-tour__footer {
-    align-items: stretch;
     flex-direction: column;
     gap: 12px;
+    align-items: stretch;
   }
 }

@@ -21,18 +21,18 @@
 }
 
 .appearance-grid .appearance-preset-card {
-  min-height: 34px;
   flex-direction: row;
-  align-items: center;
   gap: 7px;
+  align-items: center;
+  min-height: 34px;
   padding: 5px 8px;
   border-radius: var(--app-radius-sm);
 }
 
 .appearance-grid .appearance-preset-card:hover,
 .appearance-gradient-grid .appearance-preset-card:hover {
-  transform: none;
   background: var(--app-bg-hover);
+  transform: none;
 }
 
 .appearance-grid .appearance-preset-card.is-selected,
@@ -44,8 +44,8 @@
   flex: 1;
   min-width: 0;
   padding: 0;
-  background: transparent;
   text-align: left;
+  background: transparent;
 }
 
 .appearance-grid .appearance-preset-title {
@@ -79,10 +79,10 @@
 }
 
 .appearance-gradient-grid .appearance-preset-card {
-  min-height: 34px;
   flex-direction: row;
-  align-items: center;
   gap: 7px;
+  align-items: center;
+  min-height: 34px;
   padding: 5px 8px;
   border-radius: var(--app-radius-sm);
 }
@@ -122,22 +122,24 @@
   align-items: stretch;
   width: 100%;
   min-width: 0;
+  contain: layout style paint;
   overflow: hidden;
   cursor: pointer;
-  border-radius: var(--app-radius-md);
-  border: 1px solid var(--ant-color-border-secondary);
   background: var(--app-card-bg);
-  /* 抗闪白：预创建合成层 + 隔离重绘范围 */
-  will-change: transform;
-  contain: layout style paint;
+  border: 1px solid var(--ant-color-border-secondary);
+  border-radius: var(--app-radius-md);
   transition:
     border-color 160ms ease,
     box-shadow 160ms ease,
     transform 160ms ease;
+
+  /* 抗闪白：预创建合成层 + 隔离重绘范围 */
+  will-change: transform;
 }
 
 .appearance-preset-card:hover {
   border-color: var(--ant-color-border);
+
   /* 使用 translate3d 强制 GPU 合成，避免合成层切换闪烁 */
   transform: translate3d(0, -1px, 0);
 }
@@ -155,8 +157,9 @@
 }
 
 .appearance-preview-editable {
-  --appearance-edit-icon: color-mix(in srgb, #000 40%, transparent);
-  color: var(--appearance-edit-icon, color-mix(in srgb, #000 40%, transparent));
+  --appearance-edit-icon: color-mix(in srgb, #000000 40%, transparent);
+
+  color: var(--appearance-edit-icon, color-mix(in srgb, #000000 40%, transparent));
 }
 
 .appearance-preset-preview--skin {
@@ -173,8 +176,8 @@
   position: absolute;
   top: 50%;
   left: 50%;
+  color: var(--appearance-edit-icon, rgb(0 0 0 / 40%));
   transform: translate(-50%, -50%);
-  color: var(--appearance-edit-icon, rgba(0, 0, 0, 0.4));
 }
 
 /* ── 主题模式徽章 ── */
@@ -182,31 +185,31 @@
   position: absolute;
   top: 3px;
   right: 3px;
-  width: 15px;
-  height: 15px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--app-radius-sm);
+  width: 15px;
+  height: 15px;
   font-size: 8px;
+  border-radius: var(--app-radius-sm);
 }
 
 .appearance-mode-badge.is-dark {
-  color: var(--ant-color-text-inverse, #fff);
-  background: color-mix(in srgb, #000 50%, transparent);
+  color: var(--ant-color-text-inverse, #ffffff);
+  background: color-mix(in srgb, #000000 50%, transparent);
 }
 
 .appearance-mode-badge.is-light {
-  color: var(--ant-color-text, #333);
-  background: color-mix(in srgb, #fff 72%, transparent);
+  color: var(--ant-color-text, #333333);
+  background: color-mix(in srgb, #ffffff 72%, transparent);
 }
 
 /* ── 预设卡片底部信息 ── */
 .appearance-preset-meta {
   min-width: 0;
   padding: 6px 8px 7px;
-  background: var(--app-card-bg);
   text-align: center;
+  background: var(--app-card-bg);
 }
 
 .appearance-preset-title,
@@ -240,13 +243,13 @@
 .appearance-preset-label-only {
   min-width: 0;
   padding: 6px 8px;
-  font-size: 10.5px;
-  text-align: center;
-  background: var(--app-card-bg);
-  color: var(--ant-color-text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 10.5px;
+  color: var(--ant-color-text-secondary);
+  text-align: center;
   white-space: nowrap;
+  background: var(--app-card-bg);
 }
 
 .appearance-preset-label-only.is-selected {
@@ -336,8 +339,8 @@
 .appearance-custom-box,
 .appearance-editor-shell,
 .appearance-visibility-row {
-  border-radius: var(--app-radius-md);
   background: var(--app-bg-surface);
+  border-radius: var(--app-radius-md);
 }
 
 .appearance-custom-box {
@@ -345,8 +348,8 @@
   flex-direction: column;
   gap: 14px;
   padding: 14px;
-  border: 1px solid var(--ant-color-border-secondary);
   background: var(--app-bg-surface-subtle);
+  border: 1px solid var(--ant-color-border-secondary);
 }
 
 .appearance-slider-group {
@@ -354,22 +357,22 @@
 }
 
 .appearance-editor-shell {
-  margin-top: 8px;
   padding: 14px;
+  margin-top: 8px;
   border: 1px solid var(--ant-color-border-secondary);
 }
 
 .appearance-editor-preview {
   height: 32px;
   margin-bottom: 12px;
-  border-radius: var(--ant-border-radius);
   background: var(--appearance-preview-bg);
+  border-radius: var(--ant-border-radius);
 }
 
 .appearance-editor-title {
   display: inline-flex;
-  align-items: center;
   gap: 6px;
+  align-items: center;
   font-weight: 500;
 }
 
@@ -390,13 +393,13 @@
 .appearance-editor-stop-dark {
   gap: 8px;
   padding: 6px 8px;
-  border-radius: var(--ant-border-radius-sm);
   background: var(--app-card-bg);
+  border-radius: var(--ant-border-radius-sm);
 }
 
 .appearance-editor-stop-dark {
-  margin-bottom: 4px;
   padding: 4px 8px;
+  margin-bottom: 4px;
   background: var(--app-bg-surface);
 }
 
@@ -405,15 +408,15 @@
 }
 
 .appearance-editor-dark {
-  margin-top: 14px;
   padding-top: 12px;
+  margin-top: 14px;
   border-top: 1px solid var(--ant-color-border-secondary);
 }
 
 .appearance-editor-toggle-row {
   display: flex; /* antd 组件内部微调整 */
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
 
 .appearance-file-stack,
@@ -429,20 +432,20 @@
 }
 
 .appearance-overlay-row {
-  min-height: 34px;
   justify-content: space-between;
+  min-height: 34px;
   padding: 5px 8px;
+  background: var(--app-card-bg);
   border: 1px solid var(--ant-color-border-secondary);
   border-radius: var(--app-radius-sm);
-  background: var(--app-card-bg);
   transition:
     border-color 160ms ease,
     background 160ms ease;
 }
 
 .appearance-overlay-row:hover {
-  border-color: var(--ant-color-border);
   background: var(--app-bg-hover);
+  border-color: var(--ant-color-border);
 }
 
 .appearance-overlay-row .appearance-color-label {
@@ -493,7 +496,7 @@
   width: 120px;
 }
 
-@media (max-width: 520px) {
+@media (width <= 520px) {
   .appearance-grid,
   .appearance-gradient-grid {
     grid-template-columns: 1fr;
@@ -502,8 +505,8 @@
   .appearance-fit-row,
   .appearance-width-row,
   .appearance-visibility-row {
-    align-items: flex-start;
     flex-direction: column;
+    align-items: flex-start;
   }
 
   .appearance-fit-select,

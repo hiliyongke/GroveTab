@@ -10,8 +10,8 @@
 }
 
 .history-drawer__mask {
+  background: var(--app-overlay-mask-bg, rgb(15 23 42 / 24%));
   backdrop-filter: blur(var(--app-overlay-blur, 12px));
-  background: var(--app-overlay-mask-bg, rgba(15, 23, 42, 0.24));
 }
 
 .history-drawer__header {
@@ -27,8 +27,8 @@
 
 .history-panel-root .history-panel-body {
   padding: 0;
-  background: transparent;
   overflow: hidden;
+  background: transparent;
 }
 
 .history-panel-shell {
@@ -39,33 +39,33 @@
 
 .history-panel-title {
   display: flex; /* antd 组件内部微调整 */
-  align-items: center;
   gap: 10px;
+  align-items: center;
 }
 
 .history-panel-subtitle {
-  font-size: 12px;
-  color: var(--history-text-tertiary);
-  font-weight: normal;
   margin-top: 2px;
+  font-size: 12px;
+  font-weight: normal;
+  color: var(--history-text-tertiary);
 }
 
 .history-panel-header-extra {
   display: flex; /* antd 组件内部微调整 */
-  align-items: center;
   gap: 6px;
+  align-items: center;
 }
 
 /* ── 工具区（搜索 + Tabs + Segmented） ───────────────── */
 .history-panel-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 10px;
   padding: 12px 16px 0;
   background: transparent;
-  position: sticky;
-  top: 0;
-  z-index: 1;
 }
 
 .history-panel-toolbar .ant-tabs {
@@ -78,12 +78,12 @@
 
 /* ── 列表主区 ─────────────────────────────────────── */
 .history-panel-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px 16px 24px;
   display: flex; /* antd 组件内部微调整 */
+  flex: 1;
   flex-direction: column;
   gap: 16px;
+  padding: 8px 16px 24px;
+  overflow-y: auto;
 }
 
 .history-group {
@@ -93,24 +93,24 @@
 }
 
 .history-group-title {
+  position: sticky;
+  top: 0;
+  padding: 4px 4px 6px;
   font-size: 12px;
   font-weight: 600;
   color: var(--history-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  padding: 4px 4px 6px;
-  position: sticky;
-  top: 0;
 }
 
 .history-list,
 .history-window-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 2px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
 }
 
 /* ── 整窗快照卡片 ─────────────────────────────────── */
@@ -119,39 +119,40 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 12px;
-  border-radius: var(--history-radius);
+  margin-bottom: 6px;
   background: color-mix(in srgb, var(--history-accent) 10%, transparent);
   border: 1px solid color-mix(in srgb, var(--history-accent) 30%, transparent);
-  margin-bottom: 6px;
+  border-radius: var(--history-radius);
 }
 
 .history-window-card-head {
   display: flex; /* antd 组件内部微调整 */
-  align-items: center;
   gap: 8px;
+  align-items: center;
   font-size: 13px;
   color: var(--history-text);
 }
 
 .history-window-card-time {
-  color: var(--history-text-tertiary);
   font-size: 12px;
+  color: var(--history-text-tertiary);
 }
 
 /* ── 单条记录 ─────────────────────────────────────── */
 .history-item,
 .history-event {
   display: flex; /* antd 组件内部微调整 */
-  align-items: center;
   gap: 10px;
-  padding: 8px 8px 8px 10px;
-  border-radius: 8px;
-  cursor: default;
-  transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
+  align-items: center;
   min-height: 48px;
+  padding: 8px 8px 8px 10px;
+  contain: layout style paint;
+  cursor: default;
+  border-radius: 8px;
+  transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
+
   /* 抗闪白：预创建合成层 + 隔离重绘范围 */
   will-change: background-color, transform;
-  contain: layout style paint;
 }
 
 .history-item:hover,
@@ -166,80 +167,80 @@
 }
 
 .history-item-favicon-wrap {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
+  position: relative;
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  position: relative;
+  width: 18px;
+  height: 18px;
 }
 
 .history-item-favicon {
+  display: block;
   width: 16px;
   height: 16px;
-  border-radius: 3px;
   object-fit: contain;
-  display: block;
+  border-radius: 3px;
 }
 
 .history-item-favicon-fallback {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  flex-shrink: 0;
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  background: var(--history-fill-secondary);
+  width: 18px;
+  height: 18px;
   color: var(--history-text-secondary);
+  background: var(--history-fill-secondary);
+  border-radius: 4px;
 }
 
 .history-item-main,
 .history-event-main {
-  flex: 1;
-  min-width: 0;
-  cursor: pointer;
   display: flex; /* antd 组件内部微调整 */
+  flex: 1;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
+  cursor: pointer;
 }
 
 .history-item-title,
 .history-event-line {
+  display: flex; /* antd 组件内部微调整 */
+  gap: 6px;
+  align-items: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 13px;
   color: var(--history-text);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-  gap: 6px;
 }
 
 .history-event-action {
-  color: var(--history-text-secondary);
   flex-shrink: 0;
+  color: var(--history-text-secondary);
 }
 
 .history-event-target {
-  color: var(--history-text);
-  font-weight: 500;
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: 500;
+  color: var(--history-text);
+  white-space: nowrap;
 }
 
 .history-item-subtitle,
 .history-event-meta {
-  font-size: 12px;
-  color: var(--history-text-tertiary);
   display: flex; /* antd 组件内部微调整 */
-  align-items: center;
   gap: 4px;
-  white-space: nowrap;
+  align-items: center;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 12px;
+  color: var(--history-text-tertiary);
+  white-space: nowrap;
 }
 
 .history-item-dot {
@@ -263,26 +264,28 @@
 
 /* ── 时间线事件 ─────────────────────────── */
 .history-event-icon {
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
-  border-radius: 50%;
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  background: color-mix(in srgb, var(--history-accent) 12%, transparent);
+  width: 28px;
+  height: 28px;
   color: var(--history-accent);
+  background: color-mix(in srgb, var(--history-accent) 12%, transparent);
+  border-radius: 50%;
 }
 
 /* 「已撤销」状态：整体变灰，仅作为 trail 展示 */
 .history-event.is-undone {
   opacity: 0.55;
 }
+
 .history-event.is-undone .history-event-target,
 .history-event.is-undone .history-event-action {
   text-decoration: line-through;
   text-decoration-color: var(--history-text-tertiary);
 }
+
 /* ── 空状态 ────────────────────────────────────────── */
 .history-empty-hint {
   margin-top: 8px;
@@ -293,26 +296,26 @@
 
 /* ── 「昨天 → 今天」对比卡片 ───────────────────────── */
 .history-diff-card {
-  border-radius: var(--history-radius);
-  background: var(--history-fill-secondary);
-  border: 1px solid var(--history-border);
-  padding: 12px 14px;
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 10px;
+  padding: 12px 14px;
+  background: var(--history-fill-secondary);
+  border: 1px solid var(--history-border);
+  border-radius: var(--history-radius);
 }
 
 .history-diff-card-head {
   display: flex; /* antd 组件内部微调整 */
+  gap: 8px;
   align-items: baseline;
   justify-content: space-between;
-  gap: 8px;
 }
 
 .history-diff-card-title {
   display: flex; /* antd 组件内部微调整 */
-  align-items: center;
   gap: 6px;
+  align-items: center;
   font-size: 13px;
   font-weight: 600;
   color: var(--history-text);
@@ -329,9 +332,9 @@
 }
 
 .history-diff-empty {
+  padding: 4px 0 2px;
   font-size: 12px;
   color: var(--history-text-tertiary);
-  padding: 4px 0 2px;
 }
 
 .history-diff-cols {
@@ -349,12 +352,12 @@
 
 .history-diff-col-title {
   display: flex; /* antd 组件内部微调整 */
-  align-items: center;
   gap: 4px;
+  align-items: center;
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.04em;
   text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .history-diff-col-title--added {
@@ -366,49 +369,49 @@
 }
 
 .history-diff-chips {
-  list-style: none;
-  margin: 0;
-  padding: 0;
   display: flex; /* antd 组件内部微调整 */
   flex-wrap: wrap;
   gap: 4px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
 }
 
 .history-diff-chip {
   display: inline-flex;
-  align-items: center;
   gap: 4px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 11px;
-  background: var(--history-fill-tertiary);
-  color: var(--history-text-secondary);
-  border: 1px solid var(--history-border);
+  align-items: center;
   max-width: 100%;
+  padding: 2px 8px;
+  font-size: 11px;
+  color: var(--history-text-secondary);
+  background: var(--history-fill-tertiary);
+  border: 1px solid var(--history-border);
+  border-radius: 999px;
 }
 
 .history-diff-chip-host {
-  white-space: nowrap;
+  max-width: 110px;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 110px;
+  white-space: nowrap;
 }
 
 .history-diff-chip-count {
-  color: var(--history-text-tertiary);
   font-variant-numeric: tabular-nums;
+  color: var(--history-text-tertiary);
 }
 
 .history-diff-chip--added {
+  color: var(--ant-color-success);
   background: color-mix(in srgb, var(--ant-color-success) 12%, transparent);
   border-color: color-mix(in srgb, var(--ant-color-success) 30%, transparent);
-  color: var(--ant-color-success);
 }
 
 .history-diff-chip--removed {
+  color: var(--ant-color-error);
   background: color-mix(in srgb, var(--ant-color-error) 10%, transparent);
   border-color: color-mix(in srgb, var(--ant-color-error) 28%, transparent);
-  color: var(--ant-color-error);
 }
 
 .history-diff-chip--more {
@@ -416,7 +419,7 @@
   color: var(--history-text-tertiary);
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
   .history-diff-cols {
     grid-template-columns: 1fr;
   }
@@ -432,9 +435,9 @@
 
 .history-analysis-header {
   display: flex;
+  gap: 8px;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
 }
 
 .history-analysis-section {
@@ -444,14 +447,14 @@
 }
 
 .history-analysis-section-title {
+  display: flex;
+  gap: 6px;
+  align-items: center;
   font-size: 12px;
   font-weight: 600;
   color: var(--history-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
 /* 站点排行列表 */
@@ -463,8 +466,8 @@
 
 .history-host-item {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
   padding: 6px 8px;
   border-radius: 8px;
   transition: background 0.15s ease;
@@ -475,13 +478,13 @@
 }
 
 .history-host-rank {
+  flex-shrink: 0;
+  width: 18px;
   font-size: 11px;
   font-weight: 700;
-  color: var(--history-text-tertiary);
-  width: 18px;
-  text-align: center;
-  flex-shrink: 0;
   font-variant-numeric: tabular-nums;
+  color: var(--history-text-tertiary);
+  text-align: center;
 }
 
 .history-host-rank--top {
@@ -491,64 +494,64 @@
 .history-host-name {
   flex: 1;
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 13px;
   color: var(--history-text);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .history-host-bar-wrap {
   flex: 1;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--history-fill-secondary);
-  overflow: hidden;
   max-width: 80px;
+  height: 4px;
+  overflow: hidden;
+  background: var(--history-fill-secondary);
+  border-radius: 2px;
 }
 
 .history-host-bar {
   height: 100%;
-  border-radius: 2px;
   background: var(--history-accent);
+  border-radius: 2px;
   transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .history-host-count {
-  font-size: 12px;
-  color: var(--history-text-secondary);
-  font-variant-numeric: tabular-nums;
   flex-shrink: 0;
   min-width: 28px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--history-text-secondary);
   text-align: right;
 }
 
 /* 每日趋势迷你柱状图 */
 .history-day-chart {
   display: flex;
-  align-items: flex-end;
   gap: 3px;
+  align-items: flex-end;
   height: 56px;
   padding: 0 2px;
 }
 
 .history-day-bar-wrap {
-  flex: 1;
   display: flex;
+  flex: 1;
   flex-direction: column;
-  align-items: center;
   gap: 3px;
-  height: 100%;
+  align-items: center;
   justify-content: flex-end;
+  height: 100%;
 }
 
 .history-day-bar {
   width: 100%;
-  border-radius: 3px 3px 0 0;
-  background: color-mix(in srgb, var(--history-accent) 70%, transparent);
-  transition: height 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   min-height: 2px;
   cursor: default;
+  background: color-mix(in srgb, var(--history-accent) 70%, transparent);
+  border-radius: 3px 3px 0 0;
+  transition: height 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .history-day-bar:hover {
@@ -557,9 +560,9 @@
 
 .history-day-label {
   font-size: 9px;
+  font-variant-numeric: tabular-nums;
   color: var(--history-text-tertiary);
   white-space: nowrap;
-  font-variant-numeric: tabular-nums;
 }
 
 /* 小时热力分布 */
@@ -570,14 +573,14 @@
 }
 
 .history-hour-cell {
-  aspect-ratio: 1;
-  border-radius: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
+  aspect-ratio: 1;
   font-size: 9px;
   color: var(--history-text-tertiary);
   cursor: default;
+  border-radius: 3px;
   transition: transform 0.15s ease;
 }
 
@@ -588,9 +591,9 @@
 /* 导出按钮区 */
 .history-export-bar {
   display: flex;
+  gap: 8px;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
   padding-top: 4px;
   border-top: 1px solid var(--history-border);
 }

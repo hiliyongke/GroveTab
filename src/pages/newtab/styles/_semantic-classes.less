@@ -5,6 +5,7 @@
  *       .app-button, .app-modal__*, .app-lift, .app-hover-reveal, .app-row-hover,
  *       .app-card-interactive, .app-segmented 等）+ reduced-motion 媒体查询
  */
+
 /* ─── 通用语义类（跨组件复用的视觉原语） ─────────────
  *
  * 原则：每个类只做一件事，可自由组合；凡是多处重复的"毛玻璃面板 / 键帽 / 软分隔线"
@@ -14,11 +15,10 @@
 /** Elevated Surface —— 浮层容器（批量栏、命令面板、菜单等共用） */
 .app-surface-elevated {
   background: var(--app-surface-elevated-bg);
-  backdrop-filter: var(--app-glass-filter);
-  -webkit-backdrop-filter: var(--app-glass-filter);
   border: 1px solid var(--ant-color-border-secondary);
-  box-shadow: var(--app-shadow-floating);
   border-radius: var(--app-floating-radius);
+  box-shadow: var(--app-shadow-floating);
+  backdrop-filter: var(--app-glass-filter);
 }
 
 /** 键帽（显示快捷键） */
@@ -26,26 +26,27 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--app-space-1) var(--app-space-2);
   min-width: 20px;
   height: 20px;
+  padding: var(--app-space-1) var(--app-space-2);
   font-family: var(--ant-font-family-code, ui-monospace, monospace);
   font-size: 11px;
   line-height: 1;
   color: var(--ant-color-text-tertiary);
+  white-space: nowrap;
   background: var(--ant-color-fill-quaternary);
   border: 1px solid var(--ant-color-border-secondary);
   border-radius: var(--app-radius-sm);
-  white-space: nowrap;
 }
 
 /** 软分隔线（与 antd divider 相比更细、更柔，适合浮层内部） */
 .app-divider-soft {
+  flex-shrink: 0;
   width: 1px;
   height: 20px;
   background: var(--ant-color-border-secondary);
-  flex-shrink: 0;
 }
+
 .app-divider-soft--horizontal {
   width: 100%;
   height: 1px;
@@ -71,13 +72,12 @@
 .app-modal__mask {
   background-color: var(--app-overlay-mask-bg) !important;
   backdrop-filter: blur(var(--app-overlay-blur));
-  -webkit-backdrop-filter: blur(var(--app-overlay-blur));
 }
 
 .app-modal__container {
-  box-shadow: var(--app-shadow-floating) !important;
-  border-radius: calc(var(--app-radius-lg) + 4px);
   overflow: hidden;
+  border-radius: calc(var(--app-radius-lg) + 4px);
+  box-shadow: var(--app-shadow-floating) !important;
 }
 
 .app-modal__header {
@@ -106,6 +106,7 @@
     box-shadow var(--app-motion-duration, 0.2s) ease,
     border-color var(--app-motion-duration, 0.2s) ease;
 }
+
 .app-lift:hover {
   transform: translateY(-1px);
 }
@@ -149,6 +150,7 @@
 .app-row-hover {
   transition: background-color var(--app-motion-duration, 0.15s) ease;
 }
+
 .app-row-hover:hover,
 .app-row-hover:focus-within {
   background-color: var(--app-row-hover-bg, var(--ant-color-fill-tertiary));
@@ -161,11 +163,12 @@
     box-shadow var(--app-motion-duration, 0.2s) ease,
     border-color var(--app-motion-duration, 0.2s) ease;
 }
+
 .app-card-interactive:hover,
 .app-card-interactive:focus-within {
-  transform: translateY(calc(-1 * var(--app-card-lift, 2px)));
-  box-shadow: var(--app-shadow-card-hover);
   border-color: var(--app-hover-border, var(--ant-color-border));
+  box-shadow: var(--app-shadow-card-hover);
+  transform: translateY(calc(-1 * var(--app-card-lift, 2px)));
 }
 
 /**
@@ -178,6 +181,7 @@
   opacity: 0;
   transition: opacity var(--app-motion-duration, 0.15s) ease;
 }
+
 .app-hover-reveal-host:hover .app-hover-reveal,
 .app-hover-reveal-host:focus-within .app-hover-reveal,
 .app-hover-reveal.is-visible {
@@ -187,18 +191,21 @@
 /** 卡片身份色条 hover 视觉加粗。用 transform 避免 2 → 3px 尺寸变化引发布局/重绘抖动。 */
 .app-card-interactive .app-accent-bar--left {
   transform-origin: left center;
-  will-change: transform;
   transition: transform var(--app-motion-duration, 0.15s) ease;
+  will-change: transform;
 }
+
 .app-card-interactive:hover .app-accent-bar--left,
 .app-card-interactive:focus-within .app-accent-bar--left {
   transform: scaleX(1.5);
 }
+
 .app-card-interactive .app-accent-bar--top {
   transform-origin: center top;
-  will-change: transform;
   transition: transform var(--app-motion-duration, 0.15s) ease;
+  will-change: transform;
 }
+
 .app-card-interactive:hover .app-accent-bar--top,
 .app-card-interactive:focus-within .app-accent-bar--top {
   transform: scaleY(1.5);
@@ -208,6 +215,7 @@
 .app-timeline-segment-header {
   color: var(--app-color, var(--ant-color-text-secondary));
 }
+
 .app-timeline-segment-header:hover,
 .app-timeline-segment-header:focus-visible {
   color: var(--app-color-hover, var(--ant-color-text));
@@ -220,6 +228,7 @@
   .app-accordion-panel {
     animation: none;
   }
+
   .app-lift:hover,
   .app-hero-search:hover,
   .app-card-interactive:hover,

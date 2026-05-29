@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useState, useCallback, memo } from "react";
-import { Button, Dropdown, Flex, Input, List, Modal, Typography, Empty, theme } from "antd";
+import { Button, Dropdown, Flex, Input, List, Typography, Empty, theme } from "antd";
 import { Clock, Download, MoreHorizontal, RotateCcw, Save, Trash2 } from "lucide-react";
 
 import type { ArchivedSession } from "@/shared/types";
@@ -93,26 +93,21 @@ export const WindowSnapshotPanel = memo(function WindowSnapshotPanel({
 
   const handleRename = useCallback(
     (id: string, currentName: string) => {
-      Modal.confirm({
+      // 用变量收集输入值，避免双向状态与 DOM querySelector 耦合
+      let nextName = currentName;
+      feedback.modal.confirm({
         title: t("重命名快照"),
         content: (
           <Input
             id="snapshot-rename-input"
             defaultValue={currentName}
-            onPressEnter={() => {
-              const input = document.querySelector("#snapshot-rename-input") as HTMLInputElement;
-              if (input) {
-                void renameSession(id, input.value);
-                Modal.destroyAll();
-              }
+            onChange={(e) => {
+              nextName = e.target.value;
             }}
           />
         ),
         onOk: async () => {
-          const input = document.querySelector("#snapshot-rename-input") as HTMLInputElement;
-          if (input) {
-            await renameSession(id, input.value);
-          }
+          await renameSession(id, nextName);
         },
       });
     },

@@ -12,7 +12,18 @@
 
 import { useState, useCallback, useMemo, memo } from "react";
 import type { LiveTab } from "@/shared/types";
-import { Button, Tag, Tooltip, Checkbox, theme, Flex, Typography, Dropdown, Modal, Input } from "antd";
+import {
+  Button,
+  Tag,
+  Tooltip,
+  Checkbox,
+  theme,
+  Flex,
+  Typography,
+  Dropdown,
+  Modal,
+  Input,
+} from "antd";
 import type { MenuProps } from "antd";
 import {
   Globe,
@@ -230,16 +241,14 @@ export const TabItem = memo(function TabItem({
   const handleCreateNewGroup = async () => {
     // 先创建标签组
     await groupTabs({ tabIds: tab.id });
-    
+
     // 如果用户输入了名字，需要重命名新创建的组
     if (newGroupName.trim()) {
       try {
         // 获取当前窗口的标签组，找到最新创建的那个
         const groups = await queryTabGroups(tab.windowId);
-        const newGroup = groups
-          .filter((g) => g.id >= 0)
-          .sort((a, b) => b.id - a.id)[0]; // 取 ID 最大的（最新创建的）
-        
+        const newGroup = groups.filter((g) => g.id >= 0).sort((a, b) => b.id - a.id)[0]; // 取 ID 最大的（最新创建的）
+
         if (newGroup) {
           await chrome.tabGroups.update(newGroup.id, { title: newGroupName.trim() });
         }
@@ -247,14 +256,16 @@ export const TabItem = memo(function TabItem({
         console.error("Failed to rename new tab group:", err);
       }
     }
-    
+
     setNewGroupModalOpen(false);
     setNewGroupName("");
   };
-  const onMoveToExistingGroup = (groupId: number): MenuProps["onClick"] => (e) => {
-    e.domEvent.stopPropagation();
-    void groupTabs({ tabIds: tab.id, groupId });
-  };
+  const onMoveToExistingGroup =
+    (groupId: number): MenuProps["onClick"] =>
+    (e) => {
+      e.domEvent.stopPropagation();
+      void groupTabs({ tabIds: tab.id, groupId });
+    };
 
   /** 选中态背景色 */
   const selectedBg = token.colorPrimaryBg;
@@ -352,9 +363,7 @@ export const TabItem = memo(function TabItem({
         <Flex vertical className={styles["app-tab-item-main"]}>
           {/* 上行：标题 + 标记 */}
           <Flex className={styles["app-tab-item-head"]} align="center" gap="small">
-            <Typography.Text className={styles["app-tab-item-title"]}>
-              {tab.title}
-            </Typography.Text>
+            <Typography.Text className={styles["app-tab-item-title"]}>{tab.title}</Typography.Text>
             {showHostname && (
               <Typography.Text className={styles["app-tab-item-hostname"]}>
                 {tab.hostname}
@@ -414,10 +423,9 @@ export const TabItem = memo(function TabItem({
               size="small"
               icon={<Pin size={ICON_SIZE.SMALL} fill={isPinned ? "currentColor" : "none"} />}
               onClick={handleTogglePin}
-              className={[
-                styles["app-tab-item-action"],
-                isPinned ? styles["is-active"] : "",
-              ].join(" ")}
+              className={[styles["app-tab-item-action"], isPinned ? styles["is-active"] : ""].join(
+                " ",
+              )}
             />
           </Tooltip>
 
@@ -559,7 +567,9 @@ export const TabItem = memo(function TabItem({
       <Modal
         title={t("新建标签组")}
         open={newGroupModalOpen}
-        onOk={handleCreateNewGroup}
+        onOk={() => {
+          void handleCreateNewGroup();
+        }}
         onCancel={() => setNewGroupModalOpen(false)}
         okText={t("创建")}
         cancelText={t("取消")}
@@ -569,7 +579,9 @@ export const TabItem = memo(function TabItem({
           placeholder={t("输入标签组名称（可选）")}
           value={newGroupName}
           onChange={(e) => setNewGroupName(e.target.value)}
-          onPressEnter={handleCreateNewGroup}
+          onPressEnter={() => {
+            void handleCreateNewGroup();
+          }}
           autoFocus
         />
       </Modal>

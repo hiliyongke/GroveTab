@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface UseCardCollapseOptions {
   /**
@@ -32,7 +32,10 @@ export function useCardCollapse({
 }: UseCardCollapseOptions = {}) {
   const [collapsed, setCollapsedState] = useState(initialCollapsed);
   const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
+  // 避免在 render 阶段写 ref（React 19 规范），改到 effect 里同步
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   const toggleCollapse = useCallback(() => {
     setCollapsedState((prev) => {
