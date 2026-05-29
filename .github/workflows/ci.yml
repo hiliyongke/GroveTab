@@ -49,6 +49,9 @@ jobs:
       - name: Test (with coverage)
         run: pnpm run test:coverage
 
+      - name: Accessibility tests (axe-core)
+        run: pnpm vitest run tests/a11y
+
       - name: Build
         run: pnpm run build:fast
 
