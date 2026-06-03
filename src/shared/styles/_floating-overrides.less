@@ -52,85 +52,79 @@
       color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 4%, transparent),
       transparent 58%
     ),
-    var(--app-floating-glass-bg-strong) !important;
-  border: 1px solid var(--app-floating-glass-border) !important;
-  box-shadow: var(
-    --app-shadow-floating,
-    0 16px 48px color-mix(in srgb, #000000 18%, transparent)
-  ) !important;
+    var(--app-floating-glass-bg-strong);
+  border: 1px solid var(--app-floating-glass-border);
+  box-shadow: var(--app-shadow-floating, 0 16px 48px color-mix(in srgb, #000000 18%, transparent));
   backdrop-filter: var(--app-floating-glass-filter);
 }
 
 /* ── Tooltip 特殊处理：更轻量的阴影 ── */
-.ant-tooltip-inner {
-  color: var(--ant-color-text, #1f1f1f) !important;
+:root .ant-tooltip-inner {
+  color: var(--ant-color-text, #1f1f1f);
   background:
     linear-gradient(
       135deg,
       color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 54%, transparent),
       transparent 48%
     ),
-    var(--app-floating-glass-bg-strong) !important;
+    var(--app-floating-glass-bg-strong);
   border: 1px solid var(--app-floating-glass-border);
-  box-shadow: var(
-    --app-shadow-floating,
-    0 10px 28px color-mix(in srgb, #000000 16%, transparent)
-  ) !important;
+  box-shadow: var(--app-shadow-floating, 0 10px 28px color-mix(in srgb, #000000 16%, transparent));
   backdrop-filter: var(--app-floating-glass-filter);
 }
 
 /* ── 浮层箭头背景 ── */
-.ant-tooltip-arrow::before,
-.ant-popover-arrow::before,
-.ant-popover-arrow::after {
-  background: var(--app-floating-glass-bg-strong) !important;
+:root .ant-tooltip-arrow::before,
+:root .ant-popover-arrow::before,
+:root .ant-popover-arrow::after {
+  background: var(--app-floating-glass-bg-strong);
   backdrop-filter: var(--app-floating-glass-filter);
 }
 
 /* ── 浮层内部区域透明：让渐变背景从外壳透出 ── */
-.ant-drawer-header,
-.ant-drawer-body,
-.ant-drawer-footer,
-.ant-modal-header,
-.ant-modal-body,
-.ant-modal-footer,
-.ant-popover-title,
-.ant-popover-inner-content {
-  background: transparent !important;
+:root .ant-drawer-header,
+:root .ant-drawer-body,
+:root .ant-drawer-footer,
+:root .ant-modal-header,
+:root .ant-modal-body,
+:root .ant-modal-footer,
+:root .ant-popover-title,
+:root .ant-popover-inner-content {
+  background: transparent;
 }
 
 /* ── 遮罩层：半透明 + 模糊 ── */
-.ant-modal-mask,
-.ant-drawer-mask {
-  background: color-mix(in srgb, #000000 42%, transparent) !important;
+:root .ant-modal-mask,
+:root .ant-drawer-mask {
+  background: color-mix(in srgb, #000000 42%, transparent);
   backdrop-filter: blur(6px);
 }
 
-/* ── 暗色模式浮层覆盖 ── */
-[data-theme="dark"] .ant-drawer-content,
-[data-theme="dark"] .ant-modal-content,
-[data-theme="dark"] .ant-popover-inner,
-[data-theme="dark"] .ant-dropdown-menu,
-[data-theme="dark"] .ant-select-dropdown,
-[data-theme="dark"] .ant-picker-dropdown .ant-picker-panel-container,
-[data-theme="dark"] .ant-cascader-dropdown,
-[data-theme="dark"] .ant-mentions-dropdown,
-[data-theme="dark"] .ant-message-notice-content,
-[data-theme="dark"] .ant-notification-notice {
+/* ── 暗色模式浮层覆盖（提升优先级以覆盖 antd 默认） ── */
+:root[data-theme="dark"] .ant-drawer-content,
+:root[data-theme="dark"] .ant-modal-content,
+:root[data-theme="dark"] .ant-popover-inner,
+:root[data-theme="dark"] .ant-dropdown-menu,
+:root[data-theme="dark"] .ant-select-dropdown,
+:root[data-theme="dark"] .ant-picker-dropdown .ant-picker-panel-container,
+:root[data-theme="dark"] .ant-cascader-dropdown,
+:root[data-theme="dark"] .ant-mentions-dropdown,
+:root[data-theme="dark"] .ant-message-notice-content,
+:root[data-theme="dark"] .ant-notification-notice {
   background:
     linear-gradient(
       135deg,
       color-mix(in srgb, #ffffff 8%, transparent),
       color-mix(in srgb, #ffffff 0%, transparent) 42%
     ),
-    var(--app-floating-glass-bg-strong) !important;
+    var(--app-floating-glass-bg-strong);
 }
 
 [data-theme="dark"] .ant-tooltip-inner {
-  color: var(--ant-color-text, #f5f5f5) !important;
+  color: var(--ant-color-text, #f5f5f5);
 }
 
 [data-theme="dark"] .ant-modal-mask,
 [data-theme="dark"] .ant-drawer-mask {
-  background: color-mix(in srgb, #000000 55%, transparent) !important;
+  background: color-mix(in srgb, #000000 55%, transparent);
 }

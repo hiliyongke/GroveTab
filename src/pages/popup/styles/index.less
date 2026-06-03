@@ -85,25 +85,25 @@ body {
 
   .popup-search {
     height: 36px;
-    padding-inline: 4px !important;
+    padding-inline: 4px;
     margin-bottom: 9px;
-    background: var(--ant-color-bg-container) !important;
-    border: 1px solid color-mix(in srgb, var(--ant-color-border) 82%, transparent) !important;
-    border-radius: var(--app-radius-lg) !important;
-    box-shadow: none !important;
+    background: var(--ant-color-bg-container);
+    border: 1px solid color-mix(in srgb, var(--ant-color-border) 82%, transparent);
+    border-radius: var(--app-radius-lg);
+    box-shadow: none;
     transition:
       border-color 0.16s ease,
       box-shadow 0.16s ease;
 
     &:focus-within {
-      border-color: color-mix(in srgb, var(--app-color-primary) 42%, transparent) !important;
-      box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-color-primary) 9%, transparent) !important;
+      border-color: color-mix(in srgb, var(--app-color-primary) 42%, transparent);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-color-primary) 9%, transparent);
     }
 
     .ant-input {
       font-size: 13px;
-      color: var(--ant-color-text) !important;
-      background: transparent !important;
+      color: var(--ant-color-text);
+      background: transparent;
     }
   }
 
@@ -222,14 +222,14 @@ body {
     align-items: center;
     min-width: 0;
     cursor: pointer;
-    background: transparent !important;
+    background: transparent;
   }
 
   .popup-row-main:hover,
   .popup-row-main:focus,
   .popup-row-main:focus-visible,
   .popup-row-main:active {
-    background: transparent !important;
+    background: transparent;
   }
 
   .popup-row-favicon {
@@ -299,13 +299,13 @@ body {
 
   .popup-actions__primary {
     width: 100%;
-    height: 32px !important;
-    font-weight: 650 !important;
-    border-radius: var(--app-radius-lg) !important;
-    box-shadow: none !important;
+    height: 32px;
+    font-weight: 600;
+    border-radius: var(--app-radius-lg);
+    box-shadow: none;
 
     &:not(:disabled):hover {
-      box-shadow: none !important;
+      box-shadow: none;
     }
   }
 
@@ -315,25 +315,17 @@ body {
     gap: 6px;
 
     .ant-btn {
-      height: 30px !important;
-      color: var(--ant-color-text-secondary) !important;
-      background: var(--ant-color-bg-container) !important;
-      border-color: color-mix(
-        in srgb,
-        var(--ant-color-border-secondary) 82%,
-        transparent
-      ) !important;
-      border-radius: var(--app-radius-md) !important;
-      box-shadow: none !important;
+      height: 30px;
+      color: var(--ant-color-text-secondary);
+      background: var(--ant-color-bg-container);
+      border-color: color-mix(in srgb, var(--ant-color-border-secondary) 82%, transparent);
+      border-radius: var(--app-radius-md);
+      box-shadow: none;
 
       &:hover {
-        color: var(--app-color-primary) !important;
-        background: color-mix(
-          in srgb,
-          var(--app-color-primary) 8%,
-          var(--ant-color-bg-container)
-        ) !important;
-        border-color: color-mix(in srgb, var(--app-color-primary) 30%, transparent) !important;
+        color: var(--app-color-primary);
+        background: color-mix(in srgb, var(--app-color-primary) 8%, var(--ant-color-bg-container));
+        border-color: color-mix(in srgb, var(--app-color-primary) 30%, transparent);
       }
     }
   }
@@ -388,7 +380,7 @@ body {
         in srgb,
         var(--ant-color-bg-elevated) 60%,
         var(--ant-color-bg-container)
-      ) !important;
+      );
       box-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 4%, transparent);
     }
 
@@ -409,26 +401,18 @@ body {
     }
 
     .popup-search {
-      background: var(--ant-color-bg-elevated) !important;
-      border-color: color-mix(in srgb, var(--ant-color-border) 68%, transparent) !important;
+      background: var(--ant-color-bg-elevated);
+      border-color: color-mix(in srgb, var(--ant-color-border) 68%, transparent);
     }
 
     .popup-actions__secondary .ant-btn {
-      background: var(--ant-color-bg-elevated) !important;
-      border-color: color-mix(
-        in srgb,
-        var(--ant-color-border-secondary) 72%,
-        transparent
-      ) !important;
+      background: var(--ant-color-bg-elevated);
+      border-color: color-mix(in srgb, var(--ant-color-border-secondary) 72%, transparent);
     }
 
     .popup-actions__secondary .ant-btn:hover {
-      background: color-mix(
-        in srgb,
-        var(--app-color-primary) 18%,
-        var(--ant-color-bg-elevated)
-      ) !important;
-      border-color: color-mix(in srgb, var(--app-color-primary) 32%, transparent) !important;
+      background: color-mix(in srgb, var(--app-color-primary) 18%, var(--ant-color-bg-elevated));
+      border-color: color-mix(in srgb, var(--app-color-primary) 32%, transparent);
     }
   }
 }
@@ -436,7 +420,7 @@ body {
 [data-popup][data-skin="apple"],
 [data-popup] [data-skin="apple"] {
   .popup-actions__primary {
-    border-radius: var(--app-radius-pill) !important;
+    border-radius: var(--app-radius-pill);
   }
 
   .popup-row:hover,
@@ -480,34 +464,26 @@ body {
         color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 52%, transparent),
         transparent 48%
       ),
-      color-mix(in srgb, var(--app-pastel-lavender) 5%, var(--app-acrylic-bg, #ffffff)) !important;
+      color-mix(in srgb, var(--app-pastel-lavender) 5%, var(--app-acrylic-bg, #ffffff));
     border-color: color-mix(
       in srgb,
       var(--app-pastel-lavender) 20%,
       var(--app-acrylic-border, rgb(138 148 224 / 18%))
-    ) !important;
+    );
     box-shadow: inset 0 1px 0
-      color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 54%, transparent) !important;
+      color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 54%, transparent);
   }
 
   .popup-row:hover,
   .popup-row:focus-within {
-    background: color-mix(
-      in srgb,
-      var(--app-pastel-rose) 10%,
-      var(--app-pastel-lavender) 6%
-    ) !important;
+    background: color-mix(in srgb, var(--app-pastel-rose) 10%, var(--app-pastel-lavender) 6%);
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--app-pastel-lavender) 24%, transparent);
   }
 
   .popup-actions__primary {
-    background: linear-gradient(
-      135deg,
-      var(--app-pastel-lavender),
-      var(--app-pastel-rose)
-    ) !important;
-    border-color: transparent !important;
-    box-shadow: var(--app-shadow-brand-glow, 0 8px 28px rgb(138 148 224 / 18%)) !important;
+    background: linear-gradient(135deg, var(--app-pastel-lavender), var(--app-pastel-rose));
+    border-color: transparent;
+    box-shadow: var(--app-shadow-brand-glow, 0 8px 28px rgb(138 148 224 / 18%));
   }
 
   [data-theme="dark"] & {
@@ -540,13 +516,13 @@ body {
           color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 18%, transparent),
           transparent 48%
         ),
-        color-mix(in srgb, var(--app-pastel-rose) 8%, var(--app-acrylic-bg, #302338)) !important;
-      border-color: var(--app-acrylic-border, rgb(255 214 235 / 16%)) !important;
+        color-mix(in srgb, var(--app-pastel-rose) 8%, var(--app-acrylic-bg, #302338));
+      border-color: var(--app-acrylic-border, rgb(255 214 235 / 16%));
     }
 
     .popup-row:hover,
     .popup-row:focus-within {
-      background: color-mix(in srgb, var(--app-pastel-rose) 14%, transparent) !important;
+      background: color-mix(in srgb, var(--app-pastel-rose) 14%, transparent);
       box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--app-pastel-rose) 26%, transparent);
     }
   }

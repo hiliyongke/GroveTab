@@ -59,7 +59,7 @@
 .ant-input,
 .ant-input-affix-wrapper,
 .ant-input-search-button {
-  transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1) !important;
+  transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .app-button:active {
@@ -70,29 +70,29 @@
  * 统一弹窗的遮罩、背景色、内边距及阴影效果
  */
 .app-modal__mask {
-  background-color: var(--app-overlay-mask-bg) !important;
+  background-color: var(--app-overlay-mask-bg);
   backdrop-filter: blur(var(--app-overlay-blur));
 }
 
 .app-modal__container {
   overflow: hidden;
   border-radius: calc(var(--app-radius-lg) + 4px);
-  box-shadow: var(--app-shadow-floating) !important;
+  box-shadow: var(--app-shadow-floating);
 }
 
 .app-modal__header {
-  padding: var(--app-space-4) var(--app-space-6) !important;
-  margin-bottom: 0 !important;
+  padding: var(--app-space-4) var(--app-space-6);
+  margin-bottom: 0;
   border-bottom: 1px solid var(--app-hairline);
 }
 
 .app-modal__body {
-  padding: var(--app-space-6) !important;
+  padding: var(--app-space-6);
 }
 
 .app-modal__footer {
-  padding: var(--app-space-3) var(--app-space-6) !important;
-  margin-top: 0 !important;
+  padding: var(--app-space-3) var(--app-space-6);
+  margin-top: 0;
   border-top: 1px solid var(--app-hairline);
 }
 

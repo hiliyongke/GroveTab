@@ -99,7 +99,7 @@
 .app-view-dock__item {
   all: unset;
   box-sizing: border-box;
-  display: inline-flex !important;
+  display: inline-flex;
   flex: 0 0 auto;
   gap: 8px;
   align-items: center;
@@ -112,9 +112,9 @@
   color: var(--ant-color-text-secondary);
   white-space: nowrap;
   cursor: pointer;
-  border: 0 !important;
+  border: 0;
   border-radius: 16px;
-  box-shadow: none !important;
+  box-shadow: none;
   transition:
     transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
     background 160ms ease,
@@ -125,19 +125,19 @@
 .app-view-dock__item:hover {
   color: var(--ant-color-text);
   background: var(--ant-color-fill-quaternary);
-  border: 0 !important;
-  box-shadow: none !important;
+  border: 0;
+  box-shadow: none;
   transform: translateY(-1px);
 }
 
 .app-view-dock__item:active {
-  border: 0 !important;
-  box-shadow: none !important;
+  border: 0;
+  box-shadow: none;
 }
 
 .app-view-dock__item:focus {
-  border: 0 !important;
-  box-shadow: none !important;
+  border: 0;
+  box-shadow: none;
 }
 
 .app-view-dock__item:focus-visible {
@@ -165,7 +165,7 @@
     inset 0 0 0 1px
       color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 18%, transparent),
     0 10px 22px -18px
-      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 72%, transparent) !important;
+      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 72%, transparent);
 }
 
 .app-view-dock__label {
@@ -230,7 +230,7 @@
     inset 0 0 0 1px
       color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 24%, transparent),
     0 10px 24px -18px
-      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 86%, transparent) !important;
+      color-mix(in srgb, var(--app-color-primary, var(--ant-color-primary)) 86%, transparent);
 }
 
 /* ─── Workspace 切换器 ── */
