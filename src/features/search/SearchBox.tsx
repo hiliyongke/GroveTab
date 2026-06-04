@@ -8,11 +8,11 @@
  * 4. 保持键盘优先与轻量界面，确保输入响应足够快。
  */
 
-import { useState, useMemo, useRef, useCallback, useEffect, type ReactNode } from "react";
-import { Modal, Input, theme, Popover, Button, Image } from "antd";
+import { useState, useMemo, useRef, useCallback, useEffect } from "react";
+import { Modal, Input, theme, Popover, Button, Image, Tooltip } from "antd";
 import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
 import type { InputRef } from "antd";
-import { Search, Check, ChevronDown, History } from "lucide-react";
+import { Search, Check, ChevronDown, History, Trash2, RefreshCw } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import type { SearchEngineId } from "@/shared/types";
 import type { CustomSearchEngine } from "@/shared/types/settings";
@@ -26,6 +26,10 @@ import {
   getLastSearchEngine,
   setLastSearchEngine,
 } from "@/repositories";
+import { setData } from "@/repositories/storage-repo";
+import { STORAGE_KEYS } from "@/shared/config/storage-keys";
+import { fetchMultipleBoards } from "@/services/trending-service";
+import { SEARCH_TRENDING_PLATFORMS } from "./hooks/use-search-data";
 import {
   buildSearchUrl,
   normalizeEnabledSearchEngines,
@@ -51,10 +55,6 @@ interface SearchBoxProps {
 
 interface SearchSettingsSnapshot {
   searchCustomEngines?: CustomSearchEngine[];
-}
-
-function Kbd({ children }: { children: ReactNode }) {
-  return <span className={styles["search-box-kbd"]}>{children}</span>;
 }
 
 export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps) {
@@ -115,6 +115,7 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
     setRecentSearches,
     historyForHot,
     trendingCache,
+    setTrendingCache,
     historyPermission,
     historyEntries,
     historyLoading,
@@ -346,16 +347,34 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
     [token],
   );
 
-  const shortcutHints = useMemo(
-    () => [
-      { id: "navigate", keys: ["↑", "↓"], label: t("导航") },
-      { id: "open", keys: ["↵"], label: t("打开") },
-      { id: "web", keys: ["⌘↵"], label: t("网页搜索") },
-      { id: "switch", keys: ["Tab"], label: t("切到网页搜索") },
-      { id: "close", keys: ["esc"], label: t("关闭") },
-    ],
-    [t],
-  );
+  // ── 清除最近搜索 ──
+  const [clearing, setClearing] = useState(false);
+  const handleClearRecent = useCallback(async () => {
+    setClearing(true);
+    try {
+      await setData(STORAGE_KEYS.searchHistory, []);
+      setRecentSearches([]);
+    } catch {
+      /* ignore */
+    } finally {
+      setClearing(false);
+    }
+  }, [setRecentSearches]);
+
+  // ── 刷新热词 ──
+  const [refreshing, setRefreshing] = useState(false);
+  const handleRefreshTrending = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      const boards = await fetchMultipleBoards(SEARCH_TRENDING_PLATFORMS, 3);
+      setTrendingCache({ boards, lastRefreshAt: Date.now() });
+    } catch {
+      /* ignore */
+    } finally {
+      setRefreshing(false);
+    }
+  }, [setTrendingCache]);
+
 
   return (
     <Modal
@@ -568,17 +587,17 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
               ? t("找到 {count} 个候选项", { count: flatItems.length })
               : t("输入后可在本地与网页结果间快速切换")}
           </span>
-          <div className={styles["search-box-shortcuts"]}>
-            {shortcutHints.map((shortcut) => (
-              <span key={shortcut.id} className={styles["search-box-shortcut"]}>
-                <span className={styles["search-box-shortcut-keys"]}>
-                  {shortcut.keys.map((key) => (
-                    <Kbd key={`${shortcut.id}-${key}`}>{key}</Kbd>
-                  ))}
-                </span>
-                <span>{shortcut.label}</span>
-              </span>
-            ))}
+          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+            {recentSearches.length > 0 && (
+              <Tooltip title={t("清空最近搜索")}>
+                <Button type="text" size="small" loading={clearing} icon={<Trash2 size={13} />} onClick={handleClearRecent} />
+              </Tooltip>
+            )}
+            {effectiveHotSource === "trending" && (
+              <Tooltip title={t("刷新热词")}>
+                <Button type="text" size="small" loading={refreshing} icon={<RefreshCw size={13} />} onClick={handleRefreshTrending} />
+              </Tooltip>
+            )}
           </div>
         </div>
       </div>

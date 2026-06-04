@@ -163,7 +163,7 @@ export const CONFIG: AppConfig = {
   },
 
   ui: {
-    rowHeight: 36,
+    rowHeight: 40,
     viewportReserve: 240,
     menuWidth: 240,
     batchSize: 10,

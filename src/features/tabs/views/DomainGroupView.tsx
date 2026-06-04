@@ -149,7 +149,7 @@ function VirtualColumn({ groups, useVirtual }: VirtualColumnProps) {
       <div className={styles["app-domain-masonry-column"]}>
         {groups.map((group) => (
           <div key={group.domain} className={styles["app-domain-masonry-item"]}>
-            <DomainGroupCard group={group} initialCollapsed={false} />
+            <DomainGroupCard group={group} />
           </div>
         ))}
       </div>
@@ -179,7 +179,7 @@ function VirtualColumn({ groups, useVirtual }: VirtualColumnProps) {
                 transform: `translateY(${virtualItem.start}px)`,
               }}
             >
-              <DomainGroupCard group={group} initialCollapsed={false} />
+              <DomainGroupCard group={group} />
             </div>
           );
         })}

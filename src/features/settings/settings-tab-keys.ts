@@ -1,13 +1,14 @@
-export type SettingsTabKey = "appearance" | "behavior" | "system" | "about";
+export type SettingsTabKey = "appearance" | "general" | "view-layout" | "automation" | "system";
 
 export const DEFAULT_SETTINGS_TAB: SettingsTabKey = "appearance";
 
 export function isSettingsTabKey(value: string | undefined): value is SettingsTabKey {
   return (
     value === "appearance" ||
-    value === "behavior" ||
-    value === "system" ||
-    value === "about"
+    value === "general" ||
+    value === "view-layout" ||
+    value === "automation" ||
+    value === "system"
   );
 }
 

@@ -19,7 +19,6 @@ export type { StorageKey, StorageMeta } from "./storage";
 export type {
   SearchScopeField,
   SearchEngineId,
-  NewtabPageMode,
   ViewTabPosition,
   UserSettings,
 } from "./settings";

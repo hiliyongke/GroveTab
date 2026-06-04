@@ -100,7 +100,7 @@ void hydrateTabSnapshots();
  *   - 同一天只拍一次（按本地时区 YYYY-MM-DD 判重）
  *   - 拍照内容：当前所有标签页按 hostname 聚合的 [host, count] 列表
  *
- * 用作 HistoryPanel 顶部「昨天 → 今天」对比的源数据。
+ * 用作 HistoryView 顶部「昨天 → 今天」对比的源数据。
  */
 async function maybeCaptureDailySnapshot(): Promise<void> {
   try {

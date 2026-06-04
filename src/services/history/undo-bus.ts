@@ -5,10 +5,10 @@
  * 「时间线撤销」的极简事件总线。
  *
  * 设计目标：
- *   - 让 HistoryPanel 能在不直接耦合 archive / tag / metadata 任何业务模块
+ *   - 让 HistoryView 能在不直接耦合 archive / tag / metadata 任何业务模块
  *     的前提下，统一支持「撤销」按钮。
  *   - 各业务模块在初始化时通过 `registerHistoryUndoHandler(type, fn)` 注册
- *     自己的撤销实现；HistoryPanel 调用 `undoHistoryEvent(event)` 时分发到
+ *     自己的撤销实现；HistoryView 调用 `undoHistoryEvent(event)` 时分发到
  *     注册的 handler，handler 负责真正的副作用。
  *   - 不持久化注册关系（每次启动都需要业务模块自行注册一次）。
  *

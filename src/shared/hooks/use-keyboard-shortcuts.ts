@@ -2,7 +2,7 @@
  * useKeyboardShortcuts — 全局键盘快捷键管理 Hook（v1.4 收敛版）
  *
  * 提供统一的键盘快捷键支持：
- * - ⌘1..⌘7：按 VIEW_CONFIGS 顺序切换视图
+ * - ⌘1..⌘9：按 VIEW_CONFIGS 顺序切换前 9 个视图
  * - Esc：取消选择/关闭弹窗
  * - 输入框 / contenteditable 焦点中自动跳过非 ⌘ / Ctrl 前缀的按键
  *
@@ -27,8 +27,8 @@ export interface KeyboardShortcutsOptions {
 }
 
 /**
- * 视图顺序 = VIEW_CONFIGS 单源
- * ⌘1=tabs, ⌘2=timeline, ⌘3=tabgroup, ⌘4=window, ⌘5=kanban, ⌘6=frequency, ⌘7=archive
+ * 视图顺序 = VIEW_CONFIGS 单源，仅前 9 个支持快捷键
+ * ⌘1=tabs, ⌘2=tabgroup, ⌘3=window, ⌘4=timeline, ⌘5=kanban, ⌘6=bookmarks, ⌘7=frequency, ⌘8=history, ⌘9=archive
  */
 const VIEW_ORDER: readonly ViewType[] = VALID_VIEWS;
 
@@ -70,7 +70,7 @@ export function useKeyboardShortcuts({
       const { key, metaKey, ctrlKey } = event;
 
       // ⌘1..⌘7：切换视图（即使在输入框内也允许 —— 与 macOS 系统级一致）
-      if ((metaKey || ctrlKey) && /^[1-7]$/.test(key)) {
+      if ((metaKey || ctrlKey) && /^[1-9]$/.test(key)) {
         event.preventDefault();
         const viewIndex = parseInt(key, 10) - 1;
         const targetView = VIEW_ORDER[viewIndex];

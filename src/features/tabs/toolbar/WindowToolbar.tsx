@@ -6,20 +6,17 @@
  *   - 排序切换（手动/标签数/名称/活跃度）
  *   - 快照入口
  *   - 批量模式入口
- *   - 折叠策略切换
  */
 
-import { Button, Popover, Segmented, Select, Tooltip, Typography } from "antd";
-import { Camera, CheckSquare, Eye, EyeOff, Maximize2 } from "lucide-react";
-import { useSelectionStore, useSettingsStore, useTabsStore } from "@/store";
+import { Button, Popover, Select, Tooltip, Typography } from "antd";
+import { Camera, CheckSquare } from "lucide-react";
+import { useSelectionStore, useTabsStore } from "@/store";
 import { useT } from "@/shared/i18n";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { ViewToolbar } from "./ViewToolbar";
 import { WindowSnapshotPanel } from "../views/WindowView/WindowSnapshotPanel";
 import { ClipboardImport } from "../views/WindowView/ClipboardImport";
 import styles from "../styles/items.module.less";
-
-type WindowCardDefaultCollapsed = "current-only" | "all-expanded" | "all-collapsed";
 
 export type WindowSortMode = "manual" | "tabCount" | "name" | "activity";
 
@@ -37,10 +34,6 @@ export function WindowToolbar({
   onSortModeChange,
 }: WindowToolbarProps) {
   const { t } = useT();
-  const defaultCollapsed = useSettingsStore(
-    (s) => s.settings.windowCardDefaultCollapsed ?? "current-only",
-  );
-  const updateSettings = useSettingsStore((s) => s.updateSettings);
   const currentWindowId = useTabsStore((s) => s.currentWindowId);
   const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
   const selectionMode = useSelectionStore((s) => s.selectionMode);
@@ -48,58 +41,11 @@ export function WindowToolbar({
   const exitSelectionMode = useSelectionStore((s) => s.exitSelectionMode);
   const selectedCount = useSelectionStore((s) => s.selectedIds.size);
 
-  const normalize = (v: unknown): WindowCardDefaultCollapsed =>
-    v === "all-expanded" || v === "all-collapsed" || v === "current-only" ? v : "current-only";
-
   return (
     <ViewToolbar
       searchQuery={filterQuery}
       onSearchChange={onFilterChange}
       searchPlaceholder={t("window.searchPlaceholder")}
-      controls={
-        <Tooltip title={t("toolbar.collapseStrategy.title")}>
-          <span>
-            <Segmented
-              size="small"
-              value={normalize(defaultCollapsed)}
-              onChange={(v) =>
-                void updateSettings({
-                  windowCardDefaultCollapsed: v as WindowCardDefaultCollapsed,
-                })
-              }
-              options={[
-                {
-                  value: "current-only",
-                  icon: (
-                    <span className={styles["app-segmented-icon"]}>
-                      <Maximize2 size={13} />
-                    </span>
-                  ),
-                  label: t("toolbar.collapseStrategy.currentOnly"),
-                },
-                {
-                  value: "all-expanded",
-                  icon: (
-                    <span className={styles["app-segmented-icon"]}>
-                      <Eye size={13} />
-                    </span>
-                  ),
-                  label: t("toolbar.collapseStrategy.allExpanded"),
-                },
-                {
-                  value: "all-collapsed",
-                  icon: (
-                    <span className={styles["app-segmented-icon"]}>
-                      <EyeOff size={13} />
-                    </span>
-                  ),
-                  label: t("toolbar.collapseStrategy.allCollapsed"),
-                },
-              ]}
-            />
-          </span>
-        </Tooltip>
-      }
     >
       {/* 排序切换 */}
       <Select

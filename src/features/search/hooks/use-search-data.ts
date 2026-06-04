@@ -13,7 +13,7 @@ import { STORAGE_KEYS } from "@/shared/config/storage-keys";
 import { fetchMultipleBoards } from "@/services/trending-service";
 import type { HotKeywordSource } from "@/shared/config/search-engines";
 
-const SEARCH_TRENDING_PLATFORMS = ["weibo", "baidu", "toutiao"];
+export const SEARCH_TRENDING_PLATFORMS = ["weibo", "baidu", "toutiao"];
 const SEARCH_DEBOUNCE_MS = 180;
 
 export interface SearchDataState {
@@ -21,6 +21,7 @@ export interface SearchDataState {
   setRecentSearches: React.Dispatch<React.SetStateAction<string[]>>;
   historyForHot: Array<{ query: string; ts: number; count: number }>;
   trendingCache: TrendingCache | undefined;
+  setTrendingCache: React.Dispatch<React.SetStateAction<TrendingCache | undefined>>;
   historyPermission: boolean | null;
   historyEntries: HistorySearchEntry[];
   historyLoading: boolean;
@@ -150,6 +151,7 @@ export function useSearchData(options: {
     setRecentSearches,
     historyForHot,
     trendingCache,
+    setTrendingCache,
     historyPermission,
     historyEntries,
     historyLoading,

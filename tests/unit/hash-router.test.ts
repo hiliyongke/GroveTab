@@ -180,7 +180,7 @@ describe("round-trip: parse → serialize → parse", () => {
     {
       spaceId: "workspace",
       viewId: "kanban",
-      panelId: "insights",
+      panelId: "search",
     },
   ];
 

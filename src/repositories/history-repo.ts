@@ -564,7 +564,7 @@ export async function exportHistoryJson(
 /**
  * 任务6：从 chrome.history API 补录漏记的访问记录（需要 history 权限）。
  *
- * 在 HistoryPanel 打开时调用一次，把 chrome.history.search 返回的
+ * 在 HistoryView 打开时调用一次，把 chrome.history.search 返回的
  * 近期访问与本地 HistoryEvent 对账，补录缺失的 tab_opened 事件。
  */
 export async function reconcileFromChromeHistory(rangeMs = 24 * 3600 * 1000): Promise<number> {

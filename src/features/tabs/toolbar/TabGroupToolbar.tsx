@@ -4,10 +4,9 @@
  * 常驻显示在标签分组视图上方：
  *   - 搜索过滤（按组名/标签标题/URL）
  *   - 排序切换（名称/数量/最近访问）
- *   - 全部折叠/展开开关
  */
 
-import { Segmented, Switch, Tooltip } from "antd";
+import { Segmented, Tooltip } from "antd";
 import { ArrowDownAZ, Hash, Clock } from "lucide-react";
 import { useSettingsStore } from "@/store";
 import { useT } from "@/shared/i18n";
@@ -17,15 +16,11 @@ import styles from "../styles/items.module.less";
 export interface TabGroupToolbarProps {
   filterQuery: string;
   onFilterChange: (query: string) => void;
-  collapseAll: boolean;
-  onCollapseAllChange: (collapsed: boolean) => void;
 }
 
 export function TabGroupToolbar({
   filterQuery,
   onFilterChange,
-  collapseAll,
-  onCollapseAllChange,
 }: TabGroupToolbarProps) {
   const { t } = useT();
   const sortBy = useSettingsStore((s) => s.settings.tabGroupSortBy ?? "tabCount");
@@ -75,11 +70,6 @@ export function TabGroupToolbar({
                   },
                 ]}
               />
-            </span>
-          </Tooltip>
-          <Tooltip title={collapseAll ? t("tabGroup.expandAll") : t("tabGroup.collapseAll")}>
-            <span>
-              <Switch size="small" checked={collapseAll} onChange={onCollapseAllChange} />
             </span>
           </Tooltip>
         </>

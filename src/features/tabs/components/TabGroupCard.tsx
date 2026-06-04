@@ -7,11 +7,10 @@
  *   - 内容区：TabItem 列表，支持多选
  */
 
-import { useEffect, useMemo, memo } from "react";
-import { Button, Dropdown, Flex, Input, Popover, Space, Tag, Tooltip, Typography, theme } from "antd";
+import { useMemo, memo } from "react";
+import { Button, Dropdown, Flex, Input, Popover, Space, Tag, Tooltip, Typography } from "antd";
 import type { MenuProps } from "antd";
 import {
-  ChevronDown,
   MoreHorizontal,
   Palette,
   Pencil,
@@ -23,23 +22,20 @@ import {
 
 import type { LiveTab } from "@/shared/types";
 import type { ChromeTabGroupColor } from "@/chrome";
-import { updateTabGroup } from "@/chrome";
-import { swBroadcast } from "@/shared/utils/sw-broadcast";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { cssVars } from "@/shared/utils/css-vars";
 import { useT } from "@/shared/i18n";
 import { TabItem } from "./TabItem";
 import { GroupCardShell } from "./GroupCardShell";
-import { useCardCollapse } from "../hooks/useCardCollapse";
+import { useGroupCardSettings } from "../hooks/useCardStyle";
 import { useTabGroupActions } from "../hooks/useTabGroupActions";
-import { useTabsStore, useSettingsStore } from "@/store";
+import { useTabsStore } from "@/store";
 import styles from "../styles/items.module.less";
 
 type TabGroupColor = ChromeTabGroupColor;
 
 interface TabGroupCardProps {
   group: TabGroupData;
-  forceCollapsed?: boolean;
   /** 自定义标签项渲染器，用于拖拽集成 */
   renderTabItem?: (tab: LiveTab) => React.ReactNode;
 }
@@ -79,42 +75,13 @@ export interface TabGroupData {
 
 export const TabGroupCard = memo(function TabGroupCard({
   group,
-  forceCollapsed,
   renderTabItem,
 }: TabGroupCardProps) {
   const { t } = useT();
-  const { token } = theme.useToken();
+  const { barPosition, cardRadius } = useGroupCardSettings();
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
   const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
-  const barPosition = useSettingsStore((s) => s.settings.domainGroupAccentBarPosition ?? "left");
-  const radiusPreset = useSettingsStore((s) => s.settings.domainGroupCardRadius ?? "default");
 
-  const { collapsed, setCollapsed, syncState } = useCardCollapse({
-    initialCollapsed: group.collapsed,
-    onChange: (next) => {
-      if (group.groupId !== -1) {
-        void updateTabGroup(group.groupId, { collapsed: next }).then((g) => {
-          swBroadcast("tab-group-updated", {
-            id: g.id,
-            title: g.title,
-            color: g.color,
-            collapsed: g.collapsed,
-            windowId: g.windowId,
-          });
-        });
-      }
-    },
-  });
-
-  // 同步浏览器原生折叠状态到内部 state（不触发 onChange，避免重复调用 Chrome API）
-  useEffect(() => {
-    if (forceCollapsed === undefined) {
-      syncState(group.collapsed);
-    }
-  }, [group.collapsed, forceCollapsed, syncState]);
-
-  // 折叠状态优先级：forceCollapsed（全局按钮）> 内部 state（用户点击/浏览器同步）
-  const isCollapsed = forceCollapsed !== undefined ? forceCollapsed : collapsed;
   const colorValue = COLOR_HEX[group.color] ?? COLOR_HEX.grey;
 
   const {
@@ -131,19 +98,6 @@ export const TabGroupCard = memo(function TabGroupCard({
     handleMoveToNewWindow,
     isUngrouped,
   } = useTabGroupActions({ group });
-
-  const cardRadius = useMemo(() => {
-    switch (radiusPreset) {
-      case "none":
-        return 0;
-      case "small":
-        return 4;
-      case "large":
-        return 16;
-      default:
-        return token.borderRadiusLG;
-    }
-  }, [radiusPreset, token.borderRadiusLG]);
 
   const allTabIds = useMemo(() => group.tabs.map((tab) => tab.id), [group.tabs]);
 
@@ -218,46 +172,17 @@ export const TabGroupCard = memo(function TabGroupCard({
         },
       ];
 
-  const cardStyle = useMemo<React.CSSProperties>(
-    () => ({
-      borderRadius: cardRadius || 12,
-      overflow: "hidden",
-      position: "relative",
-      boxShadow: "var(--app-shadow-card)",
-      border: `1px solid ${token.colorBorderSecondary}`,
-      ...cssVars({
-        "--app-hover-border": token.colorBorder,
-        "--app-domain-card-radius": `${cardRadius || 12}px`,
-        "--app-domain-card-bar": colorValue,
-        "--app-domain-card-badge-bg": `color-mix(in srgb, ${colorValue} 14%, transparent)`,
-        "--app-domain-card-header-border": isCollapsed ? "transparent" : token.colorBorderSecondary,
-        "--app-domain-card-chevron-color": token.colorTextTertiary,
-        "--app-domain-card-title-color": token.colorText,
-        "--app-row-hover-bg": token.colorFillSecondary,
-      }),
-    }),
-    [cardRadius, colorValue, isCollapsed, token],
-  );
 
   return (
     <GroupCardShell
-      style={cardStyle}
       accentBarPosition={isUngrouped ? "none" : barPosition}
-      collapsed={isCollapsed}
+      interactive={false}
+      barColor={colorValue}
+      badgeBg={`color-mix(in srgb, ${colorValue} 14%, transparent)`}
+      cardRadius={cardRadius}
       header={
         <>
-          {/* eslint-disable-next-line no-restricted-syntax */}
-          <button
-            type="button"
-            onClick={() => setCollapsed((prev: boolean) => !prev)}
-            aria-expanded={!isCollapsed}
-            aria-label={isCollapsed ? t("展开") : t("折叠")}
-            className={styles["app-domain-group-header"]}
-          >
-            <ChevronDown
-              size={ICON_SIZE.TINY}
-              className={`${styles["app-domain-group-chevron"]}${isCollapsed ? ` ${styles["is-collapsed"]}` : ""}`}
-            />
+          <div className={styles["app-domain-group-header"]}>
             <span
               aria-hidden
               className={styles["app-tab-group-card-color-dot"]}
@@ -284,7 +209,7 @@ export const TabGroupCard = memo(function TabGroupCard({
               </Typography.Text>
             )}
             <Tag className={styles["app-domain-group-count"]}>{group.tabs.length}</Tag>
-          </button>
+          </div>
 
           <Flex className={styles["app-domain-group-actions"]}>
             <Dropdown menu={{ items: menuItems }} trigger={["click"]} placement="bottomRight">
@@ -295,7 +220,7 @@ export const TabGroupCard = memo(function TabGroupCard({
                   loading={busy}
                   icon={busy ? undefined : <MoreHorizontal size={ICON_SIZE.SMALL} />}
                   aria-label={t("更多")}
-                  className={`app-hover-reveal ${styles["app-domain-group-action"]}`}
+                  className={styles["app-domain-group-action"]}
                 />
               </Tooltip>
             </Dropdown>
@@ -303,7 +228,7 @@ export const TabGroupCard = memo(function TabGroupCard({
         </>
       }
     >
-      <Flex vertical gap={4} className={styles["app-domain-group-list--flex"]}>
+      <Flex vertical gap={6} className={styles["app-domain-group-list--flex"]}>
         {renderTabItem
           ? // 自定义渲染模式（用于 @dnd-kit 拖拽集成）
             group.tabs.map((tab) => (

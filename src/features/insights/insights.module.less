@@ -2,17 +2,14 @@
   /* Modal 自身已处理高度溢出，外层不再设置 max-height/overflow，避免双滚动条 */
 }
 
-.insights-suggestions-card {
-  margin-top: var(--app-space-3);
+/* 统计卡片统一最小高度 */
+.insights-stat-card :global(.ant-card-body) {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.insights-storage-row {
-  margin-top: var(--app-space-3);
-}
-
-.insights-stat-label {
-  font-size: 11px;
-}
 
 .insights-loading {
   padding: 8px 4px;
@@ -48,7 +45,7 @@
   flex: 0 0 40%;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 11.5px;
+  font-size: 12px;
   white-space: nowrap;
 }
 
@@ -70,6 +67,6 @@
 }
 
 .insights-bar-value {
-  font-size: 11.5px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }

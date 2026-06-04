@@ -6,7 +6,7 @@
  */
 
 import type { LucideIcon } from "lucide-react";
-import { LayoutGrid, Clock, Flame, Layers, Monitor, Columns, Archive } from "lucide-react";
+import { LayoutGrid, Clock, Flame, Layers, Monitor, Columns, Archive, TrendingUp, Wrench, BarChart3, History, Trash2, Bookmark } from "lucide-react";
 
 export type ViewMode =
   | "tabs"
@@ -15,23 +15,39 @@ export type ViewMode =
   | "tabgroup"
   | "window"
   | "kanban"
-  | "archive";
+  | "bookmarks"
+  | "archive"
+  | "trending"
+  | "devtools"
+  | "insights"
+  | "history"
+  | "trash";
 
 export interface ViewConfig {
   id: ViewMode;
-  /** 图标组件引用，消费处自行 <Icon /> 渲染 */
   Icon: LucideIcon;
   labelKey: string;
 }
 
 export const VIEW_CONFIGS: ViewConfig[] = [
+  // ── 核心管理（每日最高频） ──
   { id: "tabs", Icon: LayoutGrid, labelKey: "view.tabs" },
-  { id: "timeline", Icon: Clock, labelKey: "view.timeline" },
   { id: "tabgroup", Icon: Layers, labelKey: "view.tabgroup" },
   { id: "window", Icon: Monitor, labelKey: "view.window" },
+  // ── 可视化纵览 ──
+  { id: "timeline", Icon: Clock, labelKey: "view.timeline" },
   { id: "kanban", Icon: Columns, labelKey: "view.kanban" },
+  // ── 资源管理 ──
+  { id: "bookmarks", Icon: Bookmark, labelKey: "view.bookmarks" },
   { id: "frequency", Icon: Flame, labelKey: "view.frequency" },
-  { id: "archive", Icon: Archive, labelKey: "view.archive" }, // P2-12: archive view in VIEW_CONFIGS
+  // ── 记忆与归档 ──
+  { id: "history", Icon: History, labelKey: "view.history" },
+  { id: "archive", Icon: Archive, labelKey: "view.archive" },
+  { id: "trash", Icon: Trash2, labelKey: "view.trash" },
+  // ── 探索与工具 ──
+  { id: "insights", Icon: BarChart3, labelKey: "view.insights" },
+  { id: "trending", Icon: TrendingUp, labelKey: "view.trending" },
+  { id: "devtools", Icon: Wrench, labelKey: "view.devtools" },
 ];
 
 /** 合法的 ViewMode 值数组，用于防御旧版残留值 */

@@ -64,16 +64,16 @@ describe("useKeyboardShortcuts — view switching", () => {
     expect(onSwitchView).toHaveBeenCalledWith("tabs");
   });
 
-  it("⌘2 切换到 timeline", () => {
+  it("⌘2 切换到 tabgroup", () => {
     mount("tabs");
     fireKey("2", { metaKey: true });
-    expect(onSwitchView).toHaveBeenCalledWith("timeline");
+    expect(onSwitchView).toHaveBeenCalledWith("tabgroup");
   });
 
-  it("⌘7 切换到 archive", () => {
+  it("⌘6 切换到 bookmarks", () => {
     mount("tabs");
-    fireKey("7", { metaKey: true });
-    expect(onSwitchView).toHaveBeenCalledWith("archive");
+    fireKey("6", { metaKey: true });
+    expect(onSwitchView).toHaveBeenCalledWith("bookmarks");
   });
 
   it("Ctrl+1 与 ⌘1 等价（跨平台）", () => {
@@ -88,9 +88,9 @@ describe("useKeyboardShortcuts — view switching", () => {
     expect(onSwitchView).not.toHaveBeenCalled();
   });
 
-  it("⌘8 不在范围内不会触发", () => {
+  it("⌘0 不在范围内不会触发", () => {
     mount("tabs");
-    fireKey("8", { metaKey: true });
+    fireKey("0", { metaKey: true });
     expect(onSwitchView).not.toHaveBeenCalled();
   });
 
@@ -199,7 +199,7 @@ describe("useKeyboardShortcuts — Esc & enabled flag", () => {
 describe("getViewShortcut / getShortcutDescription", () => {
   it("getViewShortcut 返回基于 1 的索引", () => {
     expect(getViewShortcut("tabs")).toBe(1);
-    expect(getViewShortcut("archive")).toBe(7);
+    expect(getViewShortcut("archive")).toBe(9);
   });
 
   it("getShortcutDescription 包含 ⌘ / Ctrl+ 前缀", () => {

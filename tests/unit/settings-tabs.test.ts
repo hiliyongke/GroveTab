@@ -9,9 +9,10 @@ import {
 describe("settings-tab-keys", () => {
   it("识别合法设置页签", () => {
     expect(isSettingsTabKey("appearance")).toBe(true);
-    expect(isSettingsTabKey("behavior")).toBe(true);
+    expect(isSettingsTabKey("general")).toBe(true);
+    expect(isSettingsTabKey("view-layout")).toBe(true);
+    expect(isSettingsTabKey("automation")).toBe(true);
     expect(isSettingsTabKey("system")).toBe(true);
-    expect(isSettingsTabKey("about")).toBe(true);
   });
 
   it("非法或缺失页签回退到默认页签", () => {

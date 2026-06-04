@@ -12,7 +12,7 @@ import { registerHistoryUndoHandler } from "@/services/history/undo-bus";
  *
  * 为什么放在模块作用域：
  *   - useAppInitialization 在 React StrictMode 下会执行两次，必须避免重复注册导致回调被覆盖。
- *   - 各 type 的 undo handler 是「单例语义」：业务无关的 UI 模块（HistoryPanel）通过 type 索引调用。
+ *   - 各 type 的 undo handler 是「单例语义」：业务无关的 UI 模块（HistoryView）通过 type 索引调用。
  */
 let tagUndoRegistered = false;
 

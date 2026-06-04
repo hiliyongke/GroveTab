@@ -54,8 +54,6 @@ export interface DomainGroup {
   colorKey: string;
   /** 该分组下的标签页 */
   tabs: Array<import('@/shared/types').LiveTab>;
-  /** 是否折叠 */
-  collapsed: boolean;
 }
 
 import type { LiveTab } from '@/shared/types';
@@ -88,7 +86,6 @@ export function groupTabsByDomain(tabs: LiveTab[]): DomainGroup[] {
     domain,
     colorKey,
     tabs: groupTabs.sort((a, b) => b.lastAccessed - a.lastAccessed),
-    collapsed: false,
   }));
 
   groups.sort((a, b) => {

@@ -111,8 +111,14 @@ const VIEW_LABELS: Record<ViewMode, { label: string; keywords: string[] }> = {
   tabgroup: { label: "切换到标签组视图", keywords: ["fenzu", "group", "分组"] },
   window: { label: "切换到窗口视图", keywords: ["chuangkou", "window", "窗口"] },
   kanban: { label: "切换到看板视图", keywords: ["kanban", "board", "看板"] },
+  bookmarks: { label: "切换到书签视图", keywords: ["shuqian", "bookmark", "书签"] },
   frequency: { label: "切换到频率视图", keywords: ["pinlv", "freq", "频率"] },
   archive: { label: "切换到归档视图", keywords: ["guidang", "archive", "归档"] },
+  insights: { label: "切换到洞察视图", keywords: ["dongcha", "insights", "洞察"] },
+  history: { label: "切换到历史视图", keywords: ["lishi", "history", "历史"] },
+  trash: { label: "切换到回收站视图", keywords: ["huishouzhan", "trash", "回收站"] },
+  trending: { label: "切换到热点视图", keywords: ["redian", "trending", "热点"] },
+  devtools: { label: "切换到开发工具", keywords: ["kaifa", "devtools", "开发"] },
 };
 
 /**
@@ -136,10 +142,6 @@ export function createViewCommands(switchView: (view: ViewMode) => void): Comman
 const PANEL_LABELS: Record<PanelId, { label: string; keywords: string[] }> = {
   search: { label: "打开搜索", keywords: ["sousuo", "search", "搜索"] },
   settings: { label: "打开设置", keywords: ["shezhi", "settings", "设置"] },
-  insights: { label: "打开洞察面板", keywords: ["dongcha", "insights", "洞察"] },
-  history: { label: "打开浏览历史", keywords: ["lishi", "history", "历史"] },
-  trash: { label: "打开回收站", keywords: ["huishouzhan", "trash", "回收站"] },
-  archive: { label: "打开归档", keywords: ["guidang", "archive", "归档"] },
   commandPalette: { label: "命令面板", keywords: ["mingling", "command", "命令"] },
 };
 
@@ -162,9 +164,10 @@ export function createPanelCommands(openPanel: (panelId: PanelId) => void): Comm
 
 export const SETTINGS_TABS = [
   { id: "appearance", label: "打开外观设置", keywords: ["waiguan", "appearance", "外观", "主题"] },
-  { id: "behavior", label: "打开行为设置", keywords: ["xingwei", "behavior", "行为"] },
+  { id: "general", label: "打开通用设置", keywords: ["tongyong", "general", "通用"] },
+  { id: "view-layout", label: "打开视图布局设置", keywords: ["buju", "layout", "布局"] },
+  { id: "automation", label: "打开自动化设置", keywords: ["zidonghua", "automation", "自动化"] },
   { id: "system", label: "打开系统设置", keywords: ["xitong", "system", "系统"] },
-  { id: "about", label: "打开关于页面", keywords: ["guanyu", "about", "关于"] },
 ] as const;
 
 /**

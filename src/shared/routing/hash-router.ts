@@ -57,14 +57,10 @@ const PANEL_SEGMENT = "/panel/";
 export const VALID_SPACES = ["workspace", "trending", "devtools"] as const;
 export type SpaceId = (typeof VALID_SPACES)[number];
 
-/** 合法的面板 ID 集合 */
+/** 合法的面板 ID 集合（仅浮层弹窗） */
 export const VALID_PANELS = [
   "search",
   "settings",
-  "insights",
-  "history",
-  "trash",
-  "archive",
   "commandPalette",
 ] as const;
 export type PanelId = (typeof VALID_PANELS)[number];

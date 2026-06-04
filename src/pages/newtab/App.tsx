@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo, useRef, lazy, Suspense } from "react";
-import { Layout, Spin, Typography, FloatButton, Flex, Segmented, Drawer } from "antd";
+import { Layout, Spin, Typography, FloatButton, Flex } from "antd";
 import styles from "./App.module.less";
 import { useTabsStore, useSettingsStore, useSelectionStore } from "@/store";
 import { useShallow } from "zustand/shallow";
@@ -18,8 +18,8 @@ import { UndoToast } from "@/shared/ui/UndoToast";
 import { I18nProvider } from "@/shared/i18n";
 import { BatchActionBar } from "@/features/tabs/selection/BatchActionBar";
 import { AppWorkspace } from "@/features/workspace/AppWorkspace";
-const InsightsPanel = lazy(() =>
-  import("@/features/insights/InsightsPanel").then((m) => ({ default: m.default })),
+const InsightsView = lazy(() =>
+  import("@/features/insights/InsightsView").then((m) => ({ default: m.default })),
 );
 import { QuickStartLayer } from "@/features/quick-start/QuickStartLayer";
 const TidySuggestionBar = lazy(() =>
@@ -33,11 +33,9 @@ const AppHeader = lazy(() =>
 const HeroBar = lazy(() =>
   import("@/features/workspace/HeroBar").then((m) => ({ default: m.HeroBar })),
 );
-import { ViewSidebar } from "@/features/workspace/ViewSidebar";
-import { ViewBottomBar } from "@/features/workspace/ViewBottomBar";
+import { ViewTabs } from "@/features/workspace/ViewTabs";
 import { track } from "@/shared/utils/metrics";
-import type { NewtabPageMode } from "@/shared/types";
-import { VALID_VIEWS, VIEW_CONFIGS, LEGACY_VIEW_MAP, type ViewMode } from "@/shared/config/views";
+import { VALID_VIEWS, LEGACY_VIEW_MAP, type ViewMode } from "@/shared/config/views";
 import { TabsView } from "@/features/tabs/views/TabsView";
 import { registerViews } from "@/shared/config/view-registry";
 import { findDuplicates } from "@/shared/utils/dedupe";
@@ -52,21 +50,12 @@ import {
   createViewCommands,
   createPanelCommands,
   createSettingsCommands,
-  createSpaceCommands,
 } from "@/features/command-palette";
 import { createTemplateCommands } from "@/features/workspace/quick-actions/SaveAsTemplateAction";
 import { useLayoutStyle } from "./hooks/use-layout-style";
 import { useMemoryGovernance } from "@/shared/hooks/use-memory-governance";
 import { StatusBar } from "@/shared/ui/StatusBar/StatusBar";
 
-const TrendingPage = lazy(() =>
-  import("@/features/trending/TrendingPage").then((m) => ({ default: m.TrendingPage })),
-);
-const DeveloperToolsPage = lazy(() =>
-  import("@/features/developer-tools/DeveloperToolsPage").then((m) => ({
-    default: m.DeveloperToolsPage,
-  })),
-);
 
 /** 懒加载非默认视图——直接导入文件而非 barrel，确保每个视图独立拆 chunk */
 const TimelineView = lazy(() =>
@@ -84,6 +73,9 @@ const WindowView = lazy(() =>
 const KanbanView = lazy(() =>
   import("@/features/tabs/views/KanbanView").then((m) => ({ default: m.KanbanView })),
 );
+const BookmarkView = lazy(() =>
+  import("@/features/bookmarks/BookmarkView").then((m) => ({ default: m.BookmarkView })),
+);
 const ArchiveView = lazy(() =>
   import("@/features/sessions/ArchiveView").then((m) => ({ default: m.ArchiveView })),
 );
@@ -94,11 +86,19 @@ const SearchBox = lazy(() =>
 const SettingsPanel = lazy(() =>
   import("@/features/settings/SettingsPanel").then((m) => ({ default: m.SettingsPanel })),
 );
-const HistoryPanel = lazy(() =>
-  import("@/features/history/HistoryPanel").then((m) => ({ default: m.HistoryPanel })),
+const HistoryView = lazy(() =>
+  import("@/features/history/HistoryView").then((m) => ({ default: m.HistoryView })),
 );
 const TrashView = lazy(() =>
   import("@/features/sessions/TrashView").then((m) => ({ default: m.TrashView })),
+);
+const TrendingPage = lazy(() =>
+  import("@/features/trending/TrendingPage").then((m) => ({ default: m.TrendingPage })),
+);
+const DeveloperToolsPage = lazy(() =>
+  import("@/features/developer-tools/DeveloperToolsPage").then((m) => ({
+    default: m.DeveloperToolsPage,
+  })),
 );
 /** 点击动效 Canvas 图层，默认 off 时不拉取 chunk */
 const ClickEffectLayer = lazy(() =>
@@ -109,16 +109,21 @@ const VideoBackground = lazy(() =>
   import("@/features/effects/VideoBackground").then((m) => ({ default: m.VideoBackground })),
 );
 
-/** 注册所有视图到 ViewRegistry —— 新增视图只需在此添加一条 */
+/** 注册所有视图到 ViewRegistry —— 顺序决定 TabBar 展示和 ⌘1-⌘9 快捷键 */
 registerViews([
   { id: "tabs", component: TabsView, order: 1 },
-  { id: "timeline", component: TimelineView, order: 2 },
-  { id: "tabgroup", component: TabGroupView, order: 3 },
-  { id: "window", component: WindowView, order: 4 },
+  { id: "tabgroup", component: TabGroupView, order: 2 },
+  { id: "window", component: WindowView, order: 3 },
+  { id: "timeline", component: TimelineView, order: 4 },
   { id: "kanban", component: KanbanView, order: 5 },
-  { id: "frequency", component: FrequencyView, order: 6 },
-  // UX-P0-10: archive 升级为一级视图
-  { id: "archive", component: ArchiveView, order: 7 },
+  { id: "bookmarks", component: BookmarkView, order: 6 },
+  { id: "frequency", component: FrequencyView, order: 7 },
+  { id: "history", component: HistoryView, order: 8 },
+  { id: "archive", component: ArchiveView, order: 9 },
+  { id: "trash", component: TrashView, order: 10 },
+  { id: "insights", component: InsightsView, order: 11 },
+  { id: "trending", component: TrendingPage, order: 12 },
+  { id: "devtools", component: DeveloperToolsPage, order: 13 },
 ]);
 
 const { Content } = Layout;
@@ -126,7 +131,7 @@ const { Text } = Typography;
 
 function AppContent() {
   // ── URL Hash 路由 ──────────────────────────────────────────────────────────
-  const { route, switchView, switchSpace } = useUrlSync();
+  const { route, switchView } = useUrlSync();
 
   // ── 面板栈 ─────────────────────────────────────────────────────────────────
   const panelStack = usePanelStack();
@@ -137,9 +142,6 @@ function AppContent() {
       ...createViewCommands(switchView),
       ...createPanelCommands((panelId) => panelStack.push({ id: panelId })),
       ...createSettingsCommands((subId) => panelStack.openSettings(subId)),
-      ...createSpaceCommands((spaceId) =>
-        switchSpace(spaceId as "workspace" | "trending" | "devtools"),
-      ),
       ...createTemplateCommands(),
     ]);
   }, [switchView, panelStack]);
@@ -210,13 +212,7 @@ function AppContent() {
       idleThresholdMinutes: s.settings.idleThresholdMinutes ?? 1440,
     })),
   );
-  // 路由驱动显示：URL hash → pageMode / viewMode；无 hash 时 fallback 到用户设置
-  const pageMode: NewtabPageMode =
-    route.spaceId === "trending"
-      ? "trending"
-      : route.spaceId === "devtools"
-        ? "devtools"
-        : "workspace";
+  // 路由驱动显示：URL hash → viewMode；无 hash 时 fallback 到用户设置
   const viewMode: ViewMode =
     route.viewId ??
     (VALID_VIEWS.includes(defaultView as ViewMode) ? (defaultView as ViewMode) : "tabs");
@@ -255,12 +251,8 @@ function AppContent() {
   }, [panelStack]);
 
   const handleToggleHistory = useCallback(() => {
-    if (panelStack.isOpen("history")) {
-      panelStack.close("history");
-    } else {
-      panelStack.openHistory();
-    }
-  }, [panelStack]);
+    switchView("history");
+  }, [switchView]);
 
   useKeybinding("search", handleToggleSearch);
   useKeybinding("openHistory", handleToggleHistory);
@@ -282,7 +274,7 @@ function AppContent() {
         handleToggleSearch();
       }
       if (msg.type === "open-history") {
-        panelStack.openHistory();
+        switchView("history");
       }
     };
     chrome.runtime?.onMessage?.addListener?.(onMessage);
@@ -372,7 +364,7 @@ function AppContent() {
   // 整理建议 → StatusBar 持久消息（仅 workspace 空间下）
   useEffect(() => {
     const sb = useStatusBarStore.getState();
-    if (pageMode === "workspace" && hasTidySuggestions && !selectionMode) {
+    if (hasTidySuggestions && !selectionMode) {
       sb.pushMessage({
         content: t("{count} 个待处理标签", { count: duplicateTabsCount + idleTabsCount }),
         type: "warning",
@@ -383,7 +375,6 @@ function AppContent() {
       });
     }
   }, [
-    pageMode,
     hasTidySuggestions,
     selectionMode,
     duplicateTabsCount,
@@ -392,20 +383,16 @@ function AppContent() {
     t,
   ]);
 
-  const viewSegmentedOptions = useMemo(
-    () =>
-      VIEW_CONFIGS.map((view) => ({
-        value: view.id,
-        label: <span className="app-view-option">{t(view.labelKey)}</span>,
-      })),
-    [t],
-  );
 
   // ── 内容区 className ───────────────────────────────────────────────────────
   const contentShellClassName = [
     "app-content-shell",
     contentMaxWidth > 0 ? "app-content-shell--bounded" : "",
-    pageMode === "devtools" ? "app-content-shell--no-scroll" : "",
+    viewTabPosition === "left"
+      ? "app-content-shell--tabs-left"
+      : viewTabPosition === "right"
+        ? "app-content-shell--tabs-right"
+        : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -425,7 +412,7 @@ function AppContent() {
 
   return (
     <Layout
-      className={`app-layout-shell${pageMode === "workspace" && showViewSwitcher && viewTabPosition === "bottom" ? " app-layout-shell--view-bottom" : ""}`}
+      className="app-layout-shell"
       style={layoutStyle}
     >
       {uiVisibility?.header !== false && (
@@ -436,21 +423,16 @@ function AppContent() {
           idleTabsCount={idleTabsCount}
           hasTidySuggestions={hasTidySuggestions}
           compactSearchVisible={compactSearchVisible}
-          currentSpaceId={route.spaceId}
-          onSwitchSpace={(spaceId) => switchSpace(spaceId as "workspace" | "trending" | "devtools")}
           onSettings={() => panelStack.openSettings()}
           onOpenSearch={() => panelStack.openSearch()}
-          onInsights={() => panelStack.openInsights()}
-          onOpenHistory={() => panelStack.openHistory()}
-          onOpenTrash={() => panelStack.openTrash()}
           onTidy={handleTidy}
         />
       )}
 
-      {/* 主体区：侧边栏 + 内容 */}
+      {/* 主体区：左侧 ViewTabs（垂直）+ 内容 */}
       <Flex flex={1} className={styles["app-content-fill"]}>
-        {pageMode === "workspace" && showViewSwitcher && viewTabPosition === "left" && (
-          <ViewSidebar viewMode={viewMode} onViewChange={handleViewChange} position="left" />
+        {showViewSwitcher && viewTabPosition === "left" && (
+          <ViewTabs activeView={viewMode} onChange={handleViewChange} />
         )}
 
         <Content
@@ -458,7 +440,7 @@ function AppContent() {
           className={contentShellClassName}
           style={contentShellStyle}
         >
-          {pageMode === "workspace" && showHeroBar && (
+          {showHeroBar && (
             <HeroBar
               onOpenSearch={() => panelStack.openSearch()}
               sentinelRef={heroSearchRef}
@@ -469,75 +451,37 @@ function AppContent() {
             />
           )}
 
-          {pageMode === "workspace" &&
-            viewMode !== "archive" &&
+          {viewMode !== "archive" &&
             uiVisibility?.tidySuggestion !== false && (
               <div ref={tidySectionRef}>
                 <TidySuggestionBar expandSignal={tidyExpandSignal} />
               </div>
             )}
 
-          {pageMode === "workspace" && (
-            <QuickStartLayer onOpenSettings={() => panelStack.openSettings()} />
-          )}
+          <QuickStartLayer onOpenSettings={() => panelStack.openSettings()} />
 
-          {pageMode === "workspace" && showViewSwitcher && viewTabPosition === "top" && (
+          {showViewSwitcher && viewTabPosition === "top" && (
             <div className="app-view-switcher-wrap">
-              <Segmented<ViewMode>
-                value={viewMode}
-                onChange={(v: ViewMode) => handleViewChange(v)}
-                options={viewSegmentedOptions}
-                size="middle"
-                className="app-view-switcher"
-                classNames={{ item: "app-view-switcher__item" }}
-              />
+              <ViewTabs activeView={viewMode} onChange={handleViewChange} />
             </div>
           )}
 
-          {pageMode === "trending" && (
-            <Suspense
-              fallback={
-                <Flex align="center" justify="center" className="app-suspense-fallback-wrap">
-                  <Spin />
-                </Flex>
-              }
-            >
-              <TrendingPage />
-            </Suspense>
-          )}
-          {pageMode === "devtools" && (
-            <Suspense
-              fallback={
-                <Flex align="center" justify="center" className="app-suspense-fallback-wrap">
-                  <Spin />
-                </Flex>
-              }
-            >
-              <DeveloperToolsPage />
-            </Suspense>
-          )}
-          {pageMode === "workspace" && (
-            <AppWorkspace
-              checked={checked}
-              initError={initError}
-              showOnboarding={showOnboarding}
-              viewMode={viewMode}
-              onDismissOnboarding={dismissOnboarding}
-              onRetryInit={handleRetryInit}
-              onOpenArchive={() => switchView("archive")}
-              onOpenSettings={() => panelStack.openSettings()}
-            />
-          )}
+          <AppWorkspace
+            checked={checked}
+            initError={initError}
+            showOnboarding={showOnboarding}
+            viewMode={viewMode}
+            onDismissOnboarding={dismissOnboarding}
+            onRetryInit={handleRetryInit}
+            onOpenArchive={() => switchView("archive")}
+            onOpenSettings={() => panelStack.openSettings()}
+          />
         </Content>
 
-        {pageMode === "workspace" && showViewSwitcher && viewTabPosition === "right" && (
-          <ViewSidebar viewMode={viewMode} onViewChange={handleViewChange} position="right" />
+        {showViewSwitcher && viewTabPosition === "right" && (
+          <ViewTabs activeView={viewMode} onChange={handleViewChange} />
         )}
       </Flex>
-
-      {pageMode === "workspace" && showViewSwitcher && viewTabPosition === "bottom" && (
-        <ViewBottomBar viewMode={viewMode} onViewChange={handleViewChange} />
-      )}
 
       <FloatButton.BackTop
         target={() => document.querySelector(".app-content-shell") as HTMLElement}
@@ -556,7 +500,7 @@ function AppContent() {
           onOpenChange={(open) => {
             if (!open) panelStack.close("search");
           }}
-          onOpenHistory={() => panelStack.openHistory()}
+          onOpenHistory={() => switchView("history")}
         />
         <SettingsPanel
           open={panelStack.isOpen("settings")}
@@ -565,23 +509,6 @@ function AppContent() {
           }}
           defaultActiveTab={route.subId === "about" ? "about" : "appearance"}
         />
-        <InsightsPanel
-          open={panelStack.isOpen("insights")}
-          onClose={() => panelStack.close("insights")}
-        />
-        <HistoryPanel
-          open={panelStack.isOpen("history")}
-          onClose={() => panelStack.close("history")}
-        />
-        <Drawer
-          title={t("回收站")}
-          open={panelStack.isOpen("trash")}
-          onClose={() => panelStack.close("trash")}
-          width={560}
-          destroyOnClose
-        >
-          <TrashView />
-        </Drawer>
       </Suspense>
       <StatusBar />
     </Layout>

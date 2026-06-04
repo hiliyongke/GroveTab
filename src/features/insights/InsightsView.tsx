@@ -1,5 +1,5 @@
 /**
- * InsightsPanel —— 本地隐私洞察仪表盘（F-28）
+ * InsightsView —— 本地隐私洞察仪表盘
  *
  * 全部本地计算，零外部请求。4 个卡片：
  *   ① 近 7 天每日新标签页打开次数（折线图）
@@ -20,7 +20,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
-  Modal,
   Button,
   Card,
   Row,
@@ -46,7 +45,6 @@ import { useStorageQuota } from "./hooks/use-storage-quota";
 import { useSmartSuggestions } from "./hooks/use-smart-suggestions";
 import styles from "./insights.module.less";
 
-const { Text, Title } = Typography;
 
 /** 字节数格式化：1024 → 1 KB，1048576 → 1 MB */
 function formatBytes(bytes: number): string {
@@ -77,15 +75,6 @@ function getEventLabel(
   return label === i18nKey ? norm : label;
 }
 
-interface InsightsPanelProps {
-  open: boolean;
-  onClose: () => void;
-  /** 跳转到归档面板（智能建议操作） */
-  onOpenArchive?: () => void;
-  /** 跳转到设置面板（智能建议操作） */
-  onOpenSettings?: () => void;
-}
-
 /** 时间范围选项（P2-13：洞察数据时间范围可配置） */
 export type InsightsTimeRange = 7 | 14 | 30;
 
@@ -104,18 +93,28 @@ function toLocalDayKey(date: Date): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-export default function InsightsPanel({
-  open,
-  onClose,
+/** 紧凑空态占位，与 BarList 高度对齐 */
+function EmptyText({ text }: { text: string }) {
+  return (
+    <Flex align="center" justify="center" style={{ minHeight: 160 }}>
+      <Typography.Text type="secondary" style={{ fontSize: 12 }}>{text}</Typography.Text>
+    </Flex>
+  );
+}
+
+export default function InsightsView({
   onOpenArchive,
   onOpenSettings,
-}: InsightsPanelProps) {
+}: {
+  onOpenArchive?: () => void;
+  onOpenSettings?: () => void;
+}) {
   const { token } = theme.useToken();
   const { t } = useT();
   const [metrics, setMetrics] = useState<MetricEvent[]>([]);
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(false);
-  const { info: quotaInfo, loading: quotaLoading } = useStorageQuota(open);
+  const { info: quotaInfo, loading: quotaLoading } = useStorageQuota(true);
 
   /** 时间范围（P2-13：支持 7/14/30 天可配置） */
   const [timeRange, setTimeRange] = useState<InsightsTimeRange>(7);
@@ -261,11 +260,11 @@ export default function InsightsPanel({
     topDomainCount: topDomains.length,
     dailyOpens: dailyOpens.map((d) => d.count),
     onOpenArchive: () => {
-      onClose();
+      // onClose removed
       onOpenArchive?.();
     },
     onOpenSettings: () => {
-      onClose();
+      // onClose removed
       onOpenSettings?.();
     },
   });
@@ -316,15 +315,7 @@ export default function InsightsPanel({
   };
 
   return (
-    <Modal
-      open={open}
-      onCancel={onClose}
-      footer={null}
-      width="min(760px, calc(100vw - 24px))"
-      title={t("本地隐私洞察")}
-      centered
-      destroyOnHidden
-    >
+    <div style={{ padding: "12px 16px 32px", minHeight: 0 }}>
       <Flex vertical className={styles["insights-panel"]}>
         {loading ? (
           <Flex vertical className={styles["insights-loading"]}>
@@ -337,174 +328,128 @@ export default function InsightsPanel({
             hints={[t("继续使用扩展以生成洞察数据"), t("所有数据均在本地计算，不会上传")]}
           />
         ) : (
-          <Row gutter={[12, 12]}>
-            <Col xs={24} md={12}>
-              <Card
-                size="small"
-                title={
-                  <Flex justify="space-between" align="center">
-                    <span>{t("每日打开次数")}</span>
-                    <Segmented
-                      size="small"
-                      value={timeRange}
-                      onChange={(v) => setTimeRange(v as InsightsTimeRange)}
-                      options={[
-                        { label: "7d", value: 7 },
-                        { label: "14d", value: 14 },
-                        { label: "30d", value: 30 },
-                      ]}
+          <Flex vertical gap={12}>
+            {/* 第一行：折线图全宽 */}
+            <Card
+              size="small"
+              title={
+                <Flex justify="space-between" align="center">
+                  <span>{t("每日打开次数")}</span>
+                  <Segmented
+                    size="small"
+                    value={timeRange}
+                    onChange={(v) => setTimeRange(v as InsightsTimeRange)}
+                    options={[
+                      { label: "7d", value: 7 },
+                      { label: "14d", value: 14 },
+                      { label: "30d", value: 30 },
+                    ]}
+                  />
+                </Flex>
+              }
+            >
+              {dailyAllZero ? (
+                <FeatureEmptyState
+                  title={t("近 {n} 天暂无打开记录", { n: timeRange })}
+                  icon={<BarChart3 size={ICON_SIZE.LARGE} />}
+                  size="small"
+                  hints={[t("继续使用扩展以生成洞察数据")]}
+                />
+              ) : (
+                <LineChart
+                  data={dailyOpens.map((d) => d.count)}
+                  labels={dailyOpens.map((d) => d.day.slice(5))}
+                  color={token.colorPrimary}
+                />
+              )}
+            </Card>
+
+            {/* 第二行：3列 BarList + 归档统计 */}
+            <Row gutter={12}>
+              <Col xs={24} md={8}>
+                <Card size="small" title={t("Top 10 访问域名")} className={styles["insights-stat-card"]}>
+                  {topDomains.length === 0 ? <EmptyText text={t("暂无数据")} /> : (
+                    <BarList items={topDomains.map((d) => ({ label: d.host, value: d.count }))} color={token.colorPrimary} />
+                  )}
+                </Card>
+              </Col>
+              <Col xs={24} md={8}>
+                <Card size="small" title={t("使用频率前 5")} className={styles["insights-stat-card"]}>
+                  {topActions.length === 0 ? <EmptyText text={t("暂无数据")} /> : (
+                    <BarList items={topActions.map((a) => ({ label: getEventLabel(a.event, t), value: a.count }))} color={token.colorPrimary} />
+                  )}
+                </Card>
+              </Col>
+              <Col xs={24} md={8}>
+                <Card size="small" title={t("累计归档")} className={styles["insights-stat-card"]}>
+                  {archiveStats.totalTabs === 0 ? <EmptyText text={t("尚未归档")} /> : (
+                    <Flex vertical align="center" gap={4}>
+                      <Typography.Text style={{ fontSize: 28, fontWeight: 700, color: token.colorPrimary, lineHeight: 1 }}>
+                        {archiveStats.totalTabs}
+                      </Typography.Text>
+                      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                        {t("约节省 {mb} MB 内存", { mb: archiveStats.savedMemMB })}
+                      </Typography.Text>
+                    </Flex>
+                  )}
+                </Card>
+              </Col>
+            </Row>
+
+            {/* 第三行：存储占用（合并） */}
+            {!quotaLoading && quotaInfo && (
+              <Card size="small" title={t("存储占用")}>
+                <Row gutter={24}>
+                  <Col xs={24} sm={12}>
+                    <Flex vertical gap={4}>
+                      <Typography.Text type="secondary" style={{ fontSize: 12 }}>chrome.storage</Typography.Text>
+                      <Progress
+                        percent={Math.round(quotaInfo.chromeStorageRatio * 100)}
+                        status={quotaInfo.chromeStorageRatio >= 0.9 ? "exception" : quotaInfo.chromeStorageRatio >= 0.7 ? "active" : "normal"}
+                        size="small"
+                      />
+                      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                        {formatBytes(quotaInfo.chromeStorageUsed)} / {formatBytes(quotaInfo.chromeStorageTotal)}
+                      </Typography.Text>
+                    </Flex>
+                  </Col>
+                  <Col xs={24} sm={12}>
+                    <Flex vertical gap={4}>
+                      <Typography.Text type="secondary" style={{ fontSize: 12 }}>OPFS</Typography.Text>
+                      <Progress
+                        percent={quotaInfo.opfsTotal > 0 ? Math.round(quotaInfo.opfsRatio * 100) : 0}
+                        status={quotaInfo.opfsRatio >= 0.9 ? "exception" : "normal"}
+                        size="small"
+                      />
+                      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                        {formatBytes(quotaInfo.opfsUsed)}
+                        {quotaInfo.opfsTotal > 0 ? ` / ${formatBytes(quotaInfo.opfsTotal)}` : ""}
+                      </Typography.Text>
+                    </Flex>
+                  </Col>
+                </Row>
+              </Card>
+            )}
+
+            {/* 智能建议 */}
+            {suggestions.length > 0 && (
+              <Card size="small" title={t("智能建议")}>
+                <Flex vertical gap={8}>
+                  {suggestions.map((s) => (
+                    <Alert
+                      key={s.id}
+                      type={s.level === "warning" ? "warning" : s.level === "success" ? "success" : "info"}
+                      showIcon
+                      icon={s.level === "success" ? <CheckCircle2 size={14} /> : s.level === "warning" ? <AlertTriangle size={14} /> : <Info size={14} />}
+                      message={t(s.titleKey)}
+                      description={t(s.descKey)}
+                      action={s.actionKey && s.onAction ? <Button size="small" type="link" onClick={s.onAction}>{t(s.actionKey)}</Button> : undefined}
                     />
-                  </Flex>
-                }
-              >
-                {dailyAllZero ? (
-                  <FeatureEmptyState
-                    title={t("近 {n} 天暂无打开记录", { n: timeRange })}
-                    icon={<BarChart3 size={ICON_SIZE.LARGE} />}
-                    size="small"
-                    hints={[t("继续使用扩展以生成洞察数据")]}
-                  />
-                ) : (
-                  <LineChart
-                    data={dailyOpens.map((d) => d.count)}
-                    labels={dailyOpens.map((d) => d.day.slice(5))}
-                    color={token.colorPrimary}
-                  />
-                )}
+                  ))}
+                </Flex>
               </Card>
-            </Col>
-            <Col xs={24} md={12}>
-              <Card size="small" title={t("Top 10 访问域名")}>
-                {topDomains.length === 0 ? (
-                  <FeatureEmptyState
-                    title={t("暂无数据")}
-                    icon={<BarChart3 size={ICON_SIZE.LARGE} />}
-                    size="small"
-                    hints={[t("继续使用扩展以生成洞察数据"), t("所有数据均在本地计算，不会上传")]}
-                  />
-                ) : (
-                  <BarList
-                    items={topDomains.map((d) => ({ label: d.host, value: d.count }))}
-                    color={token.colorPrimary}
-                  />
-                )}
-              </Card>
-            </Col>
-            <Col xs={24} md={12}>
-              <Card size="small" title={t("累计归档")}>
-                {archiveStats.totalTabs === 0 ? (
-                  <FeatureEmptyState
-                    title={t("尚未归档过 Tab")}
-                    icon={<BarChart3 size={ICON_SIZE.LARGE} />}
-                    size="small"
-                    hints={[t("继续使用扩展以生成洞察数据")]}
-                  />
-                ) : (
-                  <>
-                    <Title level={3} className={styles["insights-archive-stat"]}>
-                      {archiveStats.totalTabs}
-                    </Title>
-                    <Text type="secondary">
-                      {t("约节省 {mb} MB 内存", { mb: archiveStats.savedMemMB })}
-                    </Text>
-                  </>
-                )}
-              </Card>
-            </Col>
-            <Col xs={24} md={12}>
-              <Card size="small" title={t("使用频率前 5")}>
-                {topActions.length === 0 ? (
-                  <FeatureEmptyState
-                    title={t("暂无数据")}
-                    icon={<BarChart3 size={ICON_SIZE.LARGE} />}
-                    size="small"
-                    hints={[t("继续使用扩展以生成洞察数据"), t("所有数据均在本地计算，不会上传")]}
-                  />
-                ) : (
-                  <BarList
-                    items={topActions.map((a) => ({
-                      label: getEventLabel(a.event, t),
-                      value: a.count,
-                    }))}
-                    color={token.colorPrimary}
-                  />
-                )}
-              </Card>
-            </Col>
-          </Row>
-        )}
-
-        {/* 存储占用卡片 */}
-        {!quotaLoading && quotaInfo && (
-          <Row gutter={[12, 12]} className={styles["insights-storage-row"]}>
-            <Col xs={24} md={12}>
-              <Card size="small" title={t("chrome.storage 占用")}>
-                <Progress
-                  percent={Math.round(quotaInfo.chromeStorageRatio * 100)}
-                  status={
-                    quotaInfo.chromeStorageRatio >= 0.9
-                      ? "exception"
-                      : quotaInfo.chromeStorageRatio >= 0.7
-                        ? "active"
-                        : "normal"
-                  }
-                  size="small"
-                />
-                <Typography.Text type="secondary" className={styles["insights-stat-label"]}>
-                  {formatBytes(quotaInfo.chromeStorageUsed)} /{" "}
-                  {formatBytes(quotaInfo.chromeStorageTotal)}
-                </Typography.Text>
-              </Card>
-            </Col>
-            <Col xs={24} md={12}>
-              <Card size="small" title={t("OPFS 存储占用")}>
-                <Progress
-                  percent={quotaInfo.opfsTotal > 0 ? Math.round(quotaInfo.opfsRatio * 100) : 0}
-                  status={quotaInfo.opfsRatio >= 0.9 ? "exception" : "normal"}
-                  size="small"
-                />
-                <Typography.Text type="secondary" className={styles["insights-stat-label"]}>
-                  {formatBytes(quotaInfo.opfsUsed)}
-                  {quotaInfo.opfsTotal > 0 ? ` / ${formatBytes(quotaInfo.opfsTotal)}` : ""}
-                </Typography.Text>
-              </Card>
-            </Col>
-          </Row>
-        )}
-
-        {/* 智能建议区 */}
-        {suggestions.length > 0 && (
-          <Card size="small" title={t("智能建议")} className={styles["insights-suggestions-card"]}>
-            <Flex vertical gap={8}>
-              {suggestions.map((s) => (
-                <Alert
-                  key={s.id}
-                  type={
-                    s.level === "warning" ? "warning" : s.level === "success" ? "success" : "info"
-                  }
-                  showIcon
-                  icon={
-                    s.level === "success" ? (
-                      <CheckCircle2 size={14} />
-                    ) : s.level === "warning" ? (
-                      <AlertTriangle size={14} />
-                    ) : (
-                      <Info size={14} />
-                    )
-                  }
-                  message={t(s.titleKey)}
-                  description={t(s.descKey)}
-                  action={
-                    s.actionKey && s.onAction ? (
-                      <Button size="small" type="link" onClick={s.onAction}>
-                        {t(s.actionKey)}
-                      </Button>
-                    ) : undefined
-                  }
-                />
-              ))}
-            </Flex>
-          </Card>
+            )}
+          </Flex>
         )}
 
         <Flex className={styles["insights-footer"]} gap={8}>
@@ -529,7 +474,7 @@ export default function InsightsPanel({
           </Popconfirm>
         </Flex>
       </Flex>
-    </Modal>
+    </div>
   );
 }
 

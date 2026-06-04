@@ -14,9 +14,8 @@
 import { useMemo } from "react";
 import { Select, Segmented, Switch, Flex } from "antd";
 
-import type { NewtabPageMode, UserSettings, ViewTabPosition } from "@/shared/types";
+import type { UserSettings, ViewTabPosition } from "@/shared/types";
 
-type WindowCardDefaultCollapsed = "current-only" | "all-expanded" | "all-collapsed";
 import { useT } from "@/shared/i18n";
 import { VIEW_CONFIGS } from "@/shared/config/views";
 import { Field } from "@/features/settings/components/Field";
@@ -49,22 +48,6 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
 
   return (
     <Flex vertical className="settings-panel-stack settings-panel-stack--regular">
-      <Field
-        label={t("默认空间")}
-        hint={t("工作台用于整理标签页；热榜查看全网热点；开发工具栏提供常用开发工具。")}
-      >
-        <Segmented
-          block
-          value={settings.newtabPageMode ?? "workspace"}
-          onChange={(value) => handleSetting({ newtabPageMode: value as NewtabPageMode })}
-          options={[
-            { value: "workspace", label: t("工作台") },
-            { value: "trending", label: t("热榜") },
-            { value: "devtools", label: t("开发工具栏") },
-          ]}
-        />
-      </Field>
-
       <Field label={t("默认视图")}>
         <Select
           value={settings.defaultView}
@@ -101,7 +84,6 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
           onChange={(value) => handleSetting({ viewTabPosition: value as ViewTabPosition })}
           options={[
             { value: "top", label: t("顶部") },
-            { value: "bottom", label: t("底部") },
             { value: "left", label: t("左侧") },
             { value: "right", label: t("右侧") },
           ]}
@@ -148,23 +130,6 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
             { value: "4", label: "4" },
             { value: "5", label: "5" },
             { value: "6", label: "6" },
-          ]}
-        />
-      </Field>
-
-      <Field label={t("窗口卡片默认展开")} hint={t("进入窗口视图时默认展开哪些窗口卡片")}>
-        <Segmented
-          block
-          value={settings.windowCardDefaultCollapsed ?? "current-only"}
-          onChange={(value) =>
-            handleSetting({
-              windowCardDefaultCollapsed: value as WindowCardDefaultCollapsed,
-            })
-          }
-          options={[
-            { value: "current-only", label: t("仅当前窗口") },
-            { value: "all-expanded", label: t("全部展开") },
-            { value: "all-collapsed", label: t("全部折叠") },
           ]}
         />
       </Field>

@@ -121,7 +121,6 @@ function estimateGroupHeight(group: TabGroupData): number {
 interface VirtualColumnProps {
   groups: TabGroupData[];
   useVirtual: boolean;
-  forceCollapsed?: boolean;
   visibleTabIds: number[];
   onJump: (tabId: number, windowId: number) => void;
   onClose: (tabId: number) => void;
@@ -130,7 +129,6 @@ interface VirtualColumnProps {
 function VirtualColumn({
   groups,
   useVirtual,
-  forceCollapsed,
   visibleTabIds,
   onJump,
   onClose,
@@ -161,7 +159,6 @@ function VirtualColumn({
     >
       <TabGroupCard
         group={group}
-        forceCollapsed={forceCollapsed}
         renderTabItem={(tab) => (
           <DraggableTabItem
             key={tab.id}
@@ -228,7 +225,6 @@ export function TabGroupView() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [filterQuery, setFilterQuery] = useState("");
-  const [collapseAll, setCollapseAll] = useState(false);
 
   const forcedColumns = useSettingsStore((s) => {
     const v = s.settings.domainGroupColumns;
@@ -394,8 +390,6 @@ export function TabGroupView() {
         <TabGroupToolbar
           filterQuery={filterQuery}
           onFilterChange={setFilterQuery}
-          collapseAll={collapseAll}
-          onCollapseAllChange={setCollapseAll}
         />
         {sortedGroups.length === 0 ? null : (
           <div
@@ -411,7 +405,6 @@ export function TabGroupView() {
                   key={columnIndex}
                   groups={columnGroups}
                   useVirtual={useVirtualization}
-                  forceCollapsed={collapseAll ? true : undefined}
                   visibleTabIds={visibleTabIds}
                   onJump={(tabId, windowId) => void jumpToTab(tabId, windowId)}
                   onClose={(tabId) => void closeSingleTab(tabId)}

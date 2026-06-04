@@ -17,77 +17,44 @@
  */
 
 import { useCallback, useMemo, useState, memo } from "react";
-import { Tag, Button, Tooltip, theme, Typography, Flex } from "antd";
-import { ChevronDown, X, Globe, Moon } from "lucide-react";
+import { Tag, Button, Tooltip, Typography, Flex } from "antd";
+import { X, Globe, Moon } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
-import { Reorder } from "motion/react";
 import type { DomainGroup } from "@/shared/utils/domain";
 import { useAccent } from "@/shared/hooks/use-accent";
 import { getFaviconUrl } from "@/features/quick-start/utils/siteUtils";
 import type { SpeedDialSite } from "@/shared/types";
 import { useResolvedTheme } from "@/shared/hooks/use-resolved-theme";
 import { findAmbiguousTitleIds } from "@/shared/utils/url-display";
-import { cssVars } from "@/shared/utils/css-vars";
 import { TabItem } from "./TabItem";
 import { GroupCardShell } from "./GroupCardShell";
-import { useCardCollapse } from "../hooks/useCardCollapse";
-import { useCardReorder } from "../hooks/useCardReorder";
-import { useTabsStore, useSettingsStore } from "@/store";
+import { useGroupCardSettings } from "../hooks/useCardStyle";
+import { useSettingsStore, useTabsStore } from "@/store";
 import { useT } from "@/shared/i18n";
 import styles from "../styles/items.module.less";
 
 interface DomainGroupCardProps {
   group: DomainGroup;
-  initialCollapsed?: boolean;
 }
 
 /**
- * 域名分组卡片：头部（可折叠）+ 标签列表
+ * 域名分组卡片：头部 + 标签列表（始终展开）
  */
 export const DomainGroupCard = memo(function DomainGroupCard({
   group,
-  initialCollapsed = false,
 }: DomainGroupCardProps) {
-  const { collapsed, toggleCollapse } = useCardCollapse({ initialCollapsed });
   const [faviconError, setFaviconError] = useState(false);
   /** 关闭整个分组的 in-flight 标记，防止重复点击 + 驱动 Button loading */
   const [closing, setClosing] = useState(false);
-  const { orderedItems: tabOrder, handleReorder } = useCardReorder(group.tabs);
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
   const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
   const closeDomainGroup = useTabsStore((s) => s.closeDomainGroup);
   const discardDomainGroup = useTabsStore((s) => s.discardDomainGroup);
   /** 用户是否开启「子项显示域名图标」——domain 分组视图的专属 UI 偏好 */
   const showItemFavicon = useSettingsStore((s) => s.settings.domainGroupShowItemFavicon ?? true);
-  /** 身份色条位置偏好（left/top/none），默认 left */
-  const barPosition = useSettingsStore((s) => s.settings.domainGroupAccentBarPosition ?? "left");
-  /** 卡片圆角档位偏好（none/small/default/large），默认 default */
-  const radiusPreset = useSettingsStore((s) => s.settings.domainGroupCardRadius ?? "default");
+  const { barPosition, cardRadius, token } = useGroupCardSettings();
   const { t } = useT();
-  const { token } = theme.useToken();
   const resolvedTheme = useResolvedTheme();
-
-  /**
-   * 圆角档位 → 实际像素值：
-   *   - none：直角（0），硬朗风格
-   *   - small：4px，轻微柔化
-   *   - default：沿用 antd `borderRadiusLG`（通常 8px），与全站一致
-   *   - large：16px，更柔和
-   * 同时驱动 Card 本身及色条同侧圆角，保证视觉统一。
-   */
-  const cardRadius = useMemo(() => {
-    switch (radiusPreset) {
-      case "none":
-        return 0;
-      case "small":
-        return 4;
-      case "large":
-        return 16;
-      case "default":
-      default:
-        return token.borderRadiusLG;
-    }
-  }, [radiusPreset, token.borderRadiusLG]);
 
   /**
    * 关闭整组处理：
@@ -139,64 +106,25 @@ export const DomainGroupCard = memo(function DomainGroupCard({
   /** 同组内 title 重复的 tab id 集合 —— 驱动 URL 消歧行的显示 */
   const ambiguousIds = useMemo(() => findAmbiguousTitleIds(group.tabs), [group.tabs]);
 
-  const cardStyle = useMemo<React.CSSProperties>(
-    () => ({
-      borderRadius: cardRadius || 12,
-      overflow: "hidden",
-      position: "relative",
-      boxShadow: "var(--app-shadow-card)",
-      border: `1px solid ${token.colorBorderSecondary}`,
-      ...cssVars({
-        "--app-hover-border": token.colorBorder,
-        "--app-domain-card-radius": `${cardRadius || 12}px`,
-        "--app-domain-card-bar": barColor,
-        "--app-domain-card-badge-bg": accent.soft,
-        "--app-domain-card-header-border": collapsed ? "transparent" : token.colorBorderSecondary,
-        "--app-domain-card-chevron-color": token.colorTextTertiary,
-        "--app-domain-card-title-color": token.colorText,
-        "--app-row-hover-bg": token.colorFillSecondary,
-      }),
-    }),
-    [
-      accent.soft,
-      barColor,
-      cardRadius,
-      collapsed,
-      token.colorBorder,
-      token.colorBorderSecondary,
-      token.colorFillSecondary,
-      token.colorText,
-      token.colorTextTertiary,
-    ],
-  );
 
   return (
     <GroupCardShell
-      style={cardStyle}
       accentBarPosition={barPosition}
-      collapsed={collapsed}
+      interactive={false}
+      barColor={barColor}
+      badgeBg={accent.soft}
+      cardRadius={cardRadius}
+      extraStyle={{
+        "--app-hover-border": token.colorBorder,
+        "--app-row-hover-bg": token.colorFillSecondary,
+      } as React.CSSProperties}
       header={
         <>
           {/*
-            分组头部 —— 可点击展开/折叠，flex:1 占满剩余空间。
-            这里特意用原生 <button>：antd <Button type="text"> 自带 hover/focus 浅色背景，
-            会与我们 less 里 `app-domain-group-header-wrap::before` 自定义的高亮层叠加，
-            视觉上"多了一层"。原生按钮无默认背景，把视觉反馈完全交给我们自己的样式控制。
-            可访问性靠 aria-expanded / aria-label 维持。
+            分组头部 —— 纯展示，不再可折叠。
+            域名徽章 + 域名文本 + 标签计数。
           */}
-          {/* eslint-disable-next-line no-restricted-syntax */}
-          <button
-            type="button"
-            onClick={toggleCollapse}
-            aria-expanded={!collapsed}
-            aria-label={collapsed ? t("展开") : t("折叠")}
-            className={styles["app-domain-group-header"]}
-          >
-            <ChevronDown
-              size={ICON_SIZE.TINY}
-              className={`${styles["app-domain-group-chevron"]}${collapsed ? ` ${styles["is-collapsed"]}` : ""}`}
-            />
-
+          <div className={styles["app-domain-group-header"]}>
             {/*
             域名徽章：26×26 圆角方块，底色是 accent.soft（极低透明主色）
             内部要么嵌 favicon，要么在占位图标。把"色彩=身份"的语义集中在这块小徽章里，
@@ -221,7 +149,7 @@ export const DomainGroupCard = memo(function DomainGroupCard({
             </Typography.Text>
 
             <Tag className={styles["app-domain-group-count"]}>{group.tabs.length}</Tag>
-          </button>
+          </div>
 
           {/* 操作按钮组：flex 排列，不再绝对定位 */}
           <Flex className={styles["app-domain-group-actions"]}>
@@ -238,7 +166,7 @@ export const DomainGroupCard = memo(function DomainGroupCard({
                   });
                 }}
                 aria-label={t("休眠整组")}
-                className={`app-hover-reveal ${styles["app-domain-group-action"]}`}
+                className={styles["app-domain-group-action"]}
               />
             </Tooltip>
 
@@ -255,50 +183,31 @@ export const DomainGroupCard = memo(function DomainGroupCard({
                   void handleCloseAll(e);
                 }}
                 aria-label={t("关闭此域名所有标签页")}
-                // closing 时强制显示（is-visible），其余情况由 hover/focus 驱动
-                className={`app-hover-reveal ${styles["app-domain-group-action"]}${closing ? ` ${styles["is-visible"]}` : ""}`}
+                className={styles["app-domain-group-action"]}
               />
             </Tooltip>
           </Flex>
         </>
       }
     >
-      {/* 标签列表 — 使用 motion Reorder 实现分组内拖拽排序 */}
-      <Flex vertical gap={4} className={styles["app-domain-group-list--flex"]}>
-        <Reorder.Group
-          axis="y"
-          values={tabOrder}
-          onReorder={handleReorder}
-          className={styles["app-domain-group-sortable"]}
-        >
-          {tabOrder.map((tab) => (
-            <Reorder.Item
-              key={tab.id}
-              value={tab}
-              className={styles["app-domain-group-sortable-item"]}
-              whileDrag={{
-                scale: 1.02,
-                boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
-                zIndex: 10,
-                position: "relative" as const,
-              }}
-            >
-              <TabItem
-                tab={tab}
-                onJump={(id, wid) => {
-                  void jumpToTab(id, wid);
-                }}
-                onClose={(id) => {
-                  void closeSingleTab(id);
-                }}
-                hideFavicon={!showItemFavicon}
-                showUrlHint={ambiguousIds.has(tab.id)}
-                selectable
-                visibleTabIds={tabOrder.map((t) => t.id)}
-              />
-            </Reorder.Item>
-          ))}
-        </Reorder.Group>
+      {/* 标签列表 */}
+      <Flex vertical gap={6} className={styles["app-domain-group-list--flex"]}>
+        {group.tabs.map((tab) => (
+          <TabItem
+            key={tab.id}
+            tab={tab}
+            onJump={(id, wid) => {
+              void jumpToTab(id, wid);
+            }}
+            onClose={(id) => {
+              void closeSingleTab(id);
+            }}
+            hideFavicon={!showItemFavicon}
+            showUrlHint={ambiguousIds.has(tab.id)}
+            selectable
+            visibleTabIds={group.tabs.map((t) => t.id)}
+          />
+        ))}
       </Flex>
     </GroupCardShell>
   );

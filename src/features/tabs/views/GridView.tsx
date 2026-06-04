@@ -232,7 +232,7 @@ function GridCard({
       </Flex>
 
       {/* 底部信息区 */}
-      <Flex vertical gap={2} className={styles["app-grid-card-content"]}>
+      <Flex vertical gap={6} className={styles["app-grid-card-content"]}>
         <Flex align="center" gap="small" className={styles["app-grid-card-meta"]}>
           <Typography.Text className={styles["app-grid-card-domain"]}>{domain}</Typography.Text>
           {hasAudible && (
@@ -374,7 +374,7 @@ function DomainTabsPanel({
       </Flex>
 
       {/* 列表区 */}
-      <Flex vertical gap={2} className={styles["app-grid-popover__list"]}>
+      <Flex vertical gap={6} className={styles["app-grid-popover__list"]}>
         {tabs.map((tab) => (
           <TabItem
             key={tab.id}

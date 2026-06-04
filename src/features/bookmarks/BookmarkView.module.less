@@ -1,0 +1,32 @@
+.bookmark-view {
+  padding: 12px 16px;
+}
+
+.bookmark-search {
+  margin-bottom: 4px;
+}
+
+.bookmark-item {
+  border-radius: var(--ant-border-radius-sm);
+  padding: 6px 10px !important;
+
+  &:hover {
+    background: var(--ant-color-fill-tertiary);
+  }
+}
+
+.bookmark-icon {
+  flex-shrink: 0;
+  color: var(--ant-color-text-tertiary);
+}
+
+.bookmark-link-icon {
+  flex-shrink: 0;
+  color: var(--ant-color-text-quaternary);
+  opacity: 0;
+  transition: opacity 0.15s;
+
+  .bookmark-item:hover & {
+    opacity: 1;
+  }
+}

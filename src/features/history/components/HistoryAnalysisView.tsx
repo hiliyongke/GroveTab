@@ -1,7 +1,7 @@
 /**
  * HistoryAnalysisView —— 历史分析视图组件（P2-11）
  *
- * 从 HistoryPanel.tsx 提取的独立组件，提供多维历史数据可视化：
+ * 从 HistoryView.tsx 提取的独立组件，提供多维历史数据可视化：
  *   - 每日活动趋势柱状图
  *   - 小时热力分布
  *   - 站点访问排行

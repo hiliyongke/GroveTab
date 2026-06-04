@@ -19,16 +19,12 @@ export interface CustomSearchEngine {
   color?: string;
 }
 
-export type NewtabPageMode = "workspace" | "trending" | "devtools";
-
 /** 视图标签栏位置 */
-export type ViewTabPosition = "top" | "left" | "right" | "bottom";
+export type ViewTabPosition = "top" | "left" | "right";
 
 export interface UserSettings {
   overrideNewTab: boolean;
-  /** 新标签页一级空间：workspace 专注标签整理；trending 全网热榜；devtools 开发工具栏。 */
-  newtabPageMode?: NewtabPageMode;
-  /** 视图标签栏位置：top（搜索栏下方水平）/ left / right（垂直侧栏）/ bottom（固定底部水平） */
+  /** 视图标签栏位置：top（搜索栏下方水平）/ left / right（垂直侧栏） */
   viewTabPosition?: ViewTabPosition;
   defaultView:
     | "domain" // legacy，运行期自动映射为 tabs + tabsLayout='masonry'
@@ -40,7 +36,13 @@ export interface UserSettings {
     | "tabgroup"
     | "window"
     | "kanban"
-    | "archive";
+    | "bookmarks"
+    | "archive"
+    | "trending"
+    | "devtools"
+    | "insights"
+    | "history"
+    | "trash";
   /**
    * 标签页主视图的布局模式（仅 defaultView='tabs' 时生效）。
    *   - 'masonry'（默认）：按域名分组的瀑布流多列布局（原 domain 视图）
@@ -89,8 +91,6 @@ export interface UserSettings {
   domainGroupColumns?: "auto" | 1 | 2 | 3 | 4 | 5 | 6;
   /** 窗口视图卡片列数；'auto' 表示按 360px 列宽自适应，1–6 为手动锁定。 */
   windowCardColumns?: "auto" | 1 | 2 | 3 | 4 | 5 | 6;
-  /** 窗口视图默认折叠策略。 */
-  windowCardDefaultCollapsed?: "current-only" | "all-expanded" | "all-collapsed";
   /** 窗口卡片内是否展示 Chrome 原生 Tab Group 子区块。 */
   windowCardShowGroupSection?: boolean;
   /** 是否展示窗口/分组末尾的幽灵拖拽落点。 */
@@ -383,7 +383,7 @@ export interface UserSettings {
    * 历史记录主开关（默认 true）。关闭后：
    *   - sw 不再向 closedTabs / historyEvents 写入新记录
    *   - SearchBox 的「最近关闭」section 自动隐藏
-   *   - HistoryPanel 仍可打开查看历史数据，但不会增加新条目
+   *   - HistoryView 仍可打开查看历史数据，但不会增加新条目
    */
   historyEnabled?: boolean;
 

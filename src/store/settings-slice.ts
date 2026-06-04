@@ -59,7 +59,6 @@ function mergeSettingsForStore(
 export const useSettingsStore = create<SettingsState>((set) => ({
   settings: {
     overrideNewTab: true,
-    newtabPageMode: "workspace",
     viewTabPosition: "top",
     defaultView: "tabs",
     theme: "system",
@@ -68,7 +67,6 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     language: "zh-CN",
     domainGroupColumns: "auto",
     windowCardColumns: "auto",
-    windowCardDefaultCollapsed: "current-only",
     windowCardShowGroupSection: true,
     windowCardShowGhostDropZone: true,
     windowCardAccentBarPosition: "left",

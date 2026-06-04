@@ -23,7 +23,6 @@ import {
   theme,
 } from "antd";
 import {
-  ChevronDown,
   EyeOff,
   Heart,
   Layers,
@@ -40,16 +39,13 @@ import {
 
 import type { LiveTab, WindowInfo } from "@/shared/types";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
-import { cssVars } from "@/shared/utils/css-vars";
 import { useT } from "@/shared/i18n";
 import { useSettingsStore, useMetadataStore } from "@/store";
 import { GroupCardShell } from "@/features/tabs/components/GroupCardShell";
-import { useCardCollapse } from "@/features/tabs/hooks/useCardCollapse";
 import { useWindowActions } from "@/features/tabs/hooks/useWindowActions";
 import { DraggableTab } from "./DraggableTab";
 import { DroppableZone } from "./DroppableZone";
 import { TabGroupSection } from "./TabGroupSection";
-import { CollapsedSummary } from "./CollapsedSummary";
 
 /** 窗口颜色色板（8 色，与 Chrome TabGroup ColorEnum 单源对齐）
  * 顺序：grey → blue → red → yellow → green → pink → purple → cyan
@@ -78,7 +74,6 @@ interface WindowCardProps {
   tabs: LiveTab[];
   windowInfo?: WindowInfo;
   currentWindowId: number;
-  initialCollapsed?: boolean;
   visibleTabIds: number[];
   onJump: (tabId: number, windowId: number) => void;
   onCloseTab: (tabId: number) => void;
@@ -120,7 +115,6 @@ export const WindowCard = memo(function WindowCard({
   tabs,
   windowInfo,
   currentWindowId,
-  initialCollapsed = false,
   visibleTabIds,
   onJump,
   onCloseTab,
@@ -128,7 +122,6 @@ export const WindowCard = memo(function WindowCard({
 }: WindowCardProps) {
   const { t } = useT();
   const { token } = theme.useToken();
-  const { collapsed, toggleCollapse } = useCardCollapse({ initialCollapsed });
   const showGroupSection = useSettingsStore(
     (state) => state.settings.windowCardShowGroupSection ?? true,
   );
@@ -209,21 +202,27 @@ export const WindowCard = memo(function WindowCard({
           : "danger"
       : null;
 
-  const cardStyle = useMemo<React.CSSProperties>(
+  const cardBarColor = useMemo(
+    () => windowColor ?? (isIncognito ? token.colorTextTertiary : token.colorPrimary),
+    [isIncognito, token, windowColor],
+  );
+  const cardBadgeBg = useMemo(
     () =>
-      cssVars({
-        "--app-domain-card-radius": `${token.borderRadiusLG}px`,
-        "--app-domain-card-bar":
-          windowColor ?? (isIncognito ? token.colorTextTertiary : token.colorPrimary),
-        "--app-domain-card-badge-bg": windowColor
-          ? `color-mix(in srgb, ${windowColor} 12%, transparent)`
-          : isIncognito
-            ? token.colorFillSecondary
-            : token.colorPrimaryBg,
-        "--app-domain-card-header-border": collapsed ? "transparent" : token.colorBorderSecondary,
-        "--app-domain-card-chevron-color": token.colorTextTertiary,
-        "--app-domain-card-title-color": token.colorText,
-        "--app-row-hover-bg": token.colorFillSecondary,
+      windowColor
+        ? `color-mix(in srgb, ${windowColor} 12%, transparent)`
+        : isIncognito
+          ? token.colorFillSecondary
+          : token.colorPrimaryBg,
+    [isIncognito, token, windowColor],
+  );
+
+  return (
+    <GroupCardShell
+      accentBarPosition={accentBarPosition}
+      interactive={false}
+      barColor={cardBarColor}
+      badgeBg={cardBadgeBg}
+      extraStyle={{
         "--app-window-card-bg": isIncognito ? token.colorFillQuaternary : token.colorBgContainer,
         "--app-window-card-border": isFocused
           ? (windowColor ?? token.colorPrimaryBorder)
@@ -231,36 +230,10 @@ export const WindowCard = memo(function WindowCard({
         "--app-window-card-header-tint": windowColor
           ? `color-mix(in srgb, ${windowColor} 4%, transparent)`
           : "transparent",
-      }),
-    [collapsed, isFocused, isIncognito, token, windowColor],
-  );
-
-  return (
-    <GroupCardShell
-      style={cardStyle}
-      accentBarPosition={accentBarPosition}
-      collapsed={collapsed}
-      collapsedSummary={
-        <CollapsedSummary tabs={tabs} groupCount={groupCount} onClick={toggleCollapse} />
-      }
+      } as React.CSSProperties}
       header={
         <>
-          {/* 左侧：可点击的标题区（折叠/展开）
-              用原生 <button>：antd <Button type="text"> 内部会包一层 <span>，
-              打断 flex 布局导致 title-wrap 的 flex:1 失效、标题被截断。
-              DomainGroupCard 已采用同样方案。 */}
-          {/* eslint-disable-next-line no-restricted-syntax */}
-          <button
-            type="button"
-            className={styles["app-window-card-header"]}
-            aria-expanded={!collapsed}
-            aria-label={collapsed ? t("展开") : t("折叠")}
-            onClick={toggleCollapse}
-          >
-            <ChevronDown
-              className={`${styles["app-window-card-chevron"]}${collapsed ? ` ${styles["is-collapsed"]}` : ""}`}
-              size={ICON_SIZE.TINY}
-            />
+          <div className={styles["app-window-card-header"]}>
             <span className={styles["app-window-card-badge"]}>
               {isIncognito ? <Shield size={ICON_SIZE.SMALL} /> : <Monitor size={ICON_SIZE.SMALL} />}
             </span>
@@ -284,7 +257,7 @@ export const WindowCard = memo(function WindowCard({
                 {t("window.summary", { count: tabs.length, groups: groupCount })}
               </span>
             </span>
-          </button>
+          </div>
 
           {/* 中间：Tags（静态指示器，不触发 hover 背景） */}
           <Flex align="center" gap={6} className={styles["app-window-card-tags"]}>
@@ -437,53 +410,51 @@ export const WindowCard = memo(function WindowCard({
         ) : undefined
       }
     >
-      {!collapsed && (
-        <DroppableZone
-          id={`window-card:${windowId}`}
-          data={{ kind: "window", windowId, incognito: isIncognito }}
-          className={styles["app-window-card-body"]}
-        >
-          {showGroupSection &&
-            groups.map((group) => (
-              <TabGroupSection
-                key={group.groupId}
-                groupId={group.groupId}
-                tabs={group.tabs}
-                visibleTabIds={visibleTabIds}
-                onJump={onJump}
-                onClose={onCloseTab}
-                onRefresh={onRefresh}
-                showIdleTime={showIdleTime}
-              />
-            ))}
+      <DroppableZone
+        id={`window-card:${windowId}`}
+        data={{ kind: "window", windowId, incognito: isIncognito }}
+        className={styles["app-window-card-body"]}
+      >
+        {showGroupSection &&
+          groups.map((group) => (
+            <TabGroupSection
+              key={group.groupId}
+              groupId={group.groupId}
+              tabs={group.tabs}
+              visibleTabIds={visibleTabIds}
+              onJump={onJump}
+              onClose={onCloseTab}
+              onRefresh={onRefresh}
+              showIdleTime={showIdleTime}
+            />
+          ))}
 
-          {ungroupedTabs.length > 0 && (
-            <DroppableZone
-              id={`window-ungrouped:${windowId}`}
-              data={{ kind: "ungrouped", windowId, incognito: isIncognito }}
-              className={styles["app-window-ungrouped-section"]}
-            >
-              <Flex className={styles["app-window-ungrouped-header"]}>
-                <Layers size={ICON_SIZE.SMALL} />
-                <Typography.Text>{t("windowGroup.ungroupedTabs")}</Typography.Text>
-                <Tag className={styles["app-window-group-count"]}>{ungroupedTabs.length}</Tag>
-              </Flex>
-              <List className={styles["app-window-group-list"]}>
-                {ungroupedTabs.map((tab) => (
-                  <DraggableTab
-                    key={tab.id}
-                    tab={tab}
-                    onJump={onJump}
-                    onClose={onCloseTab}
-                    visibleTabIds={visibleTabIds}
-                    showIdleTime={showIdleTime}
-                  />
-                ))}
-              </List>
-            </DroppableZone>
-          )}
-        </DroppableZone>
-      )}
+        {ungroupedTabs.length > 0 && (
+          <DroppableZone
+            id={`window-ungrouped:${windowId}`}
+            data={{ kind: "ungrouped", windowId, incognito: isIncognito }}
+            className={styles["app-window-ungrouped-section"]}
+          >
+            <Flex className={styles["app-window-ungrouped-header"]}>
+              <Layers size={ICON_SIZE.SMALL} />
+              <Typography.Text>{t("windowGroup.ungroupedTabs")}</Typography.Text>
+              <Tag className={styles["app-window-group-count"]}>{ungroupedTabs.length}</Tag>
+            </Flex>
+            <List className={styles["app-window-group-list"]}>
+              {ungroupedTabs.map((tab) => (
+                <DraggableTab
+                  key={tab.id}
+                  tab={tab}
+                  onJump={onJump}
+                  onClose={onCloseTab}
+                  visibleTabIds={visibleTabIds}
+                  showIdleTime={showIdleTime}
+                />
+              ))}
+            </List>
+          </DroppableZone>
+        )}
+      </DroppableZone>
     </GroupCardShell>
   );
 });

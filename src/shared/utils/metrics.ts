@@ -2,7 +2,7 @@
  * Metrics — Local privacy-friendly usage analytics（v1.0 封板事件版）
  *
  * 旧 API（累加计数器）继续保留以兼容现有调用点，新增事件型 track API。
- * 事件型数据存放在应用命名空间键下，与 InsightsPanel / 清除按钮对齐。
+ * 事件型数据存放在应用命名空间键下，与 InsightsView / 清除按钮对齐。
  */
 
 import { getData, setData } from '@/repositories';
@@ -52,7 +52,7 @@ export async function recordMetric(
   } catch {
     // metrics 永远不应阻塞主流程
   }
-  // 同时写入事件流，便于 InsightsPanel 展示
+  // 同时写入事件流，便于 InsightsView 展示
   void track(String(key), { increment });
 }
 

@@ -34,7 +34,6 @@ const CURRENT_SCHEMA_VERSION = 3;
 
 const DEFAULT_SETTINGS: UserSettings = {
   overrideNewTab: true,
-  newtabPageMode: "workspace",
   viewTabPosition: "top",
   defaultView: "tabs",
   theme: "system",
@@ -43,7 +42,6 @@ const DEFAULT_SETTINGS: UserSettings = {
   language: "zh-CN",
   domainGroupColumns: "auto",
   windowCardColumns: "auto",
-  windowCardDefaultCollapsed: "current-only",
   windowCardShowGroupSection: true,
   windowCardShowGhostDropZone: true,
   windowCardAccentBarPosition: "left",

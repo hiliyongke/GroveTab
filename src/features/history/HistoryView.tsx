@@ -1,5 +1,5 @@
 /**
- * HistoryPanel —— 插件原生历史记录面板
+ * HistoryView —— 浏览历史记录视图
  *
  * 设计目标：
  *   1. 以「最近关闭」为头号场景：用户最常的诉求是"误关 tab 撤回"
@@ -22,14 +22,12 @@ import {
   type ReactNode,
 } from "react";
 import {
-  Drawer,
   Tabs,
   Input,
   Empty,
   Button,
   Tooltip,
   Tag,
-  Popconfirm,
   Segmented,
   theme,
   Space,
@@ -37,9 +35,7 @@ import {
   Typography,
 } from "antd";
 import {
-  History,
   RotateCcw,
-  Trash2,
   Search,
   X,
   Layers,
@@ -66,14 +62,13 @@ import {
   deleteClosedTab,
   deleteClosedWindow,
   deleteHistoryEvent,
-  clearAllNativeHistory,
+  analyzeHistory,
+  reconcileFromChromeHistory,
   getDailySnapshots,
   diffSnapshots,
   snapshotDateKey,
   markHistoryEventUndone,
-  analyzeHistory,
   exportHistoryJson,
-  reconcileFromChromeHistory,
 } from "@/repositories";
 import type { HistoryAnalysis } from "@/repositories";
 import { hasHistoryUndoHandler, undoHistoryEvent } from "@/services/history/undo-bus";
@@ -86,12 +81,8 @@ import type {
   SnapshotDiff,
 } from "@/shared/types";
 import { HistoryAnalysisView } from "./components/HistoryAnalysisView";
-import styles from "./HistoryPanel.module.less";
+import styles from "./HistoryView.module.less";
 
-interface HistoryPanelProps {
-  open: boolean;
-  onClose: () => void;
-}
 
 type FilterMode = "all" | "tabs" | "search" | "archive";
 
@@ -288,7 +279,7 @@ function SnapshotDiffCard({
   );
 }
 
-export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
+export function HistoryView() {
   const { t } = useT();
   const { token } = theme.useToken();
   const relTime = useRelativeTime();
@@ -357,14 +348,14 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
   }, []);
 
   useEffect(() => {
-    if (open) void refresh();
-  }, [open, refresh]);
+    void refresh();
+  }, [refresh]);
 
   useEffect(() => {
-    if (activeTab === "analysis" && open) {
+    if (activeTab === "analysis") {
       void loadAnalysis(analysisRangeMs);
     }
-  }, [activeTab, open, analysisRangeMs, loadAnalysis]);
+  }, [activeTab, analysisRangeMs, loadAnalysis]);
 
   /** 关键词过滤的最近关闭 */
   const filteredClosedTabs = useMemo(() => {
@@ -505,12 +496,6 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
     [refresh, t],
   );
 
-  const handleClearAll = useCallback(async () => {
-    await clearAllNativeHistory();
-    feedback.success(t("已清空历史记录"));
-    void refresh();
-  }, [refresh, t]);
-
   /** 任务6：导出历史 JSON */
   const handleExportJson = useCallback(async () => {
     try {
@@ -530,23 +515,7 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
 
   // ── 渲染 ────────────────────────────────────
 
-  const headerExtra = (
-    <Flex align="center" gap={6} className={styles["history-panel-header-extra"]}>
-      <Popconfirm
-        title={t("确定要清空全部历史记录吗？此操作不可撤销。")}
-        onConfirm={() => {
-          void handleClearAll();
-        }}
-        okButtonProps={{ danger: true }}
-      >
-        <Button size="small" type="text" danger icon={<Trash2 size={ICON_SIZE.SMALL} />}>
-          {t("清空全部")}
-        </Button>
-      </Popconfirm>
-    </Flex>
-  );
-
-  const drawerVars = {
+  const viewVars = {
     "--history-accent": token.colorPrimary,
     "--history-text": token.colorText,
     "--history-text-secondary": token.colorTextSecondary,
@@ -768,32 +737,8 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
   };
 
   return (
-    <Drawer
-      open={open}
-      onClose={onClose}
-      width={520}
-      title={
-        <Flex align="center" gap={10} className={styles["history-panel-title"]}>
-          <History size={ICON_SIZE.MEDIUM} />
-          <Flex vertical>
-            <Typography.Text>{t("历史记录")}</Typography.Text>
-            <Typography.Text className={styles["history-panel-subtitle"]}>
-              {t("回看你在插件里做过什么，并一键恢复关闭的标签页")}
-            </Typography.Text>
-          </Flex>
-        </Flex>
-      }
-      extra={headerExtra}
-      classNames={{
-        mask: "history-drawer__mask",
-        header: "history-drawer__header",
-        title: "history-drawer__title",
-        body: "history-panel-body",
-        section: "history-drawer__section",
-      }}
-      rootClassName="history-panel-root"
-    >
-      <Flex vertical className={styles["history-panel-shell"]} style={drawerVars}>
+    <div style={{ padding: "12px 16px 32px", minHeight: 0 }}>
+      <Flex vertical className={styles["history-panel-shell"]} style={viewVars}>
         <Flex vertical gap={10} className={styles["history-panel-toolbar"]}>
           <Input
             value={keyword}
@@ -921,6 +866,6 @@ export function HistoryPanel({ open, onClose }: HistoryPanelProps) {
           )}
         </Flex>
       </Flex>
-    </Drawer>
+    </div>
   );
 }

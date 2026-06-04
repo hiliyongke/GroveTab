@@ -38,12 +38,6 @@ export interface PanelStackAPI {
   openSearch: () => void;
   /** 便捷方法：打开设置面板 */
   openSettings: (subId?: string) => void;
-  /** 便捷方法：打开洞察面板 */
-  openInsights: () => void;
-  /** 便捷方法：打开历史面板 */
-  openHistory: () => void;
-  /** 便捷方法：打开回收站面板 */
-  openTrash: () => void;
   /** 便捷方法：打开命令面板 */
   openCommandPalette: () => void;
 }
@@ -126,9 +120,6 @@ export function usePanelStack(): PanelStackAPI {
     (subId?: string) => push({ id: "settings", subId }),
     [push],
   );
-  const openInsights = useCallback(() => push({ id: "insights" }), [push]);
-  const openHistory = useCallback(() => push({ id: "history" }), [push]);
-  const openTrash = useCallback(() => push({ id: "trash" }), [push]);
   const openCommandPalette = useCallback(() => push({ id: "commandPalette" }), [push]);
 
   return {
@@ -143,9 +134,6 @@ export function usePanelStack(): PanelStackAPI {
     isOpen,
     openSearch,
     openSettings,
-    openInsights,
-    openHistory,
-    openTrash,
     openCommandPalette,
   };
 }

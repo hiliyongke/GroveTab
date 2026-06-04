@@ -44,18 +44,10 @@ import { SortableWindowCard } from "./SortableWindowCard";
 import type { WindowDragData, WindowDropData } from "./dragTypes";
 import styles from "@/features/tabs/styles/views.module.less";
 
-type WindowCardDefaultCollapsed = "current-only" | "all-expanded" | "all-collapsed";
-
 function normalizeWindowCardOrder(value: unknown): number[] {
   return Array.isArray(value)
     ? value.filter((item): item is number => typeof item === "number")
     : [];
-}
-
-function normalizeDefaultCollapsed(value: unknown): WindowCardDefaultCollapsed {
-  return value === "all-expanded" || value === "all-collapsed" || value === "current-only"
-    ? value
-    : "current-only";
 }
 
 function groupTabsByWindow(tabs: LiveTab[]): Map<number, LiveTab[]> {
@@ -78,22 +70,6 @@ function getWindowColProps(
   }
   // 默认响应式：1 列 → 2 列 → 3 列
   return { xs: 24, lg: 12, xl: 8 };
-}
-
-function shouldCollapseWindow(
-  strategy: "current-only" | "all-expanded" | "all-collapsed",
-  windowId: number,
-  currentWindowId: number,
-): boolean {
-  switch (strategy) {
-    case "all-expanded":
-      return false;
-    case "all-collapsed":
-      return true;
-    case "current-only":
-    default:
-      return windowId !== currentWindowId;
-  }
 }
 
 /**
@@ -121,15 +97,10 @@ export function WindowView() {
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   // 订阅原始字段（保持引用稳定，避免 selector 每次返回新数组导致 React 无限重渲染 / error #185）
   const rawWindowCardOrder = useSettingsStore((s) => s.settings.windowCardOrder);
-  const rawDefaultCollapsed = useSettingsStore((s) => s.settings.windowCardDefaultCollapsed);
   const rawWindowCardColumns = useSettingsStore((s) => s.settings.windowCardColumns);
   const windowCardOrder = useMemo(
     () => normalizeWindowCardOrder(rawWindowCardOrder),
     [rawWindowCardOrder],
-  );
-  const defaultCollapsed = useMemo(
-    () => normalizeDefaultCollapsed(rawDefaultCollapsed),
-    [rawDefaultCollapsed],
   );
   const forcedColumns = useMemo<number | null>(() => {
     return typeof rawWindowCardColumns === "number" &&
@@ -329,16 +300,11 @@ export function WindowView() {
                 <Col key={windowId} {...getWindowColProps(forcedColumns)}>
                   <SortableWindowCard windowId={windowId}>
                     <WindowCard
-                      key={`${windowId}-${defaultCollapsed}`}
+                      key={windowId}
                       windowId={windowId}
                       tabs={windowTabs}
                       windowInfo={windows.get(windowId)}
                       currentWindowId={currentWindowId}
-                      initialCollapsed={shouldCollapseWindow(
-                        defaultCollapsed,
-                        windowId,
-                        currentWindowId,
-                      )}
                       visibleTabIds={visibleTabIds}
                       onJump={(tabId, targetWindowId) => {
                         void jumpToTab(tabId, targetWindowId);

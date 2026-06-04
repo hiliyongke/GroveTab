@@ -1,35 +1,8 @@
 /**
- * HistoryPanel 样式
+ * HistoryView 样式
  *
- * 与全局 Drawer 一致的圆角与色板，靠 token 透传 CSS 变量驱动配色，
- * 暗色模式下不需要额外 override（变量已在主题层完成切换）。
+ * 内嵌在主内容区展示，统一使用 antd Token 驱动配色。
  */
-
-.history-drawer__section {
-  overflow: hidden;
-}
-
-.history-drawer__mask {
-  background: var(--app-overlay-mask-bg, rgb(15 23 42 / 24%));
-  backdrop-filter: blur(var(--app-overlay-blur, 12px));
-}
-
-.history-drawer__header {
-  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, transparent);
-  border-bottom: 1px solid var(--ant-color-border-secondary);
-}
-
-.history-drawer__title {
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-.history-panel-root .history-panel-body {
-  padding: 0;
-  overflow: hidden;
-  background: transparent;
-}
 
 .history-panel-shell {
   display: flex; /* antd 组件内部微调整 */

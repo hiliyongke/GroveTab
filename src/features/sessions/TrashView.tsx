@@ -1,18 +1,18 @@
 /**
- * TrashView — 回收站面板
+ * TrashView — 回收站视图
  *
- * 展示已关闭的标签页，支持恢复、删除、清空。
+ * 展示已关闭的标签页分组，支持批量恢复、逐一分组删除、一键清空。
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { Button, Card, Empty, Popconfirm, Space, Spin, Tag, Tooltip, Flex, Typography } from "antd";
+import { Button, Card, Empty, Popconfirm, Space, Tag, Tooltip, Flex, Typography, Spin } from "antd";
 import { Trash2, RotateCcw, Clock, X } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
 import { feedback } from "@/shared/ui/feedback";
 import { getTrashItems, removeFromTrash, clearTrash } from "@/repositories/trash-repo";
 import { createTab } from "@/chrome";
-import type { TrashedItem, TrashedTab } from "@/shared/types";
+import type { TrashedTab, TrashedItem } from "@/shared/types";
 import styles from "./styles/trash.module.less";
 
 function formatRelativeTime(
@@ -102,99 +102,106 @@ export function TrashView() {
     }
   }, [refresh, t]);
 
-  if (loading) {
-    return (
-      <Flex justify="center" align="center" className={styles["trash-loading"]}>
-        <Spin />
-      </Flex>
-    );
-  }
-
-  if (items.length === 0) {
-    return (
-      <Empty
-        image={Empty.PRESENTED_IMAGE_SIMPLE}
-        description={t("trash.empty")}
-        className={styles["trash-empty"]}
-      />
-    );
-  }
+  const totalTabs = items.reduce((sum, item) => sum + item.tabs.length, 0);
 
   return (
-    <Flex vertical gap="middle" className={styles["trash-view"]}>
-      <Flex justify="space-between" align="center">
-        <Typography.Text type="secondary">
-          {t("trash.count", { count: items.length })}
-        </Typography.Text>
-        <Popconfirm
-          title={t("trash.clearConfirm")}
-          description={t("trash.clearDesc")}
-          onConfirm={() => void handleClearAll()}
-          okText={t("trash.clear")}
-          cancelText={t("取消")}
-          okButtonProps={{ danger: true }}
-        >
-          <Button danger size="small" icon={<Trash2 size={ICON_SIZE.SMALL} />}>
-            {t("trash.clear")}
-          </Button>
-        </Popconfirm>
-      </Flex>
-
-      {items.map((item) => (
-        <Card
-          key={item.id}
-          size="small"
-          className={styles["trash-card"]}
-          title={
-            <Flex align="center" gap="small">
-              <span className={styles["trash-card__title"]}>{item.name}</span>
-              <Tag color="blue">{String(item.tabs.length)}</Tag>
-            </Flex>
-          }
-          extra={
-            <Space size={4}>
-              <Tooltip title={t("trash.restore")}>
-                <Button
-                  size="small"
-                  type="primary"
-                  icon={<RotateCcw size={ICON_SIZE.SMALL} />}
-                  onClick={() => void handleRestore(item)}
-                >
-                  {t("trash.restore")}
-                </Button>
-              </Tooltip>
-              <Tooltip title={t("trash.delete")}>
-                <Button
-                  size="small"
-                  danger
-                  icon={<X size={ICON_SIZE.SMALL} />}
-                  onClick={() => void handleDelete(item.id)}
-                />
-              </Tooltip>
-            </Space>
-          }
-        >
-          <Flex vertical gap="small">
-            <Flex align="center" gap={4} className={styles["trash-card__meta"]}>
-              <Clock size={ICON_SIZE.XS} />
-              <Typography.Text type="secondary" className={styles["trash-card__meta"]}>
-                {formatRelativeTime(item.trashedAt, t)}
-              </Typography.Text>
-            </Flex>
-            <Flex wrap gap="small">
-              {item.tabs.slice(0, 8).map((tab) => (
-                <Tooltip key={tab.id} title={tab.title}>
-                  <Flex align="center" gap={4} className={styles["trash-tab-chip"]}>
-                    <TabFavicon tab={tab} />
-                    <span className={styles["trash-tab-chip__title"]}>{tab.title || tab.url}</span>
-                  </Flex>
-                </Tooltip>
-              ))}
-              {item.tabs.length > 8 && <Tag>{`+${item.tabs.length - 8}`}</Tag>}
-            </Flex>
+    <div className={styles["trash-shell"]}>
+      {loading ? (
+        <Flex align="center" justify="center" className={styles["trash-loading"]}>
+          <Spin />
+        </Flex>
+      ) : items.length === 0 ? (
+        <Empty
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+          description={t("trash.empty")}
+          className={styles["trash-empty"]}
+        />
+      ) : (
+        <Flex vertical gap={12}>
+          {/* 工具栏：统计 + 清空 */}
+          <Flex justify="space-between" align="center" className={styles["trash-toolbar"]}>
+            <Typography.Text className={styles["trash-toolbar-count"]}>
+              {t("trash.count", { count: items.length })} · {totalTabs} {t("标签页")}
+            </Typography.Text>
+            <Popconfirm
+              title={t("trash.clearConfirm")}
+              description={t("trash.clearDesc")}
+              onConfirm={() => void handleClearAll()}
+              okText={t("trash.clear")}
+              cancelText={t("取消")}
+              okButtonProps={{ danger: true }}
+            >
+              <Button danger size="small" icon={<Trash2 size={ICON_SIZE.SMALL} />}>
+                {t("trash.clear")}
+              </Button>
+            </Popconfirm>
           </Flex>
-        </Card>
-      ))}
-    </Flex>
+
+          {/* 分组卡片列表 */}
+          {items.map((item) => (
+            <Card
+              key={item.id}
+              size="small"
+              className={styles["trash-card"]}
+              title={
+                <Flex align="center" gap="small">
+                  <Typography.Text className={styles["trash-card__title"]}>
+                    {item.name}
+                  </Typography.Text>
+                  <Tag color="blue">{item.tabs.length}</Tag>
+                </Flex>
+              }
+              extra={
+                <Space size={4}>
+                  <Tooltip title={t("trash.restore")}>
+                    <Button
+                      size="small"
+                      type="primary"
+                      icon={<RotateCcw size={ICON_SIZE.SMALL} />}
+                      onClick={() => void handleRestore(item)}
+                    >
+                      {t("trash.restore")}
+                    </Button>
+                  </Tooltip>
+                  <Tooltip title={t("trash.delete")}>
+                    <Button
+                      size="small"
+                      danger
+                      icon={<X size={ICON_SIZE.SMALL} />}
+                      onClick={() => void handleDelete(item.id)}
+                    />
+                  </Tooltip>
+                </Space>
+              }
+            >
+              <Flex vertical gap={8}>
+                <Flex align="center" gap={4}>
+                  <Clock size={ICON_SIZE.XS} />
+                  <Typography.Text className={styles["trash-card__meta-text"]}>
+                    {formatRelativeTime(item.trashedAt, t)}
+                  </Typography.Text>
+                </Flex>
+
+                <Flex wrap gap={6} className={styles["trash-tab-chips"]}>
+                  {item.tabs.slice(0, 8).map((tab) => (
+                    <Tooltip key={tab.id} title={tab.title || tab.url}>
+                      <span className={styles["trash-tab-chip"]}>
+                        <TabFavicon tab={tab} />
+                        <span className={styles["trash-tab-chip__title"]}>
+                          {tab.title || tab.url}
+                        </span>
+                      </span>
+                    </Tooltip>
+                  ))}
+                  {item.tabs.length > 8 && (
+                    <Tag>+{item.tabs.length - 8}</Tag>
+                  )}
+                </Flex>
+              </Flex>
+            </Card>
+          ))}
+        </Flex>
+      )}
+    </div>
   );
 }
