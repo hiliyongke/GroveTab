@@ -2,6 +2,9 @@
  *
  * 承载：.app-view-dock 及所有变体 left/right/bottom、
  * Workspace 切换器、响应式媒体查询、Apple 皮肤覆盖
+ *
+ * 响应式断点对齐 Ant Design 标准：
+ *   md (768px) / lg (992px) / xl (1200px) / 「宽屏」1440px
  */
 .app-view-dock {
   position: relative;
@@ -272,7 +275,7 @@
   color: var(--ant-color-text-tertiary);
 }
 
-@media (width <= 768px) {
+@media (width < 768px) { /* md-down */
   .app-view-dock--left,
   .app-view-dock--right {
     padding-inline: 8px;
@@ -314,8 +317,8 @@
   min-height: 44px;
 }
 
-/* ─── 响应式：中等偏大屏幕（1024px+）────────────────────── */
-@media (width >= 1024px) {
+/* ─── 响应式：中等偏大屏幕（lg: ≥992px）────────────────────── */
+@media (width >= 992px) {
   .app-header-shell {
     padding: 0 32px;
   }
@@ -329,7 +332,7 @@
   }
 }
 
-/* ─── 响应式：大屏幕（1440px+）────────────────────── */
+/* ─── 响应式：宽屏（≥1440px，超出 xl）────────────────────── */
 @media (width >= 1440px) {
   .app-header-shell {
     padding: 0 48px;

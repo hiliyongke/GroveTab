@@ -17,7 +17,7 @@
  */
 
 import { useCallback, useMemo, useState, memo } from "react";
-import { Tag, Button, Tooltip, theme, Typography, Flex, Space } from "antd";
+import { Tag, Button, Tooltip, theme, Typography, Flex } from "antd";
 import { ChevronDown, X, Globe, Moon } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { Reorder } from "motion/react";
@@ -264,7 +264,7 @@ export const DomainGroupCard = memo(function DomainGroupCard({
       }
     >
       {/* 标签列表 — 使用 motion Reorder 实现分组内拖拽排序 */}
-      <Space size={4} direction="vertical" className={styles["app-domain-group-list--flex"]}>
+      <Flex vertical gap={4} className={styles["app-domain-group-list--flex"]}>
         <Reorder.Group
           axis="y"
           values={tabOrder}
@@ -299,7 +299,7 @@ export const DomainGroupCard = memo(function DomainGroupCard({
             </Reorder.Item>
           ))}
         </Reorder.Group>
-      </Space>
+      </Flex>
     </GroupCardShell>
   );
 });

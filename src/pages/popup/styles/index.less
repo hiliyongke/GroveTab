@@ -528,6 +528,21 @@ body {
   }
 }
 
+/* ─── Lucide SVG 图标对齐修复 ─────────────
+ * 与 newtab 的 _icon-fix.less 保持一致 */
+.ant-btn-icon,
+.ant-input-prefix,
+.ant-input-suffix,
+.ant-tag .anticon,
+.ant-tag-icon,
+.ant-dropdown-menu-item .anticon,
+.ant-menu-item .anticon,
+.anticon {
+  svg {
+    display: block;
+  }
+}
+
 /* ─── Ant Design 浮层兜底 ─────────────
  * 已提取到 shared/styles/_floating-overrides.less，
  * newtab 和 popup 共享，避免重复。

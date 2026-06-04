@@ -19,7 +19,7 @@
  */
 
 import { useMemo, useState } from "react";
-import { Button, Card, Flex, Popover, theme, Typography, Space, Empty } from "antd";
+import { Button, Card, Flex, Popover, theme, Typography, Empty } from "antd";
 import { Volume2, X } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useTabsStore, useSettingsStore } from "@/store";
@@ -233,7 +233,7 @@ function GridCard({
 
       {/* 底部信息区 */}
       <Flex vertical gap={2} className={styles["app-grid-card-content"]}>
-        <Flex align="center" gap={6} className={styles["app-grid-card-meta"]}>
+        <Flex align="center" gap="small" className={styles["app-grid-card-meta"]}>
           <Typography.Text className={styles["app-grid-card-domain"]}>{domain}</Typography.Text>
           {hasAudible && (
             <Volume2 size={ICON_SIZE.SMALL} className={styles["app-grid-card-audible"]} />
@@ -374,7 +374,7 @@ function DomainTabsPanel({
       </Flex>
 
       {/* 列表区 */}
-      <Space direction="vertical" size={2} className={styles["app-grid-popover__list"]}>
+      <Flex vertical gap={2} className={styles["app-grid-popover__list"]}>
         {tabs.map((tab) => (
           <TabItem
             key={tab.id}
@@ -384,7 +384,7 @@ function DomainTabsPanel({
             showUrlHint={ambiguousIds.has(tab.id)}
           />
         ))}
-      </Space>
+      </Flex>
     </Flex>
   );
 }

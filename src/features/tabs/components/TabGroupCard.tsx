@@ -303,7 +303,7 @@ export const TabGroupCard = memo(function TabGroupCard({
         </>
       }
     >
-      <Space size={4} direction="vertical" className={styles["app-domain-group-list--flex"]}>
+      <Flex vertical gap={4} className={styles["app-domain-group-list--flex"]}>
         {renderTabItem
           ? // 自定义渲染模式（用于 @dnd-kit 拖拽集成）
             group.tabs.map((tab) => (
@@ -327,7 +327,7 @@ export const TabGroupCard = memo(function TabGroupCard({
                 visibleTabIds={allTabIds}
               />
             ))}
-      </Space>
+      </Flex>
     </GroupCardShell>
   );
 });

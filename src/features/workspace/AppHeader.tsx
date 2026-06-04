@@ -128,7 +128,7 @@ export function AppHeader({
   return (
     <Header className={`app-header-shell${compactSearchVisible ? " is-scrolled" : ""}`}>
       {/* ZONE 1: 身份区 */}
-      <Flex align="center" gap={8} className="app-header-left">
+      <Flex align="center" gap="small" className="app-header-left">
         <img src="/icons/logo.png" alt={BRAND.name} className="app-header-logo" />
         <Tag
           color={hasTidySuggestions ? "gold" : "green"}
@@ -179,7 +179,7 @@ export function AppHeader({
       </Flex>
 
       {/* ZONE 3+4: 空间切换 + 工具篮（合并到右侧列，与左侧等宽占位） */}
-      <Flex align="center" gap={8} className="app-header-right">
+      <Flex align="center" gap="small" className="app-header-right">
         <SpaceSwitcher currentSpaceId={currentSpaceId} onSwitchSpace={onSwitchSpace} />
         <Space size={6} className="app-header-actions">
           <Tooltip title={t(`theme.${theme}`)}>

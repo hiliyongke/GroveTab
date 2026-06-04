@@ -209,8 +209,7 @@ export function KanbanView() {
       onDragEnd={(e) => void onDragEnd(e)}
       onDragCancel={() => setActive(null)}
     >
-      <Flex vertical className={styles["app-kanban-theme"]} style={kanbanThemeStyle}>
-        <Flex align="flex-start" gap={12} className={styles["app-kanban-view"]}>
+      <Flex align="flex-start" gap="middle" className={`${styles["app-kanban-theme"]} ${styles["app-kanban-view"]}`} style={kanbanThemeStyle}>
           {/* 左侧：实时 Tab 源栏 —— 只作为拖出源，不是排序目标 */}
           <Flex vertical gap={0} className={styles["app-kanban-source"]}>
             <Typography.Text className={styles["app-kanban-source__title"]}>
@@ -279,7 +278,6 @@ export function KanbanView() {
             />
           </Flex>
         </Flex>
-      </Flex>
 
       {/* DragOverlay：拖拽时渲染的抬升副本 */}
       <DragOverlay dropAnimation={null}>

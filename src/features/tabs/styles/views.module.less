@@ -9,34 +9,8 @@
 }
 
 /* WindowView 网格布局
-   策略：响应式列数，优先保证卡片内容可读性
-   - 小屏 (<1024px): 1列，全宽
-   - 中屏 (1024-1439px): 2列
-   - 大屏 (>=1440px): 3列
-*/
-.app-window-grid {
-  --app-window-grid-gap: 16px;
-
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--app-window-grid-gap);
-  align-items: start;
-  width: 100%;
-}
-
-/* 中屏：2列 */
-@media (width >= 1024px) {
-  .app-window-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* 大屏：3列 */
-@media (width >= 1440px) {
-  .app-window-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
+   已迁移至 Ant Design Row + Col 组件实现响应式栅格
+   （见 WindowView/index.tsx 中 getWindowColProps） */
 
 .app-window-sortable-card {
   width: 100%;
@@ -611,19 +585,21 @@
   height: 100%;
 }
 
-@media (width <= 767px) {
+/* 响应式断点对齐 Ant Design 标准：md=768px / lg=992px / xl=1200px */
+
+@media (width < 768px) { /* md-down */
   .app-grid-view {
     --app-grid-card-basis: 140px;
   }
 }
 
-@media (width >= 1024px) {
+@media (width >= 992px) { /* lg */
   .app-grid-view {
     --app-grid-card-basis: var(--grid-card-min-width, 220px);
   }
 }
 
-@media (width >= 1440px) {
+@media (width >= 1440px) { /* 宽屏（超出 xl） */
   .app-grid-view {
     --app-grid-card-basis: var(--grid-card-min-width, 240px);
   }

@@ -7,11 +7,11 @@
  *   - 卡片密度切换（S/M/L）
  */
 
-import { Input, Flex, Segmented, Tooltip } from "antd";
-import { Search, LayoutGrid, List, Grip } from "lucide-react";
+import { Segmented, Tooltip } from "antd";
+import { LayoutGrid, List, Grip } from "lucide-react";
 import { useSettingsStore } from "@/store";
 import { useT } from "@/shared/i18n";
-import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { ViewToolbar } from "./ViewToolbar";
 import styles from "../styles/items.module.less";
 
 export interface TabsToolbarProps {
@@ -26,70 +26,69 @@ export function TabsToolbar({ filterQuery, onFilterChange }: TabsToolbarProps) {
   const updateSettings = useSettingsStore((s) => s.updateSettings);
 
   return (
-    <Flex align="center" gap={8} className={styles["app-domain-toolbar"]}>
-      <Input
-        prefix={<Search size={ICON_SIZE.SMALL} />}
-        placeholder={t("search.domainFilter")}
-        value={filterQuery}
-        onChange={(e) => onFilterChange(e.target.value)}
-        allowClear
-        className={styles["app-toolbar-search-input"]}
-      />
-      <Flex align="center" gap={4} className={styles["app-domain-toolbar-controls"]}>
-        <Tooltip title={t("headerLayout.title")}>
-          <span>
-            <Segmented
-              size="small"
-              value={tabsLayout}
-              onChange={(v) =>
-                void updateSettings({ tabsLayout: v as "masonry" | "compact" | "grid" })
-              }
-              options={[
-                {
-                  value: "masonry",
-                  icon: (
-                    <span className={styles["app-segmented-icon"]}>
-                      <LayoutGrid size={13} />
-                    </span>
-                  ),
-                },
-                {
-                  value: "compact",
-                  icon: (
-                    <span className={styles["app-segmented-icon"]}>
-                      <List size={13} />
-                    </span>
-                  ),
-                },
-                {
-                  value: "grid",
-                  icon: (
-                    <span className={styles["app-segmented-icon"]}>
-                      <Grip size={13} />
-                    </span>
-                  ),
-                },
-              ]}
-            />
-          </span>
-        </Tooltip>
-        <Tooltip title={t("headerDensity.title")}>
-          <span>
-            <Segmented
-              size="small"
-              value={layoutDensity}
-              onChange={(v) =>
-                void updateSettings({ layoutDensity: v as "compact" | "default" | "comfortable" })
-              }
-              options={[
-                { value: "compact", label: "S" },
-                { value: "default", label: "M" },
-                { value: "comfortable", label: "L" },
-              ]}
-            />
-          </span>
-        </Tooltip>
-      </Flex>
-    </Flex>
+    <ViewToolbar
+      searchQuery={filterQuery}
+      onSearchChange={onFilterChange}
+      searchPlaceholder={t("search.domainFilter")}
+      controls={
+        <>
+          <Tooltip title={t("headerLayout.title")}>
+            <span>
+              <Segmented
+                size="small"
+                value={tabsLayout}
+                onChange={(v) =>
+                  void updateSettings({ tabsLayout: v as "masonry" | "compact" | "grid" })
+                }
+                options={[
+                  {
+                    value: "masonry",
+                    icon: (
+                      <span className={styles["app-segmented-icon"]}>
+                        <LayoutGrid size={13} />
+                      </span>
+                    ),
+                  },
+                  {
+                    value: "compact",
+                    icon: (
+                      <span className={styles["app-segmented-icon"]}>
+                        <List size={13} />
+                      </span>
+                    ),
+                  },
+                  {
+                    value: "grid",
+                    icon: (
+                      <span className={styles["app-segmented-icon"]}>
+                        <Grip size={13} />
+                      </span>
+                    ),
+                  },
+                ]}
+              />
+            </span>
+          </Tooltip>
+          <Tooltip title={t("headerDensity.title")}>
+            <span>
+              <Segmented
+                size="small"
+                value={layoutDensity}
+                onChange={(v) =>
+                  void updateSettings({
+                    layoutDensity: v as "compact" | "default" | "comfortable",
+                  })
+                }
+                options={[
+                  { value: "compact", label: "S" },
+                  { value: "default", label: "M" },
+                  { value: "comfortable", label: "L" },
+                ]}
+              />
+            </span>
+          </Tooltip>
+        </>
+      }
+    />
   );
 }

@@ -9,11 +9,12 @@
  *   - 折叠策略切换
  */
 
-import { Button, Flex, Input, Popover, Segmented, Select, Tooltip, Typography } from "antd";
-import { Camera, CheckSquare, Eye, EyeOff, Maximize2, Search } from "lucide-react";
+import { Button, Popover, Segmented, Select, Tooltip, Typography } from "antd";
+import { Camera, CheckSquare, Eye, EyeOff, Maximize2 } from "lucide-react";
 import { useSelectionStore, useSettingsStore, useTabsStore } from "@/store";
 import { useT } from "@/shared/i18n";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { ViewToolbar } from "./ViewToolbar";
 import { WindowSnapshotPanel } from "../views/WindowView/WindowSnapshotPanel";
 import { ClipboardImport } from "../views/WindowView/ClipboardImport";
 import styles from "../styles/items.module.less";
@@ -51,16 +52,55 @@ export function WindowToolbar({
     v === "all-expanded" || v === "all-collapsed" || v === "current-only" ? v : "current-only";
 
   return (
-    <Flex align="center" gap={8} className={styles["app-domain-toolbar"]}>
-      <Input
-        prefix={<Search size={ICON_SIZE.SMALL} />}
-        placeholder={t("window.searchPlaceholder")}
-        value={filterQuery}
-        onChange={(e) => onFilterChange(e.target.value)}
-        allowClear
-        className={styles["app-toolbar-search-input"]}
-      />
-
+    <ViewToolbar
+      searchQuery={filterQuery}
+      onSearchChange={onFilterChange}
+      searchPlaceholder={t("window.searchPlaceholder")}
+      controls={
+        <Tooltip title={t("toolbar.collapseStrategy.title")}>
+          <span>
+            <Segmented
+              size="small"
+              value={normalize(defaultCollapsed)}
+              onChange={(v) =>
+                void updateSettings({
+                  windowCardDefaultCollapsed: v as WindowCardDefaultCollapsed,
+                })
+              }
+              options={[
+                {
+                  value: "current-only",
+                  icon: (
+                    <span className={styles["app-segmented-icon"]}>
+                      <Maximize2 size={13} />
+                    </span>
+                  ),
+                  label: t("toolbar.collapseStrategy.currentOnly"),
+                },
+                {
+                  value: "all-expanded",
+                  icon: (
+                    <span className={styles["app-segmented-icon"]}>
+                      <Eye size={13} />
+                    </span>
+                  ),
+                  label: t("toolbar.collapseStrategy.allExpanded"),
+                },
+                {
+                  value: "all-collapsed",
+                  icon: (
+                    <span className={styles["app-segmented-icon"]}>
+                      <EyeOff size={13} />
+                    </span>
+                  ),
+                  label: t("toolbar.collapseStrategy.allCollapsed"),
+                },
+              ]}
+            />
+          </span>
+        </Tooltip>
+      }
+    >
       {/* 排序切换 */}
       <Select
         size="small"
@@ -112,56 +152,12 @@ export function WindowToolbar({
       {/* 剪贴板导入 */}
       <ClipboardImport onRefresh={() => void loadAllTabs({ silent: true })} />
 
-      {/* 折叠策略切换 */}
-      <Flex align="center" gap={4} className={styles["app-domain-toolbar-controls"]}>
-        <Tooltip title={t("toolbar.collapseStrategy.title")}>
-          <span>
-            <Segmented
-              size="small"
-              value={normalize(defaultCollapsed)}
-              onChange={(v) =>
-                void updateSettings({ windowCardDefaultCollapsed: v as WindowCardDefaultCollapsed })
-              }
-              options={[
-                {
-                  value: "current-only",
-                  icon: (
-                    <span className={styles["app-segmented-icon"]}>
-                      <Maximize2 size={13} />
-                    </span>
-                  ),
-                  label: t("toolbar.collapseStrategy.currentOnly"),
-                },
-                {
-                  value: "all-expanded",
-                  icon: (
-                    <span className={styles["app-segmented-icon"]}>
-                      <Eye size={13} />
-                    </span>
-                  ),
-                  label: t("toolbar.collapseStrategy.allExpanded"),
-                },
-                {
-                  value: "all-collapsed",
-                  icon: (
-                    <span className={styles["app-segmented-icon"]}>
-                      <EyeOff size={13} />
-                    </span>
-                  ),
-                  label: t("toolbar.collapseStrategy.allCollapsed"),
-                },
-              ]}
-            />
-          </span>
-        </Tooltip>
-      </Flex>
-
       {/* 批量模式状态提示 */}
       {selectionMode && selectedCount > 0 && (
         <Typography.Text style={{ fontSize: 12, color: "var(--ant-color-primary)", flexShrink: 0 }}>
           {t("已选 {count} 项", { count: selectedCount })}
         </Typography.Text>
       )}
-    </Flex>
+    </ViewToolbar>
   );
 }

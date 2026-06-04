@@ -3,6 +3,7 @@
  *
  * 布局方案：
  *   - .speed-dial-grid-wrapper 为顶层 CSS Grid（auto-fill）
+ *   - 响应式断点对齐 Ant Design：md(768px) / lg(992px) / 宽屏(1440px)
  *   - .speed-dial-grid 使用 display:contents，让站点卡片成为 wrapper 的直接网格项
  *   - 分组模式下 .speed-dial-group 跨满整行，内部 .speed-dial-group-grid 为独立网格
  *   - 添加按钮始终与卡片共享同一网格，保证左右边距对称
@@ -70,26 +71,26 @@
   align-items: start;
 }
 
-@media (width <= 767px) {
+@media (width < 768px) { /* md-down */
   .speed-dial-grid-wrapper {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 12px;
   }
 }
 
-@media (width >= 768px) {
+@media (width >= 768px) { /* md */
   .speed-dial-grid-wrapper {
     grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 160px), 1fr));
   }
 }
 
-@media (width >= 1024px) {
+@media (width >= 992px) { /* lg */
   .speed-dial-grid-wrapper {
     grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 180px), 1fr));
   }
 }
 
-@media (width >= 1440px) {
+@media (width >= 1440px) { /* 宽屏（超出 xl） */
   .speed-dial-grid-wrapper {
     grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 200px), 1fr));
   }
@@ -194,26 +195,26 @@
   gap: var(--speed-dial-grid-gap, 16px);
 }
 
-@media (width <= 767px) {
+@media (width < 768px) { /* md-down */
   .speed-dial-group-grid {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 12px;
   }
 }
 
-@media (width >= 768px) {
+@media (width >= 768px) { /* md */
   .speed-dial-group-grid {
     grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 160px), 1fr));
   }
 }
 
-@media (width >= 1024px) {
+@media (width >= 992px) { /* lg */
   .speed-dial-group-grid {
     grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 180px), 1fr));
   }
 }
 
-@media (width >= 1440px) {
+@media (width >= 1440px) { /* 宽屏（超出 xl） */
   .speed-dial-group-grid {
     grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 200px), 1fr));
   }

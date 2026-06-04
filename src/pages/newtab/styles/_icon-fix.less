@@ -1,0 +1,48 @@
+/**
+ * _icon-fix.less — Lucide SVG 在 Ant Design 插槽中的对齐修复
+ *
+ * 问题：Lucide SVG 图标作为 antd Button/Input/Tag 等组件的 icon/prefix
+ * 传入时，由于 SVG 默认 display:inline、有文本基线对齐特性，导致在
+ * antd 的 flex 居中容器中无法完美居中。
+ *
+ * 修复：在 antd 图标插槽容器内，强制 SVG 为 display:block，让容器 flex
+ * align-items:center 正确生效。
+ */
+
+/* — Button icon — */
+.ant-btn-icon {
+  svg {
+    display: block;
+  }
+}
+
+/* — Input prefix / suffix — */
+.ant-input-prefix,
+.ant-input-suffix {
+  svg {
+    display: block;
+  }
+}
+
+/* — Tag icon — */
+.ant-tag .anticon,
+.ant-tag-icon {
+  svg {
+    display: block;
+  }
+}
+
+/* — Dropdown / Menu item icon — */
+.ant-dropdown-menu-item .anticon,
+.ant-menu-item .anticon {
+  svg {
+    display: block;
+  }
+}
+
+/* — 通用 .anticon 包裹器（Segmented、Breadcrumb 等） — */
+.anticon {
+  svg {
+    display: block;
+  }
+}

@@ -11,7 +11,7 @@
  */
 
 import { useMemo, useState } from "react";
-import { Empty, Flex } from "antd";
+import { Empty, Flex, Row, Col } from "antd";
 import {
   DndContext,
   KeyboardSensor,
@@ -30,7 +30,6 @@ import {
 } from "@dnd-kit/sortable";
 
 import type { LiveTab } from "@/shared/types";
-import { cssVars } from "@/shared/utils/css-vars";
 import { moveTabs } from "@/chrome/tabs";
 import { groupTabs, ungroupTabs } from "@/chrome/tabGroups";
 import { swBroadcast } from "@/shared/utils/sw-broadcast";
@@ -69,12 +68,16 @@ function groupTabsByWindow(tabs: LiveTab[]): Map<number, LiveTab[]> {
   return map;
 }
 
-function getColumnVars(forcedColumns: number | null): React.CSSProperties {
+/** 将强制列数映射为 Ant Design Col 的响应式 span / flex-basis */
+function getWindowColProps(
+  forcedColumns: number | null,
+): { xs: number; lg?: number; xl?: number; style?: React.CSSProperties } {
   if (forcedColumns && forcedColumns >= 1 && forcedColumns <= 6) {
-    return cssVars({ "--app-window-grid-template": `repeat(${forcedColumns}, minmax(0, 1fr))` });
+    const pct = `${100 / forcedColumns}%`;
+    return { xs: 24, style: { flex: `0 0 ${pct}`, maxWidth: pct } };
   }
-  // 未设置强制列数时，使用 CSS 媒体查询的响应式布局
-  return {};
+  // 默认响应式：1 列 → 2 列 → 3 列
+  return { xs: 24, lg: 12, xl: 8 };
 }
 
 function shouldCollapseWindow(
@@ -319,37 +322,39 @@ export function WindowView() {
           items={sortedWindowIds.map((id) => `window-sort:${id}`)}
           strategy={rectSortingStrategy}
         >
-          <div className={styles["app-window-grid"]} style={getColumnVars(forcedColumns)}>
+          <Row gutter={[16, 16]}>
             {sortedWindowIds.map((windowId) => {
               const windowTabs = filteredWindowGroups.get(windowId) ?? [];
               return (
-                <SortableWindowCard key={windowId} windowId={windowId}>
-                  <WindowCard
-                    key={`${windowId}-${defaultCollapsed}`}
-                    windowId={windowId}
-                    tabs={windowTabs}
-                    windowInfo={windows.get(windowId)}
-                    currentWindowId={currentWindowId}
-                    initialCollapsed={shouldCollapseWindow(
-                      defaultCollapsed,
-                      windowId,
-                      currentWindowId,
-                    )}
-                    visibleTabIds={visibleTabIds}
-                    onJump={(tabId, targetWindowId) => {
-                      void jumpToTab(tabId, targetWindowId);
-                    }}
-                    onCloseTab={(tabId) => {
-                      void closeSingleTab(tabId);
-                    }}
-                    onRefresh={() => {
-                      void loadAllTabs({ silent: true });
-                    }}
-                  />
-                </SortableWindowCard>
+                <Col key={windowId} {...getWindowColProps(forcedColumns)}>
+                  <SortableWindowCard windowId={windowId}>
+                    <WindowCard
+                      key={`${windowId}-${defaultCollapsed}`}
+                      windowId={windowId}
+                      tabs={windowTabs}
+                      windowInfo={windows.get(windowId)}
+                      currentWindowId={currentWindowId}
+                      initialCollapsed={shouldCollapseWindow(
+                        defaultCollapsed,
+                        windowId,
+                        currentWindowId,
+                      )}
+                      visibleTabIds={visibleTabIds}
+                      onJump={(tabId, targetWindowId) => {
+                        void jumpToTab(tabId, targetWindowId);
+                      }}
+                      onCloseTab={(tabId) => {
+                        void closeSingleTab(tabId);
+                      }}
+                      onRefresh={() => {
+                        void loadAllTabs({ silent: true });
+                      }}
+                    />
+                  </SortableWindowCard>
+                </Col>
               );
             })}
-          </div>
+          </Row>
         </SortableContext>
       </DndContext>
       <WindowBatchActionBar />

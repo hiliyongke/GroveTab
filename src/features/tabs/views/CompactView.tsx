@@ -266,7 +266,7 @@ export function CompactView({ filterQuery = "" }: CompactViewProps) {
   return (
     <Flex vertical gap="small">
       {/* 排序工具栏 */}
-      <Flex align="center" gap={8} className={toolbarStyles["compact-toolbar"]}>
+      <Flex align="center" gap="small" className={toolbarStyles["compact-toolbar"]}>
         <span className={toolbarStyles["compact-toolbar-label"]}>排序：</span>
         <Segmented<string>
           size="small"
