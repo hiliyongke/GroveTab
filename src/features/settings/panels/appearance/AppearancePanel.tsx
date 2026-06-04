@@ -3,7 +3,6 @@
  *
  * 重构后仅负责编排各子 Section：
  *   - SkinPresetSection：皮肤预设 + 极客模式
- *   - BackgroundSection：渐变预设 + 背景图 + 遮罩
  *   - LayoutSection：布局密度 + 内容区宽度
  *   - AnimationSection：动效 + 视频背景
  *   - UiVisibilitySection：区域显隐
@@ -14,7 +13,6 @@ import { useT } from "@/shared/i18n";
 import type { UserSettings } from "@/shared/types";
 import { Field } from "@/features/settings/components/Field";
 import { SkinPresetSection } from "./SkinPresetSection";
-import { BackgroundSection } from "./BackgroundSection";
 import { LayoutSection } from "./LayoutSection";
 import { AnimationSection } from "./AnimationSection";
 import { UiVisibilitySection } from "./UiVisibilitySection";
@@ -49,10 +47,6 @@ export function AppearancePanel({ settings, updateSettings }: AppearancePanelPro
           />
         </Field>
       </section>
-
-      {/* ── 背景定制区 ── */}
-      <Divider className={styles["appearance-divider"]}>{t("背景定制")}</Divider>
-      <BackgroundSection settings={settings} updateSettings={updateSettings} />
 
       {/* ── 布局定制区 ── */}
       <Divider className={styles["appearance-divider"]}>{t("布局定制")}</Divider>

@@ -90,36 +90,6 @@ function buildThemeMaterialTokens(
         acrylicBorder: isDark ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.08)",
         acrylicHighlight: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(255, 255, 255, 0.92)",
       };
-    case "skeuomorphism":
-      return {
-        ...base,
-        pageGradient: isDark
-          ? "radial-gradient(circle at 16% -10%, rgba(196, 163, 90, 0.14), transparent 34%), linear-gradient(180deg, #1A1610 0%, #211C15 54%, #15110C 100%)"
-          : "radial-gradient(circle at 18% -10%, rgba(184, 149, 106, 0.18), transparent 34%), linear-gradient(180deg, #F4EBDD 0%, #E8E0D0 52%, #DED3BE 100%)",
-        micaTint: isDark ? "rgba(196, 163, 90, 0.035)" : "rgba(255, 248, 232, 0.66)",
-        acrylicTint: isDark ? "rgba(196, 163, 90, 0.055)" : "rgba(255, 248, 232, 0.76)",
-        acrylicBorder: isDark ? "rgba(196, 163, 90, 0.18)" : "rgba(143, 110, 70, 0.18)",
-        acrylicHighlight: isDark ? "rgba(255, 235, 196, 0.08)" : "rgba(255, 252, 242, 0.88)",
-      };
-    case "aurora":
-      return {
-        ...base,
-        pageGradient: isDark
-          ? "radial-gradient(circle at 16% -12%, rgba(155, 142, 196, 0.30), transparent 36%), radial-gradient(circle at 84% 4%, rgba(122, 191, 184, 0.20), transparent 30%), radial-gradient(circle at 48% 100%, rgba(168, 85, 247, 0.14), transparent 42%), linear-gradient(180deg, #0A0A14 0%, #10101D 52%, #07070F 100%)"
-          : "radial-gradient(circle at 14% -10%, rgba(155, 142, 196, 0.18), transparent 34%), radial-gradient(circle at 88% 2%, rgba(122, 191, 184, 0.16), transparent 30%), linear-gradient(180deg, #FAF8FF 0%, #F3F0FF 48%, #ECE8FA 100%)",
-        acrylicBorder: isDark ? "rgba(155, 142, 196, 0.22)" : "rgba(155, 142, 196, 0.18)",
-        acrylicHighlight: isDark ? "rgba(205, 190, 255, 0.10)" : "rgba(255, 255, 255, 0.82)",
-        overlayMaskBg: isDark ? "rgba(4, 4, 12, 0.66)" : "rgba(42, 30, 74, 0.30)",
-      };
-    case "elegant":
-      return {
-        ...base,
-        pageGradient: isDark
-          ? "radial-gradient(circle at 14% -10%, rgba(184, 168, 152, 0.10), transparent 34%), linear-gradient(180deg, #141412 0%, #1A1916 54%, #10100E 100%)"
-          : "radial-gradient(circle at 16% -10%, rgba(139, 125, 107, 0.10), transparent 34%), linear-gradient(180deg, #FAF8F4 0%, #F0EBE3 52%, #E8E1D7 100%)",
-        acrylicBorder: isDark ? "rgba(184, 168, 152, 0.14)" : "rgba(139, 125, 107, 0.16)",
-        acrylicHighlight: isDark ? "rgba(255, 246, 226, 0.06)" : "rgba(255, 252, 246, 0.84)",
-      };
     case "nord":
       return {
         ...base,
@@ -128,31 +98,6 @@ function buildThemeMaterialTokens(
           : "radial-gradient(circle at 14% -10%, rgba(136, 192, 208, 0.18), transparent 34%), linear-gradient(180deg, #F4F7FB 0%, #ECEFF4 52%, #E3E8F1 100%)",
         acrylicBorder: isDark ? "rgba(136, 192, 208, 0.18)" : "rgba(94, 129, 172, 0.16)",
         acrylicHighlight: isDark ? "rgba(216, 222, 233, 0.08)" : "rgba(255, 255, 255, 0.78)",
-      };
-    case "solarized":
-      return {
-        ...base,
-        pageGradient: isDark
-          ? "radial-gradient(circle at 14% -10%, rgba(42, 161, 152, 0.16), transparent 34%), radial-gradient(circle at 88% 2%, rgba(181, 137, 0, 0.12), transparent 30%), linear-gradient(180deg, #002B36 0%, #073642 54%, #00212A 100%)"
-          : "radial-gradient(circle at 12% -10%, rgba(61, 142, 185, 0.10), transparent 32%), radial-gradient(circle at 88% 2%, rgba(181, 137, 0, 0.12), transparent 30%), linear-gradient(180deg, #FFF9E8 0%, #FDF6E3 52%, #F4ECD5 100%)",
-        acrylicBorder: isDark ? "rgba(131, 148, 150, 0.18)" : "rgba(147, 128, 74, 0.18)",
-        acrylicHighlight: isDark ? "rgba(238, 232, 213, 0.07)" : "rgba(255, 252, 242, 0.82)",
-      };
-    case "pastel":
-      return {
-        ...base,
-        pageGradient: isDark
-          ? "radial-gradient(circle at 14% -12%, rgba(138, 148, 224, 0.34), transparent 36%), radial-gradient(circle at 86% 0%, rgba(240, 168, 192, 0.28), transparent 32%), radial-gradient(circle at 50% 104%, rgba(125, 211, 252, 0.12), transparent 44%), linear-gradient(180deg, #171019 0%, #21162A 52%, #130D17 100%)"
-          : "radial-gradient(circle at 10% -10%, rgba(138, 148, 224, 0.24), transparent 34%), radial-gradient(circle at 88% 0%, rgba(240, 168, 192, 0.24), transparent 32%), radial-gradient(circle at 52% 102%, rgba(153, 246, 228, 0.18), transparent 42%), linear-gradient(180deg, #FFFDFC 0%, #FFF7F4 46%, #F7EEFF 100%)",
-        micaBase: isDark ? "#171019" : "#FFF7F4",
-        micaSurface: isDark ? "#241A28" : "#FFFDFB",
-        micaTint: isDark ? "rgba(255, 220, 240, 0.045)" : "rgba(255, 255, 255, 0.76)",
-        acrylicSurface: isDark ? "#302338" : "#FFFFFF",
-        acrylicTint: isDark ? "rgba(255, 220, 240, 0.075)" : "rgba(255, 246, 252, 0.82)",
-        acrylicBorder: isDark ? "rgba(255, 214, 235, 0.16)" : "rgba(138, 148, 224, 0.18)",
-        acrylicHighlight: isDark ? "rgba(255, 220, 240, 0.12)" : "rgba(255, 255, 255, 0.94)",
-        overlayMaskBg: isDark ? "rgba(18, 8, 22, 0.62)" : "rgba(97, 72, 118, 0.26)",
-        overlayBlur: isDark ? "16px" : "14px",
       };
     case "apple":
       return {

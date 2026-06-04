@@ -50,28 +50,16 @@ export interface UserSettings {
   tabsLayout?: "masonry" | "compact" | "grid";
   theme: "light" | "dark" | "system";
   /**
-   * 皮肤预设：
-   *   - 'minimal'        ：极简毛玻璃（macOS 原生风格，默认）
-   *   - 'glassmorphism'  ：液态玻璃风（WWDC 2025 / visionOS 风格）
-   *   - 'skeuomorphism'  ：拟物风（锤子 UI / iOS 6 风格）
-   *   - 'aurora'         ：极光流彩（暗色霓虹渐变风格）
-   *   - 'elegant'        ：典雅新古典（衬线标题 + 金色描边 + 纸张质感）
-   *   - 'nord'           ：Nord 寒色调（深蓝青冷，深浅皆宜）
-   *   - 'solarized'      ：Solarized 太阳化（暖米 + 青黄对比）
+   * 皮肤预设（4 套经典主题）：
+   *   - 'minimal'        ：极简毛玻璃（macOS 原生风格）
+   *   - 'glassmorphism'  ：液态亚克力（微软 Fluent Acrylic 风格，默认）
+   *   - 'nord'           ：Nord 北欧寒色（冷静青蓝体系）
+   *   - 'apple'          ：Apple 官网设计语言（SF Pro + 深色毛玻璃）
    */
-  skinPreset?:
-    | "minimal"
-    | "glassmorphism"
-    | "skeuomorphism"
-    | "aurora"
-    | "elegant"
-    | "nord"
-    | "solarized"
-    | "pastel"
-    | "apple";
+  skinPreset?: "minimal" | "glassmorphism" | "nord" | "apple";
 
   /**
-   * UI Token 极客定制（v1.1 新增）：在皮肤预设基础上做单项覆盖。
+   * UI Token 极客定制：在皮肤预设基础上做单项覆盖。
    *
    * 与预设的关系：
    *   最终 token = getSkinPreset(skinPreset) 的默认值  ×  本字段的 override
@@ -94,45 +82,6 @@ export interface UserSettings {
     fontWeightBody?: number;
     fontWeightHeading?: number;
     colorPrimary?: string;
-  };
-  /**
-   * 背景渐变预设：
-   *   - 'default'   ：antd 默认色，最干净
-   *   - 'slate'     ：浅灰蓝渐变（浅色友好）
-   *   - 'warm'      ：暖米色渐变（浅色友好）
-   *   - 'ocean'     ：蓝绿海洋渐变（双模自适应）
-   *   - 'forest'    ：深绿渐变（双模自适应）
-   *   - 'sunset'    ：晚霞橙紫渐变（双模自适应）
-   *   - 'deepspace' ：深空蓝黑渐变（深色友好）
-   *   - 'midnight'  ：午夜深蓝渐变（深色友好）
-   *   - 'custom'    ：用户自定义（暂未开放编辑器）
-   *
-   * 每个预设包含 light / dark 两套色值，运行期按 resolvedTheme 自动切换。
-   */
-  gradientPreset:
-    | "default"
-    | "slate"
-    | "warm"
-    | "ocean"
-    | "forest"
-    | "sunset"
-    | "deepspace"
-    | "midnight"
-    | "pastel"
-    | "aurora"
-    | "sunrise"
-    | "custom";
-  /**
-   * 自定义渐变配置（仅 gradientPreset='custom' 时生效）
-   *   - stops：色标数组，每项 { color: '#hex', position: 0~1 }
-   *   - angle：渐变角度（度），默认 135
-   *   - darkStops / darkAngle：深色模式独立配置，不填则用 stops / angle 的暗化版本
-   */
-  customGradient?: {
-    stops: Array<{ color: string; position: number }>;
-    angle: number;
-    darkStops?: Array<{ color: string; position: number }>;
-    darkAngle?: number;
   };
   showIncognito: boolean;
   language: "zh-CN" | "en";
@@ -247,34 +196,6 @@ export interface UserSettings {
   customKeybindings?: Record<string, string>;
 
   // ── 高级外观定制 ──────────────────────────────────
-
-  /**
-   * 自定义背景图配置
-   *   - url：图片 URL（支持 https 外链或 data: base64）
-   *   - fit：填充模式，'cover' 铺满裁切 / 'contain' 完整显示 / 'repeat' 平铺
-   *   - position：定位（仅 cover/contain 生效），默认 'center'
-   * 当设置 url 后，背景图会叠加在渐变背景之上（渐变作为 fallback）。
-   */
-  backgroundImage?: {
-    url: string;
-    fit: "cover" | "contain" | "repeat";
-    position?: string;
-  };
-
-  /**
-   * 背景遮罩层配置
-   *   - enabled：是否在背景图/渐变上叠加一层半透明遮罩
-   *   - color：遮罩颜色（含透明度），如 'rgba(0,0,0,0.4)'
-   *   - colorDark：深色模式遮罩颜色
-   *   - blur：遮罩下方背景模糊（px），0 为不模糊
-   * 用于让文字在复杂背景图上保持可读性。
-   */
-  backgroundOverlay?: {
-    enabled: boolean;
-    color: string;
-    colorDark: string;
-    blur: number;
-  };
 
   /**
    * 布局密度：

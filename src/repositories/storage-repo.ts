@@ -38,7 +38,6 @@ const DEFAULT_SETTINGS: UserSettings = {
   viewTabPosition: "top",
   defaultView: "tabs",
   theme: "system",
-  gradientPreset: "default",
   skinPreset: "glassmorphism",
   showIncognito: false,
   language: "zh-CN",
@@ -133,12 +132,6 @@ export async function getAllDataKeys(): Promise<string[]> {
 export async function getSettings(): Promise<UserSettings> {
   const settings = await getData<UserSettings>(STORAGE_KEYS.settings);
   if (settings === undefined) return { ...DEFAULT_SETTINGS };
-  /**
-   * 旧值迁移：aurora → slate，sunrise → warm
-   * 2026-04-23 预设体系重命名后，存量用户磁盘里可能还存着旧 ID。
-   */
-  if (settings.gradientPreset === "aurora") settings.gradientPreset = "slate";
-  if (settings.gradientPreset === "sunrise") settings.gradientPreset = "warm";
   /**
    * v1.0 封板：为缺失的新字段注入默认值（向前兼容，绝不抛错）。
    * 不使用展开合并整个 DEFAULT_SETTINGS，避免意外覆盖用户显式关闭的老字段。

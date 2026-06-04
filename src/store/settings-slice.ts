@@ -63,7 +63,6 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     viewTabPosition: "top",
     defaultView: "tabs",
     theme: "system",
-    gradientPreset: "default",
     skinPreset: "glassmorphism",
     showIncognito: false,
     language: "zh-CN",

@@ -262,19 +262,7 @@ const en: Record<string, string> = {
   "activity.cleared": "Cleared {count} archives",
   "activity.dedupMerged": "Merged {count} duplicates",
   "activity.snapshotted": "Auto-snapshot {count} tabs",
-  "gradient.default": "Default",
-  "gradient.slate": "Slate",
-  "gradient.warm": "Warm",
-  "gradient.ocean": "Ocean",
-  "gradient.forest": "Forest",
-  "gradient.sunset": "Sunset",
-  "gradient.deepspace": "Deep Space",
-  "gradient.midnight": "Midnight",
-  "gradient.pastel": "Pastel",
-  "gradient.custom": "Custom",
-  "gradient.title": "Background Theme",
-  "gradient.hint": "Choose a background style; ☀ marks suit light mode, 🌙 marks suit dark mode",
-  // ── Skin presets ──
+  // ── Skin presets (4 classic themes) ──
   "skin.title": "Skin Style",
   "skin.hint":
     "Pick a visual style; each skin changes borders, shadows, colors, glass effects and overall feel",
@@ -282,18 +270,8 @@ const en: Record<string, string> = {
   "skin.minimalDesc": "macOS native feel",
   "skin.glassmorphism": "Fluent Acrylic",
   "skin.glassmorphismDesc": "Microsoft Fluent Acrylic liquid glass",
-  "skin.skeuomorphism": "Skeuomorph",
-  "skin.skeuomorphismDesc": "Smartisan retro style",
-  "skin.aurora": "Aurora",
-  "skin.auroraDesc": "Dark neon gradients",
-  "skin.elegant": "Elegant",
-  "skin.elegantDesc": "Serif headings + gold accents",
   "skin.nord": "Nord",
   "skin.nordDesc": "Cold blue palette, easy on long sessions",
-  "skin.solarized": "Solarized",
-  "skin.solarizedDesc": "Warm cream + teal contrast",
-  "skin.pastel": "Pastel Glass",
-  "skin.pastelDesc": "Warm gradients + airy glass, soft as dawn light",
   "skin.apple": "Apple",
   "skin.appleDesc": "Apple.com design language — SF Pro type + dark glass navigation",
   // ── Geek-mode skin customization ──
@@ -313,21 +291,6 @@ const en: Record<string, string> = {
   "skin.customColorPrimaryHint":
     "Overrides the skin preset primary color; applies to buttons, links, and selection",
   "skin.customReset": "Reset to default",
-  // ── Background customization ──
-  "bg.sectionTitle": "Background",
-  "bg.imageTitle": "Custom background image",
-  "bg.imageHint":
-    "Upload an image or paste a URL; it layers on top of the gradient, which acts as fallback",
-  "bg.imageUrlPlaceholder": "Paste image URL (https://... or data:image/...)",
-  "bg.uploadImage": "Upload image",
-  "bg.fitCover": "Cover (crop)",
-  "bg.fitContain": "Contain (fit)",
-  "bg.fitRepeat": "Repeat (tile)",
-  "bg.overlayTitle": "Background overlay",
-  "bg.overlayHint": "Add a semi-transparent overlay on top of the background to keep text readable",
-  "bg.overlayEnabled": "Enable overlay",
-  "bg.overlayColor": "Overlay color",
-  "bg.overlayBlur": "Background blur",
   // ── Layout customization ──
   "layout.sectionTitle": "Layout",
   "layout.density": "Layout density",
@@ -1080,13 +1043,7 @@ const en: Record<string, string> = {
   "context.addToQuickStart": "Add to Quick Access",
   "context.alreadyInQuickStart": "Already in Quick Access",
   // Gradient editor
-  "gradient.customEditor": "Custom Gradient Editor",
-  "gradient.expandEditor": "Edit",
-  "gradient.collapseEditor": "Collapse",
-  "gradient.angle": "Angle",
-  "gradient.addStop": "Add color stop",
-  "gradient.darkModeConfig": "Dark mode config",
-  "gradient.independentDark": "Independent dark mode colors",
+
   // Workspace Overview
   "dashboard.title": "Overview",
   "dashboard.tidyReady": "Tidy available",
@@ -1272,7 +1229,7 @@ const en: Record<string, string> = {
   "about.feature.bookmark.desc": "Dedupe, broken-link detection, cluster-by-domain organizer.",
   "about.feature.skin.title": "Skins & geek tokens",
   "about.feature.skin.desc":
-    "8 preset skins + tweak radius / font size / control height individually.",
+    "4 classic skins + tweak radius / font size / control height individually.",
   "about.tipsTitle": "Tips",
   "about.tip1": "⌘/Ctrl+K opens search; press again to close; Cmd+1..9 pick an engine directly.",
   "about.tip2": "Restore defaults, replay onboarding, or wipe data in the Data tab.",

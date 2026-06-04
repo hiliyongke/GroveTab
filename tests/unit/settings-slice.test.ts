@@ -26,7 +26,6 @@ const DEFAULT_SETTINGS = {
   viewTabPosition: "top" as const,
   defaultView: "tabs" as const,
   theme: "system" as const,
-  gradientPreset: "default" as const,
   skinPreset: "glassmorphism" as const,
   showIncognito: false,
   language: "zh-CN" as const,

@@ -5,7 +5,6 @@ import { useTabsStore, useSettingsStore, useSelectionStore } from "@/store";
 import { useShallow } from "zustand/shallow";
 import {
   useSwBroadcast,
-  useResolvedTheme,
   useAppInitialization,
   useAutoCleanup,
 } from "@/shared/hooks";
@@ -195,10 +194,6 @@ function AppContent() {
 
   /** 合并单个 useSettingsStore 订阅，避免独立订阅导致重复渲染 */
   const {
-    gradientPreset,
-    customGradient,
-    backgroundImage,
-    backgroundOverlay,
     contentMaxWidth,
     defaultView,
     viewTabPosition,
@@ -207,10 +202,6 @@ function AppContent() {
     idleThresholdMinutes,
   } = useSettingsStore(
     useShallow((s) => ({
-      gradientPreset: s.settings.gradientPreset,
-      customGradient: s.settings.customGradient,
-      backgroundImage: s.settings.backgroundImage,
-      backgroundOverlay: s.settings.backgroundOverlay,
       contentMaxWidth: s.settings.contentMaxWidth ?? 0,
       defaultView: s.settings.defaultView,
       viewTabPosition: s.settings.viewTabPosition ?? "top",
@@ -230,7 +221,6 @@ function AppContent() {
     route.viewId ??
     (VALID_VIEWS.includes(defaultView as ViewMode) ? (defaultView as ViewMode) : "tabs");
 
-  const resolvedDark = useResolvedTheme() === "dark";
   const showViewSwitcher = uiVisibility?.viewSwitcher !== false;
   const showHeroBar =
     uiVisibility?.heroLogo !== false ||
@@ -243,11 +233,7 @@ function AppContent() {
   const showHeroSearch = uiVisibility?.heroSearch !== false;
 
   // ── 背景 / 布局样式 ────────────────────────────────────────────────────────
-  const { layoutStyle, overlayStyle, contentShellStyle, setScrollProgress } = useLayoutStyle({
-    gradientPreset,
-    customGradient,
-    backgroundImage,
-    backgroundOverlay,
+  const { layoutStyle, contentShellStyle } = useLayoutStyle({
     contentMaxWidth,
   });
 
@@ -442,22 +428,6 @@ function AppContent() {
       className={`app-layout-shell${pageMode === "workspace" && showViewSwitcher && viewTabPosition === "bottom" ? " app-layout-shell--view-bottom" : ""}`}
       style={layoutStyle}
     >
-      {/* 背景遮罩层：当 backgroundOverlay.enabled 时渲染 */}
-      {backgroundOverlay?.enabled && (
-        <>
-          <div className="app-background-overlay" style={overlayStyle} />
-          {/* 滚动时叠加的动态暗化层 */}
-          <div
-            className="app-background-overlay-dimmer"
-            style={
-              {
-                "--app-overlay-dimmer-bg": resolvedDark ? "#000" : "rgba(0,0,0,0.6)",
-              } as React.CSSProperties
-            }
-          />
-        </>
-      )}
-
       {uiVisibility?.header !== false && (
         <AppHeader
           tabCount={tabCount}
@@ -487,11 +457,6 @@ function AppContent() {
           data-app-content
           className={contentShellClassName}
           style={contentShellStyle}
-          onScroll={(e) => {
-            const target = e.currentTarget as HTMLElement;
-            const progress = Math.min(1, Math.max(0, target.scrollTop / 300));
-            setScrollProgress(progress);
-          }}
         >
           {pageMode === "workspace" && showHeroBar && (
             <HeroBar
