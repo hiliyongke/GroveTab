@@ -115,20 +115,55 @@
 /** 头部导航栏高度 */
 @app-header-height: 48px;
 
+/* ═══════════════════════════════════════════════════════
+ * z-index 层级常量
+ * ═══════════════════════════════════════════════════════ */
+
+@z-background: 0;
+@z-content: 1;
+@z-view-dock: 12;
+@z-header: 20;
+@z-batch-bar: 1000;
+@z-status-surface: 1100;
+@z-modal: 1200;
+@z-tooltip: 1300;
+
+/* ═══════════════════════════════════════════════════════
+ * 响应式断点
+ * ═══════════════════════════════════════════════════════ */
+
+@breakpoint-xs: 480px;
+@breakpoint-sm: 576px;
+@breakpoint-md: 768px;
+@breakpoint-lg: 1024px;
+@breakpoint-xl: 1440px;
+
 /* ═════════════════════════════════════════════════════
  * 背景色 CSS 变量（运行时动态值，必须在 :root 内才能生效）
  * ═════════════════════════════════════════════════════ */
 
 :root {
-  /* ── 视觉重量分级：4 级阴影 token ──
-   * 0 = layout / borderless 底底
-   * 1 = card 默认阴影
-   * 2 = elevated / popover
-   * 3 = modal / floating */
+  /* ── 视觉重量分级：6 级阴影 token ──
+   * xs = 微阴影（按钮 hover）
+   * sm = 卡片默认
+   * md = 浮层 / popover
+   * lg = 弹窗 / floating
+   * xl = 品牌发光 */
+  --app-shadow-xs: 0 1px 2px rgb(0 0 0 / 4%);
+  --app-shadow-sm: 0 1px 2px rgb(0 0 0 / 6%);
+  --app-shadow-md: 0 4px 12px rgb(0 0 0 / 8%);
+  --app-shadow-lg: 0 12px 32px rgb(0 0 0 / 16%);
+  --app-shadow-xl: 0 16px 48px rgb(0 0 0 / 18%);
+
+  /* 别名：语义化命名（向后兼容） */
   --app-shadow-0: none;
-  --app-shadow-1: 0 1px 2px rgb(0 0 0 / 6%);
-  --app-shadow-2: 0 4px 12px rgb(0 0 0 / 8%);
-  --app-shadow-3: 0 12px 32px rgb(0 0 0 / 16%);
+  --app-shadow-1: var(--app-shadow-sm);
+  --app-shadow-2: var(--app-shadow-md);
+  --app-shadow-3: var(--app-shadow-lg);
+  --app-shadow-floating: var(--app-shadow-xl);
+  --app-shadow-card: 0 2px 8px color-mix(in srgb, var(--ant-color-text) 8%, transparent);
+  --app-shadow-card-hover: 0 8px 24px color-mix(in srgb, var(--ant-color-text) 14%, transparent);
+  --app-shadow-brand-glow: 0 8px 28px rgb(138 148 224 / 18%);
 
   /* ── Motion tokens（语义化） ── */
   --app-motion-fast: 120ms;
@@ -187,8 +222,6 @@
 
   /* ── Window/Tab 视图变量 ── */
   --app-card-radius: 12px;
-  --app-shadow-card: 0 2px 8px color-mix(in srgb, var(--ant-color-text) 8%, transparent);
-  --app-shadow-card-hover: 0 8px 24px color-mix(in srgb, var(--ant-color-text) 14%, transparent);
   --app-window-card-bg: var(--app-bg-elevated);
   --app-window-group-bg: var(--ant-color-fill-quaternary);
   --app-window-group-border: var(--ant-color-border-secondary);
