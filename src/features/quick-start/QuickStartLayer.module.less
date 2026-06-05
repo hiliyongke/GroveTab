@@ -1,4 +1,4 @@
-@import (reference) '@/shared/styles/_variables.less';
+@import (reference) "@/shared/styles/_variables.less";
 
 /**
  * QuickStartLayer — 首页常用站点样式
@@ -73,26 +73,30 @@
   align-items: start;
 }
 
-@media (width < 768px) { /* md-down */
+@media (width < 768px) {
+  /* md-down */
   .speed-dial-grid-wrapper {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 12px;
   }
 }
 
-@media (width >= 768px) { /* md */
+@media (width >= 768px) {
+  /* md */
   .speed-dial-grid-wrapper {
     grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 160px), 1fr));
   }
 }
 
-@media (width >= @breakpoint-lg) { /* lg */
+@media (width >= @breakpoint-lg) {
+  /* lg */
   .speed-dial-grid-wrapper {
     grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 180px), 1fr));
   }
 }
 
-@media (width >= 1440px) { /* 宽屏（超出 xl） */
+@media (width >= 1440px) {
+  /* 宽屏（超出 xl） */
   .speed-dial-grid-wrapper {
     grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 200px), 1fr));
   }
@@ -197,26 +201,30 @@
   gap: var(--speed-dial-grid-gap, 16px);
 }
 
-@media (width < 768px) { /* md-down */
+@media (width < 768px) {
+  /* md-down */
   .speed-dial-group-grid {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 12px;
   }
 }
 
-@media (width >= 768px) { /* md */
+@media (width >= 768px) {
+  /* md */
   .speed-dial-group-grid {
     grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 160px), 1fr));
   }
 }
 
-@media (width >= @breakpoint-lg) { /* lg */
+@media (width >= @breakpoint-lg) {
+  /* lg */
   .speed-dial-group-grid {
     grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 180px), 1fr));
   }
 }
 
-@media (width >= 1440px) { /* 宽屏（超出 xl） */
+@media (width >= 1440px) {
+  /* 宽屏（超出 xl） */
   .speed-dial-group-grid {
     grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 200px), 1fr));
   }
@@ -232,16 +240,26 @@
   overflow: hidden;
   opacity: var(--speed-dial-card-opacity, 1);
   border-radius: var(--app-card-radius, 12px);
-  transition: opacity 160ms ease, transform var(--app-motion-fast, 0.15s) ease, box-shadow var(--app-motion-fast, 0.15s) ease;
+  transition:
+    opacity 160ms ease,
+    transform var(--app-motion-fast, 0.15s) ease,
+    box-shadow var(--app-motion-fast, 0.15s) ease;
 
   &:hover {
     transform: translateY(-1px);
     box-shadow: var(--app-shadow-sm);
   }
 
-  :global(.ant-card-body) { padding: 0; }
+  :global(.ant-card-body) {
+    padding: 0;
+  }
 
-  &__body { display: flex; flex-direction: column; height: 100%; padding: 0; }
+  &__body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0;
+  }
 
   // ── 新增卡片修饰符 ──
   &--add {
@@ -360,13 +378,13 @@
 }
 
 .app-speed-dial-favicon {
-  width: clamp(28px, calc(var(--speed-dial-card-min-width, 152px) * 0.22), 48px);
-  height: clamp(28px, calc(var(--speed-dial-card-min-width, 152px) * 0.22), 48px);
+  width: clamp(24px, calc(var(--speed-dial-card-min-width, 152px) * 0.18), 36px);
+  height: clamp(24px, calc(var(--speed-dial-card-min-width, 152px) * 0.18), 36px);
   border-radius: var(--app-radius-sm);
 }
 
 .app-speed-dial-fallback {
-  font-size: clamp(20px, calc(var(--speed-dial-card-min-width, 152px) * 0.18), 36px);
+  font-size: clamp(16px, calc(var(--speed-dial-card-min-width, 152px) * 0.14), 28px);
   font-weight: 700;
   line-height: 1;
   color: var(--speed-dial-card-accent, var(--ant-color-primary));
@@ -377,9 +395,9 @@
   display: flex; /* antd 组件内部微调整 */
   flex-direction: column;
   gap: 2px;
-  min-height: 42px;
-  padding: 8px 8px 6px;
-  border-radius: 0 0 var(--app-card-radius, 12px) var(--app-card-radius, 12px);
+  min-height: 36px;
+  padding: 6px 6px 4px;
+  border-radius: 0 0 var(--ant-border-radius-lg) var(--ant-border-radius-lg);
 }
 
 .app-speed-dial-content {
