@@ -4,6 +4,37 @@
  * 职责：全局聚焦态优化、所有 @keyframes、动画触发类、皮肤纹理 body::before
  */
 
+// ─── Duration variables ────────────────────────────
+@app-anim-duration-fast: 150ms;
+@app-anim-duration-view-fade: 150ms;
+@app-anim-duration-float-in: 0.28s;
+@app-anim-duration-accordion: 0.22s;
+@app-anim-duration-content-in: 0.36s;
+
+// ─── Easing variable ──────────────────────────────
+@app-anim-easing-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+
+// ─── Mixins ───────────────────────────────────────
+
+// Shared fade-in-up keyframes pattern (from + opacity/translateY to opacity:1 / translateY:0)
+.app-keyframes-fade-in-up(@name, @from-y: 8px) {
+  @keyframes @name {
+    from {
+      opacity: 0;
+      transform: translateY(@from-y);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+// Apply fade-in-up animation with standard easing
+.app-anim-fade-in-up(@name, @duration: @app-anim-duration-fast, @easing: @app-anim-easing-smooth) {
+  animation: @name @duration @easing;
+}
+
 /* ─── 全局聚焦态优化 ──────────────────────────
  * v1.4 规范（需求 8）：
  *   - outline: 2px solid var(--ant-color-primary)
@@ -13,7 +44,7 @@
  */
 
 /* 全局聚焦态 —— 亮色/默认 */
-:focus-visible {
+::focus-visible {
   outline: 2px solid var(--ant-color-primary);
   outline-offset: 2px;
 }
@@ -58,37 +89,17 @@
 /* ─── 页面入场动画 ─────────────────────────────────
  * 首屏加载完成后，主内容区做一个柔和的上滑渐入。
  */
-@keyframes app-fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+.app-keyframes-fade-in-up(app-fade-in-up, 8px);
 
 /* 主内容入场：由 [data-app-content] 元素触发 */
 [data-app-content] {
-  animation: app-fade-in-up 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+  .app-anim-fade-in-up(app-fade-in-up, @app-anim-duration-content-in);
 }
 
 /* ─── 视图切换动画 ─────────────────────────────────
  * 路由/视图切换时的淡入淡出效果
  */
-@keyframes app-view-fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+.app-keyframes-fade-in-up(app-view-fade-in, 4px);
 
 .app-view-transition {
   display: flex;
@@ -98,7 +109,7 @@
   height: 100%;
   transform-origin: top center;
   backface-visibility: hidden;
-  animation: app-view-fade-in var(--app-motion-duration-fast, 150ms) cubic-bezier(0.22, 1, 0.36, 1);
+  .app-anim-fade-in-up(app-view-fade-in);
 
   /* 使用 will-change 和 backface-visibility 确保 GPU 渲染，避免模糊 */
   will-change: transform, opacity;
@@ -126,25 +137,15 @@
 }
 
 .app-batch-bar {
-  animation: app-float-in 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: app-float-in @app-anim-duration-float-in @app-anim-easing-smooth;
 }
 
 /* ─── Tidy 建议栏展开动画 ─────────────────────────── */
-@keyframes app-accordion-in {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+.app-keyframes-fade-in-up(app-accordion-in, -4px);
 
 .app-accordion-panel {
   transform-origin: top center;
-  animation: app-accordion-in 0.22s ease-out;
+  animation: app-accordion-in @app-anim-duration-accordion ease-out;
 }
 
 /* ─── 皮肤纹理：噪点叠加 ──────────────────────────

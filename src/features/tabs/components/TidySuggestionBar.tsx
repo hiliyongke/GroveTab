@@ -110,20 +110,13 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
 
   const handleDiscardIdle = useCallback(
     async (items: IdleTabInfo[]) => {
-      if (busy) return;
-      setBusy(true);
-      try {
-        const ids = items.map((item) => item.tab.id);
-        await discardMultipleTabs(ids);
-        await loadAllTabs({ silent: true });
-        feedback.success(t("已休眠 {count} 个闲置标签", { count: ids.length }));
-      } catch {
-        // store 已 toast
-      } finally {
-        setBusy(false);
-      }
+      const ids = items.map((item) => item.tab.id);
+      await runAction(
+        () => discardMultipleTabs(ids),
+        t("已休眠 {count} 个闲置标签", { count: ids.length }),
+      );
     },
-    [busy, discardMultipleTabs, loadAllTabs, t],
+    [discardMultipleTabs, runAction, t],
   );
 
   const handleTidyAll = useCallback(async () => {
@@ -184,7 +177,7 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
         type="info"
         showIcon
         icon={<Zap size={ICON_SIZE.SMALL} className={styles["tidy-suggestion__alert-icon"]} />}
-        message={
+        title={
           <Flex className={styles["tidy-suggestion__summary"]}>
             <Typography.Text className={styles["tidy-suggestion__summary-text"]}>
               {summaryParts.join("；")}

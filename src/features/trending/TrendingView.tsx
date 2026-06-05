@@ -10,12 +10,11 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import {
   Alert,
   Button,
   Card,
-  Empty,
   Segmented,
   Space,
   Spin,
@@ -42,8 +41,10 @@ import {
   Clock,
 } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { cssVars } from "@/shared/utils/css-vars";
 import { feedback } from "@/shared/ui/feedback";
 import { useT } from "@/shared/i18n";
+import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
 import { createTab } from "@/chrome";
 import { createBookmark } from "@/chrome/bookmarks";
 import type {
@@ -62,7 +63,7 @@ import {
   applyInterestWeights,
 } from "@/services/trending-service";
 import type { InterestSignal } from "@/services/trending-service";
-import styles from "./TrendingPage.module.less";
+import styles from "./TrendingView.module.less";
 
 const { Text, Title } = Typography;
 
@@ -112,9 +113,6 @@ function cx(...classNames: Array<string | false | undefined>) {
   return classNames.filter(Boolean).join(" ");
 }
 
-function cssVars(vars: Record<string, string | undefined>): CSSProperties {
-  return vars;
-}
 
 function StealthDisguise({
   disguise,
@@ -499,7 +497,7 @@ function HotBoardCard({
   );
 }
 
-export function TrendingPage() {
+export function TrendingView() {
   const { t } = useT();
   const [category, setCategory] = useState<TrendingCategory>("all");
   const [groupMode, setGroupMode] = useState<TrendingGroupMode>("default");
@@ -712,7 +710,7 @@ export function TrendingPage() {
         <Alert
           type="warning"
           showIcon
-          message={t("热榜数据源暂时不可用，请稍后重试")}
+          title={t("热榜数据源暂时不可用，请稍后重试")}
           action={
             <Button size="small" onClick={handleRefreshAll} loading={loading}>
               {t("全部刷新")}
@@ -730,7 +728,12 @@ export function TrendingPage() {
           </div>
         </div>
       ) : activePlatforms.length === 0 ? (
-        <Empty description={t("没有可用的平台")} className={styles["trending-empty-state"]} />
+        <FeatureEmptyState
+          title={t("trending.noPlatforms")}
+          icon={<Newspaper size={ICON_SIZE.HERO} />}
+          hints={[t("trending.noPlatformsHint1"), t("trending.noPlatformsHint2"), t("trending.noPlatformsHint3")]}
+          actions={[{ text: t("trending.switchToAll"), onClick: () => setCategory("all"), type: "primary" }]}
+        />
       ) : (
         <div
           className={cx(styles["trending-grid"], groupMode === "compact" && styles["is-compact"])}

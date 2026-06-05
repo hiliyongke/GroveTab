@@ -92,12 +92,12 @@ const HistoryView = lazy(() =>
 const TrashView = lazy(() =>
   import("@/features/sessions/TrashView").then((m) => ({ default: m.TrashView })),
 );
-const TrendingPage = lazy(() =>
-  import("@/features/trending/TrendingPage").then((m) => ({ default: m.TrendingPage })),
+const TrendingView = lazy(() =>
+  import("@/features/trending/TrendingView").then((m) => ({ default: m.TrendingView })),
 );
-const DeveloperToolsPage = lazy(() =>
-  import("@/features/developer-tools/DeveloperToolsPage").then((m) => ({
-    default: m.DeveloperToolsPage,
+const DevToolsView = lazy(() =>
+  import("@/features/developer-tools/DevToolsView").then((m) => ({
+    default: m.DevToolsView,
   })),
 );
 /** 点击动效 Canvas 图层，默认 off 时不拉取 chunk */
@@ -122,8 +122,8 @@ registerViews([
   { id: "archive", component: ArchiveView, order: 9 },
   { id: "trash", component: TrashView, order: 10 },
   { id: "insights", component: InsightsView, order: 11 },
-  { id: "trending", component: TrendingPage, order: 12 },
-  { id: "devtools", component: DeveloperToolsPage, order: 13 },
+  { id: "trending", component: TrendingView, order: 12 },
+  { id: "devtools", component: DevToolsView, order: 13 },
 ]);
 
 const { Content } = Layout;
@@ -179,17 +179,6 @@ function AppContent() {
         tabsLayout: legacy.layout,
       });
     }
-  }, []);
-
-  /** 全局禁止浏览器原生右键菜单，打造纯 App 体验 */
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      e.preventDefault();
-    };
-    document.addEventListener("contextmenu", handler);
-    return () => {
-      document.removeEventListener("contextmenu", handler);
-    };
   }, []);
 
   const { t } = useT();
@@ -326,7 +315,8 @@ function AppContent() {
   }, [retryInit]);
 
   // ── 统计摘要 ───────────────────────────────────────────────────────────────
-  const tabs = useTabsStore((s) => s.tabs);
+  // 使用 shallow 比较避免大数组引用变化导致的不必要渲染
+  const tabs = useTabsStore(useShallow((s) => s.tabs));
   const tabCount = useMemo(() => tabs.length, [tabs]);
   const domainCount = useMemo(() => new Set(tabs.map((tab) => tab.hostname)).size, [tabs]);
   const dupGroups = useMemo(() => findDuplicates(tabs, dedupStrictness), [tabs, dedupStrictness]);
@@ -511,6 +501,8 @@ function AppContent() {
         />
       </Suspense>
       <StatusBar />
+      {/* ARIA live region for dynamic content announcements (screen readers) */}
+      <div className="app-live-region" aria-live="polite" aria-atomic="true" />
     </Layout>
   );
 }

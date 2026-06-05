@@ -6,11 +6,9 @@
  *
  * 示例：
  *   #/space/workspace                          → 主工作区
- *   #/space/workspace/view/timeline            → 工作区 + timeline 视图
- *   #/space/workspace/panel/settings           → 工作区 + 设置面板
- *   #/space/workspace/view/tabs/panel/search   → 工作区 + tabs 视图 + 搜索面板
- *   #/space/trending                           → 发现页
- *   #/space/devtools                           → 开发者工具
+ *   #/space/workspace/view/timeline            → 时间线视图
+ *   #/space/workspace/panel/settings           → 设置面板
+ *   #/space/workspace/view/tabs/panel/search   → 标签视图 + 搜索面板
  *
  * 旧版 hash 兼容：
  *   #settings  → #/space/workspace/panel/settings
@@ -54,7 +52,7 @@ const VIEW_SEGMENT = "/view/";
 const PANEL_SEGMENT = "/panel/";
 
 /** 合法的空间 ID 集合 */
-export const VALID_SPACES = ["workspace", "trending", "devtools"] as const;
+export const VALID_SPACES = ["workspace"] as const;
 export type SpaceId = (typeof VALID_SPACES)[number];
 
 /** 合法的面板 ID 集合（仅浮层弹窗） */

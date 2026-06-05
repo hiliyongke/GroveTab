@@ -1,82 +1,96 @@
-.feature-empty {
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 48px 24px;
-  text-align: center;
-  animation: feature-empty-fade-in 0.4s ease-out;
-}
+/**
+ * FeatureEmptyState 样式模块
+ * BEM 子元素使用 &__ 嵌套，尺寸变体用 &--small。
+ */
 
 @keyframes feature-empty-fade-in {
   from {
     opacity: 0;
     transform: translateY(8px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-.feature-empty__empty {
-  margin-bottom: 16px;
-}
-
-.feature-empty__icon {
-  display: inline-flex;
+.feature-empty {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 72px;
-  height: 72px;
-  font-size: 32px;
-  color: var(--ant-color-primary, #1677ff);
-  background: var(--ant-color-primary-bg, #e6f4ff);
-  border-radius: 50%;
-}
+  padding: 48px 24px;
+  text-align: center;
+  animation: feature-empty-fade-in 0.4s ease-out;
 
-.feature-empty__title {
-  display: block;
-  margin-bottom: 4px;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--ant-color-text, rgb(0 0 0 / 88%));
-}
+  // ── 尺寸变体 ──
+  &--small {
+    padding: 24px 16px;
+  }
 
-.feature-empty__description {
-  max-width: 360px;
-  margin: 0 0 16px;
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--ant-color-text-secondary, rgb(0 0 0 / 45%));
-}
+  // ── 子元素 ──
+  &__empty {
+    margin-bottom: 16px;
+  }
 
-.feature-empty__hints {
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
-  gap: 8px;
-  max-width: 320px;
-  margin-bottom: 20px;
-  text-align: left;
-}
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    font-size: 32px;
+    color: var(--ant-color-primary, #1677ff);
+    background: var(--ant-color-primary-bg, #e6f4ff);
+    border-radius: 50%;
+  }
 
-.feature-empty__hint-item {
-  display: flex; /* antd 组件内部微调整 */
-  gap: 8px;
-  align-items: flex-start;
-}
+  &__title {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ant-color-text, rgb(0 0 0 / 88%));
+  }
 
-.feature-empty__hint-dot {
-  flex-shrink: 0;
-  width: 6px;
-  height: 6px;
-  margin-top: 7px;
-  background: var(--ant-color-primary, #1677ff);
-  border-radius: 50%;
-}
+  &__description {
+    max-width: 360px;
+    margin: 0 0 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ant-color-text-secondary, rgb(0 0 0 / 45%));
+  }
 
-.feature-empty__hint-text {
-  font-size: 13px;
-  line-height: 1.6;
+  &__hints {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 320px;
+    margin-bottom: 20px;
+    text-align: left;
+  }
+
+  &__hint-item {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  &__hint-dot {
+    flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    margin-top: 7px;
+    background: var(--ant-color-primary, #1677ff);
+    border-radius: 50%;
+  }
+
+  &__hint-text {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  &__actions {
+    margin-top: 8px;
+  }
 }

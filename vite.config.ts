@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { purgeCss } from "vite-plugin-purgecss";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -263,7 +264,19 @@ function chromeExtensionPlugin() {
 }
 
 export default defineConfig({
-  plugins: [react(), chromeExtensionPlugin()],
+  plugins: [
+    react(),
+    chromeExtensionPlugin(),
+    purgeCss({
+      content: ["./src/**/*.{tsx,ts}"],
+      safelist: [
+        ":root", "body", "html",
+        /^ant-/,
+        /^is-/,
+        /^data-/,
+      ],
+    }),
+  ],
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),

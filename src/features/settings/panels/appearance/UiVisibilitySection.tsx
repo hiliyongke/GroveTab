@@ -44,7 +44,7 @@ export function UiVisibilitySection({ settings, updateSettings }: UiVisibilitySe
   return (
     <section className="settings-section">
       <Field label={t("区域显隐")} hint={t("隐藏不需要的区域，打造极简界面")}>
-        <Space direction="vertical" size={10} className="settings-control-full">
+        <Space vertical size={10} className="settings-control-full">
           {(
             [
               ["header", t("顶栏"), t("品牌标识 + 归档/主题/设置按钮")],

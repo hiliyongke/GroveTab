@@ -452,8 +452,8 @@ export const SKIN_PRESETS: SkinPreset[] = [
     colorBorderSecondaryDark: "rgba(136,192,208,0.12)",
 
     glass: {
-      blur: 8,
-      saturate: 110,
+      blur: 16,
+      saturate: 140,
       bgLight: "rgba(236,239,244,0.9)",
       bgDark: "rgba(46,52,64,0.88)",
     },

@@ -56,7 +56,7 @@ export function WorkspaceTemplatesPanel() {
       } catch {
         // fallback
         try {
-          window.open(tab.url, "_blank");
+          window.open(tab.url, "_blank", "noopener,noreferrer");
         } catch {
           /* ignore */
         }

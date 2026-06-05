@@ -10,7 +10,7 @@
  */
 
 import { useCallback, useMemo, useState } from "react";
-import { Empty, Input, Tag, Typography } from "antd";
+import { Input, Tag, Typography } from "antd";
 import {
   Braces,
   Clock,
@@ -30,9 +30,10 @@ import {
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
 import { loadStringArray, saveStringArray } from "@/shared/utils/storage-array";
+import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
 import type { DevToolCategory, DevToolDefinition } from "./tool-registry";
 import { DEV_TOOLS, searchTools } from "./tool-registry";
-import styles from "./DeveloperToolsPage.module.less";
+import styles from "./DevToolsView.module.less";
 import { TOOL_ICONS } from "./components/ToolCard";
 import { ToolPanel } from "./components/ToolPanel";
 
@@ -73,7 +74,7 @@ const CATEGORY_LABEL_KEYS: Record<DevToolCategory, string> = {
  *   - 左侧：侧边栏导航（搜索 + 按分类分组的工具列表）
  *   - 右侧：工具工作台
  */
-export function DeveloperToolsPage() {
+export function DevToolsView() {
   const { t } = useT();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedToolId, setSelectedToolId] = useState(DEV_TOOLS[0]?.id ?? "json-format");
@@ -229,10 +230,13 @@ export function DeveloperToolsPage() {
                 </div>
               ))
             ) : (
-              <Empty
-                description={t('搜索工具…')}
-                className={styles["devtools-empty-state"]}
-              />
+              <FeatureEmptyState
+              title={t("devtools.noResults")}
+              description={t("搜索无结果")}
+              icon={<Search size={ICON_SIZE.LARGE} />}
+              size="small"
+              hints={[t("devtools.noResultsHint1"), t("devtools.noResultsHint2")]}
+            />
             )}
           </div>
 

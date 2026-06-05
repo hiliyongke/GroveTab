@@ -7,6 +7,7 @@
 
 import { useEffect, useMemo } from "react";
 import { useTabsStore, useStatsStore } from "@/store";
+import { useTabActions } from "@/shared/hooks/use-tab-actions";
 import { useT } from "@/shared/i18n";
 import { findAmbiguousTitleIds } from "@/shared/utils/url-display";
 import { TabItem } from "../components/TabItem";
@@ -22,8 +23,7 @@ const MAX_DISPLAY = CONFIG.ui.maxDisplay;
 
 export function FrequencyView() {
   const tabs = useTabsStore((s) => s.tabs);
-  const jumpToTab = useTabsStore((s) => s.jumpToTab);
-  const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
+  const { jumpToTab, closeSingleTab } = useTabActions();
   const loadStats = useStatsStore((s) => s.loadStats);
   const isFallback = useStatsStore((s) => s.isFallback);
   const getCountRecent = useStatsStore((s) => s.getCountRecent);
@@ -72,7 +72,7 @@ export function FrequencyView() {
           {t("最常使用的 {count} 个标签页", { count: sortedTabs.length })}
         </Typography.Text>
         {isFallback && (
-          <Tag bordered={false} color="default" className={styles["app-frequency-rebuild-tag"]}>
+          <Tag color="default" className={styles["app-frequency-rebuild-tag"]}>
             {t("数据重建中")}
           </Tag>
         )}

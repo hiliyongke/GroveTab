@@ -3,17 +3,46 @@
  * 承载：.app-header-shell 及其子元素、搜索触发器、操作区、
  * 空间切换菜单、图标、一键整理链接
  */
+
+// ─── Mixins ───────────────────────────────────────
+
+// Inline-flex centering for header action buttons/icons
+.app-header-action-center() {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Shared flex center pattern
+.app-header-flex-center() {
+  display: flex;
+  align-items: center;
+}
+
+// Visibility transition (hidden state)
+.app-header-vis-transition() {
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease;
+}
+
+// Shared hidden state
+.app-header-hidden() {
+  opacity: 0;
+  transform: translateX(-4px);
+  pointer-events: none;
+}
+
 .app-header-shell {
   position: sticky;
   top: 0;
   z-index: 20;
 
   /* Flex + 绝对居中：左右自然流式布局，搜索栏绝对定位真居中 */
-  display: flex;
-  align-items: center;
+  .app-header-flex-center();
   justify-content: space-between;
   height: var(--app-header-height);
-  padding: 0 16px;
+  padding: 0 var(--ant-padding);
   min-width: 0;
 
   background: transparent;
@@ -22,8 +51,7 @@
 }
 
 .app-header-left {
-  display: flex;
-  align-items: center;
+  .app-header-flex-center();
   gap: var(--ant-margin-sm);
   min-width: 0;
   overflow: hidden;
@@ -38,16 +66,11 @@
 
 .app-header-status-tag,
 .app-header-metrics {
-  transition:
-    opacity 220ms ease,
-    transform 220ms ease;
-}
+  .app-header-vis-transition();
 
-.app-header-status-tag.is-hidden,
-.app-header-metrics.is-hidden {
-  opacity: 0;
-  transform: translateX(-4px);
-  pointer-events: none;
+  &.is-hidden {
+    .app-header-hidden();
+  }
 }
 
 .app-header-status-tag.is-hidden {
@@ -71,29 +94,12 @@
   border-radius: var(--app-radius-sm);
 }
 
-.app-header-metric-warning.is-warning {
-  color: var(--ant-color-warning);
-}
+.app-header-metric-warning {
+  font-weight: 500;
 
-.app-icon {
-  flex-shrink: 0;
-}
-
-.app-icon--theme {
-  color: var(--ant-color-warning);
-}
-
-.app-icon--search,
-.app-hero-search-icon {
-  color: var(--ant-color-primary);
-}
-
-.app-icon--insights {
-  color: var(--ant-color-info);
-}
-
-.app-icon--settings {
-  color: var(--ant-color-text-secondary);
+  &.is-warning {
+    color: var(--ant-color-warning);
+  }
 }
 
 .app-header-search-icon {
@@ -103,10 +109,6 @@
 .app-header-metric-strong {
   font-weight: 500;
   color: var(--ant-color-text);
-}
-
-.app-header-metric-warning {
-  font-weight: 500;
 }
 
 .app-header-dot {
@@ -125,14 +127,14 @@
   letter-spacing: -0.01em;
   cursor: pointer;
   transition: opacity var(--app-motion-duration-fast, 150ms) ease;
-}
 
-.app-header-tidy-link:hover {
-  opacity: 0.72;
-}
+  &:hover {
+    opacity: 0.72;
+  }
 
-.app-header-tidy-link:active {
-  opacity: 0.52;
+  &:active {
+    opacity: 0.52;
+  }
 }
 
 /* ── 顶栏中部（搜索触发器）── 绝对定位真居中，不占流式空间 */
@@ -146,8 +148,7 @@
 
 /* ── 顶栏右侧（主题 + 设置） ── */
 .app-header-right {
-  display: flex;
-  align-items: center;
+  .app-header-flex-center();
   flex-shrink: 0;
 }
 
@@ -186,20 +187,20 @@
     background 160ms ease,
     border-color 160ms ease,
     box-shadow 160ms ease;
-}
 
-.app-header-search-trigger.is-visible {
-  visibility: visible;
-  pointer-events: auto;
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  transition:
-    opacity 220ms ease,
-    transform 220ms ease,
-    visibility 0s,
-    background 160ms ease,
-    border-color 160ms ease,
-    box-shadow 160ms ease;
+  &.is-visible {
+    visibility: visible;
+    pointer-events: auto;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition:
+      opacity 220ms ease,
+      transform 220ms ease,
+      visibility 0s,
+      background 160ms ease,
+      border-color 160ms ease,
+      box-shadow 160ms ease;
+  }
 }
 
 .app-header-search-trigger-text {
@@ -219,57 +220,27 @@
 
 /* ── 顶栏右侧操作区 ── */
 .app-header-actions {
-  display: inline-flex;
+  .app-header-action-center();
   flex-shrink: 0;
-  align-items: center;
-}
 
-/* 统一所有按钮尺寸与图标对齐 */
-.app-header-actions .ant-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 24px;
-  height: 24px;
-  padding-inline: 6px;
-  line-height: 1;
-}
+  /* 统一所有按钮尺寸与图标对齐 */
+  .ant-btn {
+    .app-header-action-center();
+    min-width: 24px;
+    height: 24px;
+    padding-inline: 6px;
+    line-height: 1;
+  }
 
-.app-header-actions .ant-btn-icon-only {
-  width: 24px;
-  padding: 0;
-}
+  .ant-btn-icon-only {
+    width: 24px;
+    padding: 0;
+  }
 
-.app-header-actions .ant-btn .anticon,
-.app-header-actions .ant-btn > span,
-.app-header-actions .app-theme-icon,
-.app-header-actions svg {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  vertical-align: middle;
-}
-
-/* ── 空间切换下拉菜单项 ── */
-.app-space-menu-item {
-  display: inline-flex;
-  gap: 6px;
-  align-items: center;
-}
-
-.app-theme-icon {
-  display: inline-flex;
-  animation: app-theme-icon-spin 260ms ease-out;
-}
-
-.app-view-option {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 30px;
-  padding: 0 2px;
-  font-size: 12.5px;
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: -0.01em;
+  .ant-btn .anticon,
+  .ant-btn > span,
+  svg {
+    .app-header-action-center();
+    vertical-align: middle;
+  }
 }

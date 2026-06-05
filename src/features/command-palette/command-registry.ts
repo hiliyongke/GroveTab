@@ -76,34 +76,7 @@ export function getCommand(id: string): CommandDef | undefined {
   return commandMap.get(id);
 }
 
-// ── 内置命令：空间导航 ─────────────────────────────────────────────────────────
-
-export interface SpaceDef {
-  id: string;
-  label: string;
-  keywords: string[];
-}
-
-const SPACE_DEFS: SpaceDef[] = [
-  { id: "workspace", label: "返回工作台", keywords: ["gongzuo", "workspace", "工作台", "主页"] },
-  { id: "trending", label: "打开热榜", keywords: ["rebang", "trending", "热榜", "发现"] },
-  { id: "devtools", label: "打开开发工具", keywords: ["kaifa", "devtools", "开发", "工具"] },
-];
-
-/**
- * 创建空间导航命令工厂
- */
-export function createSpaceCommands(switchSpace: (spaceId: string) => void): CommandDef[] {
-  return SPACE_DEFS.map((space) => ({
-    id: `space.switch${space.id.charAt(0).toUpperCase()}${space.id.slice(1)}`,
-    label: space.label,
-    category: "navigation" as CommandCategory,
-    keywords: space.keywords,
-    execute: () => switchSpace(space.id),
-  }));
-}
-
-// ── 内置命令：导航 ─────────────────────────────────────────────────────────────
+// ── 内置命令：视图导航 ─────────────────────────────────────────────────────────
 
 const VIEW_LABELS: Record<ViewMode, { label: string; keywords: string[] }> = {
   tabs: { label: "切换到标签视图", keywords: ["biaoqian", "tab", "标签"] },

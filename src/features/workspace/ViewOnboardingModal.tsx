@@ -9,6 +9,7 @@ import { Modal, Button, Flex, Typography, Card } from "antd";
 import { useT } from "@/shared/i18n";
 import { VIEW_CONFIGS } from "@/shared/config/views";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { IconRenderer } from "@/shared/ui/IconRenderer";
 import styles from "./ViewOnboardingModal.module.less";
 
 const { Text, Title } = Typography;
@@ -50,7 +51,6 @@ export function ViewOnboardingModal({ open, onClose }: ViewOnboardingModalProps)
 
         <Flex wrap="wrap" gap={12} justify="center" className={styles.onboardingGrid}>
           {VIEW_CONFIGS.map((view) => {
-            const Icon = view.Icon;
             return (
               <Card
                 key={view.id}
@@ -66,7 +66,7 @@ export function ViewOnboardingModal({ open, onClose }: ViewOnboardingModalProps)
                 }}
               >
                 <Flex align="center" justify="center" className={styles.onboardingIconWrap}>
-                  <Icon size={ICON_SIZE.LARGE} />
+                  <IconRenderer name={view.iconName} size={ICON_SIZE.LARGE} />
                 </Flex>
                 <Flex vertical gap={4}>
                   <Text strong className={styles.onboardingCardTitle}>

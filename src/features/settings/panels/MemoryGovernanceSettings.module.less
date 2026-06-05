@@ -1,30 +1,37 @@
 /* ── MemoryGovernanceSettings ── */
 
-.threshold-row {
-  width: 100%;
-}
+@mg-input-width: 80px;
+@mg-full-width: 100%;
 
-.threshold-slider {
-  flex: 1;
-}
+.threshold {
+  &-row {
+    width: @mg-full-width;
+  }
 
-.threshold-value {
-  min-width: 36px;
-  text-align: right;
+  &-slider {
+    flex: 1;
+  }
+
+  &-value {
+    min-width: 36px;
+    text-align: right;
+  }
 }
 
 .max-tabs-input {
-  width: 80px;
+  width: @mg-input-width;
 }
 
-.allowlist-section {
-  width: 100%;
-}
+.allowlist {
+  &-section {
+    width: @mg-full-width;
+  }
 
-.allowlist-input {
-  flex: 1;
+  &-input {
+    flex: 1;
+  }
 }
 
 .memory-governance-compact {
-  width: 100%;
+  width: @mg-full-width;
 }

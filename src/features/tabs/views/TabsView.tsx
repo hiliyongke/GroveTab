@@ -7,7 +7,7 @@
  *   - 'compact'        ：虚拟化紧凑列表 → CompactView
  *   - 'grid'           ：卡片网格 → GridView
  *
- * 设计意图：降低用户认知负担，ViewDock 上只显示一个 "标签页" 入口，
+ * 设计意图：降低用户认知负担，ViewTabs 上只显示一个 "标签页" 入口，
  * 布局细调通过设置面板或视图内工具栏完成。
  *
  * 统一工具栏（TabsToolbar）：

@@ -260,7 +260,7 @@ export function ShortcutsPanel() {
         <Field label={t("全局快捷键")}>
           <Alert
             type="info"
-            message={t("在 chrome://extensions/shortcuts 中自定义快捷键")}
+            title={t("在 chrome://extensions/shortcuts 中自定义快捷键")}
             showIcon
             className="settings-shortcuts-alert"
           />

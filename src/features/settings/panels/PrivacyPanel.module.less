@@ -1,21 +1,25 @@
-/* PrivacyPanel — 隐私设置面板内联样式迁移 */
+/* PrivacyPanel */
 
-/* Select 宽度：100% + 最大 320px */
-.privacy-select-wide {
-  width: 100%;
-  max-width: 320px;
-}
+@import (reference) '@/shared/styles/_variables.less';
 
-/* Select 宽度：100% */
-.privacy-select-full {
-  width: 100%;
+@privacy-select-max: 320px;
+
+.privacy-select {
+  &-wide {
+    width: 100%;
+    max-width: @privacy-select-max;
+  }
+
+  &-full {
+    width: 100%;
+  }
 }
 
 :global(.settings-section__body .ant-space) {
   flex-wrap: wrap;
 }
 
-@media (width <= 520px) {
+@media (width <= @breakpoint-xs-sm) {
   .privacy-select-wide {
     max-width: none;
   }

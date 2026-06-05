@@ -18,11 +18,12 @@
  *       4. 不打断 Grid 的浏览上下文
  */
 
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { Button, Card, Flex, Popover, theme, Typography, Empty } from "antd";
 import { Volume2, X } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useTabsStore, useSettingsStore } from "@/store";
+import { useTabActions } from "@/shared/hooks/use-tab-actions";
 import { useT } from "@/shared/i18n";
 import { groupTabsByDomain } from "@/shared/utils/domain";
 import { useAccent } from "@/shared/hooks/use-accent";
@@ -41,8 +42,7 @@ interface GridViewProps {
  */
 export function GridView({ filterQuery = "" }: GridViewProps) {
   const tabs = useTabsStore((s) => s.tabs);
-  const jumpToTab = useTabsStore((s) => s.jumpToTab);
-  const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
+  const { jumpToTab, closeSingleTab } = useTabActions();
   /**
    * 展开触发方式（点击 / 悬停）。默认 click——保持「需要确认动作」的稳重交互；
    * 切到 hover 后，鼠标移到多 tab 卡片上立即看到列表，移开自动收起，更适合
@@ -281,6 +281,9 @@ function GridCard({
     </Popover>
   );
 }
+
+const GridCardMemo = memo(GridCard);
+export { GridCardMemo as GridCard };
 
 interface DomainTabsPanelProps {
   domain: string;

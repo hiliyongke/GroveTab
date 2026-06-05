@@ -1,13 +1,18 @@
 /* ── TimelineToolbar ── */
 
-.exact-time-label {
-  margin-left: var(--app-space-1);
-  font-size: 12px;
-  color: var(--ant-color-text-secondary);
-}
+@tl-font-size: 12px;
+@tl-secondary: var(--ant-color-text-secondary);
 
-.exact-time-toggle {
-  display: flex;
-  gap: var(--app-space-1);
-  align-items: center;
+.exact-time {
+  &-label {
+    margin-left: var(--app-space-1);
+    font-size: @tl-font-size;
+    color: @tl-secondary;
+  }
+
+  &-toggle {
+    display: flex;
+    gap: var(--app-space-1);
+    align-items: center;
+  }
 }

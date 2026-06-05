@@ -318,9 +318,6 @@ const zhCN: Record<string, string> = {
   "uiVisibility.viewSwitcherHint": "域名/时间轴/紧凑等视图标签行",
   "uiVisibility.tidySuggestion": "整理建议",
   "uiVisibility.tidySuggestionHint": "重复标签/闲置标签智能整理建议栏",
-  "pageMode.workspace": "工作台",
-  "pageMode.trending": "热榜",
-  "pageMode.devtools": "开发工具栏",
   // ── 热榜页面 ──
   "trending.title": "全网热榜",
   "trending.subtitle": "知乎、微博、B站等 17 个平台实时热榜，一页速览全网热点",
@@ -585,9 +582,8 @@ const zhCN: Record<string, string> = {
   "settings.system": "系统",
   "settings.data": "数据",
   "settings.language": "语言",
-  "settings.defaultPageMode": "默认空间",
-  "settings.defaultPageModeHint":
-    "工作台用于整理标签页；热榜查看全网热点；开发工具栏提供常用开发工具。",
+
+
   "settings.defaultView": "默认视图",
   "settings.viewTabPosition": "视图标签位置",
   "settings.viewTabPositionHint": "视图切换标签的排列方式：顶部/底部水平，左侧/右侧垂直侧栏",
@@ -914,6 +910,7 @@ const zhCN: Record<string, string> = {
   "bookmark.needPermission": "需要授权才能访问浏览器书签",
   "bookmark.grantPermission": "授权访问书签",
   "bookmark.permissionDenied": "书签权限被拒绝",
+  "bookmark.permissionDescription": "授权后可访问浏览器书签，使用去重、失效检测、智能整理等工具",
   "bookmark.searchPlaceholder": "搜索书签...",
   // ── 书签工具箱（v2）──
   "bookmark.tools.entry": "工具箱",
@@ -983,6 +980,7 @@ const zhCN: Record<string, string> = {
   "bookmark.searchHint2": "支持中英文关键词搜索",
   "bookmark.hint1": "一键收藏当前所有标签页",
   "bookmark.hint2": "使用工具箱去重、检测失效链接",
+  "bookmark.hint3": "支持列表、树状图、脑图多种浏览方式",
   "bookmark.bookmarkAll": "收藏全部标签",
   "bookmark.bookmarkedAll": "已收藏 {count} 个标签页",
   "bookmark.openFailed": "打开书签失败，请重试",
@@ -1421,5 +1419,36 @@ const zhCN: Record<string, string> = {
   "closeConfirm.archiveSuccess": "已归档 {count} 个标签页",
   "closeConfirm.archivePartial": "已有 {count} 个标签页未能关闭，可稍后手动处理",
   "closeConfirm.archiveFailed": "归档失败，请重试",
+
+  // 开发工具空态
+  "devtools.noResults": "未找到匹配的工具",
+  "devtools.noResultsHint1": "支持中英文搜索工具名称和描述",
+  "devtools.noResultsHint2": "常用工具可点击心形图标加入收藏",
+
+  // 热榜空态
+  "trending.noPlatformsHint1": "支持 17+ 平台实时热榜数据",
+  "trending.noPlatformsHint2": "「全部」分类展示所有可用平台",
+  "trending.noPlatformsHint3": "点击刷新按钮重新加载单个平台",
+  "trending.switchToAll": "查看全部",
+
+  // 回收站空态增强
+  "trash.emptyDescription": "关闭的标签页会在回收站保留 7 天，之后自动清理。",
+  "trash.emptyHint1": "关闭标签页后会自动进入回收站",
+  "trash.emptyHint2": "支持按分组批量恢复，误关也能找回",
+  "trash.emptyHint3": "超过 7 天的记录会被自动清理，保持轻盈",
+
+  // 书签空态增强
+  "bookmark.emptyDescription": "你还没有收藏任何书签，可以一键收藏当前所有标签页快速开始。",
+  "bookmark.permissionHint1": "你的书签数据完全在本地处理，不会上传",
+  "bookmark.permissionHint2": "授权后可使用书签工具箱去重、失效检测",
+  "bookmark.permissionHint3": "随时可以在 Chrome 扩展管理页撤销授权",
+
+  // 历史记录空态增强
+  "history.closedEmptyHint1": "按 Cmd/Ctrl+W 关闭的标签页会自动记录",
+  "history.closedEmptyHint2": "整窗关闭时所有标签页一起保存，可一键恢复",
+  "history.closedEmptyHint3": "右键标签页选择「归档」可长期保存",
+  "history.timelineEmptyHint1": "搜索、归档、打标签等操作会自动记录",
+  "history.timelineEmptyHint2": "支持按操作类型筛选：标签/搜索/归档",
+  "history.timelineEmptyHint3": "所有数据本地存储，不会上传到任何服务器",
 };
 export default zhCN;

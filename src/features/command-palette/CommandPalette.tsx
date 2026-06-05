@@ -191,11 +191,10 @@ export function CommandPalette() {
       closable={false}
       width={520}
       className={styles["command-palette"]}
-      styles={{
-        body: { padding: 0 },
-        mask: { backgroundColor: "rgba(0,0,0,0.3)" },
+      classNames={{
+        body: styles["command-palette__body"],
+        mask: styles["command-palette__mask"],
       }}
-      destroyOnClose
     >
       {/* 搜索输入 */}
       <div className={styles["command-palette__search"]}>
@@ -233,7 +232,7 @@ export function CommandPalette() {
         )}
       </div>
 
-      <Divider style={{ margin: 0 }} />
+      <Divider className={styles["command-palette__divider"]} />
 
       {/* 结果列表 */}
       <div className={styles["command-palette__list"]} ref={listRef}>
@@ -310,17 +309,17 @@ export function CommandPalette() {
                     <Globe size={14} />
                   )}
                 </span>
-                <Flex vertical flex={1} style={{ minWidth: 0, overflow: "hidden" }}>
+                <Flex vertical className={styles["command-palette__tab-text"]}>
                   <Text
                     ellipsis
-                    className={styles["command-palette__tab-title"] + " app-text-primary"}
+                    className={styles["command-palette__tab-title"]}
                   >
                     {tab.title || tab.hostname}
                   </Text>
                   <Text
                     type="secondary"
                     ellipsis
-                    className={styles["command-palette__tab-url"] + " app-text-secondary"}
+                    className={styles["command-palette__tab-url"]}
                   >
                     {tab.url}
                   </Text>
@@ -345,9 +344,9 @@ export function CommandPalette() {
       <div className={styles["command-palette__footer"]}>
         <Text
           type="secondary"
-          className={styles["command-palette__footer-hint"] + " app-text-secondary"}
+          className={styles["command-palette__footer-hint"]}
         >
-          <kbd>↑↓</kbd> 导航 · <kbd>Enter</kbd> 执行 · <kbd>Tab</kbd>{" "}
+          <kbd>⌘P</kbd> 打开 · <kbd>↑↓</kbd> 导航 · <kbd>Enter</kbd> 执行 · <kbd>Tab</kbd>{" "}
           {mode === "command" ? t("搜索标签") : t("切回命令")} · <kbd>ESC</kbd> 关闭
         </Text>
       </div>

@@ -2,7 +2,7 @@
  * ArchiveSidebar — 归档页左侧导航
  *
  * 提供时间段筛选（全部/今天/本周/本月/更早）+ 自动快照分区。
- * 与 DeveloperToolsPage 的 sidebar 风格对齐。
+ * 与 DevToolsView 的 sidebar 风格对齐。
  */
 
 import { useMemo } from "react";

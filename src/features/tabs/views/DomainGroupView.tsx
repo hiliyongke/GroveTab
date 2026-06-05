@@ -16,59 +16,13 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { Empty, Flex } from "antd";
 import { useTabsStore, useMetadataStore, useSettingsStore } from "@/store";
 import { groupTabsByDomain, type DomainGroup } from "@/shared/utils/domain";
-import { cssVars } from "@/shared/utils/css-vars";
+import { syncSortToBrowser, restoreBrowserOrder } from "@/shared/utils/tab-sort-sync";
+import { getColumnVars } from "@/shared/utils/flow-columns";
 import { useT } from "@/shared/i18n";
-import { moveTabs } from "@/chrome/tabs";
 import { sortTabs } from "@/features/smart-sort/hooks/useSmartSort";
-import type { LiveTab } from "@/shared/types";
 import { DomainGroupCard } from "../components/DomainGroupCard";
 import styles from "../styles/items.module.less";
 
-/**
- * 将排序后的标签顺序同步到浏览器标签栏
- */
-async function syncSortToBrowser(sortedTabs: LiveTab[]): Promise<void> {
-  const currentWindow = await chrome.windows.getCurrent();
-  const windowId = currentWindow.id;
-  if (!windowId) return;
-
-  const windowTabIds = sortedTabs
-    .filter((t) => t.windowId === windowId)
-    .map((t) => t.id);
-
-  if (windowTabIds.length === 0) return;
-
-  const allWindowTabs = await chrome.tabs.query({ windowId });
-  const pinnedCount = allWindowTabs.filter((t) => t.pinned).length;
-
-  try {
-    await moveTabs(windowTabIds, windowId, pinnedCount);
-  } catch {
-    // 忽略移动失败
-  }
-}
-
-/**
- * 恢复浏览器标签栏的原始顺序
- */
-async function restoreBrowserOrder(originalTabIds: number[]): Promise<void> {
-  const currentWindow = await chrome.windows.getCurrent();
-  const windowId = currentWindow.id;
-  if (!windowId) return;
-
-  const allWindowTabs = await chrome.tabs.query({ windowId });
-  const currentTabIds = new Set(allWindowTabs.map((t) => t.id));
-  const validIds = originalTabIds.filter((id) => currentTabIds.has(id));
-  if (validIds.length === 0) return;
-
-  const pinnedCount = allWindowTabs.filter((t) => t.pinned).length;
-
-  try {
-    await moveTabs(validIds, windowId, pinnedCount);
-  } catch {
-    // 忽略恢复失败
-  }
-}
 
 interface DomainGroupViewProps {
   filterQuery: string;
@@ -92,12 +46,6 @@ function getAutoColumnCount(containerWidth: number, groupCount: number): number 
   );
 
   return Math.min(groupCount, Math.max(1, fitCount), DOMAIN_COLUMN_MAX_AUTO);
-}
-
-function getColumnVars(columnCount: number): React.CSSProperties {
-  return cssVars({
-    "--app-domain-column-count": String(columnCount),
-  });
 }
 
 function splitIntoFlowColumns(groups: DomainGroup[], columnCount: number): DomainGroup[][] {

@@ -1,36 +1,56 @@
 /* ── Hero 区 ──
  *
- * 承载：.app-hero 及子元素、搜索框、
- * 视图切换器 .app-view-switcher 及子元素
+ * 承载：.app-hero 及子元素、搜索框
  */
+
+// ─── Mixins ───────────────────────────────────────
+
+// Hero search hover border-color (light theme)
+.app-hero-search-hover-border() {
+  border-color: color-mix(
+    in srgb,
+    var(--app-color-primary, var(--ant-color-primary)) 38%,
+    transparent
+  );
+}
+
+// Hero search hover border-color (dark theme)
+.app-hero-search-hover-border--dark() {
+  border-color: color-mix(
+    in srgb,
+    var(--app-color-primary, var(--ant-color-primary)) 48%,
+    transparent
+  );
+}
+
 .app-hero {
   /* Antd Flex 通过 props 提供 flex-direction: column, align-items: center, gap: 16px */
   position: relative;
   padding: 52px 0 36px;
-}
 
-.app-hero::before {
-  position: absolute;
-  top: 18px;
-  left: 50%;
-  width: min(820px, 86vw);
-  height: 230px;
-  pointer-events: none;
-  content: "";
-  background:
-    radial-gradient(
-      circle at 24% 35%,
-      color-mix(in srgb, var(--app-color-primary, #2b6bff) 18%, transparent),
-      transparent 34%
-    ),
-    radial-gradient(
-      circle at 78% 22%,
-      color-mix(in srgb, var(--ant-color-info, #1677ff) 14%, transparent),
-      transparent 32%
-    );
-  opacity: 0.72;
-  filter: blur(24px);
-  transform: translateX(-50%);
+  &::before {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    width: min(820px, 86vw);
+    height: 230px;
+    pointer-events: none;
+    content: "";
+    background:
+      radial-gradient(
+        circle at 24% 35%,
+        color-mix(in srgb, var(--app-color-primary, #2b6bff) 18%, transparent),
+        transparent 34%
+      ),
+      radial-gradient(
+        circle at 78% 22%,
+        color-mix(in srgb, var(--ant-color-info, #1677ff) 14%, transparent),
+        transparent 32%
+      );
+    opacity: 0.72;
+    filter: blur(24px);
+    transform: translateX(-50%);
+  }
 }
 
 .app-hero-logo {
@@ -83,22 +103,14 @@
   border-radius: calc(var(--app-search-radius) + 6px);
   box-shadow: var(--app-shadow-1);
   transition: border-color var(--app-motion-base, 200ms) var(--app-easing-standard, ease);
-}
 
-.app-hero-search:hover {
-  border-color: color-mix(
-    in srgb,
-    var(--app-color-primary, var(--ant-color-primary)) 38%,
-    transparent
-  );
+  &:hover {
+    .app-hero-search-hover-border();
+  }
 }
 
 [data-theme="dark"] .app-hero-search:hover {
-  border-color: color-mix(
-    in srgb,
-    var(--app-color-primary, var(--ant-color-primary)) 48%,
-    transparent
-  );
+  .app-hero-search-hover-border--dark();
 }
 
 .app-view-switcher-wrap {
@@ -106,80 +118,11 @@
   justify-content: flex-start;
   max-width: 100%;
   padding: 2px 0;
-  margin: calc(var(--app-space-6, 24px) * -0.35) 0 var(--app-space-6, 24px);
+  margin: var(--ant-margin-xs) 0 var(--ant-margin-lg);
   overflow: auto hidden;
   scrollbar-width: none;
-}
 
-.app-view-switcher-wrap::-webkit-scrollbar {
-  display: none;
-}
-
-.app-view-switcher {
-  --app-view-switcher-bg: color-mix(in srgb, var(--ant-color-bg-container) 58%, transparent);
-  --app-view-switcher-border: color-mix(
-    in srgb,
-    var(--ant-color-border-secondary) 58%,
-    transparent
-  );
-  --app-view-switcher-hover-bg: color-mix(
-    in srgb,
-    var(--app-color-primary, var(--ant-color-primary)) 8%,
-    transparent
-  );
-  --app-view-switcher-selected-bg: color-mix(
-    in srgb,
-    var(--ant-color-bg-elevated) 82%,
-    transparent
-  );
-  --app-view-switcher-selected-shadow: color-mix(in srgb, var(--ant-color-text) 10%, transparent);
-
-  flex: 0 0 auto;
-  max-width: 100%;
-  background: var(--app-view-switcher-bg);
-  border: 1px solid var(--app-view-switcher-border);
-  border-radius: var(--app-radius-md);
-  box-shadow: none;
-  backdrop-filter: blur(14px) saturate(var(--app-glass-saturate, 150%));
-}
-
-[data-theme="dark"] .app-view-switcher {
-  --app-view-switcher-bg: color-mix(in srgb, var(--ant-color-bg-container) 34%, transparent);
-  --app-view-switcher-border: color-mix(
-    in srgb,
-    var(--ant-color-border-secondary) 46%,
-    transparent
-  );
-  --app-view-switcher-hover-bg: color-mix(
-    in srgb,
-    var(--app-color-primary, var(--ant-color-primary)) 14%,
-    transparent
-  );
-  --app-view-switcher-selected-bg: color-mix(
-    in srgb,
-    var(--ant-color-bg-elevated) 62%,
-    transparent
-  );
-  --app-view-switcher-selected-shadow: color-mix(in srgb, #000000 32%, transparent);
-}
-
-.app-view-switcher__item {
-  border-radius: calc(var(--app-radius-md) - 2px);
-}
-
-.app-view-switcher__item .ant-segmented-item-label {
-  min-height: 30px;
-  padding: 0 11px;
-  line-height: 30px;
-}
-
-.app-view-switcher__item:hover {
-  color: var(--ant-color-text);
-  background: var(--app-view-switcher-hover-bg);
-}
-
-.app-view-switcher .ant-segmented-thumb,
-.app-view-switcher .ant-segmented-item-selected {
-  background: var(--app-view-switcher-selected-bg);
-  box-shadow: 0 2px 8px var(--app-view-switcher-selected-shadow);
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }

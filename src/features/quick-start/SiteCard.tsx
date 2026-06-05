@@ -56,7 +56,7 @@ export function SiteCard({
     if (typeof chrome !== "undefined" && chrome.tabs) {
       void chrome.tabs.create({ url: site.url });
     } else {
-      window.open(site.url, "_blank");
+      window.open(site.url, "_blank", "noopener,noreferrer");
     }
   }, [site.url]);
 
@@ -105,7 +105,16 @@ export function SiteCard({
       style={cardStyle}
     >
       {/* 缩略图区 —— 16:10，favicon 主色渐变 */}
-      <div className={styles["app-speed-dial-preview"]} onClick={openSite}>
+      <div
+        className={styles["app-speed-dial-preview"]}
+        role="button"
+        tabIndex={0}
+        aria-label={t("打开 {name}", { name: site.title || hostname })}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openSite(); }
+        }}
+        onClick={openSite}
+      >
         {/* 拖拽手柄 —— 只有绑定了 dragListeners 时才可拖拽 */}
         {dragListeners && (
           <div {...dragListeners} {...dragAttributes} className={styles["speed-dial-drag-handle"]}>
@@ -143,7 +152,16 @@ export function SiteCard({
       </div>
 
       {/* 底部信息区 */}
-      <div className={styles["app-speed-dial-content"]} onClick={openSite}>
+      <div
+        className={styles["app-speed-dial-content"]}
+        role="button"
+        tabIndex={0}
+        aria-label={t("打开 {name}", { name: site.title || hostname })}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openSite(); }
+        }}
+        onClick={openSite}
+      >
         <span className={styles["app-speed-dial-title"]} title={site.title || hostname}>
           {site.title || hostname}
         </span>

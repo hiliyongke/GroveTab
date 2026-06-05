@@ -35,6 +35,7 @@ import { groupTabs, ungroupTabs } from "@/chrome/tabGroups";
 import { swBroadcast } from "@/shared/utils/sw-broadcast";
 import { feedback } from "@/shared/ui/feedback";
 import { useTabsStore, useSettingsStore, useMetadataStore } from "@/store";
+import { useTabActions } from "@/shared/hooks/use-tab-actions";
 import { useT } from "@/shared/i18n";
 import { WindowToolbar } from "@/features/tabs/toolbar/WindowToolbar";
 import type { WindowSortMode } from "@/features/tabs/toolbar/WindowToolbar";
@@ -91,8 +92,7 @@ export function WindowView() {
   const tabs = useTabsStore((s) => s.tabs);
   const windows = useTabsStore((s) => s.windows);
   const currentWindowId = useTabsStore((s) => s.currentWindowId);
-  const jumpToTab = useTabsStore((s) => s.jumpToTab);
-  const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
+  const { jumpToTab, closeSingleTab } = useTabActions();
   const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   // 订阅原始字段（保持引用稳定，避免 selector 每次返回新数组导致 React 无限重渲染 / error #185）

@@ -10,7 +10,6 @@ export type {
   RouteDescriptor,
   NavigationSource,
   RouteChangeEvent,
-  SpaceId,
   PanelId,
 } from "./hash-router";
 export { useUrlSync, getInitialRoute } from "./use-url-sync";

@@ -132,25 +132,14 @@ export const TabItem = memo(function TabItem({
     const groups = await queryTabGroups(tab.windowId);
     setTabGroups(groups.filter((g) => g.id >= 0));
   }, [tab.windowId]);
-  /** 标准化 URL：去掉协议前缀和常见跟踪参数，用于去重比较 */
+  /** 标准化 URL：去协议 + 跟踪参数 + hash，用于去重比较 */
   const normalizeUrl = (url: string): string => {
     try {
       const u = new URL(url);
-      const dropParams = [
-        "utm_source",
-        "utm_medium",
-        "utm_campaign",
-        "utm_term",
-        "utm_content",
-        "fbclid",
-        "gclid",
-      ];
-      dropParams.forEach((p) => u.searchParams.delete(p));
+      ["utm_source","utm_medium","utm_campaign","utm_term","utm_content","fbclid","gclid"].forEach(p => u.searchParams.delete(p));
       u.hash = "";
       return u.host + u.pathname.replace(/\/+$/, "") + u.search;
-    } catch {
-      return url;
-    }
+    } catch { return url; }
   };
   /** 当前标签是否已在常用站点中 */
   const isInQuickStart = speedDialSites.some((s) => normalizeUrl(s.url) === normalizeUrl(tab.url));
@@ -298,6 +287,7 @@ export const TabItem = memo(function TabItem({
       <Flex
         role="button"
         tabIndex={0}
+        aria-label={`${tab.title} — ${tab.hostname}`}
         onClick={handleClick}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {

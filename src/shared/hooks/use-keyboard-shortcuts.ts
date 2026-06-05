@@ -11,7 +11,7 @@
  */
 
 import { useEffect, useCallback, useRef } from "react";
-import { VALID_VIEWS, type ViewMode } from "@/shared/config/views";
+import { VIEW_CONFIGS, type ViewMode } from "@/shared/config/views";
 
 export type ViewType = ViewMode;
 
@@ -27,10 +27,9 @@ export interface KeyboardShortcutsOptions {
 }
 
 /**
- * 视图顺序 = VIEW_CONFIGS 单源，仅前 9 个支持快捷键
- * ⌘1=tabs, ⌘2=tabgroup, ⌘3=window, ⌘4=timeline, ⌘5=kanban, ⌘6=bookmarks, ⌘7=frequency, ⌘8=history, ⌘9=archive
+ * 视图顺序 = VIEW_CONFIGS 中 primary 视图（前 7 个），映射 ⌘1-⌘7
  */
-const VIEW_ORDER: readonly ViewType[] = VALID_VIEWS;
+const VIEW_ORDER: readonly ViewType[] = VIEW_CONFIGS.filter((v) => v.primary).map((v) => v.id);
 
 function isEditingTarget(event: KeyboardEvent): boolean {
   const target = event.target as HTMLElement | null;
@@ -70,7 +69,7 @@ export function useKeyboardShortcuts({
       const { key, metaKey, ctrlKey } = event;
 
       // ⌘1..⌘7：切换视图（即使在输入框内也允许 —— 与 macOS 系统级一致）
-      if ((metaKey || ctrlKey) && /^[1-9]$/.test(key)) {
+      if ((metaKey || ctrlKey) && /^[1-7]$/.test(key)) {
         event.preventDefault();
         const viewIndex = parseInt(key, 10) - 1;
         const targetView = VIEW_ORDER[viewIndex];

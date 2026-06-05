@@ -1,0 +1,86 @@
+/**
+ * ViewTabs 样式模块
+ *
+ * 设计原则：
+ *   - 所有视觉属性均在此定义，TSX 中不允许内联 style
+ *   - 动态值通过 CSS 自定义属性桥接
+ *   - 过渡动画统一使用 --app-motion-* token
+ *   - BEM 修饰符用 &-- 嵌套，共享属性用 mixin 消除重复
+ */
+
+// 标签项共享基类 — 消除 inline-flex + center 三件套重复
+.view-tab-label-base() {
+  display: inline-flex;
+  align-items: center;
+}
+
+// 文本字号统一
+@tab-label-font-size: 13px;
+
+/* ── 横排标签项 ── */
+.view-tab-label {
+  .view-tab-label-base();
+  gap: 6px;
+
+  &__text {
+    font-size: @tab-label-font-size;
+  }
+
+  // ── 竖排修饰符 ──
+  &--vertical {
+    .view-tab-label-base();
+    gap: 8px;
+    width: 100%;
+
+    .view-tab-label__text {
+      flex: 1;
+      font-size: @tab-label-font-size;
+    }
+  }
+
+  // ── 折叠修饰符（仅图标） ──
+  &--collapsed {
+    .view-tab-label-base();
+    justify-content: center;
+    width: 100%;
+    height: 24px;
+  }
+}
+
+/* ── 竖排容器 ── */
+.view-tabs-vertical {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  &__tabs {
+    flex: 1;
+    min-height: 0;
+    align-items: center;
+  }
+}
+
+/* ── 折叠/展开按钮 ── */
+.view-tabs-collapse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--ant-color-text-tertiary);
+  border-radius: 0;
+  transition: color var(--app-motion-fast, 0.12s) ease;
+
+  &:hover {
+    color: var(--ant-color-text);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ant-color-primary);
+    outline-offset: -2px;
+  }
+}

@@ -48,6 +48,9 @@ export function SpeedDialAddModal({ open, onClose, editingSite, existingGroups }
   const [confirmLoading, setConfirmLoading] = useState(false);
   /** 标记用户是否手动修改过 URL 或标题，避免异步回调覆盖 */
   const userModifiedRef = useRef(false);
+  /** 组件挂载标记：防止 chrome.tabs.query 回调在卸载后 setState */
+  const mountedRef = useRef(true);
+  useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
   /** 当前活动 tab 的 favicon URL（新增时自动带入） */
   const faviconUrlRef = useRef<string | undefined>(undefined);
 
@@ -82,6 +85,7 @@ export function SpeedDialAddModal({ open, onClose, editingSite, existingGroups }
       faviconUrlRef.current = undefined;
       if (typeof chrome !== 'undefined' && chrome.tabs) {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabsList) => {
+          if (!mountedRef.current) return; // 组件可能已卸载
           const active = tabsList[0];
           // 只有当用户没有手动修改过时才自动填充
           if (active?.url && active.url.startsWith('http') && !userModifiedRef.current) {
@@ -145,7 +149,6 @@ export function SpeedDialAddModal({ open, onClose, editingSite, existingGroups }
       onOk={() => void handleOk()}
       onCancel={onClose}
       confirmLoading={confirmLoading}
-      destroyOnClose
       width={440}
     >
 <Form layout="vertical" className={styles['app-speed-dial-form']}>

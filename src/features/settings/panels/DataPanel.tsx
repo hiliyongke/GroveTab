@@ -422,7 +422,7 @@ export function DataPanel() {
                   <Alert
                     type="error"
                     showIcon
-                    message={t(
+                    title={t(
                       "此操作不可撤销：将清除所有归档、书签元数据、设置、历史记录。请确认已导出备份。",
                     )}
                   />

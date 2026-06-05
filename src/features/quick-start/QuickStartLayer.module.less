@@ -1,3 +1,5 @@
+@import (reference) '@/shared/styles/_variables.less';
+
 /**
  * QuickStartLayer — 首页常用站点样式
  *
@@ -84,7 +86,7 @@
   }
 }
 
-@media (width >= 992px) { /* lg */
+@media (width >= @breakpoint-lg) { /* lg */
   .speed-dial-grid-wrapper {
     grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 180px), 1fr));
   }
@@ -170,7 +172,7 @@
   bottom: 24px;
   z-index: 10;
   contain: layout style paint;
-  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--ant-color-text) 15%, transparent);
   transition:
     transform 120ms ease,
     box-shadow 120ms ease;
@@ -180,7 +182,7 @@
 }
 
 .speed-dial-fab:hover {
-  box-shadow: 0 6px 16px rgb(0 0 0 / 20%);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--ant-color-text) 20%, transparent);
   transform: scale3d(1.08, 1.08, 1);
 }
 
@@ -208,7 +210,7 @@
   }
 }
 
-@media (width >= 992px) { /* lg */
+@media (width >= @breakpoint-lg) { /* lg */
   .speed-dial-group-grid {
     grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 180px), 1fr));
   }
@@ -229,18 +231,24 @@
 .app-speed-dial-card {
   overflow: hidden;
   opacity: var(--speed-dial-card-opacity, 1);
-  transition: opacity 160ms ease;
-}
+  border-radius: var(--app-card-radius, 12px);
+  transition: opacity 160ms ease, transform var(--app-motion-fast, 0.15s) ease, box-shadow var(--app-motion-fast, 0.15s) ease;
 
-.app-speed-dial-card :global(.ant-card-body) {
-  padding: 0;
-}
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--app-shadow-sm);
+  }
 
-.app-speed-dial-card__body {
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
-  height: 100%;
-  padding: 0;
+  :global(.ant-card-body) { padding: 0; }
+
+  &__body { display: flex; flex-direction: column; height: 100%; padding: 0; }
+
+  // ── 新增卡片修饰符 ──
+  &--add {
+    &:hover {
+      border-color: var(--app-color-primary, var(--ant-color-primary));
+    }
+  }
 }
 
 .app-speed-dial-form {
@@ -261,7 +269,7 @@
   padding: var(--app-space-1);
   color: var(--ant-color-text-secondary);
   cursor: grab;
-  background: color-mix(in srgb, #000000 4%, transparent);
+  background: var(--ant-color-fill-quaternary);
   border-radius: var(--app-radius-xs);
   opacity: 0;
   transition:
@@ -279,12 +287,12 @@
 
 .speed-dial-drag-handle:hover {
   color: var(--ant-color-text);
-  background: color-mix(in srgb, #000000 10%, transparent);
+  background: var(--ant-color-fill-tertiary);
 }
 
 .speed-dial-drag-handle:active {
   cursor: grabbing;
-  background: color-mix(in srgb, #000000 15%, transparent);
+  background: var(--ant-color-fill-secondary);
   opacity: 1;
 }
 
@@ -298,7 +306,7 @@
   contain: layout style paint;
   color: var(--ant-color-text-tertiary);
   cursor: pointer;
-  background: color-mix(in srgb, #000000 4%, transparent);
+  background: var(--ant-color-fill-quaternary);
   border-radius: var(--app-radius-xs);
   opacity: 0;
   transform: scale3d(0.9, 0.9, 1);
@@ -319,7 +327,7 @@
 
 .speed-dial-more-btn:hover {
   color: var(--ant-color-text);
-  background: color-mix(in srgb, #000000 10%, transparent);
+  background: var(--ant-color-fill-tertiary);
 }
 
 /* ── 更多按钮容器（含菜单） ── */
@@ -338,7 +346,7 @@
   justify-content: center;
   width: 100%;
   aspect-ratio: 16 / 10;
-  border-radius: var(--ant-border-radius-lg);
+  border-radius: var(--app-card-radius, 12px);
 }
 
 .app-speed-dial-preview {
@@ -371,7 +379,7 @@
   gap: 2px;
   min-height: 42px;
   padding: 8px 8px 6px;
-  border-radius: 0 0 var(--ant-border-radius-lg) var(--ant-border-radius-lg);
+  border-radius: 0 0 var(--app-card-radius, 12px) var(--app-card-radius, 12px);
 }
 
 .app-speed-dial-content {
@@ -447,14 +455,6 @@
 
 .app-speed-dial-add-icon {
   color: var(--ant-color-text-tertiary);
-}
-
-/* ── 新增卡片 ── */
-.app-speed-dial-card--add {
-}
-
-.app-speed-dial-card--add:hover {
-  border-color: var(--app-color-primary, var(--ant-color-primary));
 }
 
 .app-speed-dial-card--add:hover .app-speed-dial-add-label {

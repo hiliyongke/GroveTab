@@ -12,6 +12,7 @@ import { APP_CHANNELS } from "@/shared/config/storage-keys";
 import { BRAND } from "@/shared/config/brand";
 
 const CHANNEL_NAME = APP_CHANNELS.swBroadcast;
+const HIGH_FREQ_DEBOUNCE_MS = 200;
 
 export function useSwBroadcast() {
   const handleBroadcast = useTabsStore((s) => s.handleBroadcast);
@@ -46,6 +47,18 @@ export function useSwBroadcast() {
       void loadAllTabs({ silent: true });
     };
 
+    /** Debounced refresh for high-frequency events (onUpdated fires per-character URL change) */
+    const refreshDebounced = (() => {
+      let timer: ReturnType<typeof setTimeout> | null = null;
+      return () => {
+        if (timer !== null) window.clearTimeout(timer);
+        timer = window.setTimeout(() => {
+          timer = null;
+          void loadAllTabs({ silent: true });
+        }, HIGH_FREQ_DEBOUNCE_MS);
+      };
+    })();
+
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         refreshSilently();
@@ -79,13 +92,13 @@ export function useSwBroadcast() {
     channel.addEventListener("message", handler);
     chrome.runtime?.onMessage?.addListener?.(runtimeHandler);
     chrome.tabs?.onCreated?.addListener?.(refreshSilently);
-    chrome.tabs?.onUpdated?.addListener?.(refreshSilently);
+    chrome.tabs?.onUpdated?.addListener?.(refreshDebounced); // 高频：每字符 URL 变化触发
     chrome.tabs?.onRemoved?.addListener?.(tabRemovedHandler);
     chrome.tabs?.onActivated?.addListener?.(tabActivatedHandler);
-    chrome.tabs?.onMoved?.addListener?.(refreshSilently);
-    chrome.tabs?.onAttached?.addListener?.(refreshSilently);
-    chrome.tabs?.onDetached?.addListener?.(refreshSilently);
-    chrome.tabs?.onReplaced?.addListener?.(refreshSilently);
+    chrome.tabs?.onMoved?.addListener?.(refreshDebounced);
+    chrome.tabs?.onAttached?.addListener?.(refreshDebounced);
+    chrome.tabs?.onDetached?.addListener?.(refreshDebounced);
+    chrome.tabs?.onReplaced?.addListener?.(refreshDebounced);
     chrome.windows?.onCreated?.addListener?.(refreshSilently);
     chrome.windows?.onRemoved?.addListener?.(refreshSilently);
     chrome.windows?.onFocusChanged?.addListener?.(windowFocusChangedHandler);
@@ -98,13 +111,13 @@ export function useSwBroadcast() {
       channel.close();
       chrome.runtime?.onMessage?.removeListener?.(runtimeHandler);
       chrome.tabs?.onCreated?.removeListener?.(refreshSilently);
-      chrome.tabs?.onUpdated?.removeListener?.(refreshSilently);
+      chrome.tabs?.onUpdated?.removeListener?.(refreshDebounced);
       chrome.tabs?.onRemoved?.removeListener?.(tabRemovedHandler);
       chrome.tabs?.onActivated?.removeListener?.(tabActivatedHandler);
-      chrome.tabs?.onMoved?.removeListener?.(refreshSilently);
-      chrome.tabs?.onAttached?.removeListener?.(refreshSilently);
-      chrome.tabs?.onDetached?.removeListener?.(refreshSilently);
-      chrome.tabs?.onReplaced?.removeListener?.(refreshSilently);
+      chrome.tabs?.onMoved?.removeListener?.(refreshDebounced);
+      chrome.tabs?.onAttached?.removeListener?.(refreshDebounced);
+      chrome.tabs?.onDetached?.removeListener?.(refreshDebounced);
+      chrome.tabs?.onReplaced?.removeListener?.(refreshDebounced);
       chrome.windows?.onCreated?.removeListener?.(refreshSilently);
       chrome.windows?.onRemoved?.removeListener?.(refreshSilently);
       chrome.windows?.onFocusChanged?.removeListener?.(windowFocusChangedHandler);

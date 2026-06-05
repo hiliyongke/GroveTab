@@ -25,15 +25,16 @@ body {
   box-sizing: border-box;
 }
 
+/* ─── hover 渐显工具类 ─── */
 .app-hover-reveal {
   opacity: 0;
   transition: opacity var(--app-motion-duration, 0.15s) ease;
-}
 
-.app-hover-reveal-host:hover .app-hover-reveal,
-.app-hover-reveal-host:focus-within .app-hover-reveal,
-.app-hover-reveal.is-visible {
-  opacity: 1;
+  .app-hover-reveal-host:hover &,
+  .app-hover-reveal-host:focus-within &,
+  &.is-visible {
+    opacity: 1;
+  }
 }
 
 [data-popup] {
@@ -54,6 +55,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
+  /* ─── 外壳 ─── */
   .popup-shell {
     position: relative;
     display: flex;
@@ -67,12 +69,13 @@ body {
     border: 0;
     border-radius: 0;
     box-shadow: none;
+
+    &::before {
+      content: none;
+    }
   }
 
-  .popup-shell::before {
-    content: none;
-  }
-
+  /* ─── 通用层叠区 ─── */
   .popup-search,
   .popup-meta,
   .popup-list,
@@ -83,6 +86,7 @@ body {
     z-index: 1;
   }
 
+  /* ─── 搜索框 ─── */
   .popup-search {
     height: 36px;
     padding-inline: 4px;
@@ -111,6 +115,7 @@ body {
     color: var(--ant-color-text-tertiary);
   }
 
+  /* ─── 元信息栏 ─── */
   .popup-meta {
     display: flex;
     gap: 8px;
@@ -135,6 +140,7 @@ body {
     color: var(--ant-color-text-quaternary);
   }
 
+  /* ─── 列表区 ─── */
   .popup-list {
     flex: 1;
     min-height: 0;
@@ -152,26 +158,26 @@ body {
     border: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 76%, transparent);
     border-radius: var(--app-radius-lg);
     box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ant-color-text) 4%, transparent);
-  }
 
-  .popup-list::-webkit-scrollbar {
-    width: 6px;
-  }
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
 
-  .popup-list::-webkit-scrollbar-track {
-    background: transparent;
-  }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
 
-  .popup-list::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, var(--ant-color-text) 16%, transparent);
-    background-clip: content-box;
-    border: 2px solid transparent;
-    border-radius: var(--app-radius-pill);
-  }
+    &::-webkit-scrollbar-thumb {
+      background: color-mix(in srgb, var(--ant-color-text) 16%, transparent);
+      background-clip: content-box;
+      border: 2px solid transparent;
+      border-radius: var(--app-radius-pill);
+    }
 
-  .popup-list:hover::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, var(--ant-color-text) 26%, transparent);
-    background-clip: content-box;
+    &:hover::-webkit-scrollbar-thumb {
+      background: color-mix(in srgb, var(--ant-color-text) 26%, transparent);
+      background-clip: content-box;
+    }
   }
 
   .popup-list-empty {
@@ -187,6 +193,7 @@ body {
     font-size: 12px;
   }
 
+  /* ─── 列表行 ─── */
   .popup-row {
     position: relative;
     display: flex;
@@ -200,17 +207,18 @@ body {
     transition:
       background-color 0.14s ease,
       box-shadow 0.14s ease;
-  }
 
-  .popup-row + .popup-row {
-    margin-top: 1px;
-  }
+    & + & {
+      margin-top: 1px;
+    }
 
-  .popup-row:hover,
-  .popup-row:focus-within {
-    background: color-mix(in srgb, var(--app-color-primary) 10%, transparent);
-    border-color: transparent;
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--app-color-primary) 18%, transparent);
+    &:hover,
+    &:focus-within {
+      background: var(--ant-color-fill-quaternary);
+      border-color: transparent;
+      box-shadow: none;
+      transform: translateX(2px);
+    }
   }
 
   .popup-row-main {
@@ -223,13 +231,13 @@ body {
     min-width: 0;
     cursor: pointer;
     background: transparent;
-  }
 
-  .popup-row-main:hover,
-  .popup-row-main:focus,
-  .popup-row-main:focus-visible,
-  .popup-row-main:active {
-    background: transparent;
+    &:hover,
+    &:focus,
+    &:focus-visible,
+    &:active {
+      background: transparent;
+    }
   }
 
   .popup-row-favicon {
@@ -291,6 +299,7 @@ body {
     }
   }
 
+  /* ─── 操作按钮区 ─── */
   .popup-actions {
     display: flex;
     flex-direction: column;
@@ -335,6 +344,7 @@ body {
     opacity: 0.62;
   }
 
+  /* ─── 关于区 ─── */
   .popup-about {
     margin-top: 7px;
     text-align: center;
@@ -362,6 +372,7 @@ body {
     }
   }
 
+  /* ─── 错误提示 ─── */
   .popup-error {
     padding: 6px 8px;
     margin-top: 6px;
@@ -371,8 +382,9 @@ body {
     border-radius: var(--app-radius-lg);
   }
 
-  // 暗色模式下针对 popup 容器的细节微调（data-theme 挂在 <html>，data-popup 挂在 <body>，
-  // 因此只能用 [data-theme="dark"] [data-popup] 这种祖先后代选择器）。
+  /* ─── 暗色模式覆盖 ─── */
+  /* data-theme 挂在 <html>，data-popup 挂在 <body>，
+     因此只能用 [data-theme="dark"] [data-popup] 这种祖先后代选择器。 */
   [data-theme="dark"] & {
     .popup-list {
       scrollbar-color: color-mix(in srgb, #ffffff 22%, transparent) transparent;
@@ -382,22 +394,24 @@ body {
         var(--ant-color-bg-container)
       );
       box-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 4%, transparent);
+
+      &::-webkit-scrollbar-thumb {
+        background: color-mix(in srgb, #ffffff 20%, transparent);
+        background-clip: content-box;
+      }
+
+      &:hover::-webkit-scrollbar-thumb {
+        background: color-mix(in srgb, #ffffff 30%, transparent);
+        background-clip: content-box;
+      }
     }
 
-    .popup-list::-webkit-scrollbar-thumb {
-      background: color-mix(in srgb, #ffffff 20%, transparent);
-      background-clip: content-box;
-    }
-
-    .popup-list:hover::-webkit-scrollbar-thumb {
-      background: color-mix(in srgb, #ffffff 30%, transparent);
-      background-clip: content-box;
-    }
-
-    .popup-row:hover,
-    .popup-row:focus-within {
-      background: color-mix(in srgb, var(--app-color-primary) 16%, transparent);
-      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--app-color-primary) 28%, transparent);
+    .popup-row {
+      &:hover,
+      &:focus-within {
+        background: color-mix(in srgb, var(--app-color-primary) 16%, transparent);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--app-color-primary) 28%, transparent);
+      }
     }
 
     .popup-search {
@@ -408,15 +422,16 @@ body {
     .popup-actions__secondary .ant-btn {
       background: var(--ant-color-bg-elevated);
       border-color: color-mix(in srgb, var(--ant-color-border-secondary) 72%, transparent);
-    }
 
-    .popup-actions__secondary .ant-btn:hover {
-      background: color-mix(in srgb, var(--app-color-primary) 18%, var(--ant-color-bg-elevated));
-      border-color: color-mix(in srgb, var(--app-color-primary) 32%, transparent);
+      &:hover {
+        background: color-mix(in srgb, var(--app-color-primary) 18%, var(--ant-color-bg-elevated));
+        border-color: color-mix(in srgb, var(--app-color-primary) 32%, transparent);
+      }
     }
   }
 }
 
+/* ─── Apple 皮肤覆盖 ─── */
 [data-popup][data-skin="apple"],
 [data-popup] [data-skin="apple"] {
   .popup-actions__primary {

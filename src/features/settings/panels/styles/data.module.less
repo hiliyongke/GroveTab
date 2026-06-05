@@ -1,147 +1,138 @@
+@import (reference) '@/shared/styles/_variables.less';
+
 /**
  * DataPanel — 数据管理面板样式
- *
- * 适配抽屉窄宽：
- *   - 紧凑间距
- *   - 统一圆角 10px
+ * BEM 子元素使用 &__ 嵌套。
  */
 
 .data-panel {
   width: 100%;
-}
 
-.data-panel__profile-create {
-  display: flex; /* antd 组件内部微调整 */
-  gap: 8px;
-  min-width: 0;
-  margin-bottom: 10px;
-}
-
-.data-panel__profile-input,
-.data-panel__profile-edit-input {
-  flex: 1;
-}
-
-.data-panel__profile-edit-input {
-  margin-right: 8px;
-}
-
-.data-panel__empty {
-  margin: var(--app-space-1) 0;
-}
-
-.data-panel__profile-list {
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
-  gap: 6px;
-}
-
-.data-panel__profile-card,
-.data-panel__quota {
-  padding: var(--app-space-3) var(--app-space-3);
-  background: var(--app-bg-surface);
-  border: 1px solid var(--ant-color-border-secondary);
-  border-radius: var(--app-radius-md);
-}
-
-.data-panel__profile-card {
-  display: flex; /* antd 组件内部微调整 */
-  gap: 8px;
-  align-items: center;
-  justify-content: space-between;
-  min-width: 0;
-}
-
-.data-panel__profile-card :global(.ant-space) {
-  flex-shrink: 0;
-}
-
-.data-panel__profile-name {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 13px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.data-panel__quota-header {
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.data-panel__quota-label {
-  display: inline-flex;
-  gap: 6px;
-  align-items: center;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.data-panel__quota-icon {
-  color: var(--ant-color-info);
-}
-
-.data-panel__quota-meta {
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-  color: var(--ant-color-text-tertiary);
-}
-
-.data-panel__quota-meta.is-warning {
-  color: var(--ant-color-error);
-}
-
-.data-panel__quota-alert {
-  margin-top: 8px;
-}
-
-.data-panel__actions {
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-}
-
-.data-panel__actions :global(.ant-upload) {
-  width: 100%;
-}
-
-.data-panel__import-status {
-  padding: 0 4px;
-  font-size: 11px;
-  color: var(--ant-color-text-tertiary);
-}
-
-.data-panel__divider {
-  margin: 4px 0;
-  font-size: 11px;
-  color: var(--ant-color-text-tertiary);
-}
-
-.data-panel__factory-confirm {
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
-  gap: 8px;
-}
-
-.data-panel__factory-copy {
-  font-size: 12px;
-  color: var(--ant-color-text-secondary);
-}
-
-@media (width <= 520px) {
-  .data-panel__profile-create,
-  .data-panel__profile-card,
-  .data-panel__quota-header {
-    flex-direction: column;
-    align-items: stretch;
+  &__profile-create {
+    display: flex;
+    gap: 8px;
+    min-width: 0;
+    margin-bottom: 10px;
   }
 
-  .data-panel__profile-card :global(.ant-space) {
-    justify-content: flex-end;
+  &__profile-input,
+  &__profile-edit-input {
+    flex: 1;
+  }
+
+  &__profile-edit-input {
+    margin-right: 8px;
+  }
+
+  &__empty {
+    margin: var(--app-space-1) 0;
+  }
+
+  &__profile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__profile-card,
+  &__quota {
+    padding: var(--app-space-3);
+    background: var(--app-bg-surface);
+    border: 1px solid var(--ant-color-border-secondary);
+    border-radius: var(--app-radius-md);
+  }
+
+  &__profile-card {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 0;
+
+    :global(.ant-space) { flex-shrink: 0; }
+  }
+
+  &__profile-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  &__quota-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  &__quota-label {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  &__quota-icon { color: var(--ant-color-info); }
+
+  &__quota-meta {
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ant-color-text-tertiary);
+
+    &.is-warning { color: var(--ant-color-error); }
+  }
+
+  &__quota-alert { margin-top: 8px; }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+
+    :global(.ant-upload) { width: 100%; }
+  }
+
+  &__import-status {
+    padding: 0 4px;
+    font-size: 11px;
+    color: var(--ant-color-text-tertiary);
+  }
+
+  &__divider {
+    margin: 4px 0;
+    font-size: 11px;
+    color: var(--ant-color-text-tertiary);
+  }
+
+  &__factory-confirm {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__factory-copy {
+    font-size: 12px;
+    color: var(--ant-color-text-secondary);
+  }
+}
+
+@media (width <= @breakpoint-xs-sm) {
+  .data-panel {
+    &__profile-create,
+    &__profile-card,
+    &__quota-header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    &__profile-card :global(.ant-space) {
+      justify-content: flex-end;
+    }
   }
 }

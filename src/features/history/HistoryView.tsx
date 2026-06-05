@@ -18,7 +18,6 @@ import {
   useEffect,
   useMemo,
   useCallback,
-  type CSSProperties,
   type ReactNode,
 } from "react";
 import {
@@ -29,7 +28,6 @@ import {
   Tooltip,
   Tag,
   Segmented,
-  theme,
   Space,
   Flex,
   Typography,
@@ -281,7 +279,6 @@ function SnapshotDiffCard({
 
 export function HistoryView() {
   const { t } = useT();
-  const { token } = theme.useToken();
   const relTime = useRelativeTime();
 
   const [activeTab, setActiveTab] = useState<"closed" | "timeline" | "analysis">("closed");
@@ -515,17 +512,6 @@ export function HistoryView() {
 
   // ── 渲染 ────────────────────────────────────
 
-  const viewVars = {
-    "--history-accent": token.colorPrimary,
-    "--history-text": token.colorText,
-    "--history-text-secondary": token.colorTextSecondary,
-    "--history-text-tertiary": token.colorTextTertiary,
-    "--history-fill-secondary": token.colorFillSecondary,
-    "--history-fill-tertiary": token.colorFillTertiary,
-    "--history-border": token.colorBorderSecondary,
-    "--history-radius": `${token.borderRadiusLG}px`,
-  } as CSSProperties;
-
   const renderClosedItem = (rec: ClosedTabRecord) => (
     <Flex key={rec.id} align="center" gap={10} className={styles["history-item"]}>
       <span className={styles["history-item-favicon-wrap"]}>
@@ -737,8 +723,8 @@ export function HistoryView() {
   };
 
   return (
-    <div style={{ padding: "12px 16px 32px", minHeight: 0 }}>
-      <Flex vertical className={styles["history-panel-shell"]} style={viewVars}>
+    <div style={{ minHeight: 0 }}>
+      <Flex vertical className={styles["history-panel-shell"]}>
         <Flex vertical gap={10} className={styles["history-panel-toolbar"]}>
           <Input
             value={keyword}

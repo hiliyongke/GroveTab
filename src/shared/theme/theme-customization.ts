@@ -245,7 +245,7 @@ export function buildAntdThemeConfig(
             colorBorderSecondary: skin.colorBorderSecondaryLight,
             colorText: skinId === "apple" ? "#1d1d1f" : "#1F2329",
             colorTextSecondary: skinId === "apple" ? "rgba(0, 0, 0, 0.8)" : "#646A73",
-            colorTextTertiary: skinId === "apple" ? "rgba(0, 0, 0, 0.48)" : "#8F959E",
+            colorTextTertiary: skinId === "apple" ? "rgba(0, 0, 0, 0.60)" : "#8F959E",
             colorFillQuaternary:
               skinId === "apple" ? "rgba(0, 0, 0, 0.04)" : "rgba(31, 35, 41, 0.04)",
             colorFillTertiary:

@@ -16,19 +16,7 @@ import { useT } from "@/shared/i18n";
 import { useSessionsStore } from "@/store";
 import { saveWindowSnapshot, restoreWindowSnapshot } from "@/services/window-snapshot";
 import { feedback } from "@/shared/ui/feedback";
-
-/** 简单的相对时间格式化 */
-function formatRelativeTime(ts: number): string {
-  const diff = Date.now() - ts;
-  const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return "刚刚";
-  if (minutes < 60) return `${minutes} 分钟前`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} 小时前`;
-  const days = Math.floor(hours / 24);
-  if (days < 30) return `${days} 天前`;
-  return new Date(ts).toLocaleDateString();
-}
+import { formatRelativeTime } from "@/shared/utils/relative-time";
 
 interface WindowSnapshotPanelProps {
   windowId: number;
@@ -195,7 +183,7 @@ export const WindowSnapshotPanel = memo(function WindowSnapshotPanel({
                   <Flex gap={4} align="center">
                     <Clock size={10} style={{ color: token.colorTextQuaternary }} />
                     <Typography.Text style={{ fontSize: 11, color: token.colorTextTertiary }}>
-                      {formatRelativeTime(session.createdAt)}
+                      {formatRelativeTime(session.createdAt, t)}
                     </Typography.Text>
                     <Typography.Text style={{ fontSize: 11, color: token.colorTextQuaternary }}>
                       ({session.tabCount} 标签)

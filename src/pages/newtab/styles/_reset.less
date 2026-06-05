@@ -56,18 +56,13 @@ h2,
 h3,
 h4,
 h5,
-h6,
-.app-typography {
+h6 {
   font-family: var(--app-font-family-heading, var(--ant-font-family));
+  font-weight: var(--app-font-weight-heading, 600);
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-weight: var(--app-font-weight-heading, 600);
+.app-typography {
+  font-family: var(--app-font-family-heading, var(--ant-font-family));
 }
 
 [data-theme="dark"] body {
@@ -86,8 +81,8 @@ h6 {
 ::selection {
   color: inherit;
   background-color: color-mix(in srgb, var(--app-color-primary) 18%, transparent);
-}
 
-[data-theme="dark"] ::selection {
-  background-color: color-mix(in srgb, var(--app-color-primary) 25%, transparent);
+  [data-theme="dark"] & {
+    background-color: color-mix(in srgb, var(--app-color-primary) 25%, transparent);
+  }
 }

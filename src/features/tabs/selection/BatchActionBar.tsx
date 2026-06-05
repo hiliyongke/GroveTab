@@ -14,7 +14,6 @@ import {
   Badge,
   Tooltip,
   Popconfirm,
-  Divider,
   theme,
   Input,
   Select,
@@ -360,7 +359,7 @@ export function BatchActionBar() {
         </Typography.Text>
       </Flex>
 
-      <Divider type="vertical" className={styles["app-divider-soft"]} aria-hidden />
+      <div className={styles["app-divider-soft"]} aria-hidden />
 
       {/* 操作组：危险→中性→主要，视觉权重递增 */}
       <Flex align="center" gap="small" className={styles["app-batch-bar__actions"]}>

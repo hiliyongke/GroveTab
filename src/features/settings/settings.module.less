@@ -1,25 +1,36 @@
+@import (reference) '@/shared/styles/_variables.less';
+
 /**
- * SettingsPanel — 设置面板样式
+ * SettingsPanel — 设置面板全局样式
  *
- * 顶部 Tabs 导航 + 可滚动内容区
+ * 设计决策：设置面板样式使用 :global() 全局作用域，
+ * 因为各设置子面板（appearance/data/about 等）需要跨模块复用。
+ * 内部仍使用 BEM 语义与 &__ 嵌套，保证可读性。
  */
 
-/* ── Drawer 全局覆盖 ── */
-.settings-drawer__header {
-  padding: 18px 20px;
-  background: var(--app-modal-bg);
-  border-bottom: 1px solid var(--ant-color-border-secondary);
+// ── 共享 mixin ──
+.settings-transition() {
+  transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.settings-drawer__title {
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
+/* ── Drawer ── */
+.settings-drawer {
+  &__header {
+    padding: 18px 20px;
+    background: var(--app-modal-bg);
+    border-bottom: 1px solid var(--ant-color-border-secondary);
+  }
 
-.settings-drawer__body {
-  padding: 0;
-  overflow: hidden;
+  &__title {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  &__body {
+    padding: 0;
+    overflow: hidden;
+  }
 }
 
 /* ── Tabs ── */
@@ -32,226 +43,295 @@
   }
 }
 
-.settings-content__body {
-  padding: 20px 28px 32px;
+.settings-content {
+  &__body {
+    padding: 20px 28px 32px;
 
-  > * {
-    max-width: 100%;
-  }
+    > * { max-width: 100%; }
 
-  &::-webkit-scrollbar { width: 5px; }
-  &::-webkit-scrollbar-track { background: transparent; }
-  &::-webkit-scrollbar-thumb {
-    background: var(--ant-color-fill);
-    border-radius: var(--app-radius-xs);
-  }
-  &::-webkit-scrollbar-thumb:hover {
-    background: var(--ant-color-fill-secondary);
-  }
-}
-
-/* ── Field 字段通用样式 ── */
-:global(.settings-field) {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-:global(.settings-field > .ant-switch) {
-  align-self: flex-start;
-}
-
-:global(.settings-field__label) {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ant-color-text-secondary);
-  letter-spacing: 0.02em;
-}
-
-:global(.settings-field__hint) {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--ant-color-text-tertiary);
-}
-
-:global(.settings-panel-stack) {
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-  width: 100%;
-}
-
-:global(.settings-panel-stack--compact) { gap: 20px; }
-:global(.settings-panel-stack--regular) { gap: 24px; }
-
-:global(.settings-section) {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-:global(.settings-section.is-disabled) { opacity: 0.55; }
-
-:global(.settings-section__title) {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ant-color-text);
-  letter-spacing: -0.01em;
-}
-
-:global(.settings-section__body) {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-:global(.settings-control-full) { width: 100%; min-width: 0; }
-:global(.settings-control-full.ant-space-compact) { display: flex; }
-:global(.settings-control-full.ant-space-compact > *) { min-width: 0; }
-
-:global(.settings-field .ant-segmented),
-:global(.settings-field .ant-select),
-:global(.settings-field .ant-input),
-:global(.settings-field .ant-input-number),
-:global(.settings-field .ant-slider) { max-width: 100%; }
-
-:global(.settings-field .ant-segmented) { min-width: 0; }
-:global(.settings-field .ant-segmented-item-label) { overflow: hidden; text-overflow: ellipsis; }
-
-:global(.settings-checkbox-group) { display: grid; gap: 8px; }
-:global(.settings-checkbox-group > label) { margin-inline-end: 0; }
-
-:global(.settings-card-list) {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-:global(.settings-card-row) {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  background: var(--app-bg-surface);
-  border: 1px solid var(--ant-color-border-secondary);
-  border-radius: var(--ant-border-radius-lg, 10px);
-  transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
-
-  &:hover {
-    border-color: var(--ant-color-border);
-    box-shadow: var(--app-shadow-sm);
+    &::-webkit-scrollbar { width: 5px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb {
+      background: var(--ant-color-fill);
+      border-radius: var(--app-radius-xs);
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background: var(--ant-color-fill-secondary);
+    }
   }
 }
 
-:global(.settings-card-row__main) { flex: 1; min-width: 0; }
+/* ── 全局设置类（跨子面板复用） ── */
+:global {
+  // Field 字段
+  .settings-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    .settings-transition();
 
-:global(.settings-card-row__title) {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--ant-color-text);
-  overflow-wrap: anywhere;
-}
+    > .ant-switch {
+      align-self: flex-start;
+    }
 
-:global(.settings-card-row__hint) {
-  margin-top: 2px;
-  font-size: 12px;
-  color: var(--ant-color-text-tertiary);
-}
+    .ant-segmented,
+    .ant-select,
+    .ant-input,
+    .ant-input-number,
+    .ant-slider {
+      max-width: 100%;
+    }
 
-:global(.settings-shortcuts-alert) { margin-bottom: 16px; font-size: 12px; }
+    .ant-segmented {
+      min-width: 0;
 
-:global(.settings-keybinding-recorder) {
-  display: flex;
-  flex-shrink: 0;
-  gap: 6px;
-  align-items: center;
-}
+      &-item-label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
 
-:global(.settings-keybinding-trigger) {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 80px;
-  max-width: 180px;
-  padding: 4px 10px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-family: inherit;
-  font-size: 12px;
-  color: var(--ant-color-text-secondary);
-  white-space: nowrap;
-  cursor: pointer;
-  background: var(--app-input-bg);
-  border: 1px solid var(--ant-color-border);
-  border-radius: var(--ant-border-radius-sm, 6px);
-  transition: all var(--app-motion-duration-fast, 150ms) ease;
+    &__label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ant-color-text-secondary);
+      letter-spacing: 0.02em;
+    }
 
-  &:hover { color: var(--ant-color-text); border-color: var(--ant-color-border-secondary); }
-  &:active { background: var(--app-bg-active); }
-  &:focus-visible { outline: 2px solid var(--ant-color-primary); outline-offset: 1px; }
-
-  &.is-recording {
-    color: var(--ant-color-primary);
-    background: var(--ant-color-primary-bg);
-    border-color: var(--ant-color-primary);
+    &__hint {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--ant-color-text-tertiary);
+    }
   }
-}
 
-:global(.settings-keybinding-reset) { color: var(--ant-color-text-tertiary); }
+  // Panel Stack
+  .settings-panel-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
 
-:global(.settings-warning-inline) {
-  display: inline-flex;
-  gap: 4px;
-  align-items: center;
-  margin-top: 4px;
-  font-size: 12px;
-  color: var(--ant-color-error-text);
-}
+    &--compact { gap: 20px; }
+    &--regular { gap: 24px; }
+  }
 
-:global(.settings-card-row .app-kbd) {
-  flex-shrink: 0;
-  max-width: 180px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  // Section
+  .settings-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    &.is-disabled { opacity: 0.55; }
+
+    &__title {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ant-color-text);
+      letter-spacing: -0.01em;
+    }
+
+    &__body {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+  }
+
+  // Form controls
+  .settings-control-full {
+    width: 100%;
+    min-width: 0;
+
+    &.ant-space-compact {
+      display: flex;
+
+      > * { min-width: 0; }
+    }
+  }
+
+  // Checkbox group
+  .settings-checkbox-group {
+    display: grid;
+    gap: 8px;
+
+    > label { margin-inline-end: 0; }
+  }
+
+  // Card list
+  .settings-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .settings-card-row {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--app-bg-surface);
+    border: 1px solid var(--ant-color-border-secondary);
+    border-radius: var(--ant-border-radius-lg, 10px);
+    .settings-transition();
+
+    &:hover {
+      border-color: var(--ant-color-border);
+      box-shadow: var(--app-shadow-sm);
+      transform: translateY(-1px);
+    }
+
+    .app-kbd {
+      flex-shrink: 0;
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    &__main { flex: 1; min-width: 0; }
+
+    &__title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ant-color-text);
+      overflow-wrap: anywhere;
+    }
+
+    &__hint {
+      margin-top: 2px;
+      font-size: 12px;
+      color: var(--ant-color-text-tertiary);
+    }
+  }
+
+  // Shortcuts
+  .settings-shortcuts-alert {
+    margin-bottom: 16px;
+    font-size: 12px;
+  }
+
+  // Keybinding recorder
+  .settings-keybinding-recorder {
+    display: flex;
+    flex-shrink: 0;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .settings-keybinding-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+    max-width: 180px;
+    padding: 4px 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--ant-color-text-secondary);
+    white-space: nowrap;
+    cursor: pointer;
+    background: var(--app-input-bg);
+    border: 1px solid var(--ant-color-border);
+    border-radius: var(--ant-border-radius-sm, 6px);
+    transition: all var(--app-motion-duration-fast, 150ms) ease;
+
+    &:hover { color: var(--ant-color-text); border-color: var(--ant-color-border-secondary); }
+    &:active { background: var(--app-bg-active); }
+    &:focus-visible { outline: 2px solid var(--ant-color-primary); outline-offset: 1px; }
+
+    &.is-recording {
+      color: var(--ant-color-primary);
+      background: var(--ant-color-primary-bg);
+      border-color: var(--ant-color-primary);
+    }
+  }
+
+  .settings-keybinding-reset {
+    color: var(--ant-color-text-tertiary);
+  }
+
+  .settings-warning-inline {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--ant-color-error-text);
+  }
 }
 
 /* ── 响应式 ── */
-@media (width <= 704px) {
+@media (width <= @breakpoint-sm-md) {
   .settings-content__body {
     padding: 16px 20px 28px;
   }
 
-  :global(.settings-card-row) {
-    flex-direction: column;
-    align-items: flex-start;
+  :global {
+    .settings-card-row {
+      flex-direction: column;
+      align-items: flex-start;
+
+      .app-kbd { max-width: 100%; }
+    }
+
+    .settings-keybinding-recorder {
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .settings-keybinding-trigger {
+      flex: 1;
+      max-width: none;
+    }
+
+    .settings-control-full.ant-space-compact {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      .ant-input,
+      .ant-btn {
+        width: 100%;
+        border-radius: var(--ant-border-radius);
+      }
+    }
+  }
+}
+
+/* ── 480px 断点：紧凑手机横屏，抽屉全宽 + 单列布局 ── */
+@media (width <= 480px) {
+  .settings-content__body {
+    padding: 12px 14px 24px;
   }
 
-  :global(.settings-keybinding-recorder) {
-    justify-content: space-between;
-    width: 100%;
-  }
+  :global {
+    .settings-drawer__header {
+      padding: 14px 16px;
+    }
 
-  :global(.settings-keybinding-trigger) {
-    flex: 1;
-    max-width: none;
-  }
+    .settings-panel-stack {
+      gap: 16px;
+    }
 
-  :global(.settings-card-row .app-kbd) { max-width: 100%; }
+    .settings-field {
+      gap: 6px;
+    }
 
-  :global(.settings-control-full.ant-space-compact) {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
+    .settings-card-row {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
 
-  :global(.settings-control-full.ant-space-compact .ant-input),
-  :global(.settings-control-full.ant-space-compact .ant-btn) {
-    width: 100%;
-    border-radius: var(--ant-border-radius);
+    .settings-keybinding-trigger {
+      max-width: none;
+      width: 100%;
+    }
   }
 }

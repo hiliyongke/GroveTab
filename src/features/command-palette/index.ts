@@ -11,9 +11,7 @@ export {
   createViewCommands,
   createPanelCommands,
   createSettingsCommands,
-  createSpaceCommands,
   type CommandDef,
   type CommandCategory,
-  type SpaceDef,
 } from "./command-registry";
 export { useCommandSearch, type SearchResult } from "./use-command-search";

@@ -56,7 +56,7 @@ export function GroupCardShell({
 }: GroupCardShellProps) {
   const { token } = theme.useToken();
   const radius = cardRadius ?? token.borderRadiusLG;
-  const interactiveClasses = interactive ? "app-card-interactive app-hover-reveal-host" : "";
+  const cardClasses = interactive ? "app-card app-card-interactive app-hover-reveal-host" : "app-card";
 
   const style = useMemo<CSSProperties>(
     () => ({
@@ -80,7 +80,7 @@ export function GroupCardShell({
   return (
     <Card
       size="small"
-      className={`${interactiveClasses} ${styles["app-domain-group-card"]}${className ? ` ${className}` : ""}`}
+      className={`${cardClasses} ${styles["app-domain-group-card"]}${className ? ` ${className}` : ""}`}
       classNames={{
         body: `${styles["app-domain-group-card__body"]}${bodyClassName ? ` ${bodyClassName}` : ""}`,
       }}

@@ -4,26 +4,99 @@
  * 毛玻璃覆盖、Tooltip、Dropdown 等
  */
 
+// ─── Mixins ───────────────────────────────────────
+
+// Glass-morphism backdrop for floating containers
+.app-glass-backdrop(@blur: 16px) {
+  backdrop-filter: var(--app-glass-filter, blur(@blur) saturate(180%));
+}
+
+// Shared glass background (used by Modal, Drawer, Popover, Dropdown, etc.)
+.app-glass-bg() {
+  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container));
+}
+
+// Acrylic overlay background (multi-layer gradient + backdrop)
+.app-acrylic-overlay-bg() {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 62%, transparent),
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--app-color-primary, #0078d4) 4%, transparent),
+      transparent 58%
+    ),
+    var(--app-acrylic-bg, var(--ant-color-bg-elevated)) !important;
+}
+
+// Dark-theme acrylic overlay background
+.app-acrylic-overlay-bg--dark() {
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 42%, transparent),
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--app-color-primary, #60cdff) 5%, transparent),
+      transparent 58%
+    ),
+    var(--app-acrylic-bg, var(--ant-color-bg-elevated)) !important;
+}
+
+// Acrylic shared border + shadow + backdrop
+.app-acrylic-decoration() {
+  border-color: var(
+    --app-acrylic-border,
+    color-mix(in srgb, var(--ant-color-border-secondary) 85%, transparent)
+  ) !important;
+  box-shadow: var(
+    --app-shadow-floating,
+    0 18px 52px color-mix(in srgb, #000000 24%, transparent)
+  ) !important;
+  backdrop-filter: blur(var(--app-glass-blur, 18px)) saturate(var(--app-glass-saturate, 180%));
+}
+
+// Transparent child sections
+.app-acrylic-child-transparent() {
+  background: transparent !important;
+}
+
+// Dark overlay mask background
+.app-overlay-mask-bg() {
+  background: color-mix(in srgb, #000000 52%, transparent) !important;
+  backdrop-filter: blur(6px);
+}
+
+// Dark overlay mask background (dark theme)
+.app-overlay-mask-bg--dark() {
+  background: color-mix(in srgb, #000000 62%, transparent) !important;
+}
+
 /* ═══════════════════════════════════════════════════════
  * 全局悬浮容器磨砂效果
  * ═══════════════════════════════════════════════════════ */
 
 /* Modal 容器 */
 .app-modal__container {
-  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container));
-  backdrop-filter: var(--app-glass-filter, blur(20px) saturate(180%));
+  .app-glass-bg();
+  .app-glass-backdrop(20px);
 }
 
 /* Drawer 容器 */
 .app-drawer__section {
-  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container));
-  backdrop-filter: var(--app-glass-filter, blur(20px) saturate(180%));
+  .app-glass-bg();
+  .app-glass-backdrop(20px);
 }
 
 /* Popover 容器（通过 classNames: { container: 'app-popover__container' } 注入） */
 .app-popover__container .ant-popover-inner {
-  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container));
-  backdrop-filter: var(--app-glass-filter, blur(16px) saturate(180%));
+  .app-glass-bg();
+  .app-glass-backdrop(16px);
 }
 
 /* Dropdown 菜单（暂无法全局注入 classNames，保留全局选择器） */
@@ -35,8 +108,8 @@
 .ant-tree-select-dropdown,
 .ant-picker-dropdown .ant-picker-panel-container,
 .ant-color-picker .ant-popover-inner {
-  background: color-mix(in srgb, var(--ant-color-bg-elevated) 92%, var(--ant-color-bg-container));
-  backdrop-filter: var(--app-glass-filter, blur(16px) saturate(180%));
+  .app-glass-bg();
+  .app-glass-backdrop(16px);
 }
 
 /* Tooltip */
@@ -64,27 +137,8 @@
 .ant-color-picker .ant-popover-inner,
 .ant-message-notice-content,
 .ant-notification-notice {
-  background:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 62%, transparent),
-      transparent 42%
-    ),
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--app-color-primary, #0078d4) 4%, transparent),
-      transparent 58%
-    ),
-    var(--app-acrylic-bg, var(--ant-color-bg-elevated)) !important;
-  border-color: var(
-    --app-acrylic-border,
-    color-mix(in srgb, var(--ant-color-border-secondary) 85%, transparent)
-  ) !important;
-  box-shadow: var(
-    --app-shadow-floating,
-    0 18px 52px color-mix(in srgb, #000000 24%, transparent)
-  ) !important;
-  backdrop-filter: blur(var(--app-glass-blur, 18px)) saturate(var(--app-glass-saturate, 180%));
+  .app-acrylic-overlay-bg();
+  .app-acrylic-decoration();
 }
 
 .app-drawer__header,
@@ -95,7 +149,7 @@
 .app-modal__footer,
 .ant-popover-title,
 .ant-popover-inner-content {
-  background: transparent !important;
+  .app-acrylic-child-transparent();
 }
 
 .ant-tooltip-inner {
@@ -128,8 +182,7 @@
 .app-drawer__mask,
 .app-modal__mask,
 .search-box-mask {
-  background: color-mix(in srgb, #000000 52%, transparent) !important;
-  backdrop-filter: blur(6px);
+  .app-overlay-mask-bg();
 }
 
 [data-theme="dark"] .app-drawer__section,
@@ -145,23 +198,12 @@
 [data-theme="dark"] .ant-color-picker .ant-popover-inner,
 [data-theme="dark"] .ant-message-notice-content,
 [data-theme="dark"] .ant-notification-notice {
-  background:
-    linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 42%, transparent),
-      transparent 42%
-    ),
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--app-color-primary, #60cdff) 5%, transparent),
-      transparent 58%
-    ),
-    var(--app-acrylic-bg, var(--ant-color-bg-elevated)) !important;
+  .app-acrylic-overlay-bg--dark();
   border-color: var(--app-acrylic-border, color-mix(in srgb, #ffffff 12%, transparent)) !important;
 }
 
 [data-theme="dark"] .app-drawer__mask,
 [data-theme="dark"] .app-modal__mask,
 [data-theme="dark"] .search-box-mask {
-  background: color-mix(in srgb, #000000 62%, transparent) !important;
+  .app-overlay-mask-bg--dark();
 }

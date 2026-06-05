@@ -11,14 +11,15 @@
 
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { Flex, Empty, Segmented, Tooltip } from "antd";
+import { Flex, Empty, Segmented, Tooltip, Typography } from "antd";
 import { Clock, TrendingUp, Timer, ArrowUpDown, Globe, Type } from "lucide-react";
 import { cssVars } from "@/shared/utils/css-vars";
 import { useTabsStore, useSmartSortStore } from "@/store";
+import { useTabActions } from "@/shared/hooks/use-tab-actions";
 import { useT } from "@/shared/i18n";
 import { TabItem } from "../components/TabItem";
 import { CONFIG } from "@/shared/config";
-import { moveTabs } from "@/chrome/tabs";
+import { syncSortToBrowser, restoreBrowserOrder } from "@/shared/utils/tab-sort-sync";
 import { sortTabs, type SortContext } from "@/features/smart-sort/hooks/useSmartSort";
 import type { SortMode } from "@/features/smart-sort/types";
 import type { LiveTab } from "@/shared/types";
@@ -89,57 +90,12 @@ async function buildFocusTimeMap(): Promise<Map<string, number>> {
 }
 
 /**
- * 将排序后的标签顺序同步到浏览器标签栏
- */
-async function syncSortToBrowser(sortedTabs: LiveTab[]): Promise<void> {
-  const currentWindow = await chrome.windows.getCurrent();
-  const windowId = currentWindow.id;
-  if (!windowId) return;
-
-  const windowTabIds = sortedTabs.filter((t) => t.windowId === windowId).map((t) => t.id);
-
-  if (windowTabIds.length === 0) return;
-
-  const allWindowTabs = await chrome.tabs.query({ windowId });
-  const pinnedCount = allWindowTabs.filter((t) => t.pinned).length;
-
-  try {
-    await moveTabs(windowTabIds, windowId, pinnedCount);
-  } catch {
-    // 忽略移动失败
-  }
-}
-
-/**
- * 恢复浏览器标签栏的原始顺序
- */
-async function restoreBrowserOrder(originalTabIds: number[]): Promise<void> {
-  const currentWindow = await chrome.windows.getCurrent();
-  const windowId = currentWindow.id;
-  if (!windowId) return;
-
-  const allWindowTabs = await chrome.tabs.query({ windowId });
-  const currentTabIds = new Set(allWindowTabs.map((t) => t.id));
-  const validIds = originalTabIds.filter((id) => currentTabIds.has(id));
-  if (validIds.length === 0) return;
-
-  const pinnedCount = allWindowTabs.filter((t) => t.pinned).length;
-
-  try {
-    await moveTabs(validIds, windowId, pinnedCount);
-  } catch {
-    // 忽略恢复失败
-  }
-}
-
-/**
  * 紧凑视图：虚拟化列表 + 排序功能 + 双向同步
  */
 export function CompactView({ filterQuery = "" }: CompactViewProps) {
   const { t } = useT();
   const tabs = useTabsStore((s) => s.tabs);
-  const jumpToTab = useTabsStore((s) => s.jumpToTab);
-  const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
+  const { jumpToTab, closeSingleTab } = useTabActions();
 
   const [sortMode, setSortMode] = useState<SortMode>("default");
   const [isSyncing, setIsSyncing] = useState(false);
@@ -280,7 +236,7 @@ export function CompactView({ filterQuery = "" }: CompactViewProps) {
               <Tooltip title={getSortTooltip(rule.value)} placement="top">
                 <Flex gap={4} align="center" justify="center">
                   {rule.icon}
-                  <span>{rule.label}</span>
+                  <Typography.Text>{rule.label}</Typography.Text>
                 </Flex>
               </Tooltip>
             ),

@@ -3,6 +3,7 @@ export default {
     'stylelint-config-standard',
     'stylelint-config-recess-order',
   ],
+  plugins: ['stylelint-no-unused-selectors'],
   overrides: [
     {
       files: ['**/*.less'],
@@ -81,6 +82,11 @@ export default {
 
     /* 选择器命名规范：只允许 BEM 风格（app- 前缀或 CSS Modules） */
     'selector-class-pattern': null,
+
+    /* 检测未使用的 CSS 选择器（自动匹配同名 TSX 文件） */
+    'plugin/no-unused-selectors': [true, {
+      plugins: ['stylelint-no-unused-selectors-plugin-tsx', 'cssmodules'],
+    }],
 
     /* 允许 Less 特有语法 */
     'at-rule-no-unknown': null,

@@ -7,12 +7,14 @@
  */
 
 import { useState, useMemo, useCallback, memo } from "react";
-import { Tabs, Tooltip } from "antd";
+import { Tabs, Tooltip, Button } from "antd";
 import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from "lucide-react";
 import { VIEW_CONFIGS, type ViewMode, type ViewConfig } from "@/shared/config/views";
 import { useT } from "@/shared/i18n";
 import { useSettingsStore } from "@/store";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { IconRenderer } from "@/shared/ui/IconRenderer";
+import styles from "./ViewTabs.module.less";
 
 export type ViewTabPosition = "left" | "top" | "right";
 
@@ -25,7 +27,7 @@ function useViewTabItems(): Array<ViewConfig & { label: string }> {
   const { t } = useT();
   return useMemo(
     () =>
-      VIEW_CONFIGS.filter((v) => v.id !== "archive").map((v) => ({
+      VIEW_CONFIGS.filter((v) => v.primary !== false).map((v) => ({
         ...v,
         label: t(v.labelKey),
       })),
@@ -52,9 +54,9 @@ export const ViewTabs = memo(function ViewTabs({ activeView, onChange }: ViewTab
         items={items.map((item) => ({
           key: item.id,
           label: (
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <item.Icon size={15} />
-              <span style={{ fontSize: 13 }}>{item.label}</span>
+            <span className={styles["view-tab-label"]}>
+              <IconRenderer name={item.iconName} size={15} />
+              <span className={styles["view-tab-label__text"]}>{item.label}</span>
             </span>
           ),
         }))}
@@ -64,53 +66,42 @@ export const ViewTabs = memo(function ViewTabs({ activeView, onChange }: ViewTab
 
   // vertical: Tabs 自适应最宽标签宽度；按钮固定底部
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <div className={styles["view-tabs-vertical"]}>
       <Tabs
         tabPosition={position}
         activeKey={activeView}
         onChange={(key) => onChange(key as ViewMode)}
         size="small"
-        style={{ flex: 1, minHeight: 0, alignItems: "center" }}
+        className={styles["view-tabs-vertical__tabs"]}
         tabBarStyle={collapsed ? { width: 52, minWidth: 52 } : undefined}
         items={items.map((item) => ({
           key: item.id,
           label: collapsed ? (
             <Tooltip title={item.label} placement={position === "left" ? "right" : "left"}>
-              <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "100%", height: 24 }}>
-                <item.Icon size={18} />
+              <span className={styles["view-tab-label--collapsed"]}>
+                <IconRenderer name={item.iconName} size={18} />
               </span>
             </Tooltip>
           ) : (
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 8, width: "100%" }}>
-              <item.Icon size={16} />
-              <span style={{ fontSize: 13, flex: 1 }}>{item.label}</span>
+            <span className={styles["view-tab-label--vertical"]}>
+              <IconRenderer name={item.iconName} size={16} />
+              <span className={styles["view-tab-label__text"]}>{item.label}</span>
             </span>
           ),
         }))}
       />
-      {/* eslint-disable-next-line no-restricted-syntax */}
-      <button
-        type="button"
+      <Button
+        type="text"
+        size="small"
         onClick={toggleCollapsed}
-        title={collapsed ? "展开文案" : "收起文案"}
         aria-label={collapsed ? "展开文案" : "收起文案"}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
-          height: 36,
-          padding: 0,
-          border: "none",
-          background: "transparent",
-          cursor: "pointer",
-          color: "var(--ant-color-text-tertiary)",
-        }}
-      >
-        {position === "left"
-          ? (collapsed ? <PanelLeftOpen size={ICON_SIZE.SMALL} /> : <PanelLeftClose size={ICON_SIZE.SMALL} />)
-          : (collapsed ? <PanelRightOpen size={ICON_SIZE.SMALL} /> : <PanelRightClose size={ICON_SIZE.SMALL} />)}
-      </button>
+        className={styles["view-tabs-collapse-btn"]}
+        icon={
+          position === "left"
+            ? (collapsed ? <PanelLeftOpen size={ICON_SIZE.SMALL} /> : <PanelLeftClose size={ICON_SIZE.SMALL} />)
+            : (collapsed ? <PanelRightOpen size={ICON_SIZE.SMALL} /> : <PanelRightClose size={ICON_SIZE.SMALL} />)
+        }
+      />
     </div>
   );
 });

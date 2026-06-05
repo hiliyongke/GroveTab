@@ -49,7 +49,7 @@ import {
   yamlToJson,
 } from "../local-tools";
 import { BRAND } from "@/shared/config/brand";
-import styles from "../DeveloperToolsPage.module.less";
+import styles from "../DevToolsView.module.less";
 
 /** 工具示例数据 */
 const TOOL_EXAMPLES: Record<

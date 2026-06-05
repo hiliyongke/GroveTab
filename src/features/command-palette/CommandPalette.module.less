@@ -1,171 +1,209 @@
-/* CommandPalette 样式 */
+/**
+ * CommandPalette 样式模块
+ *
+ * 所有 BEM 子元素使用 &__ 嵌套，状态用 &-- 修饰符。
+ * CSS 变量统一使用 antd 设计 token 作为 fallback。
+ */
+
+// 重复的基础布局 mixin
+.cmd-center() {
+  display: flex;
+  align-items: center;
+}
+
+// 共享的文本/背景变量（主题自适应）
+@cmd-bg: var(--ant-color-bg-container, #fff);
+@cmd-border-color: var(--ant-color-border-secondary, #e8e8e8);
 
 .command-palette {
   :global {
     .ant-modal-content {
       padding: 0;
       overflow: hidden;
-      border-radius: 12px;
+      border-radius: var(--app-card-radius, 12px);
     }
   }
-}
 
-.command-palette__search {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border-color, #e8e8e8);
-}
-
-.command-palette__search-icon {
-  flex-shrink: 0;
-  color: var(--text-secondary, #8c8c8c);
-}
-
-.command-palette__input {
-  flex: 1;
-  font-size: 14px;
-  color: var(--text-primary, #1f1f1f);
-  outline: none;
-  background: transparent;
-  border: none;
-
-  &::placeholder {
-    color: var(--text-secondary, #8c8c8c);
+  // ── 搜索栏 ──
+  &__search {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid @cmd-border-color;
   }
-}
 
-.command-palette__clear {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  color: var(--text-secondary, #8c8c8c);
-  cursor: pointer;
-  background: transparent;
-  border: none;
-  border-radius: 4px;
-
-  &:hover {
-    background: var(--bg-secondary, #f5f5f5);
+  &__search-icon {
+    flex-shrink: 0;
+    color: var(--ant-color-text-tertiary, #8c8c8c);
   }
-}
 
-.command-palette__list {
-  max-height: 320px;
-  padding: 4px 0;
-  overflow-y: auto;
-}
+  &__input {
+    flex: 1;
+    font-size: 14px;
+    color: var(--ant-color-text, #1f1f1f);
+    outline: none;
+    background: transparent;
+    border: none;
 
-.command-palette__category {
-  padding: 8px 16px 4px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-secondary, #8c8c8c);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.command-palette__item {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: background-color var(--app-motion-duration-fast, 150ms);
-
-  &:hover {
-    background: var(--bg-secondary, #f5f5f5);
+    &::placeholder {
+      color: var(--ant-color-text-tertiary, #8c8c8c);
+    }
   }
-}
 
-.command-palette__item--selected {
-  background: var(--primary-50, #e6f4ff);
-}
+  &__clear {
+    .cmd-center();
+    justify-content: center;
+    padding: 4px;
+    color: var(--ant-color-text-tertiary, #8c8c8c);
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
 
-.command-palette__item-icon {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  color: var(--text-secondary, #8c8c8c);
-  background: var(--bg-secondary, #f5f5f5);
-  border-radius: 6px;
-}
+    &:hover {
+      background: var(--ant-color-fill-quaternary, #f5f5f5);
+    }
+  }
 
-.command-palette__item--selected .command-palette__item-icon {
-  color: var(--primary-color, #1677ff);
-  background: var(--primary-100, #bae0ff);
-}
-
-.command-palette__item-label {
-  flex: 1;
-  font-size: 13px;
-  color: var(--text-primary, #1f1f1f);
-}
-
-.command-palette__item-shortcut {
-  padding: 1px 6px;
-  margin: 0;
-  font-size: 11px;
-  line-height: 1.6;
-  color: var(--text-secondary, #8c8c8c);
-  background: var(--bg-secondary, #f5f5f5);
-  border: none;
-  border-radius: 4px;
-}
-
-.command-palette__empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-}
-
-/* P1-1: 内联 style 迁移 —— 模式切换标签 */
-.command-palette__mode-tag {
-  margin-right: 4px;
-  font-size: 11px;
-  cursor: pointer;
-}
-
-/* P1-1: 内联 style 迁移 —— favicon 圆角 */
-.command-palette__favicon {
-  border-radius: 2px;
-}
-
-/* P1-1: 内联 style 迁移 —— 搜索结果文本 */
-.command-palette__tab-title {
-  font-size: 13px;
-}
-
-.command-palette__tab-url {
-  font-size: 11px;
-}
-
-/* P1-1: 内联 style 迁移 —— 底部提示 */
-.command-palette__footer-hint {
-  font-size: 12px;
-}
-
-.command-palette__footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 16px;
-  border-top: 1px solid var(--border-color, #e8e8e8);
-
-  kbd {
-    display: inline-block;
-    padding: 1px 5px;
-    margin: 0 2px;
-    font-family: inherit;
+  &__mode-tag {
+    margin-right: 4px;
     font-size: 11px;
-    background: var(--bg-secondary, #f5f5f5);
-    border: 1px solid var(--border-color, #d9d9d9);
-    border-radius: 3px;
+    cursor: pointer;
+  }
+
+  // ── 分类标签 ──
+  &__category {
+    padding: 8px 16px 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ant-color-text-tertiary, #8c8c8c);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  // ── 结果列表项 ──
+  &__list {
+    max-height: 320px;
+    padding: 4px 0;
+    overflow-y: auto;
+  }
+
+  &__item {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background-color var(--app-motion-duration-fast, 150ms), transform var(--app-motion-duration-fast, 150ms);
+
+  &:hover {
+    background: var(--ant-color-fill-quaternary);
+    transform: translateX(2px);
+  }
+
+    // 选中态修饰符
+    &--selected {
+      background: var(--ant-color-primary-bg, #e6f4ff);
+
+      .command-palette__item-icon {
+        color: var(--ant-color-primary, #1677ff);
+        background: var(--ant-color-primary-bg-hover, #bae0ff);
+      }
+    }
+  }
+
+  &__item-icon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    color: var(--ant-color-text-tertiary, #8c8c8c);
+    background: var(--ant-color-fill-tertiary, #f5f5f5);
+    border-radius: 6px;
+  }
+
+  &__item-label {
+    flex: 1;
+    font-size: 13px;
+    color: var(--ant-color-text, #1f1f1f);
+  }
+
+  &__item-shortcut {
+    padding: 1px 6px;
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--ant-color-text-tertiary, #8c8c8c);
+    background: var(--ant-color-fill-tertiary, #f5f5f5);
+    border: none;
+    border-radius: 4px;
+  }
+
+  // ── 空态 ──
+  &__empty {
+    .cmd-center();
+    justify-content: center;
+    padding: 24px;
+  }
+
+  // ── 标签页搜索结果 ──
+  &__favicon {
+    border-radius: 2px;
+  }
+
+  &__tab-title {
+    font-size: 13px;
+    color: var(--ant-color-text);
+  }
+
+  &__tab-url {
+    font-size: 11px;
+    color: var(--ant-color-text-secondary);
+  }
+
+  &__tab-text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  // ── Modal 内部 ──
+  &__body {
+    padding: 0;
+  }
+
+  &__mask {
+    background-color: var(--app-bg-mask);
+  }
+
+  // ── 分割线 ──
+  &__divider {
+    margin: 0;
+  }
+
+  // ── 底部操作栏 ──
+  &__footer {
+    .cmd-center();
+    justify-content: center;
+    padding: 8px 16px;
+    border-top: 1px solid @cmd-border-color;
+
+    kbd {
+      display: inline-block;
+      padding: 1px 5px;
+      margin: 0 2px;
+      font-family: inherit;
+      font-size: 11px;
+      background: var(--ant-color-fill-tertiary, #f5f5f5);
+      border: 1px solid var(--ant-color-border, #d9d9d9);
+      border-radius: 3px;
+    }
+  }
+
+  &__footer-hint {
+    font-size: 12px;
   }
 }

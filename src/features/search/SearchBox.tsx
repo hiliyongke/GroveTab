@@ -9,7 +9,7 @@
  */
 
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
-import { Modal, Input, theme, Popover, Button, Image, Tooltip } from "antd";
+import { Modal, Input, theme, Popover, Button, Image, Tooltip, Typography } from "antd";
 import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
 import type { InputRef } from "antd";
 import { Search, Check, ChevronDown, History, Trash2, RefreshCw } from "lucide-react";
@@ -214,7 +214,7 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
         close();
       } catch (err) {
         try {
-          window.open(url, "_blank");
+          window.open(url, "_blank", "noopener,noreferrer");
           close();
         } catch {
           /* 彻底失败时静默处理 */
@@ -555,7 +555,7 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
                 return (
                   <section key={section.key} className={styles["search-box-section"]}>
                     <div className={styles["search-box-section-header"]}>
-                      <span>{section.title}</span>
+                      <Typography.Text>{section.title}</Typography.Text>
                       <span className={styles["search-box-section-count"]}>
                         {section.items.length}
                       </span>

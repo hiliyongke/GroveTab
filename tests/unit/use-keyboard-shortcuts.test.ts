@@ -199,7 +199,7 @@ describe("useKeyboardShortcuts — Esc & enabled flag", () => {
 describe("getViewShortcut / getShortcutDescription", () => {
   it("getViewShortcut 返回基于 1 的索引", () => {
     expect(getViewShortcut("tabs")).toBe(1);
-    expect(getViewShortcut("archive")).toBe(9);
+    expect(getViewShortcut("archive")).toBe(0); // archive is not a primary view, returns 0
   });
 
   it("getShortcutDescription 包含 ⌘ / Ctrl+ 前缀", () => {

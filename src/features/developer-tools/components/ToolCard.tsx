@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 
-/** 工具图标映射（导出供 DeveloperToolsPage 使用） */
+/** 工具图标映射（导出供 DevToolsView 使用） */
 export const TOOL_ICONS: Record<string, React.ReactNode> = {
   "json-format": <Braces size={ICON_SIZE.LARGE} />,
   "json-to-ts": <FileJson size={ICON_SIZE.LARGE} />,

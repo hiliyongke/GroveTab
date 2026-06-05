@@ -315,7 +315,7 @@ export default function InsightsView({
   };
 
   return (
-    <div style={{ padding: "12px 16px 32px", minHeight: 0 }}>
+    <div style={{ minHeight: 0 }}>
       <Flex vertical className={styles["insights-panel"]}>
         {loading ? (
           <Flex vertical className={styles["insights-loading"]}>
@@ -334,7 +334,7 @@ export default function InsightsView({
               size="small"
               title={
                 <Flex justify="space-between" align="center">
-                  <span>{t("每日打开次数")}</span>
+                  <Typography.Text>{t("每日打开次数")}</Typography.Text>
                   <Segmented
                     size="small"
                     value={timeRange}
@@ -441,7 +441,7 @@ export default function InsightsView({
                       type={s.level === "warning" ? "warning" : s.level === "success" ? "success" : "info"}
                       showIcon
                       icon={s.level === "success" ? <CheckCircle2 size={14} /> : s.level === "warning" ? <AlertTriangle size={14} /> : <Info size={14} />}
-                      message={t(s.titleKey)}
+                      title={t(s.titleKey)}
                       description={t(s.descKey)}
                       action={s.actionKey && s.onAction ? <Button size="small" type="link" onClick={s.onAction}>{t(s.actionKey)}</Button> : undefined}
                     />

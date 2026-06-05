@@ -1,4 +1,4 @@
-import { Drawer, Tabs } from "antd";
+import { Drawer, Flex, Tabs, Typography } from "antd";
 import { useCallback } from "react";
 
 import { useT } from "@/shared/i18n";
@@ -31,9 +31,8 @@ export function SettingsShell({
     <Drawer
       open={open}
       onClose={handleClose}
-      destroyOnClose
       mask={false}
-      width={640}
+      size="large"
       title={t("设置")}
       classNames={{
         header: styles["settings-drawer__header"],
@@ -50,10 +49,10 @@ export function SettingsShell({
         items={tabs.map((tab) => ({
           key: tab.key,
           label: (
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13 }}>
+            <Flex align="center" gap={6}>
               {tab.icon}
-              {t(tab.labelKey)}
-            </span>
+              <Typography.Text style={{ fontSize: 13 }}>{t(tab.labelKey)}</Typography.Text>
+            </Flex>
           ),
           children: <div className={styles["settings-content__body"]}>{tab.content}</div>,
         }))}

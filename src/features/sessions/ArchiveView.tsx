@@ -238,6 +238,8 @@ export function ArchiveView() {
   const renameSessionAction = useSessionsStore((s) => s.renameSession);
   const { t, locale } = useT();
 
+  // 仅挂载时刷新一次会话列表
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     void refreshSessions();
   }, []);
@@ -260,10 +262,12 @@ export function ArchiveView() {
 
   useEffect(() => {
     if (!enablePinyin || pinyinMatchFn !== null) return;
+    let cancelled = false;
     void (async () => {
       const { pinyinMatch } = await import("@/shared/utils/pinyin");
-      dispatch({ type: "SET_PINYIN_MATCH_FN", payload: pinyinMatch });
+      if (!cancelled) dispatch({ type: "SET_PINYIN_MATCH_FN", payload: pinyinMatch });
     })();
+    return () => { cancelled = true; };
   }, [enablePinyin, pinyinMatchFn]);
 
   /** 搜索过滤 */

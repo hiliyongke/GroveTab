@@ -1,6 +1,25 @@
+@import (reference) '@/shared/styles/_variables.less';
+
+/**
+ * 全局视图样式（WindowView / GridView / Kanban / Timeline / Frequency / Duplicate / ContextMenu）
+ *
+ * BEM 子元素使用 &__ / &-- 嵌套，共享属性抽取为 mixin。
+ */
+
+// ── 共享 Mixins ──
+.view-flex() { display: flex; }
+.view-flex-center() { .view-flex(); align-items: center; }
+.view-flex-col() { .view-flex(); flex-direction: column; }
+.view-ellipsis() { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.view-min-0() { min-width: 0; }
+.view-shrink-0() { flex-shrink: 0; }
+
+// ══════════════════════════════════════════════════
+// WindowView
+// ══════════════════════════════════════════════════
+
 .app-window-empty {
-  display: flex;
-  flex-direction: column;
+  .view-flex-col();
   align-items: center;
   justify-content: center;
   padding: var(--app-space-8, 80px) var(--app-space-4, 16px);
@@ -8,25 +27,16 @@
   text-align: center;
 }
 
-/* WindowView 网格布局
-   已迁移至 Ant Design Row + Col 组件实现响应式栅格
-   （见 WindowView/index.tsx 中 getWindowColProps） */
-
 .app-window-sortable-card {
   width: 100%;
-  min-width: 0;
+  .view-min-0();
+
+  &.is-dragging { opacity: 0.86; }
 }
 
-.app-window-sortable-card.is-dragging {
-  opacity: 0.86;
-}
+.app-frequency-list { .view-flex-col(); gap: 2px; }
 
-.app-frequency-list {
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
-  gap: 2px;
-}
-
+// ── 共用布局块 ──
 .app-window-card-header,
 .app-window-card-title-wrap,
 .app-window-card-body,
@@ -37,222 +47,133 @@
 .app-window-ungrouped-section,
 .app-window-ungrouped-header,
 .app-window-group-color-grid,
-.app-window-ghost-dropzone {
-  display: flex; /* antd 组件内部微调整 */
-}
+.app-window-ghost-dropzone { .view-flex(); }
 
-.app-window-card-header {
-  flex: 1;
-  gap: 8px;
-  align-items: center;
-  min-width: 120px;
-  min-height: 48px;
-  padding: 0 12px;
-  overflow: hidden;
-  text-align: left;
-}
+// ── Card Header ──
+.app-window-card {
+  &-header {
+    flex: 1;
+    gap: 8px;
+    align-items: center;
+    min-width: 120px;
+    min-height: 48px;
+    padding: 0 12px;
+    overflow: hidden;
+    text-align: left;
+  }
 
-/* 中间 Tags 区 */
-.app-window-card-tags {
-  flex: 0 1 auto;
-  gap: 6px;
-  align-items: center;
-  min-width: 0;
-  max-width: 120px;
-  padding: 0 4px;
-  overflow: hidden;
-}
+  &-tags {
+    flex: 0 1 auto;
+    gap: 6px;
+    align-items: center;
+    .view-min-0();
+    max-width: 120px;
+    padding: 0 4px;
+    overflow: hidden;
+  }
 
-.app-window-group-chevron {
-  flex-shrink: 0;
-  color: var(--ant-color-text-tertiary);
-  transition: transform var(--ant-motion-duration-mid);
-}
+  &-badge {
+    display: inline-flex;
+    .view-shrink-0();
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    color: var(--app-domain-card-bar);
+    background: var(--app-domain-card-badge-bg);
+    border-radius: var(--app-radius-sm);
+  }
 
-.app-window-group-chevron.is-collapsed {
-  transform: rotate(-90deg);
-}
+  &-title-wrap {
+    .view-flex();
+    flex: 1;
+    gap: 8px;
+    align-items: baseline;
+    min-width: 140px;
+    overflow: hidden;
+  }
 
-.app-window-card-badge {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  color: var(--app-domain-card-bar);
-  background: var(--app-domain-card-badge-bg);
-  border-radius: var(--app-radius-sm);
-}
+  &-title {
+    flex: 1 1 auto;
+    min-width: 80px;
+    .view-ellipsis();
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--ant-color-text);
+  }
 
-.app-window-card-title-wrap {
-  display: flex;
-  flex: 1;
-  gap: 8px;
-  align-items: baseline;
-  min-width: 140px;
-  overflow: hidden;
-}
+  &-meta,
+  &-summary {
+    flex: 0 0 auto;
+    .view-min-0();
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--ant-color-text-tertiary);
+    white-space: nowrap;
+  }
 
-.app-window-card-title {
-  flex: 1 1 auto;
-  min-width: 80px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 14px;
-  font-weight: 650;
-  line-height: 1.4;
-  color: var(--ant-color-text);
-  white-space: nowrap;
-}
+  &-meta { max-width: 100%; .view-ellipsis(); }
+  &-summary { .view-ellipsis(); }
+  &-summary { padding: 10px 14px 12px; }
 
-.app-window-card-meta,
-.app-window-card-summary {
-  flex: 0 0 auto;
-  min-width: 0;
-  font-size: 12px;
-  line-height: 1.4;
-  color: var(--ant-color-text-tertiary);
-  white-space: nowrap;
-}
+  &-alias-input { max-width: 180px; }
+  &-tag { .view-shrink-0(); margin: 0; font-size: 10.5px; }
 
-.app-window-card-meta {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+  &-health {
+    .view-shrink-0();
+    color: var(--ant-color-text-quaternary);
 
-.app-window-card-summary {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+    &.is-good { color: var(--ant-color-success); }
+    &.is-warning { color: var(--ant-color-warning); }
+    &.is-danger { color: var(--ant-color-error); }
+  }
 
-.app-window-card-summary {
-  padding: 10px 14px 12px;
-}
+  &-action,
+  &-actions { .view-shrink-0(); }
 
-/* ── 折叠态增强摘要 ── */
-.app-window-collapsed-summary {
-  max-height: 80px;
-  padding: 8px 14px 10px;
-  overflow: hidden;
-  cursor: pointer;
-}
+  &-actions {
+    gap: 2px;
+    align-items: center;
+    padding: 0 8px 0 2px;
+  }
 
-.app-window-collapsed-summary:hover {
-  background: var(--ant-color-fill-quaternary);
-}
+  &-quick-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    min-width: 24px;
+    height: 24px;
+    padding: 0;
+    color: var(--ant-color-text-quaternary);
+    border-radius: var(--app-radius-sm);
+    transition: color var(--ant-motion-duration-fast), background-color var(--ant-motion-duration-fast);
+  }
 
-.app-window-collapsed-colors {
-  flex-shrink: 0;
-}
+  &-color-grid { flex-wrap: wrap; gap: 8px; width: 140px; }
 
-.app-window-collapsed-color-dot {
-  flex-shrink: 0;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
+  &-color-swatch {
+    width: 22px;
+    min-width: 22px;
+    height: 22px;
+    padding: 0;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 50%;
 
-.app-window-collapsed-domains {
-  flex-shrink: 1;
-  min-width: 0;
-  overflow: hidden;
-}
+    &.is-active { border-color: var(--ant-color-text); box-shadow: 0 0 0 2px var(--ant-color-bg-elevated); }
+    &:hover { opacity: 0.85; }
+  }
 
-.app-window-collapsed-domain {
-  flex-shrink: 0;
-  min-width: 0;
-}
-
-.app-window-collapsed-domain-icon {
-  flex-shrink: 0;
-  object-fit: contain;
-  border-radius: 2px;
-}
-
-.app-window-collapsed-domain-fallback {
-  flex-shrink: 0;
-  color: var(--ant-color-text-quaternary);
-}
-
-.app-window-collapsed-domain-name {
-  max-width: 80px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 11px;
-  color: var(--ant-color-text-secondary);
-  white-space: nowrap;
-}
-
-.app-window-collapsed-meta {
-  flex-shrink: 0;
-  font-size: 11px;
-  color: var(--ant-color-text-tertiary);
-}
-
-.app-window-collapsed-active {
-  flex: 1;
-  min-width: 0;
-  font-size: 11px;
-  font-style: italic;
-  color: var(--ant-color-text-tertiary);
-}
-
-.app-window-card-alias-input {
-  max-width: 180px;
-}
-
-.app-window-card-tag {
-  flex-shrink: 0;
-  margin: 0;
-  font-size: 10.5px;
-}
-
-/* ── 窗口健康度指示器 ── */
-.app-window-card-health {
-  flex-shrink: 0;
-  color: var(--ant-color-text-quaternary);
-}
-
-.app-window-card-health.is-good {
-  color: var(--ant-color-success);
-}
-
-.app-window-card-health.is-warning {
-  color: var(--ant-color-warning);
-}
-
-.app-window-card-health.is-danger {
-  color: var(--ant-color-error);
-}
-
-.app-window-card-action,
-.app-window-group-action {
-  flex-shrink: 0;
-}
-
-/* 右侧操作按钮组 */
-.app-window-card-actions {
-  flex-shrink: 0;
-  gap: 2px;
-  align-items: center;
-  padding: 0 8px 0 2px;
-}
-
-.app-window-card-quick-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  min-width: 24px;
-  height: 24px;
-  padding: 0;
-  color: var(--ant-color-text-quaternary);
-  border-radius: var(--app-radius-sm);
-  transition:
-    color var(--ant-motion-duration-fast),
-    background-color var(--ant-motion-duration-fast);
+  &-body {
+    .view-flex-col();
+    gap: 10px;
+    width: 100%;
+    .view-min-0();
+    padding: 8px;
+    background: var(--app-window-card-bg);
+  }
 }
 
 .app-window-card-actions:hover .app-window-card-quick-btn,
@@ -265,143 +186,172 @@
   background: var(--ant-color-fill-tertiary);
 }
 
-/* ── 窗口颜色选择器 ── */
-.app-window-card-color-grid {
-  flex-wrap: wrap;
-  gap: 8px;
-  width: 140px;
+// ── 折叠态摘要 ──
+.app-window-collapsed-summary {
+  max-height: 80px;
+  padding: 8px 14px 10px;
+  overflow: hidden;
+  cursor: pointer;
+
+  &:hover { background: var(--ant-color-fill-quaternary); }
 }
 
-.app-window-card-color-swatch {
-  width: 22px;
-  min-width: 22px;
-  height: 22px;
-  padding: 0;
-  cursor: pointer;
-  border: 2px solid transparent;
+.app-window-collapsed-colors { .view-shrink-0(); }
+
+.app-window-collapsed-color-dot {
+  .view-shrink-0();
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
 }
 
-.app-window-card-color-swatch.is-active {
-  border-color: var(--ant-color-text);
-  box-shadow: 0 0 0 2px var(--ant-color-bg-elevated);
+.app-window-collapsed-domains {
+  flex-shrink: 1;
+  .view-min-0();
+  overflow: hidden;
 }
 
-.app-window-card-color-swatch:hover {
-  opacity: 0.85;
+.app-window-collapsed-domain {
+  .view-shrink-0();
+  .view-min-0();
 }
 
-.app-window-card-body {
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
-  min-width: 0;
-  padding: 8px;
-  background: var(--app-window-card-bg);
+.app-window-collapsed-domain-icon {
+  .view-shrink-0();
+  object-fit: contain;
+  border-radius: 2px;
 }
 
-.app-window-group-section,
+.app-window-collapsed-domain-fallback {
+  .view-shrink-0();
+  color: var(--ant-color-text-quaternary);
+}
+
+.app-window-collapsed-domain-name {
+  max-width: 80px;
+  .view-ellipsis();
+  font-size: 11px;
+  color: var(--ant-color-text-secondary);
+}
+
+.app-window-collapsed-meta {
+  .view-shrink-0();
+  font-size: 11px;
+  color: var(--ant-color-text-tertiary);
+}
+
+.app-window-collapsed-active {
+  flex: 1;
+  .view-min-0();
+  font-size: 11px;
+  font-style: italic;
+  color: var(--ant-color-text-tertiary);
+}
+
+// ── 窗口分组 ──
+.app-window-group {
+  &-chevron {
+    .view-shrink-0();
+    color: var(--ant-color-text-tertiary);
+    transition: transform var(--ant-motion-duration-mid);
+
+    &.is-collapsed { transform: rotate(-90deg); }
+  }
+
+  &-section,
+  &-list {
+    .view-flex-col();
+    gap: 4px;
+    width: 100%;
+    .view-min-0();
+    overflow: hidden;
+    background: var(--app-window-group-bg, var(--ant-color-fill-quaternary));
+    border: 1px solid var(--app-window-group-border, var(--ant-color-border-secondary));
+    border-radius: var(--app-radius-md);
+  }
+
+  &-list {
+    gap: 2px;
+    padding: 4px;
+  }
+
+  &-header {
+    .view-flex();
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 38px;
+    padding: 0 4px 0 8px;
+  }
+
+  &-trigger {
+    flex: 1;
+    .view-flex();
+    gap: 8px;
+    align-items: center;
+    .view-min-0();
+    text-align: left;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+
+    &:disabled { cursor: default; opacity: 0.65; }
+  }
+
+  &-dot {
+    .view-shrink-0();
+    width: 10px;
+    height: 10px;
+    background: var(--app-window-group-color, var(--ant-color-primary));
+    border-radius: 50%;
+  }
+
+  &-title {
+    flex: 1;
+    .view-min-0();
+    .view-ellipsis();
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ant-color-text);
+
+    &-input { max-width: 180px; }
+  }
+
+  &-count { .view-shrink-0(); margin: 0; font-size: 10.5px; }
+
+  &-color-grid { flex-wrap: wrap; gap: 8px; width: 140px; }
+  &-color {
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    background: var(--app-window-group-color);
+    border: 2px solid transparent;
+    border-radius: 50%;
+
+    &.is-active { border-color: var(--ant-color-text); box-shadow: 0 0 0 2px var(--ant-color-bg-elevated); }
+  }
+
+  &-action { .view-shrink-0(); }
+}
+
+.app-window-group-list :global(.ant-list-items) { .view-flex-col(); gap: 2px; .view-min-0(); }
+
+// ── 未分组 / 拖拽区 ──
 .app-window-ungrouped-section {
-  flex-direction: column;
+  .view-flex-col();
   gap: 4px;
   width: 100%;
-  min-width: 0;
+  .view-min-0();
   overflow: hidden;
-  background: var(--app-window-group-bg, var(--ant-color-fill-quaternary));
+  background: var(--app-bg-surface);
   border: 1px solid var(--app-window-group-border, var(--ant-color-border-secondary));
+  border-style: dashed;
   border-radius: var(--app-radius-md);
 }
 
-.app-window-group-header {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  min-height: 38px;
-  padding: 0 4px 0 8px;
-}
-
-.app-window-group-trigger {
-  flex: 1;
-  gap: 8px;
-  align-items: center;
-  min-width: 0;
-  text-align: left;
-  cursor: pointer;
-  background: transparent;
-  border: none;
-}
-
-.app-window-group-trigger:disabled {
-  cursor: default;
-  opacity: 0.65;
-}
-
-.app-window-group-dot {
-  flex-shrink: 0;
-  width: 10px;
-  height: 10px;
-  background: var(--app-window-group-color, var(--ant-color-primary));
-  border-radius: 50%;
-}
-
-.app-window-group-title {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--ant-color-text);
-  white-space: nowrap;
-}
-
-.app-window-group-title-input {
-  max-width: 180px;
-}
-
-.app-window-group-count {
-  flex-shrink: 0;
-  margin: 0;
-  font-size: 10.5px;
-}
-
-.app-window-group-list {
-  flex-direction: column;
-  gap: 2px;
-  width: 100%;
-  min-width: 0;
-  padding: 4px;
-}
-
-.app-window-group-list :global(.ant-list-items) {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.app-window-draggable-tab {
-  display: block;
-  width: 100%;
-  min-width: 0;
-}
-
-.app-window-tab-idle {
-  flex-shrink: 0;
-  padding: 0 4px;
-  margin: 0;
-  font-size: 10px;
-  line-height: 16px;
-}
-
-.app-window-ungrouped-section {
-  background: var(--app-bg-surface);
-  border-style: dashed;
-}
-
 .app-window-ungrouped-header {
+  .view-flex();
   gap: 8px;
   align-items: center;
   padding: 8px 10px 4px;
@@ -410,30 +360,20 @@
   color: var(--ant-color-text-secondary);
 }
 
-.app-window-group-color-grid {
-  flex-wrap: wrap;
-  gap: 8px;
-  width: 140px;
-}
+.app-window-draggable-tab { display: block; width: 100%; .view-min-0(); }
 
-.app-window-group-color {
-  width: 22px;
-  height: 22px;
-  cursor: pointer;
-  background: var(--app-window-group-color);
-  border: 2px solid transparent;
-  border-radius: 50%;
-}
-
-.app-window-group-color.is-active {
-  border-color: var(--ant-color-text);
-  box-shadow: 0 0 0 2px var(--ant-color-bg-elevated);
+.app-window-tab-idle {
+  .view-shrink-0();
+  padding: 0 4px;
+  margin: 0;
+  font-size: 10px;
+  line-height: 16px;
 }
 
 .app-window-ghost-dropzone {
-  gap: 6px;
-  align-items: center;
+  .view-flex-center();
   justify-content: center;
+  gap: 6px;
   min-height: 34px;
   margin: 0 8px 8px;
   font-size: 12px;
@@ -442,11 +382,8 @@
   background: var(--app-bg-surface);
   border: 1px dashed var(--ant-color-border);
   border-radius: var(--app-radius-md);
-}
 
-.app-window-ghost-dropzone:disabled {
-  cursor: default;
-  opacity: 0.6;
+  &:disabled { cursor: default; opacity: 0.6; }
 }
 
 .is-drag-over {
@@ -455,130 +392,96 @@
   background-color: color-mix(in srgb, var(--ant-color-primary) 8%, transparent);
 }
 
-.app-frequency-header {
-  display: flex; /* antd 组件内部微调整 */
-  gap: 8px;
-  align-items: center;
-  padding: 0 10px;
-  margin-bottom: 12px;
+// ══════════════════════════════════════════════════
+// FrequencyView
+// ══════════════════════════════════════════════════
+
+.app-frequency {
+  &-header {
+    .view-flex-center();
+    gap: 8px;
+    padding: 0 10px;
+    margin-bottom: 12px;
+  }
+
+  &-header-icon { color: var(--ant-color-primary); }
+
+  &-header-copy {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--ant-color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  &-rebuild-tag { margin: 0; font-size: 10.5px; }
+
+  &-rank {
+    display: inline-flex;
+    .view-shrink-0();
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    font-size: 10.5px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    color: var(--ant-color-text-tertiary);
+    background: var(--ant-color-fill-secondary);
+    border-radius: 50%;
+
+    &.is-top-rank {
+      color: var(--ant-color-primary);
+      background: var(--ant-color-primary-bg);
+    }
+  }
 }
 
-.app-frequency-header-icon,
-.app-frequency-rank.is-top-rank {
-  color: var(--ant-color-primary);
-}
-
-.app-frequency-header-copy {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--ant-color-text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.app-frequency-rebuild-tag {
-  margin: 0;
-  font-size: 10.5px;
-}
-
-.app-frequency-rank {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  font-size: 10.5px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-  color: var(--ant-color-text-tertiary);
-  background: var(--ant-color-fill-secondary);
-  border-radius: 50%;
-}
-
-.app-frequency-rank.is-top-rank {
-  background: var(--ant-color-primary-bg);
-}
+// ══════════════════════════════════════════════════
+// Selection Notice
+// ══════════════════════════════════════════════════
 
 .app-selection-notice {
   margin-bottom: 16px;
   background: var(--ant-color-primary-bg);
   border-color: var(--ant-color-primary-border);
+
+  &__body {
+    .view-flex();
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+  }
+
+  &__summary { .view-flex-col(); gap: 4px; }
+
+  &__title { font-size: 13.5px; font-weight: 600; color: var(--ant-color-text); }
+  &__meta { font-size: 12px; color: var(--ant-color-text-secondary); }
+  &__hint { font-size: 11.5px; color: var(--ant-color-text-tertiary); }
 }
 
-.app-selection-notice__body {
-  display: flex; /* antd 组件内部微调整 */
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 14px;
-}
-
-.app-selection-notice__summary {
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
-  gap: 4px;
-}
-
-.app-selection-notice__title {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--ant-color-text);
-}
-
-.app-selection-notice__meta {
-  font-size: 12px;
-  color: var(--ant-color-text-secondary);
-}
-
-.app-selection-notice__hint {
-  font-size: 11.5px;
-  color: var(--ant-color-text-tertiary);
-}
+// ══════════════════════════════════════════════════
+// GridView
+// ══════════════════════════════════════════════════
 
 .app-grid-view {
   --app-grid-card-basis: var(--grid-card-min-width, 200px);
-
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--app-grid-card-basis)), 1fr));
-  grid-auto-rows: 1fr;
   gap: 12px;
   align-items: stretch;
   justify-content: stretch;
   width: 100%;
-}
 
-.app-grid-view__cell {
-  width: 100%;
-  min-width: 0;
-  height: 100%;
-}
+  &__cell {
+    width: 100%;
+    .view-min-0();
+    height: 100%;
 
-.app-grid-view__cell > * {
-  width: 100%;
-  min-width: 0;
-  height: 100%;
-}
-
-/* 响应式断点对齐 Ant Design 标准：md=768px / lg=992px / xl=1200px */
-
-@media (width < 768px) { /* md-down */
-  .app-grid-view {
-    --app-grid-card-basis: 140px;
-  }
-}
-
-@media (width >= 992px) { /* lg */
-  .app-grid-view {
-    --app-grid-card-basis: var(--grid-card-min-width, 220px);
-  }
-}
-
-@media (width >= 1440px) { /* 宽屏（超出 xl） */
-  .app-grid-view {
-    --app-grid-card-basis: var(--grid-card-min-width, 240px);
+    > * { width: 100%; .view-min-0(); height: 100%; }
   }
 }
 
@@ -587,220 +490,132 @@
   height: 100%;
   overflow: hidden;
   cursor: pointer;
+
+  :global(.ant-card-body) { padding: 2px; }
+
+  &__body { padding: 0; }
+
+  &-preview {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--app-grid-card-accent, var(--ant-color-primary)) 18%, transparent) 0%,
+      color-mix(in srgb, var(--app-grid-card-accent, var(--ant-color-primary)) 8%, transparent) 100%
+    );
+    border-radius: var(--ant-border-radius-lg);
+  }
+
+  &-content {
+    min-height: 42px;
+    padding: 8px 8px 6px;
+    border-radius: 0 0 var(--ant-border-radius-lg) var(--ant-border-radius-lg);
+  }
+
+  &-favicon { width: 36px; height: 36px; border-radius: var(--app-radius-sm); }
+
+  &-fallback {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--app-grid-card-accent, var(--ant-color-primary));
+  }
+
+  &-count {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    min-width: 22px;
+    height: 20px;
+    padding: 0 6px;
+    font-size: 11px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--ant-color-text);
+    background: var(--ant-color-bg-elevated);
+    border: 1px solid var(--ant-color-border-secondary);
+    border-radius: var(--app-radius-md);
+    box-shadow: var(--ant-box-shadow-tertiary);
+  }
+
+  &-meta { width: 100%; .view-min-0(); }
+
+  &-domain {
+    flex: 1;
+    .view-min-0();
+    .view-ellipsis();
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--ant-color-text);
+  }
+
+  &-audible { .view-shrink-0(); color: var(--ant-color-primary); }
+  &-copy { font-size: 11.5px; font-variant-numeric: tabular-nums; color: var(--ant-color-text-tertiary); }
 }
 
-.app-grid-card :global(.ant-card-body) {
-  padding: 2px;
-}
-
-.app-grid-card__body {
-  padding: 0;
-}
-
-.app-grid-card-preview {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  overflow: hidden;
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--app-grid-card-accent, var(--ant-color-primary)) 18%, transparent) 0%,
-    color-mix(in srgb, var(--app-grid-card-accent, var(--ant-color-primary)) 8%, transparent) 100%
-  );
-  border-radius: var(--ant-border-radius-lg);
-}
-
-.app-grid-card-content {
-  min-height: 42px;
-  padding: 8px 8px 6px;
-  border-radius: 0 0 var(--ant-border-radius-lg) var(--ant-border-radius-lg);
-}
-
-.app-grid-card-favicon {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--app-radius-sm);
-}
-
-.app-grid-card-fallback {
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--app-grid-card-accent, var(--ant-color-primary));
-}
-
-.app-grid-card-count {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  min-width: 22px;
-  height: 20px;
-  padding: 0 6px;
-  font-size: 11px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--ant-color-text);
-  background: var(--ant-color-bg-elevated);
-  border: 1px solid var(--ant-color-border-secondary);
-  border-radius: var(--app-radius-md);
-  box-shadow: var(--ant-box-shadow-tertiary);
-}
-
-.app-grid-card-meta {
-  width: 100%;
-  min-width: 0;
-}
-
-.app-grid-card-domain {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.3;
-  color: var(--ant-color-text);
-  white-space: nowrap;
-}
-
-.app-grid-card-audible {
-  flex-shrink: 0;
-  color: var(--ant-color-primary);
-}
-
-.app-grid-card-copy {
-  font-size: 11.5px;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.3;
-  color: var(--ant-color-text-tertiary);
-}
-
+// ── Grid Popover ──
 .app-grid-popover {
   width: 340px;
   max-width: calc(100vw - 32px);
+
+  &-container { padding: 0; }
+
+  &__header { padding: 10px 8px 10px 12px; border-bottom: 1px solid var(--ant-color-border-secondary); }
+  &__accent { .view-shrink-0(); align-self: stretch; width: 3px; background: var(--app-grid-popover-accent, var(--ant-color-primary)); border-radius: var(--app-radius-xs); }
+  &__favicon { object-fit: cover; }
+
+  &__favicon,
+  &__fallback {
+    .view-shrink-0();
+    width: 16px;
+    height: 16px;
+    border-radius: var(--app-radius-xs);
+  }
+
+  &__fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--app-grid-popover-accent, var(--ant-color-primary));
+    background: color-mix(in srgb, var(--app-grid-popover-accent, var(--ant-color-primary)) 14%, transparent);
+  }
+
+  &__title {
+    flex: 1;
+    .view-min-0();
+    .view-ellipsis();
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--ant-color-text);
+  }
+
+  &__count { .view-shrink-0(); font-size: 12px; font-variant-numeric: tabular-nums; color: var(--ant-color-text-tertiary); }
+  &__close { .view-shrink-0(); }
+  &__list { max-height: min(60vh, 420px); padding: 4px 4px 8px; overflow-y: auto; }
 }
 
-.app-grid-popover-container {
-  padding: 0;
-}
+// ── 响应式 ──
+@media (width < 768px) { .app-grid-view { --app-grid-card-basis: 140px; } }
+@media (width >= @breakpoint-lg) { .app-grid-view { --app-grid-card-basis: var(--grid-card-min-width, 220px); } }
+@media (width >= 1440px) { .app-grid-view { --app-grid-card-basis: var(--grid-card-min-width, 240px); } }
 
-.app-grid-popover__header {
-  padding: 10px 8px 10px 12px;
-  border-bottom: 1px solid var(--ant-color-border-secondary);
-}
-
-.app-grid-popover__accent {
-  flex-shrink: 0;
-  align-self: stretch;
-  width: 3px;
-  background: var(--app-grid-popover-accent, var(--ant-color-primary));
-  border-radius: var(--app-radius-xs);
-}
-
-.app-grid-popover__favicon,
-.app-grid-popover__fallback {
-  flex-shrink: 0;
-  width: 16px;
-  height: 16px;
-  border-radius: var(--app-radius-xs);
-}
-
-.app-grid-popover__favicon {
-  object-fit: cover;
-}
-
-.app-grid-popover__fallback {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--app-grid-popover-accent, var(--ant-color-primary));
-  background: color-mix(
-    in srgb,
-    var(--app-grid-popover-accent, var(--ant-color-primary)) 14%,
-    transparent
-  );
-}
-
-.app-grid-popover__title {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.3;
-  color: var(--ant-color-text);
-  white-space: nowrap;
-}
-
-.app-grid-popover__count {
-  flex-shrink: 0;
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  color: var(--ant-color-text-tertiary);
-}
-
-.app-grid-popover__close {
-  flex-shrink: 0;
-}
-
-.app-grid-popover__list {
-  max-height: min(60vh, 420px);
-  padding: 4px 4px 8px;
-  overflow-y: auto;
-}
+// ══════════════════════════════════════════════════
+// TabGroup / Compact / BatchBar
+// ══════════════════════════════════════════════════
 
 .app-tab-group-empty {
-  display: flex;
-  flex-direction: column;
+  .view-flex-col();
   align-items: center;
   justify-content: center;
   padding: var(--app-space-8, 80px) var(--app-space-4, 16px);
   color: var(--ant-color-text-tertiary);
   text-align: center;
-}
-
-.app-bookmark-shell,
-.app-bookmark-header,
-.app-bookmark-header__title,
-.app-bookmark-header__actions,
-.app-bookmark-search-wrap,
-.app-bookmark-result,
-.app-bookmark-empty,
-.app-bookmark-row,
-.app-bookmark-row__main,
-.app-bookmark-sections,
-.app-bookmark-section,
-.app-bookmark-section__head,
-.app-bookmark-section__body,
-.app-bookmark-section__rows,
-.app-bookmark-subgroup,
-.app-bookmark-subgroup__head,
-.app-bookmark-subgroup__body,
-.app-bookmark-search-results,
-.app-bookmark-search-list,
-.app-batch-bar__summary,
-.app-batch-bar__actions,
-.app-compact-view-spacer,
-.app-compact-view-item {
-  display: flex; /* antd 组件内部微调整 */
-}
-
-.app-bookmark-shell,
-.app-bookmark-empty,
-.app-bookmark-sections,
-.app-bookmark-section,
-.app-bookmark-section__body,
-.app-bookmark-section__rows,
-.app-bookmark-subgroup,
-.app-bookmark-subgroup__body,
-.app-bookmark-search-results,
-.app-bookmark-search-list,
-.app-bookmark-row__main,
-.app-batch-bar__summary {
-  flex-direction: column;
 }
 
 .app-compact-view {
@@ -810,503 +625,14 @@
   overflow-y: auto;
 }
 
-.app-compact-view-spacer {
-  position: relative;
-  width: 100%;
-}
+.app-compact-view-spacer { position: relative; .view-flex(); width: 100%; }
 
 .app-compact-view-item {
   position: absolute;
   top: 0;
   left: 0;
+  .view-flex();
   width: 100%;
-}
-
-/* ============================================================
-   Bookmark View — v3 visual polish
-   ------------------------------------------------------------
-   - Shell: vertical layout, header + search + scroll body
-   - Section: top-level Chrome folders rendered as flat sections
-     (no card-in-card nesting)
-   - SubGroup: indented secondary groups
-   - Row: TabItem-like row with accent bar + favicon
-   ============================================================ */
-
-.app-bookmark-shell {
-  display: flex; /* antd 组件内部微调整 */
-  flex: 1 1 auto;
-  flex-direction: column;
-  gap: var(--app-space-4, 16px);
-
-  /* 关键：flex 子项默认 min-height:auto 会被自身内容撑高，
-     需重置为 0，才能让 .app-bookmark-result 的 flex:1+min-height:0
-     真正从父级 .app-content-shell 拿到限高，否则画布无法严格撑满。 */
-  min-height: 0;
-}
-
-/* 树状视图（脑图 / 架构图）模式：
-   高度链路完全依赖 flex 默认行为：
-     .app-shell(100vh) → .app-main-body(flex:1) → .app-content-shell(flex:1)
-     → 这里的 .app-bookmark-shell（flex:1 1 auto）→ .app-bookmark-result（flex:1）
-   这里只 reset min-height（避免被自身内容撑大），不要加任何 min-height 兜底，
-   否则子级反向撑高 → 被外层 .app-content-shell 的 overflow:hidden 裁掉 → 画布消失。 */
-.app-bookmark-shell:has(.app-bookmark-result > .app-bm-tree) {
-  min-height: 0;
-}
-
-/* ---- Header ---- */
-.app-bookmark-header {
-  flex-shrink: 0;
-  gap: 12px;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.app-bookmark-header__title {
-  gap: 8px;
-  align-items: center;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--ant-color-text);
-  letter-spacing: -0.01em;
-}
-
-.app-bookmark-header__icon {
-  color: var(--ant-color-primary);
-}
-
-.app-bookmark-header__count {
-  height: 20px;
-  padding: 0 8px;
-  margin: 0;
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 20px;
-  color: var(--ant-color-text-secondary);
-  background: var(--ant-color-fill-secondary);
-}
-
-.app-bookmark-header__actions {
-  gap: 8px;
-  align-items: center;
-}
-
-/* ---- Search ---- */
-.app-bookmark-search-wrap {
-  flex-shrink: 0;
-  align-items: center;
-}
-
-.app-bookmark-search {
-  flex: 1;
-  border-radius: 12px;
-}
-
-.app-bookmark-search .ant-input-affix-wrapper,
-.app-bookmark-search.ant-input-affix-wrapper {
-  background: var(--ant-color-fill-quaternary);
-  border-color: transparent;
-  border-radius: 12px;
-  transition: all var(--ant-motion-duration-mid);
-}
-
-.app-bookmark-search.ant-input-affix-wrapper:hover {
-  background: var(--ant-color-fill-tertiary);
-  border-color: transparent;
-}
-
-.app-bookmark-search.ant-input-affix-wrapper-focused {
-  background: var(--ant-color-bg-container);
-  border-color: var(--ant-color-primary);
-  box-shadow: 0 0 0 2px var(--ant-color-primary-bg);
-}
-
-.app-bookmark-search-icon {
-  margin-right: 4px;
-  color: var(--ant-color-text-tertiary);
-}
-
-/* ---- Result container ---- */
-.app-bookmark-result {
-  flex: 1;
-  flex-direction: column;
-  min-height: 0;
-  padding-right: 4px;
-  margin-right: -4px;
-  overflow-y: auto;
-}
-
-/* 树状视图（脑图/架构图）：让画布完全撑满 result 区域，且不出现双滚动条 */
-.app-bookmark-result:has(> .app-bm-tree) {
-  /* 关键修复：默认 .app-bookmark-result 只声明了 flex-direction:column 却没有
-     display:flex，导致它对子元素而言不是 flex 容器，子级 .app-bm-tree 即使写
-     flex:1 + height:100% 也拿不到任何高度，最终画布塌陷为 0 → 看不见。
-     这里在树状视图下显式补齐 flex 容器声明，让高度沿 flex 链一路传递到画布。 */
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
-  padding-right: 0;
-  margin-right: 0;
-  overflow: hidden;
-}
-
-.app-bookmark-result > .app-bm-tree {
-  flex: 1 1 auto;
-  align-self: stretch;
-  width: 100%;
-
-  /* height:auto 覆盖基础定义的 height:100%，避免在 flex 容器中百分比高度异常 */
-  height: auto;
-
-  /* 高度完全由 flex 链路传递：
-     .app-layout-shell(100vh) → .app-content-shell(flex:1,min-h:0)
-     → .app-bookmark-shell(flex:1,min-h:0) → .app-bookmark-result(flex:1,min-h:0) → 这里
-     绝不能写 min-height:dvh，否则 .app-bm-tree 可能比父级更高，
-     底部工具栏会被父级 overflow:hidden 裁掉 → 看不见工具栏。 */
-  min-height: 0;
-  padding: 0;
-  overflow: hidden;
-}
-
-/* Custom scrollbar for result area */
-.app-bookmark-result::-webkit-scrollbar {
-  width: 6px;
-}
-
-.app-bookmark-result::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.app-bookmark-result::-webkit-scrollbar-thumb {
-  background: var(--ant-color-fill-secondary);
-  border-radius: 3px;
-}
-
-.app-bookmark-result::-webkit-scrollbar-thumb:hover {
-  background: var(--ant-color-fill);
-}
-
-.app-bookmark-loading-wrap {
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-  justify-content: center;
-  padding: 60px 0;
-}
-
-.app-bookmark-empty {
-  align-items: center;
-  padding: 40px 0;
-  text-align: center;
-}
-
-.app-bookmark-empty-icon {
-  color: var(--ant-color-text-tertiary);
-}
-
-.app-bookmark-result-empty {
-  padding: 32px 0;
-}
-
-/* ---- Sections (top-level folders) ----
-   宽屏下自动多列并排，撑满整个画布；
-   - 每列最小 360px，最大 1fr 平分
-   - align-items: start 让不同高度的分区不被强行拉伸到等高
-   - 仍是 grid，但子分区内部依然单列纵向（不影响 BookmarkRow） */
-.app-bookmark-sections {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-  gap: var(--app-space-6, 24px) var(--app-space-8, 32px);
-  align-items: start;
-  width: 100%;
-}
-
-.app-bookmark-section {
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
-  gap: var(--app-space-2, 8px);
-  min-width: 0; /* 防止子节点撑爆网格列 */
-}
-
-.app-bookmark-section__head {
-  display: flex; /* antd 组件内部微调整 */
-  gap: 12px;
-  align-items: center;
-  width: 100%;
-  padding: 8px 6px;
-  text-align: left;
-  cursor: pointer;
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-  transition: background var(--ant-motion-duration-mid);
-}
-
-.app-bookmark-section__head:hover {
-  background: var(--ant-color-fill-quaternary);
-}
-
-.app-bookmark-section__chevron {
-  flex-shrink: 0;
-  color: var(--ant-color-text-tertiary);
-  transition: transform var(--ant-motion-duration-mid);
-}
-
-.app-bookmark-section__chevron.is-collapsed {
-  transform: rotate(-90deg);
-}
-
-.app-bookmark-section__badge {
-  display: flex; /* antd 组件内部微调整 */
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  color: var(--ant-color-primary);
-  background: linear-gradient(
-    135deg,
-    var(--ant-color-primary-bg),
-    var(--ant-color-primary-bg-hover)
-  );
-  border-radius: 6px;
-}
-
-.app-bookmark-section__title {
-  flex: 1;
-  min-width: 0;
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--ant-color-text);
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-}
-
-.app-bookmark-section__count {
-  flex-shrink: 0;
-  height: 20px;
-  padding: 0 8px;
-  margin: 0;
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 20px;
-  color: var(--ant-color-text-secondary);
-  background: var(--ant-color-fill-secondary);
-}
-
-.app-bookmark-section__body {
-  gap: 2px;
-  padding-left: 6px;
-}
-
-.app-bookmark-section__rows {
-  gap: 2px;
-  padding: 2px 0;
-}
-
-/* ---- Subgroup (nested folders, indented) ---- */
-.app-bookmark-subgroup {
-  gap: 2px;
-  padding-left: calc(var(--app-bm-depth, 1) * 8px);
-}
-
-.app-bookmark-subgroup__head {
-  display: flex; /* antd 组件内部微调整 */
-  gap: 6px;
-  align-items: center;
-  width: 100%;
-  padding: 4px 8px;
-  text-align: left;
-  cursor: pointer;
-  background: transparent;
-  border: none;
-  border-radius: 6px;
-  transition: background var(--ant-motion-duration-mid);
-}
-
-.app-bookmark-subgroup__head:hover {
-  background: var(--ant-color-fill-quaternary);
-}
-
-.app-bookmark-subgroup__chevron {
-  flex-shrink: 0;
-  color: var(--ant-color-text-quaternary);
-  transition: transform var(--ant-motion-duration-mid);
-}
-
-.app-bookmark-subgroup__chevron.is-collapsed {
-  transform: rotate(-90deg);
-}
-
-.app-bookmark-subgroup__icon {
-  flex-shrink: 0;
-  color: var(--ant-color-text-tertiary);
-}
-
-.app-bookmark-subgroup__title {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: var(--ant-color-text-secondary);
-  white-space: nowrap;
-}
-
-.app-bookmark-subgroup__count {
-  flex-shrink: 0;
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-  color: var(--ant-color-text-quaternary);
-}
-
-.app-bookmark-subgroup__body {
-  gap: 2px;
-  padding-left: 14px;
-}
-
-/* ---- Bookmark row (TabItem-like) ---- */
-.app-bookmark-row {
-  position: relative;
-  gap: 10px;
-  align-items: center;
-  min-height: 36px;
-  padding: 7px 12px 7px 14px;
-  contain: layout style paint;
-  cursor: pointer;
-  outline: none;
-  border-radius: 8px;
-  transition: background var(--ant-motion-duration-mid);
-
-  /* 抗闪白：预创建合成层 + 隔离重绘范围 */
-  will-change: background;
-}
-
-.app-bookmark-row:hover {
-  background: var(--ant-color-fill-quaternary);
-}
-
-.app-bookmark-row:focus-visible {
-  background: var(--ant-color-fill-quaternary);
-  box-shadow: 0 0 0 2px var(--ant-color-primary-bg);
-}
-
-.app-bookmark-row__bar {
-  position: absolute;
-  top: 8px;
-  bottom: 8px;
-  left: 4px;
-  width: 3px;
-  background: var(--app-bm-accent, var(--ant-color-fill));
-  border-radius: 2px;
-  opacity: 0;
-  transition: opacity var(--ant-motion-duration-mid);
-}
-
-.app-bookmark-row:hover .app-bookmark-row__bar,
-.app-bookmark-row:focus-visible .app-bookmark-row__bar {
-  opacity: 1;
-}
-
-.app-bookmark-row__favicon {
-  flex-shrink: 0;
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-  border-radius: 4px;
-}
-
-.app-bookmark-row__favicon-fallback {
-  display: flex; /* antd 组件内部微调整 */
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  border-radius: 4px;
-}
-
-.app-bookmark-row__main {
-  flex: 1;
-  gap: 1px;
-  min-width: 0;
-}
-
-.app-bookmark-row__title {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 12.5px;
-  font-weight: 500;
-  line-height: 1.35;
-  color: var(--ant-color-text);
-  white-space: nowrap;
-}
-
-.app-bookmark-row__hostname {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 11px;
-  line-height: 1.35;
-  color: var(--ant-color-text-tertiary);
-  white-space: nowrap;
-}
-
-.app-bookmark-row__action {
-  flex-shrink: 0;
-  color: var(--ant-color-text-quaternary);
-  opacity: 0;
-
-  /* 使用 translate3d 强制 GPU 合成，避免合成层切换闪烁 */
-  transform: translate3d(-4px, 0, 0);
-  transition:
-    opacity var(--ant-motion-duration-mid),
-    transform var(--ant-motion-duration-mid);
-
-  /* 抗闪白：预创建合成层 */
-  will-change: transform, opacity;
-}
-
-.app-bookmark-row:hover .app-bookmark-row__action,
-.app-bookmark-row:focus-visible .app-bookmark-row__action {
-  color: var(--ant-color-text-tertiary);
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
-}
-
-/* ---- Search results ----
-   搜索结果同样按多列网格平铺，避免大屏单列拉空 */
-.app-bookmark-search-results {
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-}
-
-.app-bookmark-search-meta {
-  padding: 0 4px;
-  font-size: 11px;
-  color: var(--ant-color-text-tertiary);
-  letter-spacing: 0.02em;
-}
-
-.app-bookmark-search-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 4px 12px;
-  align-items: start;
-}
-
-.app-bookmark-highlight {
-  padding: 0 2px;
-  font-weight: 600;
-  color: var(--ant-color-text);
-  background: color-mix(in oklab, var(--ant-color-warning) 22%, transparent);
-  border-radius: 2px;
 }
 
 .app-batch-bar {
@@ -1314,123 +640,104 @@
   bottom: 24px;
   left: 50%;
   z-index: var(--app-batch-bar-z, 1);
-  display: flex; /* antd 组件内部微调整 */
+  .view-flex-center();
   gap: 10px;
-  align-items: center;
   padding: 8px 10px 8px 16px;
   transform: translateX(-50%);
+
+  &__summary {
+    gap: 8px;
+    padding-right: 2px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ant-color-text);
+
+    &-copy { font-size: 12.5px; color: var(--ant-color-text-secondary); }
+  }
+
+  &__pointer { display: block; color: var(--ant-color-primary); }
+
+  &__actions { .view-flex-center(); gap: 6px; }
+
+  &__danger-icon { color: var(--app-batch-bar-danger-icon, currentColor); }
+  &__secondary-icon { color: var(--app-batch-bar-discard-icon, currentColor); }
 }
 
-.app-batch-bar__summary {
-  gap: 8px;
-  padding-right: 2px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--ant-color-text);
-}
+// ══════════════════════════════════════════════════
+// TimelineView
+// ══════════════════════════════════════════════════
 
-.app-batch-bar__summary-copy {
-  font-size: 12.5px;
-  color: var(--ant-color-text-secondary);
-}
-
-.app-batch-bar__pointer {
-  display: block;
-  color: var(--ant-color-primary);
-}
-
-.app-batch-bar__actions {
-  gap: 6px;
-  align-items: center;
-}
-
-.app-batch-bar__danger-icon {
-  color: var(--app-batch-bar-danger-icon, currentColor);
-}
-
-.app-batch-bar__secondary-icon {
-  color: var(--app-batch-bar-discard-icon, currentColor);
-}
-
-.app-timeline-view {
-  padding-top: 4px;
-}
+.app-timeline-view { padding-top: 4px; }
 
 .app-timeline-segment {
   padding-bottom: 12px;
+
+  &.is-collapsed { padding-bottom: 4px; }
+
+  &__header { margin-bottom: 6px; }
+
+  &.is-collapsed &__header { margin-bottom: 0; }
+
+  &-trigger {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    height: 24px;
+    padding: 0 8px 0 0;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    background: transparent;
+    border: none;
+    transition: color var(--ant-motion-duration-fast);
+
+    &-content { .view-min-0(); }
+  }
+
+  &-label { font-size: inherit; font-weight: inherit; color: inherit; }
+
+  &-range {
+    font-size: 11.5px;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    color: var(--ant-color-text-tertiary);
+  }
+
+  &-count {
+    min-width: 20px;
+    height: 18px;
+    padding: 0 var(--app-space-2);
+    font-size: 11px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--ant-color-text-tertiary);
+    background: var(--ant-color-fill-secondary);
+    border-radius: var(--app-radius-sm);
+  }
+
+  &-chevron {
+    color: var(--ant-color-text-tertiary);
+    transition: transform var(--ant-motion-duration-mid);
+
+    &.is-collapsed { transform: rotate(-90deg); }
+  }
+
+  &-list { .view-flex-col(); gap: 2px; .view-min-0(); }
+
+  &-time {
+    .view-shrink-0();
+    min-width: 38px;
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ant-color-text-tertiary);
+    text-align: right;
+  }
 }
 
-.app-timeline-segment.is-collapsed {
-  padding-bottom: 4px;
-}
-
-.app-timeline-segment__header {
-  margin-bottom: 6px;
-}
-
-.app-timeline-segment.is-collapsed .app-timeline-segment__header {
-  margin-bottom: 0;
-}
-
-.app-timeline-segment-trigger {
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  height: 24px;
-  padding: 0 8px 0 0;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  outline: none;
-  background: transparent;
-  border: none;
-  transition: color var(--ant-motion-duration-fast);
-}
-
-.app-timeline-segment-trigger-content {
-  min-width: 0;
-}
-
-.app-timeline-segment-label {
-  font-size: inherit;
-  font-weight: inherit;
-  color: inherit;
-}
-
-.app-timeline-segment-range {
-  font-size: 11.5px;
-  font-weight: 400;
-  font-variant-numeric: tabular-nums;
-  color: var(--ant-color-text-tertiary);
-}
-
-.app-timeline-segment-count {
-  min-width: 20px;
-  height: 18px;
-  padding: 0 var(--app-space-2);
-  font-size: 11px;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  color: var(--ant-color-text-tertiary);
-  background: var(--ant-color-fill-secondary);
-  border-radius: var(--app-radius-sm);
-}
-
-.app-timeline-segment-chevron {
-  color: var(--ant-color-text-tertiary);
-  transition: transform var(--ant-motion-duration-mid);
-}
-
-.app-timeline-segment-chevron.is-collapsed {
-  transform: rotate(-90deg);
-}
-
-.app-timeline-segment-list {
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
+// ══════════════════════════════════════════════════
+// KanbanView
+// ══════════════════════════════════════════════════
 
 .app-kanban-theme {
   --app-kanban-source-bg: var(--ant-color-fill-quaternary);
@@ -1440,321 +747,167 @@
   --app-kanban-column-hover-bg: var(--ant-color-primary-bg);
   --app-kanban-overlay-border: var(--ant-color-primary);
   --app-kanban-overlay-shadow: var(--ant-box-shadow-secondary);
-
-  /* 源列最大高度：视口高度减去顶部工具栏 + 底部 padding 的预估占用 */
   --app-kanban-source-max-height: calc(100vh - 280px);
 }
 
-.app-kanban-view {
-  padding-bottom: 12px;
-  overflow-x: auto;
+.app-kanban {
+  &-view { padding-bottom: 12px; overflow-x: auto; }
+
+  &-source {
+    flex: 0 0 240px;
+    max-height: var(--app-kanban-source-max-height);
+    padding: 10px;
+    overflow-y: auto;
+    background: var(--app-kanban-source-bg);
+    border: 1px solid var(--app-kanban-border);
+    border-radius: var(--app-card-radius, 12px);
+
+    &__title { margin-bottom: 8px; font-size: 12px; font-weight: 600; color: var(--ant-color-text-secondary); }
+  }
+
+  &-add-column { flex: 0 0 220px; }
+
+  &-column-wrap { flex: 0 0 260px; }
+
+  &-column {
+    min-height: 400px;
+    background: var(--app-kanban-column-bg);
+    border: 1px solid var(--app-kanban-border);
+    border-radius: var(--app-card-radius, 12px);
+
+    &.is-over { background: var(--app-kanban-column-hover-bg); }
+
+    &__body { padding: var(--app-space-2); }
+    &__header { .view-min-0(); }
+    &__drag-handle { cursor: grab; }
+    &__name { flex: 1; .view-min-0(); font-size: 12.5px; font-weight: 600; color: var(--ant-color-text); cursor: text; }
+    &__count { font-size: 11px; color: var(--ant-color-text-tertiary); opacity: 0.8; }
+    &__dropzone { min-height: 300px; }
+    &__empty { padding: 24px 8px; font-size: 11.5px; color: var(--ant-color-text-tertiary); text-align: center; }
+  }
+
+  &-card,
+  &-overlay {
+    padding: var(--app-space-2);
+    font-size: 11.5px;
+    border-radius: var(--app-radius-sm);
+  }
+
+  &-card {
+    margin-bottom: 4px;
+    cursor: pointer;
+    background: var(--app-kanban-surface-bg);
+    border: 1px solid var(--app-kanban-border);
+
+    &--source { cursor: grab; }
+
+    &__favicon { border-radius: var(--app-radius-xs); }
+    &__title { .view-ellipsis(); }
+    &__title--grow { flex: 1; }
+
+    &.is-offline { opacity: 0.55; }
+  }
+
+  &-overlay {
+    min-width: 200px;
+    background: var(--app-kanban-surface-bg);
+    border: 1px solid var(--app-kanban-overlay-border);
+    box-shadow: var(--app-kanban-overlay-shadow);
+    opacity: 0.9;
+
+    &--column {
+      width: 260px;
+      min-height: 60px;
+      padding: 12px;
+      border-color: var(--app-kanban-border);
+      border-radius: var(--app-card-radius, 12px);
+    }
+  }
 }
 
-.app-kanban-source {
-  flex: 0 0 240px;
-  max-height: var(--app-kanban-source-max-height);
-  padding: 10px;
-  overflow-y: auto;
-  background: var(--app-kanban-source-bg);
-  border: 1px solid var(--app-kanban-border);
-  border-radius: var(--app-card-radius, 12px);
+// ══════════════════════════════════════════════════
+// Duplicate Detection
+// ══════════════════════════════════════════════════
+
+.app-duplicate {
+  &-footer { .view-flex-center(); justify-content: space-between; }
+  &-summary { font-size: 12px; }
+  &-groups { max-height: 480px; padding: 4px 2px; overflow-y: auto; }
+
+  &-group {
+    padding: 12px;
+    margin-bottom: 12px;
+    background: var(--ant-color-fill-quaternary);
+    border: 1px solid var(--ant-color-border-secondary);
+    border-radius: var(--app-radius-md);
+
+    &__header { .view-flex-center(); gap: 12px; justify-content: space-between; margin-bottom: 8px; }
+    &__title { font-size: 12.5px; color: var(--ant-color-text-secondary); word-break: break-all; }
+    &__tag { margin: 0; }
+    &__list { .view-flex-col(); gap: 6px; }
+  }
+
+  &-option {
+    .view-flex-center();
+    gap: var(--app-space-2);
+    padding: var(--app-space-2);
+    cursor: pointer;
+    border-radius: var(--app-radius-sm);
+    transition: background 120ms;
+
+    &.is-selected { background: var(--ant-color-primary-bg); }
+
+    &__favicon { width: 14px; height: 14px; border-radius: var(--app-radius-xs); }
+    &__content { .view-flex(); flex: 1; .view-flex-col(); .view-min-0(); }
+    &__title,
+    &__url { .view-ellipsis(); }
+    &__title { font-size: 12.5px; color: var(--ant-color-text); }
+    &__url,
+    &__meta { font-size: 11px; color: var(--ant-color-text-tertiary); }
+    &__aside { .view-flex(); .view-shrink-0(); .view-flex-col(); gap: 2px; align-items: flex-end; }
+  }
 }
 
-.app-kanban-source__title {
-  margin-bottom: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ant-color-text-secondary);
-}
-
-.app-kanban-add-column {
-  flex: 0 0 220px;
-}
-
-.app-kanban-column-wrap {
-  flex: 0 0 260px;
-}
-
-.app-kanban-column {
-  min-height: 400px;
-  background: var(--app-kanban-column-bg);
-  border: 1px solid var(--app-kanban-border);
-  border-radius: var(--app-card-radius, 12px);
-}
-
-.app-kanban-column.is-over {
-  background: var(--app-kanban-column-hover-bg);
-}
-
-.app-kanban-column__body {
-  padding: var(--app-space-2);
-}
-
-.app-kanban-column__header {
-  min-width: 0;
-}
-
-.app-kanban-column__drag-handle {
-  cursor: grab;
-}
-
-.app-kanban-column__name {
-  flex: 1;
-  min-width: 0;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--ant-color-text);
-  cursor: text;
-}
-
-.app-kanban-column__count {
-  font-size: 11px;
-  color: var(--ant-color-text-tertiary);
-  opacity: 0.8;
-}
-
-.app-kanban-column__dropzone {
-  min-height: 300px;
-}
-
-.app-kanban-column__empty {
-  padding: 24px 8px;
-  font-size: 11.5px;
-  color: var(--ant-color-text-tertiary);
-  text-align: center;
-}
-
-.app-kanban-card,
-.app-kanban-overlay {
-  padding: var(--app-space-2) var(--app-space-2);
-  font-size: 11.5px;
-  border-radius: var(--app-radius-sm);
-}
-
-.app-kanban-card {
-  margin-bottom: 4px;
-  cursor: pointer;
-  background: var(--app-kanban-surface-bg);
-  border: 1px solid var(--app-kanban-border);
-}
-
-.app-kanban-card--source {
-  cursor: grab;
-}
-
-.app-kanban-card__favicon {
-  border-radius: var(--app-radius-xs);
-}
-
-.app-kanban-card__title {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.app-kanban-card__title--grow {
-  flex: 1;
-}
-
-.app-kanban-card.is-offline {
-  opacity: 0.55;
-}
-
-.app-kanban-overlay {
-  min-width: 200px;
-  background: var(--app-kanban-surface-bg);
-  border: 1px solid var(--app-kanban-overlay-border);
-  box-shadow: var(--app-kanban-overlay-shadow);
-  opacity: 0.9;
-}
-
-.app-kanban-overlay--column {
-  width: 260px;
-  min-height: 60px;
-  padding: 12px;
-  border-color: var(--app-kanban-border);
-  border-radius: var(--app-card-radius, 12px);
-}
-
-.app-timeline-segment-time {
-  flex-shrink: 0;
-  min-width: 38px;
-  font-size: 11.5px;
-  font-variant-numeric: tabular-nums;
-  color: var(--ant-color-text-tertiary);
-  text-align: right;
-}
-
-.app-duplicate-footer {
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-  justify-content: space-between;
-}
-
-.app-duplicate-summary {
-  font-size: 12px;
-}
-
-.app-duplicate-groups {
-  max-height: 480px;
-  padding: 4px 2px;
-  overflow-y: auto;
-}
-
-.app-duplicate-group {
-  padding: 12px;
-  margin-bottom: 12px;
-  background: var(--ant-color-fill-quaternary);
-  border: 1px solid var(--ant-color-border-secondary);
-  border-radius: var(--app-radius-md);
-}
-
-.app-duplicate-group__header {
-  display: flex; /* antd 组件内部微调整 */
-  gap: 12px;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.app-duplicate-group__title {
-  font-size: 12.5px;
-  color: var(--ant-color-text-secondary);
-  word-break: break-all;
-}
-
-.app-duplicate-group__tag {
-  margin: 0;
-}
-
-.app-duplicate-group__list {
-  display: flex; /* antd 组件内部微调整 */
-  flex-direction: column;
-  gap: 6px;
-}
-
-.app-duplicate-option {
-  display: flex; /* antd 组件内部微调整 */
-  gap: var(--app-space-2);
-  align-items: center;
-  padding: var(--app-space-2) var(--app-space-2);
-  cursor: pointer;
-  border-radius: var(--app-radius-sm);
-  transition: background 120ms;
-}
-
-.app-duplicate-option.is-selected {
-  background: var(--ant-color-primary-bg);
-}
-
-.app-duplicate-option__favicon {
-  width: 14px;
-  height: 14px;
-  border-radius: var(--app-radius-xs);
-}
-
-.app-duplicate-option__content {
-  display: flex; /* antd 组件内部微调整 */
-  flex: 1;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.app-duplicate-option__title,
-.app-duplicate-option__url {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.app-duplicate-option__title {
-  font-size: 12.5px;
-  color: var(--ant-color-text);
-}
-
-.app-duplicate-option__url,
-.app-duplicate-option__meta {
-  font-size: 11px;
-  color: var(--ant-color-text-tertiary);
-}
-
-.app-duplicate-option__aside {
-  display: flex; /* antd 组件内部微调整 */
-  flex-shrink: 0;
-  flex-direction: column;
-  gap: 2px;
-  align-items: flex-end;
-}
+// ══════════════════════════════════════════════════
+// Tab Context Menu
+// ══════════════════════════════════════════════════
 
 .app-tab-context-menu {
   position: fixed;
   z-index: var(--app-tab-context-z, 1);
   width: var(--app-tab-context-width, 240px);
-}
 
-.app-tab-context-menu__card {
-  border-radius: var(--app-tab-context-radius, var(--ant-border-radius-lg));
-  box-shadow: var(--app-tab-context-shadow, var(--ant-box-shadow));
-}
+  &__card { border-radius: var(--app-tab-context-radius, var(--ant-border-radius-lg)); box-shadow: var(--app-tab-context-shadow, var(--ant-box-shadow)); }
+  &__body { padding: 4px; }
+  &__button { justify-content: flex-start; height: 32px; text-align: left; }
+  &__divider { margin: 4px 0; }
 
-.app-tab-context-menu__body {
-  padding: 4px;
-}
+  &__tag-list,
+  &__tag-input,
+  &__note-actions { .view-flex(); }
 
-.app-tab-context-menu__button {
-  justify-content: flex-start;
-  height: 32px;
-  text-align: left;
-}
+  &__tag-list { flex-wrap: wrap; gap: 4px; padding: 4px 8px 8px; }
 
-.app-tab-context-menu__divider {
-  margin: 4px 0;
-}
+  &__tag {
+    --app-tab-context-tag-bg: var(--ant-color-primary);
+    height: 20px;
+    padding: 0 6px;
+    margin: 0;
+    font-size: 11px;
+    color: var(--ant-color-text-inverse);
+    background: var(--app-tab-context-tag-bg);
+    border: none;
 
-.app-tab-context-menu__tag-list,
-.app-tab-context-menu__tag-input,
-.app-tab-context-menu__note-actions {
-  display: flex; /* antd 组件内部微调整 */
-}
+    &[data-tag-color] { line-height: 18px; background: attr(data-tag-color); }
+  }
 
-.app-tab-context-menu__tag-list {
-  flex-wrap: wrap;
-  gap: 4px;
-  padding: 4px 8px 8px;
-}
+  &__tag-input,
+  &__note { padding: 4px 6px 6px; }
 
-.app-tab-context-menu__tag {
-  --app-tab-context-tag-bg: var(--ant-color-primary);
+  &__tag-input { gap: 4px; }
 
-  height: 20px;
-  padding: 0 6px;
-  margin: 0;
-  font-size: 11px;
-  color: var(--ant-color-text-inverse);
-  background: var(--app-tab-context-tag-bg);
-  border: none;
-}
-
-.app-tab-context-menu__tag[data-tag-color] {
-  line-height: 18px;
-  background: attr(data-tag-color);
-}
-
-.app-tab-context-menu__tag-input,
-.app-tab-context-menu__note {
-  padding: 4px 6px 6px;
-}
-
-.app-tab-context-menu__tag-input {
-  gap: 4px;
-}
-
-.app-tab-context-menu__note-field {
-  font-size: 12px;
-}
-
-.app-tab-context-menu__note-actions {
-  gap: 4px;
-  justify-content: flex-end;
-  margin-top: 6px;
+  &__note {
+    &-field { font-size: 12px; }
+    &-actions { gap: 4px; justify-content: flex-end; margin-top: 6px; }
+  }
 }

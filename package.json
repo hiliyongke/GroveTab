@@ -21,6 +21,8 @@
     "lint:fix": "eslint . --fix",
     "lint:style": "stylelint \"src/**/*.{less,css}\"",
     "lint:style:fix": "stylelint \"src/**/*.{less,css}\" --fix",
+    "lint:css-modules": "stylelint \"src/**/*.module.less\"",
+    "check:unused-css": "stylelint \"src/**/*.module.less\" 2>&1 | grep -c 'no-unused-selectors' || true",
     "check-quota": "node scripts/check-quota.mjs",
     "release": "release-it",
     "release:dry": "release-it --dry-run",
@@ -92,14 +94,17 @@
     "lint-staged": "^17.0.5",
     "postcss-less": "^6.0.0",
     "prettier": "^3.8.3",
+    "purgecss": "^8.0.0",
     "release-it": "^20.0.1",
     "stylelint": "^17.12.0",
     "stylelint-config-recess-order": "^7.7.0",
     "stylelint-config-standard": "^40.0.0",
     "stylelint-less": "^4.2.1",
+    "stylelint-no-unused-selectors": "^1.0.40",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.0",
     "vite": "^8.0.10",
+    "vite-plugin-purgecss": "^0.2.13",
     "vitest": "^4.1.5"
   }
 }

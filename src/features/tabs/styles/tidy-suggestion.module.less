@@ -1,242 +1,154 @@
+@import (reference) '@/shared/styles/_variables.less';
+
 /**
- * TidySuggestionBar — 智能整理建议栏
- *
- * 设计语言：
- *   - 与内容区融合，不突兀
- *   - 圆角跟随皮肤（glassmorphism: 8px, minimal: 12px）
- *   - 半透明背景 + 微边框，融入毛玻璃体系
- *   - 展开态柔和连接 Alert 和 Panel
+ * TidySuggestionBar 智能整理建议栏样式
+ * BEM 子元素使用 &__ 嵌套，皮肤覆盖用 [data-skin]。
  */
 
 .tidy-suggestion {
   margin-bottom: 10px;
-}
 
-/* ── Alert 主体 ── */
-.tidy-suggestion__alert {
-  background: color-mix(in srgb, var(--ant-color-bg-container) 94%, var(--app-color-primary) 3%);
-  border-color: var(--app-hairline);
-  border-radius: var(--app-card-radius, 12px);
-  box-shadow: none;
-  transition: border-radius var(--ant-motion-duration-fast) var(--ant-motion-ease-in-out);
-}
+  // ── Alert 主体 ──
+  &__alert {
+    background: color-mix(in srgb, var(--ant-color-bg-container) 94%, var(--app-color-primary) 3%);
+    border-color: var(--app-hairline);
+    border-radius: var(--app-card-radius, 12px);
+    box-shadow: none;
+    transition: border-radius var(--ant-motion-duration-fast) var(--ant-motion-ease-in-out);
 
-/* 收紧 antd Alert 内部 padding，原本上下 ~12px 让条目过"高" */
-.tidy-suggestion__alert :global(.ant-alert) {
-  padding-block: 6px;
-}
-
-/* 让 antd Alert 的 icon 与文字基线更贴 */
-.tidy-suggestion__alert :global(.ant-alert-icon) {
-  margin-inline-end: 8px;
-  font-size: 14px;
-}
-
-.tidy-suggestion__alert :global(.ant-alert-message) {
-  width: 100%;
-}
-
-.tidy-suggestion.is-expanded .tidy-suggestion__alert {
-  border-bottom-color: transparent;
-  border-radius: var(--app-card-radius, 12px) var(--app-card-radius, 12px) 0 0;
-}
-
-/* ── 摘要行 ── */
-.tidy-suggestion__summary,
-.tidy-suggestion__section-header {
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-}
-
-.tidy-suggestion__summary {
-  gap: 10px;
-  width: 100%;
-}
-
-.tidy-suggestion__summary-text {
-  flex: 1;
-  font-size: 12.5px;
-  font-weight: 500;
-  line-height: 1.45;
-  color: var(--ant-color-text);
-}
-
-/* 在主操作前留一点透气，让"次操作组"自成一簇，避免三个按钮粘成一坨 */
-.tidy-suggestion__summary-actions {
-  margin-left: auto;
-}
-
-/* 闪电图标：低饱和主色，避免深色下与按钮蓝撞色 */
-.tidy-suggestion__alert-icon {
-  color: color-mix(in srgb, var(--app-color-primary) 70%, var(--ant-color-text-secondary));
-}
-
-.tidy-suggestion__dismiss-icon,
-.tidy-suggestion__chevron {
-  color: var(--ant-color-text-tertiary);
-}
-
-/* ── 一键整理按钮：低调品牌色底 ── */
-.tidy-suggestion__solid-action {
-  height: 26px;
-  padding-inline: 12px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--app-color-primary);
-  background: color-mix(in srgb, var(--app-color-primary) 12%, transparent);
-  border-color: color-mix(in srgb, var(--app-color-primary) 28%, transparent);
-  box-shadow: none;
-
-  /* 平滑过渡，避免 hover 时边框闪烁 */
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease;
-}
-
-.tidy-suggestion__solid-action:hover,
-.tidy-suggestion__solid-action:focus-visible {
-  color: var(--app-color-primary);
-
-  /* 移除 focus 时的 outline，使用 border 颜色变化作为视觉反馈 */
-  outline: none;
-  background: color-mix(in srgb, var(--app-color-primary) 18%, transparent);
-  border-color: color-mix(in srgb, var(--app-color-primary) 36%, transparent);
-}
-
-/* 次操作（chevron/X）：text 按钮 hover 弱化，避免在深色背景上产生明显白块 */
-.tidy-suggestion__summary-actions :global(.ant-btn-text):hover,
-.tidy-suggestion__summary-actions :global(.ant-btn-text):focus-visible {
-  background: color-mix(in srgb, var(--ant-color-text) 6%, transparent);
-}
-
-/* ── 展开箭头 ── */
-.tidy-suggestion__chevron {
-  transition: transform var(--ant-motion-duration-mid);
-}
-
-.tidy-suggestion.is-expanded .tidy-suggestion__chevron {
-  transform: rotate(180deg);
-}
-
-/* ── 展开面板 ── */
-.tidy-suggestion__panel {
-  padding: 8px 12px 10px;
-  margin-top: 0;
-  background: var(--ant-color-bg-container);
-  border: 1px solid var(--app-hairline);
-  border-top: none;
-  border-radius: 0 0 var(--app-card-radius, 12px) var(--app-card-radius, 12px);
-  box-shadow: none;
-}
-
-.tidy-suggestion__panel-body {
-  /* padding 已在 .tidy-suggestion__panel 上定义；保留 class 仅作为 hook 用 */
-}
-
-/* ── 分组标题 ── */
-.tidy-suggestion__section-header {
-  gap: 8px;
-  margin-bottom: 4px;
-}
-
-.tidy-suggestion__section-header.has-offset {
-  margin-top: 10px;
-}
-
-.tidy-suggestion__section-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ant-color-text);
-}
-
-.tidy-suggestion__section-icon--dup,
-.tidy-suggestion__section-icon--idle {
-  color: var(--ant-color-warning);
-}
-
-.tidy-suggestion__link-action {
-  height: auto;
-  padding: 0;
-  font-size: 11.5px;
-}
-
-/* ── 列表项 ── */
-.tidy-suggestion__list-item {
-  padding: var(--app-space-1) 0;
-  border-bottom: none;
-}
-
-.tidy-suggestion__item-title {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--ant-color-text);
-}
-
-.tidy-suggestion__item-desc {
-  font-size: 11px;
-  color: var(--ant-color-text-tertiary);
-}
-
-.tidy-suggestion__level-tag {
-  margin: 0;
-  font-size: 10px;
-}
-
-/* ── 响应式 ── */
-@media (width <= 720px) {
-  .tidy-suggestion__summary {
-    flex-direction: column;
-    align-items: flex-start;
+    :global {
+      .ant-alert { padding-block: 6px; }
+      .ant-alert-icon { margin-inline-end: 8px; font-size: 14px; }
+      .ant-alert-message { width: 100%; }
+    }
   }
 
-  .tidy-suggestion__summary-actions {
-    justify-content: flex-end;
+  &.is-expanded &__alert {
+    border-bottom-color: transparent;
+    border-radius: var(--app-card-radius, 12px) var(--app-card-radius, 12px) 0 0;
+  }
+
+  // ── 摘要行 ──
+  &__summary,
+  &__section-header { display: flex; align-items: center; }
+
+  &__summary {
+    gap: 10px;
     width: 100%;
+
+    &-text {
+      flex: 1;
+      font-size: 12.5px;
+      font-weight: 500;
+      line-height: 1.45;
+      color: var(--ant-color-text);
+    }
+
+    &-actions {
+      margin-left: auto;
+
+      :global(.ant-btn-text):hover,
+      :global(.ant-btn-text):focus-visible {
+        background: color-mix(in srgb, var(--ant-color-text) 6%, transparent);
+      }
+    }
   }
 
-  .tidy-suggestion__section-header {
-    flex-wrap: wrap;
+  &__alert-icon {
+    color: color-mix(in srgb, var(--app-color-primary) 70%, var(--ant-color-text-secondary));
+  }
+
+  &__dismiss-icon,
+  &__chevron { color: var(--ant-color-text-tertiary); }
+
+  // ── 一键整理按钮 ──
+  &__solid-action {
+    height: 26px;
+    padding-inline: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--app-color-primary);
+    background: color-mix(in srgb, var(--app-color-primary) 12%, transparent);
+    border-color: color-mix(in srgb, var(--app-color-primary) 28%, transparent);
+    box-shadow: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--app-color-primary);
+      outline: none;
+      background: color-mix(in srgb, var(--app-color-primary) 18%, transparent);
+      border-color: color-mix(in srgb, var(--app-color-primary) 36%, transparent);
+    }
+  }
+
+  // ── 展开箭头 ──
+  &__chevron { transition: transform var(--ant-motion-duration-mid); }
+  &.is-expanded &__chevron { transform: rotate(180deg); }
+
+  // ── 展开面板 ──
+  &__panel {
+    padding: 8px 12px 10px;
+    margin-top: 0;
+    background: var(--ant-color-bg-container);
+    border: 1px solid var(--app-hairline);
+    border-top: none;
+    border-radius: 0 0 var(--app-card-radius, 12px) var(--app-card-radius, 12px);
+    box-shadow: none;
+  }
+
+  &__panel-body { /* hook 保留 */ }
+
+  // ── 分组标题 ──
+  &__section-header { gap: 8px; margin-bottom: 4px; }
+  &__section-header.has-offset { margin-top: 10px; }
+  &__section-title { font-size: 12px; font-weight: 600; color: var(--ant-color-text); }
+  &__section-icon--dup,
+  &__section-icon--idle { color: var(--ant-color-warning); }
+  &__link-action { height: auto; padding: 0; font-size: 11.5px; }
+
+  // ── 列表项 ──
+  &__list-item { padding: var(--app-space-1) 0; border-bottom: none; }
+  &__item-title { font-size: 12px; font-weight: 500; color: var(--ant-color-text); }
+  &__item-desc { font-size: 11px; color: var(--ant-color-text-tertiary); }
+  &__level-tag { margin: 0; font-size: 10px; }
+}
+
+// ── 响应式 ──
+@media (width <= @breakpoint-md) {
+  .tidy-suggestion {
+    &__summary { flex-direction: column; align-items: flex-start; }
+    &__summary-actions { justify-content: flex-end; width: 100%; }
+    &__section-header { flex-wrap: wrap; }
   }
 }
 
-/* ═══════════════════════════════════════════════════════════
- * glassmorphism 皮肤：Acrylic 材质整理栏
- * ═════════════════════════════════════════════════════════ */
+// ═══ glassmorphism 皮肤 ═══
 [data-skin="glassmorphism"] {
-  .tidy-suggestion__alert {
-    background: color-mix(in srgb, var(--app-glass-bg) 88%, var(--app-color-primary) 4%);
-    border-color: rgb(255 255 255 / 8%);
-    backdrop-filter: var(--app-glass-filter);
-  }
+  .tidy-suggestion {
+    &__alert {
+      background: color-mix(in srgb, var(--app-glass-bg) 88%, var(--app-color-primary) 4%);
+      border-color: rgb(255 255 255 / 8%);
+      backdrop-filter: var(--app-glass-filter);
+    }
 
-  .tidy-suggestion__panel {
-    background: color-mix(in srgb, var(--app-glass-bg) 92%, transparent);
-    border-color: rgb(255 255 255 / 8%);
-    backdrop-filter: var(--app-glass-filter);
-  }
+    &__panel {
+      background: color-mix(in srgb, var(--app-glass-bg) 92%, transparent);
+      border-color: rgb(255 255 255 / 8%);
+      backdrop-filter: var(--app-glass-filter);
+    }
 
-  .tidy-suggestion__solid-action {
-    background: color-mix(in srgb, var(--ant-color-primary, #0078d4) 8%, transparent);
-    border-color: color-mix(
-      in srgb,
-      var(--ant-color-primary, #0078d4) 18%,
-      var(--ant-color-border-secondary, rgb(255 255 255 / 8%))
-    );
-    transition:
-      background-color 0.2s ease,
-      border-color 0.2s ease,
-      color 0.2s ease;
-  }
+    &__solid-action {
+      background: color-mix(in srgb, var(--ant-color-primary, #0078d4) 8%, transparent);
+      border-color: color-mix(in srgb, var(--ant-color-primary, #0078d4) 18%, var(--ant-color-border-secondary, rgb(255 255 255 / 8%)));
+      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 
-  .tidy-suggestion__solid-action:hover,
-  .tidy-suggestion__solid-action:focus-visible {
-    outline: none;
-    background: color-mix(in srgb, var(--ant-color-primary, #0078d4) 14%, transparent);
-    border-color: color-mix(
-      in srgb,
-      var(--ant-color-primary, #0078d4) 26%,
-      var(--ant-color-border-secondary, rgb(255 255 255 / 12%))
-    );
+      &:hover,
+      &:focus-visible {
+        outline: none;
+        background: color-mix(in srgb, var(--ant-color-primary, #0078d4) 14%, transparent);
+        border-color: color-mix(in srgb, var(--ant-color-primary, #0078d4) 26%, var(--ant-color-border-secondary, rgb(255 255 255 / 12%)));
+      }
+    }
   }
 }

@@ -3,11 +3,11 @@
  *
  * 职责：
  *   1. 订阅 HashRouter 的路由变更 → 更新 React 状态
- *   2. 提供 navigate / openPanel / closePanel / switchView / switchSpace 等 API
+ *   2. 提供 navigate / openPanel / closePanel / switchView 等 API
  *   3. 在组件卸载时自动清理订阅
  *
  * 使用方式：
- *   const { route, navigate, openPanel, closePanel, switchView, switchSpace } = useUrlSync();
+ *   const { route, navigate, openPanel, closePanel, switchView } = useUrlSync();
  */
 
 import { useState, useEffect, useCallback, useMemo } from "react";
@@ -19,7 +19,7 @@ import {
 } from "./hash-router";
 import { handleRouteTelemetry } from "./route-telemetry";
 import type { ViewMode } from "@/shared/config/views";
-import type { SpaceId, PanelId } from "./hash-router";
+import type { PanelId } from "./hash-router";
 import { track } from "@/shared/utils/metrics";
 
 export interface UrlSyncAPI {
@@ -33,8 +33,6 @@ export interface UrlSyncAPI {
   closePanel: () => void;
   /** 切换视图 */
   switchView: (viewId: ViewMode) => void;
-  /** 切换空间 */
-  switchSpace: (spaceId: SpaceId) => void;
   /** 替换当前路由（不产生历史记录） */
   replace: (route: Partial<RouteDescriptor>) => void;
   /** 返回上一页 */
@@ -112,13 +110,6 @@ export function useUrlSync(): UrlSyncAPI {
     [router],
   );
 
-  const switchSpace = useCallback(
-    (spaceId: SpaceId) => {
-      router.navigate({ spaceId, viewId: undefined, panelId: undefined, subId: undefined });
-    },
-    [router],
-  );
-
   const replace = useCallback(
     (partial: Partial<RouteDescriptor>) => {
       router.navigate(partial, { replace: true });
@@ -136,7 +127,6 @@ export function useUrlSync(): UrlSyncAPI {
     openPanel,
     closePanel,
     switchView,
-    switchSpace,
     replace,
     back,
     lastSource,

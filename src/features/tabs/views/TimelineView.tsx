@@ -23,6 +23,7 @@ import { Timeline, Button, theme, Flex, Typography, Space } from "antd";
 import { ChevronDown } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useTabsStore, useSettingsStore } from "@/store";
+import { useTabActions } from "@/shared/hooks/use-tab-actions";
 import { useT } from "@/shared/i18n";
 import { findAmbiguousTitleIds } from "@/shared/utils/url-display";
 import { TabItem } from "../components/TabItem";
@@ -279,9 +280,8 @@ function SegmentContent({
   segment: TimeSegment;
   showExactTime: boolean;
 }) {
+  const { jumpToTab, closeSingleTab } = useTabActions();
   const [collapsed, setCollapsed] = useState(false);
-  const jumpToTab = useTabsStore((s) => s.jumpToTab);
-  const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
   /** 段内同名 tab id 集合 */
   const ambiguousIds = useMemo(() => findAmbiguousTitleIds(segment.tabs), [segment.tabs]);
   /** 段内 tab ID 列表（供 Shift 范围选） */

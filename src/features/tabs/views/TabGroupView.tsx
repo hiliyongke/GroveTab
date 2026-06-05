@@ -29,8 +29,9 @@ import {
   closestCorners,
 } from "@dnd-kit/core";
 import { useTabsStore, useSettingsStore } from "@/store";
+import { useTabActions } from "@/shared/hooks/use-tab-actions";
 import type { ChromeTabGroupColor } from "@/chrome";
-import { cssVars } from "@/shared/utils/css-vars";
+import { getColumnVars } from "@/shared/utils/flow-columns";
 import { useT } from "@/shared/i18n";
 import { TabGroupCard, type TabGroupData } from "../components/TabGroupCard";
 import { DraggableTabItem } from "../components/DraggableTabItem";
@@ -53,12 +54,6 @@ function getAutoColumnCount(containerWidth: number, groupCount: number): number 
     (containerWidth + DOMAIN_COLUMN_GAP) / (DOMAIN_COLUMN_MIN_WIDTH + DOMAIN_COLUMN_GAP),
   );
   return Math.min(groupCount, Math.max(1, fitCount), DOMAIN_COLUMN_MAX_AUTO);
-}
-
-function getColumnVars(columnCount: number): React.CSSProperties {
-  return cssVars({
-    "--app-domain-column-count": String(columnCount),
-  });
 }
 
 /** 按 Chrome 原生 Tab Group 分组 */
@@ -222,6 +217,7 @@ function VirtualColumn({
 export function TabGroupView() {
   const { t } = useT();
   const tabs = useTabsStore((s) => s.tabs);
+  const { jumpToTab, closeSingleTab } = useTabActions();
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [filterQuery, setFilterQuery] = useState("");
@@ -231,8 +227,6 @@ export function TabGroupView() {
     return typeof v === "number" && v >= 1 && v <= 6 ? v : null;
   });
   const sortBy = useSettingsStore((s) => s.settings.tabGroupSortBy ?? "tabCount");
-  const jumpToTab = useTabsStore((s) => s.jumpToTab);
-  const closeSingleTab = useTabsStore((s) => s.closeSingleTab);
   const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
 
   // 按 Chrome 原生 Tab Group 分组

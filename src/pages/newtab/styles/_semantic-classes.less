@@ -6,13 +6,44 @@
  *       .app-card-interactive, .app-segmented 等）+ reduced-motion 媒体查询
  */
 
-/* ─── 通用语义类（跨组件复用的视觉原语） ─────────────
- *
- * 原则：每个类只做一件事，可自由组合；凡是多处重复的"毛玻璃面板 / 键帽 / 软分隔线"
- * 一律走这里，避免各组件各自写内联样式造成风格漂移。
- */
+// ─── Shared Variables & Mixins ────────────────────────────
 
-/** Elevated Surface —— 浮层容器（批量栏、命令面板、菜单等共用） */
+@app-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+@app-motion-default: var(--app-motion-duration, 0.2s);
+@app-motion-fast: var(--app-motion-duration, 0.15s);
+
+.transition-bg() {
+  transition: background-color @app-motion-fast ease;
+}
+
+.transition-transform() {
+  transition: transform @app-motion-default @app-motion-ease;
+}
+
+.transition-opacity() {
+  transition: opacity @app-motion-fast ease;
+}
+
+.transition-lift() {
+  transition:
+    transform @app-motion-default @app-motion-ease,
+    box-shadow @app-motion-default ease,
+    border-color @app-motion-default ease;
+}
+
+.transition-card-interactive() {
+  transition:
+    transform @app-motion-default @app-motion-ease,
+    box-shadow @app-motion-default ease,
+    border-color @app-motion-default ease;
+}
+
+.transition-accent-bar() {
+  transition: transform @app-motion-fast ease;
+}
+
+// ─── Elevated Surface ─────────────────────────────────────
+
 .app-surface-elevated {
   background: var(--app-surface-elevated-bg);
   border: 1px solid var(--ant-color-border-secondary);
@@ -21,7 +52,8 @@
   backdrop-filter: var(--app-glass-filter);
 }
 
-/** 键帽（显示快捷键） */
+// ─── KBD (Keycap) ─────────────────────────────────────────
+
 .app-kbd {
   display: inline-flex;
   align-items: center;
@@ -39,189 +71,170 @@
   border-radius: var(--app-radius-sm);
 }
 
-/** 软分隔线（与 antd divider 相比更细、更柔，适合浮层内部） */
+// ─── Soft Divider ─────────────────────────────────────────
+
 .app-divider-soft {
   flex-shrink: 0;
   width: 1px;
   height: 20px;
   background: var(--ant-color-border-secondary);
+
+  &--horizontal {
+    width: 100%;
+    height: 1px;
+  }
 }
 
-.app-divider-soft--horizontal {
-  width: 100%;
-  height: 1px;
-}
+// ─── Button / Input Transitions ───────────────────────────
 
-/** ─── 基础组件过渡动画（Button / Input） ─────────────
- * 统一按钮和输入框的交互过渡动画，使其更平滑
- */
 .app-button,
 .ant-input,
 .ant-input-affix-wrapper,
 .ant-input-search-button {
-  transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all @app-motion-default @app-motion-ease;
+
+  &:active {
+    transform: scale(0.96);
+  }
 }
 
-.app-button:active {
-  transform: scale(0.96);
+// ─── Modal Primitives ─────────────────────────────────────
+
+.app-modal {
+  &__mask {
+    background-color: var(--app-overlay-mask-bg);
+    backdrop-filter: blur(var(--app-overlay-blur));
+  }
+
+  &__container {
+    overflow: hidden;
+    border-radius: calc(var(--app-radius-lg) + 4px);
+    box-shadow: var(--app-shadow-floating);
+  }
+
+  &__header {
+    padding: var(--app-space-4) var(--app-space-6);
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--app-hairline);
+  }
+
+  &__body {
+    padding: var(--app-space-6);
+  }
+
+  &__footer {
+    padding: var(--app-space-3) var(--app-space-6);
+    margin-top: 0;
+    border-top: 1px solid var(--app-hairline);
+  }
 }
 
-/** ─── 全局弹窗（Modal）样式优化 ─────────────
- * 统一弹窗的遮罩、背景色、内边距及阴影效果
- */
-.app-modal__mask {
-  background-color: var(--app-overlay-mask-bg);
-  backdrop-filter: blur(var(--app-overlay-blur));
-}
+// ─── Lift (hover elevation) ───────────────────────────────
 
-.app-modal__container {
-  overflow: hidden;
-  border-radius: calc(var(--app-radius-lg) + 4px);
-  box-shadow: var(--app-shadow-floating);
-}
-
-.app-modal__header {
-  padding: var(--app-space-4) var(--app-space-6);
-  margin-bottom: 0;
-  border-bottom: 1px solid var(--app-hairline);
-}
-
-.app-modal__body {
-  padding: var(--app-space-6);
-}
-
-.app-modal__footer {
-  padding: var(--app-space-3) var(--app-space-6);
-  margin-top: 0;
-  border-top: 1px solid var(--app-hairline);
-}
-
-/** 吸附/悬浮状态：让元素在 hover/focus 时轻微上浮 + 柔和 ring
- *  用法：给任意交互元素加 .app-lift，hover 时自动抬起。
- *  与 prefers-reduced-motion 兼容。
- */
 .app-lift {
-  transition:
-    transform var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow var(--app-motion-duration, 0.2s) ease,
-    border-color var(--app-motion-duration, 0.2s) ease;
+  .transition-lift();
+
+  &:hover {
+    transform: translateY(-1px);
+  }
 }
 
-.app-lift:hover {
-  transform: translateY(-1px);
+// ─── Compact Search ───────────────────────────────────────
+
+.app-compact-search {
+  &:hover {
+    background: var(--ant-color-fill-secondary);
+    border-color: var(--ant-color-border);
+  }
 }
 
-/**
- * Header 吸附搜索按钮 hover。
- *
- * 元素本身是原生 <button all: unset>，不存在被 antd 覆盖的问题，
- * 因此无需 。
- */
-.app-compact-search:hover {
-  background: var(--ant-color-fill-secondary);
-  border-color: var(--ant-color-border);
-}
+// ─── Segmented ────────────────────────────────────────────
 
-/**
- * Segmented 选中态字重强化。
- *
- * 用纯 CSS 响应 antd 官方选中类 `.ant-segmented-item-selected`，
- * 替代原先在 label JSX 里通过 `viewMode === v.id` 判断 fontWeight 的写法——
- * 视觉表现完全一致，但避免了 React 在每次切换时重新构造整个 options 数组。
- */
 .app-segmented .app-segmented__item.app-segmented__item-selected {
   font-weight: 600;
 }
 
-/* ─── 纯 CSS Hover Primitives（消除 React onMouseEnter/Leave） ───
- *
- * 背景：之前多处组件（TabItem / TimelineView / GridView / DomainGroupCard /
- * SessionItem）用 React state 驱动 hover 样式——每次鼠标进/出都触发一次
- * 组件 re-render，对长列表非常吃 CPU。
- *
- * 设计：
- *   - 所有「仅改样式」的 hover 都通过 :hover / :focus-within 纯 CSS 完成。
- *   - 组件内联把 antd token 灌成局部 CSS 变量（如 --hover-bg），
- *     CSS 规则再消费这些变量——既保留了主题跟随，又完全脱离 React state。
- *   - 键盘 a11y：同步挂 :focus-within，避免只有鼠标能触发悬浮显隐的按钮。
- */
+// ─── Pure CSS Hover Primitives ────────────────────────────
 
-/** 行级 hover：标签页行、会话子项等。变量由组件内联注入。 */
+/* 行级 hover：标签页行、会话子项等。变量由组件内联注入。 */
 .app-row-hover {
-  transition: background-color var(--app-motion-duration, 0.15s) ease;
+  .transition-bg();
+
+  &:hover,
+  &:focus-within {
+    background-color: var(--app-row-hover-bg, var(--ant-color-fill-tertiary));
+  }
 }
 
-.app-row-hover:hover,
-.app-row-hover:focus-within {
-  background-color: var(--app-row-hover-bg, var(--ant-color-fill-tertiary));
-}
-
-/** 卡片级 hover：上浮 + 阴影提升 + 边框加深。 */
+/* 卡片级 hover：上浮 + 阴影提升 + 边框加深。 */
 .app-card-interactive {
-  transition:
-    transform var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow var(--app-motion-duration, 0.2s) ease,
-    border-color var(--app-motion-duration, 0.2s) ease;
+  .transition-card-interactive();
+
+  &:hover,
+  &:focus-within {
+    border-color: var(--app-hover-border, var(--ant-color-border));
+    box-shadow: var(--app-shadow-card-hover);
+    transform: translateY(calc(-1 * var(--app-card-lift, 2px)));
+  }
 }
 
-.app-card-interactive:hover,
-.app-card-interactive:focus-within {
-  border-color: var(--app-hover-border, var(--ant-color-border));
-  box-shadow: var(--app-shadow-card-hover);
-  transform: translateY(calc(-1 * var(--app-card-lift, 2px)));
-}
-
-/**
- * Hover 显隐：容器加 .app-hover-reveal-host，
- * 被显隐的子元素加 .app-hover-reveal。
- *
- * 容器 hover 或 focus-within 时子元素淡入——支持键盘 Tab 聚焦。
- */
+/* Hover 显隐 */
 .app-hover-reveal {
   opacity: 0;
-  transition: opacity var(--app-motion-duration, 0.15s) ease;
+  .transition-opacity();
 }
 
-.app-hover-reveal-host:hover .app-hover-reveal,
-.app-hover-reveal-host:focus-within .app-hover-reveal,
+.app-hover-reveal-host {
+  &:hover .app-hover-reveal,
+  &:focus-within .app-hover-reveal {
+    opacity: 1;
+  }
+}
+
 .app-hover-reveal.is-visible {
   opacity: 1;
 }
 
-/** 卡片身份色条 hover 视觉加粗。用 transform 避免 2 → 3px 尺寸变化引发布局/重绘抖动。 */
-.app-card-interactive .app-accent-bar--left {
-  transform-origin: left center;
-  transition: transform var(--app-motion-duration, 0.15s) ease;
-  will-change: transform;
+/* Accent bar hover */
+.app-card-interactive {
+  .app-accent-bar {
+    &--left {
+      transform-origin: left center;
+      .transition-accent-bar();
+      will-change: transform;
+    }
+
+    &--top {
+      transform-origin: center top;
+      .transition-accent-bar();
+      will-change: transform;
+    }
+  }
+
+  &:hover,
+  &:focus-within {
+    .app-accent-bar--left {
+      transform: scaleX(1.5);
+    }
+    .app-accent-bar--top {
+      transform: scaleY(1.5);
+    }
+  }
 }
 
-.app-card-interactive:hover .app-accent-bar--left,
-.app-card-interactive:focus-within .app-accent-bar--left {
-  transform: scaleX(1.5);
-}
+// ─── Timeline Segment Header ──────────────────────────────
 
-.app-card-interactive .app-accent-bar--top {
-  transform-origin: center top;
-  transition: transform var(--app-motion-duration, 0.15s) ease;
-  will-change: transform;
-}
-
-.app-card-interactive:hover .app-accent-bar--top,
-.app-card-interactive:focus-within .app-accent-bar--top {
-  transform: scaleY(1.5);
-}
-
-/** 时间线分段标题 hover 文本提亮。颜色通过局部 CSS 变量桥接 antd token。 */
 .app-timeline-segment-header {
   color: var(--app-color, var(--ant-color-text-secondary));
+
+  &:hover,
+  &:focus-visible {
+    color: var(--app-color-hover, var(--ant-color-text));
+  }
 }
 
-.app-timeline-segment-header:hover,
-.app-timeline-segment-header:focus-visible {
-  color: var(--app-color-hover, var(--ant-color-text));
-}
+// ─── Reduced Motion ───────────────────────────────────────
 
-/** ── 动效降级：尊重系统 reduced-motion 设置 ─── */
 @media (prefers-reduced-motion: reduce) {
   [data-app-content],
   .app-batch-bar,
@@ -234,5 +247,41 @@
   .app-card-interactive:hover,
   .app-card-interactive:focus-within {
     transform: none;
+  }
+}
+
+// ─── Accessibility Utilities ─────────────────────────────
+
+/** Screen-reader-only text: visually hidden but accessible to assistive tech */
+.app-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/** ARIA live region for dynamic content announcements */
+.app-live-region {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  pointer-events: none;
+}
+
+/** Global focus-visible: ensures interactive elements have visible focus ring */
+.app-focus-ring() {
+  &:focus-visible {
+    outline: 2px solid var(--ant-color-primary);
+    outline-offset: 2px;
+    border-radius: var(--ant-border-radius-xs);
   }
 }

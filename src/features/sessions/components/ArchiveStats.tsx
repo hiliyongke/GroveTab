@@ -3,7 +3,7 @@
  *
  * 4 个卡片横向铺开：总会话 / 总标签 / 本月新增 / 自动快照
  * 卡片可点击：触发对应筛选条件，与左导航联动。
- * 视觉与 DeveloperToolsPage 主体保持一致：浅色卡 + 主色图标徽章。
+ * 视觉与 DevToolsView 主体保持一致：浅色卡 + 主色图标徽章。
  */
 
 import { useMemo } from "react";

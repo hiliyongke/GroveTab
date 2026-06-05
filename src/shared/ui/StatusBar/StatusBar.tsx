@@ -8,17 +8,19 @@
 import { Button, Typography } from "antd";
 import { X, Info, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
 import { useStatusBarStore, type StatusBarMessage } from "@/shared/store/status-bar-slice";
+import styles from "./StatusBar.module.less";
 
 const { Text } = Typography;
 
+/** 每种消息类型的视觉配置 — 颜色使用语义化设计 token */
 const TYPE_CONFIG: Record<
   StatusBarMessage["type"],
   { icon: typeof Info; color: string; bg: string }
 > = {
-  info: { icon: Info, color: "#1677ff", bg: "#e6f4ff" },
-  success: { icon: CheckCircle, color: "#52c41a", bg: "#f6ffed" },
-  warning: { icon: AlertTriangle, color: "#faad14", bg: "#fffbe6" },
-  error: { icon: XCircle, color: "#ff4d4f", bg: "#fff2f0" },
+  info: { icon: Info, color: "var(--ant-color-primary)", bg: "var(--ant-color-primary-bg, color-mix(in srgb, #1677ff 12%, transparent))" },
+  success: { icon: CheckCircle, color: "var(--ant-color-success)", bg: "var(--ant-color-success-bg, color-mix(in srgb, #52c41a 15%, transparent))" },
+  warning: { icon: AlertTriangle, color: "var(--ant-color-warning)", bg: "var(--ant-color-warning-bg, color-mix(in srgb, #faad14 15%, transparent))" },
+  error: { icon: XCircle, color: "var(--ant-color-error)", bg: "var(--ant-color-error-bg, color-mix(in srgb, #ff4d4f 12%, transparent))" },
 };
 
 export function StatusBar() {
@@ -33,54 +35,35 @@ export function StatusBar() {
 
   return (
     <div
-      className="status-bar"
+      className={styles["status-bar"]}
       style={{
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: 32,
-        background: config.bg,
-        borderTop: `1px solid ${config.color}20`,
-        zIndex: 1000,
-        display: "flex",
-        alignItems: "center",
-        padding: "0 12px",
-        gap: 8,
-        transition: "all 0.2s ease",
-      }}
+        "--status-bar-bg": config.bg,
+        "--status-bar-color": config.color,
+        "--status-bar-border": `color-mix(in srgb, ${config.color} 20%, transparent)`,
+      } as React.CSSProperties}
     >
-      <Icon size={14} style={{ color: config.color, flexShrink: 0 }} />
-      <Text
-        style={{
-          fontSize: 12,
-          color: config.color,
-          flex: 1,
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-        }}
-      >
+      <Icon size={14} className={styles["status-bar__icon"]} />
+      <Text className={styles["status-bar__text"]}>
         {current.content}
       </Text>
       {current.action && (
         <Button
           type="link"
           size="small"
-          style={{ fontSize: 12, color: config.color, padding: 0, height: "auto" }}
+          className={styles["status-bar__action"]}
           onClick={current.action.onClick}
         >
           {current.action.label}
         </Button>
       )}
-      <Button
-        type="text"
-        size="small"
-        style={{ padding: 2, height: "auto", minWidth: "auto" }}
+      <button
+        type="button"
+        className={styles["status-bar__dismiss"]}
         onClick={() => removeMessage(current.id)}
+        aria-label="关闭"
       >
         <X size={12} />
-      </Button>
+      </button>
     </div>
   );
 }

@@ -5,13 +5,88 @@
  *       （generic themes: minimal / nord；专属覆盖: apple / glassmorphism + dark variants）
  */
 
-/* ─── Ant Design 浮层兜底 ─────────────
- * 已提取到 shared/styles/_floating-overrides.less，
- * newtab 和 popup 共享，避免重复。
- */
 @import "@/shared/styles/_floating-overrides.less";
 
+// ─── Shared Mixins ────────────────────────────────────────
+
+.skin-base-cards() {
+  & .app-card,
+  & .app-card-interactive,
+  & .app-widget-card,
+  & .app-accordion-panel {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) @_hl-opacity, transparent),
+        transparent @_hl-stop
+      ),
+      var(--app-mica-surface, var(--ant-color-bg-container));
+    border-color: var(--app-acrylic-border, var(--ant-color-border-secondary));
+    box-shadow: var(--app-shadow-card);
+  }
+}
+
+.skin-base-card-hover() {
+  & .app-card-interactive:hover,
+  & .app-card-interactive:focus-within,
+  & .app-widget-card:hover {
+    border-color: color-mix(
+      in srgb,
+      var(--app-color-primary, var(--ant-color-primary)) @_border-mix-pct,
+      var(--app-acrylic-border, var(--ant-color-border-secondary))
+    );
+    box-shadow: var(--app-shadow-card-hover);
+  }
+}
+
+.skin-base-row-hover() {
+  & .app-row-hover:hover,
+  & .app-row-hover:focus-within {
+    background-color: var(--app-list-item-hover-bg);
+  }
+}
+
+.skin-base-activity-strip() {
+  & .activity-strip__item {
+    background: color-mix(
+      in srgb,
+      var(--app-color-primary, var(--ant-color-primary)) @_as-bg-pct,
+      var(--app-mica-surface, var(--ant-color-bg-container))
+    );
+    border-color: var(--app-acrylic-border, var(--ant-color-border-secondary));
+  }
+}
+
+.skin-base-links() {
+  & .activity-strip__icon,
+  & .activity-strip__action-btn,
+  & a,
+  & .app-typography a {
+    color: var(--app-color-primary, var(--ant-color-primary));
+  }
+}
+
+.skin-base-selection() {
+  & ::selection {
+    color: inherit;
+    background-color: color-mix(
+      in srgb,
+      var(--app-color-primary, var(--ant-color-primary)) @_sel-pct,
+      transparent
+    );
+  }
+}
+
+// ─── Generic Skins (minimal / nord) ───────────────────────
+
 [data-skin]:not([data-skin="apple"], [data-skin="glassmorphism"]) {
+  // Light-mode variables
+  @_hl-opacity: 34%;
+  @_hl-stop: 76%;
+  @_border-mix-pct: 30%;
+  @_as-bg-pct: 6%;
+  @_sel-pct: 22%;
+
   --app-card-bg: var(--app-mica-surface, var(--ant-color-bg-container));
   --app-card-hover-bg: color-mix(
     in srgb,
@@ -24,63 +99,21 @@
     transparent
   );
 
-  & .app-card-interactive,
-  & .app-widget-card,
-  & .app-accordion-panel {
-    background:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 34%, transparent),
-        transparent 76%
-      ),
-      var(--app-mica-surface, var(--ant-color-bg-container));
-    border-color: var(--app-acrylic-border, var(--ant-color-border-secondary));
-    box-shadow: var(--app-shadow-card);
-  }
-
-  & .app-card-interactive:hover,
-  & .app-card-interactive:focus-within,
-  & .app-widget-card:hover {
-    border-color: color-mix(
-      in srgb,
-      var(--app-color-primary, var(--ant-color-primary)) 30%,
-      var(--app-acrylic-border, var(--ant-color-border-secondary))
-    );
-    box-shadow: var(--app-shadow-card-hover);
-  }
-
-  & .app-row-hover:hover,
-  & .app-row-hover:focus-within {
-    background-color: var(--app-list-item-hover-bg);
-  }
-
-  & .activity-strip__item {
-    background: color-mix(
-      in srgb,
-      var(--app-color-primary, var(--ant-color-primary)) 6%,
-      var(--app-mica-surface, var(--ant-color-bg-container))
-    );
-    border-color: var(--app-acrylic-border, var(--ant-color-border-secondary));
-  }
-
-  & .activity-strip__icon,
-  & .activity-strip__action-btn,
-  & a,
-  & .app-typography a {
-    color: var(--app-color-primary, var(--ant-color-primary));
-  }
-
-  & ::selection {
-    color: inherit;
-    background-color: color-mix(
-      in srgb,
-      var(--app-color-primary, var(--ant-color-primary)) 22%,
-      transparent
-    );
-  }
+  .skin-base-cards();
+  .skin-base-card-hover();
+  .skin-base-row-hover();
+  .skin-base-activity-strip();
+  .skin-base-links();
+  .skin-base-selection();
 }
 
 [data-theme="dark"][data-skin]:not([data-skin="apple"], [data-skin="glassmorphism"]) {
+  @_hl-opacity: 20%;
+  @_hl-stop: 78%;
+  @_border-mix-pct: 30%;
+  @_as-bg-pct: 10%;
+  @_sel-pct: 34%;
+
   --app-card-hover-bg: color-mix(
     in srgb,
     var(--app-color-primary, var(--ant-color-primary)) 10%,
@@ -92,110 +125,69 @@
     transparent
   );
 
-  & .app-card-interactive,
-  & .app-widget-card,
-  & .app-accordion-panel {
-    background:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 20%, transparent),
-        transparent 78%
-      ),
-      var(--app-mica-surface, var(--ant-color-bg-container));
-  }
-
-  & .activity-strip__item {
-    background: color-mix(
-      in srgb,
-      var(--app-color-primary, var(--ant-color-primary)) 10%,
-      var(--app-mica-surface, var(--ant-color-bg-container))
-    );
-  }
-
-  & ::selection {
-    background-color: color-mix(
-      in srgb,
-      var(--app-color-primary, var(--ant-color-primary)) 34%,
-      transparent
-    );
-  }
+  .skin-base-cards();
+  .skin-base-activity-strip();
+  .skin-base-selection();
 }
 
-/* ═════════════════════════════════════════════════════════
- * Apple 皮肤覆盖样式（data-skin="apple"）
- *
- * 核心设计语言：
- *   - 导航栏：深色半透明毛玻璃（rgba(0,0,0,0.8) + blur 20px）
- *   - 按钮：pill 形（980px radius）、Apple Blue (#0071e3) 强调
- *   - 卡片：无边框、无 hover 上浮、柔和阴影
- *   - 排版：SF Pro Display/Text、紧凑行高、负字间距
- *   - 背景：纯色无渐变，#f5f5f7 (light) / #000000 (dark)
- * ═════════════════════════════════════════════════════════ */
+// ─── Apple Skin ───────────────────────────────────────────
 
-/* ═══════════════════════════════════════════════════════════
- * Apple 皮肤扩展覆盖
- *
- * 注：导航栏、Hero 搜索框等核心覆盖在 app-shell.css 中
- * 这里补充全局组件级覆盖
- * ═══════════════════════════════════════════════════════════ */
+@apple-blue: #0071e3;
+@apple-blue-dark: #2997ff;
+@apple-card-shadow: 0 5px 30px color-mix(in srgb, #000000 22%, transparent);
+@apple-card-shadow-hover: 0 8px 36px color-mix(in srgb, #000000 26%, transparent);
 
 [data-skin="apple"] {
-  /* ── Apple 皮肤 CSS 变量 */
-  --app-apple-blue: #0071e3;
+  --app-apple-blue: @apple-blue;
 
-  /* ── Apple 背景色覆盖 ── */
+  // Background overrides
   --app-card-bg: transparent;
   --app-card-hover-bg: color-mix(in srgb, #000000 3%, transparent);
   --app-list-item-hover-bg: color-mix(in srgb, #000000 3%, transparent);
 
-  /* ── Apple 卡片：无边框 ── */
-  & .app-card {
+  // Cards: no border, no hover lift
+  & .app-card,
+  & .app-card-interactive {
     border: none;
+    border-radius: var(--app-card-radius, 12px);
+    box-shadow: @apple-card-shadow;
   }
 
   & .app-card:hover {
     transform: none;
   }
 
-  /* ── Apple 按钮：pill 形 CTA ── */
-  & .app-button.ant-btn-primary {
-    border-radius: var(--app-radius-pill);
-  }
-
-  /* ── Apple 链接色 ── */
-  & a,
-  & .app-typography a {
-    color: var(--app-apple-link-light);
-  }
-
-  /* ── Apple 聚焦态 ── */
-  & :focus-visible {
-    outline: 2px solid var(--app-apple-blue, #0071e3);
-    outline-offset: 2px;
-  }
-
-  /* ── Apple DomainGroupCard：无边框、柔和阴影 ── */
-  & .app-card-interactive {
-    border: none;
-    border-radius: var(--app-card-radius, 12px);
-    box-shadow: 0 5px 30px color-mix(in srgb, #000000 22%, transparent);
-  }
-
-  /* Apple：卡片 hover 不上浮，仅微调阴影 */
   & .app-card-interactive:hover,
   & .app-card-interactive:focus-within {
     border-color: transparent;
-    box-shadow: 0 8px 36px color-mix(in srgb, #000000 26%, transparent);
+    box-shadow: @apple-card-shadow-hover;
     transform: none;
   }
 
-  /* Apple：行级 hover 更柔 */
+  // Row hover
   & .app-row-hover:hover,
   & .app-row-hover:focus-within {
     background-color: color-mix(in srgb, #000000 3%, transparent);
   }
 
-  /* ── Apple ActivityStrip：pill 胶囊风格 ── */
+  // Primary button: pill shape
+  & .app-button.ant-btn-primary {
+    border-radius: var(--app-radius-pill);
+  }
+
+  // Links
+  & a,
+  & .app-typography a {
+    color: var(--app-apple-link-light);
+  }
+
+  // Focus ring
+  & :focus-visible {
+    outline: 2px solid @apple-blue;
+    outline-offset: 2px;
+  }
+
+  // ActivityStrip: pill capsules
   & .activity-strip__item {
     font-size: 13px;
     letter-spacing: -0.01em;
@@ -204,25 +196,21 @@
     border-radius: var(--app-radius-pill);
   }
 
-  & .activity-strip__icon {
-    color: var(--app-apple-blue, #0071e3);
-  }
-
+  & .activity-strip__icon,
   & .activity-strip__action-btn {
-    color: var(--app-apple-blue, #0071e3);
+    color: @apple-blue;
   }
 
-  /* ── Apple 域名分组头 ── */
+  // Domain group header
   & .app-domain-group-header {
     letter-spacing: -0.01em;
   }
 
-  /* Apple：分组内 favicon 徽章更圆润 */
   & .app-domain-group-badge {
     border-radius: var(--app-radius-sm);
   }
 
-  /* ── Apple Tag 标签 ── */
+  // Tags
   & .app-tag {
     font-weight: 500;
     letter-spacing: -0.01em;
@@ -230,16 +218,7 @@
     border-radius: var(--app-radius-pill);
   }
 
-  /* ── Apple Segmented 视图切换器 ── */
-  & .app-segmented {
-    border-radius: var(--app-radius-sm);
-  }
-
-  & .app-segmented .app-segmented__item.app-segmented__item-selected {
-    font-weight: 600;
-  }
-
-  /* ── Apple 空状态 ── */
+  // Empty state
   & .app-empty-state-title {
     font-size: 17px;
     font-weight: 600;
@@ -250,64 +229,64 @@
     border-radius: var(--app-radius-pill);
   }
 
-  /* ── Apple TidySuggestionBar ── */
+  // Accordion
   & .app-accordion-panel {
     border: none;
     border-radius: var(--app-card-radius, 12px);
     box-shadow: 0 4px 20px color-mix(in srgb, #000000 12%, transparent);
   }
 
-  /* ── Apple 选中态通知栏 ── */
+  // Alert
   & .app-alert {
     border: none;
     border-radius: var(--app-card-radius, 12px);
   }
 
-  /* ── Apple WidgetCard 覆盖 ── */
+  // WidgetCard
   & .app-widget-card {
     border: none;
     border-radius: var(--app-card-radius, 12px);
-    box-shadow: 0 5px 30px color-mix(in srgb, #000000 22%, transparent);
+    box-shadow: @apple-card-shadow;
     backdrop-filter: none;
+
+    &:hover {
+      transform: none;
+    }
   }
 
-  & .app-widget-card:hover {
-    transform: none;
-  }
-
-  /* ── Apple 滚动条 ── */
+  // Scrollbar
   & ::-webkit-scrollbar-thumb {
     background: color-mix(in srgb, #000000 15%, transparent);
     border-radius: var(--app-radius-circle);
   }
 
-  /* ── Apple 选中态文字 ── */
+  // Selection
   & ::selection {
     color: inherit;
-    background-color: color-mix(in srgb, var(--app-apple-blue, #0071e3) 18%, transparent);
+    background-color: color-mix(in srgb, @apple-blue 18%, transparent);
   }
 }
 
 [data-theme="dark"][data-skin="apple"] {
-  /* ── Apple 暗色模式覆盖 */
-  --app-apple-blue: #2997ff;
-  --app-apple-blue-dark: #2997ff;
+  --app-apple-blue: @apple-blue-dark;
+  --app-apple-blue-dark: @apple-blue-dark;
   --app-card-hover-bg: color-mix(in srgb, #ffffff 5%, transparent);
   --app-list-item-hover-bg: color-mix(in srgb, #ffffff 5%, transparent);
 
   & a,
   & .app-typography a {
-    color: var(--app-apple-link-dark, #2997ff);
+    color: var(--app-apple-link-dark, @apple-blue-dark);
   }
 
+  & .app-card,
   & .app-card-interactive {
     background: var(--app-mica-surface, #1c1c1e);
     box-shadow: 0 5px 30px color-mix(in srgb, #000000 44%, transparent);
-  }
 
-  & .app-card-interactive:hover,
-  & .app-card-interactive:focus-within {
-    box-shadow: 0 8px 36px color-mix(in srgb, #000000 52%, transparent);
+    &:hover,
+    &:focus-within {
+      box-shadow: 0 8px 36px color-mix(in srgb, #000000 52%, transparent);
+    }
   }
 
   & .app-row-hover:hover,
@@ -321,7 +300,7 @@
 
   & .activity-strip__icon,
   & .activity-strip__action-btn {
-    color: var(--app-apple-blue-dark, #2997ff);
+    color: @apple-blue-dark;
   }
 
   & .app-accordion-panel,
@@ -335,50 +314,19 @@
   }
 
   & ::selection {
-    background-color: color-mix(in srgb, var(--app-apple-blue, #0071e3) 32%, transparent);
+    background-color: color-mix(in srgb, @apple-blue 32%, transparent);
   }
 }
 
-/* ═══════════════════════════════════════════════════════════
- * Fluent Acrylic * Microsoft Fluent Design System —— Acrylic Material
- * 核心视觉：
- *   · 多层半透明叠加（tint → blur → noise → highlight）
- *   · 显性噪点纹理（Fluent 标志性特征）
- *   · 柔和的 inset 顶部高光线（模拟光线折射）
- *   · Fluent Blue (#0078D4) 强调
- *   · 圆角回归 Fluent 标准（8px）
- * ═══════════════════════════════════════════════════════════ */
+// ─── Glassmorphism / Fluent Acrylic Skin ──────────────────
 
-[data-skin="glassmorphism"] {
-  /* ── Fluent 皮肤 CSS 变量 */
-  --app-fluent-blue: #0078d4;
-  --app-fluent-blue-hover: #2b88d8;
-  --app-fluent-blue-subtle: rgb(0 120 212 / 12%);
+@fluent-blue: #0078d4;
+@fluent-blue-hover: #2b88d8;
+@fluent-blue-dark: #60cdff;
+@fluent-blue-subtle: rgb(0 120 212 / 12%);
 
-  /* ── Fluent 背景色覆盖：Mica 负责窗口底板，Acrylic 只给浮层 */
-  --app-card-bg: var(--app-mica-surface, var(--ant-color-bg-container));
-  --app-card-hover-bg: color-mix(
-    in srgb,
-    var(--app-fluent-blue, #0078d4) 6%,
-    var(--app-mica-surface, var(--ant-color-bg-container))
-  );
-  --app-list-item-hover-bg: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 7%, transparent);
-
-  /* ── Fluent Header：Mica 顶栏，稳定不透底 */
-  & .app-header-shell {
-    background:
-      linear-gradient(180deg, var(--app-acrylic-highlight), transparent 120%),
-      color-mix(
-        in srgb,
-        var(--app-mica-surface, var(--ant-color-bg-container)) 96%,
-        var(--app-fluent-blue, #0078d4) 4%
-      );
-    border-bottom: 1px solid var(--app-acrylic-border, var(--ant-color-border-secondary));
-    box-shadow: 0 1px 0 color-mix(in srgb, var(--app-acrylic-highlight) 58%, transparent);
-    backdrop-filter: blur(18px) saturate(150%);
-  }
-
-  /* ── Fluent 卡片：Mica surface + 顶部微高光，内容保持清晰 */
+.skin-fluent-cards() {
+  & .app-card,
   & .app-card-interactive {
     background:
       linear-gradient(
@@ -400,82 +348,14 @@
   & .app-card-interactive:focus-within {
     border-color: color-mix(
       in srgb,
-      var(--app-fluent-blue, #0078d4) 28%,
+      @fluent-blue 28%,
       var(--app-acrylic-border, var(--ant-color-border-secondary))
     );
     box-shadow: var(--app-shadow-card-hover);
   }
+}
 
-  /* ── Fluent 行级 hover ── */
-  & .app-row-hover:hover,
-  & .app-row-hover:focus-within {
-    background-color: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 7%, transparent);
-  }
-
-  /* ── Fluent ActivityStrip ── */
-  & .activity-strip__item {
-    border-color: color-mix(in srgb, #ffffff 6%, transparent);
-    border-radius: var(--app-radius-sm);
-  }
-
-  & .activity-strip__icon {
-    color: var(--app-fluent-blue, #0078d4);
-  }
-
-  & .activity-strip__action-btn {
-    color: var(--app-fluent-blue, #0078d4);
-  }
-
-  /* ── Fluent 链接色 ── */
-  & a,
-  & .app-typography a {
-    color: var(--app-fluent-blue, #0078d4);
-  }
-
-  /* ── Fluent 按钮 ── */
-  & .app-button.ant-btn-primary {
-    background: var(--app-fluent-blue, #0078d4);
-    border-color: var(--app-fluent-blue, #0078d4);
-    border-radius: var(--app-radius-sm);
-  }
-
-  & .app-button.ant-btn-primary:hover {
-    background: var(--app-fluent-blue-hover, #2b88d8);
-    border-color: var(--app-fluent-blue-hover, #2b88d8);
-  }
-
-  /* ── Fluent 聚焦态 ── */
-  & :focus-visible {
-    outline: 2px solid var(--app-fluent-blue, #0078d4);
-    outline-offset: 1px;
-  }
-
-  /* ── Fluent WidgetCard ── */
-  & .app-widget-card {
-    border-color: color-mix(in srgb, #ffffff 6%, transparent);
-  }
-
-  /* ── Fluent 滚动条 ── */
-  & ::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, #000000 20%, transparent);
-    border-radius: var(--app-radius-xs);
-  }
-
-  /* ── Fluent 选中态 ── */
-  & ::selection {
-    color: inherit;
-    background-color: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 20%, transparent);
-  }
-
-  /* ── Fluent 噪点纹理：Acrylic 标志性特征 ──
-   * 增强噪点可见度（基础 skin 配置已设 noiseOpacity: 0.05，
-   * 这里通过 CSS 进一步增强 Acrylic 的液态质感）
-   */
-  & body::before {
-    mix-blend-mode: overlay;
-  }
-
-  /* ── Fluent Acrylic 浮层：抽屉/弹窗使用实底 tint + 高光 + 磨砂 */
+.skin-fluent-floating() {
   & .app-drawer__section,
   & .search-box-container,
   & .app-modal__container {
@@ -487,7 +367,7 @@
       ),
       linear-gradient(
         180deg,
-        color-mix(in srgb, var(--app-fluent-blue, #0078d4) 5%, transparent),
+        color-mix(in srgb, @fluent-blue 5%, transparent),
         transparent 56%
       ),
       var(--app-acrylic-bg, var(--ant-color-bg-elevated));
@@ -495,7 +375,9 @@
     box-shadow: var(--app-shadow-floating);
     backdrop-filter: blur(var(--app-glass-blur, 32px)) saturate(var(--app-glass-saturate, 180%));
   }
+}
 
+.skin-fluent-drawer-section() {
   & .app-drawer__section {
     border-top: 0;
     border-right: 0;
@@ -504,7 +386,9 @@
       -1px 0 0 color-mix(in srgb, var(--app-acrylic-highlight) 52%, transparent) inset,
       var(--app-shadow-floating);
   }
+}
 
+.skin-fluent-header-footer() {
   & .app-drawer__header,
   & .app-modal__header {
     background: linear-gradient(
@@ -517,11 +401,6 @@
       var(--app-acrylic-border, var(--ant-color-border-secondary)) 82%,
       transparent
     );
-  }
-
-  & .app-drawer__body,
-  & .app-modal__body {
-    background: transparent;
   }
 
   & .app-drawer__footer,
@@ -537,7 +416,9 @@
       transparent
     );
   }
+}
 
+.skin-fluent-mask() {
   & .app-drawer__mask,
   & .search-box-mask,
   & .app-modal__mask {
@@ -546,13 +427,117 @@
   }
 }
 
-[data-theme="dark"][data-skin="glassmorphism"] {
-  /* ── Fluent 暗色模式 CSS 变量 */
-  --app-fluent-blue-dark: #60cdff;
+[data-skin="glassmorphism"] {
+  --app-fluent-blue: @fluent-blue;
+  --app-fluent-blue-hover: @fluent-blue-hover;
+  --app-fluent-blue-subtle: @fluent-blue-subtle;
 
-  /* ── Fluent 暗色背景色覆盖 ── */
-  --app-card-hover-bg: color-mix(in srgb, var(--app-color-primary, #0078d4) 8%, transparent);
-  --app-list-item-hover-bg: color-mix(in srgb, var(--app-color-primary, #0078d4) 8%, transparent);
+  // Background overrides
+  --app-card-bg: var(--app-mica-surface, var(--ant-color-bg-container));
+  --app-card-hover-bg: color-mix(
+    in srgb,
+    @fluent-blue 6%,
+    var(--app-mica-surface, var(--ant-color-bg-container))
+  );
+  --app-list-item-hover-bg: color-mix(in srgb, @fluent-blue 7%, transparent);
+
+  // Header: Mica top bar
+  & .app-header-shell {
+    background:
+      linear-gradient(180deg, var(--app-acrylic-highlight), transparent 120%),
+      color-mix(
+        in srgb,
+        var(--app-mica-surface, var(--ant-color-bg-container)) 96%,
+        @fluent-blue 4%
+      );
+    border-bottom: 1px solid var(--app-acrylic-border, var(--ant-color-border-secondary));
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--app-acrylic-highlight) 58%, transparent);
+    backdrop-filter: blur(18px) saturate(150%);
+  }
+
+  .skin-fluent-cards();
+
+  // Row hover
+  & .app-row-hover:hover,
+  & .app-row-hover:focus-within {
+    background-color: color-mix(in srgb, @fluent-blue 7%, transparent);
+  }
+
+  // ActivityStrip
+  & .activity-strip__item {
+    border-color: color-mix(in srgb, #ffffff 6%, transparent);
+    border-radius: var(--app-radius-sm);
+  }
+
+  & .activity-strip__icon,
+  & .activity-strip__action-btn {
+    color: @fluent-blue;
+  }
+
+  // Links
+  & a,
+  & .app-typography a {
+    color: @fluent-blue;
+  }
+
+  // Primary button
+  & .app-button.ant-btn-primary {
+    background: @fluent-blue;
+    border-color: @fluent-blue;
+    border-radius: var(--app-radius-sm);
+
+    &:hover {
+      background: @fluent-blue-hover;
+      border-color: @fluent-blue-hover;
+    }
+  }
+
+  // Focus ring
+  & :focus-visible {
+    outline: 2px solid @fluent-blue;
+    outline-offset: 1px;
+  }
+
+  // WidgetCard
+  & .app-widget-card {
+    border-color: color-mix(in srgb, #ffffff 6%, transparent);
+  }
+
+  // Scrollbar
+  & ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, #000000 20%, transparent);
+    border-radius: var(--app-radius-xs);
+  }
+
+  // Selection
+  & ::selection {
+    color: inherit;
+    background-color: color-mix(in srgb, @fluent-blue 20%, transparent);
+  }
+
+  // Acrylic noise texture
+  & body::before {
+    mix-blend-mode: overlay;
+  }
+
+  .skin-fluent-floating();
+  .skin-fluent-drawer-section();
+  .skin-fluent-header-footer();
+
+  & .app-drawer__body,
+  & .app-modal__body {
+    background: transparent;
+  }
+
+  .skin-fluent-mask();
+}
+
+[data-theme="dark"][data-skin="glassmorphism"] {
+  --app-fluent-blue-dark: @fluent-blue-dark;
+
+  // Dark-mode background overrides
+  --app-card-hover-bg: color-mix(in srgb, var(--app-color-primary, @fluent-blue) 8%, transparent);
+  --app-list-item-hover-bg: color-mix(in srgb, var(--app-color-primary, @fluent-blue) 8%, transparent);
 
   & .app-card-interactive:hover,
   & .app-card-interactive:focus-within {
@@ -561,20 +546,17 @@
 
   & .app-row-hover:hover,
   & .app-row-hover:focus-within {
-    background-color: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 8%, transparent);
+    background-color: color-mix(in srgb, @fluent-blue 8%, transparent);
   }
 
-  & .activity-strip__icon {
-    color: var(--app-fluent-blue-dark, #60cdff);
-  }
-
+  & .activity-strip__icon,
   & .activity-strip__action-btn {
-    color: var(--app-fluent-blue-dark, #60cdff);
+    color: @fluent-blue-dark;
   }
 
   & a,
   & .app-typography a {
-    color: var(--app-fluent-blue-dark, #60cdff);
+    color: @fluent-blue-dark;
   }
 
   & .app-widget-card {
@@ -586,7 +568,7 @@
   }
 
   & ::selection {
-    background-color: color-mix(in srgb, var(--app-fluent-blue, #0078d4) 36%, transparent);
+    background-color: color-mix(in srgb, @fluent-blue 36%, transparent);
   }
 
   & .app-drawer__section,

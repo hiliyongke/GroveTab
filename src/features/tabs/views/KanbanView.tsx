@@ -1,5 +1,3 @@
-/* eslint-disable react-hooks/refs */
-
 import { useEffect, useMemo, useState } from "react";
 import { Button, Card, Input, Popconfirm, theme, Typography, Flex, Empty } from "antd";
 import { Plus, Trash2, Save, PenLine, X, GripVertical } from "lucide-react";
@@ -29,6 +27,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import type { KanbanCard, KanbanColumn } from "@/shared/types";
 import { useKanbanStore, useTabsStore } from "@/store";
+import { useTabActions } from "@/shared/hooks/use-tab-actions";
 import { archiveSelectedTabs } from "@/services";
 import { useT } from "@/shared/i18n";
 import { useReducedMotionPreference } from "@/shared/hooks/use-reduced-motion";
@@ -302,7 +301,7 @@ function TabSourceItem({ card, reduced }: { card: KanbanCard; reduced: boolean }
 
   return (
     <Flex
-      ref={setNodeRef}
+      ref={setNodeRef /* eslint-disable-line react-hooks/refs — @dnd-kit ref passthrough */}
       align="center"
       gap="small"
       {...attributes}
@@ -377,7 +376,7 @@ function KanbanColumnView({
 
   return (
     <Flex
-      ref={sortable.setNodeRef}
+      ref={sortable.setNodeRef /* eslint-disable-line react-hooks/refs — @dnd-kit ref passthrough */}
       vertical
       className={styles["app-kanban-column-wrap"]}
       style={columnWrapStyle}
@@ -416,7 +415,7 @@ function KanbanColumnView({
           </Flex>
         }
       >
-        <Flex ref={body.setNodeRef} vertical className={styles["app-kanban-column__dropzone"]}>
+        <Flex ref={body.setNodeRef /* eslint-disable-line react-hooks/refs — @dnd-kit ref passthrough */} vertical className={styles["app-kanban-column__dropzone"]}>
           <SortableContext
             items={col.cards.map((c) => `card::${col.id}::${c.url}`)}
             strategy={verticalListSortingStrategy}
@@ -458,18 +457,18 @@ interface SortableCardProps {
 }
 
 function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: SortableCardProps) {
+  const { jumpToTab } = useTabActions();
   const id = `card::${columnId}::${card.url}`;
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
     data: { kind: "card", columnId, url: card.url } satisfies DragData,
   });
-  const jumpToTab = useTabsStore((s) => s.jumpToTab);
 
   const handleActivate = () => {
     if (offline) {
       // 离线状态：在新标签页中打开 URL
       try {
-        void window.open(card.url, "_blank");
+        void window.open(card.url, "_blank", "noopener,noreferrer");
       } catch {
         /* ignore */
       }
@@ -489,7 +488,7 @@ function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: S
 
   return (
     <Flex
-      ref={setNodeRef}
+      ref={setNodeRef /* eslint-disable-line react-hooks/refs — @dnd-kit ref passthrough */}
       align="center"
       gap="small"
       {...attributes}

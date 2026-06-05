@@ -9,38 +9,14 @@
  * align-items:center 正确生效。
  */
 
-/* — Button icon — */
-.ant-btn-icon {
-  svg {
-    display: block;
-  }
-}
-
-/* — Input prefix / suffix — */
+/* — 所有 antd 图标插槽内 SVG 统一 display:block — */
+.ant-btn-icon,
 .ant-input-prefix,
-.ant-input-suffix {
-  svg {
-    display: block;
-  }
-}
-
-/* — Tag icon — */
+.ant-input-suffix,
 .ant-tag .anticon,
-.ant-tag-icon {
-  svg {
-    display: block;
-  }
-}
-
-/* — Dropdown / Menu item icon — */
+.ant-tag-icon,
 .ant-dropdown-menu-item .anticon,
-.ant-menu-item .anticon {
-  svg {
-    display: block;
-  }
-}
-
-/* — 通用 .anticon 包裹器（Segmented、Breadcrumb 等） — */
+.ant-menu-item .anticon,
 .anticon {
   svg {
     display: block;

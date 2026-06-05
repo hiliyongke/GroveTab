@@ -216,7 +216,7 @@ export const WindowBatchActionBar = memo(function WindowBatchActionBar() {
           allowClear
           style={{ marginBottom: 12 }}
         />
-        <Space direction="vertical" style={{ width: "100%" }}>
+        <Space vertical style={{ width: "100%" }}>
           {filteredWindows.map((w) => (
             <Button
               key={w.id}

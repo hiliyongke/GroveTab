@@ -38,9 +38,9 @@ interface AppWorkspaceProps {
   onDismissOnboarding: () => void;
   /** 重试初始化回调 */
   onRetryInit: () => void;
-  /** 打开归档面板回调 */
+  /** 跳转到归档视图 */
   onOpenArchive: () => void;
-  /** 打开设置面板回调 */
+  /** 打开设置 */
   onOpenSettings: () => void;
 }
 

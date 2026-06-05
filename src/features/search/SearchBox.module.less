@@ -1,47 +1,53 @@
-/* ─── 搜索弹窗 Modal 容器 ─── */
+/**
+ * SearchBox 搜索弹窗样式
+ *
+ * 所有 BEM 子元素使用 &__ 嵌套，状态用 &.is-active / &.is-open。
+ * 共享布局属性使用 Less 变量和 mixin 消除重复。
+ */
+
+// ── 共享 mixins ──
+.searchbox-flex-center() {
+  display: flex;
+  align-items: center;
+}
+
+.searchbox-flex-between() {
+  .searchbox-flex-center();
+  justify-content: space-between;
+}
+
+/* ─── Modal 容器 ─── */
 .search-box-dialog {
   top: 12vh;
   padding-bottom: 0;
 }
 
-.search-box-modal .ant-modal-content,
-.search-box-modal .ant-modal-body {
-  padding: 0;
+.search-box-modal {
+  .searchbox-ant-overrides();
 }
 
-.search-box-modal .ant-modal-content {
-  overflow: hidden;
-  background: transparent;
+.searchbox-ant-overrides() {
+  :global {
+    .ant-modal-content {
+      padding: 0;
+      overflow: hidden;
+      background: transparent;
+    }
+    .ant-modal-body {
+      padding: 0;
+    }
+  }
 }
 
-/* ─── 搜索弹窗外壳 ─── */
+/* ─── 外壳 ─── */
 .search-box-shell {
   overflow: hidden;
   color: var(--searchbox-text);
 }
 
-.search-box-header,
-.search-box-section-header,
-.search-box-item,
-.search-box-item-head,
-.search-box-footer,
-.search-box-shortcuts,
-.search-box-shortcut,
-.search-box-shortcut-keys,
-.search-box-kbd,
-.search-box-item-icon {
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
-}
-
-.search-box-header,
-.search-box-footer,
-.search-box-shortcuts {
-  justify-content: space-between;
-}
-
-/* ─── 搜索输入头部 ─── */
+/* ─── 头部搜索区域 ─── */
 .search-box-header {
+  .searchbox-flex-center();
   flex-direction: row;
   gap: 8px;
   justify-content: flex-start;
@@ -53,18 +59,18 @@
   flex: 1;
   min-width: 0;
   font-size: 15px;
+
+  &-prefix {
+    color: var(--searchbox-search-icon);
+  }
 }
 
-.search-box-input-prefix {
-  color: var(--searchbox-search-icon);
+/* ─── 历史记录入口 ─── */
+.search-box-history-trigger {
+  .searchbox-flex-center();
 }
 
-/* ─── 引擎切换触发器（输入框左侧） ───
- * 设计决策：
- *   · logo 用浅色中性底 + 内边距，避免彩色圆形背景压过输入框
- *   · object-fit: contain，完整呈现品牌 logo（Google G 不再被切靠边）
- *   · 触发器与下拉项 logo 共用同一套规格，保证视觉一致
- */
+/* ─── 引擎切换触发器 ─── */
 .search-box-engine-trigger {
   all: unset;
   box-sizing: border-box;
@@ -81,35 +87,35 @@
   transition:
     background var(--searchbox-transition),
     color var(--searchbox-transition);
+
+  &:hover,
+  &.is-open {
+    color: var(--searchbox-text);
+    background: var(--searchbox-fill-tertiary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--searchbox-engine-color, var(--searchbox-accent)) 60%, transparent);
+    outline-offset: 1px;
+  }
+
+  &:active {
+    background: var(--searchbox-fill-secondary);
+  }
+
+  &-caret {
+    flex-shrink: 0;
+    color: var(--searchbox-text-tertiary);
+    opacity: 0.7;
+    transition: transform var(--searchbox-transition);
+  }
+
+  &.is-open .search-box-engine-trigger-caret {
+    transform: rotate(180deg);
+  }
 }
 
-.search-box-engine-trigger:hover,
-.search-box-engine-trigger.is-open {
-  color: var(--searchbox-text);
-  background: var(--searchbox-fill-tertiary);
-}
-
-.search-box-engine-trigger:focus-visible {
-  outline: 2px solid
-    color-mix(in srgb, var(--searchbox-engine-color, var(--searchbox-accent)) 60%, transparent);
-  outline-offset: 1px;
-}
-
-.search-box-engine-trigger:active {
-  background: var(--searchbox-fill-secondary);
-}
-
-.search-box-engine-trigger-caret {
-  flex-shrink: 0;
-  color: var(--searchbox-text-tertiary);
-  opacity: 0.7;
-  transition: transform var(--searchbox-transition);
-}
-
-.search-box-engine-trigger.is-open .search-box-engine-trigger-caret {
-  transform: rotate(180deg);
-}
-
+/* ─── 引擎 Logo ─── */
 .search-box-engine-logo {
   display: flex;
   flex-shrink: 0;
@@ -125,103 +131,94 @@
   color: var(--searchbox-text);
   background: var(--searchbox-fill-tertiary);
   border-radius: var(--app-radius-sm, 6px);
-
-  /* 选中及 hover 状态下靠品牌色提供轻量提示 */
   box-shadow: inset 0 0 0 1px
     color-mix(in srgb, var(--searchbox-engine-color, var(--searchbox-accent)) 18%, transparent);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: transparent;
+  }
 }
 
-.search-box-engine-logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  background: transparent;
-}
-
-/* ─── 引擎切换 Popover 菜单 ─── */
-.search-box-engine-popover .ant-popover-inner {
-  padding: 6px;
-  border-radius: var(--app-radius-md, 10px);
+/* ─── 引擎 Popover ─── */
+.search-box-engine-popover {
+  :global(.ant-popover-inner) {
+    padding: 6px;
+    border-radius: var(--app-radius-md, 10px);
+  }
 }
 
 .search-box-engine-menu {
-  display: flex; /* antd 组件内部微调整 */
+  display: flex;
   flex-direction: column;
   gap: 4px;
   min-width: 200px;
   padding: 0;
   margin: 0;
   list-style: none;
+
+  &-item {
+    .searchbox-flex-center();
+    gap: 10px;
+    padding: 6px 10px 6px 6px;
+    font-size: 13px;
+    color: var(--searchbox-text);
+    cursor: pointer;
+    border-radius: var(--app-radius-sm, 6px);
+    transition: background var(--searchbox-transition);
+
+    // 选中态下 logo 增强描边
+    &.is-active .search-box-engine-logo {
+      box-shadow: inset 0 0 0 1px
+        color-mix(in srgb, var(--searchbox-engine-color, var(--searchbox-accent)) 45%, transparent);
+    }
+
+    &:hover { background: var(--searchbox-fill-tertiary); }
+
+    &:focus-visible {
+      outline: 2px solid
+        color-mix(in srgb, var(--searchbox-engine-color, var(--searchbox-accent)) 60%, transparent);
+      outline-offset: 1px;
+    }
+
+    &:active { background: var(--searchbox-fill-secondary); }
+
+    &.is-active {
+      font-weight: 600;
+      color: var(--searchbox-text);
+      background: color-mix(in srgb, var(--searchbox-engine-color, var(--searchbox-accent)) 12%, transparent);
+    }
+  }
+
+  &-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &-shortcut {
+    flex-shrink: 0;
+    padding: 1px 5px;
+    font-family: var(--ant-font-family-code, ui-monospace, monospace);
+    font-size: 12px;
+    line-height: 1.2;
+    color: var(--searchbox-text-tertiary);
+    background: var(--searchbox-fill-quaternary);
+    border: 1px solid var(--searchbox-border);
+    border-radius: var(--app-radius-sm, 4px);
+  }
+
+  &-check {
+    flex-shrink: 0;
+    color: var(--searchbox-engine-color, var(--searchbox-accent));
+  }
 }
 
-.search-box-engine-menu-item {
-  display: flex; /* antd 组件内部微调整 */
-  gap: 10px;
-  align-items: center;
-  padding: 6px 10px 6px 6px;
-  font-size: 13px;
-  color: var(--searchbox-text);
-  cursor: pointer;
-  border-radius: var(--app-radius-sm, 6px);
-  transition: background var(--searchbox-transition);
-}
-
-/* 下拉项中 logo 与触发器同规格，但额外提供选中态下的强化描边 */
-.search-box-engine-menu-item.is-active .search-box-engine-logo {
-  box-shadow: inset 0 0 0 1px
-    color-mix(in srgb, var(--searchbox-engine-color, var(--searchbox-accent)) 45%, transparent);
-}
-
-.search-box-engine-menu-item:hover {
-  background: var(--searchbox-fill-tertiary);
-}
-
-.search-box-engine-menu-item:focus-visible {
-  outline: 2px solid
-    color-mix(in srgb, var(--searchbox-engine-color, var(--searchbox-accent)) 60%, transparent);
-  outline-offset: 1px;
-}
-
-.search-box-engine-menu-item:active {
-  background: var(--searchbox-fill-secondary);
-}
-
-.search-box-engine-menu-item.is-active {
-  font-weight: 600;
-  color: var(--searchbox-text);
-  background: color-mix(
-    in srgb,
-    var(--searchbox-engine-color, var(--searchbox-accent)) 12%,
-    transparent
-  );
-}
-
-.search-box-engine-menu-label {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.search-box-engine-menu-shortcut {
-  flex-shrink: 0;
-  padding: 1px 5px;
-  font-family: var(--ant-font-family-code, ui-monospace, monospace);
-  font-size: 12px;
-  line-height: 1.2;
-  color: var(--searchbox-text-tertiary);
-  background: var(--searchbox-fill-quaternary);
-  border: 1px solid var(--searchbox-border);
-  border-radius: var(--app-radius-sm, 4px);
-}
-
-.search-box-engine-menu-check {
-  flex-shrink: 0;
-  color: var(--searchbox-engine-color, var(--searchbox-accent));
-}
-
-/* ─── 搜索结果列表区域 ─── */
+/* ─── 结果列表区域 ─── */
 .search-box-list-area {
   height: min(420px, 52vh);
   min-height: 260px;
@@ -229,16 +226,16 @@
   overflow-y: auto;
 }
 
+/* ─── 空态 ─── */
 .search-box-empty {
-  display: flex; /* antd 组件内部微调整 */
-  align-items: center;
+  .searchbox-flex-center();
   justify-content: center;
   min-height: 100%;
   padding: 24px;
-}
 
-.search-box-empty-icon {
-  opacity: 0.4;
+  &-icon {
+    opacity: 0.4;
+  }
 }
 
 /* ─── 搜索结果分组 ─── */
@@ -247,6 +244,7 @@
 }
 
 .search-box-section-header {
+  .searchbox-flex-center();
   justify-content: space-between;
   padding: 8px 16px 4px;
   font-size: 13px;
@@ -268,7 +266,7 @@
 }
 
 .search-box-list {
-  display: flex; /* antd 组件内部微调整 */
+  display: flex;
   flex-direction: column;
   padding: 0 0 4px;
   margin: 0;
@@ -277,7 +275,9 @@
 
 /* ─── 搜索结果条目 ─── */
 .search-box-item {
+  display: flex;
   gap: 12px;
+  align-items: center;
   padding: var(--app-space-2) var(--app-space-3);
   margin: var(--app-space-1) var(--app-space-2);
   cursor: pointer;
@@ -286,102 +286,105 @@
   transition:
     background var(--searchbox-transition),
     transform var(--searchbox-transition);
+
+  &.is-active {
+    background: var(--searchbox-fill-secondary);
+    transform: translateX(4px);
+  }
+
+  &:hover,
+  &:focus-visible { background: var(--searchbox-fill-tertiary); }
+
+  &:active {
+    background: var(--searchbox-fill-secondary);
+    transform: scale(0.98);
+  }
+
+  // ── 子元素 ──
+  &-main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &-head {
+    .searchbox-flex-center();
+    gap: 8px;
+    min-width: 0;
+  }
+
+  &-title,
+  &-subtitle {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &-title {
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--searchbox-text);
+  }
+
+  &-subtitle {
+    margin-top: 1px;
+    font-size: 12px;
+    line-height: 1.3;
+    color: var(--searchbox-text-tertiary);
+  }
+
+  &-favicon,
+  &-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: var(--app-radius-xs);
+  }
+
+  &-favicon {
+    object-fit: cover;
+  }
+
+  &-icon {
+    justify-content: center;
+    font-size: 12px;
+    color: var(--searchbox-item-icon-color);
+    background: var(--searchbox-item-icon-bg);
+  }
 }
 
-.search-box-item.is-active {
-  background: var(--searchbox-fill-secondary);
-  transform: translateX(4px);
-}
-
-.search-box-item:hover,
-.search-box-item:focus-visible {
-  background: var(--searchbox-fill-tertiary);
-}
-
-.search-box-item:active {
-  background: var(--searchbox-fill-secondary);
-  transform: scale(0.98);
-}
-
-.search-box-item-main {
-  flex: 1;
-  min-width: 0;
-}
-
-.search-box-item-head {
-  gap: 8px;
-  min-width: 0;
-}
-
-.search-box-item-title,
-.search-box-item-subtitle {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.search-box-item-title {
-  min-width: 0;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.4;
-  color: var(--searchbox-text);
-}
-
-.search-box-item-subtitle {
-  margin-top: 1px;
-  font-size: 12px;
-  line-height: 1.3;
-  color: var(--searchbox-text-tertiary);
-}
-
-.search-box-item-favicon,
-.search-box-item-icon {
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  border-radius: var(--app-radius-xs);
-}
-
-.search-box-item-favicon {
-  object-fit: cover;
-}
-
-.search-box-item-icon {
-  justify-content: center;
-  font-size: 12px;
-  color: var(--searchbox-item-icon-color);
-  background: var(--searchbox-item-icon-bg);
-}
-
+/* ─── 标签列表 ─── */
 .search-box-tag {
   margin: 0;
   font-size: 11px;
   line-height: 1;
+
+  &-list {
+    display: inline-flex;
+    flex-shrink: 0;
+    gap: 4px;
+    align-items: center;
+    max-width: min(220px, 40%);
+    overflow: hidden;
+
+    .search-box-tag {
+      max-width: 72px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
 }
 
-.search-box-tag-list {
-  display: inline-flex;
-  flex-shrink: 0;
-  gap: 4px;
-  align-items: center;
-  max-width: min(220px, 40%);
-  overflow: hidden;
-}
-
-.search-box-tag-list .search-box-tag {
-  max-width: 72px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
+/* ─── 回车图标 ─── */
 .search-box-enter-icon {
   flex-shrink: 0;
   color: var(--searchbox-text-tertiary);
 }
 
-/* ─── 底部快捷键栏 ─── */
+/* ─── 底部操作栏 ─── */
 .search-box-footer {
+  .searchbox-flex-between();
   gap: 16px;
   min-height: 38px;
   padding: 0 16px;
@@ -393,35 +396,6 @@
 
 .search-box-status-text {
   flex-shrink: 0;
-}
-
-.search-box-shortcuts {
-  flex: 1;
-  flex-wrap: wrap;
-  gap: 14px;
-  justify-content: flex-end;
-}
-
-.search-box-shortcut {
-  gap: 5px;
-}
-
-.search-box-shortcut-keys {
-  gap: 3px;
-}
-
-.search-box-kbd {
-  justify-content: center;
-  min-width: 19px;
-  height: 19px;
-  padding: 0 var(--app-space-1);
-  font-family: var(--ant-font-family-code, ui-monospace, monospace);
-  font-size: 10px;
-  line-height: 1;
-  color: var(--searchbox-text-secondary);
-  background: var(--searchbox-fill-tertiary);
-  border: 1px solid var(--searchbox-border);
-  border-radius: var(--app-radius-sm);
 }
 
 /* ─── 响应式适配 ─── */
@@ -454,8 +428,27 @@
     align-items: flex-start;
     padding: 8px 16px 10px;
   }
+}
 
-  .search-box-shortcuts {
-    justify-content: flex-start;
+/* 480px 紧凑手机 */
+@media (width <= 480px) {
+  .search-box-dialog {
+    max-width: calc(100vw - 16px);
+    margin-inline: 8px;
+    top: 4vh;
+  }
+
+  .search-box-header {
+    padding: 10px 12px;
+  }
+
+  .search-box-engine-trigger {
+    height: 28px;
+    padding: 0 4px;
+  }
+
+  .search-box-list-area {
+    height: min(280px, 48vh);
+    min-height: 180px;
   }
 }

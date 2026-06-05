@@ -1,20 +1,21 @@
-.automation-rule-card--disabled {
-  opacity: 0.55;
+.automation-rule-card {
+  &--disabled {
+    opacity: 0.55;
+    border-color: var(--ant-color-border-secondary);
+  }
+
+  &--enabled {
+    border-color: var(--ant-color-primary);
+    opacity: 1;
+  }
 }
 
-.automation-rule-card--enabled {
-  border-color: var(--ant-color-primary);
-  opacity: 1;
-}
+.automation-icon {
+  &-primary {
+    color: var(--ant-color-primary);
+  }
 
-.automation-rule-card--disabled:not(.automation-rule-card--enabled) {
-  border-color: var(--ant-color-border-secondary);
-}
-
-.automation-icon-primary {
-  color: var(--ant-color-primary);
-}
-
-.automation-icon-tertiary {
-  color: var(--ant-color-text-tertiary);
+  &-tertiary {
+    color: var(--ant-color-text-tertiary);
+  }
 }

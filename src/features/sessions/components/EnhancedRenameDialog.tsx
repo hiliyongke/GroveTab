@@ -141,7 +141,7 @@ export function EnhancedRenameDialog({
       width={520}
       centered
     >
-      <Space direction="vertical" size="middle" className="app-archive-dialog__stack">
+      <Space vertical size="middle" className="app-archive-dialog__stack">
         {/* 当前名称 */}
         <div className="app-archive-dialog__section">
           <div className="app-archive-dialog__label">{t("当前名称")}</div>
@@ -208,7 +208,7 @@ export function EnhancedRenameDialog({
         {/* 验证提示 */}
         {!isNameValid && (
           <Alert
-            message={t("名称格式不正确")}
+            title={t("名称格式不正确")}
             type="warning"
             showIcon
             icon={<AlertCircle size={ICON_SIZE.SMALL} />}

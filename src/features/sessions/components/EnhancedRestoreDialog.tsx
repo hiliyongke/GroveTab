@@ -176,7 +176,7 @@ export function EnhancedRestoreDialog({
       width={500}
       centered
     >
-      <Space direction="vertical" size="middle" className="app-archive-dialog__stack">
+      <Space vertical size="middle" className="app-archive-dialog__stack">
         {/* 会话信息 */}
         <div className="app-archive-dialog__session-summary">
           <div className="app-archive-dialog__current-name">{sessionName}</div>
@@ -193,7 +193,7 @@ export function EnhancedRestoreDialog({
               value={restoreStrategy}
               onChange={(e) => setRestoreStrategy(e.target.value as RestoreStrategy)}
             >
-              <Space direction="vertical">
+              <Space vertical>
                 <Radio value="new_window">{t("新窗口")}</Radio>
                 <Radio value="current_window">{t("当前窗口")}</Radio>
               </Space>
@@ -221,7 +221,7 @@ export function EnhancedRestoreDialog({
 
         {/* 状态信息 */}
         <Alert
-          message={getStatusMessage()}
+          title={getStatusMessage()}
           type={getStatusType()}
           showIcon
           icon={

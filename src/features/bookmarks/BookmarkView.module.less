@@ -1,20 +1,45 @@
+/**
+ * BookmarkView 样式模块
+ *
+ * BEM 子元素使用 &__ 嵌套，状态用 &-- 修饰符。
+ */
+
 .bookmark-view {
   padding: 12px 16px;
+}
+
+.bookmark-loading {
+  padding: 48px;
 }
 
 .bookmark-search {
   margin-bottom: 4px;
 }
 
+// ── 书签项 ──
 .bookmark-item {
+  padding: 6px 10px !important; // antd List.Item 默认 padding 覆盖
   border-radius: var(--ant-border-radius-sm);
-  padding: 6px 10px !important;
+  cursor: pointer;
+  transition: background var(--app-motion-fast, 0.15s) ease, transform var(--app-motion-fast, 0.15s) ease;
 
   &:hover {
-    background: var(--ant-color-fill-tertiary);
+    background: var(--ant-color-fill-quaternary);
+    transform: translateX(2px);
+  }
+
+  &__content {
+    min-width: 0;
+  }
+
+  &__title {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
   }
 }
 
+// ── 图标 ──
 .bookmark-icon {
   flex-shrink: 0;
   color: var(--ant-color-text-tertiary);

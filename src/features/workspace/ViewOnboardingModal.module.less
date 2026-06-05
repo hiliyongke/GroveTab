@@ -1,39 +1,44 @@
-/* P1-1: ViewOnboardingModal 内联 style 迁移 */
+/* ViewOnboardingModal */
 
-.onboardingTitle {
-  margin: 0;
-  text-align: center;
-}
+@onboard-radius: 10px;
+@onboard-card-gap: 6px;
 
-.onboardingSubtitle {
-  text-align: center;
-}
+.onboarding {
+  &Title {
+    margin: 0;
+    text-align: center;
+  }
 
-.onboardingGrid {
-  width: 100%;
-  margin-top: 8px;
-}
+  &Subtitle {
+    text-align: center;
+  }
 
-.onboardingCard {
-  flex: 1 1 calc(50% - 6px);
-  width: calc(50% - 6px);
-  min-width: 260px;
-}
+  &Grid {
+    width: 100%;
+    margin-top: 8px;
+  }
 
-.onboardingIconWrap {
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  color: var(--ant-color-primary);
-  background: var(--ant-color-primary-bg);
-  border-radius: 10px;
-}
+  &Card {
+    flex: 1 1 calc(50% - @onboard-card-gap);
+    width: calc(50% - @onboard-card-gap);
+    min-width: 260px;
+  }
 
-.onboardingCardTitle {
-  font-size: 14px;
-}
+  &IconWrap {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    color: var(--ant-color-primary);
+    background: var(--ant-color-primary-bg);
+    border-radius: @onboard-radius;
+  }
 
-.onboardingCardDesc {
-  font-size: 12px;
-  line-height: 1.5;
+  &CardTitle {
+    font-size: 14px;
+  }
+
+  &CardDesc {
+    font-size: 12px;
+    line-height: 1.5;
+  }
 }

@@ -1,0 +1,66 @@
+/**
+ * StatusBar — 底部全宽持久消息层样式
+ *
+ * 策略：所有视觉属性从 TSX 内联 style 迁移至 CSS Module，
+ *       符合 CODEBUDDY.md「禁止内联 style」规范。
+ *       动态颜色通过 CSS 自定义属性桥接（每条消息独立 color 系）。
+ *       BEM 子元素使用 &__ 嵌套，消除重复类名。
+ */
+
+.status-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  gap: 8px;
+  background: var(--status-bar-bg, var(--ant-color-fill-quaternary));
+  border-top: 1px solid var(--status-bar-border, var(--ant-color-border-secondary));
+  transition: all var(--app-motion-base, 0.2s) ease;
+
+  // ── 子元素 ──
+  &__icon {
+    flex-shrink: 0;
+    color: var(--status-bar-color, var(--ant-color-text));
+  }
+
+  &__text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    color: var(--status-bar-color, var(--ant-color-text));
+  }
+
+  &__action {
+    padding: 0 !important; // antd Button 需覆盖默认内边距
+    height: auto !important;
+    font-size: 12px;
+    color: var(--status-bar-color, var(--ant-color-primary));
+  }
+
+  &__dismiss {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 2px;
+    color: var(--status-bar-color, var(--ant-color-text-tertiary));
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: var(--ant-border-radius-sm);
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: var(--ant-color-fill-secondary);
+    }
+  }
+}

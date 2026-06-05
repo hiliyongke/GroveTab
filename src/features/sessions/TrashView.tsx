@@ -5,29 +5,17 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { Button, Card, Empty, Popconfirm, Space, Tag, Tooltip, Flex, Typography, Spin } from "antd";
+import { Button, Card, Popconfirm, Space, Tag, Tooltip, Flex, Typography, Spin } from "antd";
 import { Trash2, RotateCcw, Clock, X } from "lucide-react";
+import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
 import { feedback } from "@/shared/ui/feedback";
 import { getTrashItems, removeFromTrash, clearTrash } from "@/repositories/trash-repo";
 import { createTab } from "@/chrome";
 import type { TrashedTab, TrashedItem } from "@/shared/types";
+import { formatRelativeTime } from "@/shared/utils/relative-time";
 import styles from "./styles/trash.module.less";
-
-function formatRelativeTime(
-  ts: number,
-  tfn: (key: string, params?: Record<string, string | number>) => string,
-): string {
-  const diff = Date.now() - ts;
-  const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return tfn("trash.justNow");
-  if (minutes < 60) return tfn("trash.minutesAgo", { n: minutes });
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return tfn("trash.hoursAgo", { n: hours });
-  const days = Math.floor(hours / 24);
-  return tfn("trash.daysAgo", { n: days });
-}
 
 function TabFavicon({ tab }: { tab: TrashedTab }) {
   if (tab.favIconUrl) {
@@ -111,10 +99,11 @@ export function TrashView() {
           <Spin />
         </Flex>
       ) : items.length === 0 ? (
-        <Empty
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description={t("trash.empty")}
-          className={styles["trash-empty"]}
+        <FeatureEmptyState
+          title={t("trash.empty")}
+          description={t("trash.emptyDescription")}
+          icon={<Trash2 size={ICON_SIZE.HERO} />}
+          hints={[t("trash.emptyHint1"), t("trash.emptyHint2"), t("trash.emptyHint3")]}
         />
       ) : (
         <Flex vertical gap={12}>

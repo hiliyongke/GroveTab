@@ -327,9 +327,6 @@ const en: Record<string, string> = {
   "uiVisibility.viewSwitcherHint": "Domain/Timeline/Compact etc. tab strip",
   "uiVisibility.tidySuggestion": "Tidy suggestions",
   "uiVisibility.tidySuggestionHint": "Duplicate/idle tab smart tidy bar",
-  "pageMode.workspace": "Workspace",
-  "pageMode.trending": "Trending",
-  "pageMode.devtools": "DevTools",
   // ── Trending page ──
   "trending.title": "Trending",
   "trending.subtitle": "Real-time hot boards from 17 platforms — catch all the buzz in one page",
@@ -596,9 +593,6 @@ const en: Record<string, string> = {
   "settings.system": "System",
   "settings.data": "Data",
   "settings.language": "Language",
-  "settings.defaultPageMode": "Default space",
-  "settings.defaultPageModeHint":
-    "Workspace for tab cleanup; Trending for hot topics; DevTools for developer utilities.",
   "settings.defaultView": "Default view",
   "settings.viewTabPosition": "View tab position",
   "settings.viewTabPositionHint":
@@ -944,6 +938,7 @@ const en: Record<string, string> = {
   "bookmark.needPermission": "Permission needed to access browser bookmarks",
   "bookmark.grantPermission": "Grant bookmark access",
   "bookmark.permissionDenied": "Bookmark permission denied",
+  "bookmark.permissionDescription": "Grant access to browser bookmarks to use dedup, dead-link detection, and smart organizing tools",
   "bookmark.searchPlaceholder": "Search bookmarks...",
   // ── Bookmark toolbox (v1.1) ──
   "bookmark.tools.entry": "Toolbox",
@@ -1017,6 +1012,7 @@ const en: Record<string, string> = {
   "bookmark.searchHint2": "Supports keywords in multiple languages",
   "bookmark.hint1": "Bookmark all current tabs at once",
   "bookmark.hint2": "Use toolbox to deduplicate or check dead links",
+  "bookmark.hint3": "Browse in list, tree, or mind-map views",
   "bookmark.bookmarkAll": "Bookmark all tabs",
   "bookmark.bookmarkedAll": "Bookmarked {count} tabs",
   "bookmark.openFailed": "Failed to open bookmark, please retry",
@@ -1464,5 +1460,31 @@ const en: Record<string, string> = {
   "closeConfirm.archiveSuccess": "Archived {count} tabs",
   "closeConfirm.archivePartial": "{count} tabs could not be closed, you can handle them manually later",
   "closeConfirm.archiveFailed": "Archive failed, please retry",
+
+  "devtools.noResults": "No matching tools found",
+  "devtools.noResultsHint1": "Search tool names and descriptions in English or Chinese",
+  "devtools.noResultsHint2": "Click the heart icon to add frequently used tools to favorites",
+
+  "trending.noPlatformsHint1": "Real-time trending data from 17+ platforms",
+  "trending.noPlatformsHint2": "Switch to 'All' to see every available platform",
+  "trending.noPlatformsHint3": "Click refresh to reload individual platforms",
+  "trending.switchToAll": "View all",
+
+  "trash.emptyDescription": "Closed tabs are kept in trash for 7 days, then auto-cleaned.",
+  "trash.emptyHint1": "Closed tabs automatically appear in trash",
+  "trash.emptyHint2": "Restore by group — never lose a tab by accident",
+  "trash.emptyHint3": "Items older than 7 days are auto-cleaned to stay light",
+
+  "bookmark.emptyDescription": "No bookmarks yet. Bookmark all current tabs to get started quickly.",
+  "bookmark.permissionHint1": "All bookmark data is processed locally — never uploaded",
+  "bookmark.permissionHint2": "After granting, use the toolbox to deduplicate and detect broken links",
+  "bookmark.permissionHint3": "You can revoke permission anytime in Chrome's extension settings",
+
+  "history.closedEmptyHint1": "Tabs closed with Cmd/Ctrl+W are automatically recorded",
+  "history.closedEmptyHint2": "Full-window closures are saved as a group for batch restore",
+  "history.closedEmptyHint3": "Right-click a tab and choose 'Archive' for long-term preservation",
+  "history.timelineEmptyHint1": "Search, archive, and tagging actions are automatically recorded",
+  "history.timelineEmptyHint2": "Filter by action type: tabs / search / archive",
+  "history.timelineEmptyHint3": "All data is stored locally — nothing is uploaded",
 };
 export default en;

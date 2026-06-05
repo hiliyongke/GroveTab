@@ -17,10 +17,10 @@ import {
   useEffect,
   useMemo,
   useState,
-  type CSSProperties,
   type ReactElement,
 } from "react";
 import { Button, Card, Modal, Progress, Space, Tag, theme, Typography } from "antd";
+import { cssVars } from "@/shared/utils/css-vars";
 import {
   ArrowLeft,
   ArrowRight,
@@ -77,9 +77,6 @@ const TOUR_STEPS: TourStep[] = [
   },
 ];
 
-function cssVars(vars: Record<string, string>): CSSProperties {
-  return vars;
-}
 
 export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
   const [phase, setPhase] = useState<Phase>("welcome");
@@ -278,7 +275,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
               <Button
                 size="small"
                 type="primary"
-                iconPosition="end"
+                iconPlacement="end"
                 icon={<ArrowRight size={ICON_SIZE.DEFAULT} />}
                 onClick={() => setStepIndex((idx) => Math.min(idx + 1, TOUR_STEPS.length - 1))}
               >
