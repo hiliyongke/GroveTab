@@ -1,9 +1,5 @@
 /**
- * useKeyboardShortcuts — 全局键盘快捷键管理 Hook（v1.4 收敛版）
- *
- * 提供统一的键盘快捷键支持：
- * - ⌘1..⌘9：按 VIEW_CONFIGS 顺序切换前 9 个视图
- * - Esc：取消选择/关闭弹窗
+ * useKeyboardShortcuts — 全局键盘快捷键管理 Hook。
  * - 输入框 / contenteditable 焦点中自动跳过非 ⌘ / Ctrl 前缀的按键
  *
  * 注：tabs 列表光标导航（↑↓Space/Delete）不在此处实现 ——

@@ -18,7 +18,7 @@
  *       4. 不打断 Grid 的浏览上下文
  */
 
-import { memo, useMemo, useState } from "react";
+import { memo, useMemo, useState, useCallback } from "react";
 import { Button, Card, Flex, Popover, theme, Typography, Empty } from "antd";
 import { Volume2, X } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
@@ -50,9 +50,9 @@ export function GridView({ filterQuery = "" }: GridViewProps) {
    */
   const expandTrigger = useSettingsStore((s) => s.settings.gridExpandTrigger ?? "click");
   /**
-   * 网格卡片尺寸档位（v1.4 新增）。
-   *   - 'sm'   ：紧凑（标签页多时使用，单卡 ~160px）
-   *   - 'md'   ：默认（单卡 ~200px，与 v1.3 行为一致）
+   * 网格卡片尺寸档位。
+   *   - 'sm'：紧凑，~160px
+   *   - 'md'：默认，~200px
    *   - 'lg'   ：宽松（标签页少时使用，单卡 ~240px）
    *   - 'auto' ：根据标签页数量自动适配（≤10 用 lg，11-30 用 md，>30 用 sm）
    */
@@ -103,35 +103,36 @@ export function GridView({ filterQuery = "" }: GridViewProps) {
 
   // 空状态：原始 tabs 为空时不渲染；过滤后为空时显示 Empty
   const allTabsEmpty = tabs.length === 0;
-  if (allTabsEmpty) return null;
+  if (allTabsEmpty) return <Empty description={t("empty.noOpenTabs")} />;
 
   if (groups.length === 0) {
     return <Empty description={t("search.noDomainResults")} />;
   }
 
+  const handleJump = useCallback((id: number, wid: number) => { void jumpToTab(id, wid); }, [jumpToTab]);
+  const handleClose = useCallback((id: number) => { void closeSingleTab(id); }, [closeSingleTab]);
   /** Popover 内点击「跳转」：跳完顺手关闭浮层 */
-  const handleJumpFromPopover = (tabId: number, windowId: number) => {
-    void jumpToTab(tabId, windowId);
-    setActiveDomain(null);
-  };
+  const handleJumpFromPopover = useCallback(
+    (tabId: number, windowId: number) => {
+      void jumpToTab(tabId, windowId);
+      setActiveDomain(null);
+    },
+    [jumpToTab],
+  );
 
   return (
     <div className={styles["app-grid-view"]} style={wrapperStyle}>
       {groups.map((group) => (
         <div key={group.domain} className={styles["app-grid-view__cell"]}>
-          <GridCard
+          <GridCardMemo
             domain={group.domain}
             colorKey={group.colorKey}
             tabs={group.tabs}
-            onJump={(id, wid) => {
-              void jumpToTab(id, wid);
-            }}
+            onJump={handleJump}
             open={activeDomain === group.domain}
             onOpenChange={(next) => setActiveDomain(next ? group.domain : null)}
             onJumpFromPopover={handleJumpFromPopover}
-            onCloseTab={(id) => {
-              void closeSingleTab(id);
-            }}
+            onCloseTab={handleClose}
             countLabel={t("{count} 个标签页", { count: group.tabs.length })}
             expandTrigger={expandTrigger}
           />
@@ -199,9 +200,20 @@ function GridCard({
     if (first) onJump(first.id, first.windowId);
   };
 
+  const handleCardKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleCardClick();
+    }
+  };
+
   const cardNode = (
     <Card
       onClick={handleCardClick}
+      onKeyDown={handleCardKeyDown}
+      tabIndex={0}
+      role="button"
+      aria-label={isMulti ? `${tabs.length} tabs grouped` : first?.title ?? domain}
       className={`app-card-interactive ${styles["app-grid-card"]}`}
       classNames={{ body: styles["app-grid-card__body"] }}
       data-border-radius={token.borderRadiusLG}

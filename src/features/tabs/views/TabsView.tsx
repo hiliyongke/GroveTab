@@ -16,16 +16,19 @@
  *   - 卡片密度切换（S/M/L）
  */
 
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Flex } from "antd";
 import { useSettingsStore } from "@/store";
+import { useShallow } from "zustand/shallow";
 import { DomainGroupView } from "./DomainGroupView";
 import { CompactView } from "./CompactView";
 import { GridView } from "./GridView";
 import { TabsToolbar } from "../toolbar/TabsToolbar";
 
-export function TabsView() {
-  const layout = useSettingsStore((s) => s.settings.tabsLayout ?? "masonry");
+export const TabsView = memo(function TabsView() {
+  const layout = useSettingsStore(
+    useShallow((s) => s.settings.tabsLayout ?? "masonry"),
+  );
   const [filterQuery, setFilterQuery] = useState("");
 
   return (
@@ -40,4 +43,4 @@ export function TabsView() {
       )}
     </Flex>
   );
-}
+});

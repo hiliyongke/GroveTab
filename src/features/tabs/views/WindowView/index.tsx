@@ -10,7 +10,7 @@
  *   - 拖拽排序窗口卡片 / 跨窗口拖拽标签
  */
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { Empty, Flex, Row, Col } from "antd";
 import {
   DndContext,
@@ -93,6 +93,8 @@ export function WindowView() {
   const windows = useTabsStore((s) => s.windows);
   const currentWindowId = useTabsStore((s) => s.currentWindowId);
   const { jumpToTab, closeSingleTab } = useTabActions();
+  const handleJump = useCallback((id: number, wid: number) => { void jumpToTab(id, wid); }, [jumpToTab]);
+  const handleClose = useCallback((id: number) => { void closeSingleTab(id); }, [closeSingleTab]);
   const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   // 订阅原始字段（保持引用稳定，避免 selector 每次返回新数组导致 React 无限重渲染 / error #185）
@@ -306,12 +308,8 @@ export function WindowView() {
                       windowInfo={windows.get(windowId)}
                       currentWindowId={currentWindowId}
                       visibleTabIds={visibleTabIds}
-                      onJump={(tabId, targetWindowId) => {
-                        void jumpToTab(tabId, targetWindowId);
-                      }}
-                      onCloseTab={(tabId) => {
-                        void closeSingleTab(tabId);
-                      }}
+                      onJump={handleJump}
+                      onCloseTab={handleClose}
                       onRefresh={() => {
                         void loadAllTabs({ silent: true });
                       }}

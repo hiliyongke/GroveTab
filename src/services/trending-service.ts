@@ -25,6 +25,9 @@ const API_BASE_DAILYHOT = "https://dailyhot-api.vercel.app";
 /** 请求超时（毫秒） */
 const FETCH_TIMEOUT_MS = 8000;
 
+/** 缓存新鲜度阈值（毫秒），30 分钟内视为有效 */
+const CACHE_FRESHNESS_MS = 30 * 60 * 1000;
+
 /** 单个平台最多返回的条目数 */
 const MAX_ITEMS_PER_BOARD = 20;
 
@@ -366,6 +369,12 @@ async function getCache(): Promise<TrendingCache | undefined> {
   return storageGet<TrendingCache>(CACHE_KEY);
 }
 
+/** 检查缓存是否仍然新鲜。 */
+function isCacheFresh(cache: TrendingCache | undefined): boolean {
+  if (!cache?.lastRefreshAt) return false;
+  return Date.now() - cache.lastRefreshAt < CACHE_FRESHNESS_MS;
+}
+
 /** 写入缓存（同时持久化到 OPFS） */
 async function setCache(cache: TrendingCache): Promise<void> {
   await storageSet(CACHE_KEY, cache);
@@ -459,18 +468,26 @@ export async function fetchMultipleBoards(
         data = await fetchFromDailyhot(id);
       }
 
-      // 第三优先：chrome.storage.local 缓存
+      // 第三优先：chrome.storage.local 缓存（仅新鲜时使用）
       if (data === null) {
         const cache = await getCache();
-        const cached = cache?.boards[id];
-        if (cached) {
-          data = { ...cached, from: "cache" };
+        if (isCacheFresh(cache)) {
+          const cached = cache?.boards[id];
+          if (cached) {
+            data = { ...cached, from: "cache" };
+          }
         }
       }
 
-      // 最终降级：OPFS 本地缓存
+      // 最终降级：OPFS 本地缓存（过期缓存也接受，避免空白）
       if (data === null) {
-        data = await fetchFromOPFS(id);
+        const cache = await getCache();
+        const expiredCached = cache?.boards[id];
+        if (expiredCached) {
+          data = { ...expiredCached, from: "cache" };
+        } else {
+          data = await fetchFromOPFS(id);
+        }
       }
 
       if (data !== null) {

@@ -7,12 +7,9 @@
  *   ③ 累计归档 tab 数 + 估算节省内存
  *   ④ 使用频率前 5 的操作
  *
- * 仅使用纯 SVG，不引入 echarts / chart.js，控制包体增量 ≤ 15 KB。
+ * 仅使用纯 SVG，控制包体增量 ≤ 15 KB。
  *
- * 内存估算模型（P1-7）：
- *   - 基础单标签页内存：80 MB（与 Chrome 官方内存报告一致）
- *   - 视频/媒体类标签（油管等）：+220 MB 加权
- *   - 图片富媒体类标签（Unsplash 等）：+70 MB 加权
+ * 内存估算模型：基础单标签页 80 MB，视频类 +220 MB，图片富媒体类 +70 MB。
  *   - JS 密集型应用类标签（Google Docs 等）：+120 MB 加权
  *   - 常规文本/文章类标签：−30 MB 修正（更轻量）
  *   - 通过 URL 路径特征（/watch/, /video/, /image/, /doc/）进行分类估算
@@ -33,6 +30,7 @@ import {
   Alert,
   Segmented,
 } from "antd";
+import { ErrorBoundary } from "@/shared/ui/ErrorBoundary";
 import type { MetricEvent, StatsData } from "@/shared/types";
 import { BarChart3, Download, CheckCircle2, AlertTriangle, Info } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
@@ -75,7 +73,7 @@ function getEventLabel(
   return label === i18nKey ? norm : label;
 }
 
-/** 时间范围选项（P2-13：洞察数据时间范围可配置） */
+/** 洞察数据时间范围。 */
 export type InsightsTimeRange = 7 | 14 | 30;
 
 /** 校验 StatsData 结构完整性，防止 daily 缺失导致迭代报错 */
@@ -116,7 +114,6 @@ export default function InsightsView({
   const [loading, setLoading] = useState(false);
   const { info: quotaInfo, loading: quotaLoading } = useStorageQuota(true);
 
-  /** 时间范围（P2-13：支持 7/14/30 天可配置） */
   const [timeRange, setTimeRange] = useState<InsightsTimeRange>(7);
 
   useEffect(() => {
@@ -138,10 +135,7 @@ export default function InsightsView({
     };
   }, [open]);
 
-  /**
-   * 近 N 天新标签页打开次数（P2-13：时间范围可配置）。
-   * 只在面板打开时计算 "now"，避免面板一直打开跨天后"今天"错位。
-   */
+  /** 近 N 天新标签页打开次数，面板打开时快照计算。 */
   const dailyOpens = useMemo(() => {
     const now = new Date();
     const map = new Map<string, number>();
@@ -209,10 +203,8 @@ export default function InsightsView({
   }, [metrics]);
 
   /**
-   * 内存估算模型（P1-7）：基于 URL 特征的类型加权
-   *
-   * 规则：
-   *   - /watch/, /v/, /video/, /player/ → 视频/媒体标签，+220 MB 加权
+   * 内存估算模型：基于 URL 特征加权。
+   *   - /watch/, /v/, /video/, /player/ → 视频/媒体标签，+220 MB
    *   - /image/, /photo/, /img/, /pic/    → 图片富媒体标签，+70 MB 加权
    *   - /doc/, /document/, /sheets/, /slides/ → JS 密集型应用，+120 MB 加权
    *   - 其他 → 常规标签，基础值 80 MB
@@ -315,6 +307,7 @@ export default function InsightsView({
   };
 
   return (
+    <ErrorBoundary fallback={(error, reset) => <Flex vertical align="center" gap={8} style={{ padding: 40 }}><Typography.Text type="danger">洞察数据加载失败</Typography.Text><Typography.Text type="secondary" style={{ fontSize: 12 }}>{error.message}</Typography.Text><Button size="small" onClick={reset}>重试</Button></Flex>}>
     <div style={{ minHeight: 0 }}>
       <Flex vertical className={styles["insights-panel"]}>
         {loading ? (
@@ -475,6 +468,7 @@ export default function InsightsView({
         </Flex>
       </Flex>
     </div>
+    </ErrorBoundary>
   );
 }
 

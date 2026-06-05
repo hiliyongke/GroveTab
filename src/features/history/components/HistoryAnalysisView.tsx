@@ -1,13 +1,5 @@
 /**
- * HistoryAnalysisView —— 历史分析视图组件（P2-11）
- *
- * 从 HistoryView.tsx 提取的独立组件，提供多维历史数据可视化：
- *   - 每日活动趋势柱状图
- *   - 小时热力分布
- *   - 站点访问排行
- *
- * 接收 HistoryAnalysis 数据，渲染轻量 SVG 条形图和热力网格。
- * 所有样式通过 styles prop 注入，避免 CSS Module 直接引用。
+ * HistoryAnalysisView — 历史分析视图，渲染轻量 SVG 条形图和热力网格。
  */
 
 import { Button, Empty, Flex, Select, Spin, Tooltip, Typography } from "antd";

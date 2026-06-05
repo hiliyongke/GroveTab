@@ -1,16 +1,8 @@
 /**
- * History Repository —— 插件原生历史记录的存储仓库
+ * History Repository —— 插件原生历史记录存储。
  *
- * 提供三类数据的 CRUD：
- *   1. HistoryEvent[]：细粒度操作时间线
- *   2. ClosedTabRecord[]：最近关闭的标签（高频 / 一键恢复）
- *   3. ClosedWindowRecord[]：整窗关闭快照
- *
- * 注意事项：
- *   - 所有写入路径都做 LRU 截断和 TTL 过滤，避免 chrome.storage.local 配额爆炸
- *   - 隐身（incognito）事件默认丢弃
- *   - URL 黑名单（chrome:// / about: / extension:// 等）默认丢弃
- *   - SW 与 UI 都依赖本仓库；不要依赖 React/DOM
+ * 管理 HistoryEvent、ClosedTabRecord、ClosedWindowRecord 的 CRUD，
+ * 写入时自动 LRU 截断 + TTL 过滤。
  */
 
 import { storageGet, storageSet } from "@/chrome";
@@ -29,12 +21,8 @@ export { snapshotDateKey } from "@/shared/utils/date";
 
 // ── 容量与过滤策略 ─────────────────────────
 
-/** HistoryEvent 默认最大保留条数（足够支撑「今天 / 昨天 / 本周」浏览） */
 const MAX_HISTORY_EVENTS = 500;
-/** HistoryEvent TTL：30 天 */
 const HISTORY_EVENT_TTL_MS = 30 * 24 * 3600 * 1000;
-
-/** 整窗关闭快照最大数量 */
 const MAX_CLOSED_WINDOWS = 30;
 
 // ── 隐私设置读取（与 settings-slice 解耦，在 SW 中也可用） ────────────
@@ -51,7 +39,7 @@ interface HistoryLimits {
   blocklist: string[];
 }
 
-/** 安全清洗设置：充填默认 + 范围 clamp。 */
+/** 从 UserSettings 解析限制参数，填充默认值并 clamp 范围。 */
 function resolveHistoryLimits(settings?: Partial<UserSettings>): HistoryLimits {
   const s = settings ?? {};
   const clamp = (v: number | undefined, fallback: number, min: number, max: number): number => {
@@ -71,10 +59,7 @@ function resolveHistoryLimits(settings?: Partial<UserSettings>): HistoryLimits {
   };
 }
 
-/**
- * SW 上下文使用：从 chrome.storage 读取 settings，并返回 HistoryLimits。
- * 未设置时全部走默认值（充分反脆、不依赖仓库封装）。
- */
+/** 从 chrome.storage 读取 settings 并返回 HistoryLimits。 */
 async function loadLimits(): Promise<HistoryLimits> {
   const settings = await storageGet<UserSettings>(STORAGE_KEYS.settings);
   return resolveHistoryLimits(settings);
@@ -86,11 +71,7 @@ function isHostnameBlocked(hostname: string, blocklist: string[]): boolean {
   const h = hostname.toLowerCase();
   return blocklist.some((b) => h === b || h.endsWith(`.${b}`));
 }
-/**
- * 应当忽略的 URL 前缀。
- * - chrome:// / chrome-extension:// / about: / edge:// 等内置 URL 没必要进历史
- * - 空 url 也忽略（pendingUrl 没解析出来时会出现）
- */
+/** 应忽略的 URL 前缀（浏览器内置页面）。 */
 const IGNORED_URL_PREFIXES = [
   "chrome://",
   "chrome-extension://",
@@ -110,7 +91,6 @@ export function isUrlIgnored(url: string | undefined): boolean {
 import { extractHostname } from "@/shared/utils/url";
 
 function genId(): string {
-  // crypto.randomUUID 在 SW 与现代浏览器均可用；fallback 兜底
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
   }
@@ -129,16 +109,7 @@ export async function getHistoryEvents(): Promise<HistoryEvent[]> {
   return raw.filter((e) => e.ts >= cutoff).sort((a, b) => b.ts - a.ts);
 }
 
-/**
- * 追加一条历史事件（自动注入 id/ts，自动 LRU/TTL）。
- *
- * 调用方传入“事件描述”，本函数负责：
- *   1. 自动补 id/ts（除非已传）
- *   2. 把"忽略 URL"或"隐身"事件直接丢弃
- *   3. 尊重用户设置：全局开关 / 事件录入开关 / 黑名单 / 容量
- *   4. LRU 截断到 settings.historyMaxEvents
- *   5. 落盘 + 返回最新列表
- */
+/** 追加历史事件，自动注入 id/ts、LRU 截断、尊重用户隐私设置。 */
 export async function appendHistoryEvent(
   partial: Omit<HistoryEvent, "id" | "ts"> & Partial<Pick<HistoryEvent, "id" | "ts">>,
 ): Promise<HistoryEvent[]> {
@@ -190,10 +161,7 @@ export async function deleteHistoryEvent(id: string): Promise<HistoryEvent[]> {
   return next;
 }
 
-/**
- * 将一条事件标记为「已撤销」。
- * 仅将 undoable 置为 false，并记录 undone:true 于 extra，保留 trail；不从列表中移除。
- */
+/** 标记事件为已撤销。 */
 export async function markHistoryEventUndone(id: string): Promise<HistoryEvent[]> {
   const existing = (await storageGet<HistoryEvent[]>(STORAGE_KEYS.historyEvents)) ?? [];
   const next = existing.map<HistoryEvent>((e) => {
@@ -208,8 +176,6 @@ export async function markHistoryEventUndone(id: string): Promise<HistoryEvent[]
   return next;
 }
 
-/** 按类型批量删除（如"清空所有搜索类事件"） */
-/** 清空全部历史事件 */
 async function clearHistoryEvents(): Promise<void> {
   await storageSet(STORAGE_KEYS.historyEvents, []);
 }
@@ -230,11 +196,7 @@ export async function getClosedTabs(): Promise<ClosedTabRecord[]> {
   return raw.filter((e) => e.ts >= cutoff).sort((a, b) => b.ts - a.ts);
 }
 
-/**
- * 追加一条"最近关闭"记录。
- *
- * @returns 最新列表（已 LRU/TTL 截断）
- */
+/** 追加最近关闭记录，自动 LRU/TTL 截断。 */
 export async function pushClosedTab(
   partial: Omit<ClosedTabRecord, "id" | "ts" | "hostname"> &
     Partial<Pick<ClosedTabRecord, "id" | "ts" | "hostname">>,

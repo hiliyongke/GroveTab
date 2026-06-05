@@ -111,7 +111,12 @@ export function EnhancedRestoreDialog({
         return t("已取消恢复，成功恢复 {restored} 个标签", { restored: outcome.restored });
       }
       if (outcome.restored === total) {
-        return t("恢复完成", { count: outcome.restored });
+        const base = t("恢复完成", { count: outcome.restored });
+        // 显示 TabGroup 恢复失败信息
+        if (outcome.failedGroups !== undefined && outcome.failedGroups > 0) {
+          return `${base}（${t("分组恢复失败 {n} 个", { n: outcome.failedGroups })}）`;
+        }
+        return base;
       }
       return t("部分恢复成功，已恢复 {restored}/{total} 个标签", {
         restored: outcome.restored,

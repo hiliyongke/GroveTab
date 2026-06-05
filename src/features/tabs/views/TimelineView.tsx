@@ -18,7 +18,7 @@
  *   `fine` 归一化为 `hour` 保持向后兼容。
  */
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { Timeline, Button, theme, Flex, Typography, Space } from "antd";
 import { ChevronDown } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
@@ -281,6 +281,8 @@ function SegmentContent({
   showExactTime: boolean;
 }) {
   const { jumpToTab, closeSingleTab } = useTabActions();
+  const handleJump = useCallback((id: number, wid: number) => { void jumpToTab(id, wid); }, [jumpToTab]);
+  const handleClose = useCallback((id: number) => { void closeSingleTab(id); }, [closeSingleTab]);
   const [collapsed, setCollapsed] = useState(false);
   /** 段内同名 tab id 集合 */
   const ambiguousIds = useMemo(() => findAmbiguousTitleIds(segment.tabs), [segment.tabs]);
@@ -311,12 +313,8 @@ function SegmentContent({
             <TabItem
               key={tab.id}
               tab={tab}
-              onJump={(id, wid) => {
-                void jumpToTab(id, wid);
-              }}
-              onClose={(id) => {
-                void closeSingleTab(id);
-              }}
+              onJump={handleJump}
+              onClose={handleClose}
               showHostname
               showUrlHint={ambiguousIds.has(tab.id)}
               selectable

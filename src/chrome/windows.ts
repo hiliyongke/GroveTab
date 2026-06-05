@@ -1,9 +1,8 @@
 /**
- * Chrome Windows API 封装层
- *
- * 将 chrome.windows 的直接调用收敛到此模块，
- * 以满足 tab/no-direct-chrome-api 规则。
+ * Chrome Windows API 封装。非扩展上下文降级返回安全默认值。
  */
+
+import { safeCall } from "./safe-call";
 
 /** chrome.windows.WINDOW_ID_NONE 常量 */
 export const WINDOW_ID_NONE: number =
@@ -18,31 +17,34 @@ export const WINDOW_ID_CURRENT: number =
     : -1;
 
 /** 获取当前窗口 ID */
-export function getCurrentWindowId(): Promise<number> {
-  return new Promise((resolve) => {
-    if (typeof chrome === "undefined" || !chrome.windows) {
-      resolve(WINDOW_ID_CURRENT);
-      return;
-    }
-    chrome.windows.getCurrent((win) => {
-      resolve(win.id ?? WINDOW_ID_CURRENT);
-    });
-  });
+export async function getCurrentWindowId(): Promise<number> {
+  if (typeof chrome === "undefined" || !chrome.windows) {
+    return WINDOW_ID_CURRENT;
+  }
+  try {
+    const win = await safeCall("windows.getCurrent", () =>
+      chrome.windows.getCurrent(),
+    );
+    return win.id ?? WINDOW_ID_CURRENT;
+  } catch {
+    return WINDOW_ID_CURRENT;
+  }
 }
 
 type QueryOptions = Omit<chrome.windows.QueryOptions, never>;
 
 /** 获取所有窗口 */
-export function getAllWindows(getInfo?: QueryOptions | boolean): Promise<chrome.windows.Window[]> {
-  return new Promise((resolve) => {
-    if (typeof chrome === "undefined" || !chrome.windows) {
-      resolve([]);
-      return;
-    }
-    const options: QueryOptions | undefined =
-      typeof getInfo === "boolean" ? { populate: getInfo } : getInfo;
-    void chrome.windows.getAll(options, (windows) => {
-      resolve(windows);
-    });
-  });
+export async function getAllWindows(
+  getInfo?: QueryOptions | boolean,
+): Promise<chrome.windows.Window[]> {
+  if (typeof chrome === "undefined" || !chrome.windows) {
+    return [];
+  }
+  const options: QueryOptions | undefined =
+    typeof getInfo === "boolean" ? { populate: getInfo } : getInfo;
+  try {
+    return await safeCall("windows.getAll", () => chrome.windows.getAll(options));
+  } catch {
+    return [];
+  }
 }

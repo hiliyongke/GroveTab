@@ -1,14 +1,10 @@
 /**
- * Chrome Bookmarks API 封装
- *
- * 需要 `bookmarks` optional permission。
- * 在用户首次使用书签功能时通过 `chrome.permissions.request()` 动态申请。
- * 所有 API 经 safeCall 包装，失败时返回空数组/undefined。
+ * Chrome Bookmarks API 封装。需 `bookmarks` optional permission。
  */
 
-import { safeCall } from './tabs'; // 复用 safeCall 逻辑
+import { safeCall } from './safe-call';
 
-/** 书签树节点（简化版，只保留必要字段） */
+/** 书签树节点。 */
 export interface BookmarkNode {
   id: string;
   title: string;
@@ -17,11 +13,7 @@ export interface BookmarkNode {
   children?: BookmarkNode[];
 }
 
-/**
- * 获取书签树
- *
- * 返回完整的书签树结构。若未获取权限则返回空数组。
- */
+/** 获取完整书签树。无权限时返回空数组。 */
 export async function getBookmarkTree(): Promise<BookmarkNode[]> {
   try {
     const tree = await safeCall('bookmarks.getTree', () => chrome.bookmarks.getTree());
@@ -31,9 +23,7 @@ export async function getBookmarkTree(): Promise<BookmarkNode[]> {
   }
 }
 
-/**
- * 搜索书签
- */
+/** 搜索书签。 */
 export async function searchBookmarks(query: string): Promise<BookmarkNode[]> {
   if (!query.trim()) return [];
   try {
@@ -46,9 +36,7 @@ export async function searchBookmarks(query: string): Promise<BookmarkNode[]> {
   }
 }
 
-/**
- * 创建书签
- */
+/** 创建书签。 */
 export async function createBookmark(bookmark: { parentId?: string; title?: string; url?: string }): Promise<BookmarkNode | null> {
   try {
     const result = await safeCall('bookmarks.create', () =>
@@ -60,10 +48,7 @@ export async function createBookmark(bookmark: { parentId?: string; title?: stri
   }
 }
 
-/**
- * 删除书签或空文件夹。
- * 用于去重合并、失效书签清理。
- */
+/** 删除书签或空文件夹。 */
 export async function removeBookmark(id: string): Promise<boolean> {
   try {
     await safeCall('bookmarks.remove', () => chrome.bookmarks.remove(id));
@@ -73,10 +58,7 @@ export async function removeBookmark(id: string): Promise<boolean> {
   }
 }
 
-/**
- * 将书签移动到指定父节点。
- * 用于智能整理：把同域名书签批量归到新的文件夹。
- */
+/** 移动书签到指定父节点。 */
 export async function moveBookmark(id: string, parentId: string): Promise<boolean> {
   try {
     await safeCall('bookmarks.move', () => chrome.bookmarks.move(id, { parentId }));
@@ -86,9 +68,7 @@ export async function moveBookmark(id: string, parentId: string): Promise<boolea
   }
 }
 
-/**
- * 请求书签权限（optional permission 动态申请）
- */
+/** 请求书签权限。 */
 export async function requestBookmarksPermission(): Promise<boolean> {
   try {
     return await chrome.permissions.request({ permissions: ['bookmarks'] });
@@ -97,9 +77,7 @@ export async function requestBookmarksPermission(): Promise<boolean> {
   }
 }
 
-/**
- * 检查是否已有书签权限
- */
+/** 检查是否已有书签权限。 */
 export async function hasBookmarksPermission(): Promise<boolean> {
   try {
     return await chrome.permissions.contains({ permissions: ['bookmarks'] });
@@ -108,9 +86,7 @@ export async function hasBookmarksPermission(): Promise<boolean> {
   }
 }
 
-/**
- * 展平书签树为 URL 列表
- */
+/** 展平书签树为 URL 列表。 */
 export function flattenBookmarks(nodes: BookmarkNode[]): BookmarkNode[] {
   const result: BookmarkNode[] = [];
   for (const node of nodes) {

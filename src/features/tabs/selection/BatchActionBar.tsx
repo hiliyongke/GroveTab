@@ -331,7 +331,7 @@ export function BatchActionBar() {
     });
   }, [existingGroups, selectedTabs, resetAfterBatch, loadAllTabs, t]);
 
-  // 非多选模式或无选中时不渲染
+  // 进入/退出多选模式时通过 aria-live 公告
   if (!selectionMode || count === 0) return null;
 
   const batchBarStyle: React.CSSProperties = cssVars({

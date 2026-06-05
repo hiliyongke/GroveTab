@@ -43,11 +43,7 @@ export function useSwBroadcast() {
       handleBroadcast({ type, payload, timestamp: Date.now() });
     };
 
-    const refreshSilently = () => {
-      void loadAllTabs({ silent: true });
-    };
-
-    /** Debounced refresh for high-frequency events (onUpdated fires per-character URL change) */
+    /** Debounced refresh — 所有 chrome 事件统一 defer，避免 focus/window-switch 全量刷新风暴 */
     const refreshDebounced = (() => {
       let timer: ReturnType<typeof setTimeout> | null = null;
       return () => {
@@ -59,58 +55,49 @@ export function useSwBroadcast() {
       };
     })();
 
+    // 所有非关键刷新统一走 debounce，避免 focus 切换等引发全量重载风暴
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        refreshSilently();
-      }
+      if (document.visibilityState === "visible") refreshDebounced();
     };
 
-    const tabRemovedHandler: Parameters<typeof chrome.tabs.onRemoved.addListener>[0] = (
-      tabId,
-      removeInfo,
-    ) => {
-      emit("tab-removed", {
-        id: tabId,
-        windowId: removeInfo.windowId,
-        isWindowClosing: removeInfo.isWindowClosing,
-      });
-      refreshSilently();
+    // tab-removed: emit 即时更新本地 UI，数据刷新走 debounce
+    const tabRemovedHandler: Parameters<typeof chrome.tabs.onRemoved.addListener>[0] = (tabId, removeInfo) => {
+      emit("tab-removed", { id: tabId, windowId: removeInfo.windowId, isWindowClosing: removeInfo.isWindowClosing });
+      refreshDebounced();
     };
 
-    const tabActivatedHandler: Parameters<typeof chrome.tabs.onActivated.addListener>[0] = (
-      activeInfo,
-    ) => {
+    const tabActivatedHandler: Parameters<typeof chrome.tabs.onActivated.addListener>[0] = (activeInfo) => {
       emit("tab-activated", { id: activeInfo.tabId, windowId: activeInfo.windowId });
-      refreshSilently();
+      refreshDebounced();
     };
 
     const windowFocusChangedHandler = (windowId: number) => {
       emit("window-focus-changed", { windowId });
-      refreshSilently();
+      refreshDebounced();
     };
 
     channel.addEventListener("message", handler);
     chrome.runtime?.onMessage?.addListener?.(runtimeHandler);
-    chrome.tabs?.onCreated?.addListener?.(refreshSilently);
-    chrome.tabs?.onUpdated?.addListener?.(refreshDebounced); // 高频：每字符 URL 变化触发
+    chrome.tabs?.onCreated?.addListener?.(refreshDebounced);
+    chrome.tabs?.onUpdated?.addListener?.(refreshDebounced);
     chrome.tabs?.onRemoved?.addListener?.(tabRemovedHandler);
     chrome.tabs?.onActivated?.addListener?.(tabActivatedHandler);
     chrome.tabs?.onMoved?.addListener?.(refreshDebounced);
     chrome.tabs?.onAttached?.addListener?.(refreshDebounced);
     chrome.tabs?.onDetached?.addListener?.(refreshDebounced);
     chrome.tabs?.onReplaced?.addListener?.(refreshDebounced);
-    chrome.windows?.onCreated?.addListener?.(refreshSilently);
-    chrome.windows?.onRemoved?.addListener?.(refreshSilently);
+    chrome.windows?.onCreated?.addListener?.(refreshDebounced);
+    chrome.windows?.onRemoved?.addListener?.(refreshDebounced);
     chrome.windows?.onFocusChanged?.addListener?.(windowFocusChangedHandler);
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("focus", refreshSilently);
-    window.addEventListener("pageshow", refreshSilently);
+    window.addEventListener("focus", refreshDebounced);
+    window.addEventListener("pageshow", refreshDebounced);
 
     return () => {
       channel.removeEventListener("message", handler);
       channel.close();
       chrome.runtime?.onMessage?.removeListener?.(runtimeHandler);
-      chrome.tabs?.onCreated?.removeListener?.(refreshSilently);
+      chrome.tabs?.onCreated?.removeListener?.(refreshDebounced);
       chrome.tabs?.onUpdated?.removeListener?.(refreshDebounced);
       chrome.tabs?.onRemoved?.removeListener?.(tabRemovedHandler);
       chrome.tabs?.onActivated?.removeListener?.(tabActivatedHandler);
@@ -118,12 +105,12 @@ export function useSwBroadcast() {
       chrome.tabs?.onAttached?.removeListener?.(refreshDebounced);
       chrome.tabs?.onDetached?.removeListener?.(refreshDebounced);
       chrome.tabs?.onReplaced?.removeListener?.(refreshDebounced);
-      chrome.windows?.onCreated?.removeListener?.(refreshSilently);
-      chrome.windows?.onRemoved?.removeListener?.(refreshSilently);
+      chrome.windows?.onCreated?.removeListener?.(refreshDebounced);
+      chrome.windows?.onRemoved?.removeListener?.(refreshDebounced);
       chrome.windows?.onFocusChanged?.removeListener?.(windowFocusChangedHandler);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("focus", refreshSilently);
-      window.removeEventListener("pageshow", refreshSilently);
+      window.removeEventListener("focus", refreshDebounced);
+      window.removeEventListener("pageshow", refreshDebounced);
     };
   }, [handleBroadcast, loadAllTabs]);
 }

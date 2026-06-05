@@ -1,3 +1,23 @@
 .app-content-fill {
   min-height: 0;
 }
+
+/* 键盘用户跳过导航链接 */
+.app-skip-link {
+  &:not(:focus) {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
+  &:focus {
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}

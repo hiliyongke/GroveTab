@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useSettingsStore, useTabsStore, useUndoStore, useMetadataStore } from "@/store";
 import { initArchiveStorage } from "@/services/archive";
-import { hasCompletedOnboarding } from "@/repositories/storage-repo";
+import { hasCompletedOnboarding, initMetaIfNeeded } from "@/repositories/storage-repo";
 import { useT } from "@/shared/i18n";
 import { BRAND } from "@/shared/config/brand";
 import { recordMetric, recordFcpOnce, recordFpsSampleOnce } from "@/shared/utils/metrics";
@@ -47,19 +47,17 @@ export function useAppInitialization(initRunId: number) {
   const loadUndoRecords = useUndoStore((s) => s.loadRecords);
   const loadMetadata = useMetadataStore((s) => s.loadMetadata);
 
-  // 使用 ref 保存函数引用，避免 useEffect 依赖不稳定的 store 函数 / i18n 函数导致无限循环
+  // Render-phase ref 赋值 (React 允许 render 中更新 ref)，避免额外 useEffect 开销
   const loadSettingsRef = useRef(loadSettings);
   const loadAllTabsRef = useRef(loadAllTabs);
   const loadUndoRecordsRef = useRef(loadUndoRecords);
   const loadMetadataRef = useRef(loadMetadata);
   const tRef = useRef(t);
-  useEffect(() => {
-    loadSettingsRef.current = loadSettings;
-    loadAllTabsRef.current = loadAllTabs;
-    loadUndoRecordsRef.current = loadUndoRecords;
-    loadMetadataRef.current = loadMetadata;
-    tRef.current = t;
-  });
+  loadSettingsRef.current = loadSettings;
+  loadAllTabsRef.current = loadAllTabs;
+  loadUndoRecordsRef.current = loadUndoRecords;
+  loadMetadataRef.current = loadMetadata;
+  tRef.current = t;
 
   /** 全局快捷键通过 URL hash 传信号：#search → 自动聚焦搜索框 */
   useEffect(() => {
@@ -85,7 +83,8 @@ export function useAppInitialization(initRunId: number) {
 
     void (async () => {
       try {
-        await loadSettingsRef.current();
+        // P0: initMetaIfNeeded 与 loadSettings 并行（无数据依赖）
+        await Promise.all([initMetaIfNeeded(), loadSettingsRef.current()]);
 
         const [archiveInitResult, tabsResult, undoResult, metadataResult, onboardingResult] =
           await Promise.allSettled([
@@ -141,7 +140,6 @@ export function useAppInitialization(initRunId: number) {
           setChecked(true);
         }
         void recordMetric("newtabOpens");
-        // v1.0 封板：首屏性能采样
         recordFcpOnce();
         recordFpsSampleOnce();
       }

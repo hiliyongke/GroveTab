@@ -177,15 +177,7 @@ export interface UserSettings {
   searchAutoFallbackToWeb?: boolean;
   searchUseHistorySuggestions?: boolean;
   searchUseHotSuggestions?: boolean;
-  /**
-   * 热词来源（v1.1 新增，精细化控制）：
-   *   - 'off'       ：关闭热词（不显示）
-   *   - 'local'     ：基于本地搜索历史聚合（默认，零网络）
-   *   - 'preset'    ：使用静态预设列表（老行为，作兜底）
-   *   - 'trending'  ：预留：未来接入公开热榜时使用；目前等同 off
-   *
-   * 当 searchUseHotSuggestions === false 时视为 off；否则默认 'local'。
-   */
+  /** 热词来源：'off' | 'local' | 'preset' | 'trending' */
   hotSuggestionSource?: "off" | "local" | "preset" | "trending";
   /**
    * 自定义快捷键映射（页面内快捷键）
@@ -266,14 +258,7 @@ export interface UserSettings {
   /** 常用站点是否显示「添加站点」按钮，默认 true */
   showAddSiteButton?: boolean;
 
-  /**
-   * 常用站点卡片尺寸档位（v1.3）。
-   *   - 'sm'     ：紧凑（站点多时使用，单卡 ~120px）
-   *   - 'md'     ：默认（单卡 ~160px，与 v1.3 行为一致）
-   *   - 'lg'     ：宽松（站点少时使用，单卡 ~200px）
-   *   - 'auto'   ：根据站点数量自动适配（≤6 用 lg，7-14 用 md，>14 用 sm）
-   *   - 'custom' ：使用 quickStartCardExactWidth 手动设置宽度
-   */
+  /** 常用站点卡片尺寸：'sm' | 'md' | 'lg' | 'auto' | 'custom' */
   quickStartCardSize?: "sm" | "md" | "lg" | "auto" | "custom";
 
   /**
@@ -290,35 +275,13 @@ export interface UserSettings {
    */
   quickStartGridGap?: number;
 
-  /**
-   * 网格视图卡片尺寸档位（v1.4）。
-   *   - 'sm'   ：紧凑（标签页多时使用，单卡 ~160px）
-   *   - 'md'   ：默认（单卡 ~200px，与 v1.3 行为一致）
-   *   - 'lg'   ：宽松（标签页少时使用，单卡 ~240px）
-   *   - 'auto' ：根据标签页数量自动适配（≤10 用 lg，11-30 用 md，>30 用 sm）
-   */
+  /** 网格视图卡片尺寸：'sm' | 'md' | 'lg' | 'auto' */
   gridCardSize?: "sm" | "md" | "lg" | "auto";
 
-  /**
-   * 全局点击动效（v1.2）。
-   *   - 'off'（默认）：无动效
-   *   - 'ripple'   ：品牌色涟漪环
-   *   - 'sparkle'  ：星光散射
-   *   - 'confetti' ：彩纸爆裂
-   *   - 'petal'    ：樱花飘落
-   * reducedMotion 为 'on' 或系统偏好 reduce 时自动禁用。
-   */
+  /** 全局点击动效：'off' | 'ripple' | 'sparkle' | 'confetti' | 'petal' */
   clickEffect?: "off" | "ripple" | "sparkle" | "confetti" | "petal";
 
-  /**
-   * 动态视频背景（v1.2）。
-   *   - type：'none'（默认） / 'url'（外部 URL） / 'file'（本地文件 → blob URL）
-   *   - src：视频地址（url 模式）
-   *   - objectUrl：文件模式下 IndexedDB 读取后生成的 blob URL（仅内存）
-   *   - fileKey：本地 IndexedDB 里的文件主键（用于二次启动时重新恢复）
-   *   - playbackRate：0.5 ~ 1.5，默认 1
-   *   - muted：默认 true（Chrome 要求 muted 才能 autoplay）
-   */
+  /** 动态视频背景。 */
   videoBackground?: {
     type?: "none" | "url" | "file";
     src?: string;
@@ -334,8 +297,6 @@ export interface UserSettings {
    *   - 'recentAccess'：按组内最近访问时间降序
    */
   tabGroupSortBy?: "tabCount" | "name" | "recentAccess";
-
-  // ── v1.0 封板新增字段 ──────────────────────────────
 
   /**
    * 去重严格度（F-13）：
@@ -376,8 +337,6 @@ export interface UserSettings {
    * 最后激活的 Workspace id（F-29），页面刷新时用于恢复选中状态。
    */
   lastActiveWorkspaceId?: string;
-
-  // ── 插件原生历史记录（v1.4 新增） ────────────────
 
   /**
    * 历史记录主开关（默认 true）。关闭后：
@@ -467,4 +426,13 @@ export interface UserSettings {
    * 避免内存抖动时频繁触发。
    */
   memoryGovernanceCooldownMinutes?: number;
+
+  /** Popup 排序模式：'recent' | 'title' | 'domain' | 'urlLength'，默认 'recent' */
+  popupSortMode?: "recent" | "title" | "domain" | "urlLength";
+
+  /** Popup 是否升序排列，默认 false（降序） */
+  popupSortAsc?: boolean;
+
+  /** Popup 是否按域名分组显示，默认 false */
+  popupGroupByDomain?: boolean;
 }

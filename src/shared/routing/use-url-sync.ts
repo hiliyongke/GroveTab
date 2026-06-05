@@ -57,7 +57,7 @@ export function useUrlSync(): UrlSyncAPI {
       setRoute(event.route);
       setLastSource(event.source);
 
-      // 路由埋点（UX-P0-14）
+      // 路由埋点
       handleRouteTelemetry(event);
 
       // 埋点：视图切换

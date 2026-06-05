@@ -1,13 +1,11 @@
 /**
- * Chrome URL Utilities — Special URL detection and hostname extraction
+ * Chrome URL 工具：特殊 URL 检测与 hostname 提取。
  */
 
 import type { SpecialUrlType } from "@/shared/types";
 export { extractHostname } from "@/shared/utils/url";
 
-/**
- * Classify a URL into special types or 'normal'
- */
+/** 将 URL 归类为特殊类型或 normal。 */
 function classifyUrl(url: string): SpecialUrlType {
   if (!url) return "about";
   if (url.startsWith("chrome://") || url.startsWith("chrome-extension://")) return "chrome";
@@ -18,28 +16,20 @@ function classifyUrl(url: string): SpecialUrlType {
   return "normal";
 }
 
-/**
- * Check if a URL should be displayed in the tab list
- * chrome:// and about:blank/newtab are hidden by default
- */
+/** 判断 URL 是否应在标签页列表中显示。about:blank 始终隐藏。 */
 export function shouldDisplayUrl(url: string, showSpecial = false): boolean {
   const type = classifyUrl(url);
   if (type === "normal") return true;
-  // about:blank is the new tab page itself — always hide
   if (url === "about:blank") return false;
   return showSpecial;
 }
 
-/**
- * Check if a tab is the extension new tab page itself
- */
+/** 判断是否为扩展自身的新标签页。 */
 function isExtensionNewTab(url: string): boolean {
   return url.startsWith("chrome-extension://") && url.includes("/newtab/");
 }
 
-/**
- * Check if the extension's own new tab URL matches
- */
+/** 判断标签页是否为扩展自身的新标签页。 */
 export function isSelfNewTabPage(tab: { url?: string; pendingUrl?: string }): boolean {
   const url = tab.url ?? tab.pendingUrl ?? "";
   return isExtensionNewTab(url);

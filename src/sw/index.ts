@@ -997,8 +997,7 @@ async function maybeFetchOg(url: string): Promise<void> {
   }
 }
 
-// ── Trending Cache Refresh (v1.4) ────────────────────
-
+// ── Trending Cache Refresh ──
 /**
  * 后台静默刷新热榜缓存
  *

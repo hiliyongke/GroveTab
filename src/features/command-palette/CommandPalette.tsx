@@ -1,16 +1,5 @@
 /**
- * CommandPalette —— 全局命令面板（⌘K / Ctrl+K 触发）
- *
- * UX-P0-04 + UX-P0-12：双模式搜索
- *   - 命令模式（默认）：搜索已注册命令，执行动作
- *   - 全局搜索模式（Tab 切换）：搜索所有标签页，点击跳转
- *
- * 功能：
- *   - 模糊 + 拼音搜索
- *   - 键盘导航（上下选择 + Enter 执行 + ESC 关闭）
- *   - Tab 键切换模式
- *   - 分类分组显示
- *   - 快捷键提示
+ * CommandPalette — 全局命令面板（⌘K 触发），支持命令模式与全局搜索双模式。
  */
 
 import { useEffect, useRef, useState, useCallback } from "react";

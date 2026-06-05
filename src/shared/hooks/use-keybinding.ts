@@ -1,15 +1,5 @@
 /**
- * useKeybinding · v1.3 —— 基于 tinykeys 的页面级快捷键
- *
- * 重构前（v1.2）使用手写 parseKeybinding；v1.3 改用 tinykeys（~1 KB gz）：
- *   - 成熟的 `$mod` / `Shift` / `Alt` 修饰键语义
- *   - 标准的 `key` / `code` 规范化处理
- *   - 提供官方 SSR / IME / 多键序列支持
- *
- * 行为兼容：
- *   - 在 input/textarea/contentEditable 聚焦时默认禁用（Esc 例外）
- *   - 支持 Mod+k 形式（自动映射到 tinykeys 的 $mod+KeyK）
- *   - API 完全不变：useKeybinding(action, handler)
+ * useKeybinding — 基于 tinykeys 的页面级快捷键，input/textarea 聚焦时默认禁用。
  */
 
 import { useEffect } from 'react';

@@ -15,7 +15,7 @@
  *   - 与浏览器实时同步
  */
 
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Empty, Flex } from "antd";
 import {
@@ -218,6 +218,8 @@ export function TabGroupView() {
   const { t } = useT();
   const tabs = useTabsStore((s) => s.tabs);
   const { jumpToTab, closeSingleTab } = useTabActions();
+  const handleJump = useCallback((id: number, wid: number) => { void jumpToTab(id, wid); }, [jumpToTab]);
+  const handleClose = useCallback((id: number) => { void closeSingleTab(id); }, [closeSingleTab]);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [filterQuery, setFilterQuery] = useState("");
@@ -400,8 +402,8 @@ export function TabGroupView() {
                   groups={columnGroups}
                   useVirtual={useVirtualization}
                   visibleTabIds={visibleTabIds}
-                  onJump={(tabId, windowId) => void jumpToTab(tabId, windowId)}
-                  onClose={(tabId) => void closeSingleTab(tabId)}
+                  onJump={handleJump}
+                  onClose={handleClose}
                 />
               ))
             )}

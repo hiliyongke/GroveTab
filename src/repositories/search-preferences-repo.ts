@@ -6,6 +6,10 @@
  * 因此使用 `localStorage` 而非 chrome.storage.local，避免不必要的
  * 异步 I/O 与 quota 占用。
  *
+ * ⚠️ 安全边界：localStorage 仅在 newtab 上下文（非 Service Worker）使用，
+ *        若未来扩展至 SW 上下文，需切换为 chrome.storage.local。
+ *        运行时检测：当 `typeof localStorage === "undefined"` 时自动降级返回默认值。
+ *
  * 业务代码必须通过本 repo 的函数访问，不允许在 features/* 直接调用
  * `localStorage`（被 ESLint 规则 `tab/no-direct-web-storage-api` 拦截）。
  */

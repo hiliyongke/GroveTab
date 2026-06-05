@@ -5,7 +5,7 @@
  * 以及分批恢复机制以减少 Chrome 限流与卡顿。
  */
 
-import { createTab, getCurrentWindow, groupTabs, updateTabGroup } from "@/chrome";
+import { createTab, getCurrentWindow, groupTabs, updateTabGroup, createWindow } from "@/chrome";
 import type { ChromeTabGroupColor } from "@/chrome/tabGroups";
 import { filterSafeExternalUrls } from "@/shared/utils/url-safety";
 import type { ArchivedSession, ArchivedTab } from "@/shared/types";
@@ -39,6 +39,8 @@ export interface RestoreOutcome {
   restored: number;
   batches: number;
   cancelled: boolean;
+  /** TabGroup 恢复失败的组数量 */
+  failedGroups?: number;
 }
 
 /**
@@ -89,35 +91,37 @@ export async function restoreSession(
       options.onProgress?.(1, 1);
       return { restored: 1, batches: 1, cancelled: false };
     }
-    if (typeof chrome !== "undefined" && chrome.windows !== undefined) {
-      try {
-        const w = await chrome.windows.create({ url: safeUrls[0], focused: true });
-        targetWindowId = w?.id;
-        options.onProgress?.(1, safeUrls.length);
-        const restUrls = safeUrls.slice(1);
-        const outcome = await batchCreateTabs(
-          restUrls,
-          targetWindowId,
-          batchSize,
-          batchInterval,
-          options,
-          1,
-        );
-
-        // 任务4：恢复 TabGroup 结构
-        if (
-          restoreTabGroups &&
-          targetWindowId !== undefined &&
-          session.tabGroups &&
-          session.tabGroups.length > 0
-        ) {
-          await restoreTabGroupStructure(session, targetWindowId);
-        }
-
-        return outcome;
-      } catch (err) {
-        console.warn("[archive] new_window failed, fallback current window", err);
+    try {
+      const w = await createWindow({ url: safeUrls[0], focused: true });
+      targetWindowId = w?.id;
+      if (targetWindowId === undefined) {
+        throw new Error("Failed to create window — no window id returned");
       }
+      options.onProgress?.(1, safeUrls.length);
+      const restUrls = safeUrls.slice(1);
+      const outcome = await batchCreateTabs(
+        restUrls,
+        targetWindowId,
+        batchSize,
+        batchInterval,
+        options,
+        1,
+      );
+
+      // 任务4：恢复 TabGroup 结构
+      if (
+        restoreTabGroups &&
+        targetWindowId !== undefined &&
+        session.tabGroups &&
+        session.tabGroups.length > 0
+      ) {
+        const failedGroups = await restoreTabGroupStructure(session, targetWindowId);
+        outcome.failedGroups = failedGroups;
+      }
+
+      return outcome;
+    } catch (err) {
+      console.warn("[archive] new_window failed, fallback to current window", err);
     }
   }
 
@@ -136,9 +140,15 @@ export async function restoreSession(
  *   1. 查询目标窗口中刚恢复的标签页（按 URL 匹配）
  *   2. 按原始 groupId 分组，调用 chrome.tabs.group 创建新 group
  *   3. 调用 chrome.tabGroups.update 恢复标题和颜色
+ *
+ * @returns 失败的 group 数量（供 UI 展示部分恢复状态）
  */
-async function restoreTabGroupStructure(session: ArchivedSession, windowId: number): Promise<void> {
-  if (!session.tabGroups || session.tabGroups.length === 0) return;
+async function restoreTabGroupStructure(
+  session: ArchivedSession,
+  windowId: number,
+): Promise<number> {
+  let failedCount = 0;
+  if (!session.tabGroups || session.tabGroups.length === 0) return 0;
 
   try {
     // 等待标签页完全创建（短暂延迟）
@@ -188,12 +198,15 @@ async function restoreTabGroupStructure(session: ArchivedSession, windowId: numb
           collapsed: archivedGroup.collapsed,
         });
       } catch (err) {
+        failedCount++;
         console.warn("[archive] restoreTabGroup failed for group", archivedGroup.groupId, err);
       }
     }
   } catch (err) {
     console.warn("[archive] restoreTabGroupStructure failed", err);
+    failedCount = session.tabGroups.length; // 整体失败，全部算失败
   }
+  return failedCount;
 }
 
 /** 分批创建标签页 */

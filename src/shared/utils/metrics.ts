@@ -1,8 +1,5 @@
 /**
- * Metrics — Local privacy-friendly usage analytics（v1.0 封板事件版）
- *
- * 旧 API（累加计数器）继续保留以兼容现有调用点，新增事件型 track API。
- * 事件型数据存放在应用命名空间键下，与 InsightsView / 清除按钮对齐。
+ * Metrics — 本地隐私友好的使用分析。
  */
 
 import { getData, setData } from '@/repositories';
@@ -58,10 +55,7 @@ export async function recordMetric(
 
 const MAX_EVENTS = 2000;
 
-/**
- * 事件型埋点（v1.0 封板新增）：按时间追加，最多 2000 条（保留最近）。
- * 所有数据本地存储，绝不上传。
- */
+/** 事件型埋点，按时间追加，最多 2000 条，本地存储。 */
 export async function track(event: string, payload?: Record<string, unknown>): Promise<void> {
   try {
     const list = (await getData<MetricEvent[]>(METRICS_KEY)) ?? [];

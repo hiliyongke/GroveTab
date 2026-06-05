@@ -25,6 +25,7 @@ import type { SortMode } from "@/features/smart-sort/types";
 import type { LiveTab } from "@/shared/types";
 import { getFocusTime } from "@/repositories/focus-time-repo";
 import { todayStr } from "@/shared/utils/date";
+import { feedback } from "@/shared/ui/feedback";
 import styles from "../styles/views.module.less";
 import toolbarStyles from "../styles/toolbar.module.less";
 
@@ -146,6 +147,10 @@ export function CompactView({ filterQuery = "" }: CompactViewProps) {
   /** 当前视图内所有可见 tab ID 列表（供 Shift 范围选） */
   const visibleTabIds = useMemo(() => sortedTabs.map((tab) => tab.id), [sortedTabs]);
 
+  /** 稳定回调，避免每次渲染创建新函数破坏 TabItem 的 memo */
+  const handleJumpStable = useCallback((id: number, wid: number) => { void jumpToTab(id, wid); }, [jumpToTab]);
+  const handleCloseStable = useCallback((id: number) => { void closeSingleTab(id); }, [closeSingleTab]);
+
   /** 排序切换 */
   const handleSortChange = useCallback(
     async (value: string | number) => {
@@ -153,49 +158,49 @@ export function CompactView({ filterQuery = "" }: CompactViewProps) {
       setSortMode(newMode);
 
       if (newMode !== "default") {
-        // 首次排序前保存原始顺序
         if (!originalTabIdsRef.current) {
           originalTabIdsRef.current = tabs.map((t) => t.id);
         }
 
-        // 用完整列表排序
         const sorted = sortTabs(tabs, newMode, pinnedTabIds, sortCtx);
+        // 延迟写入 store，避免阻塞当前渲染
+        requestAnimationFrame(() => {
+          useTabsStore.setState({ tabs: sorted });
+        });
 
-        // 立即更新 store 中的 tabs 顺序（UI 马上生效）
-        useTabsStore.setState({ tabs: sorted });
-
-        // 后台异步同步到浏览器
         setIsSyncing(true);
         try {
           await syncSortToBrowser(sorted);
         } catch (err) {
           console.error("[CompactView] Sort sync failed:", err);
+          feedback.error(t("sortSyncFailed"));
         } finally {
           setIsSyncing(false);
         }
       } else if (originalTabIdsRef.current) {
-        // 切回默认：恢复 store 中的原始顺序
         const originalIds = originalTabIdsRef.current;
         const idToTab = new Map(tabs.map((t) => [t.id, t]));
         const restored = originalIds
           .map((id) => idToTab.get(id))
           .filter((t): t is LiveTab => t !== undefined);
 
-        useTabsStore.setState({ tabs: restored });
+        requestAnimationFrame(() => {
+          useTabsStore.setState({ tabs: restored });
+        });
         originalTabIdsRef.current = null;
 
-        // 后台异步恢复浏览器顺序
         setIsSyncing(true);
         try {
           await restoreBrowserOrder(originalIds);
         } catch (err) {
           console.error("[CompactView] Restore order failed:", err);
+          feedback.error(t("restoreOrderFailed"));
         } finally {
           setIsSyncing(false);
         }
       }
     },
-    [tabs, pinnedTabIds, sortCtx],
+    [tabs, pinnedTabIds, sortCtx, jumpToTab, closeSingleTab],
   );
 
   const parentRef = useRef<HTMLDivElement>(null);
@@ -206,7 +211,7 @@ export function CompactView({ filterQuery = "" }: CompactViewProps) {
     overscan: 12,
   });
 
-  if (tabs.length === 0) return null;
+  if (tabs.length === 0) return <Empty description={t("empty.noOpenTabs")} />;
 
   const containerMaxHeight = `min(calc(100vh - ${VIEWPORT_RESERVE}px), ${sortedTabs.length * ROW_HEIGHT + 8}px)`;
   const containerStyle: React.CSSProperties = cssVars({
@@ -261,12 +266,8 @@ export function CompactView({ filterQuery = "" }: CompactViewProps) {
               <Flex key={tab.id} className={styles["app-compact-view-item"]} style={itemStyle}>
                 <TabItem
                   tab={tab}
-                  onJump={(id, wid) => {
-                    void jumpToTab(id, wid);
-                  }}
-                  onClose={(id) => {
-                    void closeSingleTab(id);
-                  }}
+                  onJump={handleJumpStable}
+                  onClose={handleCloseStable}
                   showHostname
                   selectable
                   visibleTabIds={visibleTabIds}

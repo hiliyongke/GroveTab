@@ -1,86 +1,16 @@
 /**
- * Chrome API — 标签页、窗口、会话、存储的 Promise 化统一封装
+ * Chrome API 封装层：标签页、窗口、存储操作。
  *
- * 设计原则：
- *   1. 所有外部调用点只依赖本文件，不直接触 `chrome.xxx`——便于统一容错
- *   2. 每个调用包一层「超时 + 错误归一化 + 标准日志」
- *      - 超时：防止 Service Worker 沉睡/通信异常导致的 Promise hang 死
- *      - 错误归一化：`chrome.runtime.lastError` 和 rejection 统一成 Error 抛出
- *      - 标准日志：出错时打品牌化前缀 + 接口名，便于线上排查
- *   3. 只做「封装」不做「兜底」——失败一律抛出，由上层 store/UI 决定是否 toast
+ * 所有调用经 safeCall 包装，统一超时保护、错误归一化、日志前缀。
  */
 
-import { BRAND } from "@/shared/config/brand";
+import { safeCall, CHROME_LOG_TAG } from "./safe-call";
 
-const CHROME_LOG_TAG = `${BRAND.logTag}/chrome`;
+export { safeCall, DEFAULT_TIMEOUT, normalizeError, withTimeout } from "./safe-call";
 
-/**
- * 将一个可能永远不 resolve 的 Promise 用超时包住
- *
- * @param promise    原始 Promise
- * @param ms         超时阈值（毫秒）
- * @param label      用于错误信息的接口名
- * @throws `Error(label) timeout` 超时后抛出
- */
-function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
-  return new Promise<T>((resolve, reject) => {
-    const timer = setTimeout(() => {
-      reject(new Error(`${CHROME_LOG_TAG} ${label} timeout after ${ms}ms`));
-    }, ms);
-    promise.then(
-      (v) => {
-        clearTimeout(timer);
-        resolve(v);
-      },
-      (err) => {
-        clearTimeout(timer);
-        reject(normalizeError(err, label));
-      },
-    );
-  });
-}
+// ── Tabs ──
 
-/**
- * 把 chrome API 抛出的任意值统一成 Error 实例
- *
- * Chrome API 在 Manifest V3 下一般会 reject 一个 Error，但历史版本里偶尔
- * reject 字符串 或 `{ message: ... }` 结构，这里统一成 Error，并带上接口上下文。
- */
-function normalizeError(err: unknown, label: string): Error {
-  if (err instanceof Error) {
-    // 保留原 stack，仅在 message 前加上下文
-    err.message = `${CHROME_LOG_TAG} ${label}: ${err.message}`;
-    return err;
-  }
-  const msg =
-    typeof err === "string" ? err : ((err as { message?: string })?.message ?? JSON.stringify(err));
-  return new Error(`${CHROME_LOG_TAG} ${label}: ${msg}`);
-}
-
-/** 常规 chrome API 的默认超时（ms）—— 足够覆盖正常执行但能兜住 SW 沉睡导致的 hang */
-const DEFAULT_TIMEOUT = 5000;
-
-/** 带超时 + 错误归一化的 chrome API 调用器 */
-export function safeCall<T>(
-  label: string,
-  fn: () => Promise<T>,
-  timeout = DEFAULT_TIMEOUT,
-): Promise<T> {
-  try {
-    return withTimeout(fn(), timeout, label);
-  } catch (err) {
-    // 同步抛出（极少数实现会同步抛）的情况也归一化
-    return Promise.reject(normalizeError(err, label));
-  }
-}
-
-// ── Tabs ──────────────────────────────────────────────
-
-/**
- * 查询标签页。
- *
- * @param queryInfo Chrome tabs.query 的查询条件；默认查询全部标签页。
- */
+/** 查询标签页，默认查全部。 */
 export async function queryTabs(queryInfo: chrome.tabs.QueryInfo = {}): Promise<chrome.tabs.Tab[]> {
   return safeCall("tabs.query", () => chrome.tabs.query(queryInfo));
 }
@@ -89,12 +19,7 @@ export async function queryAllTabs(): Promise<chrome.tabs.Tab[]> {
   return queryTabs({});
 }
 
-/**
- * 激活（跳转）一个 tab + 聚焦其所在窗口
- *
- * 分两步走是因为 chrome.tabs.update 不会自动 focus 窗口；
- * 任何一步失败都会抛出——上层可据此给出 toast 反馈。
- */
+/** 激活标签页并聚焦所在窗口。 */
 export async function activateTab(tabId: number, windowId?: number): Promise<void> {
   await safeCall("tabs.update(active)", () => chrome.tabs.update(tabId, { active: true }));
   if (windowId) {
@@ -104,55 +29,35 @@ export async function activateTab(tabId: number, windowId?: number): Promise<voi
   }
 }
 
-/**
- * 关闭单个 tab
- *
- * ⚠️ 常见失败：
- *   - tabId 已不存在（用户从浏览器 UI 自行关闭 + SW broadcast 未及时同步）
- *   - Chrome 进程回收（MV3 SW 未运行）
- * 这两种情况都会由 safeCall 抛出带上下文的 Error，上层需 toast。
- */
+/** 关闭单个标签页。 */
 export async function closeTab(tabId: number): Promise<void> {
   await safeCall("tabs.remove", () => chrome.tabs.remove(tabId));
 }
 
-/**
- * 批量关闭 tabs
- *
- * chrome.tabs.remove 支持数组——一次调用原子关闭，不需要并发 N 个请求。
- * 若其中某个 tabId 已失效，整个 Promise 会 reject，上层需自行决定是否重试。
- */
+/** 批量关闭标签页（原子操作）。 */
 export async function closeTabs(tabIds: number[]): Promise<void> {
   if (tabIds.length === 0) return;
   await safeCall("tabs.remove(batch)", () => chrome.tabs.remove(tabIds));
 }
 
-/**
- * 新建单个 tab（如恢复会话时在已有窗口追加）
- */
+/** 新建标签页。 */
 export async function createTab(
   createProperties: chrome.tabs.CreateProperties,
 ): Promise<chrome.tabs.Tab> {
   return safeCall("tabs.create", () => chrome.tabs.create(createProperties));
 }
 
-/**
- * 丢弃（休眠）单个标签页——释放内存但保留标签页位置。
- * 丢弃后标签页会变成灰色占位符，点击后自动恢复。
- * 已丢弃的标签页再次调用会静默成功（幂等）。
- */
+/** 休眠标签页，释放内存但保留位置。幂等操作。 */
 export async function discardTab(tabId: number): Promise<void> {
   await safeCall("tabs.discard", () => chrome.tabs.discard(tabId));
 }
 
-/**
- * 获取当前窗口 —— 恢复会话等场景需要
- */
+/** 获取当前窗口。 */
 export async function getCurrentWindow(): Promise<chrome.windows.Window> {
   return safeCall("windows.getCurrent", () => chrome.windows.getCurrent());
 }
 
-// ── Windows ───────────────────────────────────────────
+// ── Windows ──
 
 export async function getAllWindows(): Promise<chrome.windows.Window[]> {
   return safeCall("windows.getAll", () => chrome.windows.getAll({ populate: false }));
@@ -174,7 +79,7 @@ export async function closeWindow(windowId: number): Promise<void> {
   await safeCall("windows.remove", () => chrome.windows.remove(windowId));
 }
 
-// ── Storage ───────────────────────────────────────────
+// ── Storage ──
 
 export async function storageGet<T>(key: string): Promise<T | undefined> {
   const result = await safeCall("storage.local.get", () => chrome.storage.local.get(key));
@@ -189,72 +94,48 @@ export async function storageRemove(key: string): Promise<void> {
   await safeCall("storage.local.remove", () => chrome.storage.local.remove(key));
 }
 
-/**
- * 列出 chrome.storage.local 中的所有键。
- * 用途：一键重置等批量操作，需先枚举全部键。
- */
+/** 列出 chrome.storage.local 所有键。 */
 export async function storageGetAllKeys(): Promise<string[]> {
   const all = await safeCall("storage.local.get(null)", () => chrome.storage.local.get(null));
   return Object.keys(all);
 }
 
-/**
- * 获取 chrome.storage.local 的已用字节数。
- *
- * @param keys 指定 key 或 key 数组；传 null 表示全部
- */
+/** 获取 chrome.storage.local 已用字节数。 */
 export async function storageGetBytesInUse(keys: string | string[] | null = null): Promise<number> {
   return safeCall("storage.local.getBytesInUse", () => chrome.storage.local.getBytesInUse(keys));
 }
 
-/**
- * 注册 chrome.storage.onChanged 监听器。
- *
- * @param listener 变更回调
- * @returns 取消监听的函数
- */
+/** 注册 chrome.storage.onChanged 监听，返回取消监听的函数。 */
 export function storageOnChanged(
   listener: (changes: Record<string, chrome.storage.StorageChange>, areaName: string) => void,
 ): () => void {
   if (typeof chrome === "undefined" || chrome.storage?.onChanged === undefined) {
-    return () => {
-      /* noop */
-    };
+    return () => {};
   }
   chrome.storage.onChanged.addListener(listener);
   return () => chrome.storage.onChanged.removeListener(listener);
 }
 
-// ── Favicon ───────────────────────────────────────────
+// ── Favicon ──
 
 /**
- * 根据 URL 构造 Chrome 内置 favicon 地址
- *
- * MV3 + `favicon` permission 下，正确的入口是
- * `chrome-extension://<id>/_favicon/?pageUrl=...&size=...`。
- *
- * 该 URL 与扩展页面同源，既不会触发 CORS 错误，也能被 canvas 安全读像素。
- * 老的 `chrome://favicon2/...` 形式在 MV3 里访问会被拦下并打红控制台，禁用之。
- *
- * 非扩展上下文（如 `pnpm dev` 直接在浏览器里预览）返回空串，让调用方用
- * `tab.favIconUrl` 本身兜底。
+ * 构造扩展同源的 `_favicon/` URL，避免 CORS 错误。
+ * 非扩展上下文返回空串，调用方用 `tab.favIconUrl` 兜底。
  */
 export function getFaviconUrl(url: string, size = 32): string {
   try {
-    // 校验 URL 合法性
     new URL(url);
   } catch {
     return "";
   }
-  // 仅在扩展上下文才构造 _favicon URL；普通页面预览拿不到 chrome.runtime.id
   const runtimeId = typeof chrome !== "undefined" && chrome?.runtime?.id ? chrome.runtime.id : "";
   if (!runtimeId) return "";
   return `chrome-extension://${runtimeId}/_favicon/?pageUrl=${encodeURIComponent(url)}&size=${size}`;
 }
 
-// ── Split Screen / Window Arrangement ─────────────────
+// ── Split Screen / Window Arrangement ──
 
-/** 单个窗口的目标几何位置（像素）。 */
+/** 窗口目标几何位置（像素）。 */
 export interface WindowRect {
   left: number;
   top: number;
@@ -262,14 +143,14 @@ export interface WindowRect {
   height: number;
 }
 
-/** 内置布局预设——用于把 N 个窗口排进同一屏幕区域。 */
+/** 内置布局预设。 */
 export type SplitLayout =
-  | "side-by-side" // 左右各 50%
-  | "stacked" // 上下各 50%
-  | "grid-2x2" // 田字 2×2
-  | "main-side" // 左 2/3 主 + 右 1/3 侧栏
-  | "thirds" // 三等分横向
-  | "balanced-grid"; // 按数量自动生成接近正方形的网格
+  | "side-by-side"
+  | "stacked"
+  | "grid-2x2"
+  | "main-side"
+  | "thirds"
+  | "balanced-grid";
 
 interface ChromeDisplayInfo {
   id: string;
@@ -318,15 +199,7 @@ function createGridRects(count: number, bounds: WindowRect): WindowRect[] {
   });
 }
 
-/**
- * 计算给定屏幕区域下，N 个窗口按布局应分到的几何位置。
- *
- * 不依赖 chrome API，纯几何函数，便于单测与跨进程复用。
- *
- * @param layout  目标布局
- * @param count   窗口数量
- * @param bounds  可用屏幕区域（默认整个 availWidth/Height）
- */
+/** 按布局计算 N 个窗口的几何位置（纯函数，不依赖 Chrome API）。 */
 export function computeLayoutRects(
   layout: SplitLayout,
   count: number,
@@ -474,12 +347,7 @@ function pickDisplayBounds(
   return fallback ? normalizeRect(fallback.workArea ?? fallback.bounds) : null;
 }
 
-/**
- * 取屏幕可用区域作为默认布局边界。
- *
- * 优先使用 Chrome 官方 `system.display.getInfo()` 的 `workArea`，这样多显示器、Dock、任务栏
- * 都能得到更准确的可用区域；权限缺失或浏览器不支持时再回退到窗口几何和 `screen.avail*`。
- */
+/** 取屏幕可用区域：优先 system.display.getInfo()，回退到窗口几何 → screen.avail*。 */
 async function resolveScreenBounds(referenceWindowId?: number): Promise<WindowRect> {
   let referenceWindow: chrome.windows.Window | undefined;
   if (referenceWindowId !== undefined) {
@@ -507,19 +375,7 @@ async function resolveScreenBounds(referenceWindowId?: number): Promise<WindowRe
   return normalizeRect(getFallbackScreenBounds());
 }
 
-/**
- * 把指定的若干窗口按布局排进同一屏幕区域。
- *
- * 适用场景：
- *   - 用户把 N 个浏览器窗口"snap 到网格"
- *   - 分屏批处理：先 createWindow 再 arrangeWindows 排版
- *
- * 实现：纯 `chrome.windows.update`，不创建/关闭任何窗口。
- *
- * @param windowIds  目标窗口 ID 数组（顺序决定 layout 中的位置）
- * @param layout     布局预设
- * @param bounds     可选：自定义屏幕区域；不传则用首个窗口当前所在屏幕
- */
+/** 把若干窗口按布局排进同一屏幕区域（纯 chrome.windows.update）。 */
 export async function arrangeWindows(
   windowIds: number[],
   layout: SplitLayout,
@@ -529,7 +385,6 @@ export async function arrangeWindows(
   const screenBounds = bounds ?? (await resolveScreenBounds(windowIds[0]));
   const rects = computeLayoutRects(layout, windowIds.length, screenBounds);
 
-  // 并发更新所有窗口，整体一次到位
   await Promise.all(
     windowIds.map((id, idx) => {
       const rect = rects[idx];
@@ -548,22 +403,17 @@ export async function arrangeWindows(
   );
 }
 
-/** 单窗口贴边/还原快捷动作。 */
+/** 单窗口快捷动作。 */
 export type WindowSnapAction =
-  | "snap-left" // 左半屏
-  | "snap-right" // 右半屏
-  | "snap-top" // 上半屏
-  | "snap-bottom" // 下半屏
-  | "maximize" // 最大化
-  | "restore" // 还原为普通窗口
-  | "center"; // 居中 80%
+  | "snap-left"
+  | "snap-right"
+  | "snap-top"
+  | "snap-bottom"
+  | "maximize"
+  | "restore"
+  | "center";
 
-/**
- * 把单个窗口贴到屏幕的某一半（或最大化/居中）。
- *
- * 与 `arrangeWindows` 的区别：本函数仅操作一个窗口，不需要预先收集多个窗口 ID。
- * 适合 WindowCard 的"快速贴边"菜单。
- */
+/** 把单个窗口贴边、最大化、居中或还原。 */
 export async function snapWindow(windowId: number, action: WindowSnapAction): Promise<void> {
   if (action === "maximize") {
     await safeCall("windows.update(maximize)", () =>
@@ -621,16 +471,7 @@ export async function snapWindow(windowId: number, action: WindowSnapAction): Pr
   );
 }
 
-/**
- * 把指定的若干 tabs（可来自不同窗口）拆分到独立窗口并按布局排版。
- *
- * 流程：
- *   1. 先读取第一个标签所在显示器的可用工作区
- *   2. 对每个 tabId 调 `windows.create({ tabId })` 拆出独立窗口
- *   3. 调 `arrangeWindows` 把新窗口按目标布局排版
- *
- * @returns 排版后的窗口 ID 数组（与传入 tabId 顺序一致）
- */
+/** 把标签页拆分到独立窗口并按布局排版。返回新窗口 ID 数组。 */
 export async function splitTabsToLayout(tabIds: number[], layout: SplitLayout): Promise<number[]> {
   if (tabIds.length === 0) return [];
 
@@ -654,14 +495,7 @@ export async function splitTabsToLayout(tabIds: number[], layout: SplitLayout): 
   return newIds;
 }
 
-/**
- * 分屏：将指定标签页移到新窗口，并将原窗口和新窗口各调整到屏幕 50%（左右）。
- *
- * 保留作为薄封装，避免破坏既有调用方（TabContextMenu）。
- * 内部直接复用 `splitTabsToLayout`。
- *
- * @returns 新窗口的 ID
- */
+/** 将标签页分屏到新窗口（左右各 50%）。返回新窗口 ID。 */
 export async function splitTabToSide(tabId: number): Promise<number> {
   const tab = await safeCall("tabs.get", () => chrome.tabs.get(tabId));
   const originWindow = await safeCall("windows.get", () => chrome.windows.get(tab.windowId));
@@ -682,11 +516,9 @@ export async function splitTabToSide(tabId: number): Promise<number> {
   return newWindow.id;
 }
 
-// ── Tab Move ──────────────────────────────────────────
+// ── Tab Move ──
 
-/**
- * 批量移动标签页到指定窗口
- */
+/** 批量移动标签页到指定窗口。 */
 export async function moveTabs(
   tabIds: number[],
   windowId: number,

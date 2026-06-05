@@ -13,6 +13,7 @@
     "build": "pnpm run type-check && pnpm run test && vite build && node scripts/build-sw.mjs",
     "build:strict": "pnpm run type-check && pnpm run lint && pnpm run test && vite build && node scripts/build-sw.mjs",
     "build:fast": "tsc -b && vite build && node scripts/build-sw.mjs",
+    "report": "pnpm run build && node scripts/bundle-stats.mjs",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",

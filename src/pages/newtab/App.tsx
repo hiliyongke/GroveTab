@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo, useRef, lazy, Suspense } from "react";
+import { useEffect, useState, useCallback, useRef, lazy, Suspense } from "react";
 import { Layout, Spin, Typography, FloatButton, Flex } from "antd";
 import styles from "./App.module.less";
 import { useTabsStore, useSettingsStore, useSelectionStore } from "@/store";
@@ -164,6 +164,24 @@ function AppContent() {
   useMemoryGovernance();
   useAutoCleanup();
 
+  // P2: idle preload 常用视图 chunk，避免首次切换卡顿
+  useEffect(() => {
+    if (!checked) return;
+    const win = window as typeof window & { requestIdleCallback?: (cb: () => void) => number; cancelIdleCallback?: (id: number) => void };
+    if (win.requestIdleCallback) {
+      const id = win.requestIdleCallback(() => {
+        void import("@/features/tabs/views/DomainGroupView");
+        void import("@/features/tabs/views/TabGroupView");
+      });
+      return () => win.cancelIdleCallback?.(id);
+    }
+    const id = setTimeout(() => {
+      void import("@/features/tabs/views/DomainGroupView");
+      void import("@/features/tabs/views/TabGroupView");
+    }, 2000);
+    return () => clearTimeout(id);
+  }, [checked]);
+
   /** 旧版视图设置自动迁移（domain/compact/grid → tabs + tabsLayout），仅执行一次 */
   useEffect(() => {
     const settings = useSettingsStore.getState().settings;
@@ -314,18 +332,35 @@ function AppContent() {
     setInitRunId((value) => value + 1);
   }, [retryInit]);
 
-  // ── 统计摘要 ───────────────────────────────────────────────────────────────
-  // 使用 shallow 比较避免大数组引用变化导致的不必要渲染
-  const tabs = useTabsStore(useShallow((s) => s.tabs));
-  const tabCount = useMemo(() => tabs.length, [tabs]);
-  const domainCount = useMemo(() => new Set(tabs.map((tab) => tab.hostname)).size, [tabs]);
-  const dupGroups = useMemo(() => findDuplicates(tabs, dedupStrictness), [tabs, dedupStrictness]);
-  const idleTabsArr = useMemo(
-    () => detectIdleTabs(tabs, idleThresholdMinutes),
-    [tabs, idleThresholdMinutes],
+  // ── 统计摘要（轻量订阅，避免订阅整个 tabs 大数组） ──────────────────
+  const { tabCount, domainCount } = useTabsStore(
+    useShallow((s) => ({
+      tabCount: s.tabs.length,
+      domainCount: new Set(s.tabs.map((t) => t.hostname)).size,
+    })),
   );
-  const duplicateTabsCount = dupGroups.reduce((sum, group) => sum + group.tabs.length - 1, 0);
-  const idleTabsCount = idleTabsArr.length;
+
+  // O(n²) 重计算移至 idle callback，不阻塞主渲染路径
+  const [tidyData, setTidyData] = useState({ dupGroups: [] as ReturnType<typeof findDuplicates>, idleTabsArr: [] as ReturnType<typeof detectIdleTabs> });
+  useEffect(() => {
+    const win = window as typeof window & { requestIdleCallback?: (cb: () => void) => number; cancelIdleCallback?: (id: number) => void };
+    const id = win.requestIdleCallback
+      ? win.requestIdleCallback(() => {
+          const tabs = useTabsStore.getState().tabs;
+          setTidyData({ dupGroups: findDuplicates(tabs, dedupStrictness), idleTabsArr: detectIdleTabs(tabs, idleThresholdMinutes) });
+        })
+      : window.setTimeout(() => {
+          const tabs = useTabsStore.getState().tabs;
+          setTidyData({ dupGroups: findDuplicates(tabs, dedupStrictness), idleTabsArr: detectIdleTabs(tabs, idleThresholdMinutes) });
+        }, 0);
+    return () => {
+      if (typeof win.requestIdleCallback === "function") win.cancelIdleCallback!(id as number);
+      else clearTimeout(id);
+    };
+  }, [tabCount, dedupStrictness, idleThresholdMinutes]);
+
+  const duplicateTabsCount = tidyData.dupGroups.reduce((sum, group) => sum + group.tabs.length - 1, 0);
+  const idleTabsCount = tidyData.idleTabsArr.length;
   const hasTidySuggestions = duplicateTabsCount > 0 || idleTabsCount > 0;
 
   // ── StatusBar 数据连接 ─────────────────────────────────────────────────────
@@ -401,7 +436,11 @@ function AppContent() {
   }
 
   return (
-    <Layout
+    <>
+      <a href="#main-content" className={styles["app-skip-link"]} style={{ position: "absolute", left: -999, top: -999, zIndex: 9999, background: "var(--ant-color-bg-container)", padding: "8px 16px", border: "1px solid var(--ant-color-primary)", borderRadius: "var(--ant-border-radius)", fontSize: 14, textDecoration: "none" }}>
+        {t("跳到主内容")}
+      </a>
+      <Layout
       className="app-layout-shell"
       style={layoutStyle}
     >
@@ -426,6 +465,7 @@ function AppContent() {
         )}
 
         <Content
+          id="main-content"
           data-app-content
           className={contentShellClassName}
           style={contentShellStyle}
@@ -504,6 +544,7 @@ function AppContent() {
       {/* ARIA live region for dynamic content announcements (screen readers) */}
       <div className="app-live-region" aria-live="polite" aria-atomic="true" />
     </Layout>
+    </>
   );
 }
 

@@ -7,6 +7,8 @@
  *   - 输入实时执行、复制输出、双向交换、错误提示
  *   - 收藏置顶 / 示例填充
  *   - 全部工具纯本地处理，零网络请求
+ *
+ * 所有工具均在主线程本地执行，不依赖 chrome.debugger API。
  */
 
 import { useCallback, useMemo, useState } from "react";

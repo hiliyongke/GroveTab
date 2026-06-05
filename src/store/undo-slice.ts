@@ -1,16 +1,7 @@
 /**
  * Zustand Store — Undo Slice
  *
- * Manages undo records for closed tabs.
- * Records are persisted to chrome.storage.local and synced across new tab pages.
- *
- * Slice 依赖关系：
- *   - 依赖 settings-slice：读取 settings.undoWindowSeconds 决定 TTL
- *   - 被 tabs-slice 依赖：tabs-slice 的关闭操作（closeSingleTab, closeMultipleTabs 等）调用 addRecord
- *
- * 上游被以下模块依赖：
- *   - AppContent：消费 activeToast 进行撤销 toast 展示
- *   - UndoToast 组件：消费 undoRecord, dismissToast
+ * 管理关闭标签页的撤销记录，持久化到 chrome.storage.local。
  */
 
 import { create } from 'zustand';
@@ -72,31 +63,25 @@ export const useUndoStore = create<UndoState>((set, get) => ({
     };
 
     const records = [record, ...get().records].slice(0, MAX_UNDO_RECORDS);
-    // 关键：同步落 in-memory，再 fire-and-forget 持久化。
-    //   历史 Bug：若 `await setData(...)` 因 chrome.storage.local 异常而 hang，
-    //   上游 `closeSingleTab` / `closeMultipleTabs` 会被卡在 await，
-    //   浏览器 tab 永远不会被 `chrome.tabs.remove` 关闭，UI 一直转圈。
-    //   Undo 持久化只是为了跨会话恢复，不该成为关闭流程的硬依赖。
+    // 先同步写内存，再异步持久化。持久化失败不阻塞关闭流程。
     set({ records, activeToast: record });
     void setData(UNDO_STORAGE_KEY, records).catch((err) => {
       console.warn(`${BRAND.logTag} undo persist failed (record still in memory)`, err);
     });
 
-    // Auto-expire toast after TTL
+    // TTL 到时自动过期
     setTimeout(() => {
       const current = get();
       if (current.activeToast?.id === record.id) {
         set({ activeToast: null });
       }
-      // Mark as expired
       const updated = current.records.map((r) =>
         r.id === record.id ? { ...r, expired: true } : r,
       );
       set({ records: updated });
-      void setData(UNDO_STORAGE_KEY, updated).catch(() => {
-        /* 过期标记持久化失败无所谓——下次加载会用 createdAt 过滤 */
-      });
+      void setData(UNDO_STORAGE_KEY, updated).catch(() => {});
     }, getUndoTtlMs());
+    // TTL 在 addRecord 时固化，后续修改设置不影响已有记录。
 
     return Promise.resolve(record);
   },
@@ -107,36 +92,24 @@ export const useUndoStore = create<UndoState>((set, get) => ({
 
     const urls = filterSafeExternalUrls(record.tabs.map((t) => t.url).filter(Boolean));
 
-    /**
-     * 撤销恢复策略（用户反馈调整）：
-     *   - 全部在**当前窗口**追加打开，而不是新开窗口
-     *   - 单个 tab：直接 createTab 走当前窗口即可（chrome 默认行为）
-     *   - 多个 tab：显式拿 currentWindow.id，逐个 createTab(windowId)
-     *     （不再使用 chrome.windows.create——那样会开一个新窗口，与用户心智模型不符）
-     *   - 所有 chrome API 都经 safeCall 封装，失败会统一 toast
-     */
+    /** 在当前窗口顺序恢复标签页，避免并发建 tab 触发限流。 */
     try {
       if (urls.length === 1) {
         await createTab({ url: urls[0], active: false });
       } else if (urls.length > 1) {
         const currentWindow = await getCurrentWindow();
         const windowId = currentWindow?.id;
-        // 顺序打开而非 Promise.all：避免 Chrome 对同窗口瞬时并发建 tab 触发限流
         for (const url of urls) {
           await createTab({ url, windowId, active: false });
         }
       }
     } catch (err) {
       feedback.error(translate('恢复失败，请重试'), err);
-      // 失败也要把记录清掉，否则用户再点一次还是同一条 record，体验更差
     }
 
-    // Remove the undo record
     const records = get().records.filter((r) => r.id !== recordId);
     set({ records, activeToast: null });
-    void setData(UNDO_STORAGE_KEY, records).catch(() => {
-      /* 持久化失败无所谓，内存已清 */
-    });
+    void setData(UNDO_STORAGE_KEY, records).catch(() => {});
   },
 
   dismissToast: () => {

@@ -1,6 +1,5 @@
 /**
- * Speed Dial Type Definitions
- * 常用站点相关类型 (v1.4)
+ * 常用站点相关类型。
  */
 
 /** 常用站点条目 */

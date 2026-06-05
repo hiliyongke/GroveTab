@@ -293,6 +293,7 @@ export function HistoryView() {
   const [analysis, setAnalysis] = useState<HistoryAnalysis | null>(null);
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [analysisRangeMs, setAnalysisRangeMs] = useState(7 * 24 * 3600 * 1000);
+  const [dateRange, setDateRange] = useState<{ start?: number; end?: number }>({});
 
   /**
    * 「昨天 → 今天」 diff：运行时计算，不落盘。
@@ -316,16 +317,20 @@ export function HistoryView() {
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const [tabs, windows, evts, snaps] = await Promise.all([
+      const [tabs, windows, evts, snaps] = await Promise.allSettled([
         getClosedTabs(),
         getClosedWindows(),
         getHistoryEvents(),
         getDailySnapshots(),
       ]);
-      setClosedTabs(tabs);
-      setClosedWindows(windows);
-      setEvents(evts);
-      setSnapshots(snaps);
+      if (tabs.status === "fulfilled") setClosedTabs(tabs.value);
+      else console.warn("[HistoryView] Failed to load closed tabs:", tabs.reason);
+      if (windows.status === "fulfilled") setClosedWindows(windows.value);
+      else console.warn("[HistoryView] Failed to load closed windows:", windows.reason);
+      if (evts.status === "fulfilled") setEvents(evts.value);
+      else console.warn("[HistoryView] Failed to load events:", evts.reason);
+      if (snaps.status === "fulfilled") setSnapshots(snaps.value);
+      else console.warn("[HistoryView] Failed to load snapshots:", snaps.reason);
       // 任务6：静默对账 chrome.history（不阻塞主流程）
       void reconcileFromChromeHistory(24 * 3600 * 1000);
     } finally {
@@ -752,6 +757,30 @@ export function HistoryView() {
               },
             ]}
           />
+          {activeTab === "timeline" && (
+            <Flex gap={4} align="center" wrap>
+              <Typography.Text type="secondary" style={{ fontSize: 12, marginRight: 4 }}>{t("时间范围")}:</Typography.Text>
+              {(["今天","昨天","本周","本月"] as const).map((label) => (
+                <Button
+                  key={label}
+                  size="small"
+                  type={dateRange.start ? "default" : "text"}
+                  onClick={() => {
+                    const d = new Date();
+                    let start = 0;
+                    if (label === "今天") { d.setHours(0,0,0,0); start = d.getTime(); }
+                    else if (label === "昨天") { d.setDate(d.getDate()-1); d.setHours(0,0,0,0); start = d.getTime(); }
+                    else if (label === "本周") { d.setDate(d.getDate()-d.getDay()); d.setHours(0,0,0,0); start = d.getTime(); }
+                    else if (label === "本月") { d.setDate(1); d.setHours(0,0,0,0); start = d.getTime(); }
+                    setDateRange(start > 0 ? { start, end: Date.now() } : {});
+                  }}
+                >{label}</Button>
+              ))}
+              {dateRange.start && (
+                <Button size="small" type="text" onClick={() => setDateRange({})}>{t("清除")}</Button>
+              )}
+            </Flex>
+          )}
           {activeTab === "timeline" && (
             <Segmented<FilterMode>
               size="small"

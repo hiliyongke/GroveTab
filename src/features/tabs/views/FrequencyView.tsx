@@ -5,7 +5,7 @@
  * 数据缺失时回退到 lastAccessed 近似并显示"数据重建中"提示。
  */
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useCallback } from "react";
 import { useTabsStore, useStatsStore } from "@/store";
 import { useTabActions } from "@/shared/hooks/use-tab-actions";
 import { useT } from "@/shared/i18n";
@@ -24,6 +24,8 @@ const MAX_DISPLAY = CONFIG.ui.maxDisplay;
 export function FrequencyView() {
   const tabs = useTabsStore((s) => s.tabs);
   const { jumpToTab, closeSingleTab } = useTabActions();
+  const handleJump = useCallback((id: number, wid: number) => { void jumpToTab(id, wid); }, [jumpToTab]);
+  const handleClose = useCallback((id: number) => { void closeSingleTab(id); }, [closeSingleTab]);
   const loadStats = useStatsStore((s) => s.loadStats);
   const isFallback = useStatsStore((s) => s.isFallback);
   const getCountRecent = useStatsStore((s) => s.getCountRecent);
@@ -83,12 +85,8 @@ export function FrequencyView() {
           <TabItem
             key={entry.tab.id}
             tab={entry.tab}
-            onJump={(id, wid) => {
-              void jumpToTab(id, wid);
-            }}
-            onClose={(id) => {
-              void closeSingleTab(id);
-            }}
+            onJump={handleJump}
+            onClose={handleClose}
             showHostname
             showUrlHint={ambiguousIds.has(entry.tab.id)}
             leading={

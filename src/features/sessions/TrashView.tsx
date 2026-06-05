@@ -37,6 +37,7 @@ export function TrashView() {
   const { t } = useT();
   const [items, setItems] = useState<TrashedItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showMoreIds, setShowMoreIds] = useState<Set<string>>(new Set());
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -153,12 +154,19 @@ export function TrashView() {
                     </Button>
                   </Tooltip>
                   <Tooltip title={t("trash.delete")}>
-                    <Button
-                      size="small"
-                      danger
-                      icon={<X size={ICON_SIZE.SMALL} />}
-                      onClick={() => void handleDelete(item.id)}
-                    />
+                    <Popconfirm
+                      title={t("trash.confirmDeleteSingle")}
+                      onConfirm={() => void handleDelete(item.id)}
+                      okText={t("删除")}
+                      cancelText={t("取消")}
+                      okButtonProps={{ danger: true }}
+                    >
+                      <Button
+                        size="small"
+                        danger
+                        icon={<X size={ICON_SIZE.SMALL} />}
+                      />
+                    </Popconfirm>
                   </Tooltip>
                 </Space>
               }
@@ -172,7 +180,7 @@ export function TrashView() {
                 </Flex>
 
                 <Flex wrap gap={6} className={styles["trash-tab-chips"]}>
-                  {item.tabs.slice(0, 8).map((tab) => (
+                  {(showMoreIds.has(item.id) ? item.tabs : item.tabs.slice(0, 8)).map((tab) => (
                     <Tooltip key={tab.id} title={tab.title || tab.url}>
                       <span className={styles["trash-tab-chip"]}>
                         <TabFavicon tab={tab} />
@@ -183,7 +191,15 @@ export function TrashView() {
                     </Tooltip>
                   ))}
                   {item.tabs.length > 8 && (
-                    <Tag>+{item.tabs.length - 8}</Tag>
+                    showMoreIds.has(item.id) ? (
+                      <Button size="small" type="link" onClick={(e) => { e.stopPropagation(); setShowMoreIds((prev) => { const n = new Set(prev); n.delete(item.id); return n; }); }}>
+                        {t("trash.collapse")}
+                      </Button>
+                    ) : (
+                      <Button size="small" type="link" onClick={(e) => { e.stopPropagation(); setShowMoreIds((prev) => new Set(prev).add(item.id)); }}>
+                        {t("trash.showAll", { count: item.tabs.length - 8 })}
+                      </Button>
+                    )
                   )}
                 </Flex>
               </Flex>

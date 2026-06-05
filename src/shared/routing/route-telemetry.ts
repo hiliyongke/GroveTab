@@ -1,9 +1,7 @@
 /**
  * 路由埋点模块
  *
- * UX-P0-14：路由切换时上报埋点
- *   - dev mode：写入 console.info（方便调试）
- *   - prod mode：写入 chrome.storage.local 本地统计
+ * 路由切换时上报埋点，dev 模式写 console，prod 模式写 chrome.storage.local。
  *
  * 统计维度：
  *   - 路由切换次数（按 space/view/panel 分组）

@@ -591,7 +591,7 @@ const zhCN: Record<string, string> = {
   "settings.viewTabPositionLeft": "左侧",
   "settings.viewTabPositionRight": "右侧",
   "settings.viewTabPositionBottom": "底部",
-  // v1.0 封板新增行为项
+  // 新增行为项
   "settings.overrideNewTab": "接管新标签页",
   "settings.overrideNewTabHint":
     "开启后每次新建标签页都显示 {brand} 工作台；关闭后使用浏览器默认页。",
@@ -697,7 +697,7 @@ const zhCN: Record<string, string> = {
   "settings.profileSave": "保存",
   "settings.profileApply": "应用此预设",
   "settings.profileRename": "重命名",
-  // ── 搜索行为（v1.1 补齐）──
+  // ── 搜索行为 ──
   "settings.searchUseHotSuggestions": "显示热门关键词建议",
   "settings.searchUseHotSuggestionsHint": "在输入为空或本地结果不足时附加热词，可选择来源",
   "settings.searchUseHistorySuggestions": "使用浏览历史建议",
@@ -725,7 +725,7 @@ const zhCN: Record<string, string> = {
   "settings.clearRecentSearchesHint": '清除本地搜索历史；"本地"来源的热词会被清空，直到有新搜索',
   "settings.clearRecentSearchesConfirm": "确认清空全部最近搜索？",
   "settings.clearRecentSearchesDone": "最近搜索已清空",
-  // ── 危险区：一键重置三件套【v1.1】──
+  // ── 危险区：一键重置三件套 ──
   "settings.dangerZone": "危险区",
   "settings.resetSettings": "恢复默认配置",
   "settings.resetSettingsConfirm": "恢复默认配置？",
@@ -788,6 +788,10 @@ const zhCN: Record<string, string> = {
   "shortcuts.resetHint": "恢复默认",
   "shortcuts.conflict": "与 {peers} 冲突",
   "shortcuts.globalConflict": "与 Chrome 全局快捷键冲突，可能被全局快捷键拦截",
+  "shortcuts.openHistory": "打开历史",
+  "shortcuts.openHistoryHint": "打开浏览器历史面板",
+  "shortcuts.commandPalette": "命令面板",
+  "shortcuts.commandPaletteHint": "打开命令面板快速执行操作",
   // 视图切换快捷键
   "shortcuts.view.tabs": "标签视图",
   "shortcuts.view.timeline": "时间轴视图",
@@ -1034,7 +1038,7 @@ const zhCN: Record<string, string> = {
   "selection.selectAll": "全选",
   "selection.clear": "取消选择",
   "selection.exit": "退出多选",
-  // Insights / Workspace / Kanban (v1.0 封板)
+  // Insights / Workspace / Kanban
   "insights.title": "本地隐私洞察",
   "insights.dailyOpens": "近 7 天每日打开次数",
   "insights.topDomains": "Top 10 访问域名",
@@ -1112,7 +1116,7 @@ const zhCN: Record<string, string> = {
   "kanban.removeCardFailed": "移除卡片失败",
 
   // ══════════════════════════════════════════════════
-  // v1.2 新增：每日金句 / 点击动效 / 视频背景 / 关于页
+  // 每日金句 / 点击动效 / 视频背景 / 关于页
   // ══════════════════════════════════════════════════
 
   // —— 设置：点击动效 / 视频背景 ——
@@ -1213,6 +1217,24 @@ const zhCN: Record<string, string> = {
   "popup.noTabsToArchive": "当前没有可归档的标签页",
   "popup.openTab": "打开 {title}",
   "popup.closeTab": "关闭标签页 {title}",
+  "popup.dedup": "去重",
+  "popup.dedupCount": "去重 {count}",
+  "popup.dedupTip": "一键去重：保留最近访问的标签页，关闭重复项",
+  "popup.sortBy": "排序方式",
+  "popup.sortRecent": "最近访问",
+  "popup.sortTitle": "标题",
+  "popup.sortDomain": "域名",
+  "popup.sortUrlLength": "URL 长度",
+  "popup.sortAsc": "升序",
+  "popup.sortDesc": "降序",
+  "popup.groupByDomain": "按域名分组",
+  "popup.closeAll": "关闭全部标签页",
+  "popup.closeBlank": "关闭空白页",
+  "popup.closeBlankCount": "关闭空白页 ({count})",
+  "popup.dedupDone": "已关闭 {count} 个重复标签页",
+  "popup.dedupFailed": "去重失败",
+  "popup.closeAllDone": "已关闭全部标签页",
+  "popup.closeBlankDone": "已关闭 {count} 个空白页",
 
   // ══════════════════════════════════════════════════
   // 设置面板 section 标题
@@ -1268,8 +1290,8 @@ const zhCN: Record<string, string> = {
   "quickStart.groupNotFound": "输入即可创建新分组",
   "uiVisibility.quickStart": "常用站点",
   "uiVisibility.quickStartHint": "首页常用站点快捷入口",
-  speedDialGroupEnabled: "分组显示",
-  speedDialGroupEnabledHint: "按分组展示常用站点，关闭则平铺排列",
+  "speedDialGroupEnabled": "分组显示",
+  "speedDialGroupEnabledHint": "按分组展示常用站点，关闭则平铺排列",
   "quickStart.showAddButton": "显示添加按钮",
   "quickStart.showAddButtonHint": "隐藏后可通过设置页添加常用站点",
   "quickStart.groupCollapsible": "分组可折叠",
@@ -1292,14 +1314,14 @@ const zhCN: Record<string, string> = {
   "quickStart.autoLgThresholdHint": "站点数 ≤ 此值时使用 lg 卡片尺寸（默认 6）",
   "quickStart.autoMdThreshold": "auto→md 阈值",
   "quickStart.autoMdThresholdHint": "站点数 ≤ 此值时使用 md 卡片尺寸（默认 14），超过则使用 sm",
-  // ── 网格视图卡片大小配置（v1.4） ──────────────────────
+  // ── 网格视图卡片大小配置 ──
   "grid.cardSize": "卡片大小",
   "grid.cardSizeHint": "选择网格视图卡片的尺寸，自动模式会根据标签页数量自适应",
   "grid.cardSizeSm": "紧凑",
   "grid.cardSizeMd": "默认",
   "grid.cardSizeLg": "宽松",
   "grid.cardSizeAuto": "自适应",
-  // ── 插件原生历史记录（v1.4） ──────────────────────
+  // ── 插件原生历史记录 ──
   "history.title": "历史记录",
   "history.subtitle": "回看你在插件里做过什么，并一键恢复关闭的标签页",
   "history.close": "关闭",
@@ -1366,6 +1388,9 @@ const zhCN: Record<string, string> = {
   "trash.clearDesc": "此操作不可撤销，所有记录将被永久删除。",
   "trash.restore": "恢复",
   "trash.delete": "删除记录",
+  "trash.confirmDeleteSingle": "确认删除此记录？此操作不可撤销。",
+  "trash.showAll": "展开全部 +{count}",
+  "trash.collapse": "收起",
   "trash.restoreSuccess": "已恢复 {count} 个标签页",
   "trash.restoreFailed": "恢复失败",
   "trash.deleteFailed": "删除失败",
@@ -1442,6 +1467,43 @@ const zhCN: Record<string, string> = {
   "bookmark.permissionHint1": "你的书签数据完全在本地处理，不会上传",
   "bookmark.permissionHint2": "授权后可使用书签工具箱去重、失效检测",
   "bookmark.permissionHint3": "随时可以在 Chrome 扩展管理页撤销授权",
+
+  // 书签 CRUD 操作
+  "bookmark.addBookmark": "添加书签",
+  "bookmark.addFolder": "新建文件夹",
+  "bookmark.editBookmark": "编辑书签",
+  "bookmark.open": "打开",
+  "bookmark.edit": "编辑",
+  "bookmark.delete": "删除",
+  "bookmark.addHere": "在此添加书签",
+  "bookmark.confirmDelete": "确认删除",
+  "bookmark.confirmDeleteUrl": "确定要删除书签「{title}」吗？",
+  "bookmark.confirmDeleteFolder": "确定要删除文件夹「{title}」及其所有子项吗？",
+  "bookmark.deleteSuccess": "书签已删除",
+  "bookmark.deleteFailed": "删除失败，请重试",
+  "bookmark.editSuccess": "书签已更新",
+  "bookmark.editFailed": "更新失败，请重试",
+  "bookmark.createSuccess": "书签已创建",
+  "bookmark.createFailed": "创建失败，请重试",
+  "bookmark.folderCreated": "文件夹已创建",
+  "bookmark.folderCreateFailed": "创建文件夹失败",
+  "bookmark.folderNamePlaceholder": "文件夹名称",
+  "bookmark.batchDeleteSuccess": "已删除 {count} 个书签",
+  "bookmark.deleteSelected": "删除选中 ({count})",
+  "bookmark.selectItems": "选择要删除的书签",
+  "bookmark.batchSelect": "批量选择",
+  "bookmark.selectAll": "全选",
+  "bookmark.titlePlaceholder": "书签名称",
+  "bookmark.url": "网址",
+
+  // 空状态
+  "empty.noOpenTabs": "暂无打开的标签页",
+  "empty.noBookmarks": "暂无书签",
+
+  // 排序同步
+  "sortSyncFailed": "排序同步失败，请重试",
+  "restoreOrderFailed": "恢复排序失败，请重试",
+  "跳到主内容": "跳到主内容",
 
   // 历史记录空态增强
   "history.closedEmptyHint1": "按 Cmd/Ctrl+W 关闭的标签页会自动记录",

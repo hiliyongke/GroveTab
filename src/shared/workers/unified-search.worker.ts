@@ -11,6 +11,9 @@
  *
  *   IN  { type: 'search', query: string, requestId: string }
  *   OUT { type: 'results', requestId: string, results: SearchResult[] }
+ *
+ *   IN  { type: 'ping' }
+ *   OUT { type: 'pong', timestamp: number }   // 健康检查心跳
  */
 
 import MiniSearch from "minisearch";
@@ -194,7 +197,8 @@ function search(query: string): SearchResult[] {
 
 type InMessage =
   | { type: "build"; payload: BuildPayload }
-  | { type: "search"; query: string; requestId: string };
+  | { type: "search"; query: string; requestId: string }
+  | { type: "ping" };
 
 self.addEventListener("message", (event: MessageEvent<InMessage>) => {
   const msg = event.data;
@@ -231,5 +235,10 @@ self.addEventListener("message", (event: MessageEvent<InMessage>) => {
   if (msg.type === "search") {
     const results = search(msg.query);
     self.postMessage({ type: "results", requestId: msg.requestId, results });
+    return;
+  }
+
+  if (msg.type === "ping") {
+    self.postMessage({ type: "pong", timestamp: Date.now() });
   }
 });

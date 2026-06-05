@@ -1,7 +1,12 @@
+/* ═══════════════════════════════════════════
+ * Popup Styles — UI/UX Pro Max refined
+ * 400×600 Chrome extension popup
+ * ═══════════════════════════════════════════ */
+
 html,
 body,
 #root {
-  width: 400px;
+  width: 480px;
   height: 600px;
   padding: 0;
   margin: 0;
@@ -9,7 +14,7 @@ body,
 }
 
 body {
-  min-width: 400px;
+  min-width: 480px;
   min-height: 600px;
   overflow: hidden;
   font-family: var(--ant-font-family);
@@ -40,14 +45,14 @@ body {
 [data-popup] {
   &,
   & #root {
-    width: 400px;
+    width: 480px;
     height: 600px;
     padding: 0;
     margin: 0;
     overflow: hidden;
   }
 
-  min-width: 400px;
+  min-width: 480px;
   min-height: 600px;
   font-family: var(--ant-font-family);
   color: var(--ant-color-text, #1f1f1f);
@@ -55,59 +60,52 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* ─── 外壳 ─── */
+  /* ═══ 外壳 ═══ */
   .popup-shell {
     position: relative;
     display: flex;
     flex-direction: column;
-    width: 400px;
+    width: 480px;
     height: 600px;
-    padding: var(--app-space-3);
+    padding: 10px;
     overflow: hidden;
     color: var(--ant-color-text);
     background: var(--ant-color-bg-container);
     border: 0;
     border-radius: 0;
     box-shadow: none;
-
-    &::before {
-      content: none;
-    }
   }
 
-  /* ─── 通用层叠区 ─── */
-  .popup-search,
-  .popup-meta,
-  .popup-list,
-  .popup-actions,
-  .popup-about,
-  .popup-error {
-    position: relative;
-    z-index: 1;
-  }
-
-  /* ─── 搜索框 ─── */
+  /* ═══ 搜索框 ═══ */
   .popup-search {
-    height: 36px;
-    padding-inline: 4px;
-    margin-bottom: 9px;
-    background: var(--ant-color-bg-container);
-    border: 1px solid color-mix(in srgb, var(--ant-color-border) 82%, transparent);
-    border-radius: var(--app-radius-lg);
-    box-shadow: none;
-    transition:
-      border-color 0.16s ease,
-      box-shadow 0.16s ease;
+    height: 38px;
+    padding-inline: 6px;
+    margin-bottom: 10px;
+    background: var(--ant-color-bg-elevated);
+    border: 1px solid color-mix(in srgb, var(--ant-color-border) 70%, transparent);
+    border-radius: var(--app-radius-md);
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--ant-color-text) 3%, transparent);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 
     &:focus-within {
-      border-color: color-mix(in srgb, var(--app-color-primary) 42%, transparent);
-      box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-color-primary) 9%, transparent);
+      border-color: var(--app-color-primary);
+      box-shadow:
+        0 0 0 3px color-mix(in srgb, var(--app-color-primary) 12%, transparent),
+        0 1px 2px color-mix(in srgb, var(--ant-color-text) 4%, transparent);
     }
 
     .ant-input {
       font-size: 13px;
       color: var(--ant-color-text);
       background: transparent;
+
+      &::placeholder {
+        color: var(--ant-color-text-quaternary);
+      }
+    }
+
+    .ant-input-suffix {
+      color: var(--ant-color-text-tertiary);
     }
   }
 
@@ -115,32 +113,71 @@ body {
     color: var(--ant-color-text-tertiary);
   }
 
-  /* ─── 元信息栏 ─── */
+  /* ═══ 元信息 + 工具栏 ═══ */
   .popup-meta {
     display: flex;
-    gap: 8px;
+    flex-wrap: wrap;
+    gap: 2px 8px;
     align-items: center;
     justify-content: space-between;
-    padding: 0 4px;
-    margin-bottom: 7px;
-  }
-
-  .popup-meta-text,
-  .popup-meta-hint {
-    font-size: 11.5px;
-    letter-spacing: -0.01em;
+    padding: 0 2px;
+    margin-bottom: 8px;
+    min-height: 28px;
   }
 
   .popup-meta-text {
+    font-size: 11.5px;
     font-variant-numeric: tabular-nums;
     color: var(--ant-color-text-secondary);
+    white-space: nowrap;
   }
 
-  .popup-meta-hint {
-    color: var(--ant-color-text-quaternary);
+  /* ═══ 工具栏 ─── */
+  .popup-toolbar {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    margin-left: auto;
   }
 
-  /* ─── 列表区 ─── */
+  .popup-toolbar-sep {
+    width: 1px;
+    height: 16px;
+    margin: 0 3px;
+    background: color-mix(in srgb, var(--ant-color-border-secondary) 70%, transparent);
+  }
+
+  .popup-toolbar-btn {
+    height: 26px;
+    padding: 0 6px;
+    font-size: 11px;
+    color: var(--ant-color-text-tertiary);
+    border-radius: var(--app-radius-sm);
+    transition: color 0.15s ease, background-color 0.15s ease;
+
+    &:hover {
+      color: var(--ant-color-text);
+      background: var(--ant-color-fill-quaternary);
+    }
+
+    &--active,
+    &--active:hover {
+      color: var(--app-color-primary);
+      background: color-mix(in srgb, var(--app-color-primary) 12%, transparent);
+    }
+
+    &--warning,
+    &--warning:hover {
+      color: var(--ant-color-warning);
+      background: color-mix(in srgb, var(--ant-color-warning) 14%, transparent);
+    }
+
+    .anticon {
+      font-size: 13px;
+    }
+  }
+
+  /* ═══ 列表区 ═══ */
   .popup-list {
     flex: 1;
     min-height: 0;
@@ -148,34 +185,24 @@ body {
     margin-bottom: 10px;
     overflow-y: auto;
     scrollbar-gutter: stable;
-    scrollbar-color: color-mix(in srgb, var(--ant-color-text) 18%, transparent) transparent;
+    scrollbar-color: color-mix(in srgb, var(--ant-color-text) 14%, transparent) transparent;
     scrollbar-width: thin;
-    background: color-mix(
-      in srgb,
-      var(--ant-color-bg-container) 60%,
-      var(--ant-color-fill-quaternary)
-    );
-    border: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 76%, transparent);
-    border-radius: var(--app-radius-lg);
-    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ant-color-text) 4%, transparent);
+    background: color-mix(in srgb, var(--ant-color-bg-elevated) 60%, transparent);
+    border: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 60%, transparent);
+    border-radius: var(--app-radius-md);
 
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
+    &::-webkit-scrollbar { width: 6px; }
+    &::-webkit-scrollbar-track { background: transparent; }
 
     &::-webkit-scrollbar-thumb {
-      background: color-mix(in srgb, var(--ant-color-text) 16%, transparent);
+      background: color-mix(in srgb, var(--ant-color-text) 14%, transparent);
       background-clip: content-box;
       border: 2px solid transparent;
       border-radius: var(--app-radius-pill);
     }
 
     &:hover::-webkit-scrollbar-thumb {
-      background: color-mix(in srgb, var(--ant-color-text) 26%, transparent);
+      background: color-mix(in srgb, var(--ant-color-text) 24%, transparent);
       background-clip: content-box;
     }
   }
@@ -184,29 +211,27 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 260px;
-    padding: 28px 8px;
+    min-height: 240px;
+    padding: 32px 8px;
     text-align: center;
+
+    .popup-empty-text {
+      font-size: 12px;
+      color: var(--ant-color-text-quaternary);
+    }
   }
 
-  .popup-empty-text {
-    font-size: 12px;
-  }
-
-  /* ─── 列表行 ─── */
+  /* ═══ 列表行 ═══ */
   .popup-row {
     position: relative;
     display: flex;
-    gap: 6px;
+    gap: 8px;
     align-items: center;
     height: 42px;
-    padding: 4px 5px;
-    border: 1px solid transparent;
-    border-radius: var(--app-radius-lg);
-    box-shadow: inset 0 0 0 1px transparent;
-    transition:
-      background-color 0.14s ease,
-      box-shadow 0.14s ease;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: var(--app-radius-sm);
+    transition: background-color 0.15s ease;
 
     & + & {
       margin-top: 1px;
@@ -214,38 +239,24 @@ body {
 
     &:hover,
     &:focus-within {
-      background: var(--ant-color-fill-quaternary);
-      border-color: transparent;
-      box-shadow: none;
-      transform: translateX(2px);
+      background: var(--ant-color-fill-secondary);
     }
-  }
 
-  .popup-row-main {
-    all: unset;
-    box-sizing: border-box;
-    display: flex;
-    flex: 1;
-    gap: 8px;
-    align-items: center;
-    min-width: 0;
-    cursor: pointer;
-    background: transparent;
-
-    &:hover,
-    &:focus,
-    &:focus-visible,
     &:active {
-      background: transparent;
+      background: var(--ant-color-fill-tertiary);
+    }
+
+    &--focused {
+      background: color-mix(in srgb, var(--app-color-primary) 8%, transparent);
     }
   }
 
   .popup-row-favicon {
     flex-shrink: 0;
-    width: 17px;
-    height: 17px;
+    width: 16px;
+    height: 16px;
     object-fit: contain;
-    border-radius: var(--app-radius-sm);
+    border-radius: 3px;
   }
 
   .popup-row-content {
@@ -254,6 +265,7 @@ body {
     flex-direction: column;
     gap: 1px;
     min-width: 0;
+    overflow: hidden;
   }
 
   .popup-row-title,
@@ -264,144 +276,148 @@ body {
   }
 
   .popup-row-title {
-    font-size: 12.6px;
-    font-weight: 620;
-    line-height: 1.34;
+    font-size: 13px;
+    font-weight: 590;
+    line-height: 1.35;
     color: var(--ant-color-text);
-    letter-spacing: -0.012em;
+    letter-spacing: -0.01em;
   }
 
   .popup-row-host {
-    font-size: 10.8px;
+    font-size: 11px;
     line-height: 1.3;
     color: var(--ant-color-text-quaternary);
   }
 
   .popup-row-close {
-    all: unset;
-    box-sizing: border-box;
     display: inline-flex;
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
     color: var(--ant-color-text-tertiary);
     cursor: pointer;
-    border-radius: 8px;
-    transition:
-      color 0.14s ease,
-      background-color 0.14s ease;
+    background: transparent;
+    border: 0;
+    border-radius: var(--app-radius-sm);
+    transition: color 0.15s ease, background-color 0.15s ease;
 
     &:hover {
       color: var(--ant-color-error);
-      background: color-mix(in srgb, var(--ant-color-error) 9%, transparent);
+      background: color-mix(in srgb, var(--ant-color-error) 10%, transparent);
     }
   }
 
-  /* ─── 操作按钮区 ─── */
-  .popup-actions {
+  /* ═══ 域名分组 ═══ */
+  .popup-domain-group {
+    & + & {
+      margin-top: 4px;
+    }
+  }
+
+  .popup-domain-group-header {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .popup-actions__primary {
-    width: 100%;
-    height: 32px;
-    font-weight: 600;
-    border-radius: var(--app-radius-lg);
-    box-shadow: none;
-
-    &:not(:disabled):hover {
-      box-shadow: none;
-    }
-  }
-
-  .popup-actions__secondary {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-
-    .ant-btn {
-      height: 30px;
-      color: var(--ant-color-text-secondary);
-      background: var(--ant-color-bg-container);
-      border-color: color-mix(in srgb, var(--ant-color-border-secondary) 82%, transparent);
-      border-radius: var(--app-radius-md);
-      box-shadow: none;
-
-      &:hover {
-        color: var(--app-color-primary);
-        background: color-mix(in srgb, var(--app-color-primary) 8%, var(--ant-color-bg-container));
-        border-color: color-mix(in srgb, var(--app-color-primary) 30%, transparent);
-      }
-    }
-  }
-
-  .popup-external-icon {
-    margin-left: 4px;
-    opacity: 0.62;
-  }
-
-  /* ─── 关于区 ─── */
-  .popup-about {
-    margin-top: 7px;
-    text-align: center;
-  }
-
-  .popup-about-link {
-    all: unset;
-    box-sizing: border-box;
-    display: inline-flex;
+    gap: 8px;
     align-items: center;
-    justify-content: center;
-    min-height: 22px;
-    padding: 2px 10px;
+    padding: 5px 8px 5px;
+    border-bottom: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 35%, transparent);
+  }
+
+  .popup-domain-group-bar {
+    flex-shrink: 0;
+    width: 3px;
+    height: 15px;
+    border-radius: var(--app-radius-pill);
+  }
+
+  .popup-domain-group-favicon {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    object-fit: contain;
+    border-radius: 2px;
+  }
+
+  .popup-domain-group-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ant-color-text);
+    letter-spacing: -0.008em;
+  }
+
+  .popup-domain-group-count {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--ant-color-text-quaternary);
+    background: var(--ant-color-fill-quaternary);
+    padding: 0 5px;
+    border-radius: var(--app-radius-pill);
+    line-height: 16px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ═══ 底部操作 ═══ */
+  .popup-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 8px;
+  }
+
+  .popup-footer-brand {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ant-color-text-quaternary);
+    letter-spacing: 0.02em;
+  }
+
+  .popup-footer-btn {
+    height: 26px;
+    padding: 0 8px;
     font-size: 11px;
     color: var(--ant-color-text-tertiary);
-    cursor: pointer;
-    border-radius: var(--app-radius-pill);
-    transition:
-      color 0.15s ease,
-      background-color 0.15s ease;
+    border-radius: var(--app-radius-sm);
 
     &:hover {
-      color: var(--app-color-primary);
-      background: color-mix(in srgb, var(--app-color-primary) 7%, transparent);
+      color: var(--ant-color-text);
+      background: var(--ant-color-fill-quaternary);
     }
   }
 
-  /* ─── 错误提示 ─── */
+  /* ═══ 错误区 ═══ */
   .popup-error {
-    padding: 6px 8px;
+    padding: 6px 10px;
     margin-top: 6px;
-    font-size: 11.5px;
+    font-size: 12px;
     color: var(--ant-color-error);
     background: color-mix(in srgb, var(--ant-color-error) 8%, transparent);
-    border-radius: var(--app-radius-lg);
+    border-radius: var(--app-radius-md);
   }
 
-  /* ─── 暗色模式覆盖 ─── */
-  /* data-theme 挂在 <html>，data-popup 挂在 <body>，
-     因此只能用 [data-theme="dark"] [data-popup] 这种祖先后代选择器。 */
+  /* ═══════════════════════════════════════
+   * Dark Mode
+   * ═══════════════════════════════════════ */
   [data-theme="dark"] & {
     .popup-list {
-      scrollbar-color: color-mix(in srgb, #ffffff 22%, transparent) transparent;
-      background: color-mix(
-        in srgb,
-        var(--ant-color-bg-elevated) 60%,
-        var(--ant-color-bg-container)
-      );
-      box-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 4%, transparent);
+      scrollbar-color: color-mix(in srgb, #ffffff 18%, transparent) transparent;
+      background: color-mix(in srgb, var(--ant-color-bg-elevated) 50%, transparent);
+      border-color: color-mix(in srgb, var(--ant-color-border-secondary) 50%, transparent);
 
       &::-webkit-scrollbar-thumb {
-        background: color-mix(in srgb, #ffffff 20%, transparent);
+        background: color-mix(in srgb, #ffffff 16%, transparent);
         background-clip: content-box;
       }
 
       &:hover::-webkit-scrollbar-thumb {
-        background: color-mix(in srgb, #ffffff 30%, transparent);
+        background: color-mix(in srgb, #ffffff 26%, transparent);
         background-clip: content-box;
       }
     }
@@ -409,43 +425,46 @@ body {
     .popup-row {
       &:hover,
       &:focus-within {
-        background: color-mix(in srgb, var(--app-color-primary) 16%, transparent);
-        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--app-color-primary) 28%, transparent);
+        background: color-mix(in srgb, var(--app-color-primary) 14%, transparent);
       }
+
+      &:active {
+        background: color-mix(in srgb, var(--app-color-primary) 22%, transparent);
+      }
+
+      &--focused {
+        background: color-mix(in srgb, var(--app-color-primary) 14%, transparent);
+      }
+    }
+
+    .popup-toolbar-sep {
+      background: color-mix(in srgb, var(--ant-color-border-secondary) 50%, transparent);
+    }
+
+    .popup-toolbar-btn {
+      &:hover {
+        background: color-mix(in srgb, var(--app-color-primary) 12%, transparent);
+      }
+
+      &--active,
+      &--active:hover {
+        background: color-mix(in srgb, var(--app-color-primary) 18%, transparent);
+      }
+    }
+
+    .popup-domain-group-header {
+      border-bottom-color: color-mix(in srgb, var(--ant-color-border-secondary) 30%, transparent);
     }
 
     .popup-search {
       background: var(--ant-color-bg-elevated);
-      border-color: color-mix(in srgb, var(--ant-color-border) 68%, transparent);
-    }
-
-    .popup-actions__secondary .ant-btn {
-      background: var(--ant-color-bg-elevated);
-      border-color: color-mix(in srgb, var(--ant-color-border-secondary) 72%, transparent);
-
-      &:hover {
-        background: color-mix(in srgb, var(--app-color-primary) 18%, var(--ant-color-bg-elevated));
-        border-color: color-mix(in srgb, var(--app-color-primary) 32%, transparent);
-      }
+      border-color: color-mix(in srgb, var(--ant-color-border) 55%, transparent);
+      box-shadow: 0 1px 2px color-mix(in srgb, #000000 20%, transparent);
     }
   }
 }
 
-/* ─── Apple 皮肤覆盖 ─── */
-[data-popup][data-skin="apple"],
-[data-popup] [data-skin="apple"] {
-  .popup-actions__primary {
-    border-radius: var(--app-radius-pill);
-  }
-
-  .popup-row:hover,
-  .popup-row:focus-within {
-    transform: none;
-  }
-}
-
-/* ─── Lucide SVG 图标对齐修复 ─────────────
- * 与 newtab 的 _icon-fix.less 保持一致 */
+/* ═══ SVG 图标对齐 ═══ */
 .ant-btn-icon,
 .ant-input-prefix,
 .ant-input-suffix,
@@ -459,8 +478,5 @@ body {
   }
 }
 
-/* ─── Ant Design 浮层兜底 ─────────────
- * 已提取到 shared/styles/_floating-overrides.less，
- * newtab 和 popup 共享，避免重复。
- */
+/* ═══ 浮层兜底 ═══ */
 @import "@/shared/styles/_floating-overrides.less";

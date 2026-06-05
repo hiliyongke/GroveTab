@@ -4,11 +4,8 @@
  * 替代 App.tsx 中的硬编码视图条件渲染链。
  * 新增视图只需调用 registerView()，App.tsx 自动同步。
  *
- * 视图组件支持 React.lazy 懒加载，按需拆分 chunk 减小首屏体积。
- *
- * 缓存策略（P2-10）：
- *   - getViewComponentMap() 使用 module-level 缓存，只在 register/unregister 时才失效重建
- *   - 避免每次渲染时重新构建 Map/Object，提升性能
+ * 视图组件支持 React.lazy 懒加载，按需拆分 chunk。
+ * getViewComponentMap() 使用 module-level 缓存，仅在 register/unregister 时失效重建。
  */
 
 import type { ComponentType } from "react";
@@ -30,10 +27,7 @@ type ViewComponentMap = Record<ViewMode, ComponentType>;
 /** 注册表存储 */
 const registry = new Map<ViewMode, ViewRegistration>();
 
-/**
- * 组件映射缓存（P2-10）：
- * 只在 register/unregister 时重建，避免每次调用 getViewComponentMap 都重新构建
- */
+/** 组件映射缓存，仅在 register/unregister 时重建。 */
 let componentMapCache: ViewComponentMap | null = null;
 
 function invalidateCache(): void {
@@ -90,7 +84,7 @@ export function getEnabledViews(): ViewRegistration[] {
  * 获取视图组件映射表（供 App.tsx 渲染用）
  *
  * 返回 Record<ViewMode, ComponentType>，在渲染时用 viewMode 查找对应组件。
- * 使用缓存（P2-10）：只在缓存为空时重建，避免重复构建开销。
+ * 使用 module-level 缓存，仅在为空时重建。
  */
 export function getViewComponentMap(): ViewComponentMap {
   if (componentMapCache !== null) return componentMapCache;

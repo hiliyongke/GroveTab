@@ -263,6 +263,9 @@ function chromeExtensionPlugin() {
   };
 }
 
+/** P2-29: Bundle 体积可视化报告，`npm run report` 启用 */
+const enableReport = process.env.VITE_REPORT === "true";
+
 export default defineConfig({
   plugins: [
     react(),
@@ -276,6 +279,7 @@ export default defineConfig({
         /^data-/,
       ],
     }),
+  ],
   ],
   resolve: {
     alias: {

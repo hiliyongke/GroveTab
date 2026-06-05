@@ -41,7 +41,6 @@ export const STORAGE_KEYS = Object.freeze({
   trendingCache: key("trending_cache"),
   profiles: key("profiles"),
   speedDial: key("speed_dial"),
-  // ── 插件原生历史记录（v1.4） ──────────────────────
   /** 细粒度操作时间线（HistoryEvent[]） */
   historyEvents: key("history_events"),
   /** 最近关闭的标签快照（ClosedTabRecord[]） */

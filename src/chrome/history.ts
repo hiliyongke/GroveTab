@@ -13,9 +13,7 @@ export interface HistorySearchEntry {
   lastVisitTime: number;
 }
 
-/**
- * 检查是否已有历史记录权限。
- */
+/** 检查是否已有历史记录权限。 */
 export async function hasHistoryPermission(): Promise<boolean> {
   try {
     return await chrome.permissions.contains({ permissions: ['history'] });
@@ -24,9 +22,7 @@ export async function hasHistoryPermission(): Promise<boolean> {
   }
 }
 
-/**
- * 请求历史记录权限。
- */
+/** 请求历史记录权限。 */
 export async function requestHistoryPermission(): Promise<boolean> {
   try {
     return await chrome.permissions.request({ permissions: ['history'] });
@@ -35,9 +31,7 @@ export async function requestHistoryPermission(): Promise<boolean> {
   }
 }
 
-/**
- * 搜索浏览器历史记录。
- */
+/** 搜索浏览器历史记录。 */
 export async function searchHistoryEntries(query: string, maxResults = 6): Promise<HistorySearchEntry[]> {
   const results = await safeCall('history.search', () => chrome.history.search({
     text: query,

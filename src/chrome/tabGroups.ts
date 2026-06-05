@@ -1,13 +1,10 @@
 /**
- * Chrome API — Tab Groups Promise 化封装
- *
- * 所有调用点统一通过这里访问 `chrome.tabGroups` / `chrome.tabs.group` / `chrome.tabs.ungroup`，
- * 便于在极旧 Chrome、无权限或非扩展上下文中做能力检测和错误归一化。
+ * Chrome Tab Groups API 封装。
  */
 
 import { safeCall } from "./tabs";
 
-/** Chrome 原生 Tab Group 颜色。`@types/chrome` 当前未导出 ColorEnum，项目内显式维护字面量联合。 */
+/** Chrome 原生 Tab Group 颜色。 */
 export type ChromeTabGroupColor =
   | "grey"
   | "blue"
@@ -65,11 +62,7 @@ function assertTabGroupsAvailable(label: string): void {
   }
 }
 
-/**
- * 获取 Tab Group 列表。
- *
- * 为兼容无权限/非扩展上下文，查询失败时返回空数组；写操作仍会抛出错误交由上层反馈。
- */
+/** 获取 Tab Group 列表。能力不可用时返回空数组。 */
 export async function queryTabGroups(windowId?: number): Promise<ChromeTabGroup[]> {
   try {
     if (!isTabGroupsAvailable()) return [];

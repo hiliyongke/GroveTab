@@ -56,6 +56,10 @@ export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
     if (!loaded) return;
     document.documentElement.setAttribute('data-theme', mode);
     document.documentElement.setAttribute('data-skin', skinPreset);
+    // 皮肤切换过渡动画
+    if (!reducedMotion) {
+      document.documentElement.style.transition = 'background-color 300ms ease, color 200ms ease';
+    }
     document.documentElement.style.backgroundColor = mode === 'dark'
       ? (skinPreset === 'glassmorphism' ? '#202020' : '#141414')
       : (skinPreset === 'glassmorphism' ? '#F3F3F3' : '#F5F5F7');

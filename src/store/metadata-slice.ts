@@ -1,16 +1,7 @@
 /**
- * Zustand Store — Metadata Slice (tags, notes, pins, recent activity, workspaces)
+ * Zustand Store — Metadata Slice
  *
- * Slice 依赖关系：
- *   - 依赖 settings-slice：无直接依赖（设置变更不影响 metadata）
- *   - 被 tabs-slice 间接关联：pin/unpin 操作影响 tabs 列表的显示（如排序固定标签）
- *   - 不依赖 undo-slice、selection-slice、kanban-slice、stats-slice、speed-dial-slice
- *
- * 上游被以下模块依赖：
- *   - AppWorkspace：消费 pinnedUrls, tags, notes 等
- *   - HeroBar：消费 isPinned
- *   - ActivityStrip：消费 recentActivity
- *   - WorkspaceSwitcher：消费 workspaces
+ * 管理标签、备注、固定、最近活动、工作区等元数据。
  */
 
 import { create } from "zustand";
@@ -34,12 +25,7 @@ const TAGS_KEY = STORAGE_KEYS.tags;
 const NOTES_KEY = STORAGE_KEYS.notes;
 const PINS_KEY = STORAGE_KEYS.pins;
 
-/**
- * 稳定的空数组引用。
- *
- * 注意：selector 在无匹配时必须返回同一个引用，否则 zustand 会误判 snapshot 变化，
- * 在 React 18/19 的 useSyncExternalStore 机制下触发无限重渲染（React error #185）。
- */
+/** 稳定的空数组引用，避免 selector 触发无限重渲染。 */
 const EMPTY_TAGS: readonly string[] = Object.freeze([]);
 const EMPTY_ACTIVITY: readonly ActivityRecord[] = Object.freeze([]);
 const EMPTY_WORKSPACES: readonly Workspace[] = Object.freeze([]);
@@ -48,13 +34,9 @@ interface MetadataState {
   tags: Record<string, string[]>;
   notes: Record<string, string>;
   pinnedUrls: Set<string>;
-  /** 最近操作 ring buffer（由 repositories 持久化；最多 20 条，72h 过期） */
   recentActivity: readonly ActivityRecord[];
-  /** 用户自定义工作区（最多 3 个） */
   workspaces: readonly Workspace[];
-  /** 窗口自定义别名，仅影响 UI 展示；key 为 Chrome windowId。 */
   windowAliases: Record<number, string>;
-  /** 窗口自定义颜色，仅影响 UI 展示；key 为 Chrome windowId，value 为颜色 hex。 */
   windowColors: Record<number, string>;
 
   loadMetadata: () => Promise<void>;
@@ -67,7 +49,6 @@ interface MetadataState {
   getTags: (url: string) => readonly string[];
   getNote: (url: string) => string;
 
-  // ── v1.0 封板新增 ──
   pushActivity: (record: ActivityRecord) => Promise<void>;
   clearActivity: () => Promise<void>;
   setWorkspaces: (list: Workspace[]) => Promise<void>;
@@ -117,7 +98,6 @@ export const useMetadataStore = create<MetadataState>((set, get) => ({
       tags[key] = [...existing, tag];
       set({ tags });
       await setData(TAGS_KEY, tags);
-      // 同步写一条 undoable 的「tab_tagged」事件，让「插件历史」有入口可反悔
       void appendHistoryEvent({
         type: "tab_tagged",
         url,
@@ -174,8 +154,6 @@ export const useMetadataStore = create<MetadataState>((set, get) => ({
   isPinned: (url) => get().pinnedUrls.has(normalizeKey(url)),
   getTags: (url) => get().tags[normalizeKey(url)] ?? EMPTY_TAGS,
   getNote: (url) => get().notes[normalizeKey(url)] ?? "",
-
-  // ── v1.0 封板新增：Activity Strip / Workspace ──
 
   pushActivity: async (record) => {
     const next = await repoPushActivity(record);

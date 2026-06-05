@@ -33,6 +33,3 @@ export {
   exportSingleSession,
   createAutoSnapshot,
 } from "./archive-session-management";
-
-// 工具函数（仅内部使用，通常不对外暴露；如有需要可取消注释）
-// export { isArchivableTab, toArchivedTab, buildDefaultSessionName, canonicalUrlKey } from './archive-utils';

@@ -12,7 +12,7 @@
  * 业务逻辑保留：搜索 / 批量选择 / 合并 / 恢复 / 重命名 / 分享 / 归档当前。
  */
 
-import { useReducer, useEffect, useMemo } from "react";
+import { useReducer, useEffect, useMemo, useRef } from "react";
 import { Plus, Save, Inbox, ArrowDownUp } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { Button, Spin, Input, Modal, Typography, Select, Empty, Flex } from "antd";
@@ -213,6 +213,7 @@ export function ArchiveView() {
   const exportSessionSlice = useSessionsStore((s) => s.exportSession);
 
   const [state, dispatch] = useReducer(archiveReducer, INITIAL_STATE);
+  const abortRef = useRef<AbortController | null>(null);
   const {
     archivingCurrent,
     selectable,
@@ -500,9 +501,12 @@ export function ArchiveView() {
 
   const handleArchiveCurrent = async () => {
     if (archivingCurrent || tabCount === 0) return;
+    const controller = new AbortController();
+    abortRef.current = controller;
     dispatch({ type: "SET_ARCHIVING", payload: true });
     try {
       const result = await archiveAllTabs();
+      if (controller.signal.aborted) return;
       void track("archive_create", { count: result.archivedCount });
       const { archivedCount, closedCount, session } = result;
       void appendHistoryEvent({
@@ -657,14 +661,27 @@ export function ArchiveView() {
                 type="primary"
                 icon={<Plus size={ICON_SIZE.MEDIUM} />}
                 loading={archivingCurrent}
-                disabled={tabCount === 0}
+                disabled={tabCount === 0 && !archivingCurrent}
                 onClick={() => {
                   void handleArchiveCurrent();
                 }}
                 title={t("{count} 个标签页", { count: tabCount })}
               >
-                {t("归档")}
+                {archivingCurrent ? t("归档中...") : t("归档")}
               </Button>
+              {archivingCurrent && (
+                <Button
+                  size="small"
+                  danger
+                  onClick={() => {
+                    abortRef.current?.abort();
+                    dispatch({ type: "SET_ARCHIVING", payload: false });
+                    feedback.info(t("已取消归档"));
+                  }}
+                >
+                  {t("取消")}
+                </Button>
+              )}
             </Flex>
           </Flex>
 

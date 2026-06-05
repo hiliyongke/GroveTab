@@ -43,7 +43,7 @@ import {
 } from "lucide-react";
 import { cssVars } from "@/shared/utils/css-vars";
 import { useT } from "@/shared/i18n";
-import { useMetadataStore, useSelectionStore, useSpeedDialStore } from "@/store";
+import { useMetadataStore, useSelectionStore, useSpeedDialStore, useTabsStore } from "@/store";
 import { stringToColor } from "@/shared/utils/color";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { formatUrlForDisplay } from "@/shared/utils/url-display";
@@ -117,6 +117,9 @@ export const TabItem = memo(function TabItem({
   const isSelected = useSelectionStore((s) => s.selectedIds.has(tab.id));
   const toggleSelect = useSelectionStore((s) => s.toggleSelect);
   const enterSelectionMode = useSelectionStore((s) => s.enterSelectionMode);
+  /** 从 store 读取 currentWindowId 而非依赖 tab 对象属性，避免窗口切换时全量展开 */
+  const currentWindowId = useTabsStore((s) => s.currentWindowId);
+  const isCurrentWindow = tab.windowId === currentWindowId;
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [faviconError, setFaviconError] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -393,7 +396,7 @@ export const TabItem = memo(function TabItem({
               <Volume2 size={ICON_SIZE.SMALL} className={styles["app-tab-item-status-primary"]} />
             </Tooltip>
           )}
-          {!tab.isCurrentWindow && (
+          {!isCurrentWindow && (
             <Tooltip title={t("其他窗口")}>
               {/* 使用外链箭头图标表达「跳去另一个窗口」语义，避免与 favicon 兜底的 Global 图标混淆 */}
               <Pointer size={ICON_SIZE.SMALL} className={styles["app-tab-item-secondary-icon"]} />

@@ -1,11 +1,5 @@
 /**
- * ErrorBoundary · v1.3
- *
- * 变更：
- *  - 支持 `fallback`：自定义错误态 UI（替换默认技术栈打印）
- *  - 支持 `onReset`：允许外部重试（典型使用：Widget 内部网络调用失败，
- *    用户点击后重置 error state 再渲染 children）
- *  - 默认 UI：紧凑"加载失败 · 点击重试"占位，适合单个 Widget 卡片
+ * ErrorBoundary — 错误边界，支持自定义 fallback 和 onReset 重试。
  */
 import { Component, type ReactNode } from "react";
 import { Button } from "antd";

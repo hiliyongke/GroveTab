@@ -9,6 +9,8 @@
  * 自动域名排序：
  *   - 切换到域名分组视图时，自动按域名排序浏览器标签栏（同域名标签相邻）
  *   - 切离域名分组视图时，自动恢复浏览器标签栏的原始顺序
+ *
+ * 过滤/分组/排序均为同步 useMemo 操作。
  */
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -18,6 +20,7 @@ import { useTabsStore, useMetadataStore, useSettingsStore } from "@/store";
 import { groupTabsByDomain, type DomainGroup } from "@/shared/utils/domain";
 import { syncSortToBrowser, restoreBrowserOrder } from "@/shared/utils/tab-sort-sync";
 import { getColumnVars } from "@/shared/utils/flow-columns";
+import { feedback } from "@/shared/ui/feedback";
 import { useT } from "@/shared/i18n";
 import { sortTabs } from "@/features/smart-sort/hooks/useSmartSort";
 import { DomainGroupCard } from "../components/DomainGroupCard";
@@ -150,24 +153,22 @@ export function DomainGroupView({ filterQuery }: DomainGroupViewProps) {
   const originalTabIdsRef = useRef<number[] | null>(null);
 
   useEffect(() => {
-    // 保存原始顺序（仅首次进入域名分组视图时）
     const currentTabs = useTabsStore.getState().tabs;
     if (!originalTabIdsRef.current) {
       originalTabIdsRef.current = currentTabs.map((t) => t.id);
     }
 
-    // 按域名排序
     const sorted = sortTabs(currentTabs, "domain", [], {});
-
-    // 立即更新 store（UI 马上生效）
-    useTabsStore.setState({ tabs: sorted });
-
-    // 后台异步同步到浏览器标签栏
-    void syncSortToBrowser(sorted).catch(() => {
-      // 忽略同步失败
+    // 延迟写入 store，避免阻塞首次渲染
+    requestAnimationFrame(() => {
+      useTabsStore.setState({ tabs: sorted });
     });
 
-    // 卸载时恢复浏览器原始顺序
+    void syncSortToBrowser(sorted).catch((err) => {
+      console.warn("[DomainGroupView] Sort sync failed:", err);
+      feedback.error(t("sortSyncFailed"));
+    });
+
     return () => {
       const originalIds = originalTabIdsRef.current;
       if (originalIds) {

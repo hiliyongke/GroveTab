@@ -37,7 +37,7 @@ export type {
 // ── 活动记录 ────────────────────────────
 export type { ActivityRecord } from "./activity";
 
-// ── 插件原生历史记录（v1.4） ─────────────────
+// ── 活动记录 ────────────────────────────
 export type {
   HistoryEvent,
   HistoryEventType,

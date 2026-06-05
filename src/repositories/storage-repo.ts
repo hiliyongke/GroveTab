@@ -1,8 +1,5 @@
 /**
- * StorageRepo — Partitioned chrome.storage.local wrapper
- *
- * Data is stored under brand-configured namespaced keys.
- * to avoid reading all data on every access.
+ * StorageRepo — 基于命名空间的 chrome.storage.local 封装。
  */
 
 import { storageGet, storageSet } from "@/chrome";
@@ -24,12 +21,7 @@ import type {
   Workspace,
 } from "@/shared/types";
 
-// ── Schema Version & Migration ────────────────────────
-// v1 → v2: v1.0 封板。新增 dedupStrictness / idleThresholdMinutes /
-// autoSnapshotFrequency / enableOgFetch / lastActiveWorkspaceId 等字段；
-// 新增 activity / workspaces / kanban / ogIndex 等独立存储键。
-// v2 → v3: 引入自由 Widget 画布、网站快捷模块、自定义金句与生产力小组件设置。
-// 所有新字段走"缺失即默认"策略，不需要破坏性迁移。
+// ── Schema Version & Migration ──
 const CURRENT_SCHEMA_VERSION = 3;
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -73,7 +65,6 @@ const DEFAULT_SETTINGS: UserSettings = {
     quickStart: true,
   },
   speedDialGroupEnabled: false,
-  // v1.0 封板新增默认值
   dedupStrictness: "loose",
   idleThresholdMinutes: 1440,
   undoWindowSeconds: 5,
@@ -81,10 +72,8 @@ const DEFAULT_SETTINGS: UserSettings = {
   autoSnapshotFrequency: "12h",
   enableOgFetch: false,
   trackTabFocusTime: true,
-  // v1.2 新增默认值
   clickEffect: "off",
   videoBackground: { type: "none" },
-  // v1.4 插件原生历史记录默认值
   historyEnabled: true,
   historyRecordEvents: true,
   historyMaxClosedTabs: 50,
@@ -100,16 +89,25 @@ export async function getData<T>(key: StorageKey): Promise<T | undefined> {
 }
 
 export async function setData<T>(key: StorageKey, value: T): Promise<void> {
-  await storageSet(key, value);
+  if (typeof chrome === "undefined" || !chrome.storage?.local) {
+    console.warn("[StorageRepo] chrome.storage unavailable — write to %s silently dropped", key);
+    return;
+  }
+  try {
+    await storageSet(key, value);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes('QUOTA_BYTES') || msg.includes('quota')) {
+      console.warn('[StorageRepo] Storage quota exceeded — write to %s blocked', key);
+    }
+    throw err;
+  }
   if (key !== STORAGE_KEYS.meta) {
     await updateMetaTimestamp();
   }
 }
 
-/**
- * 删除指定 key 对应的数据。
- * 用于一键重置：清除设置 / Onboarding 标志 / 工厂重置遍历全部应用命名空间键。
- */
+/** 删除指定 key 的数据。 */
 export async function removeData(key: string): Promise<void> {
   await storageRemove(key);
   if (key !== STORAGE_KEYS.meta) {
@@ -117,10 +115,7 @@ export async function removeData(key: string): Promise<void> {
   }
 }
 
-/**
- * 列出 chrome.storage.local 中的所有键。
- * 用于一键重置：遍历并删除所有应用命名空间键以恢复出厂状态。
- */
+/** 列出 chrome.storage.local 所有键。 */
 export async function getAllDataKeys(): Promise<string[]> {
   return storageGetAllKeys();
 }
@@ -130,10 +125,6 @@ export async function getAllDataKeys(): Promise<string[]> {
 export async function getSettings(): Promise<UserSettings> {
   const settings = await getData<UserSettings>(STORAGE_KEYS.settings);
   if (settings === undefined) return { ...DEFAULT_SETTINGS };
-  /**
-   * v1.0 封板：为缺失的新字段注入默认值（向前兼容，绝不抛错）。
-   * 不使用展开合并整个 DEFAULT_SETTINGS，避免意外覆盖用户显式关闭的老字段。
-   */
   return withDefaults(settings);
 }
 
@@ -173,7 +164,6 @@ async function ensureMeta(): Promise<StorageMeta> {
     };
     await setData(STORAGE_KEYS.meta, meta);
   } else if (meta.schemaVersion < CURRENT_SCHEMA_VERSION) {
-    // 执行 schema 升级（目前为空迁移，仅 bump 版本号）
     await runMigrations(meta.schemaVersion, CURRENT_SCHEMA_VERSION);
     meta.schemaVersion = CURRENT_SCHEMA_VERSION;
     meta.updatedAt = Date.now();
@@ -182,15 +172,10 @@ async function ensureMeta(): Promise<StorageMeta> {
   return meta;
 }
 
-/**
- * 迁移执行器：按版本号顺序执行增量迁移脚本。
- * 当前 v1 → v2 为"空迁移"（字段缺失时默认值已在读取路径兜底），
- * 但保留显式升级钩子以便未来添加需要写操作的迁移。
- */
+/** 按版本号顺序执行增量迁移。当前 v1 → v2 将 settings 新字段物化落盘。 */
 async function runMigrations(fromVersion: number, toVersion: number): Promise<void> {
   for (let v = fromVersion; v < toVersion; v++) {
     if (v === 1) {
-      // v1 → v2：确保 settings 的新字段被物化落盘（可选，提升一致性）
       const current = await getData<UserSettings>(STORAGE_KEYS.settings);
       if (current !== undefined) {
         await setData(STORAGE_KEYS.settings, withDefaults(current));
@@ -350,8 +335,7 @@ export async function getOgEntry(url: string): Promise<OgEntry | undefined> {
 export async function saveOgEntry(entry: OgEntry): Promise<void> {
   const index = (await getData<Record<string, OgEntry>>(STORAGE_KEYS.ogIndex)) ?? {};
   index[entry.url] = entry;
-  // LRU：超过 10000 条时才触发一次批量清理，淘汰最老 1000 条
-  // 优化：仅在超限时排序，避免每次写入都 O(n log n) 全量排序
+  // LRU：超过 10000 条时淘汰最老 1000 条
   const keys = Object.keys(index);
   if (keys.length > 10000) {
     const oldest = keys
@@ -447,5 +431,11 @@ export async function reorderSpeedDialSites(reorderedIds: string[]): Promise<Spe
   return reordered;
 }
 
-// 模块加载时初始化元数据
-void ensureMeta();
+/// 延迟初始化元数据，避免模块导入时触发 Chrome API 调用。
+let _metaInitialized = false;
+
+export async function initMetaIfNeeded(): Promise<void> {
+  if (_metaInitialized) return;
+  _metaInitialized = true;
+  await ensureMeta();
+}

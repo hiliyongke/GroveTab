@@ -601,7 +601,7 @@ const en: Record<string, string> = {
   "settings.viewTabPositionLeft": "Left",
   "settings.viewTabPositionRight": "Right",
   "settings.viewTabPositionBottom": "Bottom",
-  // v1.0 behavior additions
+  // Behavior additions
   "settings.overrideNewTab": "Replace new tab page",
   "settings.overrideNewTabHint":
     "When on, every new tab opens the {brand} workspace; when off, the browser default is used.",
@@ -638,6 +638,7 @@ const en: Record<string, string> = {
   "settings.domainGroupColumnsHint": "Auto: adapt to window width; or lock to a fixed count",
   "settings.windowCardColumns": "Window card columns",
   "settings.windowCardColumnsHint": "Auto: adapt by 360px card width; or lock to a fixed count",
+  "settings.windowCardCurrentOnly": "Current window only",
   "settings.windowCardAllExpanded": "All expanded",
   "settings.windowCardAllCollapsed": "All collapsed",
   "settings.windowCardShowGroupSection": "Show tab group sections",
@@ -735,7 +736,7 @@ const en: Record<string, string> = {
     'Wipe locally stored search history; the trending source "Local" will be empty until new searches are made',
   "settings.clearRecentSearchesConfirm": "Really clear all recent searches?",
   "settings.clearRecentSearchesDone": "Recent searches cleared",
-  // ── Danger zone: one-click reset trio (v1.1) ──
+  // ── Danger zone: one-click reset trio ──
   "settings.dangerZone": "Danger zone",
   "settings.resetSettings": "Restore default settings",
   "settings.resetSettingsConfirm": "Restore default settings?",
@@ -815,6 +816,10 @@ const en: Record<string, string> = {
   "shortcuts.conflict": "Conflicts with {peers}",
   "shortcuts.globalConflict":
     "Conflicts with a Chrome global shortcut; the global binding will take precedence",
+  "shortcuts.openHistory": "Open history",
+  "shortcuts.openHistoryHint": "Open the browser history panel",
+  "shortcuts.commandPalette": "Command palette",
+  "shortcuts.commandPaletteHint": "Open the command palette for quick actions",
   // View switching shortcuts
   "shortcuts.view.tabs": "Tabs View",
   "shortcuts.view.timeline": "Timeline View",
@@ -940,7 +945,7 @@ const en: Record<string, string> = {
   "bookmark.permissionDenied": "Bookmark permission denied",
   "bookmark.permissionDescription": "Grant access to browser bookmarks to use dedup, dead-link detection, and smart organizing tools",
   "bookmark.searchPlaceholder": "Search bookmarks...",
-  // ── Bookmark toolbox (v1.1) ──
+  // ── Bookmark toolbox ──
   "bookmark.tools.entry": "Toolbox",
   "bookmark.tools.title": "Bookmark toolbox",
   "bookmark.tools.titleMeta": "{bookmarks} bookmarks · {folders} folders",
@@ -1066,7 +1071,7 @@ const en: Record<string, string> = {
   "selection.selectAll": "Select all",
   "selection.clear": "Clear selection",
   "selection.exit": "Exit selection",
-  // Insights / Workspace / Kanban (v1.0)
+  // Insights / Workspace / Kanban
   "insights.title": "Local insights",
   "insights.dailyOpens": "New tab opens (7 days)",
   "insights.topDomains": "Top 10 domains",
@@ -1145,7 +1150,7 @@ const en: Record<string, string> = {
   "kanban.removeCardFailed": "Failed to remove card",
 
   // ══════════════════════════════════════════════════
-  // v1.2: Daily Quote / Click effect / Video background / About
+  // Daily Quote / Click effect / Video background / About
   // ══════════════════════════════════════════════════
 
   // Effects: click / video
@@ -1252,6 +1257,24 @@ const en: Record<string, string> = {
   "popup.noTabsToArchive": "No tabs to archive",
   "popup.openTab": "Open {title}",
   "popup.closeTab": "Close tab {title}",
+  "popup.dedup": "Dedup",
+  "popup.dedupCount": "Dedup {count}",
+  "popup.dedupTip": "Remove duplicate tabs, keep the most recent one",
+  "popup.sortBy": "Sort by",
+  "popup.sortRecent": "Recent",
+  "popup.sortTitle": "Title",
+  "popup.sortDomain": "Domain",
+  "popup.sortUrlLength": "URL length",
+  "popup.sortAsc": "Ascending",
+  "popup.sortDesc": "Descending",
+  "popup.groupByDomain": "Group by domain",
+  "popup.closeAll": "Close all tabs",
+  "popup.closeBlank": "Close blank tabs",
+  "popup.closeBlankCount": "Close blank tabs ({count})",
+  "popup.dedupDone": "Closed {count} duplicate tabs",
+  "popup.dedupFailed": "Dedup failed",
+  "popup.closeAllDone": "All tabs closed",
+  "popup.closeBlankDone": "Closed {count} blank tabs",
 
   // ══════════════════════════════════════════════════
   // Settings panel section titles
@@ -1303,8 +1326,8 @@ const en: Record<string, string> = {
   "quickStart.groupNotFound": "Type to create a new group",
   "uiVisibility.quickStart": "Quick Access",
   "uiVisibility.quickStartHint": "Quick access shortcuts on homepage",
-  speedDialGroupEnabled: "Grouped Display",
-  speedDialGroupEnabledHint: "Show sites by group; turn off for flat layout",
+  "speedDialGroupEnabled": "Grouped Display",
+  "speedDialGroupEnabledHint": "Show sites by group; turn off for flat layout",
   "quickStart.showAddButton": "Show Add Button",
   "quickStart.showAddButtonHint": "Hide to add sites only via settings",
   "quickStart.groupCollapsible": "Collapsible Groups",
@@ -1338,7 +1361,7 @@ const en: Record<string, string> = {
   "settings.gridCardSizeMd": "Default",
   "settings.gridCardSizeLg": "Roomy",
   "settings.gridCardSizeAuto": "Adaptive",
-  // ── Native History (v1.4) ──────────────────────────
+  // ── Native History ──
   "history.title": "History",
   "history.subtitle": "See what you did in the extension, and restore closed tabs in one click",
   "history.close": "Close",
@@ -1407,6 +1430,9 @@ const en: Record<string, string> = {
   "trash.clearDesc": "This action cannot be undone. All items will be permanently deleted.",
   "trash.restore": "Restore",
   "trash.delete": "Delete item",
+  "trash.confirmDeleteSingle": "Delete this record? This cannot be undone.",
+  "trash.showAll": "Show all +{count}",
+  "trash.collapse": "Collapse",
   "trash.restoreSuccess": "Restored {count} tabs",
   "trash.restoreFailed": "Restore failed",
   "trash.deleteFailed": "Delete failed",
@@ -1480,6 +1506,42 @@ const en: Record<string, string> = {
   "bookmark.permissionHint2": "After granting, use the toolbox to deduplicate and detect broken links",
   "bookmark.permissionHint3": "You can revoke permission anytime in Chrome's extension settings",
 
+  // Bookmark CRUD
+  "bookmark.addBookmark": "Add Bookmark",
+  "bookmark.addFolder": "New Folder",
+  "bookmark.editBookmark": "Edit Bookmark",
+  "bookmark.open": "Open",
+  "bookmark.edit": "Edit",
+  "bookmark.delete": "Delete",
+  "bookmark.addHere": "Add Bookmark Here",
+  "bookmark.confirmDelete": "Confirm Delete",
+  "bookmark.confirmDeleteUrl": "Delete bookmark \"{title}\"?",
+  "bookmark.confirmDeleteFolder": "Delete folder \"{title}\" and all its contents?",
+  "bookmark.deleteSuccess": "Bookmark deleted",
+  "bookmark.deleteFailed": "Delete failed, please retry",
+  "bookmark.editSuccess": "Bookmark updated",
+  "bookmark.editFailed": "Update failed, please retry",
+  "bookmark.createSuccess": "Bookmark created",
+  "bookmark.createFailed": "Create failed, please retry",
+  "bookmark.folderCreated": "Folder created",
+  "bookmark.folderCreateFailed": "Failed to create folder",
+  "bookmark.folderNamePlaceholder": "Folder name",
+  "bookmark.batchDeleteSuccess": "Deleted {count} bookmark(s)",
+  "bookmark.deleteSelected": "Delete Selected ({count})",
+  "bookmark.selectItems": "Select bookmarks to delete",
+  "bookmark.batchSelect": "Batch Select",
+  "bookmark.selectAll": "Select All",
+  "bookmark.titlePlaceholder": "Bookmark title",
+  "bookmark.url": "URL",
+
+  // Empty states
+  "empty.noOpenTabs": "No open tabs",
+  "empty.noBookmarks": "No bookmarks",
+
+  // Sort sync
+  "sortSyncFailed": "Sort sync failed, please retry",
+  "restoreOrderFailed": "Restore order failed, please retry",
+  "跳到主内容": "Skip to main content",
   "history.closedEmptyHint1": "Tabs closed with Cmd/Ctrl+W are automatically recorded",
   "history.closedEmptyHint2": "Full-window closures are saved as a group for batch restore",
   "history.closedEmptyHint3": "Right-click a tab and choose 'Archive' for long-term preservation",

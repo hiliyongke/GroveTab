@@ -141,7 +141,7 @@ export function ShortcutsPanel() {
   const customKeybindings = useSettingsStore((s) => s.settings.customKeybindings);
   const resolved = useResolvedKeybindings();
 
-  // 初始化时将现有自定义快捷键同步到 registry（UX-P0-13）
+  // 初始化时将自定义快捷键同步到 registry
   useEffect(() => {
     if (customKeybindings && Object.keys(customKeybindings).length > 0) {
       setRegistryCustom(customKeybindings);
@@ -186,7 +186,6 @@ export function ShortcutsPanel() {
     (action: KeybindingAction, keyStr: string) => {
       const updated = { ...customKeybindings, [action]: keyStr };
       void updateSettings({ customKeybindings: updated });
-      // 同步到 shortcuts registry（UX-P0-13）
       setRegistryCustom(updated);
       feedback.success(t("快捷键已保存"));
     },
@@ -200,7 +199,6 @@ export function ShortcutsPanel() {
       void updateSettings({
         customKeybindings: Object.keys(updated).length > 0 ? updated : undefined,
       });
-      // 同步到 shortcuts registry（UX-P0-13）
       setRegistryCustom(Object.keys(updated).length > 0 ? updated : {});
       feedback.success(t("已恢复默认快捷键"));
     },

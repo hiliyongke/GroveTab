@@ -2,10 +2,6 @@
  * 归档服务 - 会话管理
  *
  * 负责归档会话的 CRUD 操作：删除、重命名、合并、导出、自动快照等。
- *
- * 导出验证（P1-9）：
- *   - 导出内容写入前校验 JSON 序列化是否成功
- *   - 校验导出文件大小不超过 MAX_EXPORT_SIZE（50 MB），防止损坏或超大文件
  *   - 校验 session 数据结构完整性（必须有 id/name/tabs）
  */
 
@@ -24,7 +20,7 @@ import {
 /** 导出文件大小上限（50 MB） */
 const MAX_EXPORT_SIZE = 50 * 1024 * 1024;
 
-/** 校验导出会话结构完整性（P1-9） */
+/** 校验导出会话结构完整性。 */
 function validateSessionForExport(session: ArchivedSession): string | null {
   if (!session.id) return "Missing session id";
   if (typeof session.name !== "string" || session.name.trim() === "") return "Missing session name";
@@ -107,7 +103,7 @@ export async function exportSingleSession(
   const session = sessions.find((s) => s.id === sessionId);
   if (session === undefined) return null;
 
-  // P1-9: 结构完整性校验
+  // 结构完整性校验
   const validationError = validateSessionForExport(session);
   if (validationError !== null) {
     console.error(
@@ -133,7 +129,7 @@ export async function exportSingleSession(
     return null;
   }
 
-  // P1-9: 文件大小校验
+  // 文件大小校验
   if (new TextEncoder().encode(content).length > MAX_EXPORT_SIZE) {
     console.error("[archive-session-management] exportSingleSession: content too large");
     return null;

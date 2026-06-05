@@ -1,13 +1,5 @@
 /**
- * SaveAsTemplateAction —— 保存当前标签页为工作区模板的快捷操作
- *
- * UX-P0-11：从 CommandPalette 直达，3 秒内完成保存
- *
- * 流程：
- *   1. 获取当前所有标签页
- *   2. 弹出命名输入框（Modal.prompt）
- *   3. 保存到 workspaceTemplates
- *   4. Toast 反馈
+ * SaveAsTemplateAction — 保存当前标签页为工作区模板。
  */
 
 import { feedback } from "@/shared/ui/feedback";

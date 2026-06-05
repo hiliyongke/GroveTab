@@ -1,8 +1,5 @@
 /**
- * StatusBar —— 底部全宽持久消息层
- *
- * UX-P0-07：承载持久消息（选择模式提示、整理建议等）
- * z-index: 1000（Toast=1100, Modal=1200）
+ * StatusBar — 底部持久消息层，承载选择模式提示、整理建议等。
  */
 
 import { Button, Typography } from "antd";

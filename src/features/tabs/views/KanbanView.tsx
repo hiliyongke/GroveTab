@@ -190,7 +190,6 @@ export function KanbanView() {
     }
   };
 
-  /* P1-3: 看板空状态 */
   if (tabs.length === 0) {
     return (
       <Empty

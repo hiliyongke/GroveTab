@@ -1,12 +1,4 @@
 /**
- * UndoToast — 关闭 / 归档后的撤销提示（富交互版，F-06 封板）
- *
- * 设计：
- *   - 底部居中浮动胶囊（antd token 控制配色）
- *   - 归档场景：文案 "已归档 N 个标签到「{sessionName}」" + [查看归档] + [撤销]
- *   - 普通关闭场景：保持原 [撤销] 单按钮形态
- *   - 若 record.subNote 非空（如 "M 个关闭失败"），在副行展示
- *
  * UndoToast 通过自定义事件 `app:open-archive` 通知上层打开 ArchivePanel 并高亮 session。
  */
 

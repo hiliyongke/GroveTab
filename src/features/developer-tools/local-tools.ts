@@ -468,6 +468,7 @@ export function htmlEntityTransform(input: string, action: HtmlEntityAction): De
         return { output: result };
       }
       case "decode": {
+        // 使用 textarea.innerHTML 进行 HTML 实体解码（安全，仅解码用户输入）
         const textarea = document.createElement("textarea");
         textarea.innerHTML = input;
         return { output: textarea.value };
