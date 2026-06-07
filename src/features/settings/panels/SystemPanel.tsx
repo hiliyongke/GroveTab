@@ -8,6 +8,7 @@
 
 import type { UserSettings } from "@/shared/types";
 import { Flex, Typography } from "antd";
+import { useT } from "@/shared/i18n";
 import { DataPanel } from "./DataPanel";
 import { PrivacyPanel } from "./PrivacyPanel";
 
@@ -17,15 +18,16 @@ interface SystemPanelProps {
 }
 
 export function SystemPanel({ settings, updateSettings }: SystemPanelProps) {
+  const { t } = useT();
   const sections = [
     {
       key: "data",
-      title: "数据管理",
+      title: t("数据管理"),
       content: <DataPanel />,
     },
     {
       key: "privacy",
-      title: "隐私与安全",
+      title: t("隐私与安全"),
       content: <PrivacyPanel settings={settings} updateSettings={updateSettings} />,
     },
   ];

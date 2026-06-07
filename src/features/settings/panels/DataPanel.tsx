@@ -36,13 +36,16 @@ import {
   AlertTriangle,
   Sparkles,
   ShieldCheck,
+  Package,
+  PackageCheck,
 } from "lucide-react";
 import { PermissionDiagnosticsPanel } from "./PermissionDiagnosticsPanel";
 
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { feedback } from "@/shared/ui/feedback";
 import { useT } from "@/shared/i18n";
-import { useSettingsStore } from "@/store";
+import { useSettingsStore, useSpeedDialStore } from "@/store";
+import { useFeatureFlagStore } from "@/shared/store/feature-flag-slice";
 import { exportSessionsJSON, downloadFile, parseImportJSON } from "@/shared/utils/import-export";
 import { getArchivedSessions, saveSessions } from "@/services";
 import { getQuotaStatus, formatBytes } from "@/shared/utils/quota";
@@ -51,6 +54,7 @@ import { getAllDataKeys, removeData } from "@/repositories/storage-repo";
 import { APP_RESOURCE_NAMES, STORAGE_KEYS, isAppStorageKey } from "@/shared/config/storage-keys";
 import type { SettingsProfile } from "@/shared/utils/profiles";
 import { getProfiles, createProfile, renameProfile, deleteProfile } from "@/shared/utils/profiles";
+import { exportFullBundle, importFullBundle, downloadJsonFile } from "@/shared/utils/full-export";
 import styles from "./styles/data.module.less";
 
 interface QuotaInfo {
@@ -360,6 +364,64 @@ export function DataPanel() {
             </Typography.Text>
           )}
         </Flex>
+      </section>
+
+      {/* ── 全量导出/导入（跨设备迁移） ── */}
+      <section className="settings-section">
+        <Field label={t("数据迁移")} hint={t("导出全部数据（设置 + 站点 + 归档 + 规则）为 JSON 文件，方便跨设备迁移或备份")}>
+          <Flex vertical gap={8}>
+            <Button
+              block
+              icon={<Package size={ICON_SIZE.MEDIUM} />}
+              onClick={async () => {
+                try {
+                  const json = await exportFullBundle();
+                  downloadJsonFile(json, `GroveTab-full-${new Date().toISOString().slice(0, 10)}.json`);
+                  feedback.success(t("全量数据已导出"));
+                } catch (e) {
+                  feedback.error(t("导出失败，请重试"));
+                }
+              }}
+            >
+              {t("导出全部数据")}
+            </Button>
+            <Upload
+              accept=".json"
+              showUploadList={false}
+              beforeUpload={async (file) => {
+                const text = await file.text();
+                const doImport = async () => {
+                  try {
+                    const { restored, skipped, errors } = await importFullBundle(text);
+                    await useSpeedDialStore.getState().loadSites();
+                    await useFeatureFlagStore.getState().loadFlags();
+                    const parts: string[] = [];
+                    if (restored.length > 0) parts.push(t("已恢复") + ": " + restored.join("、"));
+                    if (skipped.length > 0) parts.push(t("已跳过") + ": " + skipped.join("、"));
+                    if (errors.length > 0) parts.push(t("失败") + ": " + errors.join("、"));
+                    if (errors.length > 0) feedback.warning(parts.join(" | "));
+                    else feedback.success(parts.filter(Boolean).join(" | "));
+                  } catch (e: any) {
+                    feedback.error(e?.message || t("导入失败，请检查文件格式"));
+                  }
+                };
+                // 确认弹窗
+                modal.confirm({
+                  title: t("确认导入数据？"),
+                  content: t("导入将合并数据，不会覆盖已有设置。继续？"),
+                  okText: t("导入"),
+                  cancelText: t("取消"),
+                  onOk: () => void doImport(),
+                });
+                return false;
+              }}
+            >
+              <Button block icon={<PackageCheck size={ICON_SIZE.MEDIUM} />}>
+                {t("导入全部数据")}
+              </Button>
+            </Upload>
+          </Flex>
+        </Field>
       </section>
 
       <section className="settings-section">

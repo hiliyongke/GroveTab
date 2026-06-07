@@ -45,7 +45,7 @@ export function WindowToolbar({
     <ViewToolbar
       searchQuery={filterQuery}
       onSearchChange={onFilterChange}
-      searchPlaceholder={t("window.searchPlaceholder")}
+      searchPlaceholder={t("搜索窗口…")}
     >
       {/* 排序切换 */}
       <Select
@@ -100,7 +100,7 @@ export function WindowToolbar({
 
       {/* 批量模式状态提示 */}
       {selectionMode && selectedCount > 0 && (
-        <Typography.Text style={{ fontSize: 12, color: "var(--ant-color-primary)", flexShrink: 0 }}>
+        <Typography.Text style={{ color: "var(--ant-color-primary)", flexShrink: 0 }}>
           {t("已选 {count} 项", { count: selectedCount })}
         </Typography.Text>
       )}

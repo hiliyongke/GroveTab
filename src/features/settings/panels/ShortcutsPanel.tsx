@@ -21,32 +21,33 @@ import {
 } from "@/shared/shortcuts/registry";
 import { Field } from "@/features/settings/components/Field";
 import { BRAND } from "@/shared/config/brand";
+import { translate } from "@/shared/i18n/core";
 
 /** Chrome 全局快捷键（只读） */
 const GLOBAL_SHORTCUTS = [
-  { labelKey: "shortcuts.openCanopy", keys: "Alt + C" },
-  { labelKey: "shortcuts.saveAll", keys: "Alt + Shift + S" },
-  { labelKey: "shortcuts.toggleSearch", keys: "Alt + K" },
+  { label: translate("打开 {brand}", { brand: BRAND.name }), keys: "Alt + C" },
+  { label: translate("保存全部标签页"), keys: "Alt + Shift + S" },
+  { label: translate("切换搜索"), keys: "Alt + K" },
 ];
 
 /** 视图切换快捷键（只读） */
 const VIEW_SHORTCUTS = [
-  { labelKey: "shortcuts.view.tabs", keys: "⌘1 / Ctrl+1", description: "标签视图" },
-  { labelKey: "shortcuts.view.timeline", keys: "⌘2 / Ctrl+2", description: "时间轴视图" },
-  { labelKey: "shortcuts.view.tabgroup", keys: "⌘3 / Ctrl+3", description: "标签组视图" },
-  { labelKey: "shortcuts.view.window", keys: "⌘4 / Ctrl+4", description: "窗口视图" },
-  { labelKey: "shortcuts.view.kanban", keys: "⌘5 / Ctrl+5", description: "看板视图" },
-  { labelKey: "shortcuts.view.frequency", keys: "⌘6 / Ctrl+6", description: "频率视图" },
-  { labelKey: "shortcuts.view.archive", keys: "⌘7 / Ctrl+7", description: "归档视图" },
+  { label: translate("标签视图"), keys: "⌘1 / Ctrl+1", desc: translate("标签视图") },
+  { label: translate("时间轴视图"), keys: "⌘2 / Ctrl+2", desc: translate("时间轴视图") },
+  { label: translate("标签组视图"), keys: "⌘3 / Ctrl+3", desc: translate("标签组视图") },
+  { label: translate("窗口视图"), keys: "⌘4 / Ctrl+4", desc: translate("窗口视图") },
+  { label: translate("看板视图"), keys: "⌘5 / Ctrl+5", desc: translate("看板视图") },
+  { label: translate("频率视图"), keys: "⌘6 / Ctrl+6", desc: translate("频率视图") },
+  { label: translate("归档视图"), keys: "⌘7 / Ctrl+7", desc: translate("归档视图") },
 ];
 
 /** 键盘导航快捷键（只读） */
 const NAVIGATION_SHORTCUTS = [
-  { labelKey: "shortcuts.navigation.up", keys: "↑", description: "导航到上一个标签" },
-  { labelKey: "shortcuts.navigation.down", keys: "↓", description: "导航到下一个标签" },
-  { labelKey: "shortcuts.navigation.select", keys: "Space", description: "勾选/取消勾选标签" },
-  { labelKey: "shortcuts.navigation.close", keys: "Delete", description: "关闭选中标签" },
-  { labelKey: "shortcuts.navigation.cancel", keys: "Esc", description: "取消选择/关闭弹窗" },
+  { label: translate("上一个标签"), keys: "↑", desc: translate("导航到上一个标签") },
+  { label: translate("下一个标签"), keys: "↓", desc: translate("导航到下一个标签") },
+  { label: translate("勾选标签"), keys: "Space", desc: translate("勾选/取消勾选标签") },
+  { label: translate("关闭标签"), keys: "Delete", desc: translate("关闭选中标签") },
+  { label: translate("取消"), keys: "Esc", desc: translate("取消选择/关闭弹窗") },
 ];
 
 /**
@@ -213,14 +214,14 @@ export function ShortcutsPanel() {
           <Flex vertical className="settings-card-list">
             {VIEW_SHORTCUTS.map((item) => (
               <Flex
-                key={item.labelKey}
+                key={item.label}
                 align="center"
                 justify="space-between"
                 className="settings-card-row"
               >
                 <Flex vertical className="settings-card-row__main">
                   <Typography.Text className="settings-card-row__title">
-                    {item.description}
+                    {item.desc}
                   </Typography.Text>
                 </Flex>
                 <kbd className="app-kbd">{item.keys}</kbd>
@@ -236,14 +237,14 @@ export function ShortcutsPanel() {
           <Flex vertical className="settings-card-list">
             {NAVIGATION_SHORTCUTS.map((item) => (
               <Flex
-                key={item.labelKey}
+                key={item.label}
                 align="center"
                 justify="space-between"
                 className="settings-card-row"
               >
                 <Flex vertical className="settings-card-row__main">
                   <Typography.Text className="settings-card-row__title">
-                    {item.description}
+                    {item.desc}
                   </Typography.Text>
                 </Flex>
                 <kbd className="app-kbd">{item.keys}</kbd>
@@ -265,13 +266,13 @@ export function ShortcutsPanel() {
           <Flex vertical className="settings-card-list">
             {GLOBAL_SHORTCUTS.map((item) => (
               <Flex
-                key={item.labelKey}
+                key={item.label}
                 align="center"
                 justify="space-between"
                 className="settings-card-row"
               >
                 <Typography.Text className="settings-card-row__title">
-                  {t(item.labelKey, { brand: BRAND.name })}
+                  {item.label}
                 </Typography.Text>
                 <kbd className="app-kbd">{item.keys}</kbd>
               </Flex>

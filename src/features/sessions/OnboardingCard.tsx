@@ -5,7 +5,7 @@
  *   1. 欢迎屏：两个大按钮
  *      - 🌐 接管新标签页（推荐，默认高亮）
  *      - 🧩 仅工具栏按钮
- *   2. 若选"接管"：进入 3 步微引导（工作台总览 → 归档演示 → 快捷键帮助）
+ *   2. 若选"接管"：进入 3 步微引导（工作台总览 → 会话管理 → 效率提升）
  *      键盘：←/→ 切换、Esc 跳过
  *   3. 完成后写入引导完成标志，后续不再自动弹出
  *
@@ -27,9 +27,8 @@ import {
   Globe,
   Package,
   Network,
+  Layers,
   Zap,
-  Keyboard,
-  Archive as ArchiveIcon,
   Sparkles,
   Check,
 } from "lucide-react";
@@ -50,33 +49,9 @@ type Phase = "welcome" | "tour";
 
 interface TourStep {
   icon: ReactElement;
-  titleKey: string;
-  descKey: string;
+  title: string;
+  desc: string;
 }
-
-const TOUR_STEPS: TourStep[] = [
-  {
-    icon: <Network size={ICON_SIZE.XXLARGE} />,
-    titleKey: "onboarding.tour.overviewTitle",
-    descKey: "onboarding.tour.overviewDesc",
-  },
-  {
-    icon: <ArchiveIcon size={ICON_SIZE.XXLARGE} />,
-    titleKey: "onboarding.tour.archiveTitle",
-    descKey: "onboarding.tour.archiveDesc",
-  },
-  {
-    icon: <Sparkles size={ICON_SIZE.XXLARGE} />,
-    titleKey: "onboarding.tour.tidyTitle",
-    descKey: "onboarding.tour.tidyDesc",
-  },
-  {
-    icon: <Keyboard size={ICON_SIZE.XXLARGE} />,
-    titleKey: "onboarding.tour.shortcutsTitle",
-    descKey: "onboarding.tour.shortcutsDesc",
-  },
-];
-
 
 export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
   const [phase, setPhase] = useState<Phase>("welcome");
@@ -85,6 +60,15 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
   const { t } = useT();
   const { token } = theme.useToken();
   const updateSettings = useSettingsStore((s) => s.updateSettings);
+
+  const tourSteps = useMemo<TourStep[]>(
+    () => [
+      { icon: <Network size={ICON_SIZE.XXLARGE} />, title: t("工作台总览"), desc: t("所有打开的标签页都会在这里按域名自动分组展示，{brand} 帮你一屏掌握全局", { brand: BRAND.name }) },
+      { icon: <Layers size={ICON_SIZE.XXLARGE} />, title: t("会话管理"), desc: t("一键归档当前工作区，稍后从侧边栏恢复，告别数不清的标签页") },
+      { icon: <Sparkles size={ICON_SIZE.XXLARGE} />, title: t("效率提升"), desc: t("⌘K 全局搜索、快捷键批量关闭、自动释放内存——让浏览器更快更轻") },
+    ],
+    [t],
+  );
 
   const welcomeVars = useMemo(
     () =>
@@ -133,7 +117,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight") {
         e.preventDefault();
-        setStepIndex((idx) => Math.min(idx + 1, TOUR_STEPS.length - 1));
+        setStepIndex((idx) => Math.min(idx + 1, tourSteps.length - 1));
       } else if (e.key === "ArrowLeft") {
         e.preventDefault();
         setStepIndex((idx) => Math.max(idx - 1, 0));
@@ -147,7 +131,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
   }, [phase, finish]);
 
   const progressPercent = useMemo(
-    () => Math.round(((stepIndex + 1) / TOUR_STEPS.length) * 100),
+    () => Math.round(((stepIndex + 1) / tourSteps.length) * 100),
     [stepIndex],
   );
 
@@ -222,7 +206,7 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
     );
   }
 
-  const step = TOUR_STEPS[stepIndex];
+  const step = tourSteps[stepIndex];
   if (!step) return null;
   return (
     <Modal
@@ -239,16 +223,16 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
           <div className={styles["onboarding-tour__step-badge"]}>{step.icon}</div>
           <div className={styles["onboarding-tour__step-copy"]}>
             <Text strong className={styles["onboarding-tour__step-title"]}>
-              {t(step.titleKey)}
+              {step.title}
             </Text>
             <Text type="secondary" className={styles["onboarding-tour__step-index"]}>
-              {t('第 {current} / {total} 步', { current: stepIndex + 1, total: TOUR_STEPS.length })}
+              {t('第 {current} / {total} 步', { current: stepIndex + 1, total: tourSteps.length })}
             </Text>
           </div>
         </div>
 
         <Paragraph type="secondary" className={styles["onboarding-tour__description"]}>
-          {t(step.descKey, { brand: BRAND.name })}
+          {step.desc}
         </Paragraph>
 
         <Progress percent={progressPercent} size="small" showInfo={false} />
@@ -271,13 +255,13 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
             >
               {t('上一步')}
             </Button>
-            {stepIndex < TOUR_STEPS.length - 1 ? (
+            {stepIndex < tourSteps.length - 1 ? (
               <Button
                 size="small"
                 type="primary"
                 iconPlacement="end"
                 icon={<ArrowRight size={ICON_SIZE.DEFAULT} />}
-                onClick={() => setStepIndex((idx) => Math.min(idx + 1, TOUR_STEPS.length - 1))}
+                onClick={() => setStepIndex((idx) => Math.min(idx + 1, tourSteps.length - 1))}
               >
                 {t('下一步')}
               </Button>

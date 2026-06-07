@@ -20,6 +20,7 @@ export function AppHeader({
   duplicateTabsCount,
   idleTabsCount,
   hasTidySuggestions,
+  showBreatheDot,
   compactSearchVisible,
   onSettings,
   onOpenSearch,
@@ -30,6 +31,7 @@ export function AppHeader({
   duplicateTabsCount: number;
   idleTabsCount: number;
   hasTidySuggestions: boolean;
+  showBreatheDot: boolean;
   compactSearchVisible: boolean;
   onSettings: () => void;
   onOpenSearch: () => void;
@@ -77,6 +79,7 @@ export function AppHeader({
               {t("待处理")}
               {onTidy && (
                 <Button type="link" size="small" className="app-header-tidy-link" onClick={onTidy}>
+                  {showBreatheDot && <span className="app-header-breathe-dot" />}
                   {t("一键整理")}
                 </Button>
               )}

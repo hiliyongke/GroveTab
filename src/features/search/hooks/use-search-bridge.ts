@@ -15,17 +15,20 @@ import { useUnifiedSearchIndex } from "./use-unified-search-index";
 import type { SearchIndexLike } from "./use-search-index";
 import type { LiveTab, ArchivedSession } from "@/shared/types";
 
+type PinyinMatchFn = (text: string, query: string) => boolean;
+
 export function useSearchBridgeSync(options: {
   active: boolean;
   tabs: LiveTab[];
   archiveSessions: ArchivedSession[];
   normalizedQuery: string;
+  enablePinyin: boolean;
 }): {
   searchIndex: SearchIndexLike | null;
-  pinyinMatchFn: null;
+  pinyinMatchFn: PinyinMatchFn | null;
   workerReady: boolean;
 } {
-  const { active, tabs, archiveSessions, normalizedQuery } = options;
+  const { active, tabs, archiveSessions, normalizedQuery, enablePinyin } = options;
 
   const { ready, searchUnified } = useUnifiedSearchIndex({
     active,
@@ -36,6 +39,16 @@ export function useSearchBridgeSync(options: {
   const cacheRef = useRef<Map<string, Array<{ id: number }>>>(new Map());
   const [searchIndex, setSearchIndex] = useState<SearchIndexLike | null>(null);
   const searchTriggerRef = useRef<number>(0);
+
+  // 拼音匹配函数异步加载
+  const [pinyinMatchFn, setPinyinMatchFn] = useState<PinyinMatchFn | null>(null);
+  useEffect(() => {
+    if (!enablePinyin || pinyinMatchFn !== null) return;
+    void (async () => {
+      const { pinyinMatch } = await import("@/shared/utils/pinyin");
+      setPinyinMatchFn(() => pinyinMatch);
+    })();
+  }, [enablePinyin, pinyinMatchFn]);
 
   // 同步适配器：返回 cache 中对应 query 的结果
   const syncSearch = useCallback(
@@ -80,7 +93,7 @@ export function useSearchBridgeSync(options: {
 
   return {
     searchIndex,
-    pinyinMatchFn: null,
+    pinyinMatchFn,
     workerReady: ready,
   };
 }

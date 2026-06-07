@@ -260,7 +260,7 @@ export function DomainGroupView({ filterQuery }: DomainGroupViewProps) {
   const useVirtualization = filteredGroups.length > VIRTUALIZATION_THRESHOLD;
 
   return (
-    <Flex vertical gap="middle">
+    <Flex vertical gap="small">
       {sortedGroups.length === 0 ? null : (
         <div
           ref={containerRef}
@@ -268,7 +268,7 @@ export function DomainGroupView({ filterQuery }: DomainGroupViewProps) {
           style={getColumnVars(columnCount)}
         >
           {filteredGroups.length === 0 ? (
-            <Empty description={t("search.noDomainResults")} />
+            <Empty description={t("未找到匹配的域名")} />
           ) : (
             columns.map((columnGroups, columnIndex) => (
               <VirtualColumn

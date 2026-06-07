@@ -3,6 +3,7 @@
  */
 
 import { activateTab, createTab } from "@/chrome";
+import { translate } from "@/shared/i18n/core";
 
 export interface RecentTab {
   id: number;
@@ -17,10 +18,10 @@ export interface RecentTab {
 export type SortMode = "recent" | "title" | "domain" | "urlLength";
 
 export const SORT_OPTIONS: { value: SortMode; label: string }[] = [
-  { value: "recent", label: "最近" },
-  { value: "title", label: "标题" },
-  { value: "domain", label: "域名" },
-  { value: "urlLength", label: "长度" },
+  { value: "recent", label: translate("最近") },
+  { value: "title", label: translate("标题") },
+  { value: "domain", label: translate("域名") },
+  { value: "urlLength", label: translate("长度") },
 ];
 
 export function extractHostname(url: string): string {

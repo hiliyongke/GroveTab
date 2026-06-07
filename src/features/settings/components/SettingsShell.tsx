@@ -40,23 +40,25 @@ export function SettingsShell({
         body: styles["settings-drawer__body"],
       }}
     >
-      <Tabs
-        activeKey={activeTab}
-        onChange={(key) => onActiveTabChange(key as SettingsTabKey)}
-        size="small"
-        className={styles["settings-tabs"]}
-        tabBarStyle={{ marginBottom: 0, borderBottom: `1px solid var(--ant-color-border-secondary)` }}
-        items={tabs.map((tab) => ({
-          key: tab.key,
-          label: (
-            <Flex align="center" gap={6}>
-              {tab.icon}
-              <Typography.Text style={{ fontSize: 13 }}>{t(tab.labelKey)}</Typography.Text>
-            </Flex>
-          ),
-          children: <div className={styles["settings-content__body"]}>{tab.content}</div>,
-        }))}
-      />
+      <Flex vertical className={styles["settings-shell"]}>
+        <Tabs
+          tabPosition="left"
+          activeKey={activeTab}
+          onChange={(key) => onActiveTabChange(key as SettingsTabKey)}
+          size="small"
+          className={styles["settings-tabs"]}
+          items={tabs.map((tab) => ({
+            key: tab.key,
+            label: (
+              <Flex align="center" gap={8}>
+                {tab.icon}
+                <Typography.Text>{tab.label}</Typography.Text>
+              </Flex>
+            ),
+            children: <div className={styles["settings-content__body"]}>{tab.content}</div>,
+          }))}
+        />
+      </Flex>
     </Drawer>
   );
 }

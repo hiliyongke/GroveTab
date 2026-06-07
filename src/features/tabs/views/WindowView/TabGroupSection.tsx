@@ -102,7 +102,7 @@ export function TabGroupSection({
   const groupCollapsed = tabs.some((tab) => tab.groupCollapsed === true);
   const title = useMemo(() => {
     const groupTitle = tabs.find((tab) => tab.groupTitle)?.groupTitle?.trim();
-    return groupTitle && groupTitle.length > 0 ? groupTitle : t("tabGroup.unnamed");
+    return groupTitle && groupTitle.length > 0 ? groupTitle : t("未命名");
   }, [tabs, t]);
 
   const groupData = useMemo<TabGroupData>(
@@ -147,7 +147,7 @@ export function TabGroupSection({
         });
         onRefresh();
       } catch (err) {
-        feedback.error(t("tabGroup.actionFailed"), err);
+        feedback.error(t("操作失败，请重试"), err);
       }
     })();
   };
@@ -172,7 +172,7 @@ export function TabGroupSection({
     {
       key: "rename",
       icon: <Pencil size={ICON_SIZE.SMALL} />,
-      label: t("tabGroup.rename"),
+      label: t("重命名"),
       onClick: startRename,
     },
     {
@@ -180,7 +180,7 @@ export function TabGroupSection({
       icon: <Palette size={ICON_SIZE.SMALL} />,
       label: (
         <Popover trigger="click" placement="right" content={colorPicker}>
-          {t("tabGroup.changeColor")}
+          {t("更改颜色")}
         </Popover>
       ),
     },
@@ -188,26 +188,26 @@ export function TabGroupSection({
     {
       key: "ungroup",
       icon: <Ungroup size={ICON_SIZE.SMALL} />,
-      label: t("tabGroup.dissolve"),
+      label: t("解除分组"),
       onClick: handleUngroup,
     },
     {
       key: "discard",
       icon: <Moon size={ICON_SIZE.SMALL} />,
-      label: t("tabGroup.discard"),
+      label: t("休眠"),
       onClick: handleDiscardGroup,
     },
     {
       key: "move-new-window",
       icon: <ExternalLink size={ICON_SIZE.SMALL} />,
-      label: t("tabGroup.moveToWindow"),
+      label: t("移至新窗口"),
       onClick: handleMoveToNewWindow,
     },
     {
       key: "close",
       danger: true,
       icon: <X size={ICON_SIZE.SMALL} />,
-      label: t("tabGroup.closeGroup"),
+      label: t("关闭分组"),
       onClick: handleCloseGroup,
     },
   ];

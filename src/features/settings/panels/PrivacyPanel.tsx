@@ -11,7 +11,7 @@
  *     操作后会用 `feedback` 给出 toast 反馈
  */
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Switch, Select, Slider, Button, Popconfirm, Space, Typography, Flex } from "antd";
 import styles from "./PrivacyPanel.module.less";
 import { Trash2, Eraser } from "lucide-react";
@@ -28,18 +28,20 @@ interface PrivacyPanelProps {
   updateSettings: (patch: Partial<UserSettings>) => void | Promise<void>;
 }
 
-/** TTL 候选选项（小时） */
-const TTL_OPTIONS: Array<{ value: number; labelKey: string }> = [
-  { value: 24, labelKey: "privacy.ttl1d" },
-  { value: 72, labelKey: "privacy.ttl3d" },
-  { value: 168, labelKey: "privacy.ttl7d" },
-  { value: 720, labelKey: "privacy.ttl30d" },
-  { value: 0, labelKey: "privacy.ttlForever" },
-];
-
 export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
   const { t } = useT();
   const [clearing, setClearing] = useState(false);
+
+  const ttlOptions = useMemo(
+    () => [
+      { value: 24, label: t("1 天") },
+      { value: 72, label: t("3 天") },
+      { value: 168, label: t("7 天") },
+      { value: 720, label: t("30 天") },
+      { value: 0, label: t("永久") },
+    ],
+    [t],
+  );
 
   const enabled = settings.historyEnabled !== false;
   const recordEvents = settings.historyRecordEvents !== false;
@@ -148,9 +150,9 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
               onChange={(v) => {
                 void updateSettings({ historyClosedTabsTtlHours: v });
               }}
-              options={TTL_OPTIONS.map((opt) => ({
+              options={ttlOptions.map((opt) => ({
                 value: opt.value,
-                label: t(opt.labelKey),
+                label: opt.label,
               }))}
             />
           </Field>

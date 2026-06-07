@@ -5,6 +5,7 @@
 import { feedback } from "@/shared/ui/feedback";
 import { useSettingsStore } from "@/store";
 import { useTabsStore } from "@/store";
+import { translate } from "@/shared/i18n/core";
 import type { WorkspaceTemplate, TemplateTab } from "@/shared/types/workspace-template";
 
 /**
@@ -15,12 +16,12 @@ export function saveAsTemplateAction(): void {
   const tabs = useTabsStore.getState().tabs;
 
   feedback.modal.confirm({
-    title: "保存为工作区模板",
-    content: `将当前 ${tabs.length} 个标签页保存为模板，稍后可一键恢复。`,
-    okText: "保存",
-    cancelText: "取消",
+    title: translate("保存为工作区模板"),
+    content: translate("将当前 {count} 个标签页保存为模板，稍后可一键恢复。", { count: tabs.length }),
+    okText: translate("保存"),
+    cancelText: translate("取消"),
     onOk: () => {
-      const name = `模板 ${new Date().toLocaleDateString()}`;
+      const name = translate("模板 {date}", { date: new Date().toLocaleDateString() });
       const templateTabs: TemplateTab[] = tabs.map((tab) => ({
         url: tab.url,
         title: tab.title,
@@ -38,7 +39,9 @@ export function saveAsTemplateAction(): void {
       const currentTemplates = useSettingsStore.getState().workspaceTemplates;
       useSettingsStore.getState().setWorkspaceTemplates([...currentTemplates, newTemplate]);
 
-      feedback.success(`已保存模板「${name}」(${tabs.length} 个标签页)`);
+      feedback.success(
+        translate("已保存模板「{name}」({count} 个标签页 )", { name, count: tabs.length }),
+      );
     },
   });
 }
@@ -50,9 +53,17 @@ export function createTemplateCommands() {
   return [
     {
       id: "workspace.saveAsTemplate",
-      label: "保存当前为工作区模板",
+      label: translate("保存当前为工作区模板"),
       category: "workspace" as const,
-      keywords: ["baocun", "save", "保存", "muban", "template", "模板", "工作区"],
+      keywords: [
+        "baocun",
+        "save",
+        translate("保存"),
+        "muban",
+        "template",
+        translate("模板"),
+        translate("工作区"),
+      ],
       shortcut: "Mod+Shift+S",
       execute: saveAsTemplateAction,
     },

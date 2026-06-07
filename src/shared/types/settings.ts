@@ -20,11 +20,11 @@ export interface CustomSearchEngine {
 }
 
 /** 视图标签栏位置 */
-export type ViewTabPosition = "top" | "left" | "right";
+export type ViewTabPosition = "left" | "right";
 
 export interface UserSettings {
   overrideNewTab: boolean;
-  /** 视图标签栏位置：top（搜索栏下方水平）/ left / right（垂直侧栏） */
+  /** 视图标签栏位置：left / right（垂直侧栏） */
   viewTabPosition?: ViewTabPosition;
   defaultView:
     | "domain" // legacy，运行期自动映射为 tabs + tabsLayout='masonry'
@@ -238,6 +238,15 @@ export interface UserSettings {
   /** 常用站点是否启用分组显示，默认 false（平铺模式） */
   speedDialGroupEnabled?: boolean;
 
+  /** 常用站点布局模式：'stacked'（默认上下堆叠）| 'sidebar'（左右分栏） */
+  quickStartLayout?: "stacked" | "sidebar";
+
+  /** 侧栏位置：'left'（默认左侧）| 'right'（右侧） */
+  quickStartSidebarPosition?: "left" | "right";
+
+  /** 侧栏宽度（px），用户可通过拖拽调节。默认 64，范围 48-200。 */
+  quickStartSidebarWidth?: number;
+
   /** 是否显示浮动添加按钮（FAB），默认 false */
   quickStartFabAddButton?: boolean;
 
@@ -435,4 +444,42 @@ export interface UserSettings {
 
   /** Popup 是否按域名分组显示，默认 false */
   popupGroupByDomain?: boolean;
+
+  /**
+   * 「标签页」主视图的子视图（仅 defaultView='tabs' 时生效）。
+   *   - 'auto'（默认）：智能推荐（根据使用习惯自动选择）
+   *   - 'tabgroup'：按 Chrome Tab Group 展示
+   *   - 'window'：按窗口展示
+   *   - 'timeline'：按时间轴展示
+   */
+  tabsSubView?: "auto" | "tabgroup" | "window" | "timeline";
+
+  /**
+   * History 视图是否在 TabBar 中显示（默认 false，仅快捷键/Command Palette 可访问）。
+   */
+  historyTabVisible?: boolean;
+
+  /**
+   * 显示高级设置（默认 false）。
+   * 关闭时隐藏内存治理、历史配置、弹窗排序等低频设置项。
+   */
+  showAdvancedSettings?: boolean;
+
+  /**
+   * 用户自定义 TabBar 视图排序。
+   * 未列出的视图排到最后。
+   */
+  tabBarOrder?: string[];
+
+  /**
+   * TabBar 中用户隐藏的视图 ID 列表。
+   */
+  hiddenTabBarViews?: string[];
+
+  /**
+   * 设置数据格式版本号（v1.4 引入）。
+   * v2 = 旧版视图已迁移到 tabsSubView/tabsLayout 体系。
+   * 新安装默认为 2，旧用户迁移后更新为 2。
+   */
+  schemaVersion?: number;
 }

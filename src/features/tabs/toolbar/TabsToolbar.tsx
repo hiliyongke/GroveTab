@@ -29,10 +29,10 @@ export function TabsToolbar({ filterQuery, onFilterChange }: TabsToolbarProps) {
     <ViewToolbar
       searchQuery={filterQuery}
       onSearchChange={onFilterChange}
-      searchPlaceholder={t("search.domainFilter")}
+      searchPlaceholder={t("搜索标签页（标题/网址/域名）…")}
       controls={
         <>
-          <Tooltip title={t("headerLayout.title")}>
+          <Tooltip title={t("布局模式")}>
             <span>
               <Segmented
                 size="small"
@@ -69,7 +69,7 @@ export function TabsToolbar({ filterQuery, onFilterChange }: TabsToolbarProps) {
               />
             </span>
           </Tooltip>
-          <Tooltip title={t("headerDensity.title")}>
+          <Tooltip title={t("卡片密度")}>
             <span>
               <Segmented
                 size="small"

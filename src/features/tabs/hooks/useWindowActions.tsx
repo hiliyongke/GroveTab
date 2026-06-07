@@ -72,7 +72,7 @@ export function useWindowActions({
       if (successMessage) feedback.success(successMessage);
       onRefresh();
     } catch (err) {
-      feedback.error(t("window.actionFailed"), err);
+      feedback.error(t("操作失败，请重试"), err);
       onRefresh();
     } finally {
       setBusy(false);
@@ -103,12 +103,12 @@ export function useWindowActions({
       runWindowAction(async () => {
         await closeWindow(windowId);
         swBroadcast("tab-removed", { windowId, isWindowClosing: true });
-      }, t("window.closed"));
+      }, translate("窗口已关闭"));
 
     if (tabs.length > closeConfirmThreshold) {
       feedback.modal.confirm({
-        title: t("window.closeConfirmTitle"),
-        content: t("window.closeConfirmContent", { count: tabs.length }),
+        title: t("确认关闭窗口"),
+        content: t("确定要关闭该窗口及其 {count} 个标签页吗？", { count: tabs.length }),
         okButtonProps: { danger: true },
         onOk: execute,
       });
@@ -124,10 +124,10 @@ export function useWindowActions({
       const group = await createTabGroup(
         ungroupedTabs.map((tab) => tab.id),
         { windowId },
-        { title: t("windowGroup.newGroup"), color: "blue" },
+        { title: t("新建分组"), color: "blue" },
       );
       swBroadcast("tab-grouped", { groupId: group.id, windowId });
-    }, t("windowGroup.created"));
+    }, translate("分组已创建"));
   };
 
   const handleSnap = (action: WindowSnapAction) => {
@@ -156,7 +156,7 @@ export function useWindowActions({
       {
         key: "alias",
         icon: <Edit3 size={ICON_SIZE.SMALL} />,
-        label: t("window.rename"),
+        label: t("重命名窗口"),
         onClick: () => {
           setAliasDraft(alias ?? "");
           setAliasEditing(true);
@@ -165,7 +165,7 @@ export function useWindowActions({
       {
         key: "merge",
         icon: <Merge size={ICON_SIZE.SMALL} />,
-        label: t("window.mergeAll"),
+        label: t("合并到当前窗口"),
         disabled:
           isCurrent ||
           isIncognito !==
@@ -175,7 +175,7 @@ export function useWindowActions({
       {
         key: "create-group",
         icon: <Plus size={ICON_SIZE.SMALL} />,
-        label: t("windowGroup.createFromUngrouped"),
+        label: t("从未分组创建分组"),
         disabled: ungroupedTabs.length === 0,
         onClick: handleCreateGroupFromUngrouped,
       },
@@ -231,7 +231,7 @@ export function useWindowActions({
         key: "close",
         danger: true,
         icon: <X size={ICON_SIZE.SMALL} />,
-        label: t("window.close"),
+        label: t("关闭窗口"),
         disabled: isCurrent,
         onClick: handleCloseWindow,
       },

@@ -21,3 +21,69 @@
     transform: translateX(-50%);
   }
 }
+
+// ── Sidebar 模式常用站点右侧栏（仅图标） ──
+.app-quickstart-sidebar {
+  position: relative; // resize handle 定位基准
+  width: 64px;
+  min-width: 48px;
+  max-width: 200px;
+  flex-shrink: 0;
+  padding: 0;
+  border-left: 1px solid var(--ant-color-border-secondary);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none; // 隐藏滚动条，太窄不够放
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (max-width: 900px) {
+    display: none; // 窄屏回退到 stacked 模式
+  }
+}
+
+
+// ── 左侧 sidebar 边框方向 ──
+.app-quickstart-sidebar--left {
+  border-left: none !important;
+  border-right: 1px solid var(--ant-color-border-secondary);
+}
+
+
+// ── Sidebar resize handle（可拖拽调节宽度） ──
+.app-quickstart-resize-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: col-resize;
+  z-index: 10;
+  transition: background 120ms ease;
+
+  // 左侧 sidebar：拖拽手柄在右边缘
+  .app-quickstart-sidebar--left & {
+    right: -2px;
+  }
+
+  // 右侧 sidebar：拖拽手柄在左边缘
+  .app-quickstart-sidebar:not(.app-quickstart-sidebar--left) & {
+    left: -2px;
+  }
+
+  &:hover {
+    background: var(--ant-color-primary);
+  }
+
+  // CSS 变量驱动的 hover 扩展热区（让细线更容易抓取）
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    left: -2px;
+  }
+}
+

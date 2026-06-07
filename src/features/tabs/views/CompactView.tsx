@@ -40,15 +40,6 @@ interface CompactViewProps {
   filterQuery?: string;
 }
 
-/** 排序规则定义 */
-const SORT_RULES: Array<{ value: SortMode; label: string; icon: React.ReactNode }> = [
-  { value: "default", label: "默认", icon: <ArrowUpDown size={13} /> },
-  { value: "recency", label: "最近访问", icon: <Clock size={13} /> },
-  { value: "frequency", label: "使用频率", icon: <TrendingUp size={13} /> },
-  { value: "time", label: "停留时长", icon: <Timer size={13} /> },
-  { value: "domain", label: "按域名", icon: <Globe size={13} /> },
-  { value: "title", label: "按标题", icon: <Type size={13} /> },
-];
 
 /** 从 chrome.history 批量获取 URL → visitCount 映射 */
 async function buildVisitCountMap(): Promise<Map<string, number>> {
@@ -97,6 +88,30 @@ export function CompactView({ filterQuery = "" }: CompactViewProps) {
   const { t } = useT();
   const tabs = useTabsStore((s) => s.tabs);
   const { jumpToTab, closeSingleTab } = useTabActions();
+
+  const sortRules = useMemo(
+    () => [
+      { value: "default" as const,   label: t("默认"),     icon: <ArrowUpDown size={13} /> },
+      { value: "recency" as const,   label: t("最近访问"),  icon: <Clock size={13} /> },
+      { value: "frequency" as const, label: t("使用频率"),  icon: <TrendingUp size={13} /> },
+      { value: "time" as const,      label: t("停留时长"),  icon: <Timer size={13} /> },
+      { value: "domain" as const,    label: t("按域名"),     icon: <Globe size={13} /> },
+      { value: "title" as const,     label: t("按标题"),     icon: <Type size={13} /> },
+    ],
+    [t],
+  );
+  const tooltips: Record<SortMode, string> = useMemo(
+    () => ({
+      default:   t("按标签原始顺序排列"),
+      recency:   t("最近访问的标签排在前面"),
+      frequency: t("30 天内访问次数多的标签排在前面"),
+      time:      t("今日使用时长长的标签排在前面"),
+      domain:    t("按域名（字母序）排列，同一域名的标签相邻"),
+      title:     t("按标题（字母序）排列"),
+      manual:    t("手动置顶的标签排在最前面"),
+    }),
+    [t],
+  );
 
   const [sortMode, setSortMode] = useState<SortMode>("default");
   const [isSyncing, setIsSyncing] = useState(false);
@@ -211,7 +226,7 @@ export function CompactView({ filterQuery = "" }: CompactViewProps) {
     overscan: 12,
   });
 
-  if (tabs.length === 0) return <Empty description={t("empty.noOpenTabs")} />;
+  if (tabs.length === 0) return <Empty description={t("暂无打开的标签页")} />;
 
   const containerMaxHeight = `min(calc(100vh - ${VIEWPORT_RESERVE}px), ${sortedTabs.length * ROW_HEIGHT + 8}px)`;
   const containerStyle: React.CSSProperties = cssVars({
@@ -221,24 +236,24 @@ export function CompactView({ filterQuery = "" }: CompactViewProps) {
   const spacerStyle = { height: virtualizer.getTotalSize() };
 
   if (sortedTabs.length === 0) {
-    return <Empty description={t("search.noDomainResults")} />;
+    return <Empty description={t("未找到匹配的域名")} />;
   }
 
   return (
     <Flex vertical gap="small">
       {/* 排序工具栏 */}
       <Flex align="center" gap="small" className={toolbarStyles["compact-toolbar"]}>
-        <span className={toolbarStyles["compact-toolbar-label"]}>排序：</span>
+        <span className={toolbarStyles["compact-toolbar-label"]}>{t("排序：")}</span>
         <Segmented<string>
           size="small"
           value={sortMode}
           onChange={(value) => {
             void handleSortChange(value);
           }}
-          options={SORT_RULES.map((rule) => ({
+          options={sortRules.map((rule) => ({
             value: rule.value,
             label: (
-              <Tooltip title={getSortTooltip(rule.value)} placement="top">
+              <Tooltip title={tooltips[rule.value]} placement="top">
                 <Flex gap={4} align="center" justify="center">
                   {rule.icon}
                   <Typography.Text>{rule.label}</Typography.Text>
@@ -248,7 +263,7 @@ export function CompactView({ filterQuery = "" }: CompactViewProps) {
           }))}
           disabled={isSyncing}
         />
-        {isSyncing && <span className={toolbarStyles["compact-toolbar-syncing"]}>同步中...</span>}
+        {isSyncing && <span className={toolbarStyles["compact-toolbar-syncing"]}>{t("同步中...")}</span>}
       </Flex>
 
       {/* 标签列表 */}
@@ -281,24 +296,4 @@ export function CompactView({ filterQuery = "" }: CompactViewProps) {
   );
 }
 
-/** 获取排序规则的提示文本 */
-function getSortTooltip(mode: SortMode): string {
-  switch (mode) {
-    case "default":
-      return "按标签原始顺序排列";
-    case "recency":
-      return "最近访问的标签排在前面";
-    case "frequency":
-      return "30 天内访问次数多的标签排在前面";
-    case "time":
-      return "今日使用时长长的标签排在前面";
-    case "domain":
-      return "按域名（字母序）排列，同一域名的标签相邻";
-    case "title":
-      return "按标题（字母序）排列";
-    case "manual":
-      return "手动置顶的标签排在最前面";
-    default:
-      return "";
-  }
-}
+

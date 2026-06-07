@@ -22,7 +22,6 @@ import { getSettings, saveSettings, removeData } from "@/repositories";
 
 const DEFAULT_SETTINGS = {
   overrideNewTab: true,
-  newtabPageMode: "workspace" as const,
   viewTabPosition: "top" as const,
   defaultView: "tabs" as const,
   theme: "system" as const,

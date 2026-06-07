@@ -14,6 +14,8 @@ export type KeybindingAction =
   | 'selectAll'
   | 'commandPalette';
 
+import { translate } from "@/shared/i18n/core";
+
 /** 单条快捷键绑定定义 */
 export interface KeybindingDef {
   /** 动作标识 */
@@ -37,33 +39,33 @@ export const KEYBINDING_DEFS: KeybindingDef[] = [
   {
     action: 'search',
     defaultKey: 'Mod+k',
-    labelKey: 'shortcuts.localSearch',
-    hintKey: 'shortcuts.localSearchHint',
+    labelKey: translate('搜索'),
+    hintKey: translate('在页面内聚焦搜索框'),
   },
   {
     action: 'openHistory',
     defaultKey: 'Mod+Shift+h',
-    labelKey: 'shortcuts.openHistory',
-    hintKey: 'shortcuts.openHistoryHint',
+    labelKey: translate('打开浏览记录'),
+    hintKey: translate('在新标签页打开 Chrome 浏览历史页面'),
   },
   {
     action: 'exitSelection',
     defaultKey: 'Escape',
-    labelKey: 'shortcuts.exitSelection',
-    hintKey: 'shortcuts.exitSelectionHint',
+    labelKey: translate('退出多选模式'),
+    hintKey: translate('取消当前的多选状态'),
     allowInInput: true,
   },
   {
     action: 'selectAll',
     defaultKey: 'Mod+a',
-    labelKey: 'shortcuts.selectAll',
-    hintKey: 'shortcuts.selectAllHint',
+    labelKey: translate('全选'),
+    hintKey: translate('选中当前视图所有标签页'),
   },
   {
     action: 'commandPalette',
     defaultKey: 'Mod+p',
-    labelKey: 'shortcuts.commandPalette',
-    hintKey: 'shortcuts.commandPaletteHint',
+    labelKey: translate('命令面板'),
+    hintKey: translate('打开命令面板，搜索并执行所有功能'),
   },
 ];
 

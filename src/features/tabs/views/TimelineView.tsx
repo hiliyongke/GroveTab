@@ -375,7 +375,7 @@ export function TimelineView() {
   }));
 
   return (
-    <Flex vertical gap="middle" className={styles["app-timeline-view"]}>
+    <Flex vertical gap="small" className={styles["app-timeline-view"]}>
       <TimelineToolbar />
       <Timeline items={items} />
     </Flex>

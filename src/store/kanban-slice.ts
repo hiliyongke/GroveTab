@@ -1,3 +1,4 @@
+// @i18n-noscan — 看板列名中文原文在 getDefaultColumns() 中；翻译在 KanbanView 的 t(col.name)
 /**
  * Zustand Store — Kanban Slice (F-20 看板视图)
  *
@@ -12,13 +13,19 @@
 import { create } from 'zustand';
 import type { KanbanCard, KanbanColumn, KanbanLayout } from '@/shared/types';
 import { getKanbanLayout, saveKanbanLayout } from '@/repositories';
-
-const DEFAULT_COLUMNS: KanbanColumn[] = [
-  { id: 'work', name: '工作', cards: [] },
-  { id: 'study', name: '学习', cards: [] },
-  { id: 'fun', name: '娱乐', cards: [] },
-  { id: 'later', name: '待看', cards: [] },
-];
+/**
+ * 默认看板列 —— 中文原文，运行时由 KanbanView 通过 t() 翻译。
+ * 不使用模块层 translate() 是为了避免循环依赖：
+ *   kanban-slice → i18n/core → @/store → kanban-slice
+ */
+function getDefaultColumns(): KanbanColumn[] {
+  return [
+    { id: 'work', name: '工作', cards: [] },
+    { id: 'study', name: '学习', cards: [] },
+    { id: 'fun', name: '娱乐', cards: [] },
+    { id: 'later', name: '待看', cards: [] },
+  ];
+}
 
 interface KanbanState {
   columns: KanbanColumn[];
@@ -40,13 +47,13 @@ interface KanbanState {
 }
 
 export const useKanbanStore = create<KanbanState>((set, get) => ({
-  columns: DEFAULT_COLUMNS,
+  columns: getDefaultColumns(),
   loaded: false,
 
   loadKanban: async () => {
     const layout = await getKanbanLayout();
     if (!layout || !Array.isArray(layout.columns) || layout.columns.length === 0) {
-      set({ columns: DEFAULT_COLUMNS, loaded: true });
+      set({ columns: getDefaultColumns(), loaded: true });
       return;
     }
     set({ columns: layout.columns, loaded: true });
@@ -139,8 +146,8 @@ export const useKanbanStore = create<KanbanState>((set, get) => ({
   },
 
   reset: async () => {
-    await persist(DEFAULT_COLUMNS);
-    set({ columns: DEFAULT_COLUMNS });
+    await persist(getDefaultColumns());
+    set({ columns: getDefaultColumns() });
   },
 }));
 

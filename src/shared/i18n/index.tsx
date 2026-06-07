@@ -20,10 +20,10 @@ import React, {
 } from "react";
 import { useSettingsStore } from "@/store";
 import {
+  translate,
   translateWithLocale,
   translateDebug,
   getDictionaries,
-  loadChineseKeyMap,
   loadDictionary,
   loadLocale,
   type Locale,
@@ -81,8 +81,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     if (mapInitialized.current) return;
     mapInitialized.current = true;
 
-    // 先用内嵌字典构建中文→键名映射，确保 t() 立即可用
-    loadChineseKeyMap();
+    // 内嵌 zh-CN.ts 已提供反向映射，立即可用
 
     // 异步加载哈希命名的翻译文件（生产）或原始文件（开发）
     void loadDictionary().then((success) => {
@@ -90,18 +89,25 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
         setDictReady(true);
         // 开发模式：加载完成后输出词条统计
         if (import.meta.env.DEV) {
-          const dicts = getDictionaries();
-          const zhCount = Object.keys(dicts["zh-CN"]).length;
-          const enCount = Object.keys(dicts.en).length;
-          const missingEn = Object.keys(dicts["zh-CN"]).filter((k) => !dicts.en[k]).length;
+          const { zhCN, en } = getDictionaries();
+          const zhCount = Object.keys(zhCN).length;
+          const enCount = Object.keys(en).length;
+          const missingEn = Object.keys(zhCN).filter((k) => !en[k]).length;
 
-          console.info(
-            `[i18n] 翻译字典加载完成：zh-CN ${zhCount} 条，en ${enCount} 条${missingEn > 0 ? `，⚠️ 英文缺失 ${missingEn} 条` : "，✅ 英文翻译完整"}`,
+          const parts: string[] = [];
+          parts.push(
+            translate("[i18n] 翻译字典加载完成：zh-CN {zhCount} 条，en {enCount} 条", { zhCount, enCount }),
           );
+          if (missingEn > 0) {
+            parts.push(translate("，⚠️ 英文缺失 {missingEn} 条", { missingEn }));
+          } else {
+            parts.push(translate("，✅ 英文翻译完整"));
+          }
+          console.info(parts.join(""));
         }
       } else {
         // 加载失败：内嵌字典仍可用，仅标记未就绪
-        console.warn("[i18n] 翻译文件加载失败，使用内嵌字典");
+        console.warn(translate("[i18n] 翻译文件加载失败，使用内嵌字典"));
       }
     });
   }, []);
@@ -137,7 +143,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
         // 触发重渲染，使用新语言的翻译
         setDictReady((v) => (!v ? true : v));
       } else {
-        console.warn(`[i18n] 语言 ${locale} 翻译文件加载失败，使用内嵌字典`);
+        console.warn(translate("[i18n] 语言 {locale} 翻译文件加载失败，使用内嵌字典", { locale }));
       }
     });
   }, [locale]);

@@ -1,5 +1,6 @@
 /**
  * Brand / Product Identity — 产品身份配置层
+ * @i18n-noscan
  *
  * 本模块将所有与「品牌」相关的硬编码文案/Logo/主色/URL 抽象为一份可配置的
  * 数据包 `BrandIdentity`，上层 UI、manifest 生成、日志前缀、SW 通知、

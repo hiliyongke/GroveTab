@@ -77,8 +77,17 @@ export const useMetadataStore = create<MetadataState>((set, get) => ({
         getRecentActivity(),
         getWorkspaces(),
         getWindowAliases(),
-        getData<Record<number, string>>("grove_window_colors"),
+        getData<Record<number, string>>(STORAGE_KEYS.windowColors),
       ]);
+    // 向后兼容：旧 key "grove_window_colors" → 新 key
+    let finalWindowColors = windowColors ?? {};
+    if (Object.keys(finalWindowColors).length === 0) {
+      const old = await getData<Record<number, string>>("grove_window_colors");
+      if (old) {
+        finalWindowColors = old;
+        await setData(STORAGE_KEYS.windowColors, old); // 迁移到新 key
+      }
+    }
     set({
       tags: tags ?? {},
       notes: notes ?? {},
@@ -86,7 +95,7 @@ export const useMetadataStore = create<MetadataState>((set, get) => ({
       recentActivity: activity.length > 0 ? activity : EMPTY_ACTIVITY,
       workspaces: workspaces.length > 0 ? workspaces : EMPTY_WORKSPACES,
       windowAliases,
-      windowColors: windowColors ?? {},
+      windowColors: finalWindowColors,
     });
   },
 
@@ -213,7 +222,7 @@ export const useMetadataStore = create<MetadataState>((set, get) => ({
       windowColors[windowId] = color;
     }
     set({ windowColors });
-    await setData("grove_window_colors", windowColors);
+    await setData(STORAGE_KEYS.windowColors, windowColors);
   },
 
   gcWindowAliases: async (activeWindowIds) => {

@@ -10,6 +10,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { useT } from "@/shared/i18n";
 import { useSettingsStore } from "@/store";
 import { SettingsShell } from "./components/SettingsShell";
 import { createSettingsTabs } from "./settings-tabs";
@@ -27,6 +28,7 @@ export function SettingsPanel({
   onOpenChange,
   defaultActiveTab = "appearance",
 }: SettingsPanelProps) {
+  const { t } = useT();
   const settings = useSettingsStore((s) => s.settings);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const [activeTab, setActiveTab] = useState<SettingsTabKey>(() =>
@@ -38,8 +40,8 @@ export function SettingsPanel({
   }, [defaultActiveTab]);
 
   const tabs = useMemo(
-    () => createSettingsTabs({ settings, updateSettings }),
-    [settings, updateSettings],
+    () => createSettingsTabs({ settings, updateSettings, t }),
+    [settings, updateSettings, t],
   );
 
   return (

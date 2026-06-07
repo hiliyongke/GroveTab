@@ -30,10 +30,10 @@ export function TabGroupToolbar({
     <ViewToolbar
       searchQuery={filterQuery}
       onSearchChange={onFilterChange}
-      searchPlaceholder={t("tabGroup.searchPlaceholder")}
+      searchPlaceholder={t("搜索标签组…")}
       controls={
         <>
-          <Tooltip title={t("tabGroup.sortBy")}>
+          <Tooltip title={t("排序方式")}>
             <span>
               <Segmented
                 size="small"

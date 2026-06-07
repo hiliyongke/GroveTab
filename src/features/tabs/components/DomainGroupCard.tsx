@@ -191,7 +191,7 @@ export const DomainGroupCard = memo(function DomainGroupCard({
       }
     >
       {/* 标签列表 */}
-      <Flex vertical gap={6} className={styles["app-domain-group-list--flex"]}>
+      <Flex vertical gap={4} className={styles["app-domain-group-list--flex"]}>
         {group.tabs.map((tab) => (
           <TabItem
             key={tab.id}

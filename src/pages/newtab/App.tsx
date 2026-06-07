@@ -1,13 +1,9 @@
 import { useEffect, useState, useCallback, useRef, lazy, Suspense } from "react";
 import { Layout, Spin, Typography, FloatButton, Flex } from "antd";
 import styles from "./App.module.less";
-import { useTabsStore, useSettingsStore, useSelectionStore } from "@/store";
+import { useTabsStore, useSettingsStore, useSelectionStore, useFeatureFlagStore } from "@/store";
 import { useShallow } from "zustand/shallow";
-import {
-  useSwBroadcast,
-  useAppInitialization,
-  useAutoCleanup,
-} from "@/shared/hooks";
+import { useSwBroadcast, useAppInitialization, useAutoCleanup } from "@/shared/hooks";
 import { useT } from "@/shared/i18n";
 import { useKeybinding } from "@/shared/hooks/use-keybinding";
 import { useKeyboardShortcuts } from "@/shared/hooks/use-keyboard-shortcuts";
@@ -22,9 +18,9 @@ const InsightsView = lazy(() =>
   import("@/features/insights/InsightsView").then((m) => ({ default: m.default })),
 );
 import { QuickStartLayer } from "@/features/quick-start/QuickStartLayer";
-const TidySuggestionBar = lazy(() =>
-  import("@/features/tabs/components/TidySuggestionBar").then((m) => ({
-    default: m.TidySuggestionBar,
+const TidyModal = lazy(() =>
+  import("@/features/tabs/components/TidyModal").then((m) => ({
+    default: m.TidyModal,
   })),
 );
 const AppHeader = lazy(() =>
@@ -54,8 +50,8 @@ import {
 import { createTemplateCommands } from "@/features/workspace/quick-actions/SaveAsTemplateAction";
 import { useLayoutStyle } from "./hooks/use-layout-style";
 import { useMemoryGovernance } from "@/shared/hooks/use-memory-governance";
+import { registerInsightsNavigation } from "@/shared/utils/insights-filter";
 import { StatusBar } from "@/shared/ui/StatusBar/StatusBar";
-
 
 /** 懒加载非默认视图——直接导入文件而非 barrel，确保每个视图独立拆 chunk */
 const TimelineView = lazy(() =>
@@ -92,6 +88,9 @@ const HistoryView = lazy(() =>
 const TrashView = lazy(() =>
   import("@/features/sessions/TrashView").then((m) => ({ default: m.TrashView })),
 );
+const SessionsView = lazy(() =>
+  import("@/features/tabs/components/SessionsView").then((m) => ({ default: m.SessionsView })),
+);
 const TrendingView = lazy(() =>
   import("@/features/trending/TrendingView").then((m) => ({ default: m.TrendingView })),
 );
@@ -121,6 +120,7 @@ registerViews([
   { id: "history", component: HistoryView, order: 8 },
   { id: "archive", component: ArchiveView, order: 9 },
   { id: "trash", component: TrashView, order: 10 },
+  { id: "sessions", component: SessionsView, order: 10.5 },
   { id: "insights", component: InsightsView, order: 11 },
   { id: "trending", component: TrendingView, order: 12 },
   { id: "devtools", component: DevToolsView, order: 13 },
@@ -146,8 +146,9 @@ function AppContent() {
     ]);
   }, [switchView, panelStack]);
 
-  const [tidyExpandSignal, setTidyExpandSignal] = useState(0);
-  const tidySectionRef = useRef<HTMLDivElement>(null);
+  const [tidyModalOpen, setTidyModalOpen] = useState(false);
+  const [tidyTriggerKey, setTidyTriggerKey] = useState(0);
+  const [tidyAcknowledged, setTidyAcknowledged] = useState(false);
   const [initRunId, setInitRunId] = useState(0);
 
   const {
@@ -167,7 +168,10 @@ function AppContent() {
   // P2: idle preload 常用视图 chunk，避免首次切换卡顿
   useEffect(() => {
     if (!checked) return;
-    const win = window as typeof window & { requestIdleCallback?: (cb: () => void) => number; cancelIdleCallback?: (id: number) => void };
+    const win = window as typeof window & {
+      requestIdleCallback?: (cb: () => void) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
     if (win.requestIdleCallback) {
       const id = win.requestIdleCallback(() => {
         void import("@/features/tabs/views/DomainGroupView");
@@ -193,11 +197,22 @@ function AppContent() {
         );
       }
       void useSettingsStore.getState().updateSettings({
-        defaultView: legacy.view,
+        // LEGACY_VIEW_MAP 的 value 始终映射为 "tabs"，信任其运行时正确性
+        defaultView: legacy.view as never,
         tabsLayout: legacy.layout,
       });
     }
   }, []);
+
+  /** Feature Flag 初始化：启动时从 chrome.storage.local 加载，仅执行一次 */
+  useEffect(() => {
+    void useFeatureFlagStore.getState().loadFlags();
+  }, []);
+
+  /** 注册 Insights → Tabs 跨视图导航回调（P1-06） */
+  useEffect(() => {
+    registerInsightsNavigation(() => switchView("tabs"));
+  }, [switchView]);
 
   const { t } = useT();
 
@@ -209,20 +224,66 @@ function AppContent() {
     uiVisibility,
     dedupStrictness,
     idleThresholdMinutes,
+    quickStartLayout,
+    quickStartSidebarPosition,
+    quickStartSidebarWidth,
   } = useSettingsStore(
     useShallow((s) => ({
       contentMaxWidth: s.settings.contentMaxWidth ?? 0,
       defaultView: s.settings.defaultView,
-      viewTabPosition: s.settings.viewTabPosition ?? "top",
+      viewTabPosition: s.settings.viewTabPosition ?? "right",
       uiVisibility: s.settings.uiVisibility,
       dedupStrictness: s.settings.dedupStrictness ?? "loose",
       idleThresholdMinutes: s.settings.idleThresholdMinutes ?? 1440,
+      quickStartLayout: s.settings.quickStartLayout ?? ("stacked" as const),
+      quickStartSidebarPosition: s.settings.quickStartSidebarPosition ?? ("left" as const),
+      quickStartSidebarWidth: s.settings.quickStartSidebarWidth ?? 64,
     })),
   );
+
+  // unified_tabs_view 开启时 QuickStartLayer 由 TabsSubView 内部渲染
+  const unifiedTabsView = useFeatureFlagStore((s) => s.isEnabled("unified_tabs_view"));
+
+  // ── 侧栏拖拽 resize（本地状态，mouseup 时持久化到 settings）──
+  const [sidebarWidth, setSidebarWidth] = useState(quickStartSidebarWidth);
+  const updateSettings = useSettingsStore((s) => s.updateSettings);
+  useEffect(() => {
+    setSidebarWidth(quickStartSidebarWidth);
+  }, [quickStartSidebarWidth]);
+  const sidebarWidthRef = useRef(sidebarWidth);
+  sidebarWidthRef.current = sidebarWidth;
+  const handleResizeMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      const startX = e.clientX;
+      const startWidth = sidebarWidthRef.current;
+      const pos = quickStartSidebarPosition ?? "left";
+      const onMouseMove = (ev: MouseEvent) => {
+        const delta = pos === "left" ? ev.clientX - startX : startX - ev.clientX;
+        setSidebarWidth(Math.max(48, Math.min(200, startWidth + delta)));
+      };
+      const onMouseUp = () => {
+        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseup", onMouseUp);
+        void updateSettings({ quickStartSidebarWidth: sidebarWidthRef.current });
+      };
+      document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("mouseup", onMouseUp);
+    },
+    [quickStartSidebarPosition, updateSettings],
+  );
+
   // 路由驱动显示：URL hash → viewMode；无 hash 时 fallback 到用户设置
-  const viewMode: ViewMode =
+  const rawViewMode: ViewMode =
     route.viewId ??
     (VALID_VIEWS.includes(defaultView as ViewMode) ? (defaultView as ViewMode) : "tabs");
+
+  // 当 archive_trash_merged 开启时，archive 和 trash 重定向到 sessions
+  const archiveTrashMerged = useFeatureFlagStore((s) => s.isEnabled("archive_trash_merged"));
+  const viewMode: ViewMode =
+    archiveTrashMerged && (rawViewMode === "archive" || rawViewMode === "trash")
+      ? "sessions"
+      : rawViewMode;
 
   const showViewSwitcher = uiVisibility?.viewSwitcher !== false;
   const showHeroBar =
@@ -318,13 +379,10 @@ function AppContent() {
   });
 
   const handleTidy = useCallback(() => {
-    // 预清除 dismissed 标记，确保 TidySuggestionBar 能正确渲染并展开
     removeSessionString(LOCAL_CACHE_KEYS.tidyDismissed);
-    setTidyExpandSignal((s) => s + 1);
-    // 使用 setTimeout 确保 TidySuggestionBar 重新渲染后再滚动
-    window.setTimeout(() => {
-      tidySectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 50);
+    setTidyTriggerKey((s) => s + 1);
+    setTidyModalOpen(true);
+    setTidyAcknowledged(true);
   }, []);
 
   const handleRetryInit = useCallback(() => {
@@ -341,17 +399,29 @@ function AppContent() {
   );
 
   // O(n²) 重计算移至 idle callback，不阻塞主渲染路径
-  const [tidyData, setTidyData] = useState({ dupGroups: [] as ReturnType<typeof findDuplicates>, idleTabsArr: [] as ReturnType<typeof detectIdleTabs> });
+  const [tidyData, setTidyData] = useState({
+    dupGroups: [] as ReturnType<typeof findDuplicates>,
+    idleTabsArr: [] as ReturnType<typeof detectIdleTabs>,
+  });
   useEffect(() => {
-    const win = window as typeof window & { requestIdleCallback?: (cb: () => void) => number; cancelIdleCallback?: (id: number) => void };
+    const win = window as typeof window & {
+      requestIdleCallback?: (cb: () => void) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
     const id = win.requestIdleCallback
       ? win.requestIdleCallback(() => {
           const tabs = useTabsStore.getState().tabs;
-          setTidyData({ dupGroups: findDuplicates(tabs, dedupStrictness), idleTabsArr: detectIdleTabs(tabs, idleThresholdMinutes) });
+          setTidyData({
+            dupGroups: findDuplicates(tabs, dedupStrictness),
+            idleTabsArr: detectIdleTabs(tabs, idleThresholdMinutes),
+          });
         })
       : window.setTimeout(() => {
           const tabs = useTabsStore.getState().tabs;
-          setTidyData({ dupGroups: findDuplicates(tabs, dedupStrictness), idleTabsArr: detectIdleTabs(tabs, idleThresholdMinutes) });
+          setTidyData({
+            dupGroups: findDuplicates(tabs, dedupStrictness),
+            idleTabsArr: detectIdleTabs(tabs, idleThresholdMinutes),
+          });
         }, 0);
     return () => {
       if (typeof win.requestIdleCallback === "function") win.cancelIdleCallback!(id as number);
@@ -359,9 +429,22 @@ function AppContent() {
     };
   }, [tabCount, dedupStrictness, idleThresholdMinutes]);
 
-  const duplicateTabsCount = tidyData.dupGroups.reduce((sum, group) => sum + group.tabs.length - 1, 0);
+  const duplicateTabsCount = tidyData.dupGroups.reduce(
+    (sum, group) => sum + group.tabs.length - 1,
+    0,
+  );
   const idleTabsCount = tidyData.idleTabsArr.length;
   const hasTidySuggestions = duplicateTabsCount > 0 || idleTabsCount > 0;
+
+  // 待处理数量变化时重置已读状态，让呼吸圆点重新提醒
+  const pendingCount = duplicateTabsCount + idleTabsCount;
+  const prevPendingRef = useRef(pendingCount);
+  useEffect(() => {
+    if (pendingCount !== prevPendingRef.current) {
+      prevPendingRef.current = pendingCount;
+      setTidyAcknowledged(false);
+    }
+  }, [pendingCount]);
 
   // ── StatusBar 数据连接 ─────────────────────────────────────────────────────
   const selectionMode = useSelectionStore((s) => s.selectionMode);
@@ -385,29 +468,6 @@ function AppContent() {
       // StatusBar 消息会自行管理生命周期
     };
   }, [selectionMode, selectedCount, t]);
-
-  // 整理建议 → StatusBar 持久消息（仅 workspace 空间下）
-  useEffect(() => {
-    const sb = useStatusBarStore.getState();
-    if (hasTidySuggestions && !selectionMode) {
-      sb.pushMessage({
-        content: t("{count} 个待处理标签", { count: duplicateTabsCount + idleTabsCount }),
-        type: "warning",
-        action: {
-          label: t("一键整理"),
-          onClick: handleTidy,
-        },
-      });
-    }
-  }, [
-    hasTidySuggestions,
-    selectionMode,
-    duplicateTabsCount,
-    idleTabsCount,
-    handleTidy,
-    t,
-  ]);
-
 
   // ── 内容区 className ───────────────────────────────────────────────────────
   const contentShellClassName = [
@@ -437,113 +497,158 @@ function AppContent() {
 
   return (
     <>
-      <a href="#main-content" className={styles["app-skip-link"]} style={{ position: "absolute", left: -999, top: -999, zIndex: 9999, background: "var(--ant-color-bg-container)", padding: "8px 16px", border: "1px solid var(--ant-color-primary)", borderRadius: "var(--ant-border-radius)", fontSize: 14, textDecoration: "none" }}>
+      <a
+        href="#main-content"
+        className={styles["app-skip-link"]}
+        style={{
+          position: "absolute",
+          left: -999,
+          top: -999,
+          zIndex: 9999,
+          background: "var(--ant-color-bg-container)",
+          padding: "var(--ant-padding-xs) var(--ant-padding)",
+          border: "1px solid var(--ant-color-primary)",
+          borderRadius: "var(--ant-border-radius)",
+          textDecoration: "none",
+        }}
+      >
         {t("跳到主内容")}
       </a>
-      <Layout
-      className="app-layout-shell"
-      style={layoutStyle}
-    >
-      {uiVisibility?.header !== false && (
-        <AppHeader
-          tabCount={tabCount}
-          domainCount={domainCount}
-          duplicateTabsCount={duplicateTabsCount}
-          idleTabsCount={idleTabsCount}
-          hasTidySuggestions={hasTidySuggestions}
-          compactSearchVisible={compactSearchVisible}
-          onSettings={() => panelStack.openSettings()}
-          onOpenSearch={() => panelStack.openSearch()}
-          onTidy={handleTidy}
-        />
-      )}
-
-      {/* 主体区：左侧 ViewTabs（垂直）+ 内容 */}
-      <Flex flex={1} className={styles["app-content-fill"]}>
-        {showViewSwitcher && viewTabPosition === "left" && (
-          <ViewTabs activeView={viewMode} onChange={handleViewChange} />
+      <Layout className="app-layout-shell" style={layoutStyle}>
+        {uiVisibility?.header !== false && (
+          <AppHeader
+            tabCount={tabCount}
+            domainCount={domainCount}
+            duplicateTabsCount={duplicateTabsCount}
+            idleTabsCount={idleTabsCount}
+            hasTidySuggestions={hasTidySuggestions}
+            showBreatheDot={hasTidySuggestions && !tidyAcknowledged}
+            compactSearchVisible={compactSearchVisible}
+            onSettings={() => panelStack.openSettings()}
+            onOpenSearch={() => panelStack.openSearch()}
+            onTidy={handleTidy}
+          />
         )}
 
-        <Content
-          id="main-content"
-          data-app-content
-          className={contentShellClassName}
-          style={contentShellStyle}
-        >
-          {showHeroBar && (
-            <HeroBar
-              onOpenSearch={() => panelStack.openSearch()}
-              sentinelRef={heroSearchRef}
-              showLogo={showHeroLogo}
-              showTitle={showHeroTitle}
-              showSlogan={showHeroSlogan}
-              showSearch={showHeroSearch}
-            />
-          )}
-
-          {viewMode !== "archive" &&
-            uiVisibility?.tidySuggestion !== false && (
-              <div ref={tidySectionRef}>
-                <TidySuggestionBar expandSignal={tidyExpandSignal} />
+        {/* 主体区：左侧 ViewTabs（垂直）+ 内容 + 可选右侧 Sidebar */}
+        <Flex flex={1} className={styles["app-content-fill"]}>
+          {/* sidebar 在左侧 */}
+          {quickStartLayout === "sidebar" &&
+            quickStartSidebarPosition === "left" &&
+            uiVisibility?.quickStart !== false && (
+              <div
+                className={`${styles["app-quickstart-sidebar"]} ${styles["app-quickstart-sidebar--left"]}`}
+                style={{ width: sidebarWidth, minWidth: sidebarWidth }}
+              >
+                <div
+                  className={styles["app-quickstart-resize-handle"]}
+                  onMouseDown={handleResizeMouseDown}
+                />
+                <QuickStartLayer
+                  variant="sidebar"
+                  sidebarWidth={sidebarWidth}
+                  onOpenSettings={() => panelStack.openSettings()}
+                />
               </div>
             )}
-
-          <QuickStartLayer onOpenSettings={() => panelStack.openSettings()} />
-
-          {showViewSwitcher && viewTabPosition === "top" && (
-            <div className="app-view-switcher-wrap">
-              <ViewTabs activeView={viewMode} onChange={handleViewChange} />
-            </div>
+          {showViewSwitcher && viewTabPosition === "left" && (
+            <ViewTabs activeView={viewMode} onChange={handleViewChange} />
           )}
+          <Content
+            id="main-content"
+            data-app-content
+            className={contentShellClassName}
+            style={contentShellStyle}
+          >
+            {showHeroBar && (
+              <HeroBar
+                onOpenSearch={() => panelStack.openSearch()}
+                sentinelRef={heroSearchRef}
+                showLogo={showHeroLogo}
+                showTitle={showHeroTitle}
+                showSlogan={showHeroSlogan}
+                showSearch={showHeroSearch}
+              />
+            )}
 
-          <AppWorkspace
-            checked={checked}
-            initError={initError}
-            showOnboarding={showOnboarding}
-            viewMode={viewMode}
-            onDismissOnboarding={dismissOnboarding}
-            onRetryInit={handleRetryInit}
-            onOpenArchive={() => switchView("archive")}
-            onOpenSettings={() => panelStack.openSettings()}
+            {/* stacked 模式：QuickStart 在 ViewTabs 下方，仅标签页视图可见。
+                unified_tabs_view 开启时由 TabsSubView 内部渲染（位于子标签下方） */}
+            {quickStartLayout !== "sidebar" && viewMode === "tabs" && !unifiedTabsView && (
+              <QuickStartLayer onOpenSettings={() => panelStack.openSettings()} />
+            )}
+
+            <AppWorkspace
+              checked={checked}
+              initError={initError}
+              showOnboarding={showOnboarding}
+              viewMode={viewMode}
+              onDismissOnboarding={dismissOnboarding}
+              onRetryInit={handleRetryInit}
+              onOpenArchive={() => switchView("archive")}
+              onOpenSettings={() => panelStack.openSettings()}
+            />
+          </Content>
+
+          {/* sidebar 在右侧 */}
+          {showViewSwitcher && viewTabPosition === "right" && (
+            <ViewTabs activeView={viewMode} onChange={handleViewChange} />
+          )}
+          {quickStartLayout === "sidebar" &&
+            quickStartSidebarPosition !== "left" &&
+            uiVisibility?.quickStart !== false && (
+              <div
+                className={styles["app-quickstart-sidebar"]}
+                style={{ width: sidebarWidth, minWidth: sidebarWidth }}
+              >
+                <div
+                  className={styles["app-quickstart-resize-handle"]}
+                  onMouseDown={handleResizeMouseDown}
+                />
+                <QuickStartLayer
+                  variant="sidebar"
+                  sidebarWidth={sidebarWidth}
+                  onOpenSettings={() => panelStack.openSettings()}
+                />
+              </div>
+            )}
+        </Flex>
+
+        <FloatButton.BackTop
+          target={() => document.querySelector(".app-content-shell") as HTMLElement}
+          visibilityHeight={400}
+          className="app-back-top-override"
+        />
+
+        <UndoToast />
+
+        {viewMode !== "archive" && viewMode !== "sessions" && <BatchActionBar />}
+
+        <Suspense fallback={null}>
+          <CommandPalette />
+          <SearchBox
+            open={panelStack.isOpen("search")}
+            onOpenChange={(open) => {
+              if (!open) panelStack.close("search");
+            }}
+            onOpenHistory={() => switchView("history")}
           />
-        </Content>
-
-        {showViewSwitcher && viewTabPosition === "right" && (
-          <ViewTabs activeView={viewMode} onChange={handleViewChange} />
-        )}
-      </Flex>
-
-      <FloatButton.BackTop
-        target={() => document.querySelector(".app-content-shell") as HTMLElement}
-        visibilityHeight={400}
-        className="app-back-top-override"
-      />
-
-      <UndoToast />
-
-      {viewMode !== "archive" && <BatchActionBar />}
-
-      <Suspense fallback={null}>
-        <CommandPalette />
-        <SearchBox
-          open={panelStack.isOpen("search")}
-          onOpenChange={(open) => {
-            if (!open) panelStack.close("search");
-          }}
-          onOpenHistory={() => switchView("history")}
-        />
-        <SettingsPanel
-          open={panelStack.isOpen("settings")}
-          onOpenChange={(open: boolean) => {
-            if (!open) panelStack.close("settings");
-          }}
-          defaultActiveTab={route.subId === "about" ? "about" : "appearance"}
-        />
-      </Suspense>
-      <StatusBar />
-      {/* ARIA live region for dynamic content announcements (screen readers) */}
-      <div className="app-live-region" aria-live="polite" aria-atomic="true" />
-    </Layout>
+          <SettingsPanel
+            open={panelStack.isOpen("settings")}
+            onOpenChange={(open: boolean) => {
+              if (!open) panelStack.close("settings");
+            }}
+            defaultActiveTab={route.subId === "about" ? "about" : "appearance"}
+          />
+          <TidyModal
+            open={tidyModalOpen}
+            onClose={() => setTidyModalOpen(false)}
+            triggerKey={tidyTriggerKey}
+          />
+        </Suspense>
+        <StatusBar />
+        {/* ARIA live region for dynamic content announcements (screen readers) */}
+        <div className="app-live-region" aria-live="polite" aria-atomic="true" />
+      </Layout>
     </>
   );
 }

@@ -73,22 +73,22 @@ export function useAutoCleanup() {
 
       // 按优先级逐个清理
       const trashPruned = await pruneTrash();
-      if (trashPruned > 0) results.push(t("autoCleanup.trash", { count: trashPruned }));
+      if (trashPruned > 0) results.push(t("已将 {count} 条过期回收站记录清除", { count: trashPruned }));
 
       await clearMetrics();
-      results.push(t("autoCleanup.metrics"));
+      results.push(t("已清除过期指标数据"));
 
       const activityPruned = await cleanupActivity();
-      if (activityPruned > 0) results.push(t("autoCleanup.activity", { count: activityPruned }));
+      if (activityPruned > 0) results.push(t("已将 {count} 条过期活动记录清除", { count: activityPruned }));
 
       const historyPruned = await cleanupHistoryEvents();
-      if (historyPruned > 0) results.push(t("autoCleanup.history", { count: historyPruned }));
+      if (historyPruned > 0) results.push(t("已将 {count} 条过期历史记录清除", { count: historyPruned }));
 
       const searchPruned = await cleanupSearchHistory();
-      if (searchPruned > 0) results.push(t("autoCleanup.searchHistory", { count: searchPruned }));
+      if (searchPruned > 0) results.push(t("已将 {count} 条搜索历史清除", { count: searchPruned }));
 
       if (!cancelled && results.length > 0) {
-        feedback.info(t("autoCleanup.summary", { items: results.join("、") }));
+        feedback.info(t("存储空间自动清理完成：{items}", { items: results.join("、") }));
       }
     }
 

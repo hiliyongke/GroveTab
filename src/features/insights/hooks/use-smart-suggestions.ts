@@ -9,6 +9,7 @@
  */
 import { useMemo } from "react";
 import type { StorageQuotaInfo } from "@/shared/utils/opfs-storage";
+import { translate } from '@/shared/i18n/core';
 
 export type SuggestionLevel = "warning" | "info" | "success";
 
@@ -48,9 +49,9 @@ export function useSmartSuggestions({
       suggestions.push({
         id: "storage_risk",
         level: quota.chromeStorageRatio >= 0.9 ? "warning" : "info",
-        titleKey: "insights.suggest.storageRisk.title",
-        descKey: "insights.suggest.storageRisk.desc",
-        actionKey: "insights.suggest.storageRisk.action",
+        titleKey: translate("存储空间告急"),
+        descKey: translate("Chrome 本地存储使用率超过 70%，建议清理归档中的过期会话"),
+        actionKey: translate("前往设置"),
         onAction: onOpenSettings,
       });
     }
@@ -60,9 +61,9 @@ export function useSmartSuggestions({
       suggestions.push({
         id: "archive_suggestion",
         level: "info",
-        titleKey: "insights.suggest.archiveLarge.title",
-        descKey: "insights.suggest.archiveLarge.desc",
-        actionKey: "insights.suggest.archiveLarge.action",
+        titleKey: translate("归档会话较多"),
+        descKey: translate("你有 {count} 个标签页在归档中，建议固定常用会话到工作区"),
+        actionKey: translate("查看归档"),
         onAction: onOpenArchive,
       });
     }
@@ -72,8 +73,8 @@ export function useSmartSuggestions({
       suggestions.push({
         id: "workspace_suggestion",
         level: "info",
-        titleKey: "insights.suggest.workspace.title",
-        descKey: "insights.suggest.workspace.desc",
+        titleKey: translate("建议创建工作区"),
+        descKey: translate("你经常在 {count} 个不同站点间切换，工作区能帮你一键恢复关联标签"),
       });
     }
 
@@ -84,9 +85,9 @@ export function useSmartSuggestions({
       suggestions.push({
         id: "schedule_archive",
         level: "info",
-        titleKey: "insights.suggest.scheduleArchive.title",
-        descKey: "insights.suggest.scheduleArchive.desc",
-        actionKey: "insights.suggest.scheduleArchive.action",
+        titleKey: translate("建议开启定时归档"),
+        descKey: translate("你日均打开 {avg} 个标签页，定时归档可以自动清理不活跃标签"),
+        actionKey: translate("前往设置"),
         onAction: onOpenSettings,
       });
     }
@@ -96,8 +97,8 @@ export function useSmartSuggestions({
       suggestions.push({
         id: "all_good",
         level: "success",
-        titleKey: "insights.suggest.allGood.title",
-        descKey: "insights.suggest.allGood.desc",
+        titleKey: translate("一切正常"),
+        descKey: translate("当前没有需要关注的优化建议，继续保持好习惯！"),
       });
     }
 

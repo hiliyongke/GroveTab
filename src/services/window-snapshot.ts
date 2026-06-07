@@ -18,6 +18,7 @@ import {
 import { prependSession, getArchivedSessions } from "@/services/archive/archive-storage";
 import { restoreSession } from "@/services/archive/archive-restore";
 import { BRAND } from "@/shared/config/brand";
+import { translate } from "@/shared/i18n/core";
 
 /** 快照存储上限 */
 const SNAPSHOT_LIMIT = 50;
@@ -66,7 +67,7 @@ export async function saveWindowSnapshot(
 
   const session: ArchivedSession = {
     id: nanoid(10),
-    name: name ?? `${buildDefaultSessionName()} (快照)`,
+    name: name ?? `${buildDefaultSessionName()} ${translate("( 快照 )")}`,
     createdAt: Date.now(),
     tabs: archivedTabs,
     tabCount: archivedTabs.length,

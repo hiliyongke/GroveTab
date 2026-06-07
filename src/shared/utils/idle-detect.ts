@@ -11,6 +11,7 @@
  */
 
 import type { LiveTab } from "@/shared/types";
+import { translate } from "@/shared/i18n/core";
 
 /** 闲置等级 */
 type IdleLevel = "idle" | "stale";
@@ -81,9 +82,9 @@ export function detectIdleTabs(tabs: LiveTab[], thresholdMinutes?: number): Idle
  * 格式化闲置时间为友好字符串
  */
 export function formatIdleTime(hours: number): string {
-  if (hours < 48) return `${hours} 小时`;
+  if (hours < 48) return translate("{hours} 小时", { hours });
   const days = Math.round(hours / 24);
-  if (days < 14) return `${days} 天`;
+  if (days < 14) return translate("{days} 天", { days });
   const weeks = Math.round(days / 7);
-  return `${weeks} 周`;
+  return translate("{weeks} 周", { weeks });
 }

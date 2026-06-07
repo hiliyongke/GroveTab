@@ -1,6242 +1,1446 @@
-[
-  {
-    "key": "k_ju11djm",
-    "zh-CN": "{brand}",
-    "en": "{brand}"
-  },
-  {
-    "key": "k_2trtlux",
-    "zh-CN": "{brand} — 轻盈的标签工作台",
-    "en": "{brand} — a breezy workspace for your tabs."
-  },
-  {
-    "key": "k_qvmgvu5",
-    "zh-CN": "{count} 个书签",
-    "en": "{count} bookmarks"
-  },
-  {
-    "key": "k_b77q4fk",
-    "zh-CN": "{count} 个待处理标签",
-    "en": ""
-  },
-  {
-    "key": "k_1lss0pg",
-    "zh-CN": "{count} 个标签 / {groups} 个分组",
-    "en": "{count} tabs / {groups} groups"
-  },
-  {
-    "key": "k_jd12bmz",
-    "zh-CN": "{count} 个标签页",
-    "en": "{count} tabs"
-  },
-  {
-    "key": "k_u0d7ob1",
-    "zh-CN": "{count} 个长期未用标签",
-    "en": "{count} long-idle tabs"
-  },
-  {
-    "key": "k_4nfebii",
-    "zh-CN": "{count} 个闲置标签",
-    "en": "{count} idle tabs"
-  },
-  {
-    "key": "k_yor5myg",
-    "zh-CN": "{count} 组重复标签（{tabs} 个可合并）",
-    "en": "{count} duplicate groups ({tabs} tabs to merge)"
-  },
-  {
-    "key": "k_3pui1l8",
-    "zh-CN": "{domain} · 全部标签页",
-    "en": "{domain} · All tabs"
-  },
-  {
-    "key": "k_41ch9tq",
-    "zh-CN": "{n} 分钟",
-    "en": ""
-  },
-  {
-    "key": "k_gzoikto",
-    "zh-CN": "{n} 分钟前",
-    "en": "{n}m ago"
-  },
-  {
-    "key": "k_q3ssbim",
-    "zh-CN": "{n} 天前",
-    "en": "{n}d ago"
-  },
-  {
-    "key": "k_awjdfom",
-    "zh-CN": "{n} 小时前",
-    "en": "{n}h ago"
-  },
-  {
-    "key": "k_n54qiw0",
-    "zh-CN": "{n} 秒",
-    "en": "{n}s"
-  },
-  {
-    "key": "k_ikqobqm",
-    "zh-CN": "{time}未访问",
-    "en": "{time} since last access"
-  },
-  {
-    "key": "k_ll1lis0",
-    "zh-CN": "⌘/Ctrl + K 呼出搜索；再按一次关闭；Cmd + 1..9 切换搜索引擎。",
-    "en": "⌘/Ctrl+K opens search; press again to close; Cmd+1..9 pick an engine directly."
-  },
-  {
-    "key": "k_5ke13pl",
-    "zh-CN": "⌘K",
-    "en": "⌘K"
-  },
-  {
-    "key": "k_buemhg8",
-    "zh-CN": "⌘K / Ctrl+K 打开命令中心；Alt+Shift+S 归档当前窗口；Alt+C 随时唤回工作台。所有快捷键可在 设置 → 快捷键 中自定义。",
-    "en": "⌘K / Ctrl+K opens the command center; Alt+Shift+S archives the current window; Alt+C reopens {brand} anytime. Customize shortcuts under Settings → Shortcuts."
-  },
-  {
-    "key": "k_8b9e7o5",
-    "zh-CN": "⌥H 快速打开",
-    "en": "⌥H to open"
-  },
-  {
-    "key": "k_4i6a7lc",
-    "zh-CN": "0 = 不限制",
-    "en": "0 = no limit"
-  },
-  {
-    "key": "k_2gu5vkx",
-    "zh-CN": "1 天",
-    "en": "1 day"
-  },
-  {
-    "key": "k_hs0t3n9",
-    "zh-CN": "1.1 完成用户认证模块重构，测试覆盖率达到 92%",
-    "en": ""
-  },
-  {
-    "key": "k_5klrlik",
-    "zh-CN": "1.2 修复 3 个 P1 级线上问题，优化查询性能提升 40%",
-    "en": ""
-  },
-  {
-    "key": "k_f0ow99w",
-    "zh-CN": "100% 本地优先 · 零数据上传",
-    "en": "100% local-first · zero data upload"
-  },
-  {
-    "key": "k_8696yqd",
-    "zh-CN": "12 小时",
-    "en": "12 hours"
-  },
-  {
-    "key": "k_3cym0jf",
-    "zh-CN": "2.1 启动数据分析模块开发",
-    "en": ""
-  },
-  {
-    "key": "k_0pu2d2l",
-    "zh-CN": "2.2 完成技术方案评审与排期",
-    "en": ""
-  },
-  {
-    "key": "k_ggc0r9y",
-    "zh-CN": "24 小时（默认）",
-    "en": "24 hours (default)"
-  },
-  {
-    "key": "k_gdtc95n",
-    "zh-CN": "3 天",
-    "en": "3 days"
-  },
-  {
-    "key": "k_pp2wxw8",
-    "zh-CN": "3.1 第三方 API 响应延迟需跟进",
-    "en": ""
-  },
-  {
-    "key": "k_pj2dpoh",
-    "zh-CN": "30 天",
-    "en": "30 days"
-  },
-  {
-    "key": "k_4cagfdv",
-    "zh-CN": "6 小时",
-    "en": "6 hours"
-  },
-  {
-    "key": "k_06fpgtw",
-    "zh-CN": "7 天",
-    "en": "7 days"
-  },
-  {
-    "key": "k_6e41fip",
-    "zh-CN": "7 天（默认）",
-    "en": "7 days (default)"
-  },
-  {
-    "key": "k_1ddct32",
-    "zh-CN": "8 套预设皮肤 + 圆角/字号/控件高度逐项定制。",
-    "en": "8 preset skins + tweak radius / font size / control height individually."
-  },
-  {
-    "key": "k_2oty9jl",
-    "zh-CN": "Apple",
-    "en": "Apple"
-  },
-  {
-    "key": "k_7cxu755",
-    "zh-CN": "Apple 官网设计语言，SF Pro 字体 + 深色毛玻璃导航",
-    "en": "Apple.com design language — SF Pro type + dark glass navigation"
-  },
-  {
-    "key": "k_v5lpz0a",
-    "zh-CN": "auto→lg 阈值",
-    "en": "auto→lg Threshold"
-  },
-  {
-    "key": "k_dxh8rsq",
-    "zh-CN": "auto→md 阈值",
-    "en": "auto→md Threshold"
-  },
-  {
-    "key": "k_r6x012l",
-    "zh-CN": "Base64 编解码",
-    "en": "Base64 Codec"
-  },
-  {
-    "key": "k_hchm483",
-    "zh-CN": "Basic Auth",
-    "en": "Basic Auth"
-  },
-  {
-    "key": "k_qqjzth5",
-    "zh-CN": "Basic Auth 用户名密码编码与解码",
-    "en": "Encode and decode Basic Auth username:password"
-  },
-  {
-    "key": "k_cucapaz",
-    "zh-CN": "camelCase、PascalCase、snake_case、kebab-case 互转",
-    "en": "Convert camelCase, PascalCase, snake_case and kebab-case"
-  },
-  {
-    "key": "k_pszhx3h",
-    "zh-CN": "chrome.storage 占用",
-    "en": ""
-  },
-  {
-    "key": "k_voia0pj",
-    "zh-CN": "Cron 表达式",
-    "en": "Cron Expression"
-  },
-  {
-    "key": "k_xv4d8q5",
-    "zh-CN": "CSS 单位转换",
-    "en": "CSS Unit Converter"
-  },
-  {
-    "key": "k_xgyt5kc",
-    "zh-CN": "CSV ↔ JSON",
-    "en": "CSV ↔ JSON"
-  },
-  {
-    "key": "k_vzwjet8",
-    "zh-CN": "CSV 表格与 JSON 数组互转",
-    "en": "Convert between CSV tables and JSON arrays"
-  },
-  {
-    "key": "k_t1ubzn0",
-    "zh-CN": "Curl 转 Fetch",
-    "en": "Curl to Fetch"
-  },
-  {
-    "key": "k_hg0rsg6",
-    "zh-CN": "FCP 性能",
-    "en": "FCP perf"
-  },
-  {
-    "key": "k_gyn2m2s",
-    "zh-CN": "FPS 采样",
-    "en": "FPS sample"
-  },
-  {
-    "key": "k_sljbczr",
-    "zh-CN": "Hero 区左侧树形图标",
-    "en": "Tree logo in the Hero area"
-  },
-  {
-    "key": "k_155k587",
-    "zh-CN": "HeroBar 下的概览卡片会呈现当前标签数、域名数、窗口数、重复和闲置标签、最近归档；点击每个卡片可直达对应的视图或面板。",
-    "en": "Below the HeroBar, six cards summarize your tabs/domains/windows, duplicates, idle tabs and the latest archive. Click any card to jump straight to the relevant view."
-  },
-  {
-    "key": "k_kiji6fe",
-    "zh-CN": "HTML 实体编解码",
-    "en": "HTML Entity Codec"
-  },
-  {
-    "key": "k_q5fp56p",
-    "zh-CN": "HTML 特殊字符转义与反转义",
-    "en": "Encode or decode HTML entities and special characters"
-  },
-  {
-    "key": "k_up3ybfw",
-    "zh-CN": "HTTP Header 解析",
-    "en": "HTTP Header Parser"
-  },
-  {
-    "key": "k_jb3cnsn",
-    "zh-CN": "HTTP 状态码",
-    "en": "HTTP Status Code"
-  },
-  {
-    "key": "k_8uuh0pi",
-    "zh-CN": "JS / JSON / Regex / Shell 字符串转义",
-    "en": "Escape strings for JS, JSON, Regex or Shell"
-  },
-  {
-    "key": "k_ocnnhqo",
-    "zh-CN": "JSON Path 查询",
-    "en": "JSON Path"
-  },
-  {
-    "key": "k_lk9xov1",
-    "zh-CN": "JSON 格式化",
-    "en": "JSON Formatter"
-  },
-  {
-    "key": "k_1wepz2t",
-    "zh-CN": "JSON 转 TypeScript",
-    "en": "JSON to TypeScript"
-  },
-  {
-    "key": "k_irnw8to",
-    "zh-CN": "JSON、编解码、时间戳、哈希等常用开发工具，纯本地处理",
-    "en": "JSON, codec, timestamp, hash and more — all processed locally"
-  },
-  {
-    "key": "k_bw27u4v",
-    "zh-CN": "JWT 解码",
-    "en": "JWT Decoder"
-  },
-  {
-    "key": "k_cr4j0ih",
-    "zh-CN": "Logo URL（可选）",
-    "en": "Logo URL (optional)"
-  },
-  {
-    "key": "k_4aypixu",
-    "zh-CN": "macOS 原生风格",
-    "en": "macOS native feel"
-  },
-  {
-    "key": "k_hgnc2iq",
-    "zh-CN": "Made with",
-    "en": "Made with"
-  },
-  {
-    "key": "k_x8pr75z",
-    "zh-CN": "MIME 类型",
-    "en": "MIME Type"
-  },
-  {
-    "key": "k_x19hv7q",
-    "zh-CN": "Nord 北欧寒色",
-    "en": "Nord"
-  },
-  {
-    "key": "k_031le43",
-    "zh-CN": "OPFS 存储占用",
-    "en": ""
-  },
-  {
-    "key": "k_eintf14",
-    "zh-CN": "px、rem、em 按基准字号互转",
-    "en": "Convert px, rem and em using a base font size"
-  },
-  {
-    "key": "k_9s3uolf",
-    "zh-CN": "Q2 季度预算表",
-    "en": ""
-  },
-  {
-    "key": "k_f77u24g",
-    "zh-CN": "Re: 新项目技术方案评审",
-    "en": ""
-  },
-  {
-    "key": "k_w3dt4h2",
-    "zh-CN": "SHA-256 摘要",
-    "en": "SHA-256 Hash"
-  },
-  {
-    "key": "k_v72u8r4",
-    "zh-CN": "Solarized 太阳化",
-    "en": "Solarized"
-  },
-  {
-    "key": "k_s7v9q3a",
-    "zh-CN": "Split View {count}",
-    "en": "Split View {count}"
-  },
-  {
-    "key": "k_cfwd206",
-    "zh-CN": "SQL 格式化",
-    "en": "SQL Formatter"
-  },
-  {
-    "key": "k_nyetdh3",
-    "zh-CN": "Top 10 访问域名",
-    "en": "Top 10 domains"
-  },
-  {
-    "key": "k_qquprvk",
-    "zh-CN": "Undo 撤销窗口",
-    "en": "Undo window"
-  },
-  {
-    "key": "k_w4i30tt",
-    "zh-CN": "Unix 时间戳与日期时间互转，自动识别秒/毫秒",
-    "en": "Convert between Unix timestamp and datetime; auto-detect seconds/milliseconds"
-  },
-  {
-    "key": "k_3iqk5v9",
-    "zh-CN": "URL",
-    "en": "URL"
-  },
-  {
-    "key": "k_4zequ4r",
-    "zh-CN": "URL Query 工具",
-    "en": "URL Query Tool"
-  },
-  {
-    "key": "k_q2xe7ei",
-    "zh-CN": "URL 匹配模式（可选，留空匹配所有）",
-    "en": ""
-  },
-  {
-    "key": "k_lm059yk",
-    "zh-CN": "URL 匹配模式（支持 * 通配符）",
-    "en": ""
-  },
-  {
-    "key": "k_4xj03wv",
-    "zh-CN": "URL 匹配规则（URLPattern）",
-    "en": ""
-  },
-  {
-    "key": "k_afstzm7",
-    "zh-CN": "URL 参数解析为 JSON，或由 JSON 构建查询串",
-    "en": "Parse URL query into JSON or build query strings from JSON"
-  },
-  {
-    "key": "k_55fdr5u",
-    "zh-CN": "URL 完全相同才认为重复；?page=1 与 ?page=2 不会被判为重复。",
-    "en": "Only identical URLs are duplicates. ?page=1 and ?page=2 are not."
-  },
-  {
-    "key": "k_cdrcuds",
-    "zh-CN": "URL 拆解器",
-    "en": "URL Parser"
-  },
-  {
-    "key": "k_vmg93ln",
-    "zh-CN": "URL 编解码",
-    "en": "URL Codec"
-  },
-  {
-    "key": "k_03hpev2",
-    "zh-CN": "URL 黑名单",
-    "en": "URL block list"
-  },
-  {
-    "key": "k_q9fcxsv",
-    "zh-CN": "URLPattern 格式无效",
-    "en": ""
-  },
-  {
-    "key": "k_8hfxfmt",
-    "zh-CN": "User-Agent 解析",
-    "en": "User-Agent Parser"
-  },
-  {
-    "key": "k_fku3a5n",
-    "zh-CN": "YAML ↔ JSON",
-    "en": "YAML ↔ JSON"
-  },
-  {
-    "key": "k_zfky3m5",
-    "zh-CN": "YAML 与 JSON 格式互转",
-    "en": "Convert between YAML and JSON formats"
-  },
-  {
-    "key": "k_vftautd",
-    "zh-CN": "一、本周工作进展",
-    "en": ""
-  },
-  {
-    "key": "k_ykgy6b1",
-    "zh-CN": "一目了然地查看当前所有标签页、域名、窗口数量；快速执行搜索、整理或归档操作。",
-    "en": "See all tabs, domains, and windows at a glance. Quickly search, tidy, or archive."
-  },
-  {
-    "key": "k_jw0jdcr",
-    "zh-CN": "一眼看清书签规模与状态，选择一项能力开始优化。",
-    "en": "See your bookmark library at a glance, then pick a tool to optimize it."
-  },
-  {
-    "key": "k_s3i0g5c",
-    "zh-CN": "一键封存窗口、随时恢复、自动快照不丢失任何上下文。",
-    "en": "Archive windows in one click, restore anytime, auto-snapshots keep you safe."
-  },
-  {
-    "key": "k_5vqs27l",
-    "zh-CN": "一键归档",
-    "en": "One-click Archive"
-  },
-  {
-    "key": "k_9pnd0gs",
-    "zh-CN": "一键归档当前窗口所有标签，释放浏览器内存",
-    "en": "One-click archive all tabs in current window, free up browser memory"
-  },
-  {
-    "key": "k_arspfg1",
-    "zh-CN": "一键收藏当前所有标签页",
-    "en": "Bookmark all current tabs at once"
-  },
-  {
-    "key": "k_z9aptbz",
-    "zh-CN": "一键整理",
-    "en": "Tidy up"
-  },
-  {
-    "key": "k_f7yxyzd",
-    "zh-CN": "一键清理空文件夹",
-    "en": "Sweep away empty folders in one click"
-  },
-  {
-    "key": "k_2untw5s",
-    "zh-CN": "三、风险与依赖",
-    "en": ""
-  },
-  {
-    "key": "k_h5qgmkm",
-    "zh-CN": "上一步",
-    "en": "Back"
-  },
-  {
-    "key": "k_yr3b6mo",
-    "zh-CN": "上下半屏",
-    "en": "Top + Bottom halves"
-  },
-  {
-    "key": "k_b8q3r6s",
-    "zh-CN": "上下堆叠",
-    "en": "Top / bottom stack"
-  },
-  {
-    "key": "k_7xiv0ks",
-    "zh-CN": "上传图片",
-    "en": "Upload image"
-  },
-  {
-    "key": "k_j4dorfq",
-    "zh-CN": "上传图片或粘贴 URL；背景图叠加在渐变之上，渐变作为 fallback",
-    "en": "Upload an image or paste a URL; it layers on top of the gradient, which acts as fallback"
-  },
-  {
-    "key": "k_jweo1q4",
-    "zh-CN": "上午",
-    "en": "Morning"
-  },
-  {
-    "key": "k_ddo956m",
-    "zh-CN": "下一步",
-    "en": "Next"
-  },
-  {
-    "key": "k_a3pnfqn",
-    "zh-CN": "下午",
-    "en": "Afternoon"
-  },
-  {
-    "key": "k_dgonn25",
-    "zh-CN": "不使用",
-    "en": "None"
-  },
-  {
-    "key": "k_8jjkexc",
-    "zh-CN": "不再提示",
-    "en": "Don't show again"
-  },
-  {
-    "key": "k_514ccpx",
-    "zh-CN": "不同域名",
-    "en": "Domains"
-  },
-  {
-    "key": "k_vjrua8g",
-    "zh-CN": "不支持",
-    "en": ""
-  },
-  {
-    "key": "k_h2h93tm",
-    "zh-CN": "不记录的域名",
-    "en": "Hostnames to ignore"
-  },
-  {
-    "key": "k_7zyy3sk",
-    "zh-CN": "与 {peers} 冲突",
-    "en": "Conflicts with {peers}"
-  },
-  {
-    "key": "k_lw41rzb",
-    "zh-CN": "与 Chrome 全局快捷键冲突，可能被全局快捷键拦截",
-    "en": "Conflicts with a Chrome global shortcut; the global binding will take precedence"
-  },
-  {
-    "key": "k_0nvg4x9",
-    "zh-CN": "专项",
-    "en": "Special"
-  },
-  {
-    "key": "k_4t2fzd5",
-    "zh-CN": "两天访问的站点完全一致 ✨",
-    "en": "Same set of sites as yesterday ✨"
-  },
-  {
-    "key": "k_8ojhkr1",
-    "zh-CN": "两次治理动作之间的最小间隔，防止内存抖动时频繁触发，默认 10 分钟。",
-    "en": ""
-  },
-  {
-    "key": "k_0z5tcee",
-    "zh-CN": "严格",
-    "en": "Strict"
-  },
-  {
-    "key": "k_lwctdau",
-    "zh-CN": "个标签页",
-    "en": ""
-  },
-  {
-    "key": "k_ihb90vr",
-    "zh-CN": "中午",
-    "en": "Noon"
-  },
-  {
-    "key": "k_kz8goe0",
-    "zh-CN": "中文",
-    "en": ""
-  },
-  {
-    "key": "k_rgxqhic",
-    "zh-CN": "主区 + 侧栏",
-    "en": "Main + Side"
-  },
-  {
-    "key": "k_06fui5h",
-    "zh-CN": "也可以先去归档区恢复之前保存的会话，或者调整设置后再开始浏览。",
-    "en": "You can also restore a previous session from archives, or adjust settings before you start browsing again."
-  },
-  {
-    "key": "k_raqv77v",
-    "zh-CN": "书签",
-    "en": "Bookmarks"
-  },
-  {
-    "key": "k_uzwocki",
-    "zh-CN": "书签工具箱",
-    "en": "Bookmark toolbox"
-  },
-  {
-    "key": "k_nkpg7zh",
-    "zh-CN": "书签总数",
-    "en": "Bookmarks"
-  },
-  {
-    "key": "k_y6by2br",
-    "zh-CN": "书签权限不可用",
-    "en": ""
-  },
-  {
-    "key": "k_33xnbez",
-    "zh-CN": "书签权限被拒绝",
-    "en": "Bookmark permission denied"
-  },
-  {
-    "key": "k_f4qhwxl",
-    "zh-CN": "书签栏",
-    "en": "Bookmarks Bar"
-  },
-  {
-    "key": "k_90yv8gc",
-    "zh-CN": "书签添加失败",
-    "en": ""
-  },
-  {
-    "key": "k_zdsr6a7",
-    "zh-CN": "事件触发（打开/访问页面时）",
-    "en": ""
-  },
-  {
-    "key": "k_0cpig2c",
-    "zh-CN": "二、下周计划",
-    "en": ""
-  },
-  {
-    "key": "k_ldh8e2f",
-    "zh-CN": "二进制、八进制、十进制、十六进制互转",
-    "en": "Convert between binary, octal, decimal and hexadecimal"
-  },
-  {
-    "key": "k_j6fk8f2",
-    "zh-CN": "交换",
-    "en": "Swap"
-  },
-  {
-    "key": "k_n6c47d2",
-    "zh-CN": "产品经理",
-    "en": ""
-  },
-  {
-    "key": "k_z4n9p2v",
-    "zh-CN": "仅在卡片大小选择自定义时生效（80–280px）",
-    "en": "Only applies when Card Size is set to Custom (80–280px)"
-  },
-  {
-    "key": "k_r4tdxlc",
-    "zh-CN": "仅工具栏按钮",
-    "en": "Toolbar popup only"
-  },
-  {
-    "key": "k_bzo7u1k",
-    "zh-CN": "仅当前窗口",
-    "en": "Current window only"
-  },
-  {
-    "key": "k_gv1jyks",
-    "zh-CN": "仅通知（默认）",
-    "en": ""
-  },
-  {
-    "key": "k_9o289zu",
-    "zh-CN": "今天",
-    "en": "Today"
-  },
-  {
-    "key": "k_sl9hg5r",
-    "zh-CN": "今天不再活跃",
-    "en": "No longer active"
-  },
-  {
-    "key": "k_m3f80rd",
-    "zh-CN": "今日",
-    "en": ""
-  },
-  {
-    "key": "k_x3ojj02",
-    "zh-CN": "仍有 {count} 个标签页休眠失败，请重试",
-    "en": "{count} tab(s) could not be discarded"
-  },
-  {
-    "key": "k_2vmle6x",
-    "zh-CN": "从剪贴板导入",
-    "en": ""
-  },
-  {
-    "key": "k_7as1e1l",
-    "zh-CN": "从剪贴板导入 URL",
-    "en": ""
-  },
-  {
-    "key": "k_bbmasmz",
-    "zh-CN": "从浏览器历史中提取页面作为建议；首次使用会申请 history 权限",
-    "en": "Show browser history pages as suggestions and request permission on first use"
-  },
-  {
-    "key": "k_x9952h7",
-    "zh-CN": "代码",
-    "en": "Code"
-  },
-  {
-    "key": "k_jmsw5gi",
-    "zh-CN": "休眠",
-    "en": ""
-  },
-  {
-    "key": "k_rkw919b",
-    "zh-CN": "休眠失败，请重试",
-    "en": "Discard failed, please retry"
-  },
-  {
-    "key": "k_v5i5vj4",
-    "zh-CN": "休眠所选",
-    "en": "Discard selected"
-  },
-  {
-    "key": "k_ic10nqc",
-    "zh-CN": "休眠整组",
-    "en": "Discard group"
-  },
-  {
-    "key": "k_yz5x7p5",
-    "zh-CN": "休眠标签页",
-    "en": "Discard tab"
-  },
-  {
-    "key": "k_7rbeij1",
-    "zh-CN": "休眠组内标签",
-    "en": "Discard group tabs"
-  },
-  {
-    "key": "k_1x2jm73",
-    "zh-CN": "会话",
-    "en": "Session"
-  },
-  {
-    "key": "k_lv4ux43",
-    "zh-CN": "会话归档",
-    "en": "Session archive"
-  },
-  {
-    "key": "k_gf1c4tc",
-    "zh-CN": "会话总数",
-    "en": "Total sessions"
-  },
-  {
-    "key": "k_y2m4sv7",
-    "zh-CN": "你的标签页，找到归属",
-    "en": "Where your tabs find their place."
-  },
-  {
-    "key": "k_7w1y0yg",
-    "zh-CN": "你的标签页，找到归属。",
-    "en": "Where your tabs find their place."
-  },
-  {
-    "key": "k_luohnad",
-    "zh-CN": "使用 URLPattern 语法匹配书签 URL，自动移动到指定文件夹。",
-    "en": ""
-  },
-  {
-    "key": "k_19i6lh7",
-    "zh-CN": "使用小贴士",
-    "en": "Tips"
-  },
-  {
-    "key": "k_ju0ll1v",
-    "zh-CN": "使用工具箱去重、检测失效链接",
-    "en": "Use toolbox to deduplicate or check dead links"
-  },
-  {
-    "key": "k_1o3dl23",
-    "zh-CN": "使用数字键 1-7 快速切换不同视图",
-    "en": ""
-  },
-  {
-    "key": "k_2b2rj8c",
-    "zh-CN": "使用浏览历史建议",
-    "en": "Enable history suggestions"
-  },
-  {
-    "key": "k_wmwbs9j",
-    "zh-CN": "使用点号路径从 JSON 中提取值",
-    "en": "Extract values from JSON using dot-notation paths"
-  },
-  {
-    "key": "k_op2w2zm",
-    "zh-CN": "使用视频作为桌面背景。视频会占用额外内存与电量，按需开启。",
-    "en": "Use a video as desktop background. Video can use extra memory and battery — enable only when needed."
-  },
-  {
-    "key": "k_mcocw3d",
-    "zh-CN": "使用频率",
-    "en": "Frequency"
-  },
-  {
-    "key": "k_qjom69w",
-    "zh-CN": "使用频率前 5",
-    "en": "Top 5 actions"
-  },
-  {
-    "key": "k_e1ynqfd",
-    "zh-CN": "例外白名单（域名）",
-    "en": ""
-  },
-  {
-    "key": "k_zi2tjhg",
-    "zh-CN": "例如：Dev",
-    "en": ""
-  },
-  {
-    "key": "k_v5p2n5t",
-    "zh-CN": "例如：晨会模板",
-    "en": ""
-  },
-  {
-    "key": "k_psvbfo1",
-    "zh-CN": "例如：清理闲置标签",
-    "en": ""
-  },
-  {
-    "key": "k_o7m85i8",
-    "zh-CN": "依据当前去重严格度：{mode}。默认保留每组第一个书签，删除其余重复项。",
-    "en": "Using current dedup strictness: {mode}. Merging keeps the first bookmark of each group and removes the rest."
-  },
-  {
-    "key": "k_bdlze9s",
-    "zh-CN": "保存",
-    "en": "Save"
-  },
-  {
-    "key": "k_rw1b0q7",
-    "zh-CN": "保存在浏览器内部（IndexedDB），不会上传任何数据。",
-    "en": "Stored in-browser (IndexedDB); nothing is uploaded."
-  },
-  {
-    "key": "k_2c1n840",
-    "zh-CN": "保存在浏览器内部（OPFS），不会上传任何数据。",
-    "en": ""
-  },
-  {
-    "key": "k_r7bpw9p",
-    "zh-CN": "保存当前标签为模板",
-    "en": ""
-  },
-  {
-    "key": "k_ewbc4fy",
-    "zh-CN": "保存当前窗口快照",
-    "en": ""
-  },
-  {
-    "key": "k_890f7ok",
-    "zh-CN": "保存当前配置为预设，一键切换不同的使用场景",
-    "en": "Save current settings as a profile and switch between different usage scenarios"
-  },
-  {
-    "key": "k_cd977op",
-    "zh-CN": "保存快照失败",
-    "en": ""
-  },
-  {
-    "key": "k_m4x467p",
-    "zh-CN": "保留",
-    "en": "Keep"
-  },
-  {
-    "key": "k_3cm7hwp",
-    "zh-CN": "停止",
-    "en": "Stop"
-  },
-  {
-    "key": "k_22l1btd",
-    "zh-CN": "偷摸模式",
-    "en": "Stealth mode"
-  },
-  {
-    "key": "k_mzd33yn",
-    "zh-CN": "傍晚",
-    "en": "Evening"
-  },
-  {
-    "key": "k_y166yoj",
-    "zh-CN": "允许抓取网页描述（用于搜索增强）",
-    "en": "Fetch page descriptions (for richer search)"
-  },
-  {
-    "key": "k_jxgdyxp",
-    "zh-CN": "先输入关键词，或从最近搜索和热门话题开始",
-    "en": "Start typing, or pick from recent searches and trending topics"
-  },
-  {
-    "key": "k_253skod",
-    "zh-CN": "全不勾选",
-    "en": "Unselect all"
-  },
-  {
-    "key": "k_vctm49q",
-    "zh-CN": "全局快捷键",
-    "en": "Global shortcuts"
-  },
-  {
-    "key": "k_0e437uv",
-    "zh-CN": "全局搜索",
-    "en": "Global Search"
-  },
-  {
-    "key": "k_0wxm3hn",
-    "zh-CN": "全网热榜",
-    "en": "Trending"
-  },
-  {
-    "key": "k_c4vbni7",
-    "zh-CN": "全选",
-    "en": "Select all"
-  },
-  {
-    "key": "k_cuz8wsm",
-    "zh-CN": "全选标签",
-    "en": "Select all tabs"
-  },
-  {
-    "key": "k_2ui0xb1",
-    "zh-CN": "全部",
-    "en": "All"
-  },
-  {
-    "key": "k_0nub9b9",
-    "zh-CN": "全部 {count} 个标签页",
-    "en": "All {count} tabs"
-  },
-  {
-    "key": "k_b9nslaf",
-    "zh-CN": "全部休眠",
-    "en": "Discard all"
-  },
-  {
-    "key": "k_agti5x8",
-    "zh-CN": "全部关闭",
-    "en": "Close all"
-  },
-  {
-    "key": "k_m76gfwf",
-    "zh-CN": "全部刷新",
-    "en": "Refresh all"
-  },
-  {
-    "key": "k_ko8nrc5",
-    "zh-CN": "全部勾选最旧",
-    "en": "Keep oldest of each group"
-  },
-  {
-    "key": "k_9000yre",
-    "zh-CN": "全部合并",
-    "en": "Merge all"
-  },
-  {
-    "key": "k_qt6sbfd",
-    "zh-CN": "全部展开",
-    "en": "All expanded"
-  },
-  {
-    "key": "k_tbj63hp",
-    "zh-CN": "全部折叠",
-    "en": "All collapsed"
-  },
-  {
-    "key": "k_vkfxvqi",
-    "zh-CN": "全量重置",
-    "en": "Wipe everything"
-  },
-  {
-    "key": "k_jiwctsz",
-    "zh-CN": "公共热榜（来自互联网）",
-    "en": "Public trending (online)"
-  },
-  {
-    "key": "k_0kpzz2f",
-    "zh-CN": "共 {bookmarks} 个书签·{folders} 个文件夹",
-    "en": "{bookmarks} bookmarks · {folders} folders"
-  },
-  {
-    "key": "k_113qihn",
-    "zh-CN": "共 {count} 项重复",
-    "en": "{count} duplicates"
-  },
-  {
-    "key": "k_0pt3j8e",
-    "zh-CN": "共 {n} 条记录",
-    "en": ""
-  },
-  {
-    "key": "k_vsrnf3x",
-    "zh-CN": "关于",
-    "en": "About"
-  },
-  {
-    "key": "k_j82c27z",
-    "zh-CN": "关于 {brand}",
-    "en": "About {brand}"
-  },
-  {
-    "key": "k_x8695vr",
-    "zh-CN": "关于 Q2 季度 OKR 对齐会议的邀请",
-    "en": ""
-  },
-  {
-    "key": "k_f7fzu8h",
-    "zh-CN": "关闭",
-    "en": "Close"
-  },
-  {
-    "key": "k_guh25ql",
-    "zh-CN": "关闭 / 归档后多久内可以撤销；建议 5 秒。",
-    "en": "How long you can undo a close/archive. 5s recommended."
-  },
-  {
-    "key": "k_gafr7rh",
-    "zh-CN": "关闭了",
-    "en": "Closed"
-  },
-  {
-    "key": "k_xlrwl0i",
-    "zh-CN": "关闭了一个窗口（{count} 个标签）",
-    "en": "Closed a window ({count} tabs)"
-  },
-  {
-    "key": "k_hyvomdn",
-    "zh-CN": "关闭分组",
-    "en": "Close group"
-  },
-  {
-    "key": "k_gxtd8r0",
-    "zh-CN": "关闭分组失败，请重试",
-    "en": "Failed to close group, please retry"
-  },
-  {
-    "key": "k_s6vp32s",
-    "zh-CN": "关闭后分组内每条标签不再显示 favicon，视觉更紧凑；顶部卡片依旧保留域名图标",
-    "en": "When off, tabs inside a domain group hide their own favicons for a tighter look; the group header icon is kept."
-  },
-  {
-    "key": "k_s3wwj2a",
-    "zh-CN": "关闭后只保留「最近关闭」标签快照，不记录搜索 / 归档 / 打标签等事件。",
-    "en": "After disabling, only \"recently closed\" tab snapshots are kept; search/archive/tag events are not recorded."
-  },
-  {
-    "key": "k_r17uw5b",
-    "zh-CN": "关闭后将不再记录新的「最近关闭」与操作时间线，已有数据保留可随时清空。",
-    "en": "After disabling, no new \"recently closed\" or activity timeline entries will be recorded. Existing data is retained and can be cleared at any time."
-  },
-  {
-    "key": "k_j8uwv7f",
-    "zh-CN": "关闭失败，请重试",
-    "en": "Failed to close tab, please retry"
-  },
-  {
-    "key": "k_vm4tdkq",
-    "zh-CN": "关闭归档面板",
-    "en": "Close archive panel"
-  },
-  {
-    "key": "k_6heyolz",
-    "zh-CN": "关闭所选",
-    "en": "Close selected"
-  },
-  {
-    "key": "k_ita29rf",
-    "zh-CN": "关闭标签页",
-    "en": "Close tab"
-  },
-  {
-    "key": "k_u3njhsm",
-    "zh-CN": "关闭标签页 {title}",
-    "en": "Close tab {title}"
-  },
-  {
-    "key": "k_tizf4lc",
-    "zh-CN": "关闭此域名所有标签页",
-    "en": "Close all tabs from this domain"
-  },
-  {
-    "key": "k_2cl27lz",
-    "zh-CN": "关闭窗口",
-    "en": "Close window"
-  },
-  {
-    "key": "k_3gwwtwd",
-    "zh-CN": "关闭设置",
-    "en": "Close settings"
-  },
-  {
-    "key": "k_c32rk55",
-    "zh-CN": "关闭该标签组？",
-    "en": "Close this tab group?"
-  },
-  {
-    "key": "k_dkkv1e9",
-    "zh-CN": "关闭该窗口？",
-    "en": "Close this window?"
-  },
-  {
-    "key": "k_jgoq7bn",
-    "zh-CN": "关闭过渡动画和 hover 效果，减少视觉干扰；对前庭功能障碍用户友好",
-    "en": "Disable transitions and hover effects; helpful for vestibular disorder users"
-  },
-  {
-    "key": "k_5f31ql9",
-    "zh-CN": "其他书签",
-    "en": "Other Bookmarks"
-  },
-  {
-    "key": "k_298ozlz",
-    "zh-CN": "其他窗口",
-    "en": "Other Window"
-  },
-  {
-    "key": "k_cb5wasp",
-    "zh-CN": "典雅新古典",
-    "en": "Elegant"
-  },
-  {
-    "key": "k_pkhy9ya",
-    "zh-CN": "内存使用率已达 {pct}%，建议关闭或休眠部分标签页以释放内存。",
-    "en": ""
-  },
-  {
-    "key": "k_banolnl",
-    "zh-CN": "内存压力（{pct}%）：已自动休眠 {count} 个标签页。",
-    "en": ""
-  },
-  {
-    "key": "k_mvfis1m",
-    "zh-CN": "内存压力（{pct}%）：建议将 {count} 个闲置标签页归档以释放内存。",
-    "en": ""
-  },
-  {
-    "key": "k_0plh5pm",
-    "zh-CN": "内存压力阈值（%）",
-    "en": ""
-  },
-  {
-    "key": "k_5o97e1g",
-    "zh-CN": "内存治理",
-    "en": ""
-  },
-  {
-    "key": "k_jt4uouy",
-    "zh-CN": "内容区最大宽度",
-    "en": "Content max width"
-  },
-  {
-    "key": "k_nksmis6",
-    "zh-CN": "内容运营",
-    "en": ""
-  },
-  {
-    "key": "k_m2d8x4y",
-    "zh-CN": "最多支持分屏 {count} 个标签页",
-    "en": "Split layout supports up to {count} tabs"
-  },
-  {
-    "key": "k_v8tvm1n",
-    "zh-CN": "最多支持并排 4 个标签页",
-    "en": "Side-by-side supports up to 4 tabs"
-  },
-  {
-    "key": "k_wtpg37u",
-    "zh-CN": "最大化",
-    "en": "Maximize"
-  },
-  {
-    "key": "k_srzatp4",
-    "zh-CN": "最大嵌套深度",
-    "en": "Max depth"
-  },
-  {
-    "key": "k_n41mxux",
-    "zh-CN": "最常使用的 {count} 个标签页",
-    "en": "Top {count} most used tabs"
-  },
-  {
-    "key": "k_f2wd70h",
-    "zh-CN": "最早创建",
-    "en": "Oldest first"
-  },
-  {
-    "key": "k_v9zuefr",
-    "zh-CN": "最近 1 小时",
-    "en": "Last hour"
-  },
-  {
-    "key": "k_i6vm11u",
-    "zh-CN": "最近关闭",
-    "en": "Recently Closed"
-  },
-  {
-    "key": "k_0w3sa8x",
-    "zh-CN": "最近关闭最多保留",
-    "en": "Max recently-closed tabs"
-  },
-  {
-    "key": "k_da4om8u",
-    "zh-CN": "最近关闭自动过期",
-    "en": "Recently-closed retention"
-  },
-  {
-    "key": "k_e1pu91n",
-    "zh-CN": "最近创建",
-    "en": "Newest first"
-  },
-  {
-    "key": "k_xjbzszv",
-    "zh-CN": "最近归档：{name}",
-    "en": "Latest: {name}"
-  },
-  {
-    "key": "k_3qmxc3o",
-    "zh-CN": "最近搜索",
-    "en": "Recent"
-  },
-  {
-    "key": "k_1015uss",
-    "zh-CN": "最近搜索已清空",
-    "en": "Recent searches cleared"
-  },
-  {
-    "key": "k_hf3c6x5",
-    "zh-CN": "最近操作",
-    "en": "Recent activity"
-  },
-  {
-    "key": "k_qqfm0yt",
-    "zh-CN": "最近没有关闭过任何标签页",
-    "en": "No tabs have been closed recently"
-  },
-  {
-    "key": "k_ajnpc7c",
-    "zh-CN": "最近访问",
-    "en": "Recent access"
-  },
-  {
-    "key": "k_y0isose",
-    "zh-CN": "冷却时间（分钟）",
-    "en": ""
-  },
-  {
-    "key": "k_i098c53",
-    "zh-CN": "冷静的青蓝体系，长时间使用护眼",
-    "en": "Cold blue palette, easy on long sessions"
-  },
-  {
-    "key": "k_hqefgak",
-    "zh-CN": "准备恢复 {count} 个标签页",
-    "en": "Ready to restore {count} tabs"
-  },
-  {
-    "key": "k_gq7veec",
-    "zh-CN": "凌晨",
-    "en": "Early morning"
-  },
-  {
-    "key": "k_dqdjf3m",
-    "zh-CN": "减弱动效",
-    "en": "Reduced motion"
-  },
-  {
-    "key": "k_i6ix40s",
-    "zh-CN": "分享",
-    "en": "Share"
-  },
-  {
-    "key": "k_oatsthc",
-    "zh-CN": "分享失败，请重试",
-    "en": "Share failed, please retry"
-  },
-  {
-    "key": "k_hq1qfoy",
-    "zh-CN": "分屏布局",
-    "en": "Split layout"
-  },
-  {
-    "key": "k_95d6oq4",
-    "zh-CN": "分屏操作失败，请重试",
-    "en": "Split layout failed, please retry"
-  },
-  {
-    "key": "k_4dkiebu",
-    "zh-CN": "分屏显示",
-    "en": "Split screen"
-  },
-  {
-    "key": "k_u8hxeoh",
-    "zh-CN": "分析",
-    "en": ""
-  },
-  {
-    "key": "k_1op2r0h",
-    "zh-CN": "分组",
-    "en": "Group"
-  },
-  {
-    "key": "k_6vzh0ic",
-    "zh-CN": "分组到 {name}",
-    "en": ""
-  },
-  {
-    "key": "k_rw7hdjk",
-    "zh-CN": "分组可折叠",
-    "en": "Collapsible Groups"
-  },
-  {
-    "key": "k_i1n5m7w",
-    "zh-CN": "分组名称",
-    "en": ""
-  },
-  {
-    "key": "k_bxpv1hv",
-    "zh-CN": "分组已关闭",
-    "en": "Group closed"
-  },
-  {
-    "key": "k_78z3fy9",
-    "zh-CN": "分组已重命名",
-    "en": "Group renamed"
-  },
-  {
-    "key": "k_etyo0y6",
-    "zh-CN": "分组排序方式",
-    "en": "Group sort order"
-  },
-  {
-    "key": "k_dwy39cs",
-    "zh-CN": "分组颜色已更新",
-    "en": "Group color updated"
-  },
-  {
-    "key": "k_0uckwg8",
-    "zh-CN": "切到网页搜索",
-    "en": "jump to web search"
-  },
-  {
-    "key": "k_k3qvpsm",
-    "zh-CN": "切回命令",
-    "en": ""
-  },
-  {
-    "key": "k_piec3y9",
-    "zh-CN": "切换主题",
-    "en": "Toggle theme"
-  },
-  {
-    "key": "k_9ngqrb1",
-    "zh-CN": "切换了工作区",
-    "en": "Switched workspace"
-  },
-  {
-    "key": "k_vk4xybk",
-    "zh-CN": "切换标签页主视图的具体呈现方式",
-    "en": ""
-  },
-  {
-    "key": "k_w96eorq",
-    "zh-CN": "切换视图",
-    "en": "Switch view"
-  },
-  {
-    "key": "k_pn1kpu9",
-    "zh-CN": "切换页面模式",
-    "en": "Switch page mode"
-  },
-  {
-    "key": "k_789vz4x",
-    "zh-CN": "列表视图",
-    "en": "List View"
-  },
-  {
-    "key": "k_tcuuxxc",
-    "zh-CN": "刚刚",
-    "en": "just now"
-  },
-  {
-    "key": "k_87cabfo",
-    "zh-CN": "创建",
-    "en": ""
-  },
-  {
-    "key": "k_0mp0gea",
-    "zh-CN": "创建了归档",
-    "en": "Created archive"
-  },
-  {
-    "key": "k_khj2639",
-    "zh-CN": "创建分组",
-    "en": ""
-  },
-  {
-    "key": "k_rydg0yh",
-    "zh-CN": "创建分组失败",
-    "en": ""
-  },
-  {
-    "key": "k_zi427uv",
-    "zh-CN": "创建归档",
-    "en": "Create archive"
-  },
-  {
-    "key": "k_gs1hjod",
-    "zh-CN": "创建目标文件夹失败",
-    "en": ""
-  },
-  {
-    "key": "k_sfsonao",
-    "zh-CN": "删除",
-    "en": "Delete"
-  },
-  {
-    "key": "k_bhyinmw",
-    "zh-CN": "删除全部失效（{count} 个）",
-    "en": "Remove all broken ({count})"
-  },
-  {
-    "key": "k_o7hsxnx",
-    "zh-CN": "删除列",
-    "en": "Delete column"
-  },
-  {
-    "key": "k_cc473tc",
-    "zh-CN": "删除列失败",
-    "en": "Failed to delete column"
-  },
-  {
-    "key": "k_kizwxep",
-    "zh-CN": "删除卡片",
-    "en": "Remove card"
-  },
-  {
-    "key": "k_ydzqtu0",
-    "zh-CN": "删除后无法恢复，确定要删除此会话吗？",
-    "en": "This action cannot be undone. Are you sure you want to delete this session?"
-  },
-  {
-    "key": "k_xee5op4",
-    "zh-CN": "删除失败",
-    "en": ""
-  },
-  {
-    "key": "k_viyipzr",
-    "zh-CN": "删除失败，请重试",
-    "en": "Delete failed, please retry"
-  },
-  {
-    "key": "k_aqmklhx",
-    "zh-CN": "删除归档",
-    "en": "Delete archive"
-  },
-  {
-    "key": "k_ck2p8p8",
-    "zh-CN": "刷新",
-    "en": "Refresh"
-  },
-  {
-    "key": "k_cdhyfce",
-    "zh-CN": "刷新总览",
-    "en": "Refresh Overview"
-  },
-  {
-    "key": "k_3cr6p44",
-    "zh-CN": "前端",
-    "en": "Frontend"
-  },
-  {
-    "key": "k_vmbs9as",
-    "zh-CN": "加了标签",
-    "en": "Tagged"
-  },
-  {
-    "key": "k_ghnjnuo",
-    "zh-CN": "加入书签",
-    "en": ""
-  },
-  {
-    "key": "k_h9gh2zj",
-    "zh-CN": "加入现有分组",
-    "en": "Join existing group"
-  },
-  {
-    "key": "k_avak170",
-    "zh-CN": "加密",
-    "en": "Crypto"
-  },
-  {
-    "key": "k_91qvoia",
-    "zh-CN": "加载中...",
-    "en": "Loading..."
-  },
-  {
-    "key": "k_34qrwaa",
-    "zh-CN": "加载标签页中...",
-    "en": "Loading tabs..."
-  },
-  {
-    "key": "k_8cvhxya",
-    "zh-CN": "加载标签页失败，请刷新页面",
-    "en": "Failed to load tabs, please refresh"
-  },
-  {
-    "key": "k_gj0c2vv",
-    "zh-CN": "动效与无障碍",
-    "en": "Motion & Accessibility"
-  },
-  {
-    "key": "k_okreqyv",
-    "zh-CN": "匹配 {matched} / 共 {total} 个",
-    "en": "Matched {matched} / {total}"
-  },
-  {
-    "key": "k_vjgc1e4",
-    "zh-CN": "区域显隐",
-    "en": "Region visibility"
-  },
-  {
-    "key": "k_ab8hsd7",
-    "zh-CN": "午夜",
-    "en": "Midnight"
-  },
-  {
-    "key": "k_ta6g61n",
-    "zh-CN": "单次最多操作标签数",
-    "en": ""
-  },
-  {
-    "key": "k_07cz0ny",
-    "zh-CN": "卡片圆角",
-    "en": "Card corner radius"
-  },
-  {
-    "key": "k_c2nz3jf",
-    "zh-CN": "卡片大小",
-    "en": "Card Size"
-  },
-  {
-    "key": "k_8r7wq2m",
-    "zh-CN": "卡片宽度",
-    "en": "Card Width"
-  },
-  {
-    "key": "k_uo75dmn",
-    "zh-CN": "卡片宽度微调",
-    "en": "Card Width Fine-tune"
-  },
-  {
-    "key": "k_qx5mb7c",
-    "zh-CN": "危险区",
-    "en": "Danger zone"
-  },
-  {
-    "key": "k_7pxdlmn",
-    "zh-CN": "即将关闭 {count} 个标签页，此操作可撤销。是否继续？",
-    "en": "You are about to close {count} tabs. This action can be undone. Continue?"
-  },
-  {
-    "key": "k_on9zo72",
-    "zh-CN": "即将关闭 {domain} 下的 {count} 个标签页，此操作可撤销。是否继续？",
-    "en": "You are about to close {count} tabs from {domain}. This action can be undone. Continue?"
-  },
-  {
-    "key": "k_5qhg4vr",
-    "zh-CN": "历史记录",
-    "en": "History"
-  },
-  {
-    "key": "k_92ywwfc",
-    "zh-CN": "去重",
-    "en": "Deduplicate"
-  },
-  {
-    "key": "k_j24lelv",
-    "zh-CN": "去重、失效检测、按域名一键智能整理。",
-    "en": "Dedupe, broken-link detection, cluster-by-domain organizer."
-  },
-  {
-    "key": "k_yd4lc02",
-    "zh-CN": "去重严格度",
-    "en": "Dedup strictness"
-  },
-  {
-    "key": "k_ogoai7b",
-    "zh-CN": "反馈与开源",
-    "en": "Feedback & open source"
-  },
-  {
-    "key": "k_itqpi1l",
-    "zh-CN": "发现 {count} 个空文件夹，可一键清理",
-    "en": "Found {count} empty folder(s), can be cleaned up"
-  },
-  {
-    "key": "k_jb5ygj9",
-    "zh-CN": "发现 {count} 个重复书签，可合并清理",
-    "en": "Found {count} duplicate bookmark(s), can be merged"
-  },
-  {
-    "key": "k_hxcswqd",
-    "zh-CN": "发现 {count} 组重复标签页（{tabs} 个可合并）",
-    "en": "Found {count} duplicate groups ({tabs} tabs can be merged)"
-  },
-  {
-    "key": "k_u44t05z",
-    "zh-CN": "取消",
-    "en": "Cancel"
-  },
-  {
-    "key": "k_r3bt0hb",
-    "zh-CN": "取消固定",
-    "en": "Unpin"
-  },
-  {
-    "key": "k_c8r6g3j",
-    "zh-CN": "取消恢复",
-    "en": "Cancel restore"
-  },
-  {
-    "key": "k_sgdxxr6",
-    "zh-CN": "取消选择",
-    "en": "Clear selection"
-  },
-  {
-    "key": "k_pl846zk",
-    "zh-CN": "取消静音",
-    "en": ""
-  },
-  {
-    "key": "k_qs7ju6w",
-    "zh-CN": "另存为归档会话",
-    "en": "Save as archive"
-  },
-  {
-    "key": "k_2gxyur2",
-    "zh-CN": "可整理",
-    "en": "Tidy available"
-  },
-  {
-    "key": "k_qb5z9sy",
-    "zh-CN": "可达",
-    "en": "Reachable"
-  },
-  {
-    "key": "k_1w482ao",
-    "zh-CN": "右侧",
-    "en": "Right"
-  },
-  {
-    "key": "k_agtp74s",
-    "zh-CN": "右侧文本",
-    "en": "Right text"
-  },
-  {
-    "key": "k_k9u3ltw",
-    "zh-CN": "右键点击标签页可以快速归档、固定或添加书签。",
-    "en": "Right-click a tab to quickly archive, pin, or bookmark it."
-  },
-  {
-    "key": "k_9mmkb73",
-    "zh-CN": "合并",
-    "en": "Merge"
-  },
-  {
-    "key": "k_r2gcpu4",
-    "zh-CN": "合并会话",
-    "en": "Merged session"
-  },
-  {
-    "key": "k_f4e3mso",
-    "zh-CN": "合并全部（删除 {count} 项）",
-    "en": "Merge all (remove {count})"
-  },
-  {
-    "key": "k_tlgwf53",
-    "zh-CN": "合并到当前窗口",
-    "en": "Merge to current window"
-  },
-  {
-    "key": "k_fivb6he",
-    "zh-CN": "合并失败，请重试",
-    "en": "Merge failed, please retry"
-  },
-  {
-    "key": "k_jb660cw",
-    "zh-CN": "合并失败，部分标签可能仍然存在",
-    "en": "Merge failed; some tabs may remain"
-  },
-  {
-    "key": "k_nz3fcgs",
-    "zh-CN": "合并归档",
-    "en": "Merge archive"
-  },
-  {
-    "key": "k_gsld00j",
-    "zh-CN": "合并窗口失败，请重试",
-    "en": "Merge failed, please retry"
-  },
-  {
-    "key": "k_y5m9kwr",
-    "zh-CN": "名称",
-    "en": "Name"
-  },
-  {
-    "key": "k_qwg67ec",
-    "zh-CN": "名称不能为空",
-    "en": "Name cannot be empty"
-  },
-  {
-    "key": "k_kb8cla5",
-    "zh-CN": "名称格式不正确",
-    "en": "Invalid name format"
-  },
-  {
-    "key": "k_1mv9b3b",
-    "zh-CN": "后端",
-    "en": "Backend"
-  },
-  {
-    "key": "k_csv9n8o",
-    "zh-CN": "启用",
-    "en": ""
-  },
-  {
-    "key": "k_6mn7v96",
-    "zh-CN": "启用内存治理",
-    "en": ""
-  },
-  {
-    "key": "k_vt8jnpp",
-    "zh-CN": "启用历史建议",
-    "en": "Enable history suggestions"
-  },
-  {
-    "key": "k_qqfwhfc",
-    "zh-CN": "启用历史记录",
-    "en": "Enable history tracking"
-  },
-  {
-    "key": "k_kf9vm9k",
-    "zh-CN": "启用定制",
-    "en": "Enable customization"
-  },
-  {
-    "key": "k_8al198e",
-    "zh-CN": "启用的搜索引擎",
-    "en": "Switchable search engines"
-  },
-  {
-    "key": "k_zib033k",
-    "zh-CN": "启用遮罩层",
-    "en": "Enable overlay"
-  },
-  {
-    "key": "k_s0w0a0w",
-    "zh-CN": "周一",
-    "en": ""
-  },
-  {
-    "key": "k_jlbkk46",
-    "zh-CN": "命中名单的域名（含子域）不会出现在任何历史记录中。例如：mail.google.com、localhost。",
-    "en": "Hostnames (and subdomains) on this list will never appear in any history. e.g. mail.google.com, localhost."
-  },
-  {
-    "key": "k_v81nvr8",
-    "zh-CN": "命中的标签",
-    "en": "Matched tags"
-  },
-  {
-    "key": "k_r9z2kd8",
-    "zh-CN": "命令",
-    "en": ""
-  },
-  {
-    "key": "k_v2zkzn8",
-    "zh-CN": "命名风格转换",
-    "en": "Case Converter"
-  },
-  {
-    "key": "k_l91tzah",
-    "zh-CN": "品牌 Logo",
-    "en": "Brand logo"
-  },
-  {
-    "key": "k_tr00z4l",
-    "zh-CN": "品牌主色",
-    "en": "Brand accent"
-  },
-  {
-    "key": "k_u3x1ujj",
-    "zh-CN": "品牌副标题",
-    "en": "Brand subtitle"
-  },
-  {
-    "key": "k_tdnu5lz",
-    "zh-CN": "品牌推广",
-    "en": ""
-  },
-  {
-    "key": "k_69g0bd9",
-    "zh-CN": "品牌标识 + 归档/主题/设置按钮",
-    "en": "Brand + archive/theme/settings buttons"
-  },
-  {
-    "key": "k_2u5xk60",
-    "zh-CN": "品牌标题",
-    "en": "Brand title"
-  },
-  {
-    "key": "k_li35lo5",
-    "zh-CN": "哈希摘要",
-    "en": "Hash Digest"
-  },
-  {
-    "key": "k_m4jt5ej",
-    "zh-CN": "回收站",
-    "en": ""
-  },
-  {
-    "key": "k_6r713fo",
-    "zh-CN": "回看你在插件里做过什么，并一键恢复关闭的标签页",
-    "en": "See what you did in the extension, and restore closed tabs in one click"
-  },
-  {
-    "key": "k_4xes9fv",
-    "zh-CN": "回车即可打开搜索结果页",
-    "en": "Press Enter to open search results"
-  },
-  {
-    "key": "k_hqlbp3h",
-    "zh-CN": "固定",
-    "en": "Pin"
-  },
-  {
-    "key": "k_7yqf9qt",
-    "zh-CN": "固定标签页",
-    "en": ""
-  },
-  {
-    "key": "k_dmya664",
-    "zh-CN": "圆角",
-    "en": "Corner radius"
-  },
-  {
-    "key": "k_nhaqz8y",
-    "zh-CN": "在 {brand} 页面内按下此快捷键可打开搜索",
-    "en": "Press this shortcut inside {brand} to open search"
-  },
-  {
-    "key": "k_zj2hs1h",
-    "zh-CN": "在 chrome://extensions/shortcuts 中自定义快捷键",
-    "en": "Customize shortcuts at chrome://extensions/shortcuts"
-  },
-  {
-    "key": "k_9f36jyx",
-    "zh-CN": "在右下角显示悬浮的添加按钮，快捷键 Ctrl+Shift+A / ⌘+Shift+A",
-    "en": "Show a floating add button at bottom-right; shortcut Ctrl+Shift+A / ⌘+Shift+A"
-  },
-  {
-    "key": "k_7gooixb",
-    "zh-CN": "在当前皮肤基础上覆盖单项 token；关闭开关即可恢复预设",
-    "en": "Override individual tokens on top of the current skin; flip the switch off to revert"
-  },
-  {
-    "key": "k_tibenks",
-    "zh-CN": "在当前窗口中打开所有标签页",
-    "en": "Open all tabs in the current window"
-  },
-  {
-    "key": "k_ouwcr55",
-    "zh-CN": "在搜索框中回车时使用的搜索引擎",
-    "en": "This engine is used when you trigger a web search directly"
-  },
-  {
-    "key": "k_l4vl10g",
-    "zh-CN": "在新的浏览器窗口中打开所有标签页",
-    "en": "Open all tabs in a new browser window"
-  },
-  {
-    "key": "k_mm671eb",
-    "zh-CN": "在时段旁和每条标签旁展示具体访问时间（HH:mm）",
-    "en": "Display precise access times (HH:mm) on segments and tab rows"
-  },
-  {
-    "key": "k_k8vqcv2",
-    "zh-CN": "在标签列表中使用键盘快速操作",
-    "en": ""
-  },
-  {
-    "key": "k_nhgnix7",
-    "zh-CN": "在窗口卡片内展示 Chrome 原生标签组；关闭后退化为普通标签列表",
-    "en": "Show native Chrome tab groups inside each window card; turn off to fall back to a plain tab list"
-  },
-  {
-    "key": "k_6h2mkpu",
-    "zh-CN": "在背景上叠加半透明遮罩层，让文字在复杂背景上保持可读",
-    "en": "Add a semi-transparent overlay on top of the background to keep text readable"
-  },
-  {
-    "key": "k_kvhxxta",
-    "zh-CN": "在输入为空或本地结果不足时附加热词，可选择来源",
-    "en": "Add trending topics when input is empty or local matches are weak"
-  },
-  {
-    "key": "k_lb6v3h3",
-    "zh-CN": "在预设基础上连续微调卡片宽度（80–280px）；设为 0 则跟随预设",
-    "en": "Fine-tune card width continuously (80–280px) on top of preset; set to 0 to follow preset"
-  },
-  {
-    "key": "k_qqdqkp3",
-    "zh-CN": "域名",
-    "en": "Domains"
-  },
-  {
-    "key": "k_0hugqyf",
-    "zh-CN": "域名/时间轴/紧凑等视图标签行",
-    "en": "Domain/Timeline/Compact etc. tab strip"
-  },
-  {
-    "key": "k_wify7ta",
-    "zh-CN": "域名分组",
-    "en": "Domain Groups"
-  },
-  {
-    "key": "k_rwdsv4r",
-    "zh-CN": "域名分组列数",
-    "en": "Domain group columns"
-  },
-  {
-    "key": "k_k8bt52h",
-    "zh-CN": "域名拼音",
-    "en": "Alphabetical"
-  },
-  {
-    "key": "k_c207j87",
-    "zh-CN": "域名色条位置",
-    "en": "Accent bar position"
-  },
-  {
-    "key": "k_nz4638c",
-    "zh-CN": "基础字号",
-    "en": "Base font size"
-  },
-  {
-    "key": "k_durcqot",
-    "zh-CN": "复制",
-    "en": "Copy"
-  },
-  {
-    "key": "k_bulci4a",
-    "zh-CN": "复制URL",
-    "en": ""
-  },
-  {
-    "key": "k_dpwlml7",
-    "zh-CN": "复制失败",
-    "en": "Copy failed"
-  },
-  {
-    "key": "k_k2zre4o",
-    "zh-CN": "复制标签",
-    "en": ""
-  },
-  {
-    "key": "k_xdbtrlm",
-    "zh-CN": "复制链接",
-    "en": ""
-  },
-  {
-    "key": "k_vflvg8l",
-    "zh-CN": "外观",
-    "en": "Appearance"
-  },
-  {
-    "key": "k_maunjc9",
-    "zh-CN": "多 tab 卡片何时弹出列表浮层——点击更稳重，悬停更轻快；仅影响网格视图",
-    "en": "How a multi-tab card opens its list popover — click feels deliberate, hover feels light. Grid view only."
-  },
-  {
-    "key": "k_gfz2oc6",
-    "zh-CN": "多视图 / 域名分组 / 看板 / 时间线，按你的节奏组织 Tab。",
-    "en": "Multi-view · Domain group · Kanban · Timeline. Organize tabs your way."
-  },
-  {
-    "key": "k_fcabvxq",
-    "zh-CN": "多选",
-    "en": "Select"
-  },
-  {
-    "key": "k_cuqh4f1",
-    "zh-CN": "多选模式",
-    "en": "Multi-select mode"
-  },
-  {
-    "key": "k_lvulki4",
-    "zh-CN": "多选模式下按此键全选当前视图所有标签",
-    "en": "Press this key in multi-select mode to select all tabs in view"
-  },
-  {
-    "key": "k_d156hl2",
-    "zh-CN": "多选模式下按此键退出选择",
-    "en": "Press this key in multi-select mode to exit"
-  },
-  {
-    "key": "k_btc4b8m",
-    "zh-CN": "大",
-    "en": "Large"
-  },
-  {
-    "key": "k_s8g04md",
-    "zh-CN": "失效",
-    "en": "Dead"
-  },
-  {
-    "key": "k_xzu1mwz",
-    "zh-CN": "失效检测",
-    "en": "Health check"
-  },
-  {
-    "key": "k_9u517nm",
-    "zh-CN": "如：GitHub",
-    "en": ""
-  },
-  {
-    "key": "k_lng0o2l",
-    "zh-CN": "如：GitHub 书签",
-    "en": ""
-  },
-  {
-    "key": "k_8qlgqca",
-    "zh-CN": "始终减弱",
-    "en": "Always reduce"
-  },
-  {
-    "key": "k_hs836bf",
-    "zh-CN": "始终启用",
-    "en": "Always enable"
-  },
-  {
-    "key": "k_p8jp683",
-    "zh-CN": "娱乐",
-    "en": "Fun"
-  },
-  {
-    "key": "k_t5rczg3",
-    "zh-CN": "子项显示域名图标",
-    "en": "Show tab favicons inside groups"
-  },
-  {
-    "key": "k_3n25a03",
-    "zh-CN": "字符串转义",
-    "en": "String Escape"
-  },
-  {
-    "key": "k_t4wjhzy",
-    "zh-CN": "存储空间",
-    "en": "Storage"
-  },
-  {
-    "key": "k_fary6v7",
-    "zh-CN": "存储空间即将用完，建议清理归档数据",
-    "en": "Storage is running low. Consider clearing archive data."
-  },
-  {
-    "key": "k_y5hz5l0",
-    "zh-CN": "完成",
-    "en": "Done"
-  },
-  {
-    "key": "k_btawwdr",
-    "zh-CN": "完整显示",
-    "en": "Contain (fit)"
-  },
-  {
-    "key": "k_l8oabaw",
-    "zh-CN": "定时清理（闲置检查）",
-    "en": ""
-  },
-  {
-    "key": "k_ajrrjg8",
-    "zh-CN": "实时",
-    "en": "Live"
-  },
-  {
-    "key": "k_5mqbb4d",
-    "zh-CN": "实际支出",
-    "en": ""
-  },
-  {
-    "key": "k_4wiukxy",
-    "zh-CN": "容量与过期",
-    "en": "Capacity & retention"
-  },
-  {
-    "key": "k_zi4i961",
-    "zh-CN": "宽松",
-    "en": "Loose"
-  },
-  {
-    "key": "k_vxe6vr0",
-    "zh-CN": "宽松（默认）",
-    "en": "Loose (default)"
-  },
-  {
-    "key": "k_e8uz9t8",
-    "zh-CN": "对 URL 进行编码或解码",
-    "en": "Encode or decode URL components"
-  },
-  {
-    "key": "k_nbaowyo",
-    "zh-CN": "对全部书签应用规则",
-    "en": ""
-  },
-  {
-    "key": "k_j52j4tw",
-    "zh-CN": "对文本进行 Base64 编码或解码，支持 Unicode",
-    "en": "Encode or decode Base64, with Unicode support"
-  },
-  {
-    "key": "k_7aeo2du",
-    "zh-CN": "导入失败：{count} 个错误",
-    "en": "Import failed: {count} errors"
-  },
-  {
-    "key": "k_zcgj8v9",
-    "zh-CN": "导入归档数据",
-    "en": "Import archive"
-  },
-  {
-    "key": "k_27afu5f",
-    "zh-CN": "导入文件过大，请控制在 {size} 以内",
-    "en": "Import file is too large. Keep it within {size}"
-  },
-  {
-    "key": "k_2cc9soz",
-    "zh-CN": "导出",
-    "en": ""
-  },
-  {
-    "key": "k_btij2pq",
-    "zh-CN": "导出 JSON",
-    "en": ""
-  },
-  {
-    "key": "k_hok1psj",
-    "zh-CN": "导出失败",
-    "en": ""
-  },
-  {
-    "key": "k_kqa2v98",
-    "zh-CN": "导出归档数据",
-    "en": "Export archive"
-  },
-  {
-    "key": "k_24yxdl1",
-    "zh-CN": "导出成功",
-    "en": ""
-  },
-  {
-    "key": "k_s4aat0h",
-    "zh-CN": "导出数据",
-    "en": ""
-  },
-  {
-    "key": "k_u8un2dr",
-    "zh-CN": "导航",
-    "en": "navigate"
-  },
-  {
-    "key": "k_b9j1wic",
-    "zh-CN": "将 curl 命令转换为 JavaScript fetch 代码",
-    "en": "Convert curl commands into JavaScript fetch code"
-  },
-  {
-    "key": "k_9ovrvey",
-    "zh-CN": "将关闭 {close} 个 / 保留 {keep} 个",
-    "en": "Will close {close} / keep {keep}"
-  },
-  {
-    "key": "k_3j2jp85",
-    "zh-CN": "将关闭 {count}",
-    "en": "Will close {count}"
-  },
-  {
-    "key": "k_1wlt0qf",
-    "zh-CN": "将关闭该组内 {count} 个标签。",
-    "en": "This will close {count} tabs in the group."
-  },
-  {
-    "key": "k_xjj5wjs",
-    "zh-CN": "将删除所有归档会话，此操作不可撤销。",
-    "en": "All archived sessions will be deleted. This cannot be undone."
-  },
-  {
-    "key": "k_9q5r82r",
-    "zh-CN": "将合并 {count} 个会话为一个新会话，并按 URL 去重。原会话将被删除。",
-    "en": "Merge {count} sessions into one, deduping by URL. The originals will be deleted."
-  },
-  {
-    "key": "k_7yjn63d",
-    "zh-CN": "将当前 {count} 个标签页保存为模板，方便日后一键恢复",
-    "en": ""
-  },
-  {
-    "key": "k_8ixqii1",
-    "zh-CN": "将未分组标签创建为分组",
-    "en": "Create group from ungrouped tabs"
-  },
-  {
-    "key": "k_frzwrcl",
-    "zh-CN": "将清空所有本地统计数据，不可恢复。继续？",
-    "en": "All local stats will be cleared. This cannot be undone."
-  },
-  {
-    "key": "k_iom8rqv",
-    "zh-CN": "将立即删除全部「最近关闭」「整窗快照」和「操作时间线」，此操作不可撤销。",
-    "en": "This will immediately delete all \"recently closed\", \"window snapshots\", and \"activity timeline\" data. This action cannot be undone."
-  },
-  {
-    "key": "k_zjbtuc8",
-    "zh-CN": "将被删除",
-    "en": "Will remove"
-  },
-  {
-    "key": "k_iz0qu7s",
-    "zh-CN": "将重置全部设置（主题/皮肤/快捷键…）为默认值；所有归档、书签、历史记录数据继续保留。",
-    "en": "Resets all settings (theme / skin / shortcuts…) back to defaults; all archives, bookmarks metadata and history are kept."
-  },
-  {
-    "key": "k_t4x3rvk",
-    "zh-CN": "将隐私 / 历史相关的所有设置恢复为默认值？",
-    "en": "Reset all privacy / history settings to their defaults?"
-  },
-  {
-    "key": "k_gn9ml9i",
-    "zh-CN": "小",
-    "en": "Small"
-  },
-  {
-    "key": "k_dt3itts",
-    "zh-CN": "小组件",
-    "en": "Widgets"
-  },
-  {
-    "key": "k_0vyozdx",
-    "zh-CN": "尚未归档过 Tab",
-    "en": "No tabs archived yet"
-  },
-  {
-    "key": "k_xb594pw",
-    "zh-CN": "尝试使用 in: 语法限定范围",
-    "en": "Try using in: syntax to limit scope"
-  },
-  {
-    "key": "k_bd8vqpr",
-    "zh-CN": "尝试使用 site: 语法限定域名",
-    "en": "Try using site: syntax to limit domain"
-  },
-  {
-    "key": "k_3el6z74",
-    "zh-CN": "居中 80%",
-    "en": "Center 80%"
-  },
-  {
-    "key": "k_onhbz44",
-    "zh-CN": "居中大号搜索框 + 视图切换",
-    "en": "Large centered search box + view switcher"
-  },
-  {
-    "key": "k_kzaw91o",
-    "zh-CN": "展开",
-    "en": "Expand"
-  },
-  {
-    "key": "k_uimctpa",
-    "zh-CN": "嵌套连带删除 {count} 个空文件夹",
-    "en": "Cascades to {count} empty folders"
-  },
-  {
-    "key": "k_6o2y3as",
-    "zh-CN": "工作区",
-    "en": "Workspaces"
-  },
-  {
-    "key": "k_122bvfy",
-    "zh-CN": "工作区名",
-    "en": "Workspace name"
-  },
-  {
-    "key": "k_h8c0slz",
-    "zh-CN": "工作区总览",
-    "en": "Workspace overview"
-  },
-  {
-    "key": "k_rdjthht",
-    "zh-CN": "工作区模板",
-    "en": ""
-  },
-  {
-    "key": "k_vidawal",
-    "zh-CN": "工作台",
-    "en": "Workspace"
-  },
-  {
-    "key": "k_26r27nu",
-    "zh-CN": "工作台总览",
-    "en": "Workspace overview"
-  },
-  {
-    "key": "k_wfndj40",
-    "zh-CN": "工作台用于整理标签页；热榜查看全网热点；开发工具栏提供常用开发工具。",
-    "en": "Workspace for tab cleanup; Trending for hot topics; DevTools for developer utilities."
-  },
-  {
-    "key": "k_3ezxfbj",
-    "zh-CN": "工具箱",
-    "en": "Toolbox"
-  },
-  {
-    "key": "k_b2oei8s",
-    "zh-CN": "左侧",
-    "en": "Left"
-  },
-  {
-    "key": "k_d5x73nf",
-    "zh-CN": "左侧文本",
-    "en": "Left text"
-  },
-  {
-    "key": "k_g4h7j2k",
-    "zh-CN": "左右分栏",
-    "en": "Left / right columns"
-  },
-  {
-    "key": "k_kij7sdq",
-    "zh-CN": "左右半屏",
-    "en": "Left + Right halves"
-  },
-  {
-    "key": "k_xzntmsf",
-    "zh-CN": "已下载会话 JSON",
-    "en": "Session JSON downloaded"
-  },
-  {
-    "key": "k_jjpcxq0",
-    "zh-CN": "已休眠 {count} 个标签页",
-    "en": "Discarded {count} tabs"
-  },
-  {
-    "key": "k_3xykkq3",
-    "zh-CN": "已休眠 {count} 个闲置标签",
-    "en": "Discarded {count} idle tabs"
-  },
-  {
-    "key": "k_cqg4d3f",
-    "zh-CN": "已休眠 {domain} 的 {count} 个标签页",
-    "en": "Discarded {count} tabs from {domain}"
-  },
-  {
-    "key": "k_af71mww",
-    "zh-CN": "已休眠标签页，内存已释放",
-    "en": "Tab discarded, memory freed"
-  },
-  {
-    "key": "k_o2mfa97",
-    "zh-CN": "已关闭 {count} 个标签",
-    "en": ""
-  },
-  {
-    "key": "k_3apxsi0",
-    "zh-CN": "已关闭 {count} 个标签页",
-    "en": "Closed {count} tabs"
-  },
-  {
-    "key": "k_pw6bium",
-    "zh-CN": "已关闭 1 个标签页",
-    "en": "1 tab closed"
-  },
-  {
-    "key": "k_k4tjg3h",
-    "zh-CN": "已创建 {count} 个分类文件夹",
-    "en": "Created {count} folder(s)"
-  },
-  {
-    "key": "k_c6e19lu",
-    "zh-CN": "已创建分组",
-    "en": "Group created"
-  },
-  {
-    "key": "k_28xbysh",
-    "zh-CN": "已删除 {count} 个会话",
-    "en": "Deleted {count} sessions"
-  },
-  {
-    "key": "k_z2cc24m",
-    "zh-CN": "已删除 {count} 个失效书签",
-    "en": "Removed {count} broken bookmark(s)"
-  },
-  {
-    "key": "k_omu38af",
-    "zh-CN": "已加入书签",
-    "en": ""
-  },
-  {
-    "key": "k_2gv044s",
-    "zh-CN": "已加入目标分组",
-    "en": "Joined target group"
-  },
-  {
-    "key": "k_gakizbo",
-    "zh-CN": "已取消恢复，成功恢复 {restored} 个标签",
-    "en": "Restore cancelled, {restored} tabs restored"
-  },
-  {
-    "key": "k_taaedeh",
-    "zh-CN": "已合并 {count} 个重复标签",
-    "en": "Merged {count} duplicate tabs"
-  },
-  {
-    "key": "k_umldha1",
-    "zh-CN": "已合并 {count} 个重复标签页",
-    "en": "Merged {count} duplicate tabs"
-  },
-  {
-    "key": "k_3get2oj",
-    "zh-CN": "已合并 {count} 项重复书签",
-    "en": "Merged {count} duplicate bookmark(s)"
-  },
-  {
-    "key": "k_snbtbdr",
-    "zh-CN": "已合并 {merged} 个重复标签，休眠 {discarded} 个闲置标签",
-    "en": "Merged {merged} duplicates, discarded {discarded} idle tabs"
-  },
-  {
-    "key": "k_mu2ksz3",
-    "zh-CN": "已合并为 1 个会话，共 {count} 个标签",
-    "en": "Merged into 1 session with {count} tabs"
-  },
-  {
-    "key": "k_nr2nft1",
-    "zh-CN": "已合并为「{name}」（{count} 个标签）",
-    "en": "Merged into “{name}” ({count} tabs)"
-  },
-  {
-    "key": "k_kn023q6",
-    "zh-CN": "已合并全部 {count} 个重复标签页",
-    "en": "Merged all {count} duplicate tabs"
-  },
-  {
-    "key": "k_obxd8cw",
-    "zh-CN": "已在后台打开",
-    "en": ""
-  },
-  {
-    "key": "k_mxg9jfc",
-    "zh-CN": "已在常用站点中",
-    "en": "Already in Quick Access"
-  },
-  {
-    "key": "k_1m3jtdy",
-    "zh-CN": "已复制",
-    "en": "Copied"
-  },
-  {
-    "key": "k_l77well",
-    "zh-CN": "已复制结果",
-    "en": "Result copied"
-  },
-  {
-    "key": "k_yg4xlgf",
-    "zh-CN": "已导入 {count} 个归档，并恢复工作台配置",
-    "en": "Imported {count} archives and restored workspace config"
-  },
-  {
-    "key": "k_vep015p",
-    "zh-CN": "已导入 {count} 个标签",
-    "en": ""
-  },
-  {
-    "key": "k_rrf0btv",
-    "zh-CN": "已导入 {sessions} 个会话 / {tabs} 个标签",
-    "en": "Imported {sessions} sessions / {tabs} tabs"
-  },
-  {
-    "key": "k_xf8y1zn",
-    "zh-CN": "已导出 {count} 个会话",
-    "en": "Exported {count} sessions"
-  },
-  {
-    "key": "k_vxkfy28",
-    "zh-CN": "已导出 {format}",
-    "en": "Exported {format}"
-  },
-  {
-    "key": "k_egyj5j3",
-    "zh-CN": "已导出归档 + 工作台配置",
-    "en": "Exported archives + workspace config"
-  },
-  {
-    "key": "k_3l5ijpz",
-    "zh-CN": "已将 {count} 个标签合并到当前窗口",
-    "en": "Merged {count} tabs to current window"
-  },
-  {
-    "key": "k_bow67n8",
-    "zh-CN": "已将 {count} 个标签移到新窗口",
-    "en": "Moved {count} tabs to a new window"
-  },
-  {
-    "key": "k_uy2nkb1",
-    "zh-CN": "已并排打开 {count} 个标签页",
-    "en": "Opened {count} tabs side by side"
-  },
-  {
-    "key": "k_zwib19w",
-    "zh-CN": "已应用预设「{name}」",
-    "en": "Applied preset \"{name}\""
-  },
-  {
-    "key": "k_kq1nftq",
-    "zh-CN": "已归档 {count} 个标签",
-    "en": ""
-  },
-  {
-    "key": "k_rn3vgv1",
-    "zh-CN": "已归档 {count} 个标签到「{name}」",
-    "en": "Archived {count} tabs to “{name}”"
-  },
-  {
-    "key": "k_1r9x10s",
-    "zh-CN": "已归档 {count} 个标签页",
-    "en": "Archived {count} tabs"
-  },
-  {
-    "key": "k_9tcb2bv",
-    "zh-CN": "已恢复 {count} 个会话",
-    "en": "Restored {count} sessions"
-  },
-  {
-    "key": "k_2lif6nx",
-    "zh-CN": "已恢复 {count} 个标签",
-    "en": "Restored {count} tabs"
-  },
-  {
-    "key": "k_bz5y9tv",
-    "zh-CN": "已恢复 {count} 个标签页",
-    "en": "{count} tabs restored"
-  },
-  {
-    "key": "k_4zq19kc",
-    "zh-CN": "已恢复 1 个标签页",
-    "en": "1 tab restored"
-  },
-  {
-    "key": "k_uirfz97",
-    "zh-CN": "已恢复出厂设置，页面即将刷新",
-    "en": "Factory reset complete. Reloading…"
-  },
-  {
-    "key": "k_778m1cj",
-    "zh-CN": "已恢复默认快捷键",
-    "en": "Shortcut reset to default"
-  },
-  {
-    "key": "k_0af0phs",
-    "zh-CN": "已恢复默认设置",
-    "en": "Reset to defaults"
-  },
-  {
-    "key": "k_ljv61h8",
-    "zh-CN": "已授权",
-    "en": ""
-  },
-  {
-    "key": "k_sltykh2",
-    "zh-CN": "已授权 {name}",
-    "en": "Granted {name}"
-  },
-  {
-    "key": "k_psi34a3",
-    "zh-CN": "已撤销",
-    "en": "Undone"
-  },
-  {
-    "key": "k_34cvjho",
-    "zh-CN": "已收藏 {count} 个标签页",
-    "en": "Bookmarked {count} tabs"
-  },
-  {
-    "key": "k_p0d7lw4",
-    "zh-CN": "已有 {count} 个标签页未能关闭，可稍后手动处理",
-    "en": "{count} tab(s) were archived but could not be closed automatically"
-  },
-  {
-    "key": "k_4ys8dfd",
-    "zh-CN": "已添加",
-    "en": "Added"
-  },
-  {
-    "key": "k_xz25tv4",
-    "zh-CN": "已添加列「{name}」",
-    "en": "Added column \"{name}\""
-  },
-  {
-    "key": "k_eozj4n5",
-    "zh-CN": "已添加自定义搜索引擎",
-    "en": "Custom search engine added"
-  },
-  {
-    "key": "k_umsn4ma",
-    "zh-CN": "已清理 {count} 个空文件夹",
-    "en": "Removed {count} empty folder(s)"
-  },
-  {
-    "key": "k_vtn8nnk",
-    "zh-CN": "已清空历史记录",
-    "en": "History cleared"
-  },
-  {
-    "key": "k_yoaijrv",
-    "zh-CN": "已清空归档 {count} 个",
-    "en": "Cleared {count} archives"
-  },
-  {
-    "key": "k_ecnjzi3",
-    "zh-CN": "已清除所有本地统计",
-    "en": "All local stats cleared"
-  },
-  {
-    "key": "k_4xj5195",
-    "zh-CN": "已用内存占总内存的比例达到此值时触发治理动作，默认 80%。",
-    "en": ""
-  },
-  {
-    "key": "k_bx2fiz2",
-    "zh-CN": "已禁用",
-    "en": ""
-  },
-  {
-    "key": "k_e7et2h3",
-    "zh-CN": "已禁用；Dashboard / TidySuggestionBar 不会提示重复标签。",
-    "en": "Disabled. Dashboard / TidySuggestionBar will not surface duplicates."
-  },
-  {
-    "key": "k_rraba4u",
-    "zh-CN": "已离线（点击重新打开）",
-    "en": "Offline (click to reopen)"
-  },
-  {
-    "key": "k_9yxgvya",
-    "zh-CN": "已移动 {count} 个书签",
-    "en": ""
-  },
-  {
-    "key": "k_3rkawhl",
-    "zh-CN": "已移动 {count} 个标签",
-    "en": ""
-  },
-  {
-    "key": "k_tnm5lj7",
-    "zh-CN": "已移除",
-    "en": "Removed"
-  },
-  {
-    "key": "k_tptrji9",
-    "zh-CN": "已自动快照 {count} 个标签",
-    "en": "Auto-snapshot {count} tabs"
-  },
-  {
-    "key": "k_1fcyell",
-    "zh-CN": "已达上限，免费版最多 3 个工作区",
-    "en": "Free plan allows up to 3 workspaces"
-  },
-  {
-    "key": "k_jwsx542",
-    "zh-CN": "已选 {count}",
-    "en": "{count} selected"
-  },
-  {
-    "key": "k_aiufr1d",
-    "zh-CN": "已选 {count} 个标签（{domains} 个域名 / {windows} 个窗口）",
-    "en": "{count} tab(s) selected ({domains} domains / {windows} windows)"
-  },
-  {
-    "key": "k_7bm4aui",
-    "zh-CN": "已选 {count} 个标签页",
-    "en": ""
-  },
-  {
-    "key": "k_kptgc5i",
-    "zh-CN": "已选 {count} 项",
-    "en": ""
-  },
-  {
-    "key": "k_hl3ni7t",
-    "zh-CN": "布局定制",
-    "en": "Layout"
-  },
-  {
-    "key": "k_gnb90p0",
-    "zh-CN": "布局密度",
-    "en": "Layout density"
-  },
-  {
-    "key": "k_sx7ar13",
-    "zh-CN": "布局模式",
-    "en": "Layout Mode"
-  },
-  {
-    "key": "k_j1vqvzr",
-    "zh-CN": "常用站点",
-    "en": "Quick Access"
-  },
-  {
-    "key": "k_ktkh25q",
-    "zh-CN": "平铺",
-    "en": "Repeat (tile)"
-  },
-  {
-    "key": "k_f5y29x1",
-    "zh-CN": "并排打开",
-    "en": "Open side by side"
-  },
-  {
-    "key": "k_j30sik6",
-    "zh-CN": "应用此预设",
-    "en": "Apply this profile"
-  },
-  {
-    "key": "k_4r7wmw5",
-    "zh-CN": "应用规则失败",
-    "en": ""
-  },
-  {
-    "key": "k_yiqj49k",
-    "zh-CN": "底部",
-    "en": "Bottom"
-  },
-  {
-    "key": "k_9gc60ci",
-    "zh-CN": "开发工具栏",
-    "en": "DevTools"
-  },
-  {
-    "key": "k_rvfc5ga",
-    "zh-CN": "开启后，若没有匹配的已打开标签，搜索框会高亮网页搜索动作",
-    "en": "When enabled, the search box highlights the web action first if no open tab matches"
-  },
-  {
-    "key": "k_y3i7s0s",
-    "zh-CN": "开启后定期检测内存压力，在达到阈值时自动执行治理动作。需要 system.memory 权限。",
-    "en": ""
-  },
-  {
-    "key": "k_rfrkq5c",
-    "zh-CN": "开启后支持用拼音首字母或全拼搜索中文标题；对非中文用户可关闭以节省性能",
-    "en": "When on, search Chinese titles by pinyin initials or full spelling; non-Chinese users can turn this off to save performance"
-  },
-  {
-    "key": "k_hemrij3",
-    "zh-CN": "开启后每次新建标签页都显示 {brand} 工作台；关闭后使用浏览器默认页。",
-    "en": "When on, every new tab opens the {brand} workspace; when off, the browser default is used."
-  },
-  {
-    "key": "k_q6o95do",
-    "zh-CN": "开启后记录每个标签页的聚焦时长，在 TabItem 的悬停提示中展示今日使用时长。",
-    "en": ""
-  },
-  {
-    "key": "k_9mbie49",
-    "zh-CN": "开启后需授予 <all_urls> 权限；仅读取 meta 描述，不发送任何额外网络请求。",
-    "en": "Requires granting <all_urls>. Only reads meta description locally; no other network requests are made."
-  },
-  {
-    "key": "k_0gosnb3",
-    "zh-CN": "开始使用",
-    "en": "Start using"
-  },
-  {
-    "key": "k_5b9rlzf",
-    "zh-CN": "开始恢复",
-    "en": "Start restore"
-  },
-  {
-    "key": "k_p7ljhvd",
-    "zh-CN": "开始扫描",
-    "en": "Scan"
-  },
-  {
-    "key": "k_74q1o1x",
-    "zh-CN": "开源地址",
-    "en": "Source code"
-  },
-  {
-    "key": "k_huvhbr4",
-    "zh-CN": "归档",
-    "en": "Archive"
-  },
-  {
-    "key": "k_at5omk6",
-    "zh-CN": "归档 = 把当前窗口所有标签页打包成一个「会话」快照，保存后会关闭这些标签页。需要时点击「恢复」即可在当前窗口里重新打开，适合整理浏览环境或临时腾出空间。",
-    "en": "Archive = pack all tabs in the current window into a \"session\" snapshot. After saving, these tabs will be closed. Click \"Restore\" to reopen them in the current window. Useful for organizing your browsing environment or temporarily freeing up space."
-  },
-  {
-    "key": "k_kysuuza",
-    "zh-CN": "归档：把当前窗口的全部标签页快照保存下来，关掉它们，之后可一键恢复",
-    "en": "Archive: snapshot all tabs in the current window, close them, and restore later with one click"
-  },
-  {
-    "key": "k_3f3nu1o",
-    "zh-CN": "归档/快照",
-    "en": "Archive/Snapshot"
-  },
-  {
-    "key": "k_pgmkycf",
-    "zh-CN": "归档与恢复",
-    "en": "Archive & restore"
-  },
-  {
-    "key": "k_9bibggs",
-    "zh-CN": "归档会话",
-    "en": "Archives"
-  },
-  {
-    "key": "k_nugbrnn",
-    "zh-CN": "归档保存失败",
-    "en": "Failed to save as archive"
-  },
-  {
-    "key": "k_74wysmo",
-    "zh-CN": "归档保存所选标签页，之后可在归档面板恢复。比关闭更安全，不会丢失页面。",
-    "en": ""
-  },
-  {
-    "key": "k_uzix98l",
-    "zh-CN": "归档后标签页会被保存并关闭，随时可在左侧边栏的「归档」中恢复。",
-    "en": ""
-  },
-  {
-    "key": "k_mm14ceg",
-    "zh-CN": "归档失败",
-    "en": ""
-  },
-  {
-    "key": "k_o0mcnwg",
-    "zh-CN": "归档失败，请重试",
-    "en": "Archive failed, please retry"
-  },
-  {
-    "key": "k_hxrk1kf",
-    "zh-CN": "归档当前窗口",
-    "en": "Archive window"
-  },
-  {
-    "key": "k_98bht3q",
-    "zh-CN": "归档所选",
-    "en": "Archive selected"
-  },
-  {
-    "key": "k_cd9fail",
-    "zh-CN": "当前 {value} 条；超出后按时间顺序自动淘汰最早记录。",
-    "en": "Currently {value}. Oldest entries are dropped automatically when the limit is exceeded."
-  },
-  {
-    "key": "k_4vj2vkm",
-    "zh-CN": "当前名称",
-    "en": "Current name"
-  },
-  {
-    "key": "k_gdnyg16",
-    "zh-CN": "当前没有可归档的标签页",
-    "en": "No tabs to archive"
-  },
-  {
-    "key": "k_blhty3p",
-    "zh-CN": "当前窗口",
-    "en": "Current Window"
-  },
-  {
-    "key": "k_n7e1r0m",
-    "zh-CN": "当前窗口 ≥10 个标签且距上次快照 >6h 时静默创建隐藏会话；最多保留 20 个。",
-    "en": "When current window ≥ 10 tabs AND ≥6h since last snapshot, a hidden session is created silently. Keeps the latest 20."
-  },
-  {
-    "key": "k_9aueglz",
-    "zh-CN": "当前筛选下没有书签",
-    "en": "No bookmarks match the current filter"
-  },
-  {
-    "key": "k_8q6p6ob",
-    "zh-CN": "当前筛选下没有归档",
-    "en": "No archives match this filter"
-  },
-  {
-    "key": "k_cr0mnyc",
-    "zh-CN": "彩纸",
-    "en": "Confetti"
-  },
-  {
-    "key": "k_dm75cug",
-    "zh-CN": "待处理",
-    "en": "pending"
-  },
-  {
-    "key": "k_4ts3nw8",
-    "zh-CN": "微软 Fluent Acrylic 液态玻璃",
-    "en": "Microsoft Fluent Acrylic liquid glass"
-  },
-  {
-    "key": "k_ogex1y7",
-    "zh-CN": "快捷操作",
-    "en": "Actions"
-  },
-  {
-    "key": "k_mmpwxg0",
-    "zh-CN": "快捷键",
-    "en": "Shortcuts"
-  },
-  {
-    "key": "k_c4zrd4g",
-    "zh-CN": "快捷键已保存",
-    "en": "Shortcut saved"
-  },
-  {
-    "key": "k_lh4s30y",
-    "zh-CN": "快捷键帮助",
-    "en": "Shortcut cheatsheet"
-  },
-  {
-    "key": "k_oxsznf7",
-    "zh-CN": "快照已保存",
-    "en": ""
-  },
-  {
-    "key": "k_z8o1mnw",
-    "zh-CN": "快照已删除",
-    "en": ""
-  },
-  {
-    "key": "k_3bt6way",
-    "zh-CN": "忽略",
-    "en": "Dismiss"
-  },
-  {
-    "key": "k_2hzgxls",
-    "zh-CN": "忽略 #hash 和 utm_* / fbclid / gclid 跟踪参数；article?utm_campaign=a 与 article?utm_campaign=b 会被判为重复。",
-    "en": "Ignores #hash plus utm_* / fbclid / gclid. article?utm_campaign=a and ...=b are duplicates."
-  },
-  {
-    "key": "k_yiriebf",
-    "zh-CN": "忽略本次",
-    "en": "Ignore this time"
-  },
-  {
-    "key": "k_n9d6knb",
-    "zh-CN": "总开关",
-    "en": "Master switch"
-  },
-  {
-    "key": "k_qqnq0sv",
-    "zh-CN": "总标签 {today}（昨天 {yesterday}，{sign}{delta}）",
-    "en": "{today} tabs today (vs {yesterday}, {sign}{delta})"
-  },
-  {
-    "key": "k_fudtonw",
-    "zh-CN": "总览",
-    "en": "Overview"
-  },
-  {
-    "key": "k_sakdjyx",
-    "zh-CN": "恢复",
-    "en": "Restore"
-  },
-  {
-    "key": "k_y8ljtyp",
-    "zh-CN": "恢复了归档",
-    "en": "Restored archive"
-  },
-  {
-    "key": "k_767n2ka",
-    "zh-CN": "恢复会话",
-    "en": "Restore session"
-  },
-  {
-    "key": "k_czhtnhw",
-    "zh-CN": "恢复全部",
-    "en": "Restore all"
-  },
-  {
-    "key": "k_r0kgnlk",
-    "zh-CN": "恢复出厂设置",
-    "en": "Factory reset"
-  },
-  {
-    "key": "k_ep4u4tv",
-    "zh-CN": "恢复到新窗口",
-    "en": ""
-  },
-  {
-    "key": "k_17gm3l5",
-    "zh-CN": "恢复失败，请重试",
-    "en": "Restore failed, please retry"
-  },
-  {
-    "key": "k_tceyq2h",
-    "zh-CN": "恢复完成",
-    "en": "Restore completed"
-  },
-  {
-    "key": "k_5sr9vxm",
-    "zh-CN": "恢复归档",
-    "en": "Restore archive"
-  },
-  {
-    "key": "k_unfz5e0",
-    "zh-CN": "恢复快照失败",
-    "en": ""
-  },
-  {
-    "key": "k_98zlrnu",
-    "zh-CN": "恢复成功",
-    "en": "Restored successfully"
-  },
-  {
-    "key": "k_k0q7uxn",
-    "zh-CN": "恢复整个窗口（{count} 个标签）",
-    "en": "Restore entire window ({count} tabs)"
-  },
-  {
-    "key": "k_2m17o51",
-    "zh-CN": "恢复策略",
-    "en": "Restore strategy"
-  },
-  {
-    "key": "k_0fqkelt",
-    "zh-CN": "恢复默认",
-    "en": "Reset to default"
-  },
-  {
-    "key": "k_k1b5bp7",
-    "zh-CN": "恢复默认设置",
-    "en": "Reset to defaults"
-  },
-  {
-    "key": "k_ldng86i",
-    "zh-CN": "恢复默认配置",
-    "en": "Restore default settings"
-  },
-  {
-    "key": "k_37gdqxu",
-    "zh-CN": "恢复默认配置？",
-    "en": "Restore default settings?"
-  },
-  {
-    "key": "k_4611ayn",
-    "zh-CN": "恢复默认配置失败，请重试",
-    "en": "Failed to restore defaults, please retry"
-  },
-  {
-    "key": "k_zbowazo",
-    "zh-CN": "悬停",
-    "en": "Hover"
-  },
-  {
-    "key": "k_mwkjqf8",
-    "zh-CN": "慢速播放（0.5×）更适合做背景氛围。",
-    "en": "Slower playback (0.5×) feels better as ambient background."
-  },
-  {
-    "key": "k_7ak0zgq",
-    "zh-CN": "成功导入 {count} 个会话",
-    "en": "Imported {count} sessions"
-  },
-  {
-    "key": "k_lqph3cf",
-    "zh-CN": "我的书签",
-    "en": "My Bookmarks"
-  },
-  {
-    "key": "k_lwe5x71",
-    "zh-CN": "所有书签都可达，状态良好。",
-    "en": "All bookmarks reachable. No broken links."
-  },
-  {
-    "key": "k_cm55mre",
-    "zh-CN": "所有工具均在本地处理，输入内容不会上传到任何服务器",
-    "en": "All tools process data locally — nothing is sent to any server"
-  },
-  {
-    "key": "k_36787t3",
-    "zh-CN": "所有数据均在本地计算，不会上传",
-    "en": "All data is computed locally and never uploaded"
-  },
-  {
-    "key": "k_e1pwo19",
-    "zh-CN": "手动",
-    "en": ""
-  },
-  {
-    "key": "k_ag4d840",
-    "zh-CN": "打开",
-    "en": "open"
-  },
-  {
-    "key": "k_m2itpy9",
-    "zh-CN": "打开 {brand}",
-    "en": "Open {brand}"
-  },
-  {
-    "key": "k_x6h1k6g",
-    "zh-CN": "打开 {title}",
-    "en": "Open {title}"
-  },
-  {
-    "key": "k_mp50fkg",
-    "zh-CN": "打开一些网页，然后回到这里查看",
-    "en": "Open some pages and come back here"
-  },
-  {
-    "key": "k_zrh1pnj",
-    "zh-CN": "打开书签失败，请重试",
-    "en": "Failed to open bookmark, please retry"
-  },
-  {
-    "key": "k_rwzd4d1",
-    "zh-CN": "打开了",
-    "en": "Opened"
-  },
-  {
-    "key": "k_x9p1iom",
-    "zh-CN": "打开匹配 {pattern} 的页面时",
-    "en": ""
-  },
-  {
-    "key": "k_cuxkufn",
-    "zh-CN": "打开历史面板",
-    "en": "Open history panel"
-  },
-  {
-    "key": "k_gucqb8y",
-    "zh-CN": "打开工作台",
-    "en": "Open workspace"
-  },
-  {
-    "key": "k_ynu0nk0",
-    "zh-CN": "打开搜索",
-    "en": "Open search"
-  },
-  {
-    "key": "k_g3e5cf3",
-    "zh-CN": "打开新标签页",
-    "en": "Open new tab"
-  },
-  {
-    "key": "k_2mp0hm7",
-    "zh-CN": "打开此标签页",
-    "en": "Open this tab"
-  },
-  {
-    "key": "k_yozes8k",
-    "zh-CN": "执行",
-    "en": "Execute"
-  },
-  {
-    "key": "k_l5x00j6",
-    "zh-CN": "执行动作",
-    "en": ""
-  },
-  {
-    "key": "k_1edp5wb",
-    "zh-CN": "扩展名与 Content-Type / MIME 类型互查",
-    "en": "Look up file extensions and Content-Type / MIME values"
-  },
-  {
-    "key": "k_y77ga69",
-    "zh-CN": "扫描完全不含书签的文件夹（包括嵌套都为空的子文件夹），一键清理。",
-    "en": "Find folders that contain no bookmarks (including nested empty ones) and clean them in one click."
-  },
-  {
-    "key": "k_z5cpwy6",
-    "zh-CN": "批量休眠",
-    "en": "Discard (batch)"
-  },
-  {
-    "key": "k_ia1ewor",
-    "zh-CN": "批量关闭",
-    "en": "Close (batch)"
-  },
-  {
-    "key": "k_dh7lzt3",
-    "zh-CN": "批量关闭失败",
-    "en": ""
-  },
-  {
-    "key": "k_gf0ondf",
-    "zh-CN": "批量分组失败，请重试",
-    "en": "Failed to group selected tabs, please retry"
-  },
-  {
-    "key": "k_fl2denb",
-    "zh-CN": "批量删除",
-    "en": "Batch delete"
-  },
-  {
-    "key": "k_zwy2d2j",
-    "zh-CN": "批量删除失败",
-    "en": "Batch delete failed"
-  },
-  {
-    "key": "k_b0qc5p6",
-    "zh-CN": "批量导出",
-    "en": "Batch export"
-  },
-  {
-    "key": "k_5khe9wf",
-    "zh-CN": "批量导出失败",
-    "en": "Batch export failed"
-  },
-  {
-    "key": "k_f7b8sy2",
-    "zh-CN": "批量恢复",
-    "en": "Batch restore"
-  },
-  {
-    "key": "k_c7bdnnu",
-    "zh-CN": "批量恢复失败",
-    "en": "Batch restore failed"
-  },
-  {
-    "key": "k_5p17yga",
-    "zh-CN": "批量操作",
-    "en": "Batch"
-  },
-  {
-    "key": "k_fgcainm",
-    "zh-CN": "批量选择",
-    "en": ""
-  },
-  {
-    "key": "k_rjzqcnw",
-    "zh-CN": "找到 {count} / 共 {total} 个会话",
-    "en": "Found {count} / {total} sessions"
-  },
-  {
-    "key": "k_x8nlstp",
-    "zh-CN": "找到 {count} 个候选项",
-    "en": "{count} candidates found"
-  },
-  {
-    "key": "k_6d38llt",
-    "zh-CN": "找到 {count} 个匹配书签",
-    "en": "{count} bookmarks found"
-  },
-  {
-    "key": "k_6hlwfvj",
-    "zh-CN": "技术主管",
-    "en": ""
-  },
-  {
-    "key": "k_meipyax",
-    "zh-CN": "技术基建",
-    "en": ""
-  },
-  {
-    "key": "k_9jowrpy",
-    "zh-CN": "把你最常去的站点放在这里",
-    "en": "Add your most-visited sites here"
-  },
-  {
-    "key": "k_qbosi8p",
-    "zh-CN": "把当前窗口与新窗口排成预设布局",
-    "en": "Arrange this window with new windows in a preset layout"
-  },
-  {
-    "key": "k_ks3esak",
-    "zh-CN": "把所有窗口排到屏幕网格",
-    "en": "Snap all windows to grid"
-  },
-  {
-    "key": "k_pt9bwt9",
-    "zh-CN": "把选中的标签页拆成独立窗口并排展示",
-    "en": "Move selected tabs into separate windows arranged side by side"
-  },
-  {
-    "key": "k_c6n1t9z",
-    "zh-CN": "把选中的标签页拆成独立窗口并选择布局",
-    "en": "Move selected tabs into separate windows and choose a layout"
-  },
-  {
-    "key": "k_h078nsk",
-    "zh-CN": "折叠",
-    "en": "Collapse"
-  },
-  {
-    "key": "k_ft3zum0",
-    "zh-CN": "拆解 URL 的 protocol、host、path、query、hash",
-    "en": "Break down URL into protocol, host, path, query and hash"
-  },
-  {
-    "key": "k_uvbefyy",
-    "zh-CN": "拖入标签创建分组",
-    "en": ""
-  },
-  {
-    "key": "k_if79aqt",
-    "zh-CN": "拖到此处",
-    "en": "Drop here"
-  },
-  {
-    "key": "k_c381ecy",
-    "zh-CN": "拖动列",
-    "en": ""
-  },
-  {
-    "key": "k_y8blex5",
-    "zh-CN": "拖动列中…",
-    "en": "Dragging column…"
-  },
-  {
-    "key": "k_7c3b297",
-    "zh-CN": "拖动卡片中…",
-    "en": "Dragging card…"
-  },
-  {
-    "key": "k_m2ff7td",
-    "zh-CN": "拖拽 Tab 到此列",
-    "en": "Drag tabs here"
-  },
-  {
-    "key": "k_7cv04bt",
-    "zh-CN": "拟物",
-    "en": "Skeuomorph"
-  },
-  {
-    "key": "k_n8j0d7g",
-    "zh-CN": "拼音搜索",
-    "en": "Pinyin search"
-  },
-  {
-    "key": "k_k5rkko5",
-    "zh-CN": "按 Cmd+K 可快速搜索标签",
-    "en": "Press Cmd+K to quickly search tabs"
-  },
-  {
-    "key": "k_mkme05u",
-    "zh-CN": "按 tag 或域名组合快速筛选当前视图（免费版最多 3 个）",
-    "en": "Filter main view by tags or domains (free plan: up to 3)"
-  },
-  {
-    "key": "k_fjup7cu",
-    "zh-CN": "按下快捷键…",
-    "en": "Press keys…"
-  },
-  {
-    "key": "k_uv5ezy2",
-    "zh-CN": "按住 Ctrl/Cmd 点击标签进入多选；Shift 点击范围选；Esc 退出",
-    "en": "Ctrl/Cmd+click to multi-select; Shift+click for range; Esc to exit"
-  },
-  {
-    "key": "k_d9naqat",
-    "zh-CN": "按住 Ctrl/Cmd 点击标签进行多选；Shift 点击可选中范围",
-    "en": "Hold Ctrl/Cmd + click to multi-select; Shift+click for range selection"
-  },
-  {
-    "key": "k_8rem9h0",
-    "zh-CN": "按名称",
-    "en": "By name"
-  },
-  {
-    "key": "k_mc85slc",
-    "zh-CN": "按域名休眠",
-    "en": "Discard by domain"
-  },
-  {
-    "key": "k_t4bwqmf",
-    "zh-CN": "按域名关闭",
-    "en": "Close by domain"
-  },
-  {
-    "key": "k_o643117",
-    "zh-CN": "按域名自动分类到新文件夹",
-    "en": "Auto-group same-domain bookmarks into folders"
-  },
-  {
-    "key": "k_q6ez6dx",
-    "zh-CN": "按天",
-    "en": "Day"
-  },
-  {
-    "key": "k_lixvfh7",
-    "zh-CN": "按天更简洁；按小时把今天和昨天按整点拆成小桶，一眼看清每个小时的访问节奏",
-    "en": "Day is cleaner; Hour splits today & yesterday into 1-hour buckets so you can see activity by the hour"
-  },
-  {
-    "key": "k_fsmx845",
-    "zh-CN": "按小时",
-    "en": "Hour"
-  },
-  {
-    "key": "k_xgt43gy",
-    "zh-CN": "按时间",
-    "en": "Time range"
-  },
-  {
-    "key": "k_swnu97h",
-    "zh-CN": "按站点汇总的使用变化",
-    "en": "Site-level usage shift"
-  },
-  {
-    "key": "k_aa0fzrj",
-    "zh-CN": "按链接合并重复书签",
-    "en": "Merge bookmarks pointing to the same URL"
-  },
-  {
-    "key": "k_3nmthdr",
-    "zh-CN": "换个时间段或者清空搜索关键词试试",
-    "en": "Try a different time range or clear your search"
-  },
-  {
-    "key": "k_rhubeb5",
-    "zh-CN": "授权",
-    "en": ""
-  },
-  {
-    "key": "k_0m1wifx",
-    "zh-CN": "授权后可在搜索框中显示浏览历史与最近访问页面",
-    "en": "Grant permission to show browsing history and recently visited pages in search"
-  },
-  {
-    "key": "k_whnh73b",
-    "zh-CN": "授权访问书签",
-    "en": "Grant bookmark access"
-  },
-  {
-    "key": "k_l8w2n6m",
-    "zh-CN": "排列所有窗口",
-    "en": "Arrange all windows"
-  },
-  {
-    "key": "k_ucyfsgh",
-    "zh-CN": "排序方式",
-    "en": "Sort by"
-  },
-  {
-    "key": "k_r8ahmtr",
-    "zh-CN": "接管新标签页",
-    "en": "Replace new tab page"
-  },
-  {
-    "key": "k_2npb6dq",
-    "zh-CN": "接管新标签页（推荐）",
-    "en": "Replace new tab (recommended)"
-  },
-  {
-    "key": "k_kgos6ei",
-    "zh-CN": "控件高度",
-    "en": "Control height"
-  },
-  {
-    "key": "k_40vj0gb",
-    "zh-CN": "控制卡片/按钮/输入框基础圆角，0 为尖角",
-    "en": "Controls base corner radius across cards / buttons / inputs. 0 = sharp"
-  },
-  {
-    "key": "k_g3ntjkg",
-    "zh-CN": "控制卡片之间的水平与垂直间距（4–24px），默认 12px",
-    "en": "Control horizontal and vertical spacing between cards (4–24px), default 12px"
-  },
-  {
-    "key": "k_wm0n5fr",
-    "zh-CN": "控制卡片区域的最大宽度；设为 0 表示不限制",
-    "en": "Control the max width of the content area; set to 0 for no limit"
-  },
-  {
-    "key": "k_uawz2sh",
-    "zh-CN": "推荐名称",
-    "en": "Suggestions"
-  },
-  {
-    "key": "k_ng1x21f",
-    "zh-CN": "提示归档标签页",
-    "en": ""
-  },
-  {
-    "key": "k_d1tctl7",
-    "zh-CN": "搜索",
-    "en": "Search"
-  },
-  {
-    "key": "k_irzwg95",
-    "zh-CN": "搜索 URL",
-    "en": "Search URL"
-  },
-  {
-    "key": "k_dxoitdc",
-    "zh-CN": "搜索书签...",
-    "en": "Search bookmarks..."
-  },
-  {
-    "key": "k_a4qej56",
-    "zh-CN": "搜索历史…",
-    "en": "Search history…"
-  },
-  {
-    "key": "k_0ke8pza",
-    "zh-CN": "搜索工具…",
-    "en": "Search tools…"
-  },
-  {
-    "key": "k_25o27o2",
-    "zh-CN": "搜索引擎切换",
-    "en": "Search engine switcher"
-  },
-  {
-    "key": "k_jpo9le2",
-    "zh-CN": "搜索归档会话...",
-    "en": "Search archived sessions..."
-  },
-  {
-    "key": "k_g92tusn",
-    "zh-CN": "搜索标签",
-    "en": ""
-  },
-  {
-    "key": "k_mlcoqf8",
-    "zh-CN": "搜索标签页",
-    "en": "Search tabs"
-  },
-  {
-    "key": "k_aegqq79",
-    "zh-CN": "搜索标签页、历史记录或直接全网搜索...",
-    "en": "Search tabs, history, or the web..."
-  },
-  {
-    "key": "k_qwg2r7t",
-    "zh-CN": "搜索标签页...",
-    "en": "Search tabs..."
-  },
-  {
-    "key": "k_qphmzk2",
-    "zh-CN": "搜索标签页（标题/URL/域名）...",
-    "en": ""
-  },
-  {
-    "key": "k_ok0cw7l",
-    "zh-CN": "搜索标签页或上网（回车）",
-    "en": "Search tabs or the web (Enter)"
-  },
-  {
-    "key": "k_abdqej3",
-    "zh-CN": "搜索框",
-    "en": "Search bar"
-  },
-  {
-    "key": "k_cf0ear3",
-    "zh-CN": "搜索窗口...",
-    "en": ""
-  },
-  {
-    "key": "k_hgbcvfr",
-    "zh-CN": "搜索结果排序",
-    "en": "Search result sort"
-  },
-  {
-    "key": "k_njv9v5h",
-    "zh-CN": "搜索范围",
-    "en": "Search scope"
-  },
-  {
-    "key": "k_li8fjk8",
-    "zh-CN": "搜索行为",
-    "en": "Search"
-  },
-  {
-    "key": "k_bym9tj3",
-    "zh-CN": "搜索设置",
-    "en": ""
-  },
-  {
-    "key": "k_lgdtymo",
-    "zh-CN": "撤销",
-    "en": "Undo"
-  },
-  {
-    "key": "k_tok5wwt",
-    "zh-CN": "撤销失败",
-    "en": "Undo failed"
-  },
-  {
-    "key": "k_8nl500g",
-    "zh-CN": "播放速率",
-    "en": "Playback rate"
-  },
-  {
-    "key": "k_09trt5i",
-    "zh-CN": "操作时间线",
-    "en": "Activity Timeline"
-  },
-  {
-    "key": "k_yut363f",
-    "zh-CN": "操作时间线最多保留",
-    "en": "Max activity events"
-  },
-  {
-    "key": "k_c7t2t5n",
-    "zh-CN": "支持 9 种不同视图浏览方式",
-    "en": "Support 9 different view modes"
-  },
-  {
-    "key": "k_3qtcwnu",
-    "zh-CN": "支持 MP4 / WebM；若跨域或 CSP 受限可能无法播放。",
-    "en": "Supports MP4 / WebM; CORS / CSP restrictions may prevent playback."
-  },
-  {
-    "key": "k_34pulsb",
-    "zh-CN": "支持中文拼音、标题/域名/URL 多维、多引擎直达。",
-    "en": "Pinyin search, multi-scope, one-key jump to external engines."
-  },
-  {
-    "key": "k_28j0jpr",
-    "zh-CN": "支持中英文关键词搜索",
-    "en": "Supports keywords in multiple languages"
-  },
-  {
-    "key": "k_gt23bb2",
-    "zh-CN": "支持整组恢复或选择性恢复，不丢失任何进度",
-    "en": "Support full or partial restore, never lose any progress"
-  },
-  {
-    "key": "k_vczmf3w",
-    "zh-CN": "收件箱",
-    "en": ""
-  },
-  {
-    "key": "k_tv635xv",
-    "zh-CN": "收藏",
-    "en": "Favorites"
-  },
-  {
-    "key": "k_9ionoli",
-    "zh-CN": "收藏全部标签",
-    "en": "Bookmark all tabs"
-  },
-  {
-    "key": "k_zebm04j",
-    "zh-CN": "收起",
-    "en": "Collapse"
-  },
-  {
-    "key": "k_9c124dl",
-    "zh-CN": "放大",
-    "en": "Zoom in"
-  },
-  {
-    "key": "k_38sgqsi",
-    "zh-CN": "数字",
-    "en": "Number"
-  },
-  {
-    "key": "k_czxi0jf",
-    "zh-CN": "数据",
-    "en": "Data"
-  },
-  {
-    "key": "k_g4rohu2",
-    "zh-CN": "数据重建中",
-    "en": "Data rebuilding"
-  },
-  {
-    "key": "k_tto11tl",
-    "zh-CN": "整理建议",
-    "en": "Tidy suggestions"
-  },
-  {
-    "key": "k_z119p17",
-    "zh-CN": "整理选中的 {count} 个分类",
-    "en": "Organize {count} selected cluster(s)"
-  },
-  {
-    "key": "k_zxg8gzx",
-    "zh-CN": "文件夹",
-    "en": "Folders"
-  },
-  {
-    "key": "k_4m76e61",
-    "zh-CN": "文本完全相同",
-    "en": "Texts are identical"
-  },
-  {
-    "key": "k_9yzlntv",
-    "zh-CN": "文本差异对比",
-    "en": "Text Diff"
-  },
-  {
-    "key": "k_pikdmm4",
-    "zh-CN": "文本统计",
-    "en": "Text Stats"
-  },
-  {
-    "key": "k_fzwi4tw",
-    "zh-CN": "文档",
-    "en": "Document"
-  },
-  {
-    "key": "k_43vf0xo",
-    "zh-CN": "新会话名",
-    "en": "New session name"
-  },
-  {
-    "key": "k_lnbih9e",
-    "zh-CN": "新分组",
-    "en": "New group"
-  },
-  {
-    "key": "k_1ffiegl",
-    "zh-CN": "新名称",
-    "en": "New name"
-  },
-  {
-    "key": "k_u1wixcf",
-    "zh-CN": "新增列",
-    "en": "Add column"
-  },
-  {
-    "key": "k_pdacpsz",
-    "zh-CN": "新增列失败，请重试",
-    "en": "Failed to add column, please retry"
-  },
-  {
-    "key": "k_rqd2eev",
-    "zh-CN": "新建分组",
-    "en": "New group"
-  },
-  {
-    "key": "k_iv6isoh",
-    "zh-CN": "新建工作区",
-    "en": "Create workspace"
-  },
-  {
-    "key": "k_jx0yamw",
-    "zh-CN": "新建工作区模板",
-    "en": ""
-  },
-  {
-    "key": "k_z3bic0g",
-    "zh-CN": "新建标签组",
-    "en": ""
-  },
-  {
-    "key": "k_ewm8j0d",
-    "zh-CN": "新建规则",
-    "en": ""
-  },
-  {
-    "key": "k_xxo0mzo",
-    "zh-CN": "新开始访问",
-    "en": "Newly visited"
-  },
-  {
-    "key": "k_vgel0yq",
-    "zh-CN": "新标签页打开",
-    "en": "Open in new tab"
-  },
-  {
-    "key": "k_8jpw2gs",
-    "zh-CN": "新窗口",
-    "en": "New window"
-  },
-  {
-    "key": "k_442wwi2",
-    "zh-CN": "新闻",
-    "en": "News"
-  },
-  {
-    "key": "k_16qoxkk",
-    "zh-CN": "无法读取剪贴板，请手动粘贴",
-    "en": ""
-  },
-  {
-    "key": "k_km57y3m",
-    "zh-CN": "无痕标签页不能拖入普通窗口",
-    "en": "Incognito tabs cannot be dragged into a normal window"
-  },
-  {
-    "key": "k_c6d9l7o",
-    "zh-CN": "时间",
-    "en": "Time"
-  },
-  {
-    "key": "k_0obzf9e",
-    "zh-CN": "时间戳转换",
-    "en": "Timestamp"
-  },
-  {
-    "key": "k_zim6klw",
-    "zh-CN": "时间轴",
-    "en": "Timeline"
-  },
-  {
-    "key": "k_jhwcr8y",
-    "zh-CN": "时间轴分组粒度",
-    "en": "Timeline granularity"
-  },
-  {
-    "key": "k_mkjvxuh",
-    "zh-CN": "星光",
-    "en": "Sparkle"
-  },
-  {
-    "key": "k_kej5qoc",
-    "zh-CN": "昨天",
-    "en": "Yesterday"
-  },
-  {
-    "key": "k_dx1q83p",
-    "zh-CN": "昨天 → 今天",
-    "en": "Yesterday → Today"
-  },
-  {
-    "key": "k_fgpngsb",
-    "zh-CN": "显示具体时间",
-    "en": "Show exact time"
-  },
-  {
-    "key": "k_hvvh11m",
-    "zh-CN": "显示名称（可选）",
-    "en": "Display name (optional)"
-  },
-  {
-    "key": "k_j7qta09",
-    "zh-CN": "显示域名",
-    "en": "Show domain"
-  },
-  {
-    "key": "k_wxwq8ke",
-    "zh-CN": "显示拖拽占位区",
-    "en": "Show drag drop zones"
-  },
-  {
-    "key": "k_2fqw98j",
-    "zh-CN": "显示标签组区块",
-    "en": "Show tab group sections"
-  },
-  {
-    "key": "k_iyw1ira",
-    "zh-CN": "显示添加按钮",
-    "en": "Show Add Button"
-  },
-  {
-    "key": "k_29fx8cb",
-    "zh-CN": "显示热门关键词建议",
-    "en": "Enable trending suggestions"
-  },
-  {
-    "key": "k_ggna5qs",
-    "zh-CN": "晚上",
-    "en": "Night"
-  },
-  {
-    "key": "k_m7bmtug",
-    "zh-CN": "晚霞",
-    "en": "Sunset"
-  },
-  {
-    "key": "k_tucip50",
-    "zh-CN": "智能分组",
-    "en": "Smart Grouping"
-  },
-  {
-    "key": "k_xmhdoa3",
-    "zh-CN": "智能工作台",
-    "en": "Smart workspace"
-  },
-  {
-    "key": "k_pnayk7k",
-    "zh-CN": "智能建议",
-    "en": ""
-  },
-  {
-    "key": "k_98hpoxz",
-    "zh-CN": "智能整理",
-    "en": "Smart organize"
-  },
-  {
-    "key": "k_c4va3ri",
-    "zh-CN": "暂无书签",
-    "en": "No bookmarks yet"
-  },
-  {
-    "key": "k_m9dhnnt",
-    "zh-CN": "暂无最近标签",
-    "en": "No recent tabs"
-  },
-  {
-    "key": "k_1psub09",
-    "zh-CN": "暂无工作区模板",
-    "en": ""
-  },
-  {
-    "key": "k_p6b7zp5",
-    "zh-CN": "暂无归档会话",
-    "en": "No archived sessions"
-  },
-  {
-    "key": "k_ls0glsn",
-    "zh-CN": "暂无归档记录",
-    "en": "No archives yet"
-  },
-  {
-    "key": "k_0xltoke",
-    "zh-CN": "暂无快照",
-    "en": ""
-  },
-  {
-    "key": "k_ofp48r4",
-    "zh-CN": "暂无数据",
-    "en": "No data yet"
-  },
-  {
-    "key": "k_b5y061q",
-    "zh-CN": "暂无自动化规则，点击「新建规则」创建",
-    "en": ""
-  },
-  {
-    "key": "k_1flxvwc",
-    "zh-CN": "暂无规则，添加后书签将自动分类",
-    "en": ""
-  },
-  {
-    "key": "k_7dc3cvb",
-    "zh-CN": "暂无预设",
-    "en": "No profiles yet"
-  },
-  {
-    "key": "k_pxz6l3j",
-    "zh-CN": "暖米",
-    "en": "Warm"
-  },
-  {
-    "key": "k_pklv3vs",
-    "zh-CN": "暖米 + 青黄对比，阅读器氛围",
-    "en": "Warm cream + teal contrast"
-  },
-  {
-    "key": "k_xk7di7f",
-    "zh-CN": "暗色霓虹渐变",
-    "en": "Dark neon gradients"
-  },
-  {
-    "key": "k_vhh6zxt",
-    "zh-CN": "更多",
-    "en": "More"
-  },
-  {
-    "key": "k_yzselq4",
-    "zh-CN": "更多操作",
-    "en": ""
-  },
-  {
-    "key": "k_p5wqqj4",
-    "zh-CN": "更换视频文件",
-    "en": "Replace file"
-  },
-  {
-    "key": "k_lvwrq72",
-    "zh-CN": "更换颜色",
-    "en": "Change color"
-  },
-  {
-    "key": "k_ikg5zck",
-    "zh-CN": "更新日志",
-    "en": "Changelog"
-  },
-  {
-    "key": "k_h9shgnv",
-    "zh-CN": "更早",
-    "en": "Earlier"
-  },
-  {
-    "key": "k_4puh6p1",
-    "zh-CN": "服务器维护通知 - 本周六凌晨",
-    "en": ""
-  },
-  {
-    "key": "k_tqddghp",
-    "zh-CN": "未分组",
-    "en": "Ungrouped"
-  },
-  {
-    "key": "k_qlv92sr",
-    "zh-CN": "未分组标签",
-    "en": "Group ungrouped"
-  },
-  {
-    "key": "k_s1p22hh",
-    "zh-CN": "未发现重复书签，一切整齐。",
-    "en": "No duplicate bookmarks found. All clean."
-  },
-  {
-    "key": "k_gq0j75r",
-    "zh-CN": "未命名分组",
-    "en": "Unnamed group"
-  },
-  {
-    "key": "k_vhcwst5",
-    "zh-CN": "未命名文件夹",
-    "en": "Unnamed Folder"
-  },
-  {
-    "key": "k_4v5jre4",
-    "zh-CN": "未命名标签组",
-    "en": ""
-  },
-  {
-    "key": "k_3r70ecn",
-    "zh-CN": "未授权",
-    "en": ""
-  },
-  {
-    "key": "k_gf3lndx",
-    "zh-CN": "未注册撤销处理",
-    "en": "Undo handler not registered"
-  },
-  {
-    "key": "k_kdum77y",
-    "zh-CN": "未选择任何标签页，点击标签开始多选",
-    "en": "No tabs selected — click a tab to start selecting"
-  },
-  {
-    "key": "k_a6of292",
-    "zh-CN": "本周",
-    "en": "This week"
-  },
-  {
-    "key": "k_79c3f93",
-    "zh-CN": "本周五下午团建活动通知",
-    "en": ""
-  },
-  {
-    "key": "k_q4jyc6b",
-    "zh-CN": "本地（基于你的搜索历史）",
-    "en": "Local (from your history)"
-  },
-  {
-    "key": "k_1qs8apd",
-    "zh-CN": "本地处理",
-    "en": "Local"
-  },
-  {
-    "key": "k_uxo3o0c",
-    "zh-CN": "本地文件",
-    "en": "Local file"
-  },
-  {
-    "key": "k_su09b4o",
-    "zh-CN": "本地无结果时优先网页搜索",
-    "en": "Prioritize web search when local results miss"
-  },
-  {
-    "key": "k_36fbpw5",
-    "zh-CN": "本地视频",
-    "en": "Local video"
-  },
-  {
-    "key": "k_bzaropc",
-    "zh-CN": "本地解析 JWT header / payload 与过期时间",
-    "en": "Decode JWT header / payload and expiration locally"
-  },
-  {
-    "key": "k_aoqyqre",
-    "zh-CN": "本地隐私洞察",
-    "en": "Local insights"
-  },
-  {
-    "key": "k_it7pgr6",
-    "zh-CN": "本月",
-    "en": "This month"
-  },
-  {
-    "key": "k_zcd4knf",
-    "zh-CN": "本月新增",
-    "en": "This month"
-  },
-  {
-    "key": "k_55ln5ep",
-    "zh-CN": "权限状态",
-    "en": ""
-  },
-  {
-    "key": "k_cab56m3",
-    "zh-CN": "权限诊断",
-    "en": ""
-  },
-  {
-    "key": "k_gw0slgd",
-    "zh-CN": "来自",
-    "en": "From"
-  },
-  {
-    "key": "k_hebc2og",
-    "zh-CN": "极光流彩",
-    "en": "Aurora"
-  },
-  {
-    "key": "k_58pt4x5",
-    "zh-CN": "极简毛玻璃",
-    "en": "Minimal Glass"
-  },
-  {
-    "key": "k_s8f1fdq",
-    "zh-CN": "林栖标签页",
-    "en": "{brand}"
-  },
-  {
-    "key": "k_eful1e7",
-    "zh-CN": "架构图（垂直）",
-    "en": "Org chart (vertical)"
-  },
-  {
-    "key": "k_7uddho9",
-    "zh-CN": "柔彩",
-    "en": "Pastel"
-  },
-  {
-    "key": "k_re98hj3",
-    "zh-CN": "柔彩玻璃",
-    "en": "Pastel Glass"
-  },
-  {
-    "key": "k_0bzn14g",
-    "zh-CN": "查看全部历史",
-    "en": "View full history"
-  },
-  {
-    "key": "k_4kkcnfr",
-    "zh-CN": "查看最近关闭的标签页和完整操作时间线",
-    "en": "View recently closed tabs and full activity timeline"
-  },
-  {
-    "key": "k_pcrn6p0",
-    "zh-CN": "查看导入结果",
-    "en": "View import result"
-  },
-  {
-    "key": "k_7muoyo1",
-    "zh-CN": "查看归档",
-    "en": "View archive"
-  },
-  {
-    "key": "k_n9xkpv8",
-    "zh-CN": "查看归档列表",
-    "en": "View archives"
-  },
-  {
-    "key": "k_z7n7en8",
-    "zh-CN": "查询常见 HTTP 状态码含义与类型",
-    "en": "Look up common HTTP status codes and classes"
-  },
-  {
-    "key": "k_tjx2gwx",
-    "zh-CN": "标志",
-    "en": "Flags"
-  },
-  {
-    "key": "k_5aqqxd8",
-    "zh-CN": "标签",
-    "en": "Tags"
-  },
-  {
-    "key": "k_s8aymin",
-    "zh-CN": "标签最多",
-    "en": "Most tabs"
-  },
-  {
-    "key": "k_xda6r45",
-    "zh-CN": "标签分组",
-    "en": "Tab Groups"
-  },
-  {
-    "key": "k_32u9xl8",
-    "zh-CN": "标签已移出分组",
-    "en": ""
-  },
-  {
-    "key": "k_im1m8c0",
-    "zh-CN": "标签已移动到分组",
-    "en": ""
-  },
-  {
-    "key": "k_aa6i5hc",
-    "zh-CN": "标签总数",
-    "en": "Total tabs"
-  },
-  {
-    "key": "k_jxhts38",
-    "zh-CN": "标签操作",
-    "en": "Tabs"
-  },
-  {
-    "key": "k_u7zd3yq",
-    "zh-CN": "标签数",
-    "en": ""
-  },
-  {
-    "key": "k_bxcitdu",
-    "zh-CN": "标签数量",
-    "en": "Tab count"
-  },
-  {
-    "key": "k_rduoij1",
-    "zh-CN": "标签移动失败",
-    "en": ""
-  },
-  {
-    "key": "k_lh3eeak",
-    "zh-CN": "标签组已移动到新窗口",
-    "en": "Group moved to new window"
-  },
-  {
-    "key": "k_cjk7peh",
-    "zh-CN": "标签组操作失败，请重试",
-    "en": "Tab group action failed, please retry"
-  },
-  {
-    "key": "k_f0fnift",
-    "zh-CN": "标签页",
-    "en": "Tabs"
-  },
-  {
-    "key": "k_xnmkbe8",
-    "zh-CN": "标签页使用时长追踪",
-    "en": ""
-  },
-  {
-    "key": "k_isca7w3",
-    "zh-CN": "标签页布局",
-    "en": ""
-  },
-  {
-    "key": "k_kl0znxr",
-    "zh-CN": "标签页移动失败",
-    "en": "Failed to move tab"
-  },
-  {
-    "key": "k_vbs8lva",
-    "zh-CN": "标题",
-    "en": "Title"
-  },
-  {
-    "key": "k_2z7h2nj",
-    "zh-CN": "树状架构图",
-    "en": "Tree view"
-  },
-  {
-    "key": "k_4ui9me4",
-    "zh-CN": "核心能力",
-    "en": "Core features"
-  },
-  {
-    "key": "k_3rcwxf7",
-    "zh-CN": "根据 JSON 样例生成 TypeScript interface",
-    "en": "Generate TypeScript interfaces from JSON samples"
-  },
-  {
-    "key": "k_pzb2s4p",
-    "zh-CN": "格式化、压缩或校验 JSON 数据",
-    "en": "Format, minify or validate JSON"
-  },
-  {
-    "key": "k_pxcobrs",
-    "zh-CN": "检测 404 / 超时等失效书签",
-    "en": "Detect 404 / timeout / dead bookmarks"
-  },
-  {
-    "key": "k_gu0rltw",
-    "zh-CN": "森林",
-    "en": "Forest"
-  },
-  {
-    "key": "k_biowwwh",
-    "zh-CN": "概览",
-    "en": "Overview"
-  },
-  {
-    "key": "k_elkqaxt",
-    "zh-CN": "樱花",
-    "en": "Petal"
-  },
-  {
-    "key": "k_j7fm2g7",
-    "zh-CN": "橙色",
-    "en": "Orange"
-  },
-  {
-    "key": "k_1f2y4fy",
-    "zh-CN": "欢迎使用 {brand}",
-    "en": "Welcome to {brand}"
-  },
-  {
-    "key": "k_f4ul9lk",
-    "zh-CN": "欢迎教程已重置",
-    "en": "Onboarding reset"
-  },
-  {
-    "key": "k_kkw2gmv",
-    "zh-CN": "正则",
-    "en": "Pattern"
-  },
-  {
-    "key": "k_rla4uxq",
-    "zh-CN": "正则测试",
-    "en": "Regex Tester"
-  },
-  {
-    "key": "k_zsrd62a",
-    "zh-CN": "正在加载历史建议...",
-    "en": "Loading history suggestions..."
-  },
-  {
-    "key": "k_ay6ab5n",
-    "zh-CN": "正在加载洞察数据…",
-    "en": "Loading insights…"
-  },
-  {
-    "key": "k_bfay2l2",
-    "zh-CN": "正在加载热榜…",
-    "en": "Loading trending boards…"
-  },
-  {
-    "key": "k_q1hmr95",
-    "zh-CN": "正在恢复…",
-    "en": "Restoring…"
-  },
-  {
-    "key": "k_3osoi93",
-    "zh-CN": "正在播放",
-    "en": "Playing audio"
-  },
-  {
-    "key": "k_raj36m8",
-    "zh-CN": "正在检测 {done}/{total}",
-    "en": "Checking {done}/{total}"
-  },
-  {
-    "key": "k_gwfwkc8",
-    "zh-CN": "正常使用一段时间后，这里会出现可恢复的最近关闭与操作流水",
-    "en": "After some normal usage, recently-closed tabs and your activity log will show up here"
-  },
-  {
-    "key": "k_4nd31e5",
-    "zh-CN": "正文基础字号，影响整站文本密度",
-    "en": "Base text size; affects information density across the workspace"
-  },
-  {
-    "key": "k_33rckhz",
-    "zh-CN": "此工作区暂无 Tab",
-    "en": "No tabs in this workspace"
-  },
-  {
-    "key": "k_vg41r83",
-    "zh-CN": "此操作不可撤销：将清除所有归档、书签元数据、设置、历史记录。请确认已导出备份。",
-    "en": "This cannot be undone: all archives, bookmark metadata, settings and history will be wiped. Please export a backup first."
-  },
-  {
-    "key": "k_4f5y1d0",
-    "zh-CN": "此窗口包含 {count} 个标签，关闭后可在最近关闭中恢复。",
-    "en": "This window contains {count} tabs. You can restore it from recently closed items."
-  },
-  {
-    "key": "k_1xflvg0",
-    "zh-CN": "每个域名卡片会显示一条代表身份的纯色条，选一个你喜欢的位置",
-    "en": "Each domain card shows a solid accent bar as its identity mark — pick where you want it."
-  },
-  {
-    "key": "k_pagfexl",
-    "zh-CN": "每日打开次数",
-    "en": ""
-  },
-  {
-    "key": "k_859ouny",
-    "zh-CN": "每日活动趋势（近 14 天）",
-    "en": ""
-  },
-  {
-    "key": "k_45sftby",
-    "zh-CN": "每次打开新标签页，一键直达你的工作入口",
-    "en": "One click to your favorite sites every time you open a new tab"
-  },
-  {
-    "key": "k_2yvexlh",
-    "zh-CN": "每次打开新标签页，所有已打开的网页都会在这里展示。按域名分组、搜索、归档—3 秒内找到任何标签。",
-    "en": "Every new tab shows all your open pages. Grouped by domain, searchable, archivable — find any tab in 3 seconds."
-  },
-  {
-    "key": "k_rhyklil",
-    "zh-CN": "每次触发治理时最多操作的标签页数量，默认 5，避免一次性操作过多。",
-    "en": ""
-  },
-  {
-    "key": "k_wg9b6dx",
-    "zh-CN": "永不过期",
-    "en": "Never expire"
-  },
-  {
-    "key": "k_2r1sx8i",
-    "zh-CN": "没有匹配的命令",
-    "en": ""
-  },
-  {
-    "key": "k_nl8xyl3",
-    "zh-CN": "没有匹配的标签页",
-    "en": ""
-  },
-  {
-    "key": "k_4fjw3p1",
-    "zh-CN": "没有匹配的设置项",
-    "en": ""
-  },
-  {
-    "key": "k_gajkyqj",
-    "zh-CN": "没有可整理的大簇（需同域名≥ 3 个书签）。",
-    "en": "No large clusters (need >= 3 bookmarks per domain)."
-  },
-  {
-    "key": "k_l0v92al",
-    "zh-CN": "没有可用的平台",
-    "en": "No platforms available"
-  },
-  {
-    "key": "k_5hcv71c",
-    "zh-CN": "没有打开的标签页",
-    "en": "No open tabs"
-  },
-  {
-    "key": "k_rb1yxku",
-    "zh-CN": "没有找到匹配的书签",
-    "en": "No matching bookmarks found"
-  },
-  {
-    "key": "k_qji6uzj",
-    "zh-CN": "没有找到匹配的标签页",
-    "en": "No matching tabs found"
-  },
-  {
-    "key": "k_alhrndd",
-    "zh-CN": "没有空文件夹，结构干净。",
-    "en": "No empty folders. Your tree is tidy."
-  },
-  {
-    "key": "k_8hcyccc",
-    "zh-CN": "没有需要预览的重复组。",
-    "en": "No duplicate groups to preview."
-  },
-  {
-    "key": "k_t7pg0m2",
-    "zh-CN": "治理动作",
-    "en": ""
-  },
-  {
-    "key": "k_onkk272",
-    "zh-CN": "活跃",
-    "en": "Active"
-  },
-  {
-    "key": "k_1otzgcx",
-    "zh-CN": "活跃度",
-    "en": ""
-  },
-  {
-    "key": "k_05v77dg",
-    "zh-CN": "活跃时段分布（24 小时）",
-    "en": ""
-  },
-  {
-    "key": "k_ntwinj3",
-    "zh-CN": "浅色",
-    "en": "Light"
-  },
-  {
-    "key": "k_tns2zzu",
-    "zh-CN": "测试正则表达式匹配结果",
-    "en": "Test regex patterns and view matches"
-  },
-  {
-    "key": "k_w1ggv40",
-    "zh-CN": "浮动添加按钮",
-    "en": "Floating Add Button"
-  },
-  {
-    "key": "k_c2zmhnn",
-    "zh-CN": "海洋",
-    "en": "Ocean"
-  },
-  {
-    "key": "k_resahb5",
-    "zh-CN": "涟漪",
-    "en": "Ripple"
-  },
-  {
-    "key": "k_ttz8vut",
-    "zh-CN": "液态亚克力",
-    "en": "Fluent Acrylic"
-  },
-  {
-    "key": "k_73fwzo5",
-    "zh-CN": "深夜",
-    "en": "Late night"
-  },
-  {
-    "key": "k_7tp6adz",
-    "zh-CN": "深空",
-    "en": "Deep Space"
-  },
-  {
-    "key": "k_8zn61kj",
-    "zh-CN": "深色",
-    "en": "Dark"
-  },
-  {
-    "key": "k_uunv5cx",
-    "zh-CN": "深色模式配置",
-    "en": "Dark mode config"
-  },
-  {
-    "key": "k_qes5g91",
-    "zh-CN": "添加",
-    "en": "Add"
-  },
-  {
-    "key": "k_eiyr35l",
-    "zh-CN": "添加任意搜索引擎；URL 可使用 {query} 作为关键词占位，不填会自动追加 q={query}",
-    "en": "Add any engine. Use {query} as the keyword placeholder; otherwise q={query} is appended automatically."
-  },
-  {
-    "key": "k_fpqvdnp",
-    "zh-CN": "添加到常用站点",
-    "en": "Add to Quick Access"
-  },
-  {
-    "key": "k_v820u1m",
-    "zh-CN": "添加备注",
-    "en": "Add note"
-  },
-  {
-    "key": "k_fet4uwp",
-    "zh-CN": "添加常用站点",
-    "en": "Add Quick Access site"
-  },
-  {
-    "key": "k_4a00mcq",
-    "zh-CN": "添加标签",
-    "en": "Add tag"
-  },
-  {
-    "key": "k_8crq4fh",
-    "zh-CN": "添加站点",
-    "en": "Add site"
-  },
-  {
-    "key": "k_ky3re7l",
-    "zh-CN": "添加色标",
-    "en": "Add color stop"
-  },
-  {
-    "key": "k_ii6vmed",
-    "zh-CN": "添加规则",
-    "en": ""
-  },
-  {
-    "key": "k_va8sq7m",
-    "zh-CN": "添加规则失败",
-    "en": ""
-  },
-  {
-    "key": "k_d16sglt",
-    "zh-CN": "清理全部（共 {count} 个）",
-    "en": "Clean all ({count})"
-  },
-  {
-    "key": "k_o72tejb",
-    "zh-CN": "清空",
-    "en": "Clear"
-  },
-  {
-    "key": "k_mbhkji2",
-    "zh-CN": "清空全部",
-    "en": "Clear all"
-  },
-  {
-    "key": "k_y5pmmdv",
-    "zh-CN": "清空最近搜索",
-    "en": "Clear recent searches"
-  },
-  {
-    "key": "k_ufo68kq",
-    "zh-CN": "清空所有历史数据",
-    "en": "Clear all history data"
-  },
-  {
-    "key": "k_evgdq1i",
-    "zh-CN": "清空所有归档",
-    "en": "Clear all archives"
-  },
-  {
-    "key": "k_0f56jv2",
-    "zh-CN": "清空搜索",
-    "en": "Clear search"
-  },
-  {
-    "key": "k_lqbll6f",
-    "zh-CN": "清除",
-    "en": ""
-  },
-  {
-    "key": "k_st0xkfh",
-    "zh-CN": "清除失败，请重试",
-    "en": "Failed to clear stats, please retry"
-  },
-  {
-    "key": "k_qvhs4iu",
-    "zh-CN": "清除所有统计",
-    "en": "Clear all stats"
-  },
-  {
-    "key": "k_p5t3nd6",
-    "zh-CN": "清除筛选",
-    "en": "Clear filter"
-  },
-  {
-    "key": "k_r2zzn7v",
-    "zh-CN": "温暖渐变 + 轻盈毛玻璃，如晨曦般柔和",
-    "en": "Warm gradients + airy glass, soft as dawn light"
-  },
-  {
-    "key": "k_o5hpqli",
-    "zh-CN": "滚动查看全部",
-    "en": "Scroll for all"
-  },
-  {
-    "key": "k_mg6pvdj",
-    "zh-CN": "灰色",
-    "en": "Grey"
-  },
-  {
-    "key": "k_i5wptwq",
-    "zh-CN": "点击",
-    "en": "Click"
-  },
-  {
-    "key": "k_epzcn77",
-    "zh-CN": "点击动效",
-    "en": "Click effect"
-  },
-  {
-    "key": "k_1u95tgy",
-    "zh-CN": "点击归档按钮保存当前所有标签页",
-    "en": "Click the archive button to save all current tabs"
-  },
-  {
-    "key": "k_uymw2l1",
-    "zh-CN": "点击归档按钮可保存当前所有标签",
-    "en": "Click archive button to save all current tabs"
-  },
-  {
-    "key": "k_7ta9sad",
-    "zh-CN": "点击快捷键区域即可录制新按键组合；点击重置按钮恢复默认",
-    "en": "Click a keybinding area to record a new key combo; click reset to restore defaults"
-  },
-  {
-    "key": "k_l9ucvgi",
-    "zh-CN": "点击组头折叠/展开分组内容",
-    "en": "Click group header to collapse/expand group content"
-  },
-  {
-    "key": "k_2yuqegn",
-    "zh-CN": "点顶栏的 💾 归档，即可把所有标签一键收红为一个会话。归档后可需要时按 新窗口 / 当前窗口 / 部分恢复 三种策略快速拉回。",
-    "en": "Hit the 💾 Archive button to stash all tabs into a session. Restore later in a new window, the current window, or cherry-pick tabs."
-  },
-  {
-    "key": "k_ko7hef3",
-    "zh-CN": "热榜",
-    "en": "Trending"
-  },
-  {
-    "key": "k_6mdf3tk",
-    "zh-CN": "热榜数据源暂时不可用，请稍后重试",
-    "en": "Trending data source is temporarily unavailable, please try again later"
-  },
-  {
-    "key": "k_fqkiauj",
-    "zh-CN": "热词来源",
-    "en": "Trending source"
-  },
-  {
-    "key": "k_2batl7r",
-    "zh-CN": "热门关键词",
-    "en": "Trending"
-  },
-  {
-    "key": "k_uu0fe7t",
-    "zh-CN": "热门话题",
-    "en": "Trending"
-  },
-  {
-    "key": "k_84w6l9t",
-    "zh-CN": "状态良好",
-    "en": "All clear"
-  },
-  {
-    "key": "k_1erpphf",
-    "zh-CN": "独立深色模式配色",
-    "en": "Independent dark mode colors"
-  },
-  {
-    "key": "k_fd90o2m",
-    "zh-CN": "生成",
-    "en": "Generate"
-  },
-  {
-    "key": "k_k0qicog",
-    "zh-CN": "生成 UUID v4 或自定义随机数",
-    "en": "Generate UUID v4 or custom random numbers"
-  },
-  {
-    "key": "k_fr7gdql",
-    "zh-CN": "生成器",
-    "en": "Generator"
-  },
-  {
-    "key": "k_hj9d020",
-    "zh-CN": "用户增长",
-    "en": ""
-  },
-  {
-    "key": "k_e25wskv",
-    "zh-CN": "田字 2 × 2",
-    "en": "2 × 2 grid"
-  },
-  {
-    "key": "k_aua8x6q",
-    "zh-CN": "画布缩放",
-    "en": "Canvas zoom"
-  },
-  {
-    "key": "k_pzgrkko",
-    "zh-CN": "白名单内的域名不会被自动休眠或归档。固定标签和正在播放媒体的标签始终豁免。",
-    "en": ""
-  },
-  {
-    "key": "k_bxk41ts",
-    "zh-CN": "皮肤与极客定制",
-    "en": "Skins & geek tokens"
-  },
-  {
-    "key": "k_mjoc7ab",
-    "zh-CN": "皮肤风格",
-    "en": "Skin Style"
-  },
-  {
-    "key": "k_clrr911",
-    "zh-CN": "目标文件夹",
-    "en": ""
-  },
-  {
-    "key": "k_ctn2jir",
-    "zh-CN": "直角",
-    "en": "Squared"
-  },
-  {
-    "key": "k_7b9mfa8",
-    "zh-CN": "相关度",
-    "en": "Relevance"
-  },
-  {
-    "key": "k_w7whx39",
-    "zh-CN": "相关度：按匹配程度排序；最近访问：按标签最后活跃时间排序",
-    "en": "Relevance: sorted by match quality; Recent access: sorted by last active time"
-  },
-  {
-    "key": "k_pamgijl",
-    "zh-CN": "看板",
-    "en": "Kanban"
-  },
-  {
-    "key": "k_i1u9tc6",
-    "zh-CN": "知乎、微博、B站等 17 个平台实时热榜，一页速览全网热点",
-    "en": "Real-time hot boards from 17 platforms — catch all the buzz in one page"
-  },
-  {
-    "key": "k_09z4k4f",
-    "zh-CN": "石板灰",
-    "en": "Slate"
-  },
-  {
-    "key": "k_9piohvo",
-    "zh-CN": "确定删除此模板？",
-    "en": ""
-  },
-  {
-    "key": "k_q7jk83u",
-    "zh-CN": "确定删除此规则？",
-    "en": ""
-  },
-  {
-    "key": "k_0c5xics",
-    "zh-CN": "确定要清空全部历史记录吗？此操作不可撤销。",
-    "en": "Clear all history? This cannot be undone."
-  },
-  {
-    "key": "k_evl4dmz",
-    "zh-CN": "确认关闭",
-    "en": "Confirm close"
-  },
-  {
-    "key": "k_otwako7",
-    "zh-CN": "确认关闭 {count} 个标签页？此操作可通过撤销恢复。",
-    "en": "Close {count} tab(s)? This can be undone."
-  },
-  {
-    "key": "k_mfzbgt7",
-    "zh-CN": "确认删除",
-    "en": "Confirm Delete"
-  },
-  {
-    "key": "k_kj3434v",
-    "zh-CN": "确认删除此预设？",
-    "en": "Delete this profile?"
-  },
-  {
-    "key": "k_1sz0u71",
-    "zh-CN": "确认归档 {count} 个标签页？",
-    "en": ""
-  },
-  {
-    "key": "k_r07fez9",
-    "zh-CN": "确认归档 {count} 个标签页？归档后可在归档面板中恢复。",
-    "en": "Archive {count} tab(s)? You can restore them from the archive panel."
-  },
-  {
-    "key": "k_ybu60bh",
-    "zh-CN": "确认清空",
-    "en": "Confirm clear"
-  },
-  {
-    "key": "k_o7145mm",
-    "zh-CN": "确认清空？点击执行",
-    "en": "Confirm? Click to execute"
-  },
-  {
-    "key": "k_24fjlmm",
-    "zh-CN": "确认清空全部最近搜索？",
-    "en": "Really clear all recent searches?"
-  },
-  {
-    "key": "k_lfggu6g",
-    "zh-CN": "确认重命名",
-    "en": "Confirm rename"
-  },
-  {
-    "key": "k_zzmh5gd",
-    "zh-CN": "示例",
-    "en": "Example"
-  },
-  {
-    "key": "k_tu92o2w",
-    "zh-CN": "示例：",
-    "en": ""
-  },
-  {
-    "key": "k_fbwcni0",
-    "zh-CN": "社区",
-    "en": "Community"
-  },
-  {
-    "key": "k_o0d6oc8",
-    "zh-CN": "视图与布局",
-    "en": "View & Layout"
-  },
-  {
-    "key": "k_h3eg5r8",
-    "zh-CN": "视图切换",
-    "en": "View switcher"
-  },
-  {
-    "key": "k_9fqm1fy",
-    "zh-CN": "视图切换标签的排列方式：顶部/底部水平，左侧/右侧垂直侧栏",
-    "en": "Layout of the view switching tabs: horizontal on top/bottom, or vertical sidebar on left/right"
-  },
-  {
-    "key": "k_topktho",
-    "zh-CN": "视图标签位置",
-    "en": "View tab position"
-  },
-  {
-    "key": "k_in0pyw9",
-    "zh-CN": "视频 URL",
-    "en": "Video URL"
-  },
-  {
-    "key": "k_w66zp25",
-    "zh-CN": "视频不能超过 50MB",
-    "en": ""
-  },
-  {
-    "key": "k_5cct7v5",
-    "zh-CN": "视频背景",
-    "en": "Video background"
-  },
-  {
-    "key": "k_bctptjl",
-    "zh-CN": "禁用",
-    "en": ""
-  },
-  {
-    "key": "k_x93zvsc",
-    "zh-CN": "科技",
-    "en": "Tech"
-  },
-  {
-    "key": "k_8h48dgl",
-    "zh-CN": "秒级搜索",
-    "en": "Instant search"
-  },
-  {
-    "key": "k_m7rlob5",
-    "zh-CN": "移到新窗口",
-    "en": "Move to new window"
-  },
-  {
-    "key": "k_a9e4yf1",
-    "zh-CN": "移动到新窗口",
-    "en": "Move to new window"
-  },
-  {
-    "key": "k_1u02gla",
-    "zh-CN": "移动到标签组",
-    "en": ""
-  },
-  {
-    "key": "k_by7d2m0",
-    "zh-CN": "移动到窗口",
-    "en": ""
-  },
-  {
-    "key": "k_eabdal8",
-    "zh-CN": "移动失败",
-    "en": ""
-  },
-  {
-    "key": "k_gqghvos",
-    "zh-CN": "移动失败，请重试",
-    "en": "Move failed, please retry"
-  },
-  {
-    "key": "k_wyfqkqv",
-    "zh-CN": "移动所选标签失败，请重试",
-    "en": "Failed to move selected tabs, please retry"
-  },
-  {
-    "key": "k_lf1xobr",
-    "zh-CN": "移动设备书签",
-    "en": "Mobile Bookmarks"
-  },
-  {
-    "key": "k_soywoxy",
-    "zh-CN": "移除卡片失败",
-    "en": "Failed to remove card"
-  },
-  {
-    "key": "k_o71g91d",
-    "zh-CN": "稍后阅读",
-    "en": ""
-  },
-  {
-    "key": "k_kjjcktv",
-    "zh-CN": "空文件夹",
-    "en": "Empty folders"
-  },
-  {
-    "key": "k_vegqqgj",
-    "zh-CN": "空文件夹数",
-    "en": "Empty Folders"
-  },
-  {
-    "key": "k_oz8pcoa",
-    "zh-CN": "窗口",
-    "en": "Windows"
-  },
-  {
-    "key": "k_oeb8qt0",
-    "zh-CN": "窗口 {id}",
-    "en": "Window {id}"
-  },
-  {
-    "key": "k_nriooco",
-    "zh-CN": "窗口健康度",
-    "en": ""
-  },
-  {
-    "key": "k_ce2bt2c",
-    "zh-CN": "窗口卡片列数",
-    "en": "Window card columns"
-  },
-  {
-    "key": "k_eullnnl",
-    "zh-CN": "窗口卡片的身份色条位置，与域名分组卡片保持一致",
-    "en": "Position of the window card identity bar, aligned with domain group cards"
-  },
-  {
-    "key": "k_6sh389j",
-    "zh-CN": "窗口卡片默认展开",
-    "en": "Default window card expansion"
-  },
-  {
-    "key": "k_lols4ys",
-    "zh-CN": "窗口已关闭",
-    "en": "Window closed"
-  },
-  {
-    "key": "k_u1b1017",
-    "zh-CN": "窗口快照",
-    "en": ""
-  },
-  {
-    "key": "k_cn1xedu",
-    "zh-CN": "窗口操作失败，请重试",
-    "en": "Window action failed, please retry"
-  },
-  {
-    "key": "k_0k2h42m",
-    "zh-CN": "窗口色条位置",
-    "en": "Window accent bar position"
-  },
-  {
-    "key": "k_5c7jcot",
-    "zh-CN": "窗口贴边",
-    "en": "Snap window"
-  },
-  {
-    "key": "k_wglqdee",
-    "zh-CN": "窗口颜色",
-    "en": ""
-  },
-  {
-    "key": "k_51t1oxj",
-    "zh-CN": "立即清空",
-    "en": "Clear now"
-  },
-  {
-    "key": "k_882k4mj",
-    "zh-CN": "站点数 ≤ 此值时使用 lg 卡片尺寸（默认 6）",
-    "en": "Use lg card size when site count ≤ this value (default 6)"
-  },
-  {
-    "key": "k_80v3am2",
-    "zh-CN": "站点数 ≤ 此值时使用 md 卡片尺寸（默认 14），超过则使用 sm",
-    "en": "Use md card size when site count ≤ this value (default 14); otherwise sm"
-  },
-  {
-    "key": "k_1t6gvi2",
-    "zh-CN": "站点访问排行",
-    "en": ""
-  },
-  {
-    "key": "k_mcaw57o",
-    "zh-CN": "第 {current} / {total} 步",
-    "en": "Step {current} / {total}"
-  },
-  {
-    "key": "k_lx50ted",
-    "zh-CN": "简易 SQL 格式化与关键字大写",
-    "en": "Simple SQL formatting and keyword uppercasing"
-  },
-  {
-    "key": "k_756gpwj",
-    "zh-CN": "粉色",
-    "en": "Pink"
-  },
-  {
-    "key": "k_453aazf",
-    "zh-CN": "粘贴 URL 列表，每行一个...",
-    "en": ""
-  },
-  {
-    "key": "k_uzd76zw",
-    "zh-CN": "粘贴剪贴板",
-    "en": ""
-  },
-  {
-    "key": "k_ae4l8nt",
-    "zh-CN": "粘贴图片 URL（https://... 或 data:image/...）",
-    "en": "Paste image URL (https://... or data:image/...)"
-  },
-  {
-    "key": "k_tpg3lia",
-    "zh-CN": "精细定制（极客模式）",
-    "en": "Fine-grained customization (geek mode)"
-  },
-  {
-    "key": "k_5gq9rzy",
-    "zh-CN": "红色",
-    "en": "Red"
-  },
-  {
-    "key": "k_b927ufo",
-    "zh-CN": "约节省 {mb} MB 内存",
-    "en": "About {mb} MB saved"
-  },
-  {
-    "key": "k_q10e8dk",
-    "zh-CN": "紧凑",
-    "en": "Compact"
-  },
-  {
-    "key": "k_lpagonl",
-    "zh-CN": "紧凑：信息密度优先 / 默认：舒适平衡 / 宽松：大屏友好",
-    "en": "Compact: info-dense / Default: balanced / Comfortable: spacious for large screens"
-  },
-  {
-    "key": "k_p41jsbh",
-    "zh-CN": "紧凑列表",
-    "en": "Compact"
-  },
-  {
-    "key": "k_l82ef15",
-    "zh-CN": "紫色",
-    "en": "Purple"
-  },
-  {
-    "key": "k_azi0c8k",
-    "zh-CN": "累计归档",
-    "en": "Total archived"
-  },
-  {
-    "key": "k_v81t8rg",
-    "zh-CN": "线条粗细，0.5 / 1 / 1.5 / 2px",
-    "en": "Line thickness: 0.5 / 1 / 1.5 / 2 px"
-  },
-  {
-    "key": "k_qr9h2lg",
-    "zh-CN": "组内标签已休眠",
-    "en": "Group tabs discarded"
-  },
-  {
-    "key": "k_deps932",
-    "zh-CN": "统计字符数、单词数、行数与字节数",
-    "en": "Count characters, words, lines and bytes"
-  },
-  {
-    "key": "k_x3ozpta",
-    "zh-CN": "继续使用扩展以生成洞察数据",
-    "en": "Continue using the extension to generate insights data"
-  },
-  {
-    "key": "k_r7apymn",
-    "zh-CN": "综合",
-    "en": "General"
-  },
-  {
-    "key": "k_zx3vdw8",
-    "zh-CN": "绿色",
-    "en": "Green"
-  },
-  {
-    "key": "k_y2wpikm",
-    "zh-CN": "编码",
-    "en": "Encoding"
-  },
-  {
-    "key": "k_6w96m7f",
-    "zh-CN": "编辑",
-    "en": "Edit"
-  },
-  {
-    "key": "k_ww0i8hi",
-    "zh-CN": "编辑备注",
-    "en": "Edit note"
-  },
-  {
-    "key": "k_wo89597",
-    "zh-CN": "编辑常用站点",
-    "en": "Edit Quick Access site"
-  },
-  {
-    "key": "k_qrepnsh",
-    "zh-CN": "编辑规则",
-    "en": ""
-  },
-  {
-    "key": "k_3rz35ea",
-    "zh-CN": "缩小",
-    "en": "Zoom out"
-  },
-  {
-    "key": "k_4e8ezox",
-    "zh-CN": "网址",
-    "en": "URL"
-  },
-  {
-    "key": "k_08jjaef",
-    "zh-CN": "网格",
-    "en": "Grid"
-  },
-  {
-    "key": "k_ikpszb5",
-    "zh-CN": "网格卡片展开方式",
-    "en": "Grid card expand trigger"
-  },
-  {
-    "key": "k_m4610fm",
-    "zh-CN": "网格视图",
-    "en": "Grid View"
-  },
-  {
-    "key": "k_wnd7nzj",
-    "zh-CN": "网格间距",
-    "en": "Grid Gap"
-  },
-  {
-    "key": "k_2qs3zdb",
-    "zh-CN": "网络",
-    "en": "Network"
-  },
-  {
-    "key": "k_9l5vrvx",
-    "zh-CN": "网页搜索",
-    "en": "Web search"
-  },
-  {
-    "key": "k_tprdikp",
-    "zh-CN": "置顶了",
-    "en": "Pinned"
-  },
-  {
-    "key": "k_w38sx4m",
-    "zh-CN": "联想建议",
-    "en": "Suggestions"
-  },
-  {
-    "key": "k_yz4z21o",
-    "zh-CN": "背景主题",
-    "en": "Background Theme"
-  },
-  {
-    "key": "k_gat7xen",
-    "zh-CN": "背景定制",
-    "en": "Background"
-  },
-  {
-    "key": "k_9i4bf6q",
-    "zh-CN": "背景模糊",
-    "en": "Background blur"
-  },
-  {
-    "key": "k_n23cabc",
-    "zh-CN": "背景遮罩",
-    "en": "Background overlay"
-  },
-  {
-    "key": "k_dza5lxi",
-    "zh-CN": "脑图（横向）",
-    "en": "Mind map (horizontal)"
-  },
-  {
-    "key": "k_z0rh0v2",
-    "zh-CN": "自动",
-    "en": "Auto"
-  },
-  {
-    "key": "k_a8d4nqr",
-    "zh-CN": "自动：按 360px 卡片宽度自适应；或手动锁定列数",
-    "en": "Auto: adapt by 360px card width; or lock to a fixed count"
-  },
-  {
-    "key": "k_dosvm6w",
-    "zh-CN": "自动：随窗口宽度自适应；或手动锁定列数",
-    "en": "Auto: adapt to window width; or lock to a fixed count"
-  },
-  {
-    "key": "k_no3ls3a",
-    "zh-CN": "自动休眠标签页",
-    "en": ""
-  },
-  {
-    "key": "k_q4keliq",
-    "zh-CN": "自动分类",
-    "en": ""
-  },
-  {
-    "key": "k_27lb0y5",
-    "zh-CN": "自动分类规则",
-    "en": ""
-  },
-  {
-    "key": "k_cedihtg",
-    "zh-CN": "自动分组",
-    "en": ""
-  },
-  {
-    "key": "k_uiwzqep",
-    "zh-CN": "自动化规则",
-    "en": ""
-  },
-  {
-    "key": "k_1dbllyr",
-    "zh-CN": "自动快照",
-    "en": "Auto snapshot"
-  },
-  {
-    "key": "k_5se1l4j",
-    "zh-CN": "自动快照定时保存您的标签状态",
-    "en": "Auto snapshots periodically save your tab state"
-  },
-  {
-    "key": "k_7r7nb5n",
-    "zh-CN": "自动快照频率",
-    "en": "Auto snapshot"
-  },
-  {
-    "key": "k_mfyraqa",
-    "zh-CN": "自定义",
-    "en": "Custom"
-  },
-  {
-    "key": "k_pgf1bme",
-    "zh-CN": "自定义搜索引擎",
-    "en": "Custom search engine"
-  },
-  {
-    "key": "k_j247n3d",
-    "zh-CN": "自定义渐变编辑器",
-    "en": "Custom Gradient Editor"
-  },
-  {
-    "key": "k_fpci76v",
-    "zh-CN": "自定义背景图",
-    "en": "Custom background image"
-  },
-  {
-    "key": "k_ihcwtji",
-    "zh-CN": "自适应",
-    "en": "Auto"
-  },
-  {
-    "key": "k_x9a4p2q",
-    "zh-CN": "自适应网格",
-    "en": "Adaptive grid"
-  },
-  {
-    "key": "k_n5qkogl",
-    "zh-CN": "蓝色",
-    "en": "Blue"
-  },
-  {
-    "key": "k_iygvedb",
-    "zh-CN": "行为",
-    "en": "Behavior"
-  },
-  {
-    "key": "k_2pqr2kh",
-    "zh-CN": "表格",
-    "en": "Spreadsheet"
-  },
-  {
-    "key": "k_ndqaqxb",
-    "zh-CN": "衬线标题 + 金色质感",
-    "en": "Serif headings + gold accents"
-  },
-  {
-    "key": "k_h6ucus5",
-    "zh-CN": "覆盖皮肤预设的主色；用于按钮、链接、选中态",
-    "en": "Overrides the skin preset primary color; applies to buttons, links, and selection"
-  },
-  {
-    "key": "k_rvp60eq",
-    "zh-CN": "规则名称",
-    "en": ""
-  },
-  {
-    "key": "k_kchnv1n",
-    "zh-CN": "规则已添加",
-    "en": ""
-  },
-  {
-    "key": "k_z9tqkks",
-    "zh-CN": "角度",
-    "en": "Angle"
-  },
-  {
-    "key": "k_2c64kte",
-    "zh-CN": "解散分组",
-    "en": "Ungroup"
-  },
-  {
-    "key": "k_oyznp8b",
-    "zh-CN": "解析 HEX / RGB / HSL 颜色值并预览色块",
-    "en": "Parse HEX / RGB / HSL colors and preview the swatch"
-  },
-  {
-    "key": "k_zb7z1wk",
-    "zh-CN": "解析 HTTP 请求头为结构化 JSON",
-    "en": "Parse HTTP request headers into structured JSON"
-  },
-  {
-    "key": "k_k87884z",
-    "zh-CN": "解析浏览器、操作系统和设备类型",
-    "en": "Parse browser, OS and device type from UA string"
-  },
-  {
-    "key": "k_etgxsk5",
-    "zh-CN": "解释 5 字段 Cron 表达式含义",
-    "en": "Explain standard 5-field Cron expressions"
-  },
-  {
-    "key": "k_i3y95fr",
-    "zh-CN": "触发条件类型",
-    "en": ""
-  },
-  {
-    "key": "k_ychjrmn",
-    "zh-CN": "计算 SHA-1 / SHA-256 / SHA-512 哈希值",
-    "en": "Compute SHA-1 / SHA-256 / SHA-512 hashes"
-  },
-  {
-    "key": "k_ksrwgyg",
-    "zh-CN": "计算文本的 SHA-256 哈希值",
-    "en": "Compute SHA-256 digest of text"
-  },
-  {
-    "key": "k_cpcbezx",
-    "zh-CN": "记录操作时间线",
-    "en": "Record activity timeline"
-  },
-  {
-    "key": "k_oljvj22",
-    "zh-CN": "设置",
-    "en": "Settings"
-  },
-  {
-    "key": "k_sgfmoum",
-    "zh-CN": "设计团队",
-    "en": ""
-  },
-  {
-    "key": "k_wfksuuc",
-    "zh-CN": "设计稿已更新，请查阅 Figma",
-    "en": ""
-  },
-  {
-    "key": "k_dtuk1hs",
-    "zh-CN": "访问匹配 {pattern} 的页面时",
-    "en": ""
-  },
-  {
-    "key": "k_uehoqh7",
-    "zh-CN": "识别到 {count} 个有效 URL",
-    "en": ""
-  },
-  {
-    "key": "k_9c47m4a",
-    "zh-CN": "试试其他关键词，或直接执行网页搜索",
-    "en": "Try different keywords, or search the web directly"
-  },
-  {
-    "key": "k_rrutqou",
-    "zh-CN": "试试换一个，或清除筛选查看全部",
-    "en": "Try another or clear the filter"
-  },
-  {
-    "key": "k_v10b2hn",
-    "zh-CN": "试试搜索网站名称或域名",
-    "en": "Try searching by site name or domain"
-  },
-  {
-    "key": "k_5zh2k4i",
-    "zh-CN": "语言",
-    "en": "Language"
-  },
-  {
-    "key": "k_gus0h8w",
-    "zh-CN": "请至少选中 2 个标签页",
-    "en": "Select at least 2 tabs"
-  },
-  {
-    "key": "k_zqllx8h",
-    "zh-CN": "请至少选择 2 个会话",
-    "en": "Select at least 2 sessions"
-  },
-  {
-    "key": "k_2is8y9y",
-    "zh-CN": "请输入 RESET 以确认",
-    "en": "Please type RESET to confirm"
-  },
-  {
-    "key": "k_vxl6tgk",
-    "zh-CN": "请输入 URL 匹配规则",
-    "en": ""
-  },
-  {
-    "key": "k_ep07rt7",
-    "zh-CN": "请输入目标文件夹名",
-    "en": ""
-  },
-  {
-    "key": "k_fo6my2u",
-    "zh-CN": "请输入规则名称",
-    "en": ""
-  },
-  {
-    "key": "k_1jet3pk",
-    "zh-CN": "请选择 MP4 或 WebM 视频",
-    "en": ""
-  },
-  {
-    "key": "k_dmde3rx",
-    "zh-CN": "调整域名分组卡片的圆角大小——直角更硬朗、大圆角更柔和",
-    "en": "Adjust the corner radius of domain group cards — squared for a crisper look, large for softer feel."
-  },
-  {
-    "key": "k_uv3wwq8",
-    "zh-CN": "贴上半屏",
-    "en": "Snap to top half"
-  },
-  {
-    "key": "k_fk5ytog",
-    "zh-CN": "贴下半屏",
-    "en": "Snap to bottom half"
-  },
-  {
-    "key": "k_qykrbot",
-    "zh-CN": "贴右半屏",
-    "en": "Snap to right half"
-  },
-  {
-    "key": "k_cdsmaj0",
-    "zh-CN": "贴左半屏",
-    "en": "Snap to left half"
-  },
-  {
-    "key": "k_hn3diz3",
-    "zh-CN": "贴边失败，请重试",
-    "en": "Snap failed, please retry"
-  },
-  {
-    "key": "k_f5de5gr",
-    "zh-CN": "超时",
-    "en": "Timeout"
-  },
-  {
-    "key": "k_u8ha3go",
-    "zh-CN": "超过保留时间的记录将在下次访问时自动清理。",
-    "en": "Older entries are cleaned up automatically the next time you visit."
-  },
-  {
-    "key": "k_zyjbobl",
-    "zh-CN": "跟随系统",
-    "en": "Follow system"
-  },
-  {
-    "key": "k_f6atlrb",
-    "zh-CN": "跳转失败，标签页可能已关闭",
-    "en": "Failed to activate tab — it may have been closed"
-  },
-  {
-    "key": "k_bnhxmf3",
-    "zh-CN": "跳转标签页",
-    "en": "Jump to tab"
-  },
-  {
-    "key": "k_lvbl1ll",
-    "zh-CN": "跳过",
-    "en": "Skipped"
-  },
-  {
-    "key": "k_jc0hpdv",
-    "zh-CN": "跳过 {count} 个非法 URL",
-    "en": ""
-  },
-  {
-    "key": "k_tlxn0vj",
-    "zh-CN": "跳过引导",
-    "en": "Skip tour"
-  },
-  {
-    "key": "k_xyqa0lr",
-    "zh-CN": "较矮更紧凑，较高更舒适",
-    "en": "Smaller = tighter, taller = airier"
-  },
-  {
-    "key": "k_f15r77g",
-    "zh-CN": "输入",
-    "en": "Input"
-  },
-  {
-    "key": "k_34dk539",
-    "zh-CN": "输入 hostname 后回车，例如 mail.google.com",
-    "en": "Type a hostname and press Enter, e.g. mail.google.com"
-  },
-  {
-    "key": "k_0e1ks65",
-    "zh-CN": "输入 RESET 以确认执行：",
-    "en": "Type RESET to confirm:"
-  },
-  {
-    "key": "k_kq6k04a",
-    "zh-CN": "输入关键词搜索所有标签页",
-    "en": ""
-  },
-  {
-    "key": "k_2fu6q13",
-    "zh-CN": "输入关键词搜索标签页标题、域名或 URL",
-    "en": "Search tabs by title, domain, or URL"
-  },
-  {
-    "key": "k_gaklsma",
-    "zh-CN": "输入分组名称",
-    "en": "Enter group name"
-  },
-  {
-    "key": "k_k519gnx",
-    "zh-CN": "输入即可创建新分组",
-    "en": "Type to create a new group"
-  },
-  {
-    "key": "k_l1rueo6",
-    "zh-CN": "输入后可在本地与网页结果间快速切换",
-    "en": "Type to switch quickly between local and web results"
-  },
-  {
-    "key": "k_bihyqfc",
-    "zh-CN": "输入命令或搜索...",
-    "en": ""
-  },
-  {
-    "key": "k_m3mce6p",
-    "zh-CN": "输入备注...",
-    "en": "Enter note..."
-  },
-  {
-    "key": "k_ak66evc",
-    "zh-CN": "输入新名称",
-    "en": "Enter new name"
-  },
-  {
-    "key": "k_9zqzwg3",
-    "zh-CN": "输入标签名...",
-    "en": "Enter tag name..."
-  },
-  {
-    "key": "k_uayc44l",
-    "zh-CN": "输入标签组名称（可选）",
-    "en": ""
-  },
-  {
-    "key": "k_2lvltiy",
-    "zh-CN": "输入窗口别名",
-    "en": "Enter window alias"
-  },
-  {
-    "key": "k_s9gs3gq",
-    "zh-CN": "输入网址，如 github.com",
-    "en": "Enter URL, e.g. github.com"
-  },
-  {
-    "key": "k_qxurqwb",
-    "zh-CN": "输入预设名称…",
-    "en": "Enter profile name…"
-  },
-  {
-    "key": "k_qqjmrjw",
-    "zh-CN": "输出",
-    "en": "Output"
-  },
-  {
-    "key": "k_vp6ja2d",
-    "zh-CN": "边框粗细",
-    "en": "Border width"
-  },
-  {
-    "key": "k_0dd4iwx",
-    "zh-CN": "达到阈值时执行的操作：仅通知 / 自动休眠最久未访问的标签 / 提示归档。",
-    "en": ""
-  },
-  {
-    "key": "k_srmk5uq",
-    "zh-CN": "过滤 tag（逗号分隔）",
-    "en": "Filter tags (comma separated)"
-  },
-  {
-    "key": "k_7axm8ih",
-    "zh-CN": "过滤域名（逗号分隔）",
-    "en": "Filter domains (comma separated)"
-  },
-  {
-    "key": "k_dnwd7k7",
-    "zh-CN": "运维",
-    "en": ""
-  },
-  {
-    "key": "k_u16o3yt",
-    "zh-CN": "近 {n} 天暂无打开记录",
-    "en": ""
-  },
-  {
-    "key": "k_tpu9oib",
-    "zh-CN": "近 7 天暂无打开记录",
-    "en": "No new tab opens in the last 7 days"
-  },
-  {
-    "key": "k_k1f0gbb",
-    "zh-CN": "近 7 天每日打开次数",
-    "en": "New tab opens (7 days)"
-  },
-  {
-    "key": "k_jsbo3rk",
-    "zh-CN": "还原最大化",
-    "en": "Restore to fullscreen"
-  },
-  {
-    "key": "k_r5p0c8v",
-    "zh-CN": "还原普通窗口",
-    "en": "Restore normal window"
-  },
-  {
-    "key": "k_05t2upn",
-    "zh-CN": "还有 {n} 个",
-    "en": "+{n} more"
-  },
-  {
-    "key": "k_blpg1de",
-    "zh-CN": "还没有任何历史记录",
-    "en": "No history yet"
-  },
-  {
-    "key": "k_2ezwnce",
-    "zh-CN": "还没有足够的快照数据，明天再打开这里就能看到变化了",
-    "en": "Need at least two days of snapshots. Open this tomorrow to see the change."
-  },
-  {
-    "key": "k_h51o8h4",
-    "zh-CN": "进入窗口视图时默认展开哪些窗口卡片",
-    "en": "Choose which window cards are expanded when entering Window view"
-  },
-  {
-    "key": "k_3wequh1",
-    "zh-CN": "进制转换",
-    "en": "Radix Converter"
-  },
-  {
-    "key": "k_0ayatl3",
-    "zh-CN": "远程 URL",
-    "en": "Remote URL"
-  },
-  {
-    "key": "k_6p3bvrw",
-    "zh-CN": "退出多选",
-    "en": "Exit selection"
-  },
-  {
-    "key": "k_t91jhfs",
-    "zh-CN": "退出多选模式",
-    "en": "Exit multi-select"
-  },
-  {
-    "key": "k_jpv5gwd",
-    "zh-CN": "退出批量模式",
-    "en": ""
-  },
-  {
-    "key": "k_jwzcfrh",
-    "zh-CN": "适应画布",
-    "en": "Fit to screen"
-  },
-  {
-    "key": "k_zsa8j16",
-    "zh-CN": "选择一套视觉风格；不同皮肤改变圆角、阴影、色彩、毛玻璃等整体观感",
-    "en": "Pick a visual style; each skin changes borders, shadows, colors, glass effects and overall feel"
-  },
-  {
-    "key": "k_2erg6wt",
-    "zh-CN": "选择域名分组的排序规则；固定标签所在分组始终优先",
-    "en": "Choose how domain groups are sorted; groups with pinned tabs always come first"
-  },
-  {
-    "key": "k_bmt0ut4",
-    "zh-CN": "选择已有分组或输入新分组名",
-    "en": "Select existing group or type a new one"
-  },
-  {
-    "key": "k_wwlgvz6",
-    "zh-CN": "选择常用站点卡片的尺寸，自动模式会随屏幕宽度自适应",
-    "en": "Pick a card size; Adaptive fits cards to your screen width"
-  },
-  {
-    "key": "k_s4vhx1u",
-    "zh-CN": "选择常用站点的布局方式",
-    "en": "Choose the layout style for quick access sites"
-  },
-  {
-    "key": "k_c9621y6",
-    "zh-CN": "选择搜索时匹配哪些字段；缩小范围可提升搜索速度",
-    "en": "Choose which fields to match against; narrowing scope can speed up search"
-  },
-  {
-    "key": "k_pweppu0",
-    "zh-CN": "选择搜索框下方快捷切换的搜索引擎",
-    "en": "These engines appear in the search box so you can switch targets on the fly"
-  },
-  {
-    "key": "k_yc2f1mk",
-    "zh-CN": "选择此会话",
-    "en": "Select this session"
-  },
-  {
-    "key": "k_iae3o7u",
-    "zh-CN": "选择热词从哪里来；本地来源完全离线，不产生任何网络请求",
-    "en": "Pick where trending keywords come from; local aggregation is fully offline"
-  },
-  {
-    "key": "k_3ym6gg7",
-    "zh-CN": "选择目标窗口",
-    "en": ""
-  },
-  {
-    "key": "k_ou7xuk4",
-    "zh-CN": "选择视频文件",
-    "en": "Select video file"
-  },
-  {
-    "key": "k_q6rvhpl",
-    "zh-CN": "选择网格视图卡片的尺寸，自动模式会根据标签页数量自适应",
-    "en": "Select the card size for the grid view. Auto mode adapts based on the number of tabs."
-  },
-  {
-    "key": "k_hkzfp1h",
-    "zh-CN": "选择页面背景风格；带 ☀ 标记的适合浅色模式，带 🌙 标记的适合深色模式",
-    "en": "Choose a background style; ☀ marks suit light mode, 🌙 marks suit dark mode"
-  },
-  {
-    "key": "k_lfayqd4",
-    "zh-CN": "逐条检测书签是否可访问；需要网页访问权限，首次会弹出授权。",
-    "en": "Probe each bookmark URL; requires host permission. A prompt will appear the first time."
-  },
-  {
-    "key": "k_2buezfc",
-    "zh-CN": "逐行对比两段文本，高亮增删行",
-    "en": "Compare two texts line-by-line with highlighted changes"
-  },
-  {
-    "key": "k_e9wixrg",
-    "zh-CN": "通用行为",
-    "en": "General"
-  },
-  {
-    "key": "k_mab2wvp",
-    "zh-CN": "遮罩颜色",
-    "en": "Overlay color"
-  },
-  {
-    "key": "k_rac7bap",
-    "zh-CN": "邮件",
-    "en": "Email"
-  },
-  {
-    "key": "k_q3vfqsw",
-    "zh-CN": "部分恢复成功，已恢复 {restored}/{total} 个标签",
-    "en": "Partial restore: {restored}/{total} tabs restored"
-  },
-  {
-    "key": "k_c2hic3x",
-    "zh-CN": "配置已恢复默认，页面即将刷新",
-    "en": "Settings restored. Reloading…"
-  },
-  {
-    "key": "k_5hkwtto",
-    "zh-CN": "配置预设",
-    "en": "Settings profiles"
-  },
-  {
-    "key": "k_8i4r8zy",
-    "zh-CN": "重命名",
-    "en": "Rename"
-  },
-  {
-    "key": "k_onglrt9",
-    "zh-CN": "重命名会话",
-    "en": "Rename session"
-  },
-  {
-    "key": "k_lj6x8jk",
-    "zh-CN": "重命名失败，请重试",
-    "en": ""
-  },
-  {
-    "key": "k_4xvoah7",
-    "zh-CN": "重命名快照",
-    "en": ""
-  },
-  {
-    "key": "k_6m6hcta",
-    "zh-CN": "重命名成功",
-    "en": "Renamed"
-  },
-  {
-    "key": "k_qm3zbw6",
-    "zh-CN": "重命名窗口",
-    "en": "Rename window"
-  },
-  {
-    "key": "k_uh9hopj",
-    "zh-CN": "重复书签数",
-    "en": "Duplicate Bookmarks"
-  },
-  {
-    "key": "k_u7n7hbp",
-    "zh-CN": "重复合并预览",
-    "en": "Preview duplicates"
-  },
-  {
-    "key": "k_twfji7i",
-    "zh-CN": "重复标签",
-    "en": "Duplicates"
-  },
-  {
-    "key": "k_usvn94i",
-    "zh-CN": "重复标签/闲置标签智能整理建议栏",
-    "en": "Duplicate/idle tab smart tidy bar"
-  },
-  {
-    "key": "k_irul982",
-    "zh-CN": "重播欢迎教程",
-    "en": "Replay onboarding tour"
-  },
-  {
-    "key": "k_72eieg0",
-    "zh-CN": "重播欢迎教程？下次打开新标签页将重新弹出。",
-    "en": "Replay the welcome tour next time you open a new tab?"
-  },
-  {
-    "key": "k_rreptgq",
-    "zh-CN": "重新检测",
-    "en": ""
-  },
-  {
-    "key": "k_gly1uh1",
-    "zh-CN": "重置缩放",
-    "en": "Reset zoom"
-  },
-  {
-    "key": "k_y8kdfaz",
-    "zh-CN": "重试",
-    "en": "Retry"
-  },
-  {
-    "key": "k_xumwl1e",
-    "zh-CN": "铺满裁切",
-    "en": "Cover (crop)"
-  },
-  {
-    "key": "k_2b4eayv",
-    "zh-CN": "链接已复制",
-    "en": ""
-  },
-  {
-    "key": "k_e7u86q4",
-    "zh-CN": "错误",
-    "en": "Error"
-  },
-  {
-    "key": "k_als44am",
-    "zh-CN": "锤子 UI 复古风",
-    "en": "Smartisan retro style"
-  },
-  {
-    "key": "k_6u0oyyr",
-    "zh-CN": "键盘导航",
-    "en": ""
-  },
-  {
-    "key": "k_ddphfr1",
-    "zh-CN": "长期未用",
-    "en": "Stale"
-  },
-  {
-    "key": "k_v68wno6",
-    "zh-CN": "问题反馈",
-    "en": "Report an issue"
-  },
-  {
-    "key": "k_ldczsgs",
-    "zh-CN": "闲置",
-    "en": "Idle"
-  },
-  {
-    "key": "k_wu0rhqg",
-    "zh-CN": "闲置天数阈值",
-    "en": ""
-  },
-  {
-    "key": "k_7015usk",
-    "zh-CN": "闲置标签",
-    "en": "Idle"
-  },
-  {
-    "key": "k_a0xfx5w",
-    "zh-CN": "闲置超过 {days} 天的标签页",
-    "en": ""
-  },
-  {
-    "key": "k_6usqz7r",
-    "zh-CN": "闲置阈值",
-    "en": "Idle threshold"
-  },
-  {
-    "key": "k_5dk3sy9",
-    "zh-CN": "隐私",
-    "en": "Privacy"
-  },
-  {
-    "key": "k_3k79wev",
-    "zh-CN": "隐藏",
-    "en": "Hidden"
-  },
-  {
-    "key": "k_mffrvey",
-    "zh-CN": "隐藏不需要的区域，打造极简界面",
-    "en": "Hide regions you don't need for a minimal interface"
-  },
-  {
-    "key": "k_6z0lfj9",
-    "zh-CN": "隐藏后可通过设置页添加常用站点",
-    "en": "Hide to add sites only via settings"
-  },
-  {
-    "key": "k_hpkfky6",
-    "zh-CN": "隐藏域名",
-    "en": "Hide domain"
-  },
-  {
-    "key": "k_mvrwf1x",
-    "zh-CN": "隐身",
-    "en": "Incognito"
-  },
-  {
-    "key": "k_6494x15",
-    "zh-CN": "隐身窗口与普通窗口的标签不能混合移动或分组",
-    "en": "Incognito and normal-window tabs cannot be moved or grouped together"
-  },
-  {
-    "key": "k_sqjqgvk",
-    "zh-CN": "随时可在 设置 → 行为 中切换模式",
-    "en": "You can switch modes anytime in Settings → Behavior"
-  },
-  {
-    "key": "k_xecfx4j",
-    "zh-CN": "随机数 / UUID",
-    "en": "Random / UUID"
-  },
-  {
-    "key": "k_gcdtpci",
-    "zh-CN": "需要授权才能访问浏览器书签",
-    "en": "Permission needed to access browser bookmarks"
-  },
-  {
-    "key": "k_z3z1i7r",
-    "zh-CN": "需要授权访问任意网址才能检测书签有效性",
-    "en": "Host access permission is required to verify bookmark health"
-  },
-  {
-    "key": "k_u7tybgh",
-    "zh-CN": "青色",
-    "en": "Cyan"
-  },
-  {
-    "key": "k_9s8du6v",
-    "zh-CN": "静音",
-    "en": ""
-  },
-  {
-    "key": "k_5u0j8z2",
-    "zh-CN": "页面内快捷键",
-    "en": "In-page shortcuts"
-  },
-  {
-    "key": "k_9d6cfmv",
-    "zh-CN": "页面内搜索",
-    "en": "In-page search"
-  },
-  {
-    "key": "k_67zqwap",
-    "zh-CN": "顶栏",
-    "en": "Header bar"
-  },
-  {
-    "key": "k_xy4alt8",
-    "zh-CN": "顶部",
-    "en": "Top"
-  },
-  {
-    "key": "k_ipbbdjr",
-    "zh-CN": "项目名称",
-    "en": ""
-  },
-  {
-    "key": "k_q0ohmc2",
-    "zh-CN": "项目周报 - 第 17 周",
-    "en": ""
-  },
-  {
-    "key": "k_oxkekbi",
-    "zh-CN": "预算金额（万元）",
-    "en": ""
-  },
-  {
-    "key": "k_fiwb7mz",
-    "zh-CN": "预览",
-    "en": "Preview"
-  },
-  {
-    "key": "k_y6h25kl",
-    "zh-CN": "预设已保存",
-    "en": "Profile saved"
-  },
-  {
-    "key": "k_rfejs3q",
-    "zh-CN": "预设已删除",
-    "en": "Profile deleted"
-  },
-  {
-    "key": "k_0vg1wkn",
-    "zh-CN": "预设已重命名",
-    "en": "Profile renamed"
-  },
-  {
-    "key": "k_svbm7j1",
-    "zh-CN": "预设词表（静态）",
-    "en": "Preset list (static)"
-  },
-  {
-    "key": "k_f1luuyn",
-    "zh-CN": "颜色",
-    "en": "Color"
-  },
-  {
-    "key": "k_v9xcyq8",
-    "zh-CN": "颜色值预览",
-    "en": "Color Preview"
-  },
-  {
-    "key": "k_aa25flj",
-    "zh-CN": "首页常用站点快捷入口",
-    "en": "Quick access shortcuts on homepage"
-  },
-  {
-    "key": "k_eejmx0w",
-    "zh-CN": "黄色",
-    "en": "Yellow"
-  },
-  {
-    "key": "k_m9esfi2",
-    "zh-CN": "默认",
-    "en": "Default"
-  },
-  {
-    "key": "k_8fkmxxf",
-    "zh-CN": "默认搜索引擎",
-    "en": "Default search engine"
-  },
-  {
-    "key": "k_pnqub7m",
-    "zh-CN": "默认视图",
-    "en": "Default view"
-  },
-  {
-    "key": "k_ghzglvo",
-    "zh-CN": "默认空间",
-    "en": "Default space"
-  }
-]
+{
+  "13500829": "最近关闭自动过期",
+  "13789159": "将立即删除全部「最近关闭」「整窗快照」和「操作时间线」，此操作不可撤销。",
+  "16163953": "已移至新窗口",
+  "21972151": "URL 完全相同才认为重复；?page=1 与 ?page=2 不会被判为重复。",
+  "24070121": "已恢复 1 个标签页",
+  "24326685": "在时段旁和每条标签旁展示具体访问时间（HH:mm）",
+  "32536950": "文档",
+  "33249754": "{unit}为 {value}",
+  "33948004": "确认清空？点击执行",
+  "39003734": "样式",
+  "44637601": "确认永久删除该分组？",
+  "46779389": "书签",
+  "49210562": "拖拽排序或隐藏不常用的视图；至少保留一个可见视图。",
+  "49693736": "较矮更紧凑，较高更舒适",
+  "52539117": "归档时无法记录 Tab Group 信息，恢复时无法重建分组结构",
+  "52636511": "红色",
+  "53780495": "关闭 {domain} 的 {count} 个标签页",
+  "54530911": "HTML 实体{op} 失败：{msg}",
+  "58612466": "URL 匹配模式（支持 * 通配符）",
+  "59946805": "客户端错误",
+  "60678191": "User-Agent 解析",
+  "69559280": "{n} 小时前",
+  "72520580": "本周",
+  "73685580": "仅工具栏按钮",
+  "74522784": "按天",
+  "75564459": "书签中心",
+  "75564501": "⌘/Ctrl + K 呼出搜索；再按一次关闭；Cmd + 1..9 切换搜索引擎。",
+  "81909158": "月份",
+  "87080256": "规则名称",
+  "93062650": "综合热榜",
+  "97542386": "粉色",
+  "98977545": "上下堆叠",
+  "0007d170": "删除成功",
+  "002c1de0": "YAML/JSON 互转",
+  "00382a77": "分组到 {name}",
+  "005e9fb3": "关闭后分组内每条标签不再显示 favicon，视觉更紧凑；顶部卡片依旧保留域名图标",
+  "00c53966": "移动到标签组",
+  "00c84c4d": "聚合全网热点与热榜资讯",
+  "0103eb2d": "圆角",
+  "0128baed": "网页搜索",
+  "013faa1c": "全量重置",
+  "0151154e": "未命名标签组",
+  "01523037": "启用历史建议",
+  "017ee18c": "回收站加载失败",
+  "01a4999d": "生成 UUID、随机字符串、随机数字等",
+  "01ed9362": "稍后阅读",
+  "029a45d0": "{n} 秒",
+  "02acf7ea": "未找到匹配的标签组",
+  "02e05932": "按 Chrome 标签组分组管理标签页",
+  "02e78e8f": "已合并 {count} 个重复标签",
+  "02e9b8d3": "今日使用时长长的标签排在前面",
+  "03070356": "浏览和管理当前所有打开的标签页",
+  "035c61ec": "打开匹配 {pattern} 的页面时",
+  "0399a00c": "添加站点",
+  "03e59bb3": "紧凑",
+  "040c8661": "按标题",
+  "04195cbe": "自动：随窗口宽度自适应；或手动锁定列数",
+  "043f5d1f": "打开搜索",
+  "0467cc92": "查看全部",
+  "046c6233": "最近",
+  "047109de": "待处理",
+  "04a691b3": "创建成功",
+  "04bab824": "已有 {count} 个标签页未能关闭，可稍后手动处理",
+  "0507eb74": "导入将合并数据，不会覆盖已有设置。继续？",
+  "05638402": "切换左右布局",
+  "056f2d7d": "导航",
+  "05b8b381": "近 {n} 天暂无打开记录",
+  "06b6bcc2": "搜索标签页（标题/URL/域名）...",
+  "06cf8f44": "启用定制",
+  "06e004ef": "代码",
+  "06f8914c": "切换至右侧",
+  "076fb3a3": "未授权",
+  "07b35c4e": "交换",
+  "07c60b53": "自适应",
+  "0835f11f": "回车即可打开搜索结果页",
+  "086110d8": "重复标签",
+  "08cb0566": "归档中...",
+  "08d6cb0e": "批量导出失败",
+  "091bce1e": "已加入目标分组",
+  "092eb7d1": "最近搜索已清空",
+  "0950548a": "归档会话 (+{count})",
+  "095dca66": "Top 10 访问域名",
+  "095e938e": "停止",
+  "09add081": "当前窗口 ≥10 个标签且距上次快照 >6h 时静默创建隐藏会话；最多保留 20 个。",
+  "09bd9c5e": "将当前 {count} 个标签页保存为模板，稍后可一键恢复。",
+  "0a2ed3e2": "在 chrome://extensions/shortcuts 中自定义快捷键",
+  "0a4e30ae": "例如：清理闲置标签",
+  "0a67ba27": "治理动作",
+  "0ae2c225": "永久",
+  "0b046439": "已休眠 {count} 个标签页",
+  "0b306101": "添加书签",
+  "0b54d3a8": "30 天内访问次数多的标签排在前面",
+  "0bb1a16a": "品牌推广",
+  "0bc886bb": "视图布局",
+  "0bd2d8f8": "默认视图",
+  "0bde7b70": "未分组标签",
+  "0c648289": "时间戳",
+  "0c6f379d": "点击归档按钮保存当前所有标签页",
+  "0c8c939a": "{time}未访问",
+  "0ccc36c5": "应用此预设",
+  "0d824a24": "回收站为空",
+  "0d830788": "数据",
+  "0d98c747": "其他",
+  "0dd83f4d": "查看全部历史",
+  "0df36795": "浏览和搜索浏览历史记录",
+  "0e62c428": "多 tab 卡片何时弹出列表浮层——点击更稳重，悬停更轻快；仅影响网格视图",
+  "0e6a2e07": "请输入 5 段 Cron 表达式：分 时 日 月 周",
+  "0ec94a37": "本月",
+  "0ec9eaf9": "更多",
+  "0ed5bac5": "确定要关闭这 {count} 个标签页吗？",
+  "0f90902a": "百科",
+  "0fa5956e": "输入备注...",
+  "1014b33d": "分组名称",
+  "101a1e90": "视图切换",
+  "101a4ce5": "热榜",
+  "105c8a51": "导出成功",
+  "10d247e0": "搜狗",
+  "10d552da": "输入即可创建新分组",
+  "11685e66": "每日活动趋势（近 14 天）",
+  "11a768bd": "内存治理",
+  "11b540ed": "{unit}范围 {value}",
+  "12498cd9": "选择搜索时匹配哪些字段；缩小范围可提升搜索速度",
+  "12536df8": "网络工具",
+  "1289219b": "查看标签页访问频率热力图",
+  "12be4f5d": "清空所有历史数据",
+  "12e0ebc9": "恢复默认配置？",
+  "1324e4e4": "已授权",
+  "132c5cdc": "重试",
+  "140c6cce": "清空全部",
+  "14274cc1": "在当前窗口中打开所有标签页",
+  "1430f47f": "恢复了归档",
+  "1466d1f2": "关闭全部标签页",
+  "148c9bdf": "重播欢迎教程",
+  "14b1ae9e": "字符串转义/反转义",
+  "14d34236": "标签",
+  "14f4526e": "热门话题",
+  "15ab8e81": "导入源超过 20K 行限制",
+  "15e24124": "输入命令或搜索...",
+  "1603b069": "周一",
+  "1622dc9b": "未知",
+  "16569be4": "请至少选中 2 个标签页",
+  "16845e7b": "将 URL 拆解为协议、主机、端口、路径等组成部分",
+  "16bf955c": "网格",
+  "16c18a99": "已聚焦",
+  "16f82207": "匹配 {matched} / 共 {total} 个",
+  "172b0da3": "切换搜索",
+  "173a3985": "部分恢复成功，已恢复 {restored}/{total} 个标签",
+  "17eed135": "智能分组",
+  "17f24cd4": "建议开启定时归档",
+  "1842f08c": "切换到热点视图",
+  "18c63459": "默认",
+  "18c99f70": "例如：Dev",
+  "1906c4ef": "视频 URL",
+  "190980c7": "域名",
+  "191db4b2": "预算金额（万元）",
+  "19214e43": "新建标签组",
+  "192c2a1e": "建议创建工作区",
+  "196390b8": "HTML 实体字符的编码与解码",
+  "19a00b27": "暂无书签",
+  "1a30a642": "拖拽 Tab 到此列",
+  "1a63ac23": "示例",
+  "1a6aa24e": "执行",
+  "1a9d02b2": "选择一个视图开始浏览",
+  "1aaa768d": "历史上的今天",
+  "1abcfdd7": "鉴权",
+  "1ad87e47": "使用 JSONPath 语法提取嵌套 JSON 中的数据节点",
+  "1adb15d6": "暂无归档会话",
+  "1adeedfc": "本地（基于你的搜索历史）",
+  "1bac376d": "批量删除失败",
+  "1bb33934": "工作台",
+  "1bdb3490": "慢速播放（0.5×）更适合做背景氛围。",
+  "1c049246": "布局模式",
+  "1c16cf5d": "提示归档标签页",
+  "1c4a07b5": "右键标签卡片查看更多操作",
+  "1c7b6af8": "按下快捷键…",
+  "1ca96f76": "选择书签",
+  "1d320bfe": "回收站内容在浏览器重启后仍保留",
+  "1d585dc3": "已取消恢复，成功恢复 {restored} 个标签",
+  "1d590cc8": "标签已移动到分组",
+  "1d889b65": "清空后不可恢复，确定要清空吗？",
+  "1d8f45f3": "确认删除书签「{title}」？",
+  "1d95b75b": "大小写",
+  "1d9c15c5": "新闻",
+  "1db78d20": "2.2 完成技术方案评审与排期",
+  "1de582ef": "每次触发治理时最多操作的标签页数量，默认 5，避免一次性操作过多。",
+  "1e28ed64": "在右下角显示悬浮的添加按钮，快捷键 Ctrl+Shift+A / ⌘+Shift+A",
+  "1e2f6adf": "打开了",
+  "1e8e304a": "恢复会话",
+  "1e99f9d5": "6 小时",
+  "1e9fd7ea": "成功响应",
+  "1ea32038": "相关度",
+  "1ee1f673": "退出多选模式",
+  "1ef8fd21": "固定",
+  "1efe9e15": "归档 · {date}",
+  "1f02ca36": "支持 MP4 / WebM；若跨域或 CSP 受限可能无法播放。",
+  "1f446d59": "打开浏览记录",
+  "1f46978c": "爱范儿",
+  "1f8f4f27": "确认导入数据？",
+  "1fa8befb": "无法识别的颜色格式，请输入 HEX / RGB / HSL",
+  "1fc98fc5": "切换到标签视图",
+  "1fd2e0a6": "已添加列「{name}」",
+  "20109e0d": "已合并全部 {count} 个重复标签页",
+  "202eb76d": "[i18n] en.json 加载失败",
+  "20bbcdb9": "两天访问的站点完全一致 ✨",
+  "20cf3b18": "颜色已更改",
+  "2138751f": "[pangu] {count} 条翻译已自动调整间距",
+  "21efd88b": "暂无数据",
+  "2204ebdf": "暂无快照",
+  "2205b60e": "全局快捷键",
+  "2220b14f": "贴右半屏",
+  "2228c031": "测试正则表达式，高亮显示匹配结果和捕获组",
+  "223d1050": "CSV 至少需要表头和一行数据",
+  "226b0912": "类型",
+  "228c74bc": "已在常用站点中",
+  "2293eccd": "查看各 HTTP 状态码的含义和描述",
+  "22ec5fa3": "仅用于读写书签数据",
+  "22fe412f": "输入 hostname 后回车，例如 mail.google.com",
+  "230785ba": "选择已有分组或输入新分组名",
+  "23093bb2": "更新日志",
+  "2368f300": "创建分组",
+  "23c997a0": "其他窗口",
+  "24188e40": "CSV/JSON 互转",
+  "249ce8a7": "保存快照失败",
+  "24b7a36a": "清除失败，请重试",
+  "255b152a": "重复合并预览",
+  "257db1f3": "在 px、rem、em、vw、vh 等 CSS 单位之间进行换算",
+  "258308e8": "接管新标签页",
+  "25bb4f02": "确认关闭窗口",
+  "25c971d2": "命名",
+  "261c1b0b": "正文基础字号，影响整站文本密度",
+  "262ff892": "0 = 不限制",
+  "2638a0d4": "全量数据已导出",
+  "26a0e29d": "实际支出",
+  "26b5bd49": "加载中...",
+  "26eeb5ae": "欢迎使用 GroveTab",
+  "26f79afc": "回收站内容已同步到",
+  "273c7f60": "最近关闭最多保留",
+  "273d6288": "关闭此域名所有标签页",
+  "277a984f": "抖音",
+  "27bc6f5a": "去重",
+  "27e26924": "打开自动化设置",
+  "280c0aa4": "删除选中 ({count})",
+  "2843e2f6": "实时",
+  "28622a95": "记录操作时间线",
+  "2872888f": "查看和恢复已删除的标签页",
+  "288c3813": "标签页",
+  "288f0c40": "清空",
+  "2896bd79": "回收站",
+  "28b62324": "已导出 {count} 个会话",
+  "28b988ce": "文件类型",
+  "28ce3e92": "导出失败，请重试",
+  "28fde2fd": "开启后定期检测内存压力，在达到阈值时自动执行治理动作。需要 system.memory 权限。",
+  "28fef84d": "清空所有归档",
+  "29086acd": "智能标签治理",
+  "291f6fa6": "默认端口",
+  "29481fce": "恢复出厂设置",
+  "2950599a": "归档失败",
+  "295bb704": "语言",
+  "296b824f": "一、本周工作进展",
+  "297f42b2": "切换至左侧",
+  "29f78dc1": "推荐名称",
+  "2a0afd9a": "URL 拆解",
+  "2a3e7f5c": "手动",
+  "2ad676a0": "移动失败",
+  "2af0341b": "显示热门关键词建议",
+  "2b03ac09": "未注册撤销处理",
+  "2b3c37cb": "最多支持分屏 {count} 个标签页",
+  "2b6fa4bb": "推荐榜",
+  "2b74d54c": "已离线（点击重新打开）",
+  "2bb76b6f": "暂无工作区模板",
+  "2bdee7b8": "将 JSON 对象转换为 TypeScript 类型定义",
+  "2c487428": "颜色工具",
+  "2c509530": "开发工具",
+  "2c5550b7": "关闭后只保留「最近关闭」标签快照，不记录搜索 / 归档 / 打标签等事件。",
+  "2c6be223": "调整域名分组卡片的圆角大小——直角更硬朗、大圆角更柔和",
+  "2ca98254": "管理和搜索浏览器书签",
+  "2cad7365": "加入书签",
+  "2d029eda": "品牌 Logo",
+  "2d37131c": "洞察",
+  "2d71d113": "数据管理",
+  "2d87226a": "窗口卡片列数",
+  "2dd2fef2": "GroveTab 需要书签权限才能管理您的书签",
+  "2de0d491": "小时",
+  "2df23d42": "达到阈值时执行的操作：仅通知 / 自动休眠最久未访问的标签 / 提示归档。",
+  "2df7747f": "未知工具",
+  "2e02bca0": "{count} 个扩展名",
+  "2e467d21": "去重严格度",
+  "2e576047": "正则表达式",
+  "2e827d23": "恢复失败",
+  "2e953e8f": "使用频率前 5",
+  "2eacecb9": "闲置阈值",
+  "2f0d4589": "输入 RESET 以确认执行：",
+  "2f13c514": "收起文案",
+  "2f37a9e2": "搜索标签",
+  "2f48e5d9": "近 14 天",
+  "2f4aaddd": "删除",
+  "2f51c18f": "归档",
+  "2f8d6f15": "昨天",
+  "2fa7e75c": "加载标签页失败，请刷新页面",
+  "2fc8af29": "Logo URL（可选）",
+  "2ffd6c5d": "退出批量模式",
+  "3045f498": "部分标签页归档失败（{count} 个）",
+  "3060f6c4": "紧凑：信息密度优先 / 默认：舒适平衡 / 宽松：大屏友好",
+  "307f6be3": "恢复完成",
+  "30af30bb": "偷摸模式",
+  "30d454af": "批量恢复失败",
+  "3105b359": "恢复默认配置",
+  "310b464d": "将合并 {count} 个会话为一个新会话，并按 URL 去重。原会话将被删除。",
+  "312d9fdb": "在「外观」Tab 可以尝试极客模式定制圆角、字号、主色等细节。",
+  "3180b4d8": "哈希摘要计算",
+  "318ef16e": "极简毛玻璃",
+  "31c0abfd": "{n} 天前",
+  "31dd11c7": "内置多款高质量皮肤，支持毛玻璃、暗色模式、自定义配色和设计 Token",
+  "32249be9": "粘贴剪贴板",
+  "326b3ac6": "搜索行为",
+  "328f910f": "输入后可在本地与网页结果间快速切换",
+  "32b4c83b": "个标签页",
+  "32c65d8d": "标题",
+  "331639d7": "取消恢复",
+  "331bb108": "{count} 个参数",
+  "333de60a": "名称格式不正确",
+  "33aeb388": "切换到洞察视图",
+  "33bb9bfa": "存储空间自动清理完成：{items}",
+  "342f8d1b": "尝试使用 in: 语法限定范围",
+  "348e0702": "会话管理",
+  "34b9475b": "从浏览器历史中提取页面作为建议；首次使用会申请 history 权限",
+  "34fda9bc": "移至新窗口",
+  "351cb1f8": "静音",
+  "35728b36": "基础字号",
+  "3590afe9": "去重失败",
+  "35a0cdab": "专项",
+  "360163c7": "关闭窗口",
+  "3640cc64": "自动休眠标签页",
+  "368016d9": "{n} 分钟前",
+  "3684eb5c": "切换了工作区",
+  "3687681b": "与 Chrome 全局快捷键冲突，可能被全局快捷键拦截",
+  "376cf529": "线条粗细，0.5 / 1 / 1.5 / 2px",
+  "376fc50a": "HSL 值超出范围（H:0-360, S:0-100, L:0-100）",
+  "379c5c71": "分屏布局",
+  "37ae2852": "亿",
+  "37ec0a21": "智能整理",
+  "37f00ec5": "顶栏",
+  "38a42b25": "多显示器识别",
+  "38ce27d8": "下一步",
+  "391b8fa9": "小",
+  "392cfbc8": "随机整数",
+  "39588fd3": "显示全部 {count} 个",
+  "395fa4fb": "合并会话",
+  "39a2cb79": "左侧",
+  "39a6858b": "整理建议",
+  "39bcd85f": "允许抓取网页描述（用于搜索增强）",
+  "3a17b735": "分钟",
+  "3a74e41b": "JSON 格式正确 ✓",
+  "3a7e9e71": "将删除所有归档会话，此操作不可撤销。",
+  "3a8c2a49": "前端工具",
+  "3a92967b": "将 cURL 命令转换为 JavaScript Fetch 代码",
+  "3aac0e33": "删除列",
+  "3ac17a05": "保存当前标签为模板",
+  "3aca2202": "分屏操作失败，请重试",
+  "3ae14696": "摘要",
+  "3aed2c11": "自动",
+  "3aed74b5": "书签实时同步",
+  "3b422700": "⌘K 全局搜索、快捷键批量关闭、自动释放内存——让浏览器更快更轻",
+  "3b50a2c0": "新窗口",
+  "3b665ed4": "关闭 / 归档后多久内可以撤销；建议 5 秒。",
+  "3b74e82d": "先输入关键词，或从最近搜索和热门话题开始",
+  "3bb47b67": "编辑成功",
+  "3bde446e": "随机",
+  "3beae8b8": "JWT 解码器",
+  "3bebb4ea": "热榜新闻",
+  "3bffe183": "[i18n] 加载失败 ({status}): {url}",
+  "3c02a305": "未收录该 HTTP 状态码",
+  "3c03e104": "选择热词从哪里来；本地来源完全离线，不产生任何网络请求",
+  "3c568e7c": "自动快照",
+  "3c71aa6f": "上一个标签",
+  "3c7c7def": "JSON 格式化",
+  "3c90d36e": "匹配 {total} 处（{unique} 种）",
+  "3ca04d64": "打开历史面板",
+  "3d00e4cd": "已清除过期指标数据",
+  "3d078fbc": "科技",
+  "3d0a2df9": "参数",
+  "3d86509a": "卡片圆角",
+  "3dcc0a17": "全部合并",
+  "3e3b7854": "Undo 撤销窗口",
+  "3e3fec84": "对 JS/JSON/Regex/Shell 等场景的字符串进行转义或反转义",
+  "3e4a51d3": "仅在卡片大小选择自定义时生效（80–280px）",
+  "3e654d80": "重命名会话",
+  "3e6932be": "按名称排列",
+  "3e9409cc": "已休眠标签页，内存已释放",
+  "3eab3cbd": "还没有任何历史记录",
+  "3ef13518": "准备恢复 {count} 个标签页",
+  "3fa51682": "高保真归档",
+  "3fab9665": "Q2 季度预算表",
+  "3fdbb89d": "，✅ 英文翻译完整",
+  "3ff3c3e2": "开发",
+  "407f3df2": "批量导入",
+  "411955a0": "开源地址",
+  "4181f7fe": "刚刚",
+  "41f446fd": "URL 编解码",
+  "426cc151": "常用站点",
+  "42920dd7": "添加常用站点",
+  "42a6f548": "确认清空回收站",
+  "430eb2cb": "皮肤风格",
+  "4363c17e": "点击",
+  "4370eb07": "尝试切换到其它分类查看",
+  "43d250a1": "拼音搜索",
+  "43e534ac": "宽松",
+  "4403fca0": "清除",
+  "4404a8da": "时间线",
+  "440a4f18": "支持文件夹管理",
+  "440b82c0": "涟漪",
+  "443f46c7": "多选",
+  "444bf6a1": "最早创建",
+  "4476a5d0": "恢复默认配置失败，请重试",
+  "44e8f7b0": "全不勾选",
+  "4534327e": "数据重建中",
+  "455b768e": "进制",
+  "45a0b174": "进制转换失败：{msg}",
+  "45a672a2": "时间轴分组粒度",
+  "45a963ec": "内存压力阈值（%）",
+  "45abbe26": "搜索书签…",
+  "45ffc98b": "更换视频文件",
+  "467d7011": "Cron 表达式解析",
+  "479aa622": "导入源超过 5 MB 限制",
+  "47b6e748": "使用浏览历史建议",
+  "483b0aaa": "已解除分组",
+  "490c31d3": "已将 {count} 个标签合并到当前窗口",
+  "4915970c": "全部 {count} 个标签页",
+  "49923a80": "最常使用的 {count} 个标签页",
+  "49e63599": "保存当前为工作区模板",
+  "4a085478": "已跳过",
+  "4a274c72": "把选中的标签页拆成独立窗口并选择布局",
+  "4a41e05f": "在输入为空或本地结果不足时附加热词，可选择来源",
+  "4a63edba": "扩展名",
+  "4ae5c4b1": "已删除 {count} 个会话",
+  "4ae84293": "关闭了",
+  "4aeff83b": "显示添加按钮",
+  "4af215d9": "热点",
+  "4af36ec4": "数据迁移",
+  "4b0b781a": "关闭后将不再记录新的「最近关闭」与操作时间线，已有数据保留可随时清空。",
+  "4b74a554": "未发现 exp 过期时间字段",
+  "4b7d6310": "链接已复制",
+  "4bae6e68": "三、风险与依赖",
+  "4bc306ca": "最近关闭标签列表为空，历史对账失效",
+  "4c00e9df": "关闭标签页",
+  "4c02b1ab": "重命名快照",
+  "4c3a5050": "搜索标签页...",
+  "4c47aa0c": "所有打开的标签页都会在这里按域名自动分组展示，{brand} 帮你一屏掌握全局",
+  "4c65b7cd": "自动化",
+  "4cb9be5e": "配置预设",
+  "4cbe375c": "暂无预设",
+  "4cd514f9": "问题反馈",
+  "4ce78f9f": "统计文本的字数、字符数、字节数、行数等",
+  "4cf29961": "显示拖拽占位区",
+  "4d0b8632": "显示精确时间",
+  "4d19da58": "搜索工具…",
+  "4d775d4c": "显示",
+  "4d8dd914": "频率视图",
+  "4d9b70e1": "效率提升",
+  "4db640fd": "动效与无障碍",
+  "4dbef247": "文章榜",
+  "4dfe7036": "生成",
+  "4e2b3149": "{hours} 小时",
+  "4e2d0be0": "Base64 文本编码与解码",
+  "4e4a274a": "auto→md 阈值",
+  "4e8e2a80": "品牌标题",
+  "4eceb13e": "正在加载历史建议...",
+  "4f13912c": "解码 JWT Token 的 Header 和 Payload 内容",
+  "4fa8c1a3": "工作区",
+  "4fd12800": "右键点击标签页可以快速归档、固定或添加书签。",
+  "4ff1e74e": "日期",
+  "50239f4f": "已撤销",
+  "502d8075": "哔哩哔哩",
+  "507ef3fc": "数据格式不兼容",
+  "5094d440": "播放速率",
+  "5154ae17": "复制失败",
+  "51d4e3b5": "新增列失败，请重试",
+  "51df1122": "分享失败，请重试",
+  "51eb0ba6": "你有 {count} 个标签页在归档中，建议固定常用会话到工作区",
+  "5255c189": "视图栏排序",
+  "52e6abbe": "已复制",
+  "535ba13f": "切换标签页主视图的具体呈现方式",
+  "53a1ca49": "统一搜索（历史）",
+  "53c33f75": "点击组头折叠/展开分组内容",
+  "53ce0d28": "分组排序方式",
+  "53d20654": "全部刷新",
+  "53f33f49": "MIME 类型查询",
+  "53f6f74b": "已选 {count} 个标签页",
+  "53f76e0f": "确认删除文件夹「{title}」及其内容？",
+  "547be52f": "工作区模板",
+  "547c664e": "切换到时间线视图",
+  "549e5a7e": "切换到会话视图",
+  "54ea89b4": "接口",
+  "55405ea6": "导出",
+  "5591473e": "自动化规则",
+  "55a3c77a": "JSON 转 TypeScript 失败：{msg}",
+  "55a8e98d": "字节",
+  "55a9b0bd": "已休眠 {domain} 的 {count} 个标签页",
+  "55dd16a5": "一键归档",
+  "55fcceef": "布局密度",
+  "560e8629": "已重命名",
+  "564a671d": "OneTab 组 {index}",
+  "564dc1e5": "开启后记录每个标签页的聚焦时长，在 TabItem 的悬停提示中展示今日使用时长。",
+  "56652ae5": "转换失败：{msg}",
+  "56e47cfc": "解析失败：{msg}",
+  "56faed2d": "将关闭 {count}",
+  "57001f4c": "数据不会上传到任何服务器",
+  "5700d237": "切换到频率视图",
+  "571a4b9d": "热点榜",
+  "57603fcb": "关闭标签",
+  "577e913e": "自动快照 · {dateStr}",
+  "578972b9": "每 {step} {unit}",
+  "57ce4b7a": "文本差异对比",
+  "57ed1190": "不使用",
+  "585acde8": "当前窗口",
+  "586c08e0": "控制卡片之间的水平与垂直间距（4–24px），默认 12px",
+  "5875b0f0": "不支持",
+  "58a434bc": "新分组",
+  "58af7940": "SQL 格式化",
+  "58c1691b": "搜索标签页（标题/网址/域名）…",
+  "58f9cccb": "加入现有分组",
+  "592acccf": "已加入书签",
+  "59b67d55": "已恢复 {count} 个会话",
+  "59cf15fe": "模板",
+  "59ed665b": "相关度：按匹配程度排序；最近访问：按标签最后活跃时间排序",
+  "5a196fb7": "归档保存失败",
+  "5a2d34b2": "视频不能超过 50MB",
+  "5a4923a7": "热门关键词",
+  "5a8279e8": "保存和恢复会话快照",
+  "5a9b38a7": "减弱动效",
+  "5aefca55": "布局",
+  "5b554bb3": "欢迎教程已重置",
+  "5b7998c9": "存储空间",
+  "5bb6b885": "另存为归档会话",
+  "5bfedcff": "随机数",
+  "5c1e893a": "检查拼写是否正确",
+  "5c20a495": "3 天",
+  "5c7cb596": "自动快照定时保存您的标签状态",
+  "5cc23262": "已删除",
+  "5d148ed2": "访问匹配 {pattern} 的页面时",
+  "5d216a79": "最大化",
+  "5d3ea40a": "2.1 启动数据分析模块开发",
+  "5d689567": "始终启用",
+  "5d6952ff": "启用历史记录",
+  "5d9a5ded": "确认关闭分组",
+  "5db0dcce": "，⚠️ 英文缺失 {missingEn} 条",
+  "5debbdd3": "本地无结果时优先网页搜索",
+  "5df9b177": "统计洞察与数据可视化",
+  "5e68f591": "窗口",
+  "5ed34381": "当前没有可归档的标签页",
+  "5ef819c5": "归档后标签页会被保存并关闭，随时可在左侧边栏的「归档」中恢复。",
+  "5f0e1bb0": "点击归档按钮可保存当前所有标签",
+  "5f30be94": "二、下周计划",
+  "5f634988": "复制标签",
+  "5fa6e727": "共 {n} 条记录",
+  "5fdfbade": "差异",
+  "6017c16e": "正常使用一段时间后，这里会出现可恢复的最近关闭与操作流水",
+  "60b0d871": "Unix 时间戳与日期时间字符串互相转换",
+  "60b69eb8": "也可以选择归档这些标签页，以便稍后恢复",
+  "60e109ba": "内存使用率已达 {pct}%，建议关闭或休眠部分标签页以释放内存。",
+  "60eec86d": "运维",
+  "60f314b8": "内容区最大宽度",
+  "6124ce76": "在新标签页打开 Chrome 浏览历史页面",
+  "6142be34": "标签页移动失败",
+  "6168fb08": "二进制",
+  "618135e5": "关闭所选",
+  "618494ab": "{label}：{count} 条，{hosts} 个站点",
+  "61e1c68b": "在此添加",
+  "620d5a11": "每{unit}",
+  "625fb26b": "取消",
+  "631cd220": "确认删除",
+  "632b2382": "1.2 修复 3 个 P1 级线上问题，优化查询性能提升 40%",
+  "634238de": "打开设置",
+  "636a135b": "保存当前配置为预设，一键切换不同的使用场景",
+  "638461cc": "部分平台仅支持综合分类",
+  "63d8e35a": "忽略本次",
+  "6450d843": "数据分析",
+  "645379a4": "设置导入失败",
+  "645dbc55": "预览",
+  "6484987f": "输入 HEX/RGB/HSL 值，实时预览颜色并在格式间互转",
+  "64bf10f7": "数据源可能正在维护",
+  "64ff10f3": "隐藏后可通过设置页添加常用站点",
+  "6533a6ed": "已将 {count} 条过期历史记录清除",
+  "658760b8": "JSON 路径查询",
+  "659f345c": "站点数 ≤ 此值时使用 md 卡片尺寸（默认 14），超过则使用 sm",
+  "65e2f186": "你日均打开 {avg} 个标签页，定时归档可以自动清理不活跃标签",
+  "6606687e": "合并到当前窗口",
+  "6612548a": "压缩",
+  "66719c6b": "品牌主色",
+  "66936c8f": "始终减弱",
+  "66d4a30e": "容量与过期",
+  "66eeacd9": "全选",
+  "6709f454": "随机生成",
+  "670b9d5e": "分屏显示",
+  "671ac1a1": "立即清空",
+  "679f49d5": "请输入 HTTP 状态码数字",
+  "67aad21f": "启用内存治理",
+  "67d63d76": "核心功能不可用，标签列表无法加载",
+  "68008ad7": "加载标签页中...",
+  "68051bf4": "数据库",
+  "6810c55f": "控制卡片区域的最大宽度；设为 0 表示不限制",
+  "681c0f39": "全局搜索",
+  "683dd616": "根据文件扩展名查询 MIME 类型，或反向查询",
+  "685a6eba": "内存压力（{pct}%）：已自动休眠 {count} 个标签页。",
+  "694fc5ef": "刷新",
+  "6968c5a5": "已添加自定义搜索引擎",
+  "69983b85": "未命名分组",
+  "69c142c5": "信息响应",
+  "69ce2c02": "编辑书签",
+  "6a17cc77": "12 小时",
+  "6a58c882": "看板",
+  "6adc305e": "JSON 格式无效",
+  "6ae6216f": "预设已删除",
+  "6b36c6f7": "颜色",
+  "6b3d972d": "JSON 解析失败：{msg}",
+  "6b5557ca": "已将 {count} 个标签移到新窗口",
+  "6b69d936": "默认搜索引擎",
+  "6b8ae43c": "快捷键已保存",
+  "6b9eaaff": "1.1 完成用户认证模块重构，测试覆盖率达到 92%",
+  "6ba943a4": "导入失败，请检查文件格式",
+  "6be27193": "退出多选",
+  "6bf48c97": "未分组",
+  "6c00e761": "文本统计",
+  "6c805ed5": "标签组",
+  "6cab4ee0": "恢复整个窗口（{count} 个标签）",
+  "6cbd7185": "切换到标签组视图",
+  "6d057de4": "HEX 颜色值应为 3/4/6/8 位",
+  "6d65dcad": "单个添加",
+  "6d662378": "打开 {name}",
+  "6d698128": "{hostname} · {count} 个标签",
+  "6d8df7d5": "用户增长",
+  "6dd1b030": "打开系统设置",
+  "6e10194d": "取消静音",
+  "6e111c8b": "网格卡片展开方式",
+  "6e2014d1": "启用的搜索引擎",
+  "6e5de8db": "闲置超过 {days} 天的标签页",
+  "6e7395f8": "工作台总览",
+  "6e80fe5e": "新增列",
+  "6e8a1d46": "导入归档数据",
+  "6e95514f": "新会话名",
+  "6fc4da7c": "Apple 风格浅色主题，优雅简洁",
+  "6ffa3379": "毫秒：{ms}",
+  "70005e94": "搜索 URL",
+  "7009fe68": "已将 {count} 条搜索历史清除",
+  "70a008e5": "存储数据 ({count} 项 )",
+  "713da6ca": "模板 {date}",
+  "7167bce7": "粘贴 URL 列表，每行一个...",
+  "71bbc726": "跟随系统",
+  "71de8af8": "服务端错误",
+  "7232da88": "显示具体时间",
+  "72891ad4": "归档/快照",
+  "72d05c20": "闲置",
+  "72ebfe28": "定时",
+  "72fa7c88": "分析",
+  "73398de6": "危险区",
+  "736eaaae": "添加标签",
+  "73896f08": "关闭归档面板",
+  "738a41f9": "项目名称",
+  "738bdff0": "时间戳转换",
+  "73bbeb39": "设计团队",
+  "73cfce30": "搜索窗口…",
+  "73ee1689": "从剪贴板导入 URL",
+  "7415b73b": "核心能力",
+  "7468f3e5": "恢复默认",
+  "749b98fd": "关闭标签页后会自动加入回收站",
+  "74ce502c": "今天不再活跃",
+  "757f1ab3": "前往设置",
+  "75b16081": "请求",
+  "75dae44b": "归档当前窗口",
+  "75dbbf5f": "书签添加失败",
+  "76159d0d": "取消选择",
+  "762b385d": "[i18n] 加载异常，使用兜底策略 :",
+  "769d88e4": "完成",
+  "76b59df3": "文件夹已创建",
+  "76c0b927": "搜索历史…",
+  "76c84326": "找到 {count} / 共 {total} 个会话",
+  "771d897d": "状态码",
+  "77308aa6": "恢复成功 — 可从常用站点快速访问",
+  "7752b0e3": "添加任意搜索引擎；URL 可使用 {query} 作为关键词占位，不填会自动追加 q={query}",
+  "777b4bfb": "一键去重：保留最近访问的标签页，关闭重复项",
+  "7792bbbb": "在 CSV 和 JSON 格式之间互相转换",
+  "781486b3": "确定要清空全部历史记录吗？此操作不可撤销。",
+  "781e4b3f": "少数派",
+  "782211de": "分组恢复失败 {n} 个",
+  "78c2dcbe": "1 天",
+  "7918b2db": "打开外观设置",
+  "795b5a12": "洞察数据加载失败",
+  "79d3abe9": "复制",
+  "79e61654": "配置已恢复默认，页面即将刷新",
+  "7a1c6154": "预设已重命名",
+  "7a49777a": "最近没有关闭过任何标签页",
+  "7a6d2774": "搜狐",
+  "7aadba87": "输入网址，如 github.com",
+  "7b1122eb": "输入应以 curl 开头",
+  "7b121249": "关闭分组失败，请重试",
+  "7b5770db": "字数",
+  "7b9841aa": "开启后需授予 <all_urls> 权限；仅读取 meta 描述，不发送任何额外网络请求。",
+  "7bf373c4": "把你最常去的站点放在这里",
+  "7bf56df6": "累计归档",
+  "7c084da2": "已关闭接管，新标签页恢复默认",
+  "7c254ebf": "恢复默认设置",
+  "7cbc7b2e": "正则表达式测试",
+  "7cbcbb55": "关闭了一个窗口（{count} 个标签）",
+  "7cef725b": "时间轴",
+  "7cfa34ae": "本地文件",
+  "7d06dff2": "URL Query {op} 失败：{msg}",
+  "7d3bc7d3": "卡片密度",
+  "7d6bfe3c": "{count} 个 Header",
+  "7d727ee4": "识别到 {count} 个有效 URL",
+  "7da36525": "历史记录功能完全失效，无法读取浏览历史",
+  "7dd73a57": "保存当前窗口快照",
+  "7ddbe15c": "网络",
+  "7dffe6ea": "按项目、场景创建灵活工作区，一键切换和恢复所需标签组合",
+  "7e153799": "子项显示域名图标",
+  "7e172d15": "快照已删除",
+  "7e238d57": "切换到回收站视图",
+  "7e2d6a7d": "无法读取显示器工作区，窗口布局将回退到浏览器窗口尺寸",
+  "7e935fbb": "[i18n] 语言 {locale} 加载失败 :",
+  "7eb3b629": "极简",
+  "7ebbfe2a": "勾选标签",
+  "7f0425a8": "未命名",
+  "7f1d8bfb": "已合并 {merged} 个重复标签，休眠 {discarded} 个闲置标签",
+  "7f6071b7": "实时搜索所有标签页、书签和浏览历史，支持多引擎切换",
+  "7f75c8de": "总标签",
+  "7f7c624a": "批量操作",
+  "7f8f476f": "转义",
+  "7fa25155": "{count} 个闲置标签",
+  "7fb62b30": "批量删除",
+  "800dfdd9": "今天",
+  "8019f086": "批量选择",
+  "8035fa73": "输入分组名称",
+  "8041b90d": "恢复策略",
+  "806b6df8": "标签数",
+  "808e5669": "实体",
+  "808fc75f": "按站点汇总的使用变化",
+  "80d0a3b3": "百分号编码（Percent-Encoding）的编码与解码",
+  "80e1f39c": "CSV 解析失败：{msg}",
+  "80eae1fa": "搜索标签页、历史记录或直接全网搜索...",
+  "80fb2db8": "新标签页打开",
+  "810ed5fe": "颜色预览与转换",
+  "812cfab5": "已关闭 {count} 个标签页",
+  "813a3538": "每个域名卡片会显示一条代表身份的纯色条，选一个你喜欢的位置",
+  "814ba77b": "此操作不可撤销：将清除所有归档、书签元数据、设置、历史记录。请确认已导出备份。",
+  "816c4694": "恢复失败，请重试",
+  "817e661b": "当前没有需要关注的优化建议，继续保持好习惯！",
+  "8195020b": "活跃时段分布（24 小时）",
+  "81bdac6e": "已导入 {count} 个归档，并恢复工作台配置",
+  "81d7f5bc": "所有数据均在本地计算，不会上传",
+  "81d9f505": "关于",
+  "829abe5a": "分组",
+  "829fa42a": "已清空历史记录",
+  "8308a9dd": "归档和管理已保存的标签会话",
+  "833cd30d": "在当前皮肤基础上覆盖单项 token；关闭开关即可恢复预设",
+  "8362b47f": "TabGroup 恢复",
+  "83e45fcc": "按名称",
+  "8435ee7f": "正则 /{pattern}/{flags} 未匹配到任何内容",
+  "8452aaab": "确认清空",
+  "847caa2a": "请输入 RESET 以确认",
+  "8558cb14": "归档 = 把当前窗口所有标签页打包成一个「会话」快照，保存后会关闭这些标签页。需要时点击「恢复」即可在当前窗口里重新打开，适合整理浏览环境或临时腾出空间。",
+  "85a4ef12": "最近访问",
+  "85aacf24": "稀土掘金",
+  "85bd5d65": "休眠标签页",
+  "85d22db7": "开始使用",
+  "85d28005": "添加文件夹",
+  "85fd742f": "确定要关闭该窗口及其 {count} 个标签页吗？",
+  "8678aef3": "选择此会话",
+  "867e11fd": "技术基建",
+  "86daf0be": "24 小时（默认）",
+  "874ad617": "快照已保存",
+  "874baa1d": "点击下方按钮授权",
+  "878114f0": "URL 参数解析",
+  "878c3a36": "计算字符串的 MD5/SHA-1/SHA-256/SHA-512 哈希值",
+  "879058ce": "复制链接",
+  "87f2f8de": "未找到匹配的域名",
+  "87fbd4c5": "路径 {path} 不存在",
+  "8852f737": "恢复快照失败",
+  "8855fc0e": "操作时间线最多保留",
+  "88619b6f": "取消当前的多选状态",
+  "888af1f2": "社区",
+  "88b1d5ce": "色彩",
+  "88e7de9f": "综合",
+  "88e9017e": "没有需要预览的重复组。",
+  "892b242f": "分组已创建",
+  "8930e2a7": "居中大号搜索框 + 视图切换",
+  "8949c366": "按浏览器窗口分组管理标签页",
+  "894c9171": "关闭分组",
+  "89976e86": "删除失败，请重试",
+  "899c0c27": "排序：",
+  "89bc1912": "二进制、八进制、十进制、十六进制之间互相转换",
+  "8a4c8a1c": "[i18n] zh-CN.json 加载失败",
+  "8a8b895f": "系统",
+  "8acbdff1": "会话 {dateStr}",
+  "8b1d7576": "HTTP 状态码查询",
+  "8ba7c3a7": "输出",
+  "8bd26af8": "产品经理",
+  "8c84d211": "确认归档 {count} 个标签页？",
+  "8c96b074": "已关闭分组",
+  "8ca5cc44": "重命名窗口",
+  "8cd6bc18": "清空回收站",
+  "8ce881b4": "显示标签组区块",
+  "8d17ace5": "使用频率",
+  "8d1de045": "按小时",
+  "8d621ae9": "选中当前视图所有标签页",
+  "8d9a071e": "导入",
+  "8e6dd4df": "卡片宽度",
+  "8eb51eed": "解析查询参数为 Key-Value，或反向构建查询字符串",
+  "8eea928f": "授权书签权限",
+  "8f172f6f": "搜索归档会话...",
+  "8f5458c0": "全网热榜",
+  "8f7e1fe1": "按域名分组显示",
+  "8fce2fe9": "输入关键词搜索所有标签页",
+  "8fd311ce": "归档会话较多",
+  "8fd821d6": "预设词表（静态）",
+  "9020f85d": "合并失败，请重试",
+  "909f12d8": "切换到历史视图",
+  "912302cb": "浏览器",
+  "913f26f3": "卡片大小",
+  "915593a1": "操作失败，请重试",
+  "91ba2fde": "JWT 至少应包含 header 和 payload 两段",
+  "91dbf2aa": "确认？",
+  "9203be0a": "查看最近关闭的标签页和完整操作时间线",
+  "923a9a44": "30 天",
+  "92636e8c": "跳过",
+  "929d3c9b": "拖入标签创建分组",
+  "92f2e0b6": "窗口已关闭",
+  "930064cc": "当前名称",
+  "9302f925": "未找到匹配的书签",
+  "9304e8f4": "编辑失败",
+  "9305fd36": "批量关闭失败",
+  "935ab853": "随机生成器",
+  "936f731d": "不记录的域名",
+  "93dee976": "多选模式",
+  "93e40c84": "命令面板",
+  "941a2660": "创建了归档",
+  "942fcade": "尝试不同的关键词",
+  "9444e292": "导入成功，已添加 {n} 个站点",
+  "944cfea8": "选择视频文件",
+  "947dd672": "开启后显示内存治理、时间轴设置、快捷键、数据配置等高级选项。默认关闭以简化设置面板。",
+  "94cf1c68": "点击快捷键区域即可录制新按键组合；点击重置按钮恢复默认",
+  "9530e8e4": "快捷操作",
+  "95390b1c": "跳过引导",
+  "9579ce89": "安全客",
+  "95990ad1": "每日打开次数",
+  "9599f701": "选择网格视图卡片的尺寸，自动模式会根据标签页数量自适应",
+  "95a21edc": "两次治理动作之间的最小间隔，防止内存抖动时频繁触发，默认 10 分钟。",
+  "95b351c8": "编辑",
+  "9612cac1": "极简干净的设计，最大化空间利用",
+  "9683b8e4": "按时间轴查看标签页活动",
+  "96b15b89": "边框粗细",
+  "96d2b75f": "永久删除",
+  "96db9b67": "标签数量",
+  "96eb4d49": "彩纸",
+  "96f399f3": "标签最多",
+  "9756779f": "auto→lg 阈值",
+  "977ba665": "开启后，若没有匹配的已打开标签，搜索框会高亮网页搜索动作",
+  "9795c0dd": "恢复到新窗口",
+  "97c10ac7": "导航到上一个标签",
+  "97d05326": "随机生成失败：{msg}",
+  "97e5d17f": "还有 {n} 个",
+  "983ad926": "最近关闭标签",
+  "98932bbe": "已禁用；Dashboard / TidySuggestionBar 不会提示重复标签。",
+  "98a315c0": "授权",
+  "98a47fb3": "品牌副标题",
+  "98efe645": "确定关闭全部标签页？",
+  "98fc27fb": "Nord 暗色主题，护眼柔和的极地配色",
+  "9970ad07": "主题",
+  "99786b13": "无效的日期时间，请输入如 2024-01-01 或 ISO 格式",
+  "9981c30b": "最近创建",
+  "99a267c9": "毛玻璃",
+  "99a77990": "确认删除此预设？",
+  "99db7dcb": "关于 Q2 季度 OKR 对齐会议的邀请",
+  "99f94907": "还原普通窗口",
+  "9a02cdac": "十进制",
+  "9a37f36d": "进制转换",
+  "9a462cdf": "在搜索框中回车时使用的搜索引擎",
+  "9a834e9a": "会话",
+  "9abfe4a0": "前端",
+  "9acf9c6f": "娱乐",
+  "9b00d1ea": "已下载会话 JSON",
+  "9b040730": "搜索标签页或上网（回车）",
+  "9b3c42fb": "没有匹配的命令",
+  "9b4f8965": "使用数字键 1-7 快速切换不同视图",
+  "9b8b4fd6": "{weeks} 周",
+  "9c07532d": "字符",
+  "9c20de8b": "Chrome 本地存储使用率超过 70%，建议清理归档中的过期会话",
+  "9c3bc20a": "[i18n] 请求异常 : {url}",
+  "9c6e33d3": "输入标签名...",
+  "9c75a131": "[i18n] 字典就绪：zh-CN {zhCount} 条，en {enCount} 条",
+  "9c9aabab": "蓝色",
+  "9c9df13c": "所有工具均在本地处理，输入内容不会上传到任何服务器",
+  "9cdf9732": "常用站点（全部已存在）",
+  "9d032066": "万",
+  "9d0ca7af": "设计稿已更新，请查阅 Figma",
+  "9d1ba183": "本地视频",
+  "9d30571f": "按天更简洁；按小时把今天和昨天按整点拆成小桶，一眼看清每个小时的访问节奏",
+  "9da6370a": "HTTP 基本认证信息的编码与解码",
+  "9db32b23": "YAML 解析失败：{msg}",
+  "9dfe943d": "JSON 转 TypeScript",
+  "9e04664f": "在页面内聚焦搜索框",
+  "9e105f4d": "没有打开的标签页",
+  "9e5405a7": "页面内快捷键",
+  "9e68c355": "已恢复默认快捷键",
+  "9e71cf60": "星期",
+  "9e8b9a52": "已选 {count}",
+  "9ea38c4f": "主区 + 侧栏",
+  "9f06dd67": "编辑备注",
+  "9f3422a8": "未知模式",
+  "9f64b915": "在新的浏览器窗口中打开所有标签页",
+  "9fc0b255": "删除列失败",
+  "9fde2a66": "域名分组",
+  "9fde7fde": "按 Cmd+K 可快速搜索标签",
+  "9ffc5711": "格式化或压缩 SQL 语句，提高可读性",
+  "a0403cf3": "清空最近搜索",
+  "a055e295": "已创建分组",
+  "a05e48b4": "已导出归档 + 工作台配置",
+  "a06aa205": "下一个标签",
+  "a0a92500": "切换到窗口视图",
+  "a0d3e5cf": "冷却时间（分钟）",
+  "a12a92ea": "闲置标签",
+  "a151a729": "互转",
+  "a165e1ab": "每次打开新标签页，一键直达你的工作入口",
+  "a1d940b0": "编辑规则",
+  "a1e5c727": "置顶了",
+  "a1fa9885": "移动到窗口",
+  "a2105dff": "休眠失败，请重试",
+  "a277448e": "合并失败，部分标签可能仍然存在",
+  "a2946a1a": "排序方式",
+  "a2b5d9e1": "取消固定",
+  "a2e2fad5": "正在加载热榜…",
+  "a2f09eb7": "[i18n] 翻译文件加载失败，使用内嵌字典",
+  "a3176107": "控件高度",
+  "a3353218": "隐私与安全",
+  "a356f481": "多维视图",
+  "a37c8f9d": "多工作区管理",
+  "a3f4a5b0": "百度",
+  "a3fce192": "已应用预设「{name}」",
+  "a416c55a": "书签管理",
+  "a4275d34": "文件夹创建失败",
+  "a43e052e": "移除卡片失败",
+  "a45e7ef8": "保存全部标签页",
+  "a47b2cb1": "展开全部",
+  "a4ac7e75": "升序",
+  "a4d9bc5f": "{count} 个标签页",
+  "a4e87517": "看板视图",
+  "a4f38cd3": "精细定制（极客模式）",
+  "a4f7e77d": "Re: 新项目技术方案评审",
+  "a5305986": "选择常用站点卡片的尺寸，自动模式会随屏幕宽度自适应",
+  "a5802f01": "确认重命名",
+  "a5831f60": "URL 黑名单",
+  "a5840a5d": "展开文案",
+  "a5955bbf": "半透明毛玻璃效果，现代质感",
+  "a5a04644": "智能归档",
+  "a5a5d773": "覆盖皮肤预设的主色；用于按钮、链接、选中态",
+  "a5c89972": "时间戳转换失败：{msg}",
+  "a5e9b032": "开始恢复",
+  "a6021c2a": "移到新窗口",
+  "a6b2eae5": "Basic Auth {op} 失败：{msg}",
+  "a6fbb829": "站点访问排行",
+  "a73e1956": "尝试使用 site: 语法限定域名",
+  "a74e5fe1": "时间轴视图",
+  "a7667448": "选择搜索框下方快捷切换的搜索引擎",
+  "a794c778": "分组可折叠",
+  "a7bab80c": "开启后每次新建标签页都显示 {brand} 工作台；关闭后使用浏览器默认页。",
+  "a7bac223": "中文",
+  "a8301ae8": "撤销失败",
+  "a87154f4": "已恢复 {count} 个标签页",
+  "a889286a": "创建失败",
+  "a8b0c204": "全部",
+  "a98473f2": "文件夹名称",
+  "a9e74f26": "已恢复出厂设置，页面即将刷新",
+  "aa05fd09": "通用",
+  "aa357cb9": "解析",
+  "aa68dfe8": "最近关闭",
+  "ab18e30c": "大",
+  "ab2946cd": "正则语法错误：{msg}",
+  "abc51d35": "哈希计算失败：{msg}",
+  "ac026576": "视图标签位置",
+  "ac1372e8": "窗口色条位置",
+  "acb276c8": "从未分组创建分组",
+  "acd5cb84": "失败",
+  "acd9b2e4": "关闭选中标签",
+  "ace47663": "按域名",
+  "acf0664a": "删除失败",
+  "acf254fc": "正在播放",
+  "ad19521b": "居中 80%",
+  "ad373af3": "搜索无结果",
+  "ad6b0c40": "JSON 格式错误",
+  "ad869b04": "解析 User-Agent 字符串，识别浏览器、操作系统和设备",
+  "adf40b87": "数值计算",
+  "adf82335": "首页常用站点快捷入口",
+  "ae336cd0": "收藏",
+  "aead287a": "尚未归档",
+  "aece15e7": "左侧文本",
+  "aed3d474": "已关闭 1 个标签页",
+  "aedf8b69": "可以随时恢复或永久删除",
+  "af5e8133": "文本完全相同",
+  "afcde261": "外观",
+  "b00c2ec8": "主题皮肤",
+  "b07298f5": "窗口 {id}",
+  "b088138c": "调度",
+  "b08890a6": "设计",
+  "b0b09b55": "昨天 → 今天",
+  "b0bc986a": "休眠所选",
+  "b0d1ab34": "技术主管",
+  "b0d3018e": "热门榜",
+  "b124f282": "项目周报 - 第 17 周",
+  "b15d9127": "关闭",
+  "b19d2c20": "键盘导航",
+  "b1e98d23": "站点数 ≤ 此值时使用 lg 卡片尺寸（默认 6）",
+  "b2227481": "活跃度",
+  "b27277be": "未选择任何标签页，点击标签开始多选",
+  "b27608df": "标签页使用时长追踪",
+  "b29f1dec": "操作时间线",
+  "b2ac4d68": "白名单内的域名不会被自动休眠或归档。固定标签和正在播放媒体的标签始终豁免。",
+  "b2c712c7": "绿色",
+  "b2f27e38": "Basic Auth 编解码",
+  "b339aa87": "表格",
+  "b3a003c2": "星光",
+  "b3b3e974": "今日头条",
+  "b3b91f77": "网址",
+  "b3bbd808": "标签移动失败",
+  "b41b3f89": "URL {op} 失败：{msg}",
+  "b42e4297": "本月新增",
+  "b477c05a": "右侧文本",
+  "b48b3f8a": "解码",
+  "b494e35a": "更改颜色",
+  "b4b5e7a2": "已删除 {count} 条书签",
+  "b4b9ecac": "关闭 {count} 个标签页",
+  "b4ed3259": "关闭失败，请重试",
+  "b4ee7d51": "使用视频作为桌面背景。视频会占用额外内存与电量，按需开启。",
+  "b4f64fd1": "正在恢复…",
+  "b53a46bc": "随机 HEX",
+  "b5694f21": "按时间",
+  "b5738da7": "无匹配",
+  "b580656c": "将重置全部设置（主题/皮肤/快捷键…）为默认值；所有归档、书签、历史记录数据继续保留。",
+  "b58c7549": "添加",
+  "b5971503": "必须是数组格式",
+  "b59b8f25": "{days} 天",
+  "b5ca7308": "无效的{radix} 数",
+  "b5cbdd01": "正则表达式为空",
+  "b5d03caa": "八进制",
+  "b5d165d7": "十六进制",
+  "b5db5cef": "总开关",
+  "b5dbd2c8": "哈希",
+  "b6393e77": "将原始 HTTP 请求头文本解析为结构化 Key-Value 对",
+  "b644ba7d": "打开命令面板，搜索并执行所有功能",
+  "b6691385": "自动：按 360px 卡片宽度自适应；或手动锁定列数",
+  "b69fd2af": "URL 匹配模式（可选，留空匹配所有）",
+  "b703167b": "Base64 编解码",
+  "b70a5564": "频率",
+  "b70b53b8": "格式化",
+  "b70e8e43": "已恢复",
+  "b714dfb2": "权限状态",
+  "b7158a42": "认证",
+  "b73106fa": "你的标签页，找到归属。",
+  "b7579706": "校验",
+  "b75b1056": "本地时间：{local}",
+  "b75c79f9": "忽略 #hash 和 utm_* / fbclid / gclid 跟踪参数；article?utm_campaign=a 与 article?utm_campaign=b 会被判为重复。",
+  "b76ba0c9": "查看归档",
+  "b81075b7": "健康度 {score} 分",
+  "b83f0601": "解析 Cron 表达式，查看调度执行计划和下次执行时间",
+  "b840209b": "常用站点 (+{count})",
+  "b84081e1": "{count} 个标签 · {groups} 个分组",
+  "b8526801": "→ 时间戳",
+  "b8cad5b6": "JSON 应为对象数组",
+  "b9169f24": "已选 {count} 个标签（{domains} 个域名 / {windows} 个窗口）",
+  "b9613078": "功能开关",
+  "b9880cd2": "取消选择/关闭弹窗",
+  "b9d0f24c": "存储占用",
+  "ba355275": "{count} 组重复标签（{tabs} 个可合并）",
+  "ba8792d0": "已合并为 1 个会话，共 {count} 个标签",
+  "ba9dc6d2": "历史记录",
+  "bac7806d": "Base64 {op} 失败：{msg}",
+  "bad4f44d": "存储空间告急",
+  "badae080": "选择一套视觉风格；不同皮肤改变圆角、阴影、色彩、毛玻璃等整体观感",
+  "bb0c11fc": "最近访问的标签排在前面",
+  "bb323514": "按住 Ctrl/Cmd 点击标签进行多选；Shift 点击可选中范围",
+  "bb43d72e": "显示历史记录",
+  "bbab4687": "RGB 值应在 0-255 之间",
+  "bbf545d6": "看板视图管理任务和工作流",
+  "bc242878": "更早",
+  "bc45e4d7": "导航到下一个标签",
+  "bc5d21c5": "历史分析",
+  "bc6c8503": "时间工具",
+  "bce58a1e": "无法读取剪贴板，请手动粘贴",
+  "bcec032e": "青色",
+  "bd81577a": "合并",
+  "bd9fcf46": "撤销",
+  "bdaad085": "公共热榜（来自互联网）",
+  "bdb0e7d6": "导入全部数据",
+  "bdcf249f": "Cron 字段解析失败",
+  "be47bd27": "请求头",
+  "be5fbbe3": "保存",
+  "be89c3a6": "历史对账",
+  "bee912d7": "查询",
+  "bf17e147": "贴左半屏",
+  "bf18e6a7": "宽松（默认）",
+  "bf307d01": "直角",
+  "bf9c167b": "统一搜索",
+  "bfceae5b": "确定删除此模板？",
+  "bfe458ea": "粘贴 JSON 数组，自动去重已存在的站点：",
+  "c00fa769": "切换到看板视图",
+  "c015c660": "开发工具栏",
+  "c05900ed": "{label}：{count} 条",
+  "c059bed7": "近 30 天",
+  "c06592df": "存储空间即将用完，建议清理归档数据",
+  "c0a5278e": "暂无打开的标签页",
+  "c0d5d68f": "忽略",
+  "c1395dbe": "内存压力（{pct}%）：建议将 {count} 个闲置标签页归档以释放内存。",
+  "c1884532": "找到 {count} 个候选项",
+  "c207d3bc": "打开一些网页，然后回到这里查看",
+  "c217a7ee": "视频背景",
+  "c217f285": "网易新闻",
+  "c24d2cf1": "热榜数据源暂时不可用，请稍后重试",
+  "c254ed5a": "{count} 个长期未用标签",
+  "c25d4feb": "已移动 {count} 个标签",
+  "c2821eae": "标签操作",
+  "c287e69e": "授权后可在搜索框中显示浏览历史与最近访问页面",
+  "c30a464f": "导入文件过大，请控制在 {size} 以内",
+  "c31f48f8": "分享",
+  "c3a13549": "HTML 实体编解码",
+  "c3e81797": "搜索框",
+  "c3efca43": "品牌标识 + 归档/主题/设置按钮",
+  "c4735219": "标准 5 字段 Cron：分 时 日 月 周",
+  "c51dd14a": "重定向",
+  "c535a8e9": "拖动卡片中…",
+  "c54adcf6": "服务器维护通知 - 本周六凌晨",
+  "c5703509": "搜索范围",
+  "c5e0fe97": "添加到常用站点",
+  "c60a1929": "开启后支持用拼音首字母或全拼搜索中文标题；对非中文用户可关闭以节省性能",
+  "c69c451c": "域名分组列数",
+  "c6b2bfc5": "批量导出",
+  "c701ceef": "后端工具",
+  "c70a7144": "已并排打开 {count} 个标签页",
+  "c722df8b": "本地开发工具集（JSON、加密、编码等）",
+  "c72d2e13": "导出全部数据（设置 + 站点 + 归档 + 规则）为 JSON 文件，方便跨设备迁移或备份",
+  "c74549d6": "解除分组",
+  "c79c4eeb": "已恢复默认设置",
+  "c7bc0c46": "导出全部数据",
+  "c7c8fab1": "{count} 行数据",
+  "c7db6d4f": "恢复",
+  "c7f0d5d1": "导出数据",
+  "c827d8db": "历史",
+  "c860dec2": "接管新标签页（推荐）",
+  "c867e3d7": "严格",
+  "c8a09eb8": "搜索引擎切换",
+  "c8cbb7ac": "停留时长",
+  "c8ce4b36": "重命名",
+  "c8fe0492": "搜索结果排序",
+  "c949729c": "顶部",
+  "c982c301": "查看归档列表",
+  "c9886f44": "搜索窗口...",
+  "c9921d10": "已归档 {count} 个标签到「{name}」",
+  "c9bc41c9": "需要书签权限",
+  "c9e0e3b0": "当前分类暂无可用平台",
+  "c9e1e4a8": "已休眠分组",
+  "ca4889ae": "在 camel、snake、kebab、Pascal 等命名风格之间互转",
+  "ca75e15a": "支持整组恢复或选择性恢复，不丢失任何进度",
+  "caa1dbce": "控制卡片/按钮/输入框基础圆角，0 为尖角",
+  "caaca314": "清除所有统计",
+  "cad5b764": "点击动效",
+  "cb0f14b7": "保存在浏览器内部（OPFS），不会上传任何数据。",
+  "cb400d1e": "全部休眠",
+  "cb4dbe89": "全部勾选最旧",
+  "cb62c91d": "格式应为 username:password",
+  "cb787b8a": "每次打开新标签页，所有已打开的网页都会在这里展示。按域名分组、搜索、归档—3 秒内找到任何标签。",
+  "cbc5254a": "JSON 转 CSV 失败：{msg}",
+  "cbd40fd2": "窗口视图",
+  "cbd9eeab": "将清空所有本地统计数据，不可恢复。继续？",
+  "cbe32105": "跳到主内容",
+  "cc05e084": "例外白名单（域名）",
+  "cc64d7f1": "新建分组",
+  "cc6c35a3": "编码",
+  "cc84f637": "拆解",
+  "cc88156c": "在标签列表中使用键盘快速操作",
+  "cc89e56b": "暂无最近标签",
+  "ccd42cf6": "热词来源",
+  "cd3859ea": "打开通用设置",
+  "cd3bd016": "窗口颜色",
+  "cd5afd9c": "第 {n} 项缺少 url",
+  "cd649f76": "时间范围",
+  "cd6f79e7": "面板",
+  "cd8b3675": "本地缓存",
+  "cd8db012": "自适应网格",
+  "ce26955a": "知道了",
+  "ce80c000": "刷新热词",
+  "ce9222b5": "域名色条位置",
+  "cebb226d": "[i18n] 翻译字典加载完成：zh-CN {zhCount} 条，en {enCount} 条",
+  "ced4a158": "支持搜索和批量操作",
+  "cf3ddc49": "勾选/取消勾选标签",
+  "cf8fd427": "共 {count} 组",
+  "cfb85387": "区域显隐",
+  "cfc089f7": "数据处理",
+  "cfd711a4": "无效的时间戳",
+  "d0383b6f": "一切正常",
+  "d05d8e31": "降序",
+  "d0e166b4": "暂无自动化规则，点击「新建规则」创建",
+  "d0ff6e1c": "窗口快照",
+  "d1242da5": "定时清理（闲置检查）",
+  "d12e77c5": "标志",
+  "d1b38b92": "归档会话",
+  "d1d90491": "执行动作",
+  "d1f2042f": "单次最多操作标签数",
+  "d201b913": "手动置顶的标签排在最前面",
+  "d254852a": "切换到开发工具",
+  "d29c0ec7": "显示高级设置",
+  "d2e27f36": "窗口贴边",
+  "d30eede3": "归档保存所选标签页，之后可在归档面板恢复。比关闭更安全，不会丢失页面。",
+  "d38ab6fa": "智能建议",
+  "d3a0b221": "总标签 {today}（昨天 {yesterday}，{sign}{delta}）",
+  "d3a7e052": "窗口别名",
+  "d40eb5f1": "已清除所有本地统计",
+  "d41eea43": "权限诊断",
+  "d44bc5d8": "无痕标签页不能拖入普通窗口",
+  "d46d6d8b": "已导入 {count} 个标签",
+  "d4c84775": "将隐私 / 历史相关的所有设置恢复为默认值？",
+  "d4eae289": "拖动列",
+  "d4fefd4e": "添加备注",
+  "d506fb5b": "窗口卡片的身份色条位置，与域名分组卡片保持一致",
+  "d54dffda": "新建工作区模板",
+  "d59c50b6": "标签已移出分组",
+  "d5c8a495": "书签标题",
+  "d60257b8": "Hero 区左侧树形图标",
+  "d6049cfc": "关闭的标签页会暂时存放在这里",
+  "d6522285": "闲置天数阈值",
+  "d678a700": "已关闭 {count} 个重复标签页",
+  "d67c5ac8": "命中名单的域名（含子域）不会出现在任何历史记录中。例如：mail.google.com、localhost。",
+  "d6b3899a": "不同",
+  "d6bb7843": "你经常在 {count} 个不同站点间切换，工作区能帮你一键恢复关联标签",
+  "d6dc083d": "编辑常用站点",
+  "d7098f50": "打开",
+  "d70d0b03": "确定删除此规则？",
+  "d712caeb": "标签工作台",
+  "d7547810": "出错了",
+  "d7570c25": "与 {peers} 冲突",
+  "d7650ece": "比较",
+  "d7656a65": "统计",
+  "d765efc4": "近 7 天",
+  "d7ec2d3f": "名称",
+  "d7f93699": "HTTP 请求头解析",
+  "d82754d0": "3.1 第三方 API 响应延迟需跟进",
+  "d86876d0": "归档失败，请重试",
+  "d88bf08b": "已归档 {count} 个标签页",
+  "d8ad7367": "[i18n] 语言 {locale} 翻译文件加载失败，使用内嵌字典",
+  "d8b1e7a3": "将当前 {count} 个标签页保存为模板，方便日后一键恢复",
+  "d926a79a": "内容运营",
+  "d927ed06": "当前 {value} 条；超出后按时间顺序自动淘汰最早记录。",
+  "d96484e6": "例如：晨会模板",
+  "d97af55c": "已用内存占总内存的比例达到此值时触发治理动作，默认 80%。",
+  "d9ac9228": "创建",
+  "d9bbeb44": "橙色",
+  "d9e44213": "移动所选标签失败，请重试",
+  "da1aea5c": "标签页加载失败，请刷新页面重试",
+  "da3e79a7": "标签视图",
+  "da6760cf": "快讯",
+  "dab3cae5": "拖动列中…",
+  "dadb1500": "域名/时间轴/紧凑等视图标签行",
+  "dadc3693": "清除所有最近的搜索历史记录",
+  "db221be6": "自动分类规则",
+  "dc1c49a2": "已选 {count} 项",
+  "dc512810": "批量分组失败，请重试",
+  "dcb660b6": "已恢复 {count} 个标签",
+  "dcbe5df3": "100% 本地优先 · 零数据上传",
+  "dce5379c": "隐藏",
+  "dce6a364": "重命名成功",
+  "dd51ab50": "导出失败",
+  "ddb86dd3": "黄色",
+  "ddb971d5": "加了标签",
+  "ddcf14d1": "一键整理",
+  "dde02933": "确认清空全部最近搜索？",
+  "ddf7d2a5": "命令",
+  "ddfe8b7a": "标签页布局",
+  "de2a774b": "右侧",
+  "de65c312": "在「数据」Tab 可以一键恢复默认配置 / 重播引导 / 全量重置。",
+  "de71402a": "来自",
+  "de7d42b6": "已归档 {count} 个标签",
+  "de833846": "切换到书签视图",
+  "de852daa": "批量恢复",
+  "def9e98b": "收起",
+  "df09fff7": "名称不能为空",
+  "df61ffdc": "网格间距",
+  "df6b58e9": "已合并 {count} 个重复标签页",
+  "dfd0cd7f": "长度",
+  "e01ffa78": "+{added} 行 -{removed} 行",
+  "e0395fee": "选择域名分组的排序规则；固定标签所在分组始终优先",
+  "e058cc93": "CSS 单位换算",
+  "e082621c": "折叠",
+  "e0a60fe7": "未收录该扩展名",
+  "e0dc473f": "全站日榜",
+  "e0fae8d8": "输入为空",
+  "e1112479": "命名风格转换",
+  "e12756b8": "请输入形如 16px、1rem、1.5em 的值",
+  "e1b05f87": "导出 JSON",
+  "e1dd145b": "仍有 {count} 个标签页休眠失败，请重试",
+  "e1e14bd3": "紫色",
+  "e1e8ef6b": "回收站已清空",
+  "e206412e": "已接管新标签页",
+  "e235ac49": "切回上下布局",
+  "e29fad9e": "自动保存会话快照，支持定时归档、手动归档和跨设备恢复",
+  "e2eb173d": "按大小排列",
+  "e2edde5a": "展开",
+  "e366ccf1": "设置",
+  "e39da848": "约节省 {mb} MB 内存",
+  "e39e4110": "继续使用扩展以生成洞察数据",
+  "e40d845e": "固定标签页",
+  "e45d82ab": "第 {current} / {total} 步",
+  "e47d59b1": "输入",
+  "e494dacb": "跳转失败，标签页可能已关闭",
+  "e4decf94": "新名称",
+  "e4e059c2": "标签页超过设定时间未访问后将被标记为闲置状态",
+  "e5d6c68f": "事件触发（打开/访问页面时）",
+  "e5f71fc3": "搜索",
+  "e6183420": "状态良好",
+  "e621d713": "休眠",
+  "e6d8f15c": "搜索标签组…",
+  "e6f529f1": "格式化、压缩或验证 JSON 文本",
+  "e70b5a29": "未找到匹配的工具",
+  "e7287673": "一键归档当前工作区，稍后从侧边栏恢复，告别数不清的标签页",
+  "e75969b5": "收件箱",
+  "e7731990": "本地处理",
+  "e778d61a": "后端",
+  "e77eac7e": "悬停",
+  "e7affbdd": "导出归档数据",
+  "e8578b52": "已关闭全部标签页",
+  "e863e8f6": "长期未用",
+  "e86ddfa9": "左右分栏",
+  "e8aa0d1a": "已合并为「{name}」（{count} 个标签）",
+  "e8b121d0": "已取消归档",
+  "e8b5191f": "重复标签/闲置标签智能整理建议栏",
+  "e8cb951d": "最近搜索",
+  "e8d56530": "自动快照频率",
+  "e8e3b990": "{n} 分钟",
+  "e8ee4ca4": "导入失败：{count} 个错误",
+  "e8f3c7a5": "输入预设名称…",
+  "e9158769": "请至少选择 2 个会话",
+  "e92bf129": "{chars} 字符 · {bytes} 字节",
+  "e938ee07": "基准字号：{size}px",
+  "e93dc619": "仅通知（默认）",
+  "e9528867": "过期时间：{date}",
+  "e9c66122": "保存为工作区模板",
+  "e9e8054f": "邮件",
+  "ea1bc7a8": "已将 {count} 条过期活动记录清除",
+  "ea20dffc": "转换",
+  "ea625c1b": "跳过 {count} 个非法 URL",
+  "ea704c4c": "新开始访问",
+  "eab7c7a4": "请选择 MP4 或 WebM 视频",
+  "eb18eee2": "隐身窗口与普通窗口的标签不能混合移动或分组",
+  "ebb6e0b7": "cURL 转 Fetch",
+  "ebf7d78e": "点击下方按钮添加第一个书签",
+  "ec16aac5": "按标签原始顺序排列",
+  "ec25deba": "清空失败",
+  "ec3493e0": "书签功能不可用，无法读取或监听书签变更",
+  "ec3e3fad": "打开 {brand}",
+  "ec68191d": "自定义搜索引擎",
+  "ec6bbb2e": "→ 日期",
+  "ec892810": "关闭全部 {count} 个非固定标签页",
+  "ecf6a70b": "超过保留时间的记录将在下次访问时自动清理。",
+  "ecfad919": "已在后台打开",
+  "ed1214b4": "将关闭 {close} 个 / 保留 {keep} 个",
+  "ed3dd0bf": "正则",
+  "ed503445": "重播欢迎教程？下次打开新标签页将重新弹出。",
+  "ed5ff99c": "使用小贴士",
+  "ed8e4e04": "标签组视图",
+  "eda8cb3d": "无痕模式",
+  "eeb69088": "上一步",
+  "eef7519c": "欢迎使用 {brand}",
+  "ef1d1521": "输入标签组名称（可选）",
+  "ef4af56a": "显示名称（可选）",
+  "f0b25ab9": "关闭标签页 {title}",
+  "f0f43712": "无效的 URL 格式",
+  "f10ed468": "新建规则",
+  "f11bbb6c": "JWT 解码失败：{msg}",
+  "f139c5cf": "输入新名称",
+  "f16981e8": "创建分组失败",
+  "f16f1f87": "已关闭 {count} 个标签",
+  "f1d4ff50": "自定义",
+  "f20532d3": "按标题（字母序）排列",
+  "f24e166e": "已将 {count} 条过期回收站记录清除",
+  "f2996845": "单位",
+  "f32f9719": "视图切换标签的排列方式：左侧/右侧垂直侧栏",
+  "f3acaaaa": "并排对比两段文本的逐行差异",
+  "f3d9a3bc": "编码转换",
+  "f3db9e96": "总会话",
+  "f3ece576": "选择目标窗口",
+  "f40bb45c": "远程 URL",
+  "f41124a9": "隐藏不需要的区域，打造极简界面",
+  "f4b3b085": "可整理",
+  "f4e4258b": "确认关闭 {count} 个标签页？此操作可通过撤销恢复。",
+  "f504986f": "匹配",
+  "f5103664": "重命名失败，请重试",
+  "f515f8fb": "重新检测",
+  "f53c8b12": "预设已保存",
+  "f55f1736": "设备",
+  "f5636796": "归档标签页",
+  "f57f5560": "布局定制",
+  "f599179b": "打开视图布局设置",
+  "f59b1993": "删除后无法恢复，确定要删除此会话吗？",
+  "f5afcd51": "无法获取内存使用率，内存治理功能失效",
+  "f5b1a0b7": "加密哈希",
+  "f5deaa17": "对比",
+  "f652374a": "触发条件类型",
+  "f667fb2e": "移动失败，请重试",
+  "f705c3a8": "切换到归档视图",
+  "f787f452": "同步中...",
+  "f78d5619": "随时可在 设置 → 行为 中切换模式",
+  "f7ba6174": "窗口健康度",
+  "f7c0dccc": "从剪贴板导入",
+  "f7f83176": "未收录该 MIME 类型",
+  "f81bd1a9": "关闭过渡动画和 hover 效果，减少视觉干扰；对前庭功能障碍用户友好",
+  "f8b64f20": "反馈与开源",
+  "f8f67dd9": "树形管理书签，支持拖拽、批量导入、文件夹嵌套和隐私密码锁",
+  "f8fa36e4": "删除卡片",
+  "f8fc6734": "( 快照 )",
+  "f91c265e": "没有匹配的标签页",
+  "f9d9f10a": "开启后在视图切换栏中显示历史记录入口；默认仅通过快捷键或全局搜索访问",
+  "f9e7b4cb": "一键归档当前窗口所有标签，释放浏览器内存",
+  "f9ea4109": "内存压力感知",
+  "fa386ef0": "试试其他关键词，或直接执行网页搜索",
+  "fa9b6312": "自动分组",
+  "fa9efe3d": "在 YAML 和 JSON 格式之间互相转换",
+  "faff3ae1": "热搜榜",
+  "fb050d6c": "微博",
+  "fb4ca1cf": "加载中…",
+  "fb5c6d7e": "浮动添加按钮",
+  "fb73b176": "切回命令",
+  "fbd7ba61": "数据洞察",
+  "fc019e6a": "分组粒度",
+  "fc5a5383": "按域名（字母序）排列，同一域名的标签相邻",
+  "fc65cd74": "归档视图",
+  "fca97e78": "灰色",
+  "fcba60e7": "构建",
+  "fce6c7f9": "已休眠 {count} 个闲置标签",
+  "fcf36f4a": "在窗口卡片内展示 Chrome 原生标签组；关闭后退化为普通标签列表",
+  "fd0e413a": "域名拼音",
+  "fd31a1d2": "已保存模板「{name}」({count} 个标签页 )",
+  "fdef8c23": "7 天",
+  "fe19a08c": "本周五下午团建活动通知",
+  "fe6028fd": "JSON Path 查询失败：{msg}",
+  "fe7f3424": "支持拖拽导入",
+  "fe92b00f": "樱花",
+  "ff02df17": "不支持的进制",
+  "ff4ba4e5": "休眠整组",
+  "ff63d9dc": "开启分组",
+  "fff96ede": "更多操作"
+}

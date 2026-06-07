@@ -138,6 +138,7 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
     tabs,
     archiveSessions,
     normalizedQuery,
+    enablePinyin,
   });
 
   // ── 结果计算 ──────────────────────────────────────────────────────────────

@@ -31,6 +31,7 @@ import { track } from "@/shared/utils/metrics";
 import { useUndoStore } from "./undo-slice";
 import { useSelectionStore } from "./selection-slice";
 import { useSettingsStore } from "./settings-slice";
+import { useMetadataStore } from "./metadata-slice";
 import { BRAND } from "@/shared/config/brand";
 import { addToTrash } from "@/repositories/trash-repo";
 import type { TrashedTab } from "@/shared/types";
@@ -42,6 +43,11 @@ interface TabsState {
   windows: Map<number, WindowInfo>;
   loading: boolean;
   error: string | null;
+
+  /** v1.5: 标签元数据代理（tags/notes/pins），来自 metadata-slice */
+  getTabTags: (url: string) => string[];
+  getTabNote: (url: string) => string;
+  isTabPinned: (url: string) => boolean;
 
   /** 拉取所有标签页。silent=true 时不设 loading=true，适合静默刷新。 */
   loadAllTabs: (options?: { silent?: boolean }) => Promise<void>;
@@ -174,6 +180,20 @@ export const useTabsStore = create<TabsState>((set, get) => ({
   loading: false,
   error: null,
 
+  /** v1.5: 元数据代理到 metadata-slice（合并架构） */
+  getTabTags: (url) => {
+    const mdStore = useMetadataStore.getState();
+    return mdStore.getTags(url) as string[];
+  },
+  getTabNote: (url) => {
+    const mdStore = useMetadataStore.getState();
+    return mdStore.getNote(url);
+  },
+  isTabPinned: (url) => {
+    const mdStore = useMetadataStore.getState();
+    return mdStore.isPinned(url);
+  },
+
   loadAllTabs: async (options) => {
     const silent = options?.silent === true;
     if (silent) {
@@ -286,9 +306,13 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       }
       case "tab-activated": {
         const { id } = message.payload;
-        set({
-          tabs: tabs.map((t) => (t.id === id ? { ...t, lastAccessed: Date.now() } : t)),
-        });
+        // 仅更新 lastAccessed，跳过全量 array map 避免 29 个订阅者级联 re-render
+        const idx = tabs.findIndex((t) => t.id === id);
+        if (idx === -1) break;
+        // 直接 mutate 数组引用避免重建（Zustand 使用 Object.is 比较，同引用 = 不通知）
+        const updated = [...tabs];
+        updated[idx] = { ...tabs[idx]!, lastAccessed: Date.now() };
+        set({ tabs: updated });
         break;
       }
       case "tab-moved":
@@ -330,6 +354,10 @@ export const useTabsStore = create<TabsState>((set, get) => ({
   jumpToTab: async (tabId, windowId) => {
     try {
       await activateTab(tabId, windowId);
+      // 即时更新 lastAccessed，避免等待 SW broadcast 回环延迟
+      set((state) => ({
+        tabs: state.tabs.map((t) => (t.id === tabId ? { ...t, lastAccessed: Date.now() } : t)),
+      }));
       void track("tab_jump", { tabId, windowId, otherWindow: windowId !== get().currentWindowId });
     } catch (err) {
       feedback.error(translate("跳转失败，标签页可能已关闭"), err);
@@ -376,7 +404,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       void addToTrash(targets.map(liveTabToTrashedTab)).catch(() => {});
       void useUndoStore
         .getState()
-        .addRecord(snapshots, `关闭 ${targets.length} 个标签页`)
+        .addRecord(snapshots, translate("关闭 {count} 个标签页", { count: targets.length }))
         .catch((err) => {
           console.warn(`${BRAND.logTag} addRecord failed, undo will be unavailable`, err);
         });
@@ -402,11 +430,11 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     if (nonPinned.length > getCloseConfirmThreshold()) {
       const action = await new Promise<"close" | "archive" | "cancel">((resolve) => {
         feedback.modal.confirm({
-          title: translate("closeConfirm.title", { count: nonPinned.length }),
-          content: translate("closeConfirm.description"),
-          okText: translate("closeConfirm.closeBtn"),
+          title: translate("关闭 {count} 个标签页", { count: nonPinned.length }),
+          content: translate("也可以选择归档这些标签页，以便稍后恢复"),
+          okText: translate("关闭标签页"),
           okButtonProps: { danger: true },
-          cancelText: translate("closeConfirm.archiveBtn"),
+          cancelText: translate("归档标签页"),
           cancelButtonProps: { type: "primary" },
           onOk: () => resolve("close"),
           onCancel: () => resolve("archive"),
@@ -416,17 +444,17 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       if (action === "archive") {
         try {
           const { archivedCount, closedCount } = await archiveSelectedTabs(nonPinned.map((t) => t.id));
-          feedback.success(translate("closeConfirm.archiveSuccess", { count: archivedCount }));
+          feedback.success(translate("已归档 {count} 个标签页", { count: archivedCount }));
           if (closedCount < archivedCount) {
             feedback.warning(
-              translate("closeConfirm.archivePartial", {
+              translate("部分标签页归档失败（{count} 个）", {
                 count: archivedCount - closedCount,
               }),
             );
           }
           void track("tab_archive_domain", { domain, count: archivedCount });
         } catch (err) {
-          feedback.error(translate("closeConfirm.archiveFailed"), err);
+          feedback.error(translate("归档失败，请重试"), err);
           set({ error: String(err) });
           void get().loadAllTabs({ silent: true });
           throw err;
@@ -440,7 +468,10 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       void addToTrash(nonPinned.map(liveTabToTrashedTab)).catch(() => {});
       void useUndoStore
         .getState()
-        .addRecord(snapshots, `关闭 ${domain} 的 ${nonPinned.length} 个标签页`)
+        .addRecord(
+          snapshots,
+          translate("关闭 {domain} 的 {count} 个标签页", { domain, count: nonPinned.length }),
+        )
         .catch((err) => {
           console.warn(`${BRAND.logTag} addRecord failed, undo will be unavailable`, err);
         });
@@ -464,11 +495,11 @@ export const useTabsStore = create<TabsState>((set, get) => ({
     if (nonPinned.length > getCloseConfirmThreshold()) {
       const action = await new Promise<"close" | "archive" | "cancel">((resolve) => {
         feedback.modal.confirm({
-          title: translate("closeConfirm.title", { count: nonPinned.length }),
-          content: translate("closeConfirm.description"),
-          okText: translate("closeConfirm.closeBtn"),
+          title: translate("关闭 {count} 个标签页", { count: nonPinned.length }),
+          content: translate("也可以选择归档这些标签页，以便稍后恢复"),
+          okText: translate("关闭标签页"),
           okButtonProps: { danger: true },
-          cancelText: translate("closeConfirm.archiveBtn"),
+          cancelText: translate("归档标签页"),
           cancelButtonProps: { type: "primary" },
           onOk: () => resolve("close"),
           onCancel: () => resolve("archive"),
@@ -478,17 +509,17 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       if (action === "archive") {
         try {
           const { archivedCount, closedCount } = await archiveSelectedTabs(nonPinned.map((t) => t.id));
-          feedback.success(translate("closeConfirm.archiveSuccess", { count: archivedCount }));
+          feedback.success(translate("已归档 {count} 个标签页", { count: archivedCount }));
           if (closedCount < archivedCount) {
             feedback.warning(
-              translate("closeConfirm.archivePartial", {
+              translate("部分标签页归档失败（{count} 个）", {
                 count: archivedCount - closedCount,
               }),
             );
           }
           void track("tab_archive_all", { count: archivedCount });
         } catch (err) {
-          feedback.error(translate("closeConfirm.archiveFailed"), err);
+          feedback.error(translate("归档失败，请重试"), err);
           set({ error: String(err) });
           void get().loadAllTabs({ silent: true });
           throw err;
@@ -502,7 +533,7 @@ export const useTabsStore = create<TabsState>((set, get) => ({
       void addToTrash(nonPinned.map(liveTabToTrashedTab)).catch(() => {});
       void useUndoStore
         .getState()
-        .addRecord(snapshots, `关闭全部 ${nonPinned.length} 个非固定标签页`)
+        .addRecord(snapshots, translate("关闭全部 {count} 个非固定标签页", { count: nonPinned.length }))
         .catch((err) => {
           console.warn(`${BRAND.logTag} addRecord failed, undo will be unavailable`, err);
         });

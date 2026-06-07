@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
+import { translate } from "@/shared/i18n/core";
 import { loadStringArray, saveStringArray } from "@/shared/utils/storage-array";
 import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
 import type { DevToolCategory, DevToolDefinition } from "./tool-registry";
@@ -57,16 +58,16 @@ const CATEGORY_ICONS: Record<DevToolCategory, React.ReactNode> = {
 };
 
 const CATEGORY_LABEL_KEYS: Record<DevToolCategory, string> = {
-  data: "devtools.catData",
-  encoding: "devtools.catEncoding",
-  time: "devtools.catTime",
-  crypto: "devtools.catCrypto",
-  number: "devtools.catNumber",
-  generator: "devtools.catGenerator",
-  color: "devtools.catColor",
-  frontend: "devtools.catFrontend",
-  backend: "devtools.catBackend",
-  network: "devtools.catNetwork",
+  data: translate("数据处理"),
+  encoding: translate("编码转换"),
+  time: translate("时间工具"),
+  crypto: translate("加密哈希"),
+  number: translate("数值计算"),
+  generator: translate("随机生成"),
+  color: translate("颜色工具"),
+  frontend: translate("前端工具"),
+  backend: translate("后端工具"),
+  network: translate("网络工具"),
 };
 
 /**
@@ -233,11 +234,11 @@ export function DevToolsView() {
               ))
             ) : (
               <FeatureEmptyState
-              title={t("devtools.noResults")}
+              title={t("未找到匹配的工具")}
               description={t("搜索无结果")}
               icon={<Search size={ICON_SIZE.LARGE} />}
               size="small"
-              hints={[t("devtools.noResultsHint1"), t("devtools.noResultsHint2")]}
+              hints={[t("尝试不同的关键词"), t("检查拼写是否正确")]}
             />
             )}
           </div>

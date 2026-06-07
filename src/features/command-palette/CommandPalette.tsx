@@ -39,14 +39,16 @@ const CATEGORY_ICON: Record<CommandCategory, React.ReactNode> = {
   other: <Search size={14} />,
 };
 
+import { translate } from "@/shared/i18n/core";
+
 /** 分类标签 */
 const CATEGORY_LABEL: Record<CommandCategory, string> = {
-  navigation: "导航",
-  panel: "面板",
-  tab: "标签",
-  settings: "设置",
-  workspace: "工作区",
-  other: "其他",
+  navigation: translate("导航"),
+  panel: translate("面板"),
+  tab: translate("标签"),
+  settings: translate("设置"),
+  workspace: translate("工作区"),
+  other: translate("其他"),
 };
 
 export function CommandPalette() {
@@ -335,8 +337,8 @@ export function CommandPalette() {
           type="secondary"
           className={styles["command-palette__footer-hint"]}
         >
-          <kbd>⌘P</kbd> 打开 · <kbd>↑↓</kbd> 导航 · <kbd>Enter</kbd> 执行 · <kbd>Tab</kbd>{" "}
-          {mode === "command" ? t("搜索标签") : t("切回命令")} · <kbd>ESC</kbd> 关闭
+          <kbd>⌘P</kbd> {t("打开")} · <kbd>↑↓</kbd> {t("导航")} · <kbd>Enter</kbd> {t("执行")} · <kbd>Tab</kbd>{" "}
+          {mode === "command" ? t("搜索标签") : t("切回命令")} · <kbd>ESC</kbd> {t("关闭")}
         </Text>
       </div>
     </Modal>

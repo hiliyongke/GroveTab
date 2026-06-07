@@ -26,7 +26,7 @@ const CURRENT_SCHEMA_VERSION = 3;
 
 const DEFAULT_SETTINGS: UserSettings = {
   overrideNewTab: true,
-  viewTabPosition: "top",
+  viewTabPosition: "right",
   defaultView: "tabs",
   theme: "system",
   skinPreset: "glassmorphism",
@@ -381,12 +381,29 @@ async function saveSpeedDialSites(sites: SpeedDialSite[]): Promise<void> {
   await setData(STORAGE_KEYS.speedDial, sorted);
 }
 
-/** 新增一个常用站点（不可变操作） */
+/** 新增一个常用站点（不可变操作，自动去重） */
 export async function addSpeedDialSite(site: SpeedDialSite): Promise<SpeedDialSite[]> {
   const sites = await getSpeedDialSites();
+  // 去重：相同 URL 的站点不再重复添加
+  const normalized = site.url.toLowerCase().replace(/\/+$/, '');
+  const exists = sites.some((s) => s.url.toLowerCase().replace(/\/+$/, '') === normalized);
+  if (exists) return sites;
   const newSites = [...sites, site];
   await saveSpeedDialSites(newSites);
   return newSites;
+}
+
+/** 批量导入站点（自动去重，跳过已存在的 URL） */
+export async function batchAddSpeedDialSites(newSites: SpeedDialSite[]): Promise<SpeedDialSite[]> {
+  const sites = await getSpeedDialSites();
+  const normalizedUrls = new Set(sites.map((s) => s.url.toLowerCase().replace(/\/+$/, '')));
+  const toAdd = newSites.filter(
+    (ns) => !normalizedUrls.has(ns.url.toLowerCase().replace(/\/+$/, '')),
+  );
+  if (toAdd.length === 0) return sites;
+  const result = [...sites, ...toAdd];
+  await saveSpeedDialSites(result);
+  return result;
 }
 
 /** 更新一个常用站点（不可变操作） */

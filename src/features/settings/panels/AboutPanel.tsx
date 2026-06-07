@@ -17,6 +17,7 @@
  *   2) Popup 底部"关于"链接：打开新 Tab，URL hash #about，App 监听后自动打开设置面板并切到 about Tab
  */
 
+import { useMemo } from "react";
 import { Button, Divider, Flex, List, Typography } from "antd";
 import { cssVars } from "@/shared/utils/css-vars";
 import {
@@ -50,48 +51,26 @@ const PKG_VERSION = (() => {
 
 interface FeatureCard {
   icon: React.ComponentType<{ size?: number }>;
-  titleKey: string;
-  descKey: string;
+  title: string;
+  desc: string;
   color: string;
 }
-
-const FEATURES: FeatureCard[] = [
-  {
-    icon: Package,
-    titleKey: "about.feature.workspace.title",
-    descKey: "about.feature.workspace.desc",
-    color: "#0EA5E9",
-  },
-  {
-    icon: Archive,
-    titleKey: "about.feature.archive.title",
-    descKey: "about.feature.archive.desc",
-    color: "#F59E0B",
-  },
-  {
-    icon: SearchIcon,
-    titleKey: "about.feature.search.title",
-    descKey: "about.feature.search.desc",
-    color: "#8B5CF6",
-  },
-  {
-    icon: BookmarkIcon,
-    titleKey: "about.feature.bookmark.title",
-    descKey: "about.feature.bookmark.desc",
-    color: "#10B981",
-  },
-  {
-    icon: Palette,
-    titleKey: "about.feature.skin.title",
-    descKey: "about.feature.skin.desc",
-    color: "#9B8EC4",
-  },
-];
 
 export function AboutPanel() {
   const { t, locale } = useT();
   const brandName = getBrandDisplayName(locale);
   const slogan = getBrandSlogan(locale);
+
+  const features: FeatureCard[] = useMemo(
+    () => [
+      { icon: Package, title: t("多工作区管理"), desc: t("按项目、场景创建灵活工作区，一键切换和恢复所需标签组合"), color: "#0EA5E9" },
+      { icon: Archive, title: t("智能归档"), desc: t("自动保存会话快照，支持定时归档、手动归档和跨设备恢复"), color: "#F59E0B" },
+      { icon: SearchIcon, title: t("全局搜索"), desc: t("实时搜索所有标签页、书签和浏览历史，支持多引擎切换"), color: "#8B5CF6" },
+      { icon: BookmarkIcon, title: t("书签管理"), desc: t("树形管理书签，支持拖拽、批量导入、文件夹嵌套和隐私密码锁"), color: "#10B981" },
+      { icon: Palette, title: t("主题皮肤"), desc: t("内置多款高质量皮肤，支持毛玻璃、暗色模式、自定义配色和设计 Token"), color: "#9B8EC4" },
+    ],
+    [t],
+  );
   const heroStyle: React.CSSProperties = cssVars({
     "--about-hero-gradient":
       "linear-gradient(135deg, var(--ant-color-bg-elevated) 0%, var(--ant-color-fill-quaternary) 100%)",
@@ -120,13 +99,13 @@ export function AboutPanel() {
             {t("核心能力")}
           </Typography.Title>
           <div className={styles["about-panel__feature-grid"]}>
-            {FEATURES.map((feature) => {
+            {features.map((feature) => {
               const Icon = feature.icon;
               const featureStyle: React.CSSProperties = cssVars({
                 "--about-feature-color": feature.color,
               });
               return (
-                <Flex key={feature.titleKey} className={styles["about-panel__feature-card"]}>
+                <Flex key={feature.title} className={styles["about-panel__feature-card"]}>
                   <Flex
                     align="center"
                     justify="center"
@@ -137,10 +116,10 @@ export function AboutPanel() {
                   </Flex>
                   <Flex vertical className={styles["about-panel__feature-copy"]}>
                     <Typography.Text className={styles["about-panel__feature-title"]}>
-                      {t(feature.titleKey)}
+                      {feature.title}
                     </Typography.Text>
                     <Typography.Text className={styles["about-panel__feature-desc"]}>
-                      {t(feature.descKey)}
+                      {feature.desc}
                     </Typography.Text>
                   </Flex>
                 </Flex>
@@ -160,9 +139,9 @@ export function AboutPanel() {
             className={styles["about-panel__tips-list"]}
             dataSource={[
               t("⌘/Ctrl + K 呼出搜索；再按一次关闭；Cmd + 1..9 切换搜索引擎。"),
-              t('在 "数据" Tab 可以一键恢复默认配置 / 重播引导 / 全量重置。'),
+              t("在「数据」Tab 可以一键恢复默认配置 / 重播引导 / 全量重置。"),
               t("右键点击标签页可以快速归档、固定或添加书签。"),
-              t('在 "外观" Tab 可以尝试极客模式定制圆角、字号、主色等细节。'),
+              t("在「外观」Tab 可以尝试极客模式定制圆角、字号、主色等细节。"),
             ]}
             renderItem={(item) => (
               <List.Item className={styles["about-panel__tip-item"]}>{item}</List.Item>

@@ -70,7 +70,7 @@ function groupTabsByChromeGroup(
       const groupKey = gid === -1 ? -1 : gid;
       map.set(groupKey, {
         groupId: gid,
-        title: gid === -1 ? t("tabGroup.ungrouped") : (tab.groupTitle ?? t("tabGroup.unnamed")),
+        title: gid === -1 ? t("未分组") : (tab.groupTitle ?? t("未命名")),
         color: (gid === -1 ? "grey" : (tab.groupColor ?? "grey")) as ChromeTabGroupColor,
         // 明确处理 undefined → false，避免 undefined 导致 React 渲染异常
         collapsed: gid === -1 ? false : tab.groupCollapsed === true,
@@ -382,7 +382,7 @@ export function TabGroupView() {
         void handleDragEnd(event);
       }}
     >
-      <Flex vertical gap="middle">
+      <Flex vertical gap="small">
         <TabGroupToolbar
           filterQuery={filterQuery}
           onFilterChange={setFilterQuery}
@@ -394,7 +394,7 @@ export function TabGroupView() {
             style={getColumnVars(columnCount)}
           >
             {filteredGroups.length === 0 ? (
-              <Empty description={t("tabGroup.noResults")} />
+              <Empty description={t("未找到匹配的标签组")} />
             ) : (
               columns.map((columnGroups, columnIndex) => (
                 <VirtualColumn

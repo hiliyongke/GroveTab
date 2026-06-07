@@ -137,6 +137,39 @@
   }
 }
 
+// 呼吸指示圆点（提示有标签需要整理）
+@keyframes header-dot-breathe {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--ant-color-warning) 50%, transparent);
+  }
+
+  50% {
+    opacity: 0.25;
+    transform: scale(2);
+    box-shadow: 0 0 6px 3px color-mix(in srgb, var(--ant-color-warning) 35%, transparent);
+  }
+}
+
+.app-header-breathe-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ant-color-warning);
+  margin-right: 5px;
+  vertical-align: middle;
+  animation: header-dot-breathe 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-header-breathe-dot {
+    animation: none;
+  }
+}
+
 /* ── 顶栏中部（搜索触发器）── 绝对定位真居中，不占流式空间 */
 .app-header-center {
   position: absolute;

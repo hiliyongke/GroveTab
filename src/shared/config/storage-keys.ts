@@ -35,6 +35,7 @@ export const STORAGE_KEYS = Object.freeze({
   activity: key("activity"),
   workspaces: key("workspaces"),
   windowAliases: key("window_aliases"),
+  windowColors: key("window_colors"),
   kanban: key("kanban"),
   ogIndex: key("og_index"),
   autoSnapshotMeta: key("auto_snapshot_meta"),
@@ -63,6 +64,8 @@ export const STORAGE_KEYS = Object.freeze({
   workspaceTemplates: key("workspace_templates"),
   /** 智能排序配置（SmartSortConfig） */
   smartSort: key("smart_sort"),
+  /** Feature Flag 存储键（v1.4 核心整合） */
+  featureFlags: key("feature_flags"),
 });
 
 /** 判断是否属于当前应用命名空间的存储键。 */

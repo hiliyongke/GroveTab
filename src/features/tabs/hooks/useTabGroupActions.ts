@@ -43,9 +43,9 @@ export function useTabGroupActions({ group }: UseTabGroupActionsOptions) {
     setBusy(true);
     try {
       await action();
-      if (successKey) feedback.success(t(successKey));
+      if (successKey) feedback.success(successKey);
     } catch (err) {
-      feedback.error(t("tabGroup.actionFailed"), err);
+      feedback.error(t("操作失败，请重试"), err);
     } finally {
       setBusy(false);
     }
@@ -64,7 +64,7 @@ export function useTabGroupActions({ group }: UseTabGroupActionsOptions) {
         windowId: g.windowId,
       });
       setRenaming(false);
-    }, "tabGroup.renamed");
+    }, t("已重命名"));
   };
 
   const handleColorChange = (nextColor: ChromeTabGroupColor) => {
@@ -78,7 +78,7 @@ export function useTabGroupActions({ group }: UseTabGroupActionsOptions) {
         collapsed: g.collapsed,
         windowId: g.windowId,
       });
-    }, "tabGroup.colorChanged");
+    }, t("颜色已更改"));
   };
 
   const handleUngroup = () => {
@@ -86,18 +86,18 @@ export function useTabGroupActions({ group }: UseTabGroupActionsOptions) {
     void runGroupAction(async () => {
       await ungroupTabs(group.tabs.map((tab) => tab.id));
       swBroadcast("tab-ungrouped", { groupId: group.groupId, windowId: group.windowId });
-    }, "tabGroup.dissolved");
+    }, t("已解除分组"));
   };
 
   const handleCloseGroup = () => {
     feedback.modal.confirm({
-      title: t("tabGroup.closeConfirmTitle"),
-      content: t("tabGroup.closeConfirmContent", { count: group.tabs.length }),
+      title: t("确认关闭分组"),
+      content: t("确定要关闭这 {count} 个标签页吗？", { count: group.tabs.length }),
       okButtonProps: { danger: true },
       onOk: () =>
         runGroupAction(async () => {
           await closeTabs(group.tabs.map((tab) => tab.id));
-        }, "tabGroup.closed"),
+        }, t("已关闭分组")),
     });
   };
 
@@ -106,7 +106,7 @@ export function useTabGroupActions({ group }: UseTabGroupActionsOptions) {
       await Promise.all(
         group.tabs.filter((tab) => !tab.discarded).map((tab) => discardTab(tab.id)),
       );
-    }, "tabGroup.discarded");
+    }, t("已休眠分组"));
   };
 
   const handleMoveToNewWindow = () => {
@@ -141,7 +141,7 @@ export function useTabGroupActions({ group }: UseTabGroupActionsOptions) {
           windowId: g.windowId,
         });
       }
-    }, "tabGroup.movedToWindow");
+    }, t("已移至新窗口"));
   };
 
   const startRename = () => {

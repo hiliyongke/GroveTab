@@ -26,7 +26,7 @@
 .app-hero {
   /* Antd Flex 通过 props 提供 flex-direction: column, align-items: center, gap: 16px */
   position: relative;
-  padding: 52px 0 36px;
+  padding: 24px 0 16px;
 
   &::before {
     position: absolute;
@@ -114,13 +114,11 @@
 
 .app-view-switcher-wrap {
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   max-width: 100%;
   padding: 2px 0;
-  margin: var(--ant-margin-xs) 0 var(--ant-margin-lg);
   overflow: auto hidden;
   scrollbar-width: none;
-
   &::-webkit-scrollbar {
     display: none;
   }

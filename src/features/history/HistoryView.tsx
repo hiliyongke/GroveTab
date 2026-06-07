@@ -83,17 +83,9 @@ import styles from "./HistoryView.module.less";
 
 
 type FilterMode = "all" | "tabs" | "search" | "archive";
+type TimeBucket = "today" | "yesterday" | "thisWeek" | "earlier";
 
-/** "时间分组"对应的展示顺序与标签 key */
-const TIME_GROUPS: Array<{ id: "today" | "yesterday" | "thisWeek" | "earlier"; labelKey: string }> =
-  [
-    { id: "today", labelKey: "history.groupToday" },
-    { id: "yesterday", labelKey: "history.groupYesterday" },
-    { id: "thisWeek", labelKey: "history.groupThisWeek" },
-    { id: "earlier", labelKey: "history.groupEarlier" },
-  ];
-
-function bucketize(ts: number): (typeof TIME_GROUPS)[number]["id"] {
+function bucketize(ts: number): TimeBucket {
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   const yesterdayStart = todayStart - 24 * 3600 * 1000;
@@ -412,6 +404,28 @@ export function HistoryView() {
     }
     return map;
   }, [filteredEvents]);
+
+  /** 声明时翻译：时间分组标签 */
+  const timeGroups = useMemo<Array<{ id: TimeBucket; label: string }>>(
+    () => [
+      { id: "today", label: t("今天") },
+      { id: "yesterday", label: t("昨天") },
+      { id: "thisWeek", label: t("本周") },
+      { id: "earlier", label: t("更早") },
+    ],
+    [t],
+  );
+
+  /** 快捷时间范围标签 */
+  const quickRangeLabels = useMemo(
+    () => ({
+      today: t("今天"),
+      yesterday: t("昨天"),
+      thisWeek: t("本周"),
+      thisMonth: t("本月"),
+    }),
+    [t],
+  );
 
   // ── 操作处理 ─────────────────────────────────
 
@@ -760,18 +774,23 @@ export function HistoryView() {
           {activeTab === "timeline" && (
             <Flex gap={4} align="center" wrap>
               <Typography.Text type="secondary" style={{ fontSize: 12, marginRight: 4 }}>{t("时间范围")}:</Typography.Text>
-              {(["今天","昨天","本周","本月"] as const).map((label) => (
+              {([
+                { key: "today" as const, label: quickRangeLabels.today },
+                { key: "yesterday" as const, label: quickRangeLabels.yesterday },
+                { key: "thisWeek" as const, label: quickRangeLabels.thisWeek },
+                { key: "thisMonth" as const, label: quickRangeLabels.thisMonth },
+              ] as const).map(({ key, label }) => (
                 <Button
-                  key={label}
+                  key={key}
                   size="small"
                   type={dateRange.start ? "default" : "text"}
                   onClick={() => {
                     const d = new Date();
                     let start = 0;
-                    if (label === "今天") { d.setHours(0,0,0,0); start = d.getTime(); }
-                    else if (label === "昨天") { d.setDate(d.getDate()-1); d.setHours(0,0,0,0); start = d.getTime(); }
-                    else if (label === "本周") { d.setDate(d.getDate()-d.getDay()); d.setHours(0,0,0,0); start = d.getTime(); }
-                    else if (label === "本月") { d.setDate(1); d.setHours(0,0,0,0); start = d.getTime(); }
+                    if (key === "today") { d.setHours(0,0,0,0); start = d.getTime(); }
+                    else if (key === "yesterday") { d.setDate(d.getDate()-1); d.setHours(0,0,0,0); start = d.getTime(); }
+                    else if (key === "thisWeek") { d.setDate(d.getDate()-d.getDay()); d.setHours(0,0,0,0); start = d.getTime(); }
+                    else if (key === "thisMonth") { d.setDate(1); d.setHours(0,0,0,0); start = d.getTime(); }
                     setDateRange(start > 0 ? { start, end: Date.now() } : {});
                   }}
                 >{label}</Button>
@@ -826,7 +845,7 @@ export function HistoryView() {
                     {closedWindows.map(renderClosedWindow)}
                   </Flex>
                 )}
-                {TIME_GROUPS.map(({ id, labelKey }) => {
+                {timeGroups.map(({ id, label }) => {
                   const list = groupedClosed.get(id);
                   if (!list || list.length === 0) return null;
                   return (
@@ -838,7 +857,7 @@ export function HistoryView() {
                       className={styles["history-group"]}
                     >
                       <Typography.Text className={styles["history-group-title"]}>
-                        {t(labelKey)}
+                        {label}
                       </Typography.Text>
                       <Flex vertical gap={2} className={styles["history-list"]}>
                         {list.map(renderClosedItem)}
@@ -858,7 +877,7 @@ export function HistoryView() {
               </div>
             </Empty>
           ) : (
-            TIME_GROUPS.map(({ id, labelKey }) => {
+            timeGroups.map(({ id, label }) => {
               const list = groupedEvents.get(id);
               if (!list || list.length === 0) return null;
               return (
@@ -870,7 +889,7 @@ export function HistoryView() {
                   className={styles["history-group"]}
                 >
                   <Typography.Text className={styles["history-group-title"]}>
-                    {t(labelKey)}
+                    {label}
                   </Typography.Text>
                   <Flex vertical gap={2} className={styles["history-list"]}>
                     {list.map(renderEvent)}

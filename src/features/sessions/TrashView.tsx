@@ -10,6 +10,7 @@ import { Trash2, RotateCcw, Clock, X } from "lucide-react";
 import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
+import { useFeatureFlagStore } from "@/shared/store/feature-flag-slice";
 import { feedback } from "@/shared/ui/feedback";
 import { getTrashItems, removeFromTrash, clearTrash } from "@/repositories/trash-repo";
 import { createTab } from "@/chrome";
@@ -35,6 +36,7 @@ function TabFavicon({ tab }: { tab: TrashedTab }) {
 
 export function TrashView() {
   const { t } = useT();
+  const archiveTrashMerged = useFeatureFlagStore((s) => s.flags.archive_trash_merged);
   const [items, setItems] = useState<TrashedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showMoreIds, setShowMoreIds] = useState<Set<string>>(new Set());
@@ -45,7 +47,7 @@ export function TrashView() {
       const data = await getTrashItems();
       setItems(data);
     } catch (err) {
-      feedback.error(t("trash.loadFailed"), err);
+      feedback.error(t("回收站加载失败"), err);
     } finally {
       setLoading(false);
     }
@@ -61,9 +63,9 @@ export function TrashView() {
         await Promise.all(trashedItem.tabs.map((tab) => createTab({ url: tab.url })));
         await removeFromTrash(trashedItem.id);
         await refresh();
-        feedback.success(t("trash.restoreSuccess", { count: trashedItem.tabs.length }));
+        feedback.success(t("已恢复 {count} 个标签页", { count: trashedItem.tabs.length }));
       } catch (err) {
-        feedback.error(t("trash.restoreFailed"), err);
+        feedback.error(t("恢复失败"), err);
       }
     },
     [refresh, t],
@@ -75,7 +77,7 @@ export function TrashView() {
         await removeFromTrash(id);
         await refresh();
       } catch (err) {
-        feedback.error(t("trash.deleteFailed"), err);
+        feedback.error(t("删除失败"), err);
       }
     },
     [refresh, t],
@@ -85,9 +87,9 @@ export function TrashView() {
     try {
       await clearTrash();
       await refresh();
-      feedback.success(t("trash.clearSuccess"));
+      feedback.success(t("回收站已清空"));
     } catch (err) {
-      feedback.error(t("trash.clearFailed"), err);
+      feedback.error(t("清空失败"), err);
     }
   }, [refresh, t]);
 
@@ -101,28 +103,28 @@ export function TrashView() {
         </Flex>
       ) : items.length === 0 ? (
         <FeatureEmptyState
-          title={t("trash.empty")}
-          description={t("trash.emptyDescription")}
+          title={t("回收站为空")}
+          description={t("关闭的标签页会暂时存放在这里")}
           icon={<Trash2 size={ICON_SIZE.HERO} />}
-          hints={[t("trash.emptyHint1"), t("trash.emptyHint2"), t("trash.emptyHint3")]}
+          hints={[t("关闭标签页后会自动加入回收站"), t("可以随时恢复或永久删除"), t("回收站内容在浏览器重启后仍保留")]}
         />
       ) : (
         <Flex vertical gap={12}>
           {/* 工具栏：统计 + 清空 */}
           <Flex justify="space-between" align="center" className={styles["trash-toolbar"]}>
             <Typography.Text className={styles["trash-toolbar-count"]}>
-              {t("trash.count", { count: items.length })} · {totalTabs} {t("标签页")}
+              {t("共 {count} 组", { count: items.length })} · {totalTabs} {t("标签页")}
             </Typography.Text>
             <Popconfirm
-              title={t("trash.clearConfirm")}
-              description={t("trash.clearDesc")}
+              title={t("确认清空回收站")}
+              description={t("清空后不可恢复，确定要清空吗？")}
               onConfirm={() => void handleClearAll()}
-              okText={t("trash.clear")}
+              okText={t("清空回收站")}
               cancelText={t("取消")}
               okButtonProps={{ danger: true }}
             >
               <Button danger size="small" icon={<Trash2 size={ICON_SIZE.SMALL} />}>
-                {t("trash.clear")}
+                {t("清空回收站")}
               </Button>
             </Popconfirm>
           </Flex>
@@ -143,19 +145,19 @@ export function TrashView() {
               }
               extra={
                 <Space size={4}>
-                  <Tooltip title={t("trash.restore")}>
+                  <Tooltip title={t("恢复")}>
                     <Button
                       size="small"
                       type="primary"
                       icon={<RotateCcw size={ICON_SIZE.SMALL} />}
                       onClick={() => void handleRestore(item)}
                     >
-                      {t("trash.restore")}
+                      {t("恢复")}
                     </Button>
                   </Tooltip>
-                  <Tooltip title={t("trash.delete")}>
+                  <Tooltip title={t("永久删除")}>
                     <Popconfirm
-                      title={t("trash.confirmDeleteSingle")}
+                      title={t("确认永久删除该分组？")}
                       onConfirm={() => void handleDelete(item.id)}
                       okText={t("删除")}
                       cancelText={t("取消")}
@@ -193,11 +195,11 @@ export function TrashView() {
                   {item.tabs.length > 8 && (
                     showMoreIds.has(item.id) ? (
                       <Button size="small" type="link" onClick={(e) => { e.stopPropagation(); setShowMoreIds((prev) => { const n = new Set(prev); n.delete(item.id); return n; }); }}>
-                        {t("trash.collapse")}
+                        {t("展开全部")}
                       </Button>
                     ) : (
                       <Button size="small" type="link" onClick={(e) => { e.stopPropagation(); setShowMoreIds((prev) => new Set(prev).add(item.id)); }}>
-                        {t("trash.showAll", { count: item.tabs.length - 8 })}
+                        {t("显示全部 {count} 个", { count: item.tabs.length - 8 })}
                       </Button>
                     )
                   )}
@@ -205,6 +207,26 @@ export function TrashView() {
               </Flex>
             </Card>
           ))}
+        </Flex>
+      )}
+      {archiveTrashMerged && items.length > 0 && (
+        <Flex justify="center" style={{ marginTop: 24 }}>
+          <Typography.Text type="secondary">
+            {t("回收站内容已同步到")}
+            <Button
+              type="link"
+              size="small"
+              onClick={() => {
+                window.dispatchEvent(
+                  new CustomEvent("navigate", {
+                    detail: { view: "archive", filter: "trash" },
+                  }),
+                );
+              }}
+            >
+              {t("归档视图")}
+            </Button>
+          </Typography.Text>
         </Flex>
       )}
     </div>

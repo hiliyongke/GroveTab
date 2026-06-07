@@ -51,70 +51,69 @@ import {
 import { BRAND } from "@/shared/config/brand";
 import styles from "../DevToolsView.module.less";
 
-/** 工具示例数据 */
-const TOOL_EXAMPLES: Record<
-  string,
-  { input?: string; input2?: string; pattern?: string; flags?: string; mode?: string }
-> = {
-  "json-format": {
-    input: JSON.stringify({
-      name: BRAND.name,
-      version: "1.3",
-      features: ["tabs", "widgets", "devtools"],
-    }),
-  },
-  "json-to-ts": {
-    input: JSON.stringify({
-      id: 1,
-      name: BRAND.name,
-      active: true,
-      profile: { role: "admin", tags: ["dev", "ops"] },
-    }),
-  },
-  "json-path": {
-    input: '{"user":{"name":"Tom","age":30,"address":{"city":"Beijing"}}}',
-    pattern: "$.user.address.city",
-  },
-  "yaml-json": { input: `name: ${BRAND.name}\nversion: "1.3"\nfeatures:\n  - tabs\n  - widgets` },
-  "csv-json": { input: "name,age,city\nTom,30,Beijing\nJerry,25,Shanghai" },
-  "jwt-decoder": {
-    input:
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-  },
-  "basic-auth": { input: "admin:secret123" },
-  "sql-format": {
-    input: "select id,name from users where active=1 order by created_at desc limit 10",
-  },
-  "url-parse": { input: `${BRAND.productUrl}?tab=readme#overview` },
-  "url-query": { input: "https://example.com/search?q=devtools&lang=zh&page=1" },
-  "url-codec": { input: "https://example.com/search?q=开发工具&page=1" },
-  "curl-fetch": {
-    input:
-      'curl -X POST https://api.example.com/users -H "Content-Type: application/json" -d \'{"name":"Tom"}\'',
-  },
-  "http-status": { input: "404" },
-  "http-header": {
-    input: "Content-Type: application/json\nAuthorization: Bearer token123\nX-Request-ID: abc-123",
-  },
-  "ua-parse": {
-    input:
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-  },
-  "base64-codec": { input: "Hello 世界" },
-  "html-entity": { input: '<div class="container">Tom & Jerry</div>' },
-  "string-escape": { input: 'Hello "World"\nNew line\tTab' },
-  "regex-test": { input: "hello world hello", pattern: "hello", flags: "g" },
-  "text-diff": { input: "line1\nline2\nline3", input2: "line1\nline2 modified\nline4" },
-  "case-convert": { input: "user profile card" },
-  "text-stats": { input: "Hello world!\n你好，世界！\nThis is a test." },
-  timestamp: { input: "1700000000" },
-  cron: { input: "*/5 * * * *" },
-  hash: { input: `${BRAND.name} DevTools` },
-  radix: { input: "255" },
-  "css-unit": { input: "16px" },
-  "color-preview": { input: "#1677FF" },
-  "mime-type": { input: "json" },
-};
+// TOOL_EXAMPLES 移入组件用 useMemo + t() 动态生成，避免模块级 translate() 时机问题
+function buildToolExamples(): Record<string, { input?: string; input2?: string; pattern?: string; flags?: string }> {
+  return {
+    "json-format": {
+      input: JSON.stringify({
+        name: BRAND.name,
+        version: "1.3",
+        features: ["tabs", "widgets", "devtools"],
+      }),
+    },
+    "json-to-ts": {
+      input: JSON.stringify({
+        id: 1,
+        name: BRAND.name,
+        active: true,
+        profile: { role: "admin", tags: ["dev", "ops"] },
+      }),
+    },
+    "json-path": {
+      input: '{"user":{"name":"Tom","age":30,"address":{"city":"Beijing"}}}',
+      pattern: "$.user.address.city",
+    },
+    "yaml-json": { input: `name: ${BRAND.name}\nversion: "1.3"\nfeatures:\n  - tabs\n  - widgets` },
+    "csv-json": { input: "name,age,city\nTom,30,Beijing\nJerry,25,Shanghai" },
+    "jwt-decoder": {
+      input:
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+    },
+    "basic-auth": { input: "admin:secret123" },
+    "sql-format": {
+      input: "select id,name from users where active=1 order by created_at desc limit 10",
+    },
+    "url-parse": { input: `${BRAND.productUrl}?tab=readme#overview` },
+    "url-query": { input: "https://example.com/search?q=devtools&lang=zh&page=1" },
+    "url-codec": { input: "https://example.com/search?q=test&page=1" },
+    "curl-fetch": {
+      input:
+        'curl -X POST https://api.example.com/users -H "Content-Type: application/json" -d \'{"name":"Tom"}\'',
+    },
+    "http-status": { input: "404" },
+    "http-header": {
+      input: "Content-Type: application/json\nAuthorization: Bearer token123\nX-Request-ID: abc-123",
+    },
+    "ua-parse": {
+      input:
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    },
+    "base64-codec": { input: "Hello World" },
+    "html-entity": { input: '<div class="container">Tom & Jerry</div>' },
+    "string-escape": { input: 'Hello "World"\nNew line\tTab' },
+    "regex-test": { input: "hello world hello", pattern: "hello", flags: "g" },
+    "text-diff": { input: "line1\nline2\nline3", input2: "line1\nline2 modified\nline4" },
+    "case-convert": { input: "user profile card" },
+    "text-stats": { input: "Hello world!\nThis is a test." },
+    timestamp: { input: "1700000000" },
+    cron: { input: "*/5 * * * *" },
+    hash: { input: `${BRAND.name} DevTools` },
+    radix: { input: "255" },
+    "css-unit": { input: "16px" },
+    "color-preview": { input: "#1677FF" },
+    "mime-type": { input: "json" },
+  };
+}
 
 const { Text } = Typography;
 
@@ -324,7 +323,7 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
         case "random-gen":
           return randomGenerate(randomAction, randomLen);
         default:
-          return { output: "", error: "未知工具" };
+          return { output: "", error: t("未知工具") };
       }
     },
     [
@@ -348,6 +347,7 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
       baseFontSize,
       randomAction,
       randomLen,
+      t,
     ],
   );
 
@@ -456,8 +456,10 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
     [handleExecute],
   );
 
+  const toolExamples = useMemo(() => buildToolExamples(), []);
+
   const handleFillExample = useCallback(() => {
-    const example = TOOL_EXAMPLES[tool.id];
+    const example = toolExamples[tool.id];
     if (!example) return;
     if (example.input !== undefined) setInput(example.input);
     if (example.input2 !== undefined) setInput2(example.input2);
@@ -506,10 +508,10 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
         return `${BRAND.productUrl}?tab=readme#overview`;
       case "url-query":
         return urlQueryAction === "parse"
-          ? "https://example.com?a=1&b=2 或 a=1&b=2"
+          ? 'https://example.com?a=1&b=2'
           : '{"a":1,"b":"hello"}';
       case "url-codec":
-        return "https://example.com/search?q=开发工具";
+        return "https://example.com/search?q=test";
       case "curl-fetch":
         return 'curl -X POST https://api.example.com/users -H "Content-Type: application/json" -d \'{"name":"Tom"}\'';
       case "http-status":
@@ -519,29 +521,29 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
       case "ua-parse":
         return "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36...";
       case "base64-codec":
-        return "输入文本或 Base64 字符串";
+        return "Input text or Base64 string";
       case "html-entity":
         return '<div class="hello">Tom & Jerry</div>';
       case "string-escape":
         return 'Hello "World"\nNew line\tTab';
       case "regex-test":
-        return "输入待测试文本";
+        return "Text to test against regex pattern";
       case "case-convert":
         return "user profile card";
       case "timestamp":
-        return "1700000000 或 2024-01-01";
+        return "1700000000 or 2024-01-01";
       case "cron":
         return "*/5 * * * *";
       case "hash":
-        return "输入要计算哈希的文本";
+        return "Text to hash";
       case "radix":
         return "255";
       case "css-unit":
-        return "16px 或 1rem";
+        return "16px or 1rem";
       case "color-preview":
-        return "#1677FF 或 rgb(22, 119, 255)";
+        return "#1677FF or rgb(22, 119, 255)";
       case "mime-type":
-        return "json 或 application/json";
+        return "json or application/json";
       default:
         return "";
     }
@@ -556,9 +558,9 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
             value={jsonAction}
             onChange={(value) => setJsonAction(value as JsonAction)}
             options={[
-              { value: "format", label: "格式化" },
-              { value: "minify", label: "压缩" },
-              { value: "validate", label: "校验" },
+              { value: "format", label: t("格式化") },
+              { value: "minify", label: t("压缩") },
+              { value: "validate", label: t("校验") },
             ]}
           />
         )}
@@ -577,8 +579,8 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
             value={yamlAction}
             onChange={(value) => setYamlAction(value as "yamlToJson" | "jsonToYaml")}
             options={[
-              { value: "yamlToJson", label: "YAML → JSON" },
-              { value: "jsonToYaml", label: "JSON → YAML" },
+              { value: "yamlToJson", label: t("YAML → JSON") },
+              { value: "jsonToYaml", label: t("JSON → YAML") },
             ]}
           />
         )}
@@ -588,8 +590,8 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
             value={csvAction}
             onChange={(value) => setCsvAction(value as "csvToJson" | "jsonToCsv")}
             options={[
-              { value: "csvToJson", label: "CSV → JSON" },
-              { value: "jsonToCsv", label: "JSON → CSV" },
+              { value: "csvToJson", label: t("CSV → JSON") },
+              { value: "jsonToCsv", label: t("JSON → CSV") },
             ]}
           />
         )}
@@ -656,8 +658,8 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
             value={timestampAction}
             onChange={(value) => setTimestampAction(value as TimestampAction)}
             options={[
-              { value: "toDatetime", label: "→ 日期" },
-              { value: "toTimestamp", label: "→ 时间戳" },
+              { value: "toDatetime", label: t("→ 日期") },
+              { value: "toTimestamp", label: t("→ 时间戳") },
             ]}
           />
         )}
@@ -718,8 +720,8 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
             onChange={(value) => setRandomAction(value as RandomAction)}
             options={[
               { value: "uuid", label: "UUID" },
-              { value: "randomInt", label: "随机整数" },
-              { value: "randomHex", label: "随机 HEX" },
+              { value: "randomInt", label: t("随机整数") },
+              { value: "randomHex", label: t("随机 HEX") },
             ]}
           />
         )}
@@ -731,7 +733,7 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
             onChange={(event) => setRandomLen(Number(event.target.value) || 1)}
             min={1}
             max={128}
-            prefix="长度"
+            prefix="Len"
             className={styles["devtools-field-size--random"]}
           />
         )}
@@ -771,7 +773,7 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
           <Input
             size="small"
             prefix={<Braces size={14} />}
-            placeholder="JSON Path，如 $.user.name"
+            placeholder="JSON Path, e.g. $.user.name"
             value={regexPattern}
             onChange={(event) => setRegexPattern(event.target.value)}
           />
@@ -786,7 +788,7 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
               value={input}
               onChange={(event) => setInput(event.target.value)}
               rows={7}
-              placeholder="第一段文本"
+              placeholder="Left text"
             />
           </div>
           <div className={styles["devtools-field"]}>
@@ -795,7 +797,7 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
               value={input2}
               onChange={(event) => setInput2(event.target.value)}
               rows={7}
-              placeholder="第二段文本"
+              placeholder="Right text"
             />
           </div>
         </div>
@@ -842,7 +844,7 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
         <Button onClick={handleClear} icon={<Trash2 size={14} />}>
           {t('清空')}
         </Button>
-        {TOOL_EXAMPLES[tool.id] && (
+        {toolExamples[tool.id] && (
           <Button onClick={handleFillExample} icon={<Terminal size={14} />}>
             {t('示例')}
           </Button>

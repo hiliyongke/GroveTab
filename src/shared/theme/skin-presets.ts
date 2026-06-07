@@ -13,6 +13,8 @@
  *   4. 皮肤 ID 与 UserSettings.skinPreset 联合类型一一对应
  */
 
+import { translate } from '@/shared/i18n/core';
+
 /** 皮肤 ID 联合类型 */
 export type SkinPresetId = "minimal" | "glassmorphism" | "nord" | "apple";
 
@@ -179,8 +181,8 @@ export const SKIN_PRESETS: SkinPreset[] = [
   // ═══════════════════════════════════════════════════
   {
     id: "minimal",
-    labelKey: "skin.minimal",
-    descriptionKey: "skin.minimalDesc",
+    labelKey: translate("极简"),
+    descriptionKey: translate("极简干净的设计，最大化空间利用"),
     previewColors: ["#2B6BFF", "#EAF1FF", "#8DB2FF"],
     compatibleMode: "both",
 
@@ -298,8 +300,8 @@ export const SKIN_PRESETS: SkinPreset[] = [
   // ═══════════════════════════════════════════════════
   {
     id: "glassmorphism",
-    labelKey: "skin.glassmorphism",
-    descriptionKey: "skin.glassmorphismDesc",
+    labelKey: translate("毛玻璃"),
+    descriptionKey: translate("半透明毛玻璃效果，现代质感"),
     previewColors: ["#0078D4", "rgba(255,255,255,0.45)", "#2B88D8"],
     compatibleMode: "both",
 
@@ -410,8 +412,8 @@ export const SKIN_PRESETS: SkinPreset[] = [
   // ═══════════════════════════════════════════════════
   {
     id: "nord",
-    labelKey: "skin.nord",
-    descriptionKey: "skin.nordDesc",
+    labelKey: "Nord",
+    descriptionKey: translate("Nord 暗色主题，护眼柔和的极地配色"),
     previewColors: ["#5E81AC", "#ECEFF4", "#88C0D0"],
     compatibleMode: "both",
 
@@ -501,8 +503,8 @@ export const SKIN_PRESETS: SkinPreset[] = [
   // ═══════════════════════════════════════════════════
   {
     id: "apple",
-    labelKey: "skin.apple",
-    descriptionKey: "skin.appleDesc",
+    labelKey: "Apple",
+    descriptionKey: translate("Apple 风格浅色主题，优雅简洁"),
     previewColors: ["#0071e3", "#f5f5f7", "#1d1d1f"],
     compatibleMode: "both",
 

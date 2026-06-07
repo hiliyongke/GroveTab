@@ -6,17 +6,18 @@
  */
 
 import { useEffect, useMemo, useCallback } from "react";
-import { useTabsStore, useStatsStore } from "@/store";
+import { useTabsStore, useStatsStore, useSettingsStore } from "@/store";
 import { useTabActions } from "@/shared/hooks/use-tab-actions";
 import { useT } from "@/shared/i18n";
 import { findAmbiguousTitleIds } from "@/shared/utils/url-display";
 import { TabItem } from "../components/TabItem";
 import { Flame } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
-import { Tag, Flex, Typography } from "antd";
+import { Tag, Flex, Typography, Tooltip } from "antd";
 import { CONFIG } from "@/shared/config";
 import { STORAGE_KEYS } from "@/shared/config/storage-keys";
 import { storageOnChanged } from "@/chrome";
+import { calcTabHealth } from "@/shared/utils/tab-health";
 import styles from "../styles/views.module.less";
 
 const MAX_DISPLAY = CONFIG.ui.maxDisplay;
@@ -30,6 +31,8 @@ export function FrequencyView() {
   const isFallback = useStatsStore((s) => s.isFallback);
   const getCountRecent = useStatsStore((s) => s.getCountRecent);
   const statsLoaded = useStatsStore((s) => s.loaded);
+  const statsData = useStatsStore((s) => s.data);
+  const dedupStrictness = useSettingsStore((s) => s.settings.dedupStrictness ?? "loose");
   const { t } = useT();
 
   // 首次进入视图时加载统计数据
@@ -54,10 +57,11 @@ export function FrequencyView() {
       // 精确为 0 时回落 lastAccessed，保证 UI 仍然按"最近活跃"排序
       const score =
         preciseCount > 0 ? preciseCount * 1_000_000_000 + tab.lastAccessed : tab.lastAccessed;
-      return { tab, score, count: preciseCount };
+      const health = calcTabHealth(tab, tabs, statsData, dedupStrictness);
+      return { tab, score, count: preciseCount, health };
     });
     return withScore.sort((a, b) => b.score - a.score).slice(0, MAX_DISPLAY);
-  }, [tabs, getCountRecent]);
+  }, [tabs, getCountRecent, statsData, dedupStrictness]);
 
   const ambiguousIds = useMemo(
     () => findAmbiguousTitleIds(sortedTabs.map((x) => x.tab)),
@@ -90,11 +94,16 @@ export function FrequencyView() {
             showHostname
             showUrlHint={ambiguousIds.has(entry.tab.id)}
             leading={
-              <Typography.Text
-                className={`${styles["app-frequency-rank"]}${i < 3 ? " is-top-rank" : ""}`}
-              >
-                {i + 1}
-              </Typography.Text>
+              <Flex align="center" gap={4}>
+                <Typography.Text
+                  className={`${styles["app-frequency-rank"]}${i < 3 ? " is-top-rank" : ""}`}
+                >
+                  {i + 1}
+                </Typography.Text>
+                <Tooltip title={t("健康度 {score} 分", { score: entry.health.total })}>
+                  <span className={`${styles["app-health-dot"]} ${styles[`app-health-dot--${entry.health.level}`]}`} />
+                </Tooltip>
+              </Flex>
             }
           />
         ))}

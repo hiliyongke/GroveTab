@@ -107,7 +107,7 @@ function getWindowTitle(
   alias?: string,
 ): string {
   if (alias && alias.trim().length > 0) return alias.trim();
-  return isCurrent ? t("window.current") : t("window.otherWithId", { id: windowId });
+  return isCurrent ? t("当前窗口") : t("窗口 {id}", { id: windowId });
 }
 
 export const WindowCard = memo(function WindowCard({
@@ -243,7 +243,7 @@ export const WindowCard = memo(function WindowCard({
                   size="small"
                   autoFocus
                   value={aliasDraft}
-                  placeholder={t("window.aliasPlaceholder")}
+                  placeholder={t("窗口别名")}
                   onChange={(event) => setAliasDraft(event.target.value)}
                   onClick={(event) => event.stopPropagation()}
                   onPressEnter={handleSaveAlias}
@@ -254,7 +254,7 @@ export const WindowCard = memo(function WindowCard({
                 <span className={styles["app-window-card-title"]}>{title}</span>
               )}
               <span className={styles["app-window-card-meta"]}>
-                {t("window.summary", { count: tabs.length, groups: groupCount })}
+                {t("{count} 个标签 · {groups} 个分组", { count: tabs.length, groups: groupCount })}
               </span>
             </span>
           </div>
@@ -263,7 +263,7 @@ export const WindowCard = memo(function WindowCard({
           <Flex align="center" gap={6} className={styles["app-window-card-tags"]}>
             {isFocused && !isCurrent && (
               <Tag color="green" className={styles["app-window-card-tag"]}>
-                {t("window.focused")}
+                {t("已聚焦")}
               </Tag>
             )}
             {splitViewCount > 0 && (
@@ -276,7 +276,7 @@ export const WindowCard = memo(function WindowCard({
                 className={styles["app-window-card-tag"]}
                 icon={<EyeOff size={ICON_SIZE.MICRO} />}
               >
-                {t("window.incognito")}
+                {t("无痕模式")}
               </Tag>
             )}
             {healthLevel && (
@@ -336,7 +336,7 @@ export const WindowCard = memo(function WindowCard({
               />
             </Tooltip>
             {!isCurrent && (
-              <Tooltip title={t("window.mergeAll")}>
+              <Tooltip title={t("合并到当前窗口")}>
                 <Button
                   type="text"
                   size="small"
@@ -345,7 +345,7 @@ export const WindowCard = memo(function WindowCard({
                     e.stopPropagation();
                     handleMergeToCurrent();
                   }}
-                  aria-label={t("window.mergeAll")}
+                  aria-label={t("合并到当前窗口")}
                   className={styles["app-window-card-quick-btn"]}
                 />
               </Tooltip>
@@ -404,7 +404,7 @@ export const WindowCard = memo(function WindowCard({
           >
             <Plus size={ICON_SIZE.SMALL} />
             {ungroupedTabs.length > 0
-              ? t("windowGroup.createFromUngrouped")
+              ? t("从未分组创建分组")
               : t("拖入标签创建分组")}
           </Button>
         ) : undefined
@@ -437,7 +437,7 @@ export const WindowCard = memo(function WindowCard({
           >
             <Flex className={styles["app-window-ungrouped-header"]}>
               <Layers size={ICON_SIZE.SMALL} />
-              <Typography.Text>{t("windowGroup.ungroupedTabs")}</Typography.Text>
+              <Typography.Text>{t("未分组标签")}</Typography.Text>
               <Tag className={styles["app-window-group-count"]}>{ungroupedTabs.length}</Tag>
             </Flex>
             <List className={styles["app-window-group-list"]}>

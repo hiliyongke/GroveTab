@@ -17,50 +17,51 @@ const HIGH_FREQ_DEBOUNCE_MS = 200;
 export function useSwBroadcast() {
   const handleBroadcast = useTabsStore((s) => s.handleBroadcast);
   const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
-  const channelRef = useRef<BroadcastChannel | null>(null);
+
+  /** 用 ref 解耦 useEffect 依赖，避免 store 引用变化时重建全部 14 个监听器 */
+  const handleBroadcastRef = useRef(handleBroadcast);
+  const loadAllTabsRef = useRef(loadAllTabs);
+  handleBroadcastRef.current = handleBroadcast;
+  loadAllTabsRef.current = loadAllTabs;
 
   useEffect(() => {
     const channel = new BroadcastChannel(CHANNEL_NAME);
-    channelRef.current = channel;
 
     const handler = (event: MessageEvent<SwBroadcastMessage>) => {
-      handleBroadcast(event.data);
+      handleBroadcastRef.current(event.data);
     };
 
     const runtimeHandler = (message: SwBroadcastMessage) => {
-      // 来源验证：只处理本扩展发出的消息，忽略其他扩展通过 chrome.runtime.sendMessage 广播的消息
       if (
         message &&
         typeof message.type === "string" &&
         typeof message.timestamp === "number" &&
         message.source === BRAND.id
       ) {
-        handleBroadcast(message);
+        handleBroadcastRef.current(message);
       }
     };
 
     const emit = (type: SwBroadcastType, payload: Record<string, unknown> = {}) => {
-      handleBroadcast({ type, payload, timestamp: Date.now() });
+      handleBroadcastRef.current({ type, payload, timestamp: Date.now() });
     };
 
-    /** Debounced refresh — 所有 chrome 事件统一 defer，避免 focus/window-switch 全量刷新风暴 */
+    /** Debounced refresh — 所有 chrome 事件统一 defer */
     const refreshDebounced = (() => {
       let timer: ReturnType<typeof setTimeout> | null = null;
       return () => {
         if (timer !== null) window.clearTimeout(timer);
         timer = window.setTimeout(() => {
           timer = null;
-          void loadAllTabs({ silent: true });
+          void loadAllTabsRef.current({ silent: true });
         }, HIGH_FREQ_DEBOUNCE_MS);
       };
     })();
 
-    // 所有非关键刷新统一走 debounce，避免 focus 切换等引发全量重载风暴
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") refreshDebounced();
     };
 
-    // tab-removed: emit 即时更新本地 UI，数据刷新走 debounce
     const tabRemovedHandler: Parameters<typeof chrome.tabs.onRemoved.addListener>[0] = (tabId, removeInfo) => {
       emit("tab-removed", { id: tabId, windowId: removeInfo.windowId, isWindowClosing: removeInfo.isWindowClosing });
       refreshDebounced();
@@ -112,5 +113,5 @@ export function useSwBroadcast() {
       window.removeEventListener("focus", refreshDebounced);
       window.removeEventListener("pageshow", refreshDebounced);
     };
-  }, [handleBroadcast, loadAllTabs]);
+  }, []); // 依赖为空 — ref 始终指向最新 store 函数
 }

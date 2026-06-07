@@ -349,9 +349,9 @@ export function PopupContent() {
       }
       setRecentTabs((prev) => prev.filter((t) => !toClose.includes(t.id)));
       void refreshTabs();
-      messageApi.success(`已关闭 ${toClose.length} 个重复标签页`);
+      messageApi.success(t("已关闭 {count} 个重复标签页", { count: toClose.length }));
     } catch {
-      messageApi.error("去重失败");
+      messageApi.error(t("去重失败"));
     } finally {
       setDedupRunning(false);
     }
@@ -375,7 +375,7 @@ export function PopupContent() {
     }
     setRecentTabs([]);
     void refreshTabs();
-    messageApi.success("已关闭全部标签页");
+    messageApi.success(t("已关闭全部标签页"));
   }, [recentTabs, refreshTabs, messageApi]);
 
   // ── Render ──
@@ -408,13 +408,13 @@ export function PopupContent() {
               onClick={() => void archiveAll()}
               className="popup-toolbar-btn"
             >
-              归档
+              {t("归档")}
             </Button>
           </Tooltip>
 
           <span className="popup-toolbar-sep" />
 
-          <Tooltip title="一键去重：保留最近访问的标签页，关闭重复项">
+          <Tooltip title={t("一键去重：保留最近访问的标签页，关闭重复项")}>
             <Button
               type="text"
               size="small"
@@ -424,7 +424,7 @@ export function PopupContent() {
               onClick={() => void handleDedup()}
               className="popup-toolbar-btn"
             >
-              {dupCount > 0 ? `去重 ${dupCount}` : "去重"}
+              {dupCount > 0 ? `${t("去重")} ${dupCount}` : t("去重")}
             </Button>
           </Tooltip>
 
@@ -448,11 +448,11 @@ export function PopupContent() {
               icon={<ArrowUpDown size={ICON_SIZE.SMALL} />}
               className="popup-toolbar-btn"
             >
-              {SORT_OPTIONS.find((o) => o.value === sortMode)?.label ?? "最近"}
+              {SORT_OPTIONS.find((o) => o.value === sortMode)?.label ?? t("最近")}
             </Button>
           </Dropdown>
 
-          <Tooltip title={sortAsc ? "降序" : "升序"}>
+          <Tooltip title={sortAsc ? t("降序") : t("升序")}>
             <Button
               type="text"
               size="small"
@@ -470,7 +470,7 @@ export function PopupContent() {
 
           <span className="popup-toolbar-sep" />
 
-          <Tooltip title="按域名分组显示">
+          <Tooltip title={t("按域名分组显示")}>
             <Button
               type="text"
               size="small"
@@ -480,7 +480,7 @@ export function PopupContent() {
             />
           </Tooltip>
 
-          <Tooltip title={overrideNewTab ? "已接管新标签页" : "已关闭接管，新标签页恢复默认"}>
+          <Tooltip title={overrideNewTab ? t("已接管新标签页") : t("已关闭接管，新标签页恢复默认")}>
             <Button
               type="text"
               size="small"
@@ -497,13 +497,13 @@ export function PopupContent() {
           </Tooltip>
 
           <Popconfirm
-            title="确定关闭全部标签页？"
+            title={t("确定关闭全部标签页？")}
             onConfirm={() => void handleCloseAll()}
-            okText="关闭"
-            cancelText="取消"
+            okText={t("关闭")}
+            cancelText={t("取消")}
             placement="bottomRight"
           >
-            <Tooltip title="关闭全部标签页">
+            <Tooltip title={t("关闭全部标签页")}>
               <Button
                 type="text"
                 size="small"
@@ -521,7 +521,7 @@ export function PopupContent() {
         {displayTabs.length === 0 ? (
           <div className="popup-list-empty">
             {!loaded ? (
-              <Text type="secondary" className="popup-empty-text">加载中…</Text>
+              <Text type="secondary" className="popup-empty-text">{t("加载中…")}</Text>
             ) : (
               <Empty
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -576,7 +576,7 @@ export function PopupContent() {
           onClick={openNewTab}
           className="popup-footer-btn"
         >
-          工作台
+          {t("工作台")}
         </Button>
       </div>
 

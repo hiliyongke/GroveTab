@@ -1,17 +1,10 @@
 /**
  * FeatureEmptyState 样式模块
- * BEM 子元素使用 &__ 嵌套，尺寸变体用 &--small。
+ * 统一使用 --app-* CSS 变量
  */
-
 @keyframes feature-empty-fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .feature-empty {
@@ -19,78 +12,62 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 24px;
+  padding: var(--app-space-12) var(--app-space-6);
   text-align: center;
   animation: feature-empty-fade-in 0.4s ease-out;
 
-  // ── 尺寸变体 ──
   &--small {
-    padding: 24px 16px;
+    padding: var(--app-space-6) var(--app-space-4);
   }
 
-  // ── 子元素 ──
-  &__empty {
-    margin-bottom: 16px;
-  }
-
+  &__empty     { margin-bottom: var(--app-space-4); }
   &__icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 72px;
-    height: 72px;
-    font-size: 32px;
-    color: var(--ant-color-primary, #1677ff);
-    background: var(--ant-color-primary-bg, #e6f4ff);
-    border-radius: 50%;
+    width: 72px; height: 72px;
+    font-size: var(--app-font-xxl);
+    color: var(--ant-color-primary);
+    background: var(--ant-color-primary-bg);
+    border-radius: var(--app-radius-circle);
   }
 
   &__title {
     display: block;
-    margin-bottom: 4px;
-    font-size: 16px;
+    margin-bottom: var(--app-gap-xs);
+    font-size: var(--app-font-lg);
     font-weight: 600;
-    color: var(--ant-color-text, rgb(0 0 0 / 88%));
+    color: var(--ant-color-text);
   }
 
   &__description {
     max-width: 360px;
-    margin: 0 0 16px;
-    font-size: 13px;
+    margin: 0 0 var(--app-space-4);
+    font-size: var(--app-font-base);
     line-height: 1.6;
-    color: var(--ant-color-text-secondary, rgb(0 0 0 / 45%));
+    color: var(--ant-color-text-secondary);
   }
 
   &__hints {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--app-gap-md);
     max-width: 320px;
-    margin-bottom: 20px;
+    margin-bottom: calc(var(--app-space-5));
     text-align: left;
   }
 
-  &__hint-item {
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-  }
+  &__hint-item { display: flex; gap: var(--app-gap-md); align-items: flex-start; }
 
   &__hint-dot {
     flex-shrink: 0;
-    width: 6px;
-    height: 6px;
+    width: 6px; height: 6px;
     margin-top: 7px;
-    background: var(--ant-color-primary, #1677ff);
+    background: var(--ant-color-primary);
     border-radius: 50%;
   }
 
-  &__hint-text {
-    font-size: 13px;
-    line-height: 1.6;
-  }
+  &__hint-text { font-size: var(--app-font-base); line-height: 1.6; }
 
-  &__actions {
-    margin-top: 8px;
-  }
+  &__actions { margin-top: var(--app-gap-md); }
 }

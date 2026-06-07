@@ -83,7 +83,7 @@ export function GeneralSettings({ settings, updateSettings }: GeneralSettingsPro
       </Field>
 
       {/* ── 闲置阈值 (F-13 / F-09) ── */}
-      <Field label={t("闲置阈值")} hint={t("settings.idleThresholdHint")}>
+      <Field label={t("闲置阈值")} hint={t("标签页超过设定时间未访问后将被标记为闲置状态")}>
         <Select
           value={settings.idleThresholdMinutes ?? 1440}
           onChange={(value) => handleSetting({ idleThresholdMinutes: value })}
@@ -163,6 +163,17 @@ export function GeneralSettings({ settings, updateSettings }: GeneralSettingsPro
         <Switch
           checked={settings.trackTabFocusTime !== false}
           onChange={(value) => handleSetting({ trackTabFocusTime: value })}
+        />
+      </Field>
+
+      {/* ── 高级模式 ── */}
+      <Field
+        label={t("显示高级设置")}
+        hint={t("开启后显示内存治理、时间轴设置、快捷键、数据配置等高级选项。默认关闭以简化设置面板。")}
+      >
+        <Switch
+          checked={settings.showAdvancedSettings === true}
+          onChange={(value) => handleSetting({ showAdvancedSettings: value })}
         />
       </Field>
     </Flex>

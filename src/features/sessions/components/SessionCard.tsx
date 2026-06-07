@@ -22,6 +22,7 @@ import "dayjs/locale/en";
 dayjs.extend(relativeTime);
 import type { ArchivedSession, ArchivedTab } from "@/shared/types";
 import { useT } from "@/shared/i18n";
+import { useFeatureFlagStore } from "@/shared/store/feature-flag-slice";
 import styles from "../styles/archive.module.less";
 
 interface SessionCardProps {
@@ -66,6 +67,7 @@ export function SessionCard({
 }: SessionCardProps) {
   const { t } = useT();
   const dayjsLocale = locale === "zh-CN" ? "zh-cn" : "en";
+  const archiveTrashMerged = useFeatureFlagStore((s) => s.flags.archive_trash_merged);
 
   /** 命中 tabs 优先排前面的 preview faves */
   const previewFavicons = useMemo(() => {
@@ -83,6 +85,7 @@ export function SessionCard({
 
   const overflowCount = Math.max(0, session.tabs.length - FAVICON_PREVIEW_LIMIT);
   const isAuto = session.source === "auto" || session.hidden === true;
+  const isTrash = session.source === "trash" && archiveTrashMerged;
 
   const highlightText = (text: string): React.ReactNode => {
     if (!highlightQuery?.trim()) return text;
@@ -103,10 +106,10 @@ export function SessionCard({
 
   return (
     <article
-      className={`${styles["archive-card"]}${highlighted === true ? " " + styles["is-highlighted"] : ""}${selected === true ? " " + styles["is-selected"] : ""}`}
+      className={`${styles["archive-card"]}${highlighted === true ? " " + styles["is-highlighted"] : ""}${selected === true ? " " + styles["is-selected"] : ""}${isTrash ? " " + styles["is-trash"] : ""}`}
     >
       {/* 顶部：复选框 + 自动标记 */}
-      {(selectable === true || isAuto) && (
+      {(selectable === true || isAuto || isTrash) && (
         <Flex
           align="center"
           justify="space-between"
@@ -124,6 +127,11 @@ export function SessionCard({
           {isAuto && (
             <Tag color="gold" className={styles["archive-card__auto-tag"]}>
               <Sparkles size={ICON_SIZE.TINY} /> {t("自动快照")}
+            </Tag>
+          )}
+          {isTrash && (
+            <Tag color="red" className={styles["archive-card__auto-tag"]}>
+              <Trash2 size={ICON_SIZE.TINY} /> {t("回收站")}
             </Tag>
           )}
         </Flex>

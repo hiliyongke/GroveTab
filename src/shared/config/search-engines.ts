@@ -8,7 +8,11 @@
  *   - 'trending'  ：可选公开热榜（目前未启用，占位）
  *
  * 所有数据源都不强制联网，国内环境默认 off / local 即可。
+ *
+ * 本文件包含 locale-specific 数据（搜索引擎品牌名 + 预设热词表），
+ * 不属于「中文原文 → 译文」字典，因此跳过 i18n:scan 检查。
  */
+// @i18n-noscan
 
 import type { SearchEngineId, SearchHistoryEntry, TrendingCache } from "@/shared/types";
 import type { CustomSearchEngine } from "@/shared/types/settings";

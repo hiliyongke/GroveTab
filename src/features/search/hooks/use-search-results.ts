@@ -372,7 +372,7 @@ export function useSearchResults(options: {
 
   const commandItems = useMemo<UniversalSearchItem[]>(() => {
     if (isTagScopedQuery || onOpenHistory === undefined || normalizedQuery === "") return [];
-    const triggers = ["history", "recent", "closed", "/h", "/history", "历史", "最近", "关闭"];
+    const triggers = ["history", "recent", "closed", "/h", "/history", t("历史"), t("最近"), t("关闭")];
     if (!triggers.some((kw) => lowerQuery.includes(kw))) return [];
     return [
       {

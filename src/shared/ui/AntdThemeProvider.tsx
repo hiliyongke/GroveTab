@@ -23,6 +23,41 @@ import { LOCAL_CACHE_KEYS } from '@/shared/config/storage-keys';
 
 const ANT_APP_STYLE: React.CSSProperties = { minHeight: '100vh' };
 
+/** 静态 classNames 对象，避免每次渲染创建新引用导致 antd ConfigProvider 重复计算 */
+const MODAL_CLASS_NAMES = {
+  mask: 'app-modal__mask',
+  header: 'app-modal__header',
+  body: 'app-modal__body',
+  footer: 'app-modal__footer',
+  container: 'app-modal__container',
+} as const;
+const DRAWER_CLASS_NAMES = {
+  mask: 'app-drawer__mask',
+  header: 'app-drawer__header',
+  body: 'app-drawer__body',
+  footer: 'app-drawer__footer',
+  section: 'app-drawer__section',
+} as const;
+const POPOVER_CLASS_NAMES = { container: 'app-popover__container' } as const;
+const CARD_CLASS = { root: 'app-card' };
+const TAG_CLASS = { root: 'app-tag' };
+const BUTTON_CLASS = { root: 'app-button' };
+const ALERT_CLASS = { root: 'app-alert' };
+const BADGE_CLASS = { indicator: 'app-badge__indicator' };
+const SEGMENTED_CLASS = { root: 'app-segmented', item: 'app-segmented__item' };
+const TYPOGRAPHY_CONFIG = { className: 'app-typography' } as const;
+
+/** 包装 classNames 的对象，避免每次渲染创建新引用 */
+const TAG_PROPS = { classNames: TAG_CLASS };
+const BUTTON_PROPS = { classNames: BUTTON_CLASS };
+const CARD_PROPS = { classNames: CARD_CLASS };
+const ALERT_PROPS = { classNames: ALERT_CLASS };
+const BADGE_PROPS = { classNames: BADGE_CLASS };
+const SEGMENTED_PROPS = { classNames: SEGMENTED_CLASS };
+const MODAL_PROPS = { classNames: MODAL_CLASS_NAMES };
+const DRAWER_PROPS = { classNames: DRAWER_CLASS_NAMES };
+const POPOVER_PROPS = { classNames: POPOVER_CLASS_NAMES };
+
 function FeedbackBridge() {
   const { message, notification, modal } = AntdApp.useApp();
   const apiRef = useRef({ message, notification, modal });
@@ -96,8 +131,8 @@ export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
     for (const [key, value] of Object.entries(appThemeVars)) {
       root.style.setProperty(key, value);
     }
-
     return () => {
+      // 主题切换时清理已设置的变量，由下一次 effect 重新写入
       for (const key of Object.keys(appThemeVars)) {
         root.style.removeProperty(key);
       }
@@ -115,41 +150,16 @@ export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
     <ConfigProvider
       theme={themeConfig}
       locale={locale}
-      typography={{ className: 'app-typography' }}
-      tag={{ classNames: { root: 'app-tag' } }}
-      button={{ classNames: { root: 'app-button' } }}
-      card={{ classNames: { root: 'app-card' } }}
-      alert={{ classNames: { root: 'app-alert' } }}
-      badge={{ classNames: { indicator: 'app-badge__indicator' } }}
-      segmented={{
-        classNames: {
-          root: 'app-segmented',
-          item: 'app-segmented__item',
-        },
-      }}
-      modal={{
-        classNames: {
-          mask: 'app-modal__mask',
-          header: 'app-modal__header',
-          body: 'app-modal__body',
-          footer: 'app-modal__footer',
-          container: 'app-modal__container',
-        },
-      }}
-      drawer={{
-        classNames: {
-          mask: 'app-drawer__mask',
-          header: 'app-drawer__header',
-          body: 'app-drawer__body',
-          footer: 'app-drawer__footer',
-          section: 'app-drawer__section',
-        },
-      }}
-      popover={{
-        classNames: {
-          container: 'app-popover__container',
-        },
-      }}
+      typography={TYPOGRAPHY_CONFIG}
+      tag={TAG_PROPS}
+      button={BUTTON_PROPS}
+      card={CARD_PROPS}
+      alert={ALERT_PROPS}
+      badge={BADGE_PROPS}
+      segmented={SEGMENTED_PROPS}
+      modal={MODAL_PROPS}
+      drawer={DRAWER_PROPS}
+      popover={POPOVER_PROPS}
     >
       <AntdApp style={ANT_APP_STYLE}>
         <FeedbackBridge />

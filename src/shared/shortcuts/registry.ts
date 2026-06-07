@@ -10,6 +10,7 @@
  */
 
 import { KEYBINDING_DEFS, type KeybindingAction, type KeybindingDef } from "@/shared/config/keybindings";
+import { translate } from "@/shared/i18n/core";
 
 // ── 注册表 ────────────────────────────────────────────────────────────────────
 
@@ -62,7 +63,7 @@ export function detectConflicts(): string[] {
   const conflicts: string[] = [];
   for (const [key, actions] of keyMap) {
     if (actions.length > 1) {
-      const msg = `[Shortcuts] 冲突: "${key}" 被绑定到 ${actions.join(", ")}`;
+      const msg = `[Shortcuts] ${translate("冲突: \"{key}\" 被绑定到 {actions}", { key, actions: actions.join(", ") })}`;
       if (import.meta.env.DEV) {
         console.warn(msg);
       }

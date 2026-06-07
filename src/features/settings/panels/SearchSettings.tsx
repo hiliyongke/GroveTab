@@ -300,7 +300,7 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
       </Field>
 
       {/* 清空最近搜索 —— 将应用命名空间下的搜索历史键直接置为空数组 */}
-      <Field label={t("清空最近搜索")} hint={t("settings.clearRecentSearchesHint")}>
+      <Field label={t("清空最近搜索")} hint={t("清除所有最近的搜索历史记录")}>
         <Popconfirm
           title={t("确认清空全部最近搜索？")}
           onConfirm={() => {

@@ -82,13 +82,13 @@ export function GridView({ filterQuery = "" }: GridViewProps) {
     // 自动适配逻辑：根据标签页总数决定卡片大小
     if (cardSize === "auto") {
       const totalTabs = tabs.length;
-      if (totalTabs <= 10) return "240px"; // 标签页少时使用大卡片
-      if (totalTabs <= 30) return "200px"; // 中等数量使用默认卡片
-      return "160px"; // 标签页多时使用紧凑卡片
+      if (totalTabs <= 10) return "200px"; // 标签页少时使用大卡片
+      if (totalTabs <= 30) return "160px"; // 中等数量使用默认卡片
+      return "140px"; // 标签页多时使用紧凑卡片
     }
 
     // 固定档位映射
-    const SIZE_MAP = { sm: "160px", md: "200px", lg: "240px" } as const;
+    const SIZE_MAP = { sm: "140px", md: "160px", lg: "200px" } as const;
     return SIZE_MAP[cardSize] ?? SIZE_MAP.md;
   }, [cardSize, tabs.length]);
 
@@ -103,10 +103,10 @@ export function GridView({ filterQuery = "" }: GridViewProps) {
 
   // 空状态：原始 tabs 为空时不渲染；过滤后为空时显示 Empty
   const allTabsEmpty = tabs.length === 0;
-  if (allTabsEmpty) return <Empty description={t("empty.noOpenTabs")} />;
+  if (allTabsEmpty) return <Empty description={t("暂无打开的标签页")} />;
 
   if (groups.length === 0) {
-    return <Empty description={t("search.noDomainResults")} />;
+    return <Empty description={t("未找到匹配的域名")} />;
   }
 
   const handleJump = useCallback((id: number, wid: number) => { void jumpToTab(id, wid); }, [jumpToTab]);
@@ -181,6 +181,11 @@ function GridCard({
   const accent = useAccent(first?.favIconUrl, colorKey);
   const color = accent.bar;
 
+  /** 卡片内联样式：注入 favicon 取色结果作为 CSS 变量 —— 与 SiteCard 一致 */
+  const cardStyle: React.CSSProperties = cssVars({
+    "--app-grid-card-accent": color,
+  });
+
   /**
    * 点击卡片：
    *   - 单 tab：直接跳转
@@ -218,7 +223,7 @@ function GridCard({
       classNames={{ body: styles["app-grid-card__body"] }}
       data-border-radius={token.borderRadiusLG}
       data-hover-border={token.colorPrimaryBorder}
-      data-card-accent={color}
+      style={cardStyle}
     >
       {/* 缩略图区 —— 16:10 宽高比 */}
       <Flex align="center" justify="center" className={styles["app-grid-card-preview"]}>
@@ -226,8 +231,8 @@ function GridCard({
           <img
             src={first.favIconUrl}
             alt=""
-            width={36}
-            height={36}
+            width={28}
+            height={28}
             className={styles["app-grid-card-favicon"]}
             onError={() => setFaviconError(true)}
           />

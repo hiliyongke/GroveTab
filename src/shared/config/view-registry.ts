@@ -10,6 +10,7 @@
 
 import type { ComponentType } from "react";
 import type { ViewMode } from "@/shared/config/views";
+import { useFeatureFlagStore } from "@/shared/store/feature-flag-slice";
 
 /** 视图注册条目 */
 export interface ViewRegistration {
@@ -35,11 +36,46 @@ function invalidateCache(): void {
 }
 
 /**
+ * 检测是否为开发者模式（unpacked extension）。
+ * 未发布的扩展没有 update_url，仅 developer load 时会缺失该字段。
+ */
+function isDevMode(): boolean {
+  try {
+    return !("update_url" in chrome.runtime.getManifest());
+  } catch {
+    return false;
+  }
+}
+
+/**
  * 注册一个视图
  *
  * @param reg 视图注册信息
  */
 export function registerView(reg: ViewRegistration): void {
+  // Guard: unified_tabs_view 为 true 时，tabgroup/window/timeline 不再注册为顶层视图
+  if (
+    (reg.id === "tabgroup" || reg.id === "window" || reg.id === "timeline")
+  ) {
+    const flags = useFeatureFlagStore.getState().flags;
+    if (flags.unified_tabs_view !== false) {
+      return;
+    }
+  }
+
+  // Guard: archive_trash_merged 为 false 时，sessions 不注册
+  if (reg.id === "sessions") {
+    const flags = useFeatureFlagStore.getState().flags;
+    if (flags.archive_trash_merged === false) {
+      return;
+    }
+  }
+
+  // Guard: devtools 仅开发者模式可见
+  if (reg.id === "devtools" && !isDevMode()) {
+    return;
+  }
+
   registry.set(reg.id, {
     enabled: true,
     order: 99,
@@ -81,10 +117,13 @@ export function getEnabledViews(): ViewRegistration[] {
 }
 
 /**
+ * 获取单个视图组件（供组合视图如 SessionsView 使用）
+ */
+export function getViewComponent(id: ViewMode): ComponentType | undefined {
+  return registry.get(id)?.component;
+}
+/**
  * 获取视图组件映射表（供 App.tsx 渲染用）
- *
- * 返回 Record<ViewMode, ComponentType>，在渲染时用 viewMode 查找对应组件。
- * 使用 module-level 缓存，仅在为空时重建。
  */
 export function getViewComponentMap(): ViewComponentMap {
   if (componentMapCache !== null) return componentMapCache;

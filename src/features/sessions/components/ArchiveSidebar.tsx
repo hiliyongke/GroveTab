@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from "react";
-import { Inbox, Sun, CalendarDays, CalendarRange, Clock, Sparkles } from "lucide-react";
+import { Inbox, Sun, CalendarDays, CalendarRange, Clock, Sparkles, Trash2 } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import type { ArchivedSession } from "@/shared/types";
 import { useT } from "@/shared/i18n";
@@ -19,22 +19,20 @@ interface ArchiveSidebarProps {
   onSelectFilter: (filter: ArchiveFilterId | "earlier") => void;
 }
 
-interface FilterSpec {
-  id: ArchiveFilterId | "earlier";
-  labelKey: string;
-  Icon: typeof Inbox;
-}
-
-const FILTERS: FilterSpec[] = [
-  { id: "all", labelKey: "archive.filter.all", Icon: Inbox },
-  { id: "today", labelKey: "archive.filter.today", Icon: Sun },
-  { id: "week", labelKey: "archive.filter.thisWeek", Icon: CalendarDays },
-  { id: "month", labelKey: "archive.filter.thisMonth", Icon: CalendarRange },
-  { id: "earlier", labelKey: "archive.filter.earlier", Icon: Clock },
-];
 
 export function ArchiveSidebar({ sessions, activeFilter, onSelectFilter }: ArchiveSidebarProps) {
   const { t } = useT();
+
+  const filters = useMemo(
+    () => [
+      { id: "all" as const, label: t("全部"), Icon: Inbox },
+      { id: "today" as const, label: t("今天"), Icon: Sun },
+      { id: "week" as const, label: t("本周"), Icon: CalendarDays },
+      { id: "month" as const, label: t("本月"), Icon: CalendarRange },
+      { id: "earlier" as const, label: t("更早"), Icon: Clock },
+    ],
+    [t],
+  );
 
   /** 计算每个分类下的会话数量 */
   const counts = useMemo(() => {
@@ -49,9 +47,13 @@ export function ArchiveSidebar({ sessions, activeFilter, onSelectFilter }: Archi
       month: 0,
       earlier: 0,
       auto: 0,
+      trash: 0,
     };
     for (const session of sessions) {
       const isAuto = session.source === "auto" || session.hidden === true;
+      if (session.source === "trash") {
+        result.trash += 1;
+      }
       if (isAuto) {
         result.auto += 1;
         continue;
@@ -70,7 +72,7 @@ export function ArchiveSidebar({ sessions, activeFilter, onSelectFilter }: Archi
       <div className={styles["archive-sidebar__group"]}>
         <div className={styles["archive-sidebar__group-title"]}>{t("按时间")}</div>
         <div className={styles["archive-sidebar__list"]}>
-          {FILTERS.map((filter) => {
+          {filters.map((filter) => {
             const isActive = activeFilter === filter.id;
             return (
               <div
@@ -86,7 +88,7 @@ export function ArchiveSidebar({ sessions, activeFilter, onSelectFilter }: Archi
                 <span className={styles["archive-sidebar__item-icon"]}>
                   <filter.Icon size={ICON_SIZE.MEDIUM} />
                 </span>
-                <span className={styles["archive-sidebar__item-label"]}>{t(filter.labelKey)}</span>
+                <span className={styles["archive-sidebar__item-label"]}>{filter.label}</span>
                 <span className={styles["archive-sidebar__item-count"]}>{counts[filter.id]}</span>
               </div>
             );
@@ -111,6 +113,21 @@ export function ArchiveSidebar({ sessions, activeFilter, onSelectFilter }: Archi
             </span>
             <span className={styles["archive-sidebar__item-label"]}>{t("自动快照")}</span>
             <span className={styles["archive-sidebar__item-count"]}>{counts.auto}</span>
+          </div>
+          <div
+            role="button"
+            tabIndex={0}
+            className={`${styles["archive-sidebar__item"]}${activeFilter === "trash" ? " " + styles["is-active"] : ""}`}
+            onClick={() => onSelectFilter("trash")}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") onSelectFilter("trash");
+            }}
+          >
+            <span className={styles["archive-sidebar__item-icon"]}>
+              <Trash2 size={ICON_SIZE.MEDIUM} />
+            </span>
+            <span className={styles["archive-sidebar__item-label"]}>{t("回收站")}</span>
+            <span className={styles["archive-sidebar__item-count"]}>{counts.trash}</span>
           </div>
         </div>
       </div>

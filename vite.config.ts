@@ -1,6 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { purgeCss } from "vite-plugin-purgecss";
+import purgeCss from "vite-plugin-purgecss";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -41,51 +41,6 @@ interface Manifest {
   action: { default_popup?: string; default_icon?: Record<string, string> };
   icons: Record<string, string>;
   [key: string]: unknown;
-}
-
-/**
- * 从 i18n/source 构建翻译查找表
- * key-mapping.json: { "header.search": "k_9iqbwju", ... }
- * en.json / zh-CN.json: [{ key: "k_9iqbwju", "zh-CN": "搜索", en: "Search" }, ...]
- *
- * _locales 中的 key 格式为下划线（如 header_search），对应 key-mapping 中的点号格式（header.search）
- */
-function buildI18nLookup(locale: "zh-CN" | "en"): Record<string, string> {
-  const keyMappingPath = resolve(__dirname, "i18n/source/key-mapping.json");
-  const sourcePath = resolve(__dirname, `i18n/source/${locale}.json`);
-
-  if (!existsSync(keyMappingPath) || !existsSync(sourcePath)) {
-    return {};
-  }
-
-  // key-mapping: { "header.search": "k_9iqbwju" }
-  const keyMapping = JSON.parse(readFileSync(keyMappingPath, "utf-8")) as Record<string, string>;
-
-  // source: [{ key: "k_xxx", "zh-CN": "...", en: "..." }]
-  interface SourceEntry {
-    key: string;
-    "zh-CN": string;
-    en: string;
-  }
-  const sourceEntries = JSON.parse(readFileSync(sourcePath, "utf-8")) as SourceEntry[];
-
-  // 构建 k_xxx → 翻译文本 的映射
-  const keyToText: Record<string, string> = {};
-  for (const entry of sourceEntries) {
-    keyToText[entry.key] = entry[locale] || entry["zh-CN"] || "";
-  }
-
-  // 构建 "header.search" → 翻译文本 的映射
-  const lookup: Record<string, string> = {};
-  for (const [dotKey, kId] of Object.entries(keyMapping)) {
-    const text = keyToText[kId];
-    if (text) {
-      // 同时存储点号格式和下划线格式，方便查找
-      lookup[dotKey] = text;
-      lookup[dotKey.replace(/\./g, "_")] = text;
-    }
-  }
-  return lookup;
 }
 
 /**
@@ -132,32 +87,7 @@ function writeBrandLocales() {
       { message: string; description?: string; placeholders?: Record<string, unknown> }
     >;
 
-    // 从 i18n/source 构建翻译查找表
-    const i18nLookup = buildI18nLookup(item.locale);
-
-    // 遍历 _locales 中所有 key，尝试从 i18n/source 自动同步翻译
-    // 品牌相关字段单独处理，其余字段从 i18n/source 自动拉取
-    const brandKeys = new Set([
-      "appName",
-      "appDescription",
-      "context_save_all",
-      "newtab_title",
-      "popup_title",
-      "onboarding_title",
-    ]);
-
-    for (const msgKey of Object.keys(messages)) {
-      if (brandKeys.has(msgKey)) continue;
-      // _locales key 格式（如 header_search）→ i18n lookup key
-      const text = i18nLookup[msgKey];
-      if (text) {
-        // 保留原有 placeholders 结构，只更新 message 文本
-        // 注意：_locales 使用 $count$ 占位符，i18n/source 使用 {count}，需转换
-        messages[msgKey].message = text.replace(/\{(\w+)\}/g, "$$$$1$$");
-      }
-    }
-
-    // 品牌相关字段：始终由 BUILD_BRAND 控制
+    // _locales 品牌字段由 BUILD_BRAND 控制，人工维护，不自动同步
     messages.appName.message = BUILD_BRAND.name;
     messages.appDescription.message = pickLocaleField(BUILD_BRAND.description, item.locale);
     messages.context_save_all.message =
@@ -171,9 +101,6 @@ function writeBrandLocales() {
       item.locale === "zh-CN" ? `欢迎使用 ${BUILD_BRAND.name}` : `Welcome to ${BUILD_BRAND.name}`;
 
     writeFileSync(file, JSON.stringify(messages, null, 2));
-    console.log(
-      `[i18n] _locales/${item.dir}/messages.json 已同步（${Object.keys(i18nLookup).length / 2} 条翻译可用）`,
-    );
   }
 }
 
@@ -277,9 +204,11 @@ export default defineConfig({
         /^ant-/,
         /^is-/,
         /^data-/,
+        // CSS Modules 生成的 class
+        /_/,
+        /^app-/,
       ],
     }),
-  ],
   ],
   resolve: {
     alias: {

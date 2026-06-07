@@ -20,6 +20,7 @@ import type { MessageInstance } from 'antd/es/message/interface';
 import type { NotificationInstance } from 'antd/es/notification/interface';
 import type { HookAPI as ModalHookAPI } from 'antd/es/modal/useModal';
 import { BRAND } from '@/shared/config/brand';
+import { translate } from '@/shared/i18n/core';
 
 /** 统一日志前缀：在构建时从 BRAND 读取，后续品牌切换自动同步 */
 const LOG_TAG = BRAND.logTag;
@@ -126,7 +127,7 @@ export const feedback = {
       else {
         const fallbackTitle = typeof config.title === 'string' || typeof config.title === 'number'
           ? String(config.title)
-          : '确认？';
+          : translate('确认？');
         const ok = window.confirm(fallbackTitle);
         if (ok && config.onOk !== undefined) config.onOk(null);
       }

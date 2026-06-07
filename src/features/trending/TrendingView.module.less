@@ -16,10 +16,10 @@
 }
 
 .trending-surface-card {
-  background: var(--app-glass-bg);
-  border: 1px solid var(--app-hairline);
+  background: var(--ant-color-bg-elevated);
+  border: 1px solid var(--ant-color-border-secondary);
   box-shadow: var(--app-shadow-card);
-  backdrop-filter: var(--app-glass-filter);
+  border-radius: var(--app-card-radius);
 }
 
 .trending-toolbar-card {
@@ -242,4 +242,28 @@
   .trending-toolbar-card__segment--group { width: 100%; }
   .trending-grid,
   .trending-grid.is-compact { grid-template-columns: 1fr; }
+}
+
+// ── SpeedDial 常用站点卡片（v1.5） ──
+.trending-speeddial-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--ant-border-radius);
+  background: var(--ant-color-fill-tertiary);
+  font-size: 13px;
+  max-width: 160px;
+  overflow: hidden;
+}
+.trending-speeddial-favicon {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.trending-speeddial-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

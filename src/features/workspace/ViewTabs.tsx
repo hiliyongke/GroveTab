@@ -1,9 +1,8 @@
 /**
  * ViewTabs — 统一视图切换组件
  *
- * antd Tabs，left / top / right 三位置：
- *   - top：横排图标+文案
- *   - left/right：竖排图标+文案，底部折叠按钮
+ * antd Tabs，left / right 垂直侧栏：
+ *   - 竖排图标+文案，底部折叠按钮
  */
 
 import { useState, useMemo, useCallback, memo } from "react";
@@ -12,11 +11,12 @@ import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from "
 import { VIEW_CONFIGS, type ViewMode, type ViewConfig } from "@/shared/config/views";
 import { useT } from "@/shared/i18n";
 import { useSettingsStore } from "@/store";
+import { useFeatureFlagStore } from "@/shared/store/feature-flag-slice";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { IconRenderer } from "@/shared/ui/IconRenderer";
 import styles from "./ViewTabs.module.less";
 
-export type ViewTabPosition = "left" | "top" | "right";
+export type ViewTabPosition = "left" | "right";
 
 interface ViewTabsProps {
   activeView: ViewMode;
@@ -25,46 +25,48 @@ interface ViewTabsProps {
 
 function useViewTabItems(): Array<ViewConfig & { label: string }> {
   const { t } = useT();
+  const archiveTrashMerged = useFeatureFlagStore((s) => s.isEnabled("archive_trash_merged"));
+  const historyTabVisible = useSettingsStore((s) => s.settings.historyTabVisible === true);
+  const rawOrder = useSettingsStore((s) => s.settings.tabBarOrder);
+  const rawHidden = useSettingsStore((s) => s.settings.hiddenTabBarViews);
+  // useMemo 稳定化 [] 默认值，避免每次 store 更新生成新引用
+  const tabBarOrder = useMemo(() => rawOrder ?? [], [rawOrder]);
+  const hiddenTabBarViews = useMemo(() => rawHidden ?? [], [rawHidden]);
   return useMemo(
-    () =>
-      VIEW_CONFIGS.filter((v) => v.primary !== false).map((v) => ({
-        ...v,
-        label: t(v.labelKey),
-      })),
-    [t],
+    () => {
+      const filtered = VIEW_CONFIGS.filter((v) => {
+        // 用户自定义隐藏（P2-03）
+        if (hiddenTabBarViews.includes(v.id)) return false;
+        if (v.primary === false) {
+          if (v.id === "history" && historyTabVisible) return true;
+          return false;
+        }
+        if (archiveTrashMerged && (v.id === "archive" || v.id === "trash")) return false;
+        return true;
+      }).map((v) => ({ ...v, label: t(v.labelKey) }));
+
+      // P2-03: 用户自定义排序
+      if (tabBarOrder.length > 0) {
+        const orderMap = new Map(tabBarOrder.map((id, i) => [id, i]));
+        filtered.sort((a, b) => (orderMap.get(a.id) ?? 99) - (orderMap.get(b.id) ?? 99));
+      }
+
+      return filtered;
+    },
+    [t, archiveTrashMerged, historyTabVisible, tabBarOrder, hiddenTabBarViews],
   );
 }
 
 export const ViewTabs = memo(function ViewTabs({ activeView, onChange }: ViewTabsProps) {
+  const { t } = useT();
   const items = useViewTabItems();
   const position = useSettingsStore(
-    (s) => (s.settings.viewTabPosition ?? "top") as ViewTabPosition,
+    (s) => (s.settings.viewTabPosition ?? "right") as ViewTabPosition,
   );
-  const isVertical = position !== "top";
   const [collapsed, setCollapsed] = useState(false);
   const toggleCollapsed = useCallback(() => setCollapsed((p) => !p), []);
 
-  if (!isVertical) {
-    return (
-      <Tabs
-        tabPosition="top"
-        activeKey={activeView}
-        onChange={(key) => onChange(key as ViewMode)}
-        size="small"
-        items={items.map((item) => ({
-          key: item.id,
-          label: (
-            <span className={styles["view-tab-label"]}>
-              <IconRenderer name={item.iconName} size={15} />
-              <span className={styles["view-tab-label__text"]}>{item.label}</span>
-            </span>
-          ),
-        }))}
-      />
-    );
-  }
-
-  // vertical: Tabs 自适应最宽标签宽度；按钮固定底部
+  // 垂直侧栏 Tabs 自适应最宽标签宽度；按钮固定底部
   return (
     <div className={styles["view-tabs-vertical"]}>
       <Tabs
@@ -94,7 +96,7 @@ export const ViewTabs = memo(function ViewTabs({ activeView, onChange }: ViewTab
         type="text"
         size="small"
         onClick={toggleCollapsed}
-        aria-label={collapsed ? "展开文案" : "收起文案"}
+        aria-label={collapsed ? t("展开文案") : t("收起文案")}
         className={styles["view-tabs-collapse-btn"]}
         icon={
           position === "left"

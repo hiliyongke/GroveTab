@@ -136,16 +136,26 @@ export const TabItem = memo(function TabItem({
     setTabGroups(groups.filter((g) => g.id >= 0));
   }, [tab.windowId]);
   /** 标准化 URL：去协议 + 跟踪参数 + hash，用于去重比较 */
-  const normalizeUrl = (url: string): string => {
+  const normalizedTabUrl = useMemo(() => {
     try {
-      const u = new URL(url);
+      const u = new URL(tab.url);
       ["utm_source","utm_medium","utm_campaign","utm_term","utm_content","fbclid","gclid"].forEach(p => u.searchParams.delete(p));
       u.hash = "";
       return u.host + u.pathname.replace(/\/+$/, "") + u.search;
-    } catch { return url; }
-  };
+    } catch { return tab.url; }
+  }, [tab.url]);
   /** 当前标签是否已在常用站点中 */
-  const isInQuickStart = speedDialSites.some((s) => normalizeUrl(s.url) === normalizeUrl(tab.url));
+  const isInQuickStart = useMemo(
+    () => speedDialSites.some((s) => {
+      try {
+        const u = new URL(s.url);
+        ["utm_source","utm_medium","utm_campaign","utm_term","utm_content","fbclid","gclid"].forEach(p => u.searchParams.delete(p));
+        u.hash = "";
+        return (u.host + u.pathname.replace(/\/+$/, "") + u.search) === normalizedTabUrl;
+      } catch { return s.url === normalizedTabUrl; }
+    }),
+    [speedDialSites, normalizedTabUrl],
+  );
   /** 休眠态——标签已被浏览器丢弃，显示灰色样式 */
   const isDiscarded = tab.discarded ?? false;
 

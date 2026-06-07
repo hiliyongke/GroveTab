@@ -27,7 +27,7 @@ export function TimelineToolbar() {
     <ViewToolbar
       controls={
         <>
-          <Tooltip title={t("toolbar.granularity.title")}>
+          <Tooltip title={t("分组粒度")}>
             <span>
               <Segmented
                 size="small"
@@ -43,7 +43,7 @@ export function TimelineToolbar() {
                         <Clock size={13} />
                       </span>
                     ),
-                    label: t("toolbar.granularity.day"),
+                    label: t("按天"),
                   },
                   {
                     value: "hour",
@@ -52,7 +52,7 @@ export function TimelineToolbar() {
                         <Clock3 size={13} />
                       </span>
                     ),
-                    label: t("toolbar.granularity.hour"),
+                    label: t("按小时"),
                   },
                 ]}
               />
@@ -60,7 +60,7 @@ export function TimelineToolbar() {
           </Tooltip>
           <Flex align="center" gap={4} className={toolbarStyles["exact-time-toggle"]}>
             <Typography.Text className={toolbarStyles["exact-time-label"]}>
-              {t("toolbar.exactTime")}
+              {t("显示精确时间")}
             </Typography.Text>
             <Switch
               size="small"

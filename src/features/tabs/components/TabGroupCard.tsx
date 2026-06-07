@@ -102,6 +102,13 @@ export const TabGroupCard = memo(function TabGroupCard({
   const allTabIds = useMemo(() => group.tabs.map((tab) => tab.id), [group.tabs]);
 
   // 颜色选择器
+  const colorNames = useMemo(
+    () => ({
+      grey: t("灰色"), blue: t("蓝色"), red: t("红色"), yellow: t("黄色"),
+      green: t("绿色"), pink: t("粉色"), purple: t("紫色"), cyan: t("青色"), orange: t("橙色"),
+    }),
+    [t],
+  );
   const colorPicker = (
     <Space wrap className={styles["app-window-group-color-grid"]}>
       {TAB_GROUP_COLORS.map((item) => (
@@ -110,7 +117,7 @@ export const TabGroupCard = memo(function TabGroupCard({
           type="text"
           className={`${styles["app-window-group-color"]} ${item === group.color ? styles["is-active"] : ""}`}
           style={cssVars({ "--app-window-group-color": COLOR_HEX[item] })}
-          aria-label={t(`windowGroup.color.${item}`)}
+          aria-label={colorNames[item] ?? item}
           onClick={() => handleColorChange(item)}
         />
       ))}
@@ -124,7 +131,7 @@ export const TabGroupCard = memo(function TabGroupCard({
           key: "close",
           danger: true,
           icon: <X size={ICON_SIZE.SMALL} />,
-          label: t("tabGroup.closeGroup"),
+          label: t("关闭分组"),
           onClick: handleCloseGroup,
         },
       ]
@@ -132,7 +139,7 @@ export const TabGroupCard = memo(function TabGroupCard({
         {
           key: "rename",
           icon: <Pencil size={ICON_SIZE.SMALL} />,
-          label: t("tabGroup.rename"),
+          label: t("重命名"),
           onClick: startRename,
         },
         {
@@ -140,7 +147,7 @@ export const TabGroupCard = memo(function TabGroupCard({
           icon: <Palette size={ICON_SIZE.SMALL} />,
           label: (
             <Popover trigger="click" placement="right" content={colorPicker}>
-              {t("tabGroup.changeColor")}
+              {t("更改颜色")}
             </Popover>
           ),
         },
@@ -148,26 +155,26 @@ export const TabGroupCard = memo(function TabGroupCard({
         {
           key: "ungroup",
           icon: <Ungroup size={ICON_SIZE.SMALL} />,
-          label: t("tabGroup.dissolve"),
+          label: t("解除分组"),
           onClick: handleUngroup,
         },
         {
           key: "discard",
           icon: <Moon size={ICON_SIZE.SMALL} />,
-          label: t("tabGroup.discard"),
+          label: t("休眠"),
           onClick: handleDiscardGroup,
         },
         {
           key: "move-new-window",
           icon: <ExternalLink size={ICON_SIZE.SMALL} />,
-          label: t("tabGroup.moveToWindow"),
+          label: t("移至新窗口"),
           onClick: handleMoveToNewWindow,
         },
         {
           key: "close",
           danger: true,
           icon: <X size={ICON_SIZE.SMALL} />,
-          label: t("tabGroup.closeGroup"),
+          label: t("关闭分组"),
           onClick: handleCloseGroup,
         },
       ];
@@ -228,7 +235,7 @@ export const TabGroupCard = memo(function TabGroupCard({
         </>
       }
     >
-      <Flex vertical gap={6} className={styles["app-domain-group-list--flex"]}>
+      <Flex vertical gap={4} className={styles["app-domain-group-list--flex"]}>
         {renderTabItem
           ? // 自定义渲染模式（用于 @dnd-kit 拖拽集成）
             group.tabs.map((tab) => (

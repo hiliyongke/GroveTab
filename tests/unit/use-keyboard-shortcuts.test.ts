@@ -52,32 +52,32 @@ describe("useKeyboardShortcuts — view switching", () => {
     vi.restoreAllMocks();
   });
 
-  function mount(activeView: "tabs" | "timeline" | "archive") {
+  function mount(activeView: "tabs" | "bookmarks" | "sessions") {
     const r = renderHook(() => useKeyboardShortcuts({ activeView, onSwitchView, onCancel }));
     unmounts.push(r.unmount);
     return r;
   }
 
   it("⌘1 切换到 tabs", () => {
-    mount("timeline");
+    mount("bookmarks");
     fireKey("1", { metaKey: true });
     expect(onSwitchView).toHaveBeenCalledWith("tabs");
   });
 
-  it("⌘2 切换到 tabgroup", () => {
+  it("⌘2 切换到 bookmarks", () => {
     mount("tabs");
     fireKey("2", { metaKey: true });
-    expect(onSwitchView).toHaveBeenCalledWith("tabgroup");
-  });
-
-  it("⌘6 切换到 bookmarks", () => {
-    mount("tabs");
-    fireKey("6", { metaKey: true });
     expect(onSwitchView).toHaveBeenCalledWith("bookmarks");
   });
 
+  it("⌘3 切换到 sessions", () => {
+    mount("tabs");
+    fireKey("3", { metaKey: true });
+    expect(onSwitchView).toHaveBeenCalledWith("sessions");
+  });
+
   it("Ctrl+1 与 ⌘1 等价（跨平台）", () => {
-    mount("timeline");
+    mount("bookmarks");
     fireKey("1", { ctrlKey: true });
     expect(onSwitchView).toHaveBeenCalledWith("tabs");
   });
@@ -117,7 +117,7 @@ describe("useKeyboardShortcuts — input field suppression", () => {
 
   it("INPUT 焦点中 ⌘1 仍生效（与系统级一致）", () => {
     const r = renderHook(() =>
-      useKeyboardShortcuts({ activeView: "timeline", onSwitchView, onCancel }),
+      useKeyboardShortcuts({ activeView: "bookmarks", onSwitchView, onCancel }),
     );
     unmount = r.unmount;
     const input = document.createElement("input");

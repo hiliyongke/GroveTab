@@ -46,24 +46,6 @@ const cache = new Map<string, Accent | null>();
 const pending = new Map<string, Promise<Accent | null>>();
 
 /**
- * 判断 URL 是否与当前页面同源
- *
- * 扩展自身的 `chrome-extension://<id>/_favicon/...` 与 newtab 页同源 → true。
- * 远程站点的 favicon（https://example.com/favicon.ico）→ false。
- * data: / blob: 也视为同源（canvas 可安全读取）。
- */
-function isSameOriginUrl(url: string): boolean {
-  try {
-    // 协议 data:/blob: 天然可在 canvas 里使用
-    if (url.startsWith('data:') || url.startsWith('blob:')) return true;
-    const parsed = new URL(url, window.location.href);
-    return parsed.origin === window.location.origin;
-  } catch {
-    return false;
-  }
-}
-
-/**
  * 把 RGB → HSL 的饱和度（仅需 S，用于过滤灰色）
  */
 function saturation(r: number, g: number, b: number): number {
@@ -224,13 +206,13 @@ export function buildAccentFromHue(h: number, lShift = 0): Accent {
 /**
  * 把 favicon URL 变成 Accent
  *
- * **同源策略**：
- *   只有当 URL 与当前页面同源（典型情况：扩展自己的 `_favicon/` 入口）时，
- *   才尝试加载并读像素。跨源 favicon 即便 `crossOrigin="anonymous"` 请求成功，
- *   对方不返回 CORS 头时浏览器仍会在控制台打红（JS 无法捕获），因此**直接放弃**，
- *   由调用方用 `stringToAccent` 哈希色兜底——视觉上只是撞色，控制台保持干净。
+ * **跨源策略**：
+ *   在 Chrome 扩展环境中，通过 `fetch()` 下载 favicon 图片数据，构造 blob URL
+ *   （blob: 协议被视为同源），再用 Image + Canvas 提取主色。
+ *   这样避开了 `new Image(crossOrigin)` 的 CORS 限制 —— 只要扩展有对应
+ *   host_permissions，fetch 就能正常拿到图片字节。
  *
- * 失败场景：跨源 / 非图像 / 纯灰图标 / 加载超时 → resolve(null)
+ * 失败场景：fetch 超时 / 非图像响应 / 纯灰图标 / canvas 读失败 → resolve(null)
  */
 export function getAccentFromFavicon(url: string): Promise<Accent | null> {
   if (!url) return Promise.resolve(null);
@@ -238,69 +220,74 @@ export function getAccentFromFavicon(url: string): Promise<Accent | null> {
   const inFlight = pending.get(url);
   if (inFlight) return inFlight;
 
-  // 非同源直接放弃，避免浏览器级 CORS 报错污染控制台
-  if (!isSameOriginUrl(url)) {
-    cache.set(url, null);
-    return Promise.resolve(null);
-  }
-
   const task = new Promise<Accent | null>((resolve) => {
-    const img = new Image();
-    // 同源图片无需 crossOrigin；设置反而可能触发多余的预检
-    // img.crossOrigin = 'anonymous';
+    const abort = new AbortController();
 
     // 3 秒超时兜底
     const timer = window.setTimeout(() => {
+      abort.abort();
       cleanup();
-      cache.set(url, null);
       resolve(null);
     }, 3000);
 
     const cleanup = () => {
       window.clearTimeout(timer);
-      img.onload = null;
-      img.onerror = null;
     };
 
-    img.onload = () => {
-      cleanup();
-      try {
-        const size = 16;
-        const canvas = document.createElement('canvas');
-        canvas.width = size;
-        canvas.height = size;
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        if (!ctx) {
+    // 用 fetch 下载 favicon 数据 → blob URL（同源，canvas 无 CORS 限制）
+    fetch(url, { signal: abort.signal })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.blob();
+      })
+      .then((blob) => {
+        const blobUrl = URL.createObjectURL(blob);
+        const img = new Image();
+        img.onload = () => {
+          cleanup();
+          URL.revokeObjectURL(blobUrl);
+          try {
+            const size = 16;
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            if (!ctx) {
+              cache.set(url, null);
+              resolve(null);
+              return;
+            }
+            ctx.drawImage(img, 0, 0, size, size);
+            const pixels = ctx.getImageData(0, 0, size, size);
+            const dominant = extractDominantColor(pixels);
+            if (!dominant) {
+              cache.set(url, null);
+              resolve(null);
+              return;
+            }
+            const [h] = rgbToHsl(...dominant);
+            const accent = buildAccentFromHue(h);
+            cache.set(url, accent);
+            resolve(accent);
+          } catch {
+            cache.set(url, null);
+            resolve(null);
+          }
+        };
+        img.onerror = () => {
+          cleanup();
+          URL.revokeObjectURL(blobUrl);
           cache.set(url, null);
           resolve(null);
-          return;
-        }
-        ctx.drawImage(img, 0, 0, size, size);
-        const pixels = ctx.getImageData(0, 0, size, size);
-        const dominant = extractDominantColor(pixels);
-        if (!dominant) {
-          cache.set(url, null);
-          resolve(null);
-          return;
-        }
-        const [h] = rgbToHsl(...dominant);
-        const accent = buildAccentFromHue(h);
-        cache.set(url, accent);
-        resolve(accent);
-      } catch {
-        // canvas 读像素被 CORS 拦截 → 记失败
+        };
+        img.src = blobUrl;
+      })
+      .catch(() => {
+        // fetch 失败：网络错误 / 超时 / 非图片响应
+        cleanup();
         cache.set(url, null);
         resolve(null);
-      }
-    };
-
-    img.onerror = () => {
-      cleanup();
-      cache.set(url, null);
-      resolve(null);
-    };
-
-    img.src = url;
+      });
   });
 
   pending.set(url, task);

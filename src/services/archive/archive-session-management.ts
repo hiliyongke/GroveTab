@@ -16,6 +16,7 @@ import {
   isArchivableTab,
   toArchivedTab,
 } from "./archive-utils";
+import { translate } from "@/shared/i18n/core";
 
 /** 导出文件大小上限（50 MB） */
 const MAX_EXPORT_SIZE = 50 * 1024 * 1024;
@@ -158,7 +159,7 @@ export async function createAutoSnapshot(tabs: chrome.tabs.Tab[]): Promise<Archi
   });
   const session: ArchivedSession = {
     id: nanoid(10),
-    name: `自动快照 · ${dateStr}`,
+    name: translate("自动快照 · {dateStr}", { dateStr }),
     createdAt: now.getTime(),
     tabs: archivedTabs,
     tabCount: archivedTabs.length,

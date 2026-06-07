@@ -16,6 +16,22 @@ import {
 } from "@/repositories";
 import { STORAGE_KEYS } from "@/shared/config/storage-keys";
 
+/**
+ * 旧版 defaultView → v2 视图体系的迁移映射表（v1.4 核心整合）。
+ * 运行期检测到 legacy defaultView 时自动迁移到 tabsSubView / tabsLayout。
+ */
+export const LEGACY_DEFAULT_VIEW_MIGRATION: Record<
+  string,
+  { defaultView: string; tabsSubView?: string; tabsLayout?: string }
+> = {
+  domain: { defaultView: "tabs", tabsLayout: "masonry" },
+  compact: { defaultView: "tabs", tabsLayout: "compact" },
+  grid: { defaultView: "tabs", tabsLayout: "grid" },
+  tabgroup: { defaultView: "tabs", tabsSubView: "tabgroup" },
+  window: { defaultView: "tabs", tabsSubView: "window" },
+  timeline: { defaultView: "tabs", tabsSubView: "timeline" },
+};
+
 interface SettingsState {
   settings: UserSettings;
   loaded: boolean;
@@ -53,7 +69,7 @@ function mergeSettingsForStore(
 export const useSettingsStore = create<SettingsState>((set) => ({
   settings: {
     overrideNewTab: true,
-    viewTabPosition: "top",
+    viewTabPosition: "right",
     defaultView: "tabs",
     theme: "system",
     skinPreset: "glassmorphism",
@@ -116,6 +132,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     popupSortMode: "recent",
     popupSortAsc: false,
     popupGroupByDomain: false,
+    tabsSubView: "auto",
+    schemaVersion: 2,
   },
   loaded: false,
   automationRules: [],

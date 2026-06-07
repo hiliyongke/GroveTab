@@ -11,14 +11,16 @@
  * 7. 网格视图展开触发方式（点击 / 悬停）
  */
 
-import { useMemo } from "react";
-import { Select, Segmented, Switch, Flex } from "antd";
+import { useMemo, useCallback } from "react";
+import { Select, Segmented, Switch, Flex, Button, theme } from "antd";
+import { ArrowUp, ArrowDown, EyeOff } from "lucide-react";
 
 import type { UserSettings, ViewTabPosition } from "@/shared/types";
 
 import { useT } from "@/shared/i18n";
 import { VIEW_CONFIGS } from "@/shared/config/views";
 import { Field } from "@/features/settings/components/Field";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
 
 interface ViewLayoutSettingsProps {
   settings: UserSettings;
@@ -66,9 +68,9 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
               handleSetting({ tabsLayout: value as "masonry" | "compact" | "grid" })
             }
             options={[
-              { value: "masonry", label: t("view.domain") },
-              { value: "compact", label: t("view.compact") },
-              { value: "grid", label: t("view.grid") },
+              { value: "masonry", label: t("域名分组") },
+              { value: "compact", label: t("紧凑") },
+              { value: "grid", label: t("网格") },
             ]}
           />
         </Field>
@@ -76,14 +78,13 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
 
       <Field
         label={t("视图标签位置")}
-        hint={t("视图切换标签的排列方式：顶部/底部水平，左侧/右侧垂直侧栏")}
+        hint={t("视图切换标签的排列方式：左侧/右侧垂直侧栏")}
       >
         <Segmented
           block
-          value={settings.viewTabPosition ?? "top"}
+          value={settings.viewTabPosition ?? "right"}
           onChange={(value) => handleSetting({ viewTabPosition: value as ViewTabPosition })}
           options={[
-            { value: "top", label: t("顶部") },
             { value: "left", label: t("左侧") },
             { value: "right", label: t("右侧") },
           ]}
@@ -254,6 +255,119 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
           ]}
         />
       </Field>
+
+      <Field
+        label={t("显示历史记录")}
+        hint={t("开启后在视图切换栏中显示历史记录入口；默认仅通过快捷键或全局搜索访问")}
+      >
+        <Switch
+          checked={settings.historyTabVisible === true}
+          onChange={(value) => handleSetting({ historyTabVisible: value })}
+        />
+      </Field>
+
+      {/* P2-03: TabBar 自定义排序 */}
+      <TabBarOrderEditor settings={settings} updateSettings={updateSettings} />
     </Flex>
+  );
+}
+
+/** P2-03: TabBar 视图排序与显隐编辑器 */
+function TabBarOrderEditor({ settings, updateSettings }: {
+  settings: UserSettings;
+  updateSettings: (patch: Partial<UserSettings>) => void | Promise<void>;
+}) {
+  const { t } = useT();
+  const { token } = theme.useToken();
+  const order = settings.tabBarOrder ?? [];
+  const hidden = settings.hiddenTabBarViews ?? [];
+
+  const handleSetting = (patch: Partial<UserSettings>) => { void updateSettings(patch); };
+
+  // 当前 TabBar 可见的 primary 视图
+  const visibleViews = useMemo(
+    () => VIEW_CONFIGS.filter((v) => v.primary !== false && v.id !== "archive" && v.id !== "trash"),
+    [],
+  );
+
+  // 排序后视图列表
+  const ordered = useMemo(() => {
+    const list = [...visibleViews];
+    if (order.length > 0) {
+      const orderMap = new Map(order.map((id, i) => [id, i]));
+      list.sort((a, b) => (orderMap.get(a.id) ?? 99) - (orderMap.get(b.id) ?? 99));
+    }
+    return list;
+  }, [visibleViews, order]);
+
+  const moveUp = useCallback((index: number) => {
+    if (index <= 0) return;
+    const newOrder = [...ordered.map((v) => v.id)];
+    [newOrder[index - 1], newOrder[index]] = [newOrder[index]!, newOrder[index - 1]!];
+    handleSetting({ tabBarOrder: newOrder });
+  }, [ordered, handleSetting]);
+
+  const moveDown = useCallback((index: number) => {
+    if (index >= ordered.length - 1) return;
+    const newOrder = [...ordered.map((v) => v.id)];
+    [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1]!, newOrder[index]!];
+    handleSetting({ tabBarOrder: newOrder });
+  }, [ordered, handleSetting]);
+
+  const toggleHidden = useCallback((viewId: string) => {
+    const newHidden = hidden.includes(viewId)
+      ? hidden.filter((id) => id !== viewId)
+      : [...hidden, viewId];
+    handleSetting({ hiddenTabBarViews: newHidden });
+  }, [hidden, handleSetting]);
+
+  return (
+    <Field label={t("视图栏排序")} hint={t("拖拽排序或隐藏不常用的视图；至少保留一个可见视图。")}>
+      <Flex vertical gap={4}>
+        {ordered.map((view, index) => {
+          const isHidden = hidden.includes(view.id);
+          return (
+            <Flex
+              key={view.id}
+              align="center"
+              justify="space-between"
+              style={{
+                padding: "4px 8px",
+                borderRadius: token.borderRadiusSM,
+                backgroundColor: token.colorFillTertiary,
+                opacity: isHidden ? 0.5 : 1,
+              }}
+            >
+              <span style={{ flex: 1 }}>{t(view.labelKey)}</span>
+              <Flex gap={2}>
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<ArrowUp size={ICON_SIZE.SMALL} />}
+                  disabled={index === 0}
+                  onClick={() => moveUp(index)}
+                />
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<ArrowDown size={ICON_SIZE.SMALL} />}
+                  disabled={index === ordered.length - 1}
+                  onClick={() => moveDown(index)}
+                />
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<EyeOff size={ICON_SIZE.SMALL} />}
+                  danger={isHidden}
+                  onClick={() => toggleHidden(view.id)}
+                  disabled={hidden.length >= ordered.length - 1 && !isHidden}
+                  title={isHidden ? t("显示") : t("隐藏")}
+                />
+              </Flex>
+            </Flex>
+          );
+        })}
+      </Flex>
+    </Field>
   );
 }

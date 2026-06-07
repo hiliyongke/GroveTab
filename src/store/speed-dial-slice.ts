@@ -15,6 +15,7 @@ import type { SpeedDialSite } from '@/shared/types';
 import {
   getSpeedDialSites,
   addSpeedDialSite as repoAdd,
+  batchAddSpeedDialSites as repoBatchAdd,
   updateSpeedDialSite as repoUpdate,
   removeSpeedDialSite as repoRemove,
   reorderSpeedDialSites as repoReorder,
@@ -35,6 +36,8 @@ interface SpeedDialState {
   removeSite: (id: string) => Promise<void>;
   /** 拖拽重排 */
   reorderSites: (reorderedIds: string[]) => Promise<void>;
+  /** 批量导入站点（自动去重） */
+  batchImport: (sites: SpeedDialSite[]) => Promise<void>;
 }
 
 export const useSpeedDialStore = create<SpeedDialState>((set) => ({
@@ -79,6 +82,15 @@ export const useSpeedDialStore = create<SpeedDialState>((set) => ({
       set({ sites });
     } catch (err) {
       console.error('[speed-dial] reorderSites failed:', err);
+    }
+  },
+
+  batchImport: async (newSites) => {
+    try {
+      const sites = await repoBatchAdd(newSites);
+      set({ sites });
+    } catch (err) {
+      console.error('[speed-dial] batchImport failed:', err);
     }
   },
 }));

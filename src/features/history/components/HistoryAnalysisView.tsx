@@ -2,6 +2,7 @@
  * HistoryAnalysisView — 历史分析视图，渲染轻量 SVG 条形图和热力网格。
  */
 
+import { useMemo } from "react";
 import { Button, Empty, Flex, Select, Spin, Tooltip, Typography } from "antd";
 import { BarChart2, Clock, Download, Globe } from "lucide-react";
 import type { HistoryAnalysis } from "@/repositories";
@@ -17,13 +18,6 @@ interface HistoryAnalysisViewProps {
   styles: Record<string, string>;
 }
 
-const RANGE_OPTIONS = [
-  { value: 1 * 24 * 3600 * 1000, label: "今天" },
-  { value: 7 * 24 * 3600 * 1000, label: "近 7 天" },
-  { value: 14 * 24 * 3600 * 1000, label: "近 14 天" },
-  { value: 30 * 24 * 3600 * 1000, label: "近 30 天" },
-];
-
 export function HistoryAnalysisView({
   analysis,
   loading,
@@ -33,6 +27,16 @@ export function HistoryAnalysisView({
   t,
   styles,
 }: HistoryAnalysisViewProps): ReactNode {
+  const rangeOptions = useMemo(
+    () => [
+      { value: 1 * 24 * 3600 * 1000, label: t("今天") },
+      { value: 7 * 24 * 3600 * 1000, label: t("近 7 天") },
+      { value: 14 * 24 * 3600 * 1000, label: t("近 14 天") },
+      { value: 30 * 24 * 3600 * 1000, label: t("近 30 天") },
+    ],
+    [t],
+  );
+
   if (loading) {
     return (
       <Flex align="center" justify="center" className={styles["history-loading-center"]}>
@@ -49,7 +53,7 @@ export function HistoryAnalysisView({
             size="small"
             value={rangeMs}
             onChange={onRangeChange}
-            options={RANGE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+            options={rangeOptions.map((o) => ({ value: o.value, label: o.label }))}
             className={styles["history-date-picker"]}
           />
           <Button size="small" icon={<Download size={12} />} onClick={onExport}>
@@ -75,7 +79,7 @@ export function HistoryAnalysisView({
             size="small"
             value={rangeMs}
             onChange={onRangeChange}
-            options={RANGE_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+            options={rangeOptions.map((o) => ({ value: o.value, label: o.label }))}
             className={styles["history-date-picker"]}
           />
           <Typography.Text className={styles["history-stat-text"]}>
@@ -100,7 +104,7 @@ export function HistoryAnalysisView({
             return (
               <Tooltip
                 key={day.label}
-                title={`${day.label}：${day.count} 条，${day.uniqueHosts} 个站点`}
+                title={t("{label}：{count} 条，{hosts} 个站点", { label: day.label, count: day.count, hosts: day.uniqueHosts })}
               >
                 <div className={styles["history-day-bar-wrap"]}>
                   <div
@@ -126,7 +130,7 @@ export function HistoryAnalysisView({
             const intensity = maxHourCount > 0 ? hour.count / maxHourCount : 0;
             const bg = `color-mix(in srgb, var(--ant-color-primary) ${Math.round(intensity * 80 + 8)}%, transparent)`;
             return (
-              <Tooltip key={hour.label} title={`${hour.label}：${hour.count} 条`}>
+              <Tooltip key={hour.label} title={t("{label}：{count} 条", { label: hour.label, count: hour.count })}>
                 <div
                   className={styles["history-hour-cell"]}
                   style={{ background: bg } as CSSProperties}

@@ -30,6 +30,7 @@ import {
   useSettingsStore,
   useSessionsStore,
 } from "@/store";
+import { useFeatureFlagStore } from "@/shared/store/feature-flag-slice";
 import { feedback } from "@/shared/ui/feedback";
 import { appendHistoryEvent } from "@/repositories";
 import { SessionCard } from "./components/SessionCard";
@@ -53,7 +54,7 @@ type TimeBucket = "today" | "yesterday" | "thisWeek" | "thisMonth" | "earlier";
 
 interface BucketEntry {
   key: TimeBucket;
-  labelKey: string;
+  label: string;
   sessions: ArchivedSession[];
 }
 
@@ -238,6 +239,7 @@ export function ArchiveView() {
   const addUndoRecord = useUndoStore((s) => s.addRecord);
   const renameSessionAction = useSessionsStore((s) => s.renameSession);
   const { t, locale } = useT();
+  const archiveTrashMerged = useFeatureFlagStore((s) => s.flags.archive_trash_merged);
 
   // 仅挂载时刷新一次会话列表
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -313,6 +315,7 @@ export function ArchiveView() {
 
     return searchFiltered.filter((s) => {
       const isAuto = s.source === "auto" || s.hidden === true;
+      if (scope === "trash" && archiveTrashMerged) return s.source === "trash";
       if (scope === "auto") return isAuto;
       if (isAuto) return false; // 普通 scope 不展示 auto
       if (scope === "all") return true;
@@ -349,8 +352,7 @@ export function ArchiveView() {
       return [
         {
           key: "today",
-          labelKey:
-            sortMode === "largest" ? "archive.toolbar.sortLargest" : "archive.toolbar.sortName",
+          label: sortMode === "largest" ? t("按大小排列") : t("按名称排列"),
           sessions: sortedSessions,
         },
       ];
@@ -370,22 +372,22 @@ export function ArchiveView() {
       if (list) list.push(s);
       else map.set(key, [s]);
     }
-    const order: Array<{ key: TimeBucket; labelKey: string }> = [
-      { key: "today", labelKey: "archive.timeGroup.today" },
-      { key: "yesterday", labelKey: "archive.timeGroup.yesterday" },
-      { key: "thisWeek", labelKey: "archive.timeGroup.thisWeek" },
-      { key: "thisMonth", labelKey: "archive.timeGroup.thisMonth" },
-      { key: "earlier", labelKey: "archive.timeGroup.earlier" },
+    const order: Array<{ key: TimeBucket; label: string }> = [
+      { key: "today", label: t("今天") },
+      { key: "yesterday", label: t("昨天") },
+      { key: "thisWeek", label: t("本周") },
+      { key: "thisMonth", label: t("本月") },
+      { key: "earlier", label: t("更早") },
     ];
     const out: BucketEntry[] = [];
     for (const o of order) {
       const list = map.get(o.key);
       if (list && list.length > 0) {
-        out.push({ key: o.key, labelKey: o.labelKey, sessions: list });
+        out.push({ key: o.key, label: o.label, sessions: list });
       }
     }
     return out;
-  }, [sortedSessions, sortMode]);
+  }, [sortedSessions, sortMode, t]);
 
   /** 搜索时自动展开命中卡片 */
   useEffect(() => {
@@ -411,7 +413,7 @@ export function ArchiveView() {
     if (outcome.cancelled) {
       feedback.info(t("已取消恢复，成功恢复 {restored} 个标签", { restored: outcome.restored }));
     } else if (outcome.restored === total) {
-      feedback.success(t("恢复成功"));
+      feedback.success(t("恢复成功 — 可从常用站点快速访问"));
     } else {
       feedback.warning(
         t("部分恢复成功，已恢复 {restored}/{total} 个标签", { restored: outcome.restored, total }),
@@ -740,7 +742,7 @@ export function ArchiveView() {
                     className={styles["archive-time-group__header"]}
                   >
                     <Typography.Text className={styles["archive-time-group__title"]}>
-                      {t(bucket.labelKey)}
+                      {bucket.label}
                     </Typography.Text>
                     <Typography.Text className={styles["archive-time-group__count"]}>
                       {bucket.sessions.length}

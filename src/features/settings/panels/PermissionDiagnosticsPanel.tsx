@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { Badge, Button, Flex, Space, Tag, Tooltip, Typography } from "antd";
 import { CheckCircle, XCircle, AlertCircle, RefreshCw, ShieldCheck } from "lucide-react";
 import { useT } from "@/shared/i18n";
+import { translate } from "@/shared/i18n/core";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import permStyles from "./PermissionDiagnosticsPanel.module.less";
 
@@ -31,46 +32,46 @@ const PERMISSION_DEFS: Array<Omit<PermissionEntry, "status">> = [
   {
     permission: "tabs",
     label: "tabs",
-    features: ["标签工作台", "统一搜索", "内存治理"],
-    impact: "核心功能不可用，标签列表无法加载",
+    features: [translate("标签工作台"), translate("统一搜索"), translate("内存治理")],
+    impact: translate("核心功能不可用，标签列表无法加载"),
   },
   {
     permission: "history",
     label: "history",
-    features: ["历史分析", "多维视图", "统一搜索（历史）"],
-    impact: "历史记录功能完全失效，无法读取浏览历史",
+    features: [translate("历史分析"), translate("多维视图"), translate("统一搜索（历史）")],
+    impact: translate("历史记录功能完全失效，无法读取浏览历史"),
   },
   {
     permission: "bookmarks",
     label: "bookmarks",
-    features: ["书签中心", "书签实时同步", "自动分类规则"],
-    impact: "书签功能不可用，无法读取或监听书签变更",
+    features: [translate("书签中心"), translate("书签实时同步"), translate("自动分类规则")],
+    impact: translate("书签功能不可用，无法读取或监听书签变更"),
   },
   {
     permission: "sessions",
     label: "sessions",
-    features: ["最近关闭标签", "历史对账"],
-    impact: "最近关闭标签列表为空，历史对账失效",
+    features: [translate("最近关闭标签"), translate("历史对账")],
+    impact: translate("最近关闭标签列表为空，历史对账失效"),
   },
   {
     permission: "tabGroups",
     label: "tabGroups",
-    features: ["高保真归档", "TabGroup 恢复"],
-    impact: "归档时无法记录 Tab Group 信息，恢复时无法重建分组结构",
+    features: [translate("高保真归档"), translate("TabGroup 恢复")],
+    impact: translate("归档时无法记录 Tab Group 信息，恢复时无法重建分组结构"),
   },
   {
     permission: "system.memory",
     label: "system.memory",
-    features: ["内存压力感知", "智能标签治理"],
-    impact: "无法获取内存使用率，内存治理功能失效",
+    features: [translate("内存压力感知"), translate("智能标签治理")],
+    impact: translate("无法获取内存使用率，内存治理功能失效"),
   },
   {
     permission: "system.display",
     label: "system.display",
     // eslint-disable-next-line i18n-zh/no-bare-zh-in-js
-    features: ["多显示器识别", "窗口贴边", "分屏布局"],
+    features: [translate("多显示器识别"), translate("窗口贴边"), translate("分屏布局")],
     // eslint-disable-next-line i18n-zh/no-bare-zh-in-js
-    impact: "无法读取显示器工作区，窗口布局将回退到浏览器窗口尺寸",
+    impact: translate("无法读取显示器工作区，窗口布局将回退到浏览器窗口尺寸"),
   },
 ];
 

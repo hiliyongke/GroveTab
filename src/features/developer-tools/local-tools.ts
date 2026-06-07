@@ -5,6 +5,8 @@
  * 首版不引入任何第三方依赖，优先使用浏览器 Web API。
  */
 
+import { translate } from "@/shared/i18n/core";
+
 /** 工具执行结果 */
 export interface DevToolResult {
   /** 转换输出文本 */
@@ -30,7 +32,7 @@ export type JsonAction = "format" | "minify" | "validate";
  * @returns 格式化或压缩后的文本，校验时原样返回
  */
 export function jsonTransform(input: string, action: JsonAction): DevToolResult {
-  if (!input.trim()) return { output: "", error: "输入为空" };
+  if (!input.trim()) return { output: "", error: translate("输入为空") };
   try {
     const parsed: unknown = JSON.parse(input);
     switch (action) {
@@ -39,11 +41,11 @@ export function jsonTransform(input: string, action: JsonAction): DevToolResult 
       case "minify":
         return { output: JSON.stringify(parsed) };
       case "validate":
-        return { output: input, meta: "JSON 格式正确 ✓" };
+        return { output: input, meta: translate("JSON 格式正确 ✓") };
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return { output: "", error: `JSON 解析失败：${msg}` };
+    return { output: "", error: translate("JSON 解析失败：{msg}", { msg }) };
   }
 }
 
@@ -59,7 +61,7 @@ export type UrlAction = "encode" | "decode";
  * @param action - 编码或解码
  */
 export function urlTransform(input: string, action: UrlAction): DevToolResult {
-  if (!input) return { output: "", error: "输入为空" };
+  if (!input) return { output: "", error: translate("输入为空") };
   try {
     switch (action) {
       case "encode":
@@ -69,7 +71,13 @@ export function urlTransform(input: string, action: UrlAction): DevToolResult {
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return { output: "", error: `URL ${action === "encode" ? "编码" : "解码"}失败：${msg}` };
+    return {
+      output: "",
+      error: translate("URL {op} 失败：{msg}", {
+        op: action === "encode" ? translate("编码") : translate("解码"),
+        msg,
+      }),
+    };
   }
 }
 
@@ -85,7 +93,7 @@ export type Base64Action = "encode" | "decode";
  * 解码时先 atob 再通过 TextDecoder 还原。
  */
 export function base64Transform(input: string, action: Base64Action): DevToolResult {
-  if (!input) return { output: "", error: "输入为空" };
+  if (!input) return { output: "", error: translate("输入为空") };
   try {
     switch (action) {
       case "encode": {
@@ -101,7 +109,13 @@ export function base64Transform(input: string, action: Base64Action): DevToolRes
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return { output: "", error: `Base64 ${action === "encode" ? "编码" : "解码"}失败：${msg}` };
+    return {
+      output: "",
+      error: translate("Base64 {op} 失败：{msg}", {
+        op: action === "encode" ? translate("编码") : translate("解码"),
+        msg,
+      }),
+    };
   }
 }
 
@@ -116,43 +130,46 @@ export type TimestampAction = "toDatetime" | "toTimestamp";
  * 自动识别秒（10 位）和毫秒（13 位）时间戳。
  */
 export function timestampTransform(input: string, action: TimestampAction): DevToolResult {
-  if (!input.trim()) return { output: "", error: "输入为空" };
+  if (!input.trim()) return { output: "", error: translate("输入为空") };
   try {
     switch (action) {
       case "toDatetime": {
         const num = Number(input.trim());
         if (!Number.isFinite(num) || num < 0) {
-          return { output: "", error: "无效的时间戳" };
+          return { output: "", error: translate("无效的时间戳") };
         }
         // 自动识别秒/毫秒：10 位以下视为秒
         const ms = num > 9999999999 ? num : num * 1000;
         const date = new Date(ms);
         if (isNaN(date.getTime())) {
-          return { output: "", error: "无效的时间戳" };
+          return { output: "", error: translate("无效的时间戳") };
         }
         const iso = date.toISOString();
         const local = date.toLocaleString("zh-CN", { hour12: false });
         return {
           output: iso,
-          meta: `本地时间：${local}`,
+          meta: translate("本地时间：{local}", { local }),
         };
       }
       case "toTimestamp": {
         const date = new Date(input.trim());
         if (isNaN(date.getTime())) {
-          return { output: "", error: "无效的日期时间，请输入如 2024-01-01 或 ISO 格式" };
+          return {
+            output: "",
+            error: translate("无效的日期时间，请输入如 2024-01-01 或 ISO 格式"),
+          };
         }
         const sec = Math.floor(date.getTime() / 1000);
         const ms = date.getTime();
         return {
           output: String(sec),
-          meta: `毫秒：${ms}`,
+          meta: translate("毫秒：{ms}", { ms }),
         };
       }
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return { output: "", error: `时间戳转换失败：${msg}` };
+    return { output: "", error: translate("时间戳转换失败：{msg}", { msg }) };
   }
 }
 
@@ -176,23 +193,31 @@ const RADIX_MAP: Record<string, number> = {
  * @param toRadix - 输出进制：'bin' | 'oct' | 'dec' | 'hex'
  */
 export function radixTransform(input: string, fromRadix: string, toRadix: string): DevToolResult {
-  if (!input.trim()) return { output: "", error: "输入为空" };
+  if (!input.trim()) return { output: "", error: translate("输入为空") };
   const fromBase = RADIX_MAP[fromRadix];
   const toBase = RADIX_MAP[toRadix];
-  if (!fromBase || !toBase) return { output: "", error: "不支持的进制" };
+  if (!fromBase || !toBase) return { output: "", error: translate("不支持的进制") };
   try {
     const num = parseInt(input.trim(), fromBase);
     if (isNaN(num)) {
+      const radixLabel =
+        fromRadix === "bin"
+          ? translate("二进制")
+          : fromRadix === "oct"
+            ? translate("八进制")
+            : fromRadix === "hex"
+              ? translate("十六进制")
+              : translate("十进制");
       return {
         output: "",
-        error: `无效的${fromRadix === "bin" ? "二进制" : fromRadix === "oct" ? "八进制" : fromRadix === "hex" ? "十六进制" : "十进制"}数`,
+        error: translate("无效的{radix} 数", { radix: radixLabel }),
       };
     }
     const result = num.toString(toBase).toUpperCase();
     return { output: result };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return { output: "", error: `进制转换失败：${msg}` };
+    return { output: "", error: translate("进制转换失败：{msg}", { msg }) };
   }
 }
 
@@ -235,7 +260,7 @@ export function randomGenerate(action: RandomAction, length?: number): DevToolRe
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return { output: "", error: `随机生成失败：${msg}` };
+    return { output: "", error: translate("随机生成失败：{msg}", { msg }) };
   }
 }
 
@@ -244,7 +269,7 @@ export function randomGenerate(action: RandomAction, length?: number): DevToolRe
 /** 解析颜色值 */
 export function colorParse(input: string): DevToolResult {
   const trimmed = input.trim();
-  if (!trimmed) return { output: "", error: "输入为空" };
+  if (!trimmed) return { output: "", error: translate("输入为空") };
 
   // 尝试解析 HEX
   const hexMatch = /^#?([0-9a-fA-F]{3,8})$/.exec(trimmed);
@@ -252,7 +277,7 @@ export function colorParse(input: string): DevToolResult {
     const hex = hexMatch[1] ?? "";
     // 校验有效长度
     if (![3, 4, 6, 8].includes(hex.length)) {
-      return { output: "", error: "HEX 颜色值应为 3/4/6/8 位" };
+      return { output: "", error: translate("HEX 颜色值应为 3/4/6/8 位") };
     }
     const fullHex =
       hex.length === 3
@@ -270,7 +295,7 @@ export function colorParse(input: string): DevToolResult {
       gi = Number(g),
       bi = Number(b);
     if (ri > 255 || gi > 255 || bi > 255) {
-      return { output: "", error: "RGB 值应在 0-255 之间" };
+      return { output: "", error: translate("RGB 值应在 0-255 之间") };
     }
     const hexColor = `#${ri.toString(16).padStart(2, "0")}${gi.toString(16).padStart(2, "0")}${bi.toString(16).padStart(2, "0")}`;
     const output = a !== undefined ? `rgba(${ri}, ${gi}, ${bi}, ${a})` : `rgb(${ri}, ${gi}, ${bi})`;
@@ -288,14 +313,14 @@ export function colorParse(input: string): DevToolResult {
       si = Number(s),
       li = Number(l);
     if (hi > 360 || si > 100 || li > 100) {
-      return { output: "", error: "HSL 值超出范围（H:0-360, S:0-100, L:0-100）" };
+      return { output: "", error: translate("HSL 值超出范围（H:0-360, S:0-100, L:0-100）") };
     }
     const output =
       a !== undefined ? `hsla(${hi}, ${si}%, ${li}%, ${a})` : `hsl(${hi}, ${si}%, ${li}%)`;
     return { output, colorValue: output };
   }
 
-  return { output: "", error: "无法识别的颜色格式，请输入 HEX / RGB / HSL" };
+  return { output: "", error: translate("无法识别的颜色格式，请输入 HEX / RGB / HSL") };
 }
 
 // ── 多算法哈希 ────────────────────────────────────────
@@ -315,7 +340,7 @@ export async function hashDigest(
   input: string,
   algorithm: HashAlgorithm = "sha256",
 ): Promise<DevToolResult> {
-  if (!input) return { output: "", error: "输入为空" };
+  if (!input) return { output: "", error: translate("输入为空") };
   try {
     const algoName =
       algorithm === "sha1" ? "SHA-1" : algorithm === "sha512" ? "SHA-512" : "SHA-256";
@@ -326,7 +351,7 @@ export async function hashDigest(
     return { output: hex, meta: `${algoName} · ${hashArray.length * 8} bit` };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return { output: "", error: `哈希计算失败：${msg}` };
+    return { output: "", error: translate("哈希计算失败：{msg}", { msg }) };
   }
 }
 
@@ -340,7 +365,7 @@ export async function hashDigest(
  * @param flags - 正则标志（如 g、i、m）
  */
 export function regexTest(input: string, pattern: string, flags: string): DevToolResult {
-  if (!pattern.trim()) return { output: "", error: "正则表达式为空" };
+  if (!pattern.trim()) return { output: "", error: translate("正则表达式为空") };
   try {
     const regex = new RegExp(pattern, flags);
     const matches: string[] = [];
@@ -355,16 +380,22 @@ export function regexTest(input: string, pattern: string, flags: string): DevToo
       if (match) matches.push(...match.filter((_, i) => i > 0 && _ !== undefined));
     }
     if (matches.length === 0) {
-      return { output: "无匹配", meta: `正则 /${pattern}/${flags} 未匹配到任何内容` };
+      return {
+        output: translate("无匹配"),
+        meta: translate("正则 /{pattern}/{flags} 未匹配到任何内容", { pattern, flags }),
+      };
     }
     const unique = [...new Set(matches)];
     return {
       output: unique.join("\n"),
-      meta: `匹配 ${matches.length} 处（${unique.length} 种）`,
+      meta: translate("匹配 {total} 处（{unique} 种）", {
+        total: matches.length,
+        unique: unique.length,
+      }),
     };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return { output: "", error: `正则语法错误：${msg}` };
+    return { output: "", error: translate("正则语法错误：{msg}", { msg }) };
   }
 }
 
@@ -432,7 +463,7 @@ export function textDiff(left: string, right: string): DevToolResult {
 
   return {
     output,
-    meta: added + removed === 0 ? "文本完全相同" : `+${added} 行  -${removed} 行`,
+    meta: added + removed === 0 ? translate("文本完全相同") : translate("+{added} 行 -{removed} 行", { added, removed }),
   };
 }
 
@@ -457,7 +488,7 @@ const HTML_ENTITIES: Array<[RegExp, string]> = [
  * @param action - 编码或解码
  */
 export function htmlEntityTransform(input: string, action: HtmlEntityAction): DevToolResult {
-  if (!input) return { output: "", error: "输入为空" };
+  if (!input) return { output: "", error: translate("输入为空") };
   try {
     switch (action) {
       case "encode": {
@@ -476,7 +507,13 @@ export function htmlEntityTransform(input: string, action: HtmlEntityAction): De
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return { output: "", error: `HTML 实体${action === "encode" ? "编码" : "解码"}失败：${msg}` };
+    return {
+      output: "",
+      error: translate("HTML 实体{op} 失败：{msg}", {
+        op: action === "encode" ? translate("编码") : translate("解码"),
+        msg,
+      }),
+    };
   }
 }
 
@@ -500,23 +537,25 @@ function decodeBase64Url(input: string): string {
  */
 export function jwtDecode(input: string): DevToolResult {
   const token = input.trim();
-  if (!token) return { output: "", error: "输入为空" };
+  if (!token) return { output: "", error: translate("输入为空") };
   const parts = token.split(".");
-  if (parts.length < 2) return { output: "", error: "JWT 至少应包含 header 和 payload 两段" };
+  if (parts.length < 2) {
+    return { output: "", error: translate("JWT 至少应包含 header 和 payload 两段") };
+  }
   try {
     const header = JSON.parse(decodeBase64Url(parts[0] ?? "")) as Record<string, unknown>;
     const payload = JSON.parse(decodeBase64Url(parts[1] ?? "")) as Record<string, unknown>;
     const exp = typeof payload.exp === "number" ? new Date(payload.exp * 1000) : null;
     const meta = exp
-      ? `过期时间：${exp.toLocaleString("zh-CN", { hour12: false })}`
-      : "未发现 exp 过期时间字段";
+      ? translate("过期时间：{date}", { date: exp.toLocaleString("zh-CN", { hour12: false }) })
+      : translate("未发现 exp 过期时间字段");
     return {
       output: JSON.stringify({ header, payload }, null, 2),
       meta,
     };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return { output: "", error: `JWT 解码失败：${msg}` };
+    return { output: "", error: translate("JWT 解码失败：{msg}", { msg }) };
   }
 }
 
@@ -532,7 +571,7 @@ export type UrlQueryAction = "parse" | "build";
  * @param action - 解析或构建
  */
 export function urlQueryTransform(input: string, action: UrlQueryAction): DevToolResult {
-  if (!input.trim()) return { output: "", error: "输入为空" };
+  if (!input.trim()) return { output: "", error: translate("输入为空") };
   try {
     if (action === "parse") {
       const trimmed = input.trim();
@@ -551,7 +590,7 @@ export function urlQueryTransform(input: string, action: UrlQueryAction): DevToo
       });
       return {
         output: JSON.stringify(result, null, 2),
-        meta: `${Array.from(params.keys()).length} 个参数`,
+        meta: translate("{count} 个参数", { count: Array.from(params.keys()).length }),
       };
     }
 
@@ -567,7 +606,13 @@ export function urlQueryTransform(input: string, action: UrlQueryAction): DevToo
     return { output: params.toString() };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return { output: "", error: `URL Query ${action === "parse" ? "解析" : "构建"}失败：${msg}` };
+    return {
+      output: "",
+      error: translate("URL Query {op} 失败：{msg}", {
+        op: action === "parse" ? translate("解析") : translate("构建"),
+        msg,
+      }),
+    };
   }
 }
 
@@ -596,7 +641,7 @@ function capitalize(word: string): string {
  */
 export function caseConvert(input: string): DevToolResult {
   const words = splitWords(input);
-  if (words.length === 0) return { output: "", error: "输入为空" };
+  if (words.length === 0) return { output: "", error: translate("输入为空") };
   const pascal = words.map(capitalize).join("");
   const camel = words[0] + words.slice(1).map(capitalize).join("");
   const result = {
@@ -648,7 +693,7 @@ function inferTsType(value: unknown, name: string, interfaces: string[]): string
  * @param rootName - 根 interface 名称
  */
 export function jsonToTypeScript(input: string, rootName = "Root"): DevToolResult {
-  if (!input.trim()) return { output: "", error: "输入为空" };
+  if (!input.trim()) return { output: "", error: translate("输入为空") };
   try {
     const parsed: unknown = JSON.parse(input);
     const interfaces: string[] = [];
@@ -656,7 +701,7 @@ export function jsonToTypeScript(input: string, rootName = "Root"): DevToolResul
     return { output: interfaces.reverse().join("\n\n") };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return { output: "", error: `JSON 转 TypeScript 失败：${msg}` };
+    return { output: "", error: translate("JSON 转 TypeScript 失败：{msg}", { msg }) };
   }
 }
 
@@ -698,20 +743,20 @@ const HTTP_STATUS_MAP: Record<number, string> = {
 /** 查询 HTTP 状态码 */
 export function httpStatusLookup(input: string): DevToolResult {
   const code = Number(input.trim());
-  if (!Number.isInteger(code)) return { output: "", error: "请输入 HTTP 状态码数字" };
+  if (!Number.isInteger(code)) return { output: "", error: translate("请输入 HTTP 状态码数字") };
   const text = HTTP_STATUS_MAP[code];
-  if (!text) return { output: "", error: "未收录该 HTTP 状态码" };
+  if (!text) return { output: "", error: translate("未收录该 HTTP 状态码") };
   const family = Math.floor(code / 100);
   const meta =
     family === 2
-      ? "成功响应"
+      ? translate("成功响应")
       : family === 3
-        ? "重定向"
+        ? translate("重定向")
         : family === 4
-          ? "客户端错误"
+          ? translate("客户端错误")
           : family === 5
-            ? "服务端错误"
-            : "信息响应";
+            ? translate("服务端错误")
+            : translate("信息响应");
   return { output: `${code} ${text}`, meta };
 }
 
@@ -747,15 +792,18 @@ const MIME_MAP: Record<string, string> = {
 /** 查询 MIME 类型或扩展名 */
 export function mimeLookup(input: string): DevToolResult {
   const key = input.trim().replace(/^\./, "").toLowerCase();
-  if (!key) return { output: "", error: "输入为空" };
+  if (!key) return { output: "", error: translate("输入为空") };
   if (key.includes("/")) {
     const entries = Object.entries(MIME_MAP).filter(([, mime]) => mime === key);
     return entries.length > 0
-      ? { output: entries.map(([ext]) => `.${ext}`).join("\n"), meta: `${entries.length} 个扩展名` }
-      : { output: "", error: "未收录该 MIME 类型" };
+      ? {
+          output: entries.map(([ext]) => `.${ext}`).join("\n"),
+          meta: translate("{count} 个扩展名", { count: entries.length }),
+        }
+      : { output: "", error: translate("未收录该 MIME 类型") };
   }
   const mime = MIME_MAP[key];
-  return mime ? { output: mime } : { output: "", error: "未收录该扩展名" };
+  return mime ? { output: mime } : { output: "", error: translate("未收录该扩展名") };
 }
 
 // ── CSS 单位转换 ──────────────────────────────────────
@@ -763,7 +811,7 @@ export function mimeLookup(input: string): DevToolResult {
 /** CSS 单位转换 */
 export function cssUnitConvert(input: string, baseFontSize = 16): DevToolResult {
   const match = /^(-?\d+(?:\.\d+)?)(px|rem|em)$/i.exec(input.trim());
-  if (!match) return { output: "", error: "请输入形如 16px、1rem、1.5em 的值" };
+  if (!match) return { output: "", error: translate("请输入形如 16px、1rem、1.5em 的值") };
   const value = Number(match[1]);
   const unit = (match[2] ?? "").toLowerCase();
   const px = unit === "px" ? value : value * baseFontSize;
@@ -773,7 +821,10 @@ export function cssUnitConvert(input: string, baseFontSize = 16): DevToolResult 
     rem: `${Number(rem.toFixed(4))}rem`,
     em: `${Number(rem.toFixed(4))}em`,
   };
-  return { output: JSON.stringify(result, null, 2), meta: `基准字号：${baseFontSize}px` };
+  return {
+    output: JSON.stringify(result, null, 2),
+    meta: translate("基准字号：{size}px", { size: baseFontSize }),
+  };
 }
 
 // ── 文本统计 ──────────────────────────────────────────
@@ -786,7 +837,7 @@ export function textStats(input: string): DevToolResult {
   const chars = Array.from(input).length;
   return {
     output: JSON.stringify({ chars, words, lines, bytes }, null, 2),
-    meta: `${chars} 字符 · ${bytes} 字节`,
+    meta: translate("{chars} 字符 · {bytes} 字节", { chars, bytes }),
   };
 }
 
@@ -794,17 +845,19 @@ export function textStats(input: string): DevToolResult {
 
 /** Cron 字段说明 */
 function describeCronField(value: string, unit: string): string {
-  if (value === "*") return `每${unit}`;
-  if (value.startsWith("*/")) return `每 ${value.slice(2)} ${unit}`;
-  if (value.includes(",")) return `${unit}为 ${value.split(",").join("、")}`;
-  if (value.includes("-")) return `${unit}范围 ${value}`;
-  return `${unit}为 ${value}`;
+  if (value === "*") return translate("每{unit}", { unit });
+  if (value.startsWith("*/")) return translate("每 {step} {unit}", { step: value.slice(2), unit });
+  if (value.includes(",")) return translate("{unit}为 {value}", { unit, value: value.split(",").join("、") });
+  if (value.includes("-")) return translate("{unit}范围 {value}", { unit, value });
+  return translate("{unit}为 {value}", { unit, value });
 }
 
 /** Cron 表达式说明（5 字段） */
 export function cronDescribe(input: string): DevToolResult {
   const parts = input.trim().split(/\s+/);
-  if (parts.length !== 5) return { output: "", error: "请输入 5 段 Cron 表达式：分 时 日 月 周" };
+  if (parts.length !== 5) {
+    return { output: "", error: translate("请输入 5 段 Cron 表达式：分 时 日 月 周") };
+  }
   const [minute, hour, day, month, week] = parts;
   if (
     minute === undefined ||
@@ -813,16 +866,16 @@ export function cronDescribe(input: string): DevToolResult {
     month === undefined ||
     week === undefined
   ) {
-    return { output: "", error: "Cron 字段解析失败" };
+    return { output: "", error: translate("Cron 字段解析失败") };
   }
   const lines = [
-    describeCronField(minute, "分钟"),
-    describeCronField(hour, "小时"),
-    describeCronField(day, "日期"),
-    describeCronField(month, "月份"),
-    describeCronField(week, "星期"),
+    describeCronField(minute, translate("分钟")),
+    describeCronField(hour, translate("小时")),
+    describeCronField(day, translate("日期")),
+    describeCronField(month, translate("月份")),
+    describeCronField(week, translate("星期")),
   ];
-  return { output: lines.join("\n"), meta: "标准 5 字段 Cron：分 时 日 月 周" };
+  return { output: lines.join("\n"), meta: translate("标准 5 字段 Cron：分 时 日 月 周") };
 }
 
 // ── URL 拆解器 ────────────────────────────────────────
@@ -830,7 +883,7 @@ export function cronDescribe(input: string): DevToolResult {
 /** 拆解 URL 为各个组成部分 */
 export function urlParse(input: string): DevToolResult {
   const trimmed = input.trim();
-  if (!trimmed) return { output: "", error: "输入为空" };
+  if (!trimmed) return { output: "", error: translate("输入为空") };
   try {
     const url = new URL(trimmed);
     const result = {
@@ -838,7 +891,7 @@ export function urlParse(input: string): DevToolResult {
       protocol: url.protocol,
       host: url.host,
       hostname: url.hostname,
-      port: url.port || "默认端口",
+      port: url.port || translate("默认端口"),
       pathname: url.pathname,
       search: url.search,
       hash: url.hash,
@@ -846,7 +899,7 @@ export function urlParse(input: string): DevToolResult {
     };
     return { output: JSON.stringify(result, null, 2) };
   } catch {
-    return { output: "", error: "无效的 URL 格式" };
+    return { output: "", error: translate("无效的 URL 格式") };
   }
 }
 
@@ -855,8 +908,10 @@ export function urlParse(input: string): DevToolResult {
 /** 简易 Curl 转 Fetch */
 export function curlToFetch(input: string): DevToolResult {
   const trimmed = input.trim();
-  if (!trimmed) return { output: "", error: "输入为空" };
-  if (!trimmed.toLowerCase().startsWith("curl")) return { output: "", error: "输入应以 curl 开头" };
+  if (!trimmed) return { output: "", error: translate("输入为空") };
+  if (!trimmed.toLowerCase().startsWith("curl")) {
+    return { output: "", error: translate("输入应以 curl 开头") };
+  }
   try {
     const urlMatch = /curl\s+['"]?([^'"\s]+)['"]?/.exec(trimmed);
     const url = urlMatch ? (urlMatch[1] ?? "") : "";
@@ -876,7 +931,7 @@ export function curlToFetch(input: string): DevToolResult {
     return { output: code };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return { output: "", error: `转换失败：${msg}` };
+    return { output: "", error: translate("转换失败：{msg}", { msg }) };
   }
 }
 
@@ -884,7 +939,7 @@ export function curlToFetch(input: string): DevToolResult {
 
 /** 简易 JSON Path 查询 */
 export function jsonPathQuery(input: string, path: string): DevToolResult {
-  if (!input.trim() || !path.trim()) return { output: "", error: "输入为空" };
+  if (!input.trim() || !path.trim()) return { output: "", error: translate("输入为空") };
   try {
     const data: unknown = JSON.parse(input);
     const keys = path
@@ -896,13 +951,13 @@ export function jsonPathQuery(input: string, path: string): DevToolResult {
       if (current && typeof current === "object") {
         current = (current as Record<string, unknown>)[key];
       } else {
-        return { output: "", error: `路径 ${path} 不存在` };
+        return { output: "", error: translate("路径 {path} 不存在", { path }) };
       }
     }
     return { output: JSON.stringify(current, null, 2) };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return { output: "", error: `JSON Path 查询失败：${msg}` };
+    return { output: "", error: translate("JSON Path 查询失败：{msg}", { msg }) };
   }
 }
 
@@ -974,25 +1029,25 @@ function parseYamlValue(value: string): unknown {
 
 /** YAML 转 JSON */
 export function yamlToJson(input: string): DevToolResult {
-  if (!input.trim()) return { output: "", error: "输入为空" };
+  if (!input.trim()) return { output: "", error: translate("输入为空") };
   try {
     const parsed = parseYaml(input);
     return { output: JSON.stringify(parsed, null, 2) };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return { output: "", error: `YAML 解析失败：${msg}` };
+    return { output: "", error: translate("YAML 解析失败：{msg}", { msg }) };
   }
 }
 
 /** JSON 转 YAML */
 export function jsonToYaml(input: string): DevToolResult {
-  if (!input.trim()) return { output: "", error: "输入为空" };
+  if (!input.trim()) return { output: "", error: translate("输入为空") };
   try {
     const parsed: unknown = JSON.parse(input);
     return { output: objectToYaml(parsed) };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return { output: "", error: `JSON 解析失败：${msg}` };
+    return { output: "", error: translate("JSON 解析失败：{msg}", { msg }) };
   }
 }
 
@@ -1023,35 +1078,43 @@ function objectToYaml(value: unknown, indent = 0): string {
 
 /** CSV 转 JSON */
 export function csvToJson(input: string): DevToolResult {
-  if (!input.trim()) return { output: "", error: "输入为空" };
+  if (!input.trim()) return { output: "", error: translate("输入为空") };
   try {
     const lines = input.trim().split("\n");
-    if (lines.length < 2) return { output: "", error: "CSV 至少需要表头和一行数据" };
+    if (lines.length < 2) {
+      return { output: "", error: translate("CSV 至少需要表头和一行数据") };
+    }
     const headers = (lines[0] ?? "").split(",").map((h) => h.trim());
     const rows = lines.slice(1).map((line) => {
       const values = line.split(",").map((v) => v.trim());
       return Object.fromEntries(headers.map((h, i) => [h, values[i] ?? ""]));
     });
-    return { output: JSON.stringify(rows, null, 2), meta: `${rows.length} 行数据` };
+    return {
+      output: JSON.stringify(rows, null, 2),
+      meta: translate("{count} 行数据", { count: rows.length }),
+    };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return { output: "", error: `CSV 解析失败：${msg}` };
+    return { output: "", error: translate("CSV 解析失败：{msg}", { msg }) };
   }
 }
 
 /** JSON 转 CSV */
 export function jsonToCsv(input: string): DevToolResult {
-  if (!input.trim()) return { output: "", error: "输入为空" };
+  if (!input.trim()) return { output: "", error: translate("输入为空") };
   try {
     const data = JSON.parse(input) as Array<Record<string, unknown>>;
     if (!Array.isArray(data) || data.length === 0)
-      return { output: "", error: "JSON 应为对象数组" };
+      return { output: "", error: translate("JSON 应为对象数组") };
     const headers = Object.keys(data[0]!);
     const rows = data.map((row) => headers.map((h) => String(row[h] ?? "")).join(","));
-    return { output: [headers.join(","), ...rows].join("\n"), meta: `${data.length} 行数据` };
+    return {
+      output: [headers.join(","), ...rows].join("\n"),
+      meta: translate("{count} 行数据", { count: data.length }),
+    };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return { output: "", error: `JSON 转 CSV 失败：${msg}` };
+    return { output: "", error: translate("JSON 转 CSV 失败：{msg}", { msg }) };
   }
 }
 
@@ -1059,7 +1122,7 @@ export function jsonToCsv(input: string): DevToolResult {
 
 /** 解析 HTTP Header 字符串 */
 export function httpHeaderParse(input: string): DevToolResult {
-  if (!input.trim()) return { output: "", error: "输入为空" };
+  if (!input.trim()) return { output: "", error: translate("输入为空") };
   try {
     const lines = input.trim().split("\n");
     const headers: Record<string, string> = {};
@@ -1073,11 +1136,11 @@ export function httpHeaderParse(input: string): DevToolResult {
     }
     return {
       output: JSON.stringify(headers, null, 2),
-      meta: `${Object.keys(headers).length} 个 Header`,
+      meta: translate("{count} 个 Header", { count: Object.keys(headers).length }),
     };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return { output: "", error: `解析失败：${msg}` };
+    return { output: "", error: translate("解析失败：{msg}", { msg }) };
   }
 }
 
@@ -1085,11 +1148,11 @@ export function httpHeaderParse(input: string): DevToolResult {
 
 /** Basic Auth 编码 */
 export function basicAuth(input: string, action: "encode" | "decode"): DevToolResult {
-  if (!input.trim()) return { output: "", error: "输入为空" };
+  if (!input.trim()) return { output: "", error: translate("输入为空") };
   try {
     if (action === "encode") {
       const [username, password] = input.split(":");
-      if (!username) return { output: "", error: "格式应为 username:password" };
+      if (!username) return { output: "", error: translate("格式应为 username:password") };
       const encoded = btoa(`${username}:${password ?? ""}`);
       return { output: `Basic ${encoded}` };
     }
@@ -1098,7 +1161,13 @@ export function basicAuth(input: string, action: "encode" | "decode"): DevToolRe
     return { output: decoded };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    return { output: "", error: `Basic Auth ${action === "encode" ? "编码" : "解码"}失败：${msg}` };
+    return {
+      output: "",
+      error: translate("Basic Auth {op} 失败：{msg}", {
+        op: action === "encode" ? translate("编码") : translate("解码"),
+        msg,
+      }),
+    };
   }
 }
 
@@ -1106,7 +1175,7 @@ export function basicAuth(input: string, action: "encode" | "decode"): DevToolRe
 
 /** 简易 SQL 格式化 */
 export function sqlFormat(input: string): DevToolResult {
-  if (!input.trim()) return { output: "", error: "输入为空" };
+  if (!input.trim()) return { output: "", error: translate("输入为空") };
   const keywords = [
     "SELECT",
     "FROM",
@@ -1179,7 +1248,7 @@ export function stringEscape(
   input: string,
   mode: "js" | "json" | "regex" | "shell",
 ): DevToolResult {
-  if (!input) return { output: "", error: "输入为空" };
+  if (!input) return { output: "", error: translate("输入为空") };
   switch (mode) {
     case "js":
       return { output: JSON.stringify(input).slice(1, -1) };
@@ -1190,6 +1259,6 @@ export function stringEscape(
     case "shell":
       return { output: input.replace(/'/g, "'\"'\"'") };
     default:
-      return { output: "", error: "未知模式" };
+      return { output: "", error: translate("未知模式") };
   }
 }

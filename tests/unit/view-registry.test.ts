@@ -11,6 +11,7 @@ import {
   getEnabledViews,
   getViewComponentMap,
 } from '@/shared/config/view-registry';
+import { useFeatureFlagStore } from '@/shared/store/feature-flag-slice';
 
 /** 简单的 mock 组件 */
 const MockComponent = () => null;
@@ -22,6 +23,8 @@ describe('ViewRegistry', () => {
     // 清空注册表（通过 unregisterView）
     const views = getEnabledViews();
     for (const v of views) unregisterView(v.id);
+    // 关闭 unified_tabs_view flag，避免测试中的 timeline 注册被守卫拦截
+    useFeatureFlagStore.setState({ flags: { ...useFeatureFlagStore.getState().flags, unified_tabs_view: false } });
   });
 
   it('注册并获取单个视图', () => {

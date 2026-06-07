@@ -175,17 +175,17 @@ export const WindowSnapshotPanel = memo(function WindowSnapshotPanel({
             >
               <List.Item.Meta
                 title={
-                  <Typography.Text style={{ fontSize: 12, fontWeight: 500 }} ellipsis>
+                  <Typography.Text strong ellipsis>
                     {session.name}
                   </Typography.Text>
                 }
                 description={
                   <Flex gap={4} align="center">
                     <Clock size={10} style={{ color: token.colorTextQuaternary }} />
-                    <Typography.Text style={{ fontSize: 11, color: token.colorTextTertiary }}>
+                    <Typography.Text style={{ color: token.colorTextTertiary }}>
                       {formatRelativeTime(session.createdAt, t)}
                     </Typography.Text>
-                    <Typography.Text style={{ fontSize: 11, color: token.colorTextQuaternary }}>
+                    <Typography.Text style={{ color: token.colorTextQuaternary }}>
                       ({session.tabCount} 标签)
                     </Typography.Text>
                   </Flex>

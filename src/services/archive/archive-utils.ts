@@ -12,6 +12,7 @@ import {
   shouldDisplayUrl,
 } from '@/chrome';
 import { getFaviconUrl } from '@/chrome';
+import { translate } from '@/shared/i18n/core';
 
 /** 判断标签页是否允许归档。 */
 export function isArchivableTab(tab: chrome.tabs.Tab): boolean {
@@ -49,7 +50,7 @@ export function buildDefaultSessionName(): string {
   const localized = typeof chrome === 'undefined'
     ? ''
     : (chrome.i18n?.getMessage?.('archive_session_name', [dateStr]) ?? '');
-  return localized !== '' ? localized : `会话 ${dateStr}`;
+  return localized !== '' ? localized : translate("会话 {dateStr}", { dateStr });
 }
 
 /** URL 规范化键（忽略 hash、utm/fbclid/gclid 参数），用于去重。 */

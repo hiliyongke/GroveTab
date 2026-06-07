@@ -227,8 +227,8 @@ export const WindowBatchActionBar = memo(function WindowBatchActionBar() {
               style={{ textAlign: "left" }}
             >
               {w.id === currentWindowId
-                ? t("window.current")
-                : `${t("window.otherWithId", { id: w.id })} (${w.tabsCount})`}
+                ? t("当前窗口")
+                : `${t("窗口 {id}", { id: w.id })} (${w.tabsCount})`}
             </Button>
           ))}
         </Space>

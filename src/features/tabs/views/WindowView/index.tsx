@@ -277,7 +277,7 @@ export function WindowView() {
   }
 
   return (
-    <Flex vertical gap="middle">
+    <Flex vertical gap="small">
       <WindowToolbar
         filterQuery={filterQuery}
         onFilterChange={setFilterQuery}

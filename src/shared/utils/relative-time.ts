@@ -11,12 +11,12 @@ export function formatRelativeTime(
 ): string {
   const diff = Date.now() - ts;
   const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return t("time.justNow", { defaultValue: "刚刚" });
-  if (minutes < 60) return t("time.minutesAgo", { n: minutes, defaultValue: "{n} 分钟前" });
+  if (minutes < 1) return t("刚刚");
+  if (minutes < 60) return t("{n} 分钟前", { n: minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return t("time.hoursAgo", { n: hours, defaultValue: "{n} 小时前" });
+  if (hours < 24) return t("{n} 小时前", { n: hours });
   const days = Math.floor(hours / 24);
-  if (days < 7) return t("time.daysAgo", { n: days, defaultValue: "{n} 天前" });
+  if (days < 7) return t("{n} 天前", { n: days });
   const date = new Date(ts);
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }

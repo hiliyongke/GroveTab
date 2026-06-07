@@ -5,6 +5,7 @@
 import { Button, Typography } from "antd";
 import { X, Info, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
 import { useStatusBarStore, type StatusBarMessage } from "@/shared/store/status-bar-slice";
+import { useT } from "@/shared/i18n";
 import styles from "./StatusBar.module.less";
 
 const { Text } = Typography;
@@ -21,6 +22,7 @@ const TYPE_CONFIG: Record<
 };
 
 export function StatusBar() {
+  const { t } = useT();
   const messages = useStatusBarStore((s) => s.messages);
   const removeMessage = useStatusBarStore((s) => s.removeMessage);
   const current = messages[0]; // 只显示第一条
@@ -57,7 +59,7 @@ export function StatusBar() {
         type="button"
         className={styles["status-bar__dismiss"]}
         onClick={() => removeMessage(current.id)}
-        aria-label="关闭"
+        aria-label={t("关闭")}
       >
         <X size={12} />
       </button>

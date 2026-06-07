@@ -6,6 +6,7 @@ import type { ArchivedSession, ArchivedTab } from '@/shared/types';
 import { BRAND } from '@/shared/config/brand';
 import { CONFIG } from '@/shared/config';
 import { isSafeExternalUrl } from '@/shared/utils/url-safety';
+import { translate } from '@/shared/i18n/core';
 
 const CURRENT_EXPORT_VERSION = 1;
 const MAX_IMPORT_SESSIONS = CONFIG.business.maxImportSessions;
@@ -172,7 +173,7 @@ export function parseImportJSON(text: string): { sessions: ArchivedSession[]; er
  * Markdown 导出：`## 会话名` + `- [title](url)`。
  */
 export function exportSessionsMarkdown(sessions: ArchivedSession[]): string {
-  const lines: string[] = [`# ${BRAND.name} 归档 · ${new Date().toLocaleString()}`, ''];
+  const lines: string[] = [`# ${BRAND.name} ${translate("归档 · {date}", { date: new Date().toLocaleString() })}`, ''];
   for (const s of sessions) {
     lines.push(`## ${s.name}`);
     for (const tab of s.tabs) {
@@ -248,7 +249,7 @@ export function parseImportHTML(text: string): { sessions: ArchivedSession[]; er
     const handled = new Set<HTMLAnchorElement>();
 
     for (const h3 of h3s) {
-      const name = h3.textContent?.trim() ?? '未命名';
+      const name = h3.textContent?.trim() ?? translate('未命名');
       const dl = h3.nextElementSibling;
       if (dl?.tagName !== 'DL') continue;
       const anchors = Array.from(dl.querySelectorAll('a'));
@@ -295,7 +296,7 @@ export function parseImportHTML(text: string): { sessions: ArchivedSession[]; er
     if (orphanTabs.length > 0) {
       sessions.push({
         id: `import-${Date.now()}-orphan`,
-        name: '未命名',
+        name: translate('未命名'),
         createdAt: Date.now(),
         tabs: orphanTabs,
         tabCount: orphanTabs.length,
@@ -323,7 +324,7 @@ export function parseImportOneTab(text: string): { sessions: ArchivedSession[]; 
     if (current.length === 0) return;
     sessions.push({
       id: `onetab-${Date.now()}-${groupIndex++}`,
-      name: `OneTab 组 ${groupIndex}`,
+      name: translate("OneTab 组 {index}", { index: groupIndex }),
       createdAt: Date.now(),
       tabs: current,
       tabCount: current.length,
@@ -451,8 +452,8 @@ export function applyImport(
  */
 export function validateImportSizeLimits(text: string): string | null {
   const byteLength = new Blob([text]).size;
-  if (byteLength > 5 * 1024 * 1024) return '导入源超过 5 MB 限制';
+  if (byteLength > 5 * 1024 * 1024) return translate('导入源超过 5 MB 限制');
   const lines = text.split('\n').length;
-  if (lines > 20000) return '导入源超过 20K 行限制';
+  if (lines > 20000) return translate('导入源超过 20K 行限制');
   return null;
 }

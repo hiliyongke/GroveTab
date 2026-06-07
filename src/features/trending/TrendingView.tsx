@@ -9,12 +9,13 @@
  *   - 点击条目跳转到原始链接
  */
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import type { ReactNode } from "react";
 import {
   Alert,
   Button,
   Card,
+  Flex,
   Segmented,
   Space,
   Spin,
@@ -39,6 +40,7 @@ import {
   Bookmark,
   Copy,
   Clock,
+  Globe,
 } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { cssVars } from "@/shared/utils/css-vars";
@@ -47,6 +49,7 @@ import { useT } from "@/shared/i18n";
 import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
 import { createTab } from "@/chrome";
 import { createBookmark } from "@/chrome/bookmarks";
+import { useSpeedDialStore } from "@/store";
 import type {
   TrendingCategory,
   TrendingGroupMode,
@@ -64,49 +67,30 @@ import {
 } from "@/services/trending-service";
 import type { InterestSignal } from "@/services/trending-service";
 import styles from "./TrendingView.module.less";
+import { translate } from '@/shared/i18n/core';
 
 const { Text, Title } = Typography;
 
 interface CategoryOption {
   value: TrendingCategory;
-  labelKey: string;
+  label: string;
   icon: ReactNode;
 }
 
-const CATEGORIES: CategoryOption[] = [
-  { value: "all", labelKey: "trending.catAll", icon: <LayoutGrid size={ICON_SIZE.DEFAULT} /> },
-  {
-    value: "comprehensive",
-    labelKey: "trending.catComprehensive",
-    icon: <Flame size={ICON_SIZE.DEFAULT} />,
-  },
-  { value: "tech", labelKey: "trending.catTech", icon: <Cpu size={ICON_SIZE.DEFAULT} /> },
-  {
-    value: "entertainment",
-    labelKey: "trending.catEntertainment",
-    icon: <Gamepad2 size={ICON_SIZE.DEFAULT} />,
-  },
-  {
-    value: "community",
-    labelKey: "trending.catCommunity",
-    icon: <Users size={ICON_SIZE.DEFAULT} />,
-  },
-  { value: "news", labelKey: "trending.catNews", icon: <Newspaper size={ICON_SIZE.DEFAULT} /> },
-];
 
 const STEALTH_OPTIONS: Array<{
   value: StealthModeConfig["disguise"];
   labelKey: string;
   icon: ReactNode;
 }> = [
-  { value: "email", labelKey: "trending.stealthEmail", icon: <Mail size={ICON_SIZE.DEFAULT} /> },
-  { value: "doc", labelKey: "trending.stealthDoc", icon: <FileText size={ICON_SIZE.DEFAULT} /> },
+  { value: "email", labelKey: translate("邮件"), icon: <Mail size={ICON_SIZE.DEFAULT} /> },
+  { value: "doc", labelKey: translate("文档"), icon: <FileText size={ICON_SIZE.DEFAULT} /> },
   {
     value: "spreadsheet",
-    labelKey: "trending.stealthSpreadsheet",
+    labelKey: translate("表格"),
     icon: <Table2 size={ICON_SIZE.DEFAULT} />,
   },
-  { value: "code", labelKey: "trending.stealthCode", icon: <Code2 size={ICON_SIZE.DEFAULT} /> },
+  { value: "code", labelKey: translate("代码"), icon: <Code2 size={ICON_SIZE.DEFAULT} /> },
 ];
 
 function cx(...classNames: Array<string | false | undefined>) {
@@ -166,17 +150,17 @@ function StealthDisguise({
         };
       case "code":
         return {
-          title: t("main.ts"),
+          title: "main.ts",
           items: [
-            { from: " 1", subject: t("import { createApp } from 'vue';"), time: "" },
-            { from: " 2", subject: t("import App from './App.vue';"), time: "" },
-            { from: " 3", subject: t("import router from './router';"), time: "" },
-            { from: " 4", subject: t("import { createPinia } from 'pinia';"), time: "" },
+            { from: " 1", subject: "import { createApp } from 'vue';", time: "" },
+            { from: " 2", subject: "import App from './App.vue';", time: "" },
+            { from: " 3", subject: "import router from './router';", time: "" },
+            { from: " 4", subject: "import { createPinia } from 'pinia';", time: "" },
             { from: " 5", subject: "", time: "" },
-            { from: " 6", subject: t("const app = createApp(App);"), time: "" },
-            { from: " 7", subject: t("app.use(createPinia());"), time: "" },
-            { from: " 8", subject: t("app.use(router);"), time: "" },
-            { from: " 9", subject: t('app.mount("#app");'), time: "" },
+            { from: " 6", subject: "const app = createApp(App);", time: "" },
+            { from: " 7", subject: "app.use(createPinia());", time: "" },
+            { from: " 8", subject: "app.use(router);", time: "" },
+            { from: " 9", subject: 'app.mount("#app");', time: "" },
           ],
         };
     }
@@ -588,16 +572,25 @@ export function TrendingView() {
   }, []);
 
   const categoryOptions = useMemo(
-    () =>
-      CATEGORIES.map((item) => ({
+    () => {
+      const items: CategoryOption[] = [
+        { value: "all", label: t("全部"), icon: <LayoutGrid size={ICON_SIZE.DEFAULT} /> },
+        { value: "comprehensive", label: t("综合"), icon: <Flame size={ICON_SIZE.DEFAULT} /> },
+        { value: "tech", label: t("科技"), icon: <Cpu size={ICON_SIZE.DEFAULT} /> },
+        { value: "entertainment", label: t("娱乐"), icon: <Gamepad2 size={ICON_SIZE.DEFAULT} /> },
+        { value: "community", label: t("社区"), icon: <Users size={ICON_SIZE.DEFAULT} /> },
+        { value: "news", label: t("新闻"), icon: <Newspaper size={ICON_SIZE.DEFAULT} /> },
+      ];
+      return items.map((item) => ({
         value: item.value,
         label: (
           <span className={styles["trending-category-option"]}>
             {item.icon}
-            <span>{t(item.labelKey)}</span>
+            <span>{item.label}</span>
           </span>
         ),
-      })),
+      }));
+    },
     [t],
   );
 
@@ -706,6 +699,9 @@ export function TrendingView() {
         </div>
       </Card>
 
+      {/* v1.5: SpeedDial 常用站点快捷入口 */}
+      <SpeedDialSection />
+
       {allFailed && (
         <Alert
           type="warning"
@@ -729,10 +725,10 @@ export function TrendingView() {
         </div>
       ) : activePlatforms.length === 0 ? (
         <FeatureEmptyState
-          title={t("trending.noPlatforms")}
+          title={t("当前分类暂无可用平台")}
           icon={<Newspaper size={ICON_SIZE.HERO} />}
-          hints={[t("trending.noPlatformsHint1"), t("trending.noPlatformsHint2"), t("trending.noPlatformsHint3")]}
-          actions={[{ text: t("trending.switchToAll"), onClick: () => setCategory("all"), type: "primary" }]}
+          hints={[t("部分平台仅支持综合分类"), t("尝试切换到其它分类查看"), t("数据源可能正在维护")]}
+          actions={[{ text: t("查看全部"), onClick: () => setCategory("all"), type: "primary" }]}
         />
       ) : (
         <div
@@ -776,5 +772,61 @@ export function TrendingView() {
         </div>
       )}
     </section>
+  );
+}
+
+/**
+ * v1.5: SpeedDial 常用站点卡片网格（融入 Trending 页面）。
+ * 从 SpeedDialStore 读取站点列表，显示紧凑图标+标题行。
+ */
+function SpeedDialSection() {
+  const sites = useSpeedDialStore((s) => s.sites);
+  const loadSites = useSpeedDialStore((s) => s.loadSites);
+  const loaded = useSpeedDialStore((s) => s.loaded);
+  const attemptedRef = useRef(false);
+  const { t } = useT();
+
+  useEffect(() => {
+    if (!loaded && !attemptedRef.current) {
+      attemptedRef.current = true;
+      void loadSites();
+    }
+  }, [loaded, loadSites]);
+
+  if (sites.length === 0) return null;
+
+  return (
+    <Card
+      size="small"
+      title={t("常用站点")}
+      className={styles["trending-surface-card"]}
+      classNames={{ body: styles["trending-board-card__body"] }}
+    >
+      <Flex wrap="wrap" gap={12}>
+        {sites.slice(0, 8).map((site) => (
+          <Typography.Link
+            key={site.url}
+            href={site.url}
+            target="_blank"
+            rel="noreferrer"
+            className={styles["trending-speeddial-link"]}
+          >
+            {site.favIconUrl ? (
+              <img
+                src={site.favIconUrl}
+                alt=""
+                className={styles["trending-speeddial-favicon"]}
+                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+              />
+            ) : (
+              <Globe size={14} />
+            )}
+            <span className={styles["trending-speeddial-title"]}>
+              {site.title || site.url}
+            </span>
+          </Typography.Link>
+        ))}
+      </Flex>
+    </Card>
   );
 }

@@ -7,13 +7,13 @@
  */
 
 import { useMemo } from "react";
-import { Archive, Layers, Calendar, Sparkles } from "lucide-react";
+import { Archive, Layers, Calendar, Sparkles, Trash2 } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import type { ArchivedSession } from "@/shared/types";
 import { useT } from "@/shared/i18n";
 import styles from "../styles/archive.module.less";
 
-export type ArchiveFilterId = "all" | "today" | "week" | "month" | "auto";
+export type ArchiveFilterId = "all" | "today" | "week" | "month" | "auto" | "trash";
 
 interface ArchiveStatsProps {
   sessions: ArchivedSession[];
@@ -23,39 +23,25 @@ interface ArchiveStatsProps {
 
 interface StatCardSpec {
   id: ArchiveFilterId;
-  labelKey: string;
+  label: string;
   Icon: typeof Archive;
-  valueKey: "total" | "tabs" | "month" | "auto";
-  tone: "primary" | "info" | "success" | "warning";
+  valueKey: "total" | "tabs" | "month" | "auto" | "trash";
+  tone: "primary" | "info" | "success" | "warning" | "danger";
 }
-
-const CARDS: StatCardSpec[] = [
-  {
-    id: "all",
-    labelKey: "archive.stats.totalSessions",
-    Icon: Archive,
-    valueKey: "total",
-    tone: "primary",
-  },
-  { id: "all", labelKey: "archive.stats.totalTabs", Icon: Layers, valueKey: "tabs", tone: "info" },
-  {
-    id: "month",
-    labelKey: "archive.stats.thisMonth",
-    Icon: Calendar,
-    valueKey: "month",
-    tone: "success",
-  },
-  {
-    id: "auto",
-    labelKey: "archive.stats.autoSnapshots",
-    Icon: Sparkles,
-    valueKey: "auto",
-    tone: "warning",
-  },
-];
 
 export function ArchiveStats({ sessions, activeFilter, onSelectFilter }: ArchiveStatsProps) {
   const { t } = useT();
+
+  const cards = useMemo<StatCardSpec[]>(
+    () => [
+      { id: "all", label: t("总会话"), Icon: Archive, valueKey: "total", tone: "primary" },
+      { id: "all", label: t("总标签"), Icon: Layers, valueKey: "tabs", tone: "info" },
+      { id: "month", label: t("本月新增"), Icon: Calendar, valueKey: "month", tone: "success" },
+      { id: "auto", label: t("自动快照"), Icon: Sparkles, valueKey: "auto", tone: "warning" },
+      { id: "trash", label: t("已删除"), Icon: Trash2, valueKey: "trash", tone: "danger" },
+    ],
+    [t],
+  );
 
   const stats = useMemo(() => {
     const now = new Date();
@@ -63,22 +49,25 @@ export function ArchiveStats({ sessions, activeFilter, onSelectFilter }: Archive
     let totalTabs = 0;
     let monthCount = 0;
     let autoCount = 0;
+    let trashCount = 0;
     for (const session of sessions) {
       totalTabs += session.tabCount;
       if (session.createdAt >= monthStart) monthCount += 1;
       if (session.source === "auto" || session.hidden === true) autoCount += 1;
+      if (session.source === "trash") trashCount += 1;
     }
     return {
       total: sessions.length,
       tabs: totalTabs,
       month: monthCount,
       auto: autoCount,
+      trash: trashCount,
     };
   }, [sessions]);
 
   return (
     <div className={styles["archive-stats"]}>
-      {CARDS.map((card, idx) => {
+      {cards.map((card, idx) => {
         const value = stats[card.valueKey];
         const isActive = activeFilter === card.id && card.id !== "all";
         return (
@@ -97,7 +86,7 @@ export function ArchiveStats({ sessions, activeFilter, onSelectFilter }: Archive
             </span>
             <span className={styles["archive-stat-card__body"]}>
               <span className={styles["archive-stat-card__value"]}>{value}</span>
-              <span className={styles["archive-stat-card__label"]}>{t(card.labelKey)}</span>
+              <span className={styles["archive-stat-card__label"]}>{card.label}</span>
             </span>
           </div>
         );

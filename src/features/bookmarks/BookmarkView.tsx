@@ -67,7 +67,15 @@ export function BookmarkView() {
   const [collapsedDirs, setCollapsedDirs] = useState<Set<string>>(new Set());
   const refreshRef = useRef<() => Promise<void>>(async () => {});
 
-  const loadBookmarks = useCallback(async () => {
+  // 缓存书签树（模块级缓存，避免切 tab 重新拉取）
+  const treeCacheRef = useRef<BookmarkNode[] | null>(null);
+
+  const loadBookmarks = useCallback(async (force = false) => {
+    if (!force && treeCacheRef.current) {
+      setTree(treeCacheRef.current);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const permitted = await hasBookmarksPermission();
@@ -80,6 +88,7 @@ export function BookmarkView() {
         }
       }
       const result = await getBookmarkTree();
+      treeCacheRef.current = result;
       setTree(result);
     } finally {
       setLoading(false);
@@ -90,7 +99,11 @@ export function BookmarkView() {
     void loadBookmarks();
   }, [loadBookmarks]);
 
-  refreshRef.current = loadBookmarks;
+  // 手动刷新时强制重拉（绕过缓存）
+  const forceLoad = useCallback(async () => {
+    await loadBookmarks(true);
+  }, [loadBookmarks]);
+  refreshRef.current = forceLoad;
 
   // 递归搜索：匹配 title/URL/文件夹名
   const filterNodes = useCallback(
@@ -134,7 +147,7 @@ export function BookmarkView() {
   const handleDelete = useCallback(async (id: string) => {
     const ok = await removeBookmark(id);
     if (ok) {
-      message.success(t("bookmark.deleteSuccess"));
+      message.success(t("删除成功"));
       void loadBookmarks();
       setSelectedIds((prev) => {
         const next = new Set(prev);
@@ -142,7 +155,7 @@ export function BookmarkView() {
         return next;
       });
     } else {
-      message.error(t("bookmark.deleteFailed"));
+      message.error(t("删除失败"));
     }
   }, [loadBookmarks, t]);
 
@@ -152,7 +165,7 @@ export function BookmarkView() {
       const ok = await removeBookmark(id);
       if (ok) count++;
     }
-    message.success(t("bookmark.batchDeleteSuccess", { count }));
+    message.success(t("已删除 {count} 条书签", { count }));
     setSelectedIds(new Set());
     setSelectionMode(false);
     void loadBookmarks();
@@ -168,12 +181,12 @@ export function BookmarkView() {
       // Actually, Chrome has chrome.bookmarks.update(id, changes). Let me use a direct call.
       if (typeof chrome !== "undefined" && chrome.bookmarks) {
         await chrome.bookmarks.update(editModal.node.id, update);
-        message.success(t("bookmark.editSuccess"));
+        message.success(t("编辑成功"));
         setEditModal({ open: false, isNew: false });
         void loadBookmarks();
       }
     } catch {
-      message.error(t("bookmark.editFailed"));
+      message.error(t("编辑失败"));
     }
   }, [editModal.node, loadBookmarks, t]);
 
@@ -184,11 +197,11 @@ export function BookmarkView() {
         title: title || url,
         url,
       });
-      message.success(t("bookmark.createSuccess"));
+      message.success(t("创建成功"));
       setEditModal({ open: false, isNew: false });
       void loadBookmarks();
     } catch {
-      message.error(t("bookmark.createFailed"));
+      message.error(t("创建失败"));
     }
   }, [editModal.parentId, loadBookmarks, t]);
 
@@ -196,11 +209,11 @@ export function BookmarkView() {
     if (!name.trim()) return;
     try {
       await createBookmark({ title: name.trim() });
-      message.success(t("bookmark.folderCreated"));
+      message.success(t("文件夹已创建"));
       setNewFolderModal(false);
       void loadBookmarks();
     } catch {
-      message.error(t("bookmark.folderCreateFailed"));
+      message.error(t("文件夹创建失败"));
     }
   }, [loadBookmarks, t]);
 
@@ -238,7 +251,7 @@ export function BookmarkView() {
           ? [
               {
                 key: "open",
-                label: t("bookmark.open"),
+                label: t("打开"),
                 icon: <ExternalLink size={ICON_SIZE.SMALL} />,
                 onClick: () => handleJump(node.url),
               },
@@ -246,7 +259,7 @@ export function BookmarkView() {
           : []),
         {
           key: "edit",
-          label: t("bookmark.edit"),
+          label: t("编辑"),
           icon: <Edit2 size={ICON_SIZE.SMALL} />,
           onClick: () => setEditModal({ open: true, node, isNew: false }),
         },
@@ -255,7 +268,7 @@ export function BookmarkView() {
           : [
               {
                 key: "add",
-                label: t("bookmark.addHere"),
+                label: t("在此添加"),
                 icon: <BookmarkPlus size={ICON_SIZE.SMALL} />,
                 onClick: () => setEditModal({ open: true, isNew: true, parentId: node.id }),
               },
@@ -263,15 +276,15 @@ export function BookmarkView() {
         { type: "divider" as const },
         {
           key: "delete",
-          label: t("bookmark.delete"),
+          label: t("删除"),
           danger: true,
           icon: <Trash2 size={ICON_SIZE.SMALL} />,
           onClick: () => {
             Modal.confirm({
-              title: t("bookmark.confirmDelete"),
+              title: t("确认删除"),
               content: node.url
-                ? t("bookmark.confirmDeleteUrl", { title: node.title })
-                : t("bookmark.confirmDeleteFolder", { title: node.title }),
+                ? t("确认删除书签「{title}」？", { title: node.title })
+                : t("确认删除文件夹「{title}」及其内容？", { title: node.title }),
               okText: t("删除"),
               cancelText: t("取消"),
               okButtonProps: { danger: true },
@@ -293,11 +306,11 @@ export function BookmarkView() {
   if (permissionDenied) {
     return (
       <FeatureEmptyState
-        title={t("bookmark.needPermission")}
-        description={t("bookmark.permissionDescription")}
+        title={t("需要书签权限")}
+        description={t("GroveTab 需要书签权限才能管理您的书签")}
         icon={<Bookmark size={ICON_SIZE.HERO} />}
-        hints={[t("bookmark.permissionHint1"), t("bookmark.permissionHint2"), t("bookmark.permissionHint3")]}
-        actions={[{ text: t("bookmark.grantPermission"), onClick: requestBookmarksPermission, type: "primary" }]}
+        hints={[t("点击下方按钮授权"), t("仅用于读写书签数据"), t("数据不会上传到任何服务器")]}
+        actions={[{ text: t("授权书签权限"), onClick: requestBookmarksPermission, type: "primary" }]}
       />
     );
   }
@@ -305,13 +318,13 @@ export function BookmarkView() {
   if (tree.length === 0) {
     return (
       <FeatureEmptyState
-        title={t("bookmark.emptyTitle")}
-        description={t("bookmark.emptyDescription")}
+        title={t("暂无书签")}
+        description={t("点击下方按钮添加第一个书签")}
         icon={<BookmarkPlus size={ICON_SIZE.HERO} />}
-        hints={[t("bookmark.hint1"), t("bookmark.hint2"), t("bookmark.hint3")]}
+        hints={[t("支持拖拽导入"), t("支持文件夹管理"), t("支持搜索和批量操作")]}
         actions={[
-          { text: t("bookmark.addBookmark"), onClick: () => setEditModal({ open: true, isNew: true }), type: "primary" },
-          { text: t("bookmark.addFolder"), onClick: () => setNewFolderModal(true) },
+          { text: t("添加书签"), onClick: () => setEditModal({ open: true, isNew: true }), type: "primary" },
+          { text: t("添加文件夹"), onClick: () => setNewFolderModal(true) },
         ]}
       />
     );
@@ -327,7 +340,7 @@ export function BookmarkView() {
           allowClear
           size="small"
           prefix={<Search size={ICON_SIZE.SMALL} />}
-          placeholder={t("bookmark.searchPlaceholder")}
+          placeholder={t("搜索书签…")}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className={styles["bookmark-search"]}
@@ -340,14 +353,14 @@ export function BookmarkView() {
               icon={<BookmarkPlus size={ICON_SIZE.SMALL} />}
               onClick={() => setEditModal({ open: true, isNew: true })}
             >
-              {t("bookmark.addBookmark")}
+              {t("添加书签")}
             </Button>
             <Button
               size="small"
               icon={<FolderPlus size={ICON_SIZE.SMALL} />}
               onClick={() => setNewFolderModal(true)}
             >
-              {t("bookmark.addFolder")}
+              {t("添加文件夹")}
             </Button>
           </Space>
         )}
@@ -366,15 +379,15 @@ export function BookmarkView() {
           >
             {selectionMode
               ? selectedIds.size > 0
-                ? t("bookmark.deleteSelected", { count: selectedIds.size })
-                : t("bookmark.selectItems")
-              : t("bookmark.batchSelect")}
+                ? t("删除选中 ({count})", { count: selectedIds.size })
+                : t("选择书签")
+              : t("批量选择")}
           </Button>
         )}
         {isSearching && selectionMode && (
           <>
             <Button size="small" onClick={selectAllFiltered}>
-              {t("bookmark.selectAll")}
+              {t("全选")}
             </Button>
             <Button
               size="small"
@@ -401,7 +414,7 @@ export function BookmarkView() {
       {/* 搜索结果（扁平列表） */}
       {isSearching && filteredList.length === 0 && (
         <Flex justify="center" className={styles["bookmark-empty"]}>
-          <Typography.Text type="secondary">{t("bookmark.noResults")}</Typography.Text>
+          <Typography.Text type="secondary">{t("未找到匹配的书签")}</Typography.Text>
         </Flex>
       )}
       {isSearching &&
@@ -570,8 +583,8 @@ function renderTree(
                 <Popconfirm
                   title={
                     node.url
-                      ? t("bookmark.confirmDeleteUrl", { title: node.title })
-                      : t("bookmark.confirmDeleteFolder", { title: node.title })
+                      ? t("确认删除书签「{title}」？", { title: node.title })
+                      : t("确认删除文件夹「{title}」及其内容？", { title: node.title })
                   }
                   onConfirm={(e) => {
                     e?.stopPropagation();
@@ -650,7 +663,7 @@ function BookmarkEditModal({
   return (
     <Modal
       open={open}
-      title={isNew ? t("bookmark.addBookmark") : t("bookmark.editBookmark")}
+      title={isNew ? t("添加书签") : t("编辑书签")}
       onOk={() => onSave(title, url)}
       onCancel={onClose}
       okText={t("保存")}
@@ -660,13 +673,13 @@ function BookmarkEditModal({
       <Flex vertical gap={12} style={{ marginTop: 12 }}>
         <div>
           <Typography.Text type="secondary" style={{ fontSize: 12, marginBottom: 4, display: "block" }}>
-            {t("bookmark.title")}
+            {t("标题")}
           </Typography.Text>
-          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("bookmark.titlePlaceholder")} />
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("书签标题")} />
         </div>
         <div>
           <Typography.Text type="secondary" style={{ fontSize: 12, marginBottom: 4, display: "block" }}>
-            {t("bookmark.url")}
+            {t("网址")}
           </Typography.Text>
           <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://" />
         </div>
@@ -697,7 +710,7 @@ function BookmarkFolderModal({
   return (
     <Modal
       open={open}
-      title={t("bookmark.addFolder")}
+      title={t("添加文件夹")}
       onOk={() => onSave(name)}
       onCancel={onClose}
       okText={t("创建")}
@@ -709,7 +722,7 @@ function BookmarkFolderModal({
           autoFocus
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder={t("bookmark.folderNamePlaceholder")}
+          placeholder={t("文件夹名称")}
           onPressEnter={() => onSave(name)}
         />
       </Flex>

@@ -10,6 +10,7 @@
 
 import { storageGet, storageSet } from "@/chrome";
 import { opfsRead, opfsWrite } from "@/shared/utils/opfs-storage";
+import { translate } from "@/shared/i18n/core";
 import type { HotBoardData, TrendingCache, TrendingCategory, TrendingItem } from "@/shared/types";
 import { STORAGE_KEYS } from "@/shared/config/storage-keys";
 
@@ -60,32 +61,32 @@ const PLATFORMS: PlatformMeta[] = [
   // 综合
   {
     id: "weibo",
-    name: "微博",
-    subtitle: "热搜榜",
+    name: translate("微博"),
+    subtitle: translate("热搜榜"),
     category: "comprehensive",
     color: "#ff8200",
     order: 1,
   },
   {
     id: "baidu",
-    name: "百度",
-    subtitle: "热搜榜",
+    name: translate("百度"),
+    subtitle: translate("热搜榜"),
     category: "comprehensive",
     color: "#306cff",
     order: 2,
   },
   {
     id: "toutiao",
-    name: "今日头条",
-    subtitle: "热榜",
+    name: translate("今日头条"),
+    subtitle: translate("热榜"),
     category: "comprehensive",
     color: "#ff0000",
     order: 3,
   },
   {
     id: "sogou",
-    name: "搜狗",
-    subtitle: "热搜榜",
+    name: translate("搜狗"),
+    subtitle: translate("热搜榜"),
     category: "comprehensive",
     color: "#ff6f00",
     order: 4,
@@ -93,52 +94,52 @@ const PLATFORMS: PlatformMeta[] = [
   // 科技
   {
     id: "juejin",
-    name: "稀土掘金",
-    subtitle: "文章榜",
+    name: translate("稀土掘金"),
+    subtitle: translate("文章榜"),
     category: "tech",
     color: "#007fff",
     order: 5,
   },
-  { id: "sspai", name: "少数派", subtitle: "热榜", category: "tech", color: "#d6192b", order: 6 },
-  { id: "csdn", name: "CSDN", subtitle: "综合热榜", category: "tech", color: "#fc5531", order: 7 },
+  { id: "sspai", name: translate("少数派"), subtitle: translate("热榜"), category: "tech", color: "#d6192b", order: 6 },
+  { id: "csdn", name: translate("CSDN"), subtitle: translate("综合热榜"), category: "tech", color: "#fc5531", order: 7 },
   {
     id: "github",
-    name: "GitHub",
-    subtitle: "热门榜",
+    name: translate("GitHub"),
+    subtitle: translate("热门榜"),
     category: "tech",
     color: "#24292f",
     order: 8,
   },
-  { id: "51cto", name: "51CTO", subtitle: "推荐榜", category: "tech", color: "#c92027", order: 9 },
+  { id: "51cto", name: translate("51CTO"), subtitle: translate("推荐榜"), category: "tech", color: "#c92027", order: 9 },
   // 娱乐
   {
     id: "bilihot",
-    name: "哔哩哔哩",
-    subtitle: "热搜榜",
+    name: translate("哔哩哔哩"),
+    subtitle: translate("热搜榜"),
     category: "entertainment",
     color: "#00a1d6",
     order: 10,
   },
   {
     id: "biliall",
-    name: "哔哩哔哩",
-    subtitle: "全站日榜",
+    name: translate("哔哩哔哩"),
+    subtitle: translate("全站日榜"),
     category: "entertainment",
     color: "#00a1d6",
     order: 11,
   },
   {
     id: "douyin",
-    name: "抖音",
-    subtitle: "热点榜",
+    name: translate("抖音"),
+    subtitle: translate("热点榜"),
     category: "entertainment",
     color: "#000000",
     order: 12,
   },
   {
     id: "acfun",
-    name: "AcFun",
-    subtitle: "热榜",
+    name: translate("AcFun"),
+    subtitle: translate("热榜"),
     category: "entertainment",
     color: "#fd4c5d",
     order: 13,
@@ -146,25 +147,25 @@ const PLATFORMS: PlatformMeta[] = [
   // 社区
   {
     id: "history",
-    name: "历史上的今天",
-    subtitle: "百科",
+    name: translate("历史上的今天"),
+    subtitle: translate("百科"),
     category: "community",
     color: "#8B4513",
     order: 14,
   },
   // 新闻
-  { id: "ker", name: "安全客", subtitle: "快讯", category: "tech", color: "#0066ff", order: 10 },
+  { id: "ker", name: translate("安全客"), subtitle: translate("快讯"), category: "tech", color: "#0066ff", order: 10 },
   // 新闻
   {
     id: "netease_news",
-    name: "网易新闻",
-    subtitle: "热点榜",
+    name: translate("网易新闻"),
+    subtitle: translate("热点榜"),
     category: "news",
     color: "#c03828",
     order: 15,
   },
-  { id: "sohu", name: "搜狐", subtitle: "热榜新闻", category: "news", color: "#ff6b00", order: 16 },
-  { id: "ifanr", name: "爱范儿", subtitle: "快讯", category: "news", color: "#d22222", order: 17 },
+  { id: "sohu", name: translate("搜狐"), subtitle: translate("热榜新闻"), category: "news", color: "#ff6b00", order: 16 },
+  { id: "ifanr", name: translate("爱范儿"), subtitle: translate("快讯"), category: "news", color: "#d22222", order: 17 },
 ];
 
 /** 获取指定分类下的平台列表 */
@@ -190,8 +191,8 @@ function formatHot(hot: number | string | undefined): string {
     if (Number.isNaN(n)) return hot;
     return formatHot(n);
   }
-  if (hot >= 100_000_000) return `${(hot / 100_000_000).toFixed(1)}亿`;
-  if (hot >= 10_000) return `${(hot / 10_000).toFixed(1)}万`;
+  if (hot >= 100_000_000) return `${(hot / 100_000_000).toFixed(1)}${translate("亿")}`;
+  if (hot >= 10_000) return `${(hot / 10_000).toFixed(1)}${translate("万")}`;
   return String(hot);
 }
 

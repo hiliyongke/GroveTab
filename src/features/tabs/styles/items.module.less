@@ -8,11 +8,11 @@
   --app-domain-column-count: 1;
   display: grid;
   grid-template-columns: repeat(var(--app-domain-column-count), minmax(300px, 1fr));
-  gap: var(--ant-padding);
+  gap: 12px;
   align-items: start;
   width: 100%;
 
-  &-column { display: flex; flex-direction: column; gap: var(--ant-padding); min-width: 0; }
+  &-column { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
   &-item { width: 100%; min-width: 0; }
 }
 
@@ -23,7 +23,7 @@
   overflow: hidden;
   box-shadow: var(--app-shadow-card);
 
-  &__body { padding: var(--ant-margin-xs) 0; }
+  &__body { padding: 4px 0; }
 }
 
 // ── 装饰条 ──
@@ -52,7 +52,7 @@
     display: flex;
     align-items: center;
     min-width: 0;
-    min-height: 48px;
+    min-height: 40px;
     background: transparent;
     border: none;
     border-bottom: 1px solid var(--app-domain-card-header-border, transparent);
@@ -62,11 +62,11 @@
     position: relative;
     display: flex;
     flex: 1;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
     min-width: 0;
-    height: 48px;
-    padding: 0 12px;
+    height: 40px;
+    padding: 0 10px;
     margin: 0;
     font: inherit;
     color: inherit;
@@ -139,7 +139,7 @@
   }
 
   &-list {
-    padding: 6px;
+    padding: 4px;
 
     &--flex { display: flex; padding-top: 2px; }
     &-item { width: 100%; }
@@ -168,11 +168,11 @@
 .app-tab-item {
   position: relative;
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
   width: 100%;
-  min-height: 40px;
-  padding: var(--app-space-1) var(--app-space-3);
+  min-height: 36px;
+  padding: 2px var(--app-space-2);
   cursor: pointer;
   outline: none;
   border-radius: var(--ant-border-radius-sm);
@@ -255,7 +255,7 @@
     max-width: 60%;
   }
 
-  &-head { display: flex; gap: 6px; align-items: center; min-width: 0; }
+  &-head { display: flex; gap: 4px; align-items: center; min-width: 0; }
 
   &-title {
     flex: 0 1 auto;
@@ -299,7 +299,7 @@
   &-status {
     display: flex;
     flex-shrink: 0;
-    gap: 6px;
+    gap: 4px;
     align-items: center;
 
     &-primary { color: var(--app-tab-primary); }
@@ -332,14 +332,13 @@
     gap: 4px;
     align-items: center;
     min-width: fit-content;
-    margin-left: 4px;
+    margin-left: auto;
   }
 }
 
 // ═══ 工具栏 & 杂项 ═══
 .app-domain-toolbar {
   flex-wrap: nowrap;
-  padding: 0 var(--app-space-3);
 
   &-controls {
     flex-shrink: 0;

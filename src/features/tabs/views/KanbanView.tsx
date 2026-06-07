@@ -207,7 +207,7 @@ export function KanbanView() {
       onDragEnd={(e) => void onDragEnd(e)}
       onDragCancel={() => setActive(null)}
     >
-      <Flex align="flex-start" gap="middle" className={`${styles["app-kanban-theme"]} ${styles["app-kanban-view"]}`} style={kanbanThemeStyle}>
+      <Flex align="flex-start" gap="small" className={`${styles["app-kanban-theme"]} ${styles["app-kanban-view"]}`} style={kanbanThemeStyle}>
           {/* 左侧：实时 Tab 源栏 —— 只作为拖出源，不是排序目标 */}
           <Flex vertical gap={0} className={styles["app-kanban-source"]}>
             <Typography.Text className={styles["app-kanban-source__title"]}>
@@ -544,6 +544,7 @@ function ColumnNameEditor({
   col: KanbanColumn;
   onRename: (name: string) => void;
 }) {
+  const { t } = useT();
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(col.name);
   if (editing) {
@@ -570,7 +571,7 @@ function ColumnNameEditor({
       className={styles["app-kanban-column__name"]}
       onDoubleClick={() => setEditing(true)}
     >
-      {col.name}
+      {t(col.name)}
       <Button
         type="text"
         size="small"
