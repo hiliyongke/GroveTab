@@ -3,6 +3,7 @@ import { Spin, Button, Result } from "antd";
 import { RefreshCw } from "lucide-react";
 import { FeatureEmptyState } from "./FeatureEmptyState";
 import { useT } from "@/shared/i18n";
+import styles from "./FeedbackState.module.less";
 
 export interface FeedbackStateProps {
   /** 是否加载中 */
@@ -53,9 +54,9 @@ export function FeedbackState({
   // 加载态
   if (loading) {
     return (
-      <div style={{ textAlign: "center", padding: "60px 0" }}>
+      <div className={styles["loading-container"]}>
         <Spin size="large" />
-        {loadingText && <div style={{ marginTop: 16, color: "#8c8c8c" }}>{loadingText}</div>}
+        {loadingText && <div className={styles["loading-text"]}>{loadingText}</div>}
       </div>
     );
   }

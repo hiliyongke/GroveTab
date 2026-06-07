@@ -14,7 +14,7 @@ vi.mock("@/repositories", () => ({
   getStats: vi.fn(),
 }));
 
-import { useStatsStore } from "@/store/stats-slice";
+import { useStatsStore } from "@/store";
 import { getStats } from "@/repositories";
 
 /** 把日期对象转成 SQL 风格的 yyyy-mm-dd 字符串（与项目内 toDayStr 同语义）。 */

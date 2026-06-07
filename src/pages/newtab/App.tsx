@@ -52,6 +52,7 @@ import { useLayoutStyle } from "./hooks/use-layout-style";
 import { useMemoryGovernance } from "@/shared/hooks/use-memory-governance";
 import { registerInsightsNavigation } from "@/shared/utils/insights-filter";
 import { StatusBar } from "@/shared/ui/StatusBar/StatusBar";
+import { Settings as SettingsIcon } from "lucide-react";
 
 /** 懒加载非默认视图——直接导入文件而非 barrel，确保每个视图独立拆 chunk */
 const TimelineView = lazy(() =>
@@ -241,8 +242,8 @@ function AppContent() {
     })),
   );
 
-  // unified_tabs_view 开启时 QuickStartLayer 由 TabsSubView 内部渲染
-  const unifiedTabsView = useFeatureFlagStore((s) => s.isEnabled("unified_tabs_view"));
+  // QuickStartLayer 已由 TabsSubView 内部渲染（位于子标签下方）
+
 
   // ── 侧栏拖拽 resize（本地状态，mouseup 时持久化到 settings）──
   const [sidebarWidth, setSidebarWidth] = useState(quickStartSidebarWidth);
@@ -305,6 +306,8 @@ function AppContent() {
   const handleViewChange = useCallback(
     (view: ViewMode) => {
       switchView(view);
+      // 持久化当前视图偏好，下次新开 tab 自动回到该视图
+      void useSettingsStore.getState().updateSettings({ defaultView: view });
       void track("view_switch", { to: view });
     },
     [switchView],
@@ -497,23 +500,12 @@ function AppContent() {
 
   return (
     <>
-      <a
+      <Typography.Link
         href="#main-content"
         className={styles["app-skip-link"]}
-        style={{
-          position: "absolute",
-          left: -999,
-          top: -999,
-          zIndex: 9999,
-          background: "var(--ant-color-bg-container)",
-          padding: "var(--ant-padding-xs) var(--ant-padding)",
-          border: "1px solid var(--ant-color-primary)",
-          borderRadius: "var(--ant-border-radius)",
-          textDecoration: "none",
-        }}
       >
         {t("跳到主内容")}
-      </a>
+      </Typography.Link>
       <Layout className="app-layout-shell" style={layoutStyle}>
         {uiVisibility?.header !== false && (
           <AppHeader
@@ -571,11 +563,7 @@ function AppContent() {
               />
             )}
 
-            {/* stacked 模式：QuickStart 在 ViewTabs 下方，仅标签页视图可见。
-                unified_tabs_view 开启时由 TabsSubView 内部渲染（位于子标签下方） */}
-            {quickStartLayout !== "sidebar" && viewMode === "tabs" && !unifiedTabsView && (
-              <QuickStartLayer onOpenSettings={() => panelStack.openSettings()} />
-            )}
+            {/* QuickStart 已由 TabsSubView 内部渲染（位于子标签下方） */}
 
             <AppWorkspace
               checked={checked}
@@ -613,6 +601,16 @@ function AppContent() {
             )}
         </Flex>
 
+        {/* 顶栏隐藏时提供设置入口，避免无门可入 */}
+        {uiVisibility?.header === false && (
+          <FloatButton
+            icon={<SettingsIcon size={18} />}
+            tooltip={t("打开设置")}
+            onClick={() => panelStack.openSettings()}
+            className="app-settings-fab"
+            style={{ bottom: 24, right: 24 }}
+          />
+        )}
         <FloatButton.BackTop
           target={() => document.querySelector(".app-content-shell") as HTMLElement}
           visibilityHeight={400}

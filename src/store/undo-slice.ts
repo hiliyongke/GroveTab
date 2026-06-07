@@ -20,6 +20,18 @@ const UNDO_STORAGE_KEY = STORAGE_KEYS.undo;
 const DEFAULT_UNDO_TTL_MS = 5_000;
 const MAX_UNDO_RECORDS = 5;
 
+/** recordId → setTimeout ID，用于在记录被撤销/淘汰时取消 TTL 定时器 */
+const recordTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+/** 取消并清理指定记录的 TTL 定时器 */
+function clearRecordTimer(recordId: string): void {
+  const timerId = recordTimers.get(recordId);
+  if (timerId !== undefined) {
+    clearTimeout(timerId);
+    recordTimers.delete(recordId);
+  }
+}
+
 function getUndoTtlMs(): number {
   const seconds = useSettingsStore.getState().settings.undoWindowSeconds;
   if (typeof seconds !== 'number' || !Number.isFinite(seconds)) return DEFAULT_UNDO_TTL_MS;
@@ -62,15 +74,25 @@ export const useUndoStore = create<UndoState>((set, get) => ({
       subNote: extra?.subNote,
     };
 
-    const records = [record, ...get().records].slice(0, MAX_UNDO_RECORDS);
+    const prevRecords = get().records;
+    const records = [record, ...prevRecords].slice(0, MAX_UNDO_RECORDS);
+
+    // 取消被 slice 淘汰的旧记录的 timer（新列表不含的记录）
+    const retainedIds = new Set(records.map((r) => r.id));
+    for (const oldRecord of prevRecords) {
+      if (!retainedIds.has(oldRecord.id)) {
+        clearRecordTimer(oldRecord.id);
+      }
+    }
+
     // 先同步写内存，再异步持久化。持久化失败不阻塞关闭流程。
     set({ records, activeToast: record });
     void setData(UNDO_STORAGE_KEY, records).catch((err) => {
       console.warn(`${BRAND.logTag} undo persist failed (record still in memory)`, err);
     });
 
-    // TTL 到时自动过期
-    setTimeout(() => {
+    // TTL 到时自动过期（保存 timer ID 以便在撤销/淘汰时取消）
+    const timerId = setTimeout(() => {
       const current = get();
       if (current.activeToast?.id === record.id) {
         set({ activeToast: null });
@@ -80,7 +102,9 @@ export const useUndoStore = create<UndoState>((set, get) => ({
       );
       set({ records: updated });
       void setData(UNDO_STORAGE_KEY, updated).catch(() => {});
+      recordTimers.delete(record.id);
     }, getUndoTtlMs());
+    recordTimers.set(record.id, timerId);
     // TTL 在 addRecord 时固化，后续修改设置不影响已有记录。
 
     return Promise.resolve(record);
@@ -108,6 +132,7 @@ export const useUndoStore = create<UndoState>((set, get) => ({
     }
 
     const records = get().records.filter((r) => r.id !== recordId);
+    clearRecordTimer(recordId);
     set({ records, activeToast: null });
     void setData(UNDO_STORAGE_KEY, records).catch(() => {});
   },

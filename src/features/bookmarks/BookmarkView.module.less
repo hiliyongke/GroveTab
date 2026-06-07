@@ -1,57 +1,350 @@
 /**
- * BookmarkView 样式模块
+ * BookmarkView 样式
  *
- * BEM 子元素使用 &__ 嵌套，状态用 &-- 修饰符。
+ * 集中管理子组件使用的全局类名（bookmark-toolbar / bookmark-selection-bar / 等）。
+ * 树节点/最近/搜索列表等深层组件的样式见 ./styles/BookmarkTree.module.less。
  */
 
 .bookmark-view {
-  padding: 12px 16px;
+  padding: var(--app-space-3) var(--app-space-4);
 }
 
 .bookmark-loading {
-  padding: 48px;
+  padding: var(--app-space-12);
 }
 
-.bookmark-search {
-  margin-bottom: 4px;
+// ── 工具栏 ─────────────────────────────────────────────────
+.bookmark-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--app-gap-md);
+  align-items: center;
+  margin-bottom: var(--app-space-3);
+
+  &__search {
+    flex: 1 1 200px;
+    min-width: 140px;
+    max-width: 360px;
+  }
+
+  &__sort--active {
+    color: var(--ant-color-primary);
+    border-color: var(--ant-color-primary);
+  }
 }
 
-// ── 书签项 ──
-.bookmark-item {
-  padding: 6px 10px !important; // antd List.Item 默认 padding 覆盖
-  border-radius: var(--ant-border-radius-sm);
-  cursor: pointer;
-  transition: background var(--app-motion-fast, 0.15s) ease, transform var(--app-motion-fast, 0.15s) ease;
+// ── 多选操作栏 ─────────────────────────────────────────────
+.bookmark-selection-bar {
+  display: flex;
+  gap: var(--app-gap-md);
+  align-items: center;
+  padding: var(--app-gap-sm) var(--app-gap-md);
+  margin-bottom: var(--app-gap-md);
+  background: var(--app-bg-selected);
+  border: 1px solid var(--ant-color-primary-border, var(--ant-color-primary-bg));
+  border-radius: var(--app-radius-md);
+  animation: bookmark-fade-slide var(--app-motion-base) var(--app-easing-standard);
 
-  &:hover {
-    background: var(--ant-color-fill-quaternary);
-    transform: translateX(2px);
+  &__count {
+    margin-right: auto;
+    font-size: var(--app-font-base);
+    font-weight: 500;
+    color: var(--ant-color-text);
+  }
+}
+
+// ── 统计行 ─────────────────────────────────────────────────
+.bookmark-stats-bar {
+  margin-bottom: var(--app-gap-md);
+  font-size: var(--app-font-sm);
+  color: var(--ant-color-text-tertiary);
+
+  &__progress {
+    font-weight: 500;
+    color: var(--ant-color-primary);
   }
 
-  &__content {
-    min-width: 0;
+  &__broken-badge {
+    cursor: pointer;
+    transition: background var(--app-motion-fast) var(--app-easing-standard);
+
+    &:hover {
+      background: var(--app-bg-hover);
+    }
+  }
+}
+
+// ── 智能分类 ───────────────────────────────────────────────
+.bookmark-smart-tags {
+  margin-bottom: var(--app-space-3);
+
+  &__item {
+    cursor: pointer;
+    user-select: none;
+    transition: background var(--app-motion-fast) var(--app-easing-standard);
+
+    &:hover {
+      background: var(--app-list-item-hover-bg);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ant-color-primary);
+      outline-offset: 2px;
+    }
+  }
+}
+
+// ── 模态框 ─────────────────────────────────────────────────
+.bookmark-edit-modal {
+  &__body {
+    margin-top: var(--app-space-3);
   }
 
-  &__title {
+  &__label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: var(--app-font-sm);
+  }
+}
+
+.bookmark-new-folder__input {
+  margin-top: var(--app-space-2);
+}
+
+.bookmark-broken-modal {
+  &__success {
+    padding: var(--app-space-6);
+  }
+
+  &__success-icon {
+    color: var(--ant-color-success);
+  }
+
+  &__scroll {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  &__item {
+    padding: 6px 0;
+    border-bottom: 1px solid var(--ant-color-border-secondary);
+  }
+
+  &__item-icon {
+    flex-shrink: 0;
+    color: var(--ant-color-error);
+  }
+
+  &__item-text {
     flex: 1;
     min-width: 0;
-    font-size: 14px;
+  }
+
+  &__item-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: var(--app-font-base);
+    white-space: nowrap;
+  }
+
+  &__item-url {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 11px;
+    color: var(--ant-color-text-quaternary);
+    white-space: nowrap;
+  }
+
+  &__item-duration {
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ant-color-text-quaternary);
+  }
+
+  &__running-actions {
+    justify-content: space-between;
+  }
+
+  &__hint {
+    font-size: var(--app-font-sm);
+  }
+
+  &__preview {
+    max-height: 220px;
+    padding: var(--app-gap-sm);
+    overflow-y: auto;
+    background: var(--app-bg-surface);
+    border-radius: var(--app-radius-md);
+  }
+
+  &__preview-row {
+    padding: 4px 6px;
+    border-radius: var(--app-radius-xs);
+    transition: background var(--app-motion-fast) var(--app-easing-standard);
+    animation: bookmark-broken-row-in var(--app-motion-base) var(--app-easing-standard);
+  }
+
+  &__preview-ok {
+    flex-shrink: 0;
+    color: var(--ant-color-success);
+  }
+
+  &__preview-err {
+    flex-shrink: 0;
+    color: var(--ant-color-error);
+  }
+
+  &__preview-title {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: var(--app-font-sm);
+    white-space: nowrap;
+  }
+
+  &__preview-time {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__summary {
+    padding: var(--app-gap-md);
+    background: var(--app-bg-surface);
+    border-radius: var(--app-radius-md);
+  }
+
+  &__ok-icon {
+    color: var(--ant-color-success);
+  }
+
+  &__err-icon {
+    color: var(--ant-color-error);
+  }
+
+  &__duration {
+    margin-left: auto;
+    font-size: var(--app-font-sm);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__allok {
+    padding: var(--app-space-6);
+  }
+
+  &__idle {
+    padding: var(--app-space-10) 0;
+  }
+
+  &__idle-icon {
+    color: var(--ant-color-primary);
+    opacity: 0.5;
   }
 }
 
-// ── 图标 ──
-.bookmark-icon {
-  flex-shrink: 0;
-  color: var(--ant-color-text-tertiary);
+@keyframes bookmark-broken-row-in {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.bookmark-link-icon {
-  flex-shrink: 0;
-  color: var(--ant-color-text-quaternary);
-  opacity: 0;
-  transition: opacity 0.15s;
+.bookmark-duplicates-modal {
+  &__success {
+    padding: var(--app-space-6);
+  }
 
-  .bookmark-item:hover & {
+  &__success-icon {
+    color: var(--ant-color-success);
+  }
+
+  &__list {
+    max-height: 480px;
+    overflow-y: auto;
+  }
+
+  &__group {
+    padding: var(--app-gap-md);
+    margin-bottom: var(--app-gap-md);
+    border: 1px solid var(--ant-color-border-secondary);
+    border-radius: var(--app-radius-md);
+  }
+
+  &__group-header {
+    margin-bottom: var(--app-gap-sm);
+  }
+
+  &__group-icon {
+    color: var(--ant-color-primary);
+  }
+
+  &__group-url {
+    flex: 1;
+    font-size: 11px;
+    word-break: break-all;
+  }
+
+  &__group-count {
+    font-size: 11px;
+    color: var(--ant-color-text-tertiary);
+  }
+
+  &__item {
+    padding: 4px 0;
+  }
+
+  &__item-idx {
+    min-width: 24px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ant-color-text-tertiary);
+  }
+
+  &__item-title {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: var(--app-font-base);
+    white-space: nowrap;
+  }
+
+  &__item-keep {
+    padding: 1px 6px;
+    font-size: 10px;
+    color: var(--ant-color-success);
+    background: var(--ant-color-success-bg);
+    border-radius: var(--app-radius-pill);
+  }
+
+  &__remove-btn {
+    align-self: flex-start;
+    margin-top: var(--app-gap-sm);
+  }
+}
+
+@keyframes bookmark-fade-slide {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
     opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ── 减少动效偏好 ───────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .bookmark-stats-bar__broken-badge,
+  .bookmark-smart-tags__item,
+  .bookmark-selection-bar {
+    transition: none !important;
+    animation: none !important;
   }
 }

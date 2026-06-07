@@ -105,7 +105,7 @@ export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // ignore local cache failures
     }
-  }, [mode, loaded]);
+  }, [mode, skinPreset, reducedMotion, loaded]);
 
   useEffect(() => {
     if (!loaded) return;

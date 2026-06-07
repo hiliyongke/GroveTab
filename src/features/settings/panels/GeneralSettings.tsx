@@ -16,6 +16,7 @@ import type { UserSettings } from "@/shared/types";
 import { useT } from "@/shared/i18n";
 import { Field } from "@/features/settings/components/Field";
 import { BRAND } from "@/shared/config/brand";
+import { CLOSE_CONFIRM_THRESHOLD } from "@/shared/types/settings";
 
 interface GeneralSettingsProps {
   settings: UserSettings;
@@ -163,6 +164,25 @@ export function GeneralSettings({ settings, updateSettings }: GeneralSettingsPro
         <Switch
           checked={settings.trackTabFocusTime !== false}
           onChange={(value) => handleSetting({ trackTabFocusTime: value })}
+        />
+      </Field>
+
+      {/* ── 关闭确认阈值 ── */}
+      <Field
+        label={t("关闭确认阈值")}
+        hint={t(
+          "批量关闭/合并窗口时，标签数超过此值将弹出二次确认；默认 {default} 个。",
+          { default: CLOSE_CONFIRM_THRESHOLD },
+        )}
+      >
+        <Select
+          value={settings.closeConfirmThreshold ?? CLOSE_CONFIRM_THRESHOLD}
+          onChange={(value) => handleSetting({ closeConfirmThreshold: value })}
+          className="settings-control-full"
+          options={[10, 20, 30, 50, 100].map((n) => ({
+            value: n,
+            label: t("{n} 个", { n }),
+          }))}
         />
       </Field>
 

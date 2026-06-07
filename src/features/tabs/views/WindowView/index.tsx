@@ -10,7 +10,7 @@
  *   - 拖拽排序窗口卡片 / 跨窗口拖拽标签
  */
 
-import { useMemo, useState, useCallback } from "react";
+import { memo, useMemo, useState, useCallback } from "react";
 import { Empty, Flex, Row, Col } from "antd";
 import {
   DndContext,
@@ -88,7 +88,7 @@ function filterTabs(tabs: LiveTab[], query: string): LiveTab[] {
   );
 }
 
-export function WindowView() {
+export const WindowView = memo(function WindowView() {
   const tabs = useTabsStore((s) => s.tabs);
   const windows = useTabsStore((s) => s.windows);
   const currentWindowId = useTabsStore((s) => s.currentWindowId);
@@ -115,7 +115,14 @@ export function WindowView() {
 
   // ── 搜索过滤 ──────────────────────────────
   const [filterQuery, setFilterQuery] = useState("");
-  const [sortMode, setSortMode] = useState<WindowSortMode>("manual");
+  const sortMode = useSettingsStore((s) => s.settings.windowSortMode ?? "manual") as WindowSortMode;
+  const setSortMode = useCallback(
+    (mode: WindowSortMode | ((prev: WindowSortMode) => WindowSortMode)) => {
+      const next = typeof mode === "function" ? mode(sortMode) : mode;
+      void updateSettings({ windowSortMode: next });
+    },
+    [sortMode, updateSettings],
+  );
 
   const windowGroups = useMemo(() => groupTabsByWindow(tabs), [tabs]);
 
@@ -324,4 +331,4 @@ export function WindowView() {
       <WindowBatchActionBar />
     </Flex>
   );
-}
+});

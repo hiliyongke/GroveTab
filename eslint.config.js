@@ -343,11 +343,11 @@ export default tseslint.config(
    * css-modules/no-undef-class   — JS 中引用但 CSS 未定义的 class
    * 注：通过 FlatCompat 桥接，兼容 ESLint 10 flat config
    * ============================================================ */
-  ...compat.config({
-    plugins: ['css-modules'],
-    rules: {
-      'css-modules/no-unused-class': ['warn', { camelCase: true }],
-      'css-modules/no-undef-class': ['warn', { camelCase: true }],
-    },
-  }),
+  // ...compat.config({ // 临时禁用：ESLint 10 兼容性问题
+  //   plugins: ['css-modules'],
+  //   rules: {
+  //     'css-modules/no-unused-class': ['warn', { camelCase: true }],
+  //     'css-modules/no-undef-class': ['warn', { camelCase: true }],
+  //   },
+  // }),
 );

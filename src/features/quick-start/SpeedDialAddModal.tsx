@@ -155,8 +155,9 @@ export function SpeedDialAddModal({ open, onClose, editingSite, existingGroups }
       await batchImport(newSites);
       feedback.success(t('导入成功，已添加 {n} 个站点', { n: newSites.length }));
       onClose();
-    } catch (e: any) {
-      feedback.error(e?.message || t('JSON 格式错误'));
+    } catch (e: unknown) {
+      const err = e instanceof Error ? e : new Error(String(e));
+      feedback.error(err.message || t('JSON 格式错误'));
     } finally {
       setConfirmLoading(false);
     }
@@ -192,7 +193,7 @@ export function SpeedDialAddModal({ open, onClose, editingSite, existingGroups }
             { label: t('单个添加'), value: 'single' as const },
             { label: t('批量导入'), value: 'import' as const },
           ]}
-          style={{ marginBottom: 16 }}
+          style={{ marginBottom: "var(--app-space-4)" }}
         />
       )}
 

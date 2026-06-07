@@ -242,11 +242,9 @@
   border-radius: var(--app-card-radius, 12px);
   transition:
     opacity 160ms ease,
-    transform var(--app-motion-fast, 0.15s) ease,
     box-shadow var(--app-motion-fast, 0.15s) ease;
 
   &:hover {
-    transform: translateY(-1px);
     box-shadow: var(--app-shadow-sm);
   }
 
@@ -506,7 +504,7 @@
 }
 
 .speed-dial-empty-btn:hover {
-  transform: translateY(-1px);
+  background: var(--app-bg-hover);
 }
 
 // ── Sidebar 纯图标视图 ──
@@ -546,7 +544,7 @@
   height: 28px;
   padding: 0;
   color: var(--ant-color-text-quaternary);
-  border-radius: 6px;
+  border-radius: var(--app-radius-sm);
   transition: color 120ms ease, background 120ms ease;
 
   &:hover {
@@ -625,7 +623,7 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: 10px;
+  border-radius: var(--app-radius-md);
   cursor: pointer;
   text-decoration: none;
   flex-shrink: 0;
@@ -634,7 +632,6 @@
 
   &:hover {
     background: var(--ant-color-fill-secondary);
-    transform: scale(1.08);
 
     .sidebar-drag-handle {
       opacity: 1;
@@ -642,7 +639,7 @@
   }
 
   &:active {
-    transform: scale(0.92);
+    transform: scale(0.96);
   }
 }
 

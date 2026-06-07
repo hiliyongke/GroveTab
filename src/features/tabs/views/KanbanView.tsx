@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { Button, Card, Input, Popconfirm, theme, Typography, Flex, Empty } from "antd";
 import { Plus, Trash2, Save, PenLine, X, GripVertical } from "lucide-react";
 import { cssVars } from "@/shared/utils/css-vars";
@@ -44,7 +44,7 @@ interface ActiveDrag {
   data: DragData;
 }
 
-export function KanbanView() {
+export const KanbanView = memo(function KanbanView() {
   const { token } = theme.useToken();
   const { t } = useT();
   const columns = useKanbanStore((s) => s.columns);
@@ -283,7 +283,7 @@ export function KanbanView() {
       </DragOverlay>
     </DndContext>
   );
-}
+});
 
 // ── 子组件：源 Tab 卡片 ──────────────────────────────────
 function TabSourceItem({ card, reduced }: { card: KanbanCard; reduced: boolean }) {

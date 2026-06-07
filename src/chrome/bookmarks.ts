@@ -58,6 +58,29 @@ export async function removeBookmark(id: string): Promise<boolean> {
   }
 }
 
+/** 更新书签标题/URL。 */
+export async function updateBookmark(id: string, changes: { title?: string; url?: string }): Promise<BookmarkNode | null> {
+  try {
+    return await safeCall('bookmarks.update', () => chrome.bookmarks.update(id, changes));
+  } catch {
+    return null;
+  }
+}
+
+/** 获取最近添加的书签。 */
+export async function getRecentBookmarks(count: number = 20): Promise<BookmarkNode[]> {
+  try {
+    return await safeCall('bookmarks.getRecent', () => chrome.bookmarks.getRecent(count));
+  } catch { return []; }
+}
+
+/** 获取书签子树。 */
+export async function getBookmarkSubTree(id: string): Promise<BookmarkNode[]> {
+  try {
+    return await safeCall('bookmarks.getSubTree', () => chrome.bookmarks.getSubTree(id));
+  } catch { return []; }
+}
+
 /** 移动书签到指定父节点。 */
 export async function moveBookmark(id: string, parentId: string): Promise<boolean> {
   try {

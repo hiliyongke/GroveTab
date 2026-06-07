@@ -23,6 +23,13 @@ import enBuiltin from '../../../i18n/source/en.json';
 
 export type Locale = "zh-CN" | "en";
 
+// ─── Window 类型扩展 ──────────────────────────────────────
+declare global {
+  interface Window {
+    __I18N_MANIFEST__?: Record<string, string>;
+  }
+}
+
 // ─── 反向映射 ────────────────────────────────────────────
 
 /**
@@ -54,8 +61,8 @@ export function getDictionaries(): { zhCN: Record<string, string>; en: Record<st
 // ─── 字典加载 ────────────────────────────────────────────
 
 function getI18nManifest(): Record<string, string> {
-  if (typeof window !== "undefined" && (window as any).__I18N_MANIFEST__) {
-    return (window as any).__I18N_MANIFEST__;
+  if (typeof window !== "undefined" && window.__I18N_MANIFEST__) {
+    return window.__I18N_MANIFEST__;
   }
   return {};
 }

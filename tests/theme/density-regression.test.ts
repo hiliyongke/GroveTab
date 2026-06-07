@@ -23,16 +23,11 @@ function extractPxValue(cssValue: string): number {
   return match ? parseFloat(match[1]) : 0;
 }
 
-describe("密度回归测试 (9皮肤 × 3密度)", () => {
+describe("密度回归测试 (4皮肤 × 3密度)", () => {
   const skins = [
     "minimal",
     "glassmorphism",
-    "skeuomorphism",
-    "aurora",
-    "elegant",
     "nord",
-    "solarized",
-    "pastel",
     "apple",
   ] as const;
 

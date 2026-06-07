@@ -26,6 +26,8 @@ export interface UserSettings {
   overrideNewTab: boolean;
   /** 视图标签栏位置：left / right（垂直侧栏） */
   viewTabPosition?: ViewTabPosition;
+  /** 视图标签栏是否折叠（仅显示图标），默认 false */
+  viewTabCollapsed?: boolean;
   defaultView:
     | "domain" // legacy，运行期自动映射为 tabs + tabsLayout='masonry'
     | "tabs"
@@ -42,7 +44,8 @@ export interface UserSettings {
     | "devtools"
     | "insights"
     | "history"
-    | "trash";
+    | "trash"
+    | "sessions";
   /**
    * 标签页主视图的布局模式（仅 defaultView='tabs' 时生效）。
    *   - 'masonry'（默认）：按域名分组的瀑布流多列布局（原 domain 视图）
@@ -103,6 +106,8 @@ export interface UserSettings {
   windowShowIdleTime?: boolean;
   /** 窗口视图中是否显示窗口健康度指示器 */
   windowShowHealthIndicator?: boolean;
+  /** 窗口排序模式：'manual' | 'tabCount' | 'name' | 'activity'，默认 'manual' */
+  windowSortMode?: "manual" | "tabCount" | "name" | "activity";
   /**
    * 时间轴分组粒度：
    *   - 'day' ：今天/昨天/本周/更早（默认，简洁）

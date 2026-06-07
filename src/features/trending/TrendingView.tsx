@@ -9,13 +9,12 @@
  *   - 点击条目跳转到原始链接
  */
 
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import type { ReactNode } from "react";
 import {
   Alert,
   Button,
   Card,
-  Flex,
   Segmented,
   Space,
   Spin,
@@ -28,11 +27,6 @@ import {
   EyeOff,
   ExternalLink,
   Flame,
-  Cpu,
-  Gamepad2,
-  Users,
-  Newspaper,
-  LayoutGrid,
   Mail,
   FileText,
   Table2,
@@ -40,7 +34,6 @@ import {
   Bookmark,
   Copy,
   Clock,
-  Globe,
 } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { cssVars } from "@/shared/utils/css-vars";
@@ -49,9 +42,7 @@ import { useT } from "@/shared/i18n";
 import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
 import { createTab } from "@/chrome";
 import { createBookmark } from "@/chrome/bookmarks";
-import { useSpeedDialStore } from "@/store";
 import type {
-  TrendingCategory,
   TrendingGroupMode,
   HotBoardData,
   StealthModeConfig,
@@ -70,13 +61,6 @@ import styles from "./TrendingView.module.less";
 import { translate } from '@/shared/i18n/core';
 
 const { Text, Title } = Typography;
-
-interface CategoryOption {
-  value: TrendingCategory;
-  label: string;
-  icon: ReactNode;
-}
-
 
 const STEALTH_OPTIONS: Array<{
   value: StealthModeConfig["disguise"];
@@ -483,8 +467,21 @@ function HotBoardCard({
 
 export function TrendingView() {
   const { t } = useT();
-  const [category, setCategory] = useState<TrendingCategory>("all");
-  const [groupMode, setGroupMode] = useState<TrendingGroupMode>("default");
+  const [groupMode, setGroupModeState] = useState<TrendingGroupMode>(() => {
+    try { return (localStorage.getItem("trending_group_mode") as TrendingGroupMode) || "default"; }
+    catch { return "default"; }
+  });
+  const [cardSort, setCardSort] = useState<"default" | "alpha">(() => {
+    try { return (localStorage.getItem("trending_card_sort") as any) || "default"; }
+    catch { return "default"; }
+  });
+  const setGroupMode = useCallback((g: TrendingGroupMode | ((p: TrendingGroupMode) => TrendingGroupMode)) => {
+    setGroupModeState((prev) => {
+      const next = typeof g === "function" ? g(prev) : g;
+      try { localStorage.setItem("trending_group_mode", next); } catch {}
+      return next;
+    });
+  }, []);
   const [stealthMode, setStealthMode] = useState<StealthModeConfig>({
     enabled: false,
     disguise: "email",
@@ -529,7 +526,14 @@ export function TrendingView() {
     [t],
   );
 
-  const activePlatforms = useMemo(() => getPlatformsByCategory(category), [category]);
+  const activePlatforms = useMemo(() => getPlatformsByCategory("all"), []);
+
+  // 卡片排序
+  const sortedPlatforms = useMemo(() => {
+    const arr = [...activePlatforms];
+    if (cardSort === "alpha") arr.sort((a, b) => a.name.localeCompare(b.name));
+    return arr;
+  }, [activePlatforms, cardSort]);
   const hasBoardData = Object.keys(boards).length > 0;
 
   const loadBoards = useCallback(async (platformIds: string[]) => {
@@ -570,29 +574,6 @@ export function TrendingView() {
   const toggleStealthMode = useCallback(() => {
     setStealthMode((prev) => ({ ...prev, enabled: !prev.enabled }));
   }, []);
-
-  const categoryOptions = useMemo(
-    () => {
-      const items: CategoryOption[] = [
-        { value: "all", label: t("全部"), icon: <LayoutGrid size={ICON_SIZE.DEFAULT} /> },
-        { value: "comprehensive", label: t("综合"), icon: <Flame size={ICON_SIZE.DEFAULT} /> },
-        { value: "tech", label: t("科技"), icon: <Cpu size={ICON_SIZE.DEFAULT} /> },
-        { value: "entertainment", label: t("娱乐"), icon: <Gamepad2 size={ICON_SIZE.DEFAULT} /> },
-        { value: "community", label: t("社区"), icon: <Users size={ICON_SIZE.DEFAULT} /> },
-        { value: "news", label: t("新闻"), icon: <Newspaper size={ICON_SIZE.DEFAULT} /> },
-      ];
-      return items.map((item) => ({
-        value: item.value,
-        label: (
-          <span className={styles["trending-category-option"]}>
-            {item.icon}
-            <span>{item.label}</span>
-          </span>
-        ),
-      }));
-    },
-    [t],
-  );
 
   const groupModeOptions = useMemo(
     () => [
@@ -681,13 +662,6 @@ export function TrendingView() {
           </div>
 
           <div className={styles["trending-toolbar-card__controls"]}>
-            <Segmented<TrendingCategory>
-              value={category}
-              onChange={setCategory}
-              options={categoryOptions}
-              size="small"
-              className={`${styles["trending-toolbar-card__segment"]} ${styles["trending-toolbar-card__segment--categories"]}`}
-            />
             <Segmented<TrendingGroupMode>
               size="small"
               value={groupMode}
@@ -695,13 +669,18 @@ export function TrendingView() {
               options={groupModeOptions}
               className={`${styles["trending-toolbar-card__segment"]} ${styles["trending-toolbar-card__segment--group"]}`}
             />
+            <Segmented<string>
+              size="small"
+              value={cardSort}
+              onChange={(v) => { setCardSort(v as "default" | "alpha"); try { localStorage.setItem("trending_card_sort", v); } catch {} }}
+              options={[{ value: "default", label: t("默认") }, { value: "alpha", label: t("按字母") }]}
+              className={styles["trending-toolbar-card__segment"]}
+            />
           </div>
         </div>
       </Card>
 
-      {/* v1.5: SpeedDial 常用站点快捷入口 */}
-      <SpeedDialSection />
-
+      {/* 常用站点入口已移除 — 热榜页面专注内容发现，快捷入口由浮层/顶栏提供 */}
       {allFailed && (
         <Alert
           type="warning"
@@ -726,15 +705,15 @@ export function TrendingView() {
       ) : activePlatforms.length === 0 ? (
         <FeatureEmptyState
           title={t("当前分类暂无可用平台")}
-          icon={<Newspaper size={ICON_SIZE.HERO} />}
+          icon={<Flame size={ICON_SIZE.HERO} />}
           hints={[t("部分平台仅支持综合分类"), t("尝试切换到其它分类查看"), t("数据源可能正在维护")]}
-          actions={[{ text: t("查看全部"), onClick: () => setCategory("all"), type: "primary" }]}
+          actions={[{ text: t("刷新全部"), onClick: handleRefreshAll, type: "primary" }]}
         />
       ) : (
         <div
           className={cx(styles["trending-grid"], groupMode === "compact" && styles["is-compact"])}
         >
-          {activePlatforms.map((platform) => {
+          {sortedPlatforms.map((platform) => {
             const board = boards[platform.id];
             if (!board) {
               return (
@@ -775,58 +754,3 @@ export function TrendingView() {
   );
 }
 
-/**
- * v1.5: SpeedDial 常用站点卡片网格（融入 Trending 页面）。
- * 从 SpeedDialStore 读取站点列表，显示紧凑图标+标题行。
- */
-function SpeedDialSection() {
-  const sites = useSpeedDialStore((s) => s.sites);
-  const loadSites = useSpeedDialStore((s) => s.loadSites);
-  const loaded = useSpeedDialStore((s) => s.loaded);
-  const attemptedRef = useRef(false);
-  const { t } = useT();
-
-  useEffect(() => {
-    if (!loaded && !attemptedRef.current) {
-      attemptedRef.current = true;
-      void loadSites();
-    }
-  }, [loaded, loadSites]);
-
-  if (sites.length === 0) return null;
-
-  return (
-    <Card
-      size="small"
-      title={t("常用站点")}
-      className={styles["trending-surface-card"]}
-      classNames={{ body: styles["trending-board-card__body"] }}
-    >
-      <Flex wrap="wrap" gap={12}>
-        {sites.slice(0, 8).map((site) => (
-          <Typography.Link
-            key={site.url}
-            href={site.url}
-            target="_blank"
-            rel="noreferrer"
-            className={styles["trending-speeddial-link"]}
-          >
-            {site.favIconUrl ? (
-              <img
-                src={site.favIconUrl}
-                alt=""
-                className={styles["trending-speeddial-favicon"]}
-                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-              />
-            ) : (
-              <Globe size={14} />
-            )}
-            <span className={styles["trending-speeddial-title"]}>
-              {site.title || site.url}
-            </span>
-          </Typography.Link>
-        ))}
-      </Flex>
-    </Card>
-  );
-}

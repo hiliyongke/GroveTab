@@ -4,6 +4,16 @@
 
 /* 键盘用户跳过导航链接 */
 .app-skip-link {
+  position: absolute;
+  left: -999px;
+  top: -999px;
+  z-index: 9999;
+  background: var(--ant-color-bg-container);
+  padding: var(--ant-padding-xs) var(--ant-padding);
+  border: 1px solid var(--ant-color-primary);
+  border-radius: var(--ant-border-radius);
+  text-decoration: none;
+
   &:not(:focus) {
     clip: rect(0 0 0 0);
     clip-path: inset(50%);
@@ -16,7 +26,7 @@
 
   &:focus {
     position: fixed;
-    top: 12px;
+    top: var(--ant-margin-sm);
     left: 50%;
     transform: translateX(-50%);
   }

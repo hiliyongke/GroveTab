@@ -174,7 +174,7 @@
       font-weight: 500;
       color: var(--ant-color-text-tertiary);
       background: var(--ant-color-fill-tertiary);
-      border-radius: 10px;
+      border-radius: var(--app-radius-sm);
     }
   }
 }
@@ -342,10 +342,9 @@
   &:hover {
     border-color: color-mix(in srgb, var(--ant-color-primary) 40%, var(--app-hairline));
     box-shadow: var(--app-shadow-sm);
-    transform: translateY(-1px);
   }
 
-  &:active { transform: translateY(-1px) scale(0.99); }
+  &:active { transform: scale(0.99); }
 
   &.is-highlighted {
     border-color: var(--ant-color-primary);
@@ -411,7 +410,7 @@
       font-weight: 600;
       color: var(--ant-color-text-tertiary);
       background: var(--ant-color-fill-quaternary);
-      border-radius: 12px;
+      border-radius: var(--app-radius-lg);
     }
   }
 
@@ -471,7 +470,6 @@
 
     &:hover {
       background: var(--ant-color-fill-tertiary);
-      transform: translateX(2px);
     }
 
     &:active { transform: scale(0.98); }

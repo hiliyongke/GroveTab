@@ -3,6 +3,7 @@
  */
 
 import { memo } from "react";
+import { Button } from "antd";
 import { X } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
@@ -58,17 +59,17 @@ export const RecentTabRow = memo(function RecentTabRow({
         <span className="popup-row-title">{tab.title}</span>
         {showFavicon && <span className="popup-row-host">{tab.hostname}</span>}
       </div>
-      <button
-        type="button"
+      <Button
+        type="text"
+        size="small"
         onClick={(e) => {
           e.stopPropagation();
           onClose();
         }}
         aria-label={t("关闭标签页 {title}", { title: tab.title })}
         className="popup-row-close"
-      >
-        <X size={ICON_SIZE.SMALL} />
-      </button>
+        icon={<X size={ICON_SIZE.SMALL} />}
+      />
     </div>
   );
 });

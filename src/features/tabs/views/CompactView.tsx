@@ -9,7 +9,7 @@
  *   - 使用虚拟滚动，支持 500+ Tab 不掉帧
  */
 
-import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import React, { memo, useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Flex, Empty, Segmented, Tooltip, Typography } from "antd";
 import { Clock, TrendingUp, Timer, ArrowUpDown, Globe, Type } from "lucide-react";
@@ -84,7 +84,7 @@ async function buildFocusTimeMap(): Promise<Map<string, number>> {
 /**
  * 紧凑视图：虚拟化列表 + 排序功能 + 双向同步
  */
-export function CompactView({ filterQuery = "" }: CompactViewProps) {
+export const CompactView = memo(function CompactView({ filterQuery = "" }: CompactViewProps) {
   const { t } = useT();
   const tabs = useTabsStore((s) => s.tabs);
   const { jumpToTab, closeSingleTab } = useTabActions();
@@ -294,6 +294,6 @@ export function CompactView({ filterQuery = "" }: CompactViewProps) {
       </Flex>
     </Flex>
   );
-}
+});
 
 

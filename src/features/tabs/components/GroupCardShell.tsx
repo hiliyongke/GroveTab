@@ -60,13 +60,14 @@ export function GroupCardShell({
 
   const style = useMemo<CSSProperties>(
     () => ({
-      borderRadius: radius || 12,
+      borderRadius: radius ?? 12,
       overflow: "hidden",
       position: "relative",
-      boxShadow: "var(--app-shadow-card)",
-      border: `1px solid ${token.colorBorderSecondary}`,
+      // 🚫 不再内联 boxShadow / border —— 让 _skin-overrides.less 的
+      //    [data-skin="apple"] .app-card、[data-skin="glassmorphism"] 等
+      //    Less 规则接管，否则内联 style 优先级碾压皮肤样式。
       ...cssVars({
-        "--app-domain-card-radius": `${radius || 12}px`,
+        "--app-domain-card-radius": `${radius ?? 12}px`,
         "--app-domain-card-bar": barColor,
         "--app-domain-card-badge-bg": badgeBg,
         "--app-domain-card-header-border": token.colorBorderSecondary,

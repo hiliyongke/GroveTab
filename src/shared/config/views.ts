@@ -67,8 +67,8 @@ export const VIEW_CONFIGS: ViewConfig[] = [
   { id: "sessions", iconName: "Archive", labelKey: translate("会话"), primary: true },
   // ── 探索与工具 ──
   { id: "insights", iconName: "BarChart3", labelKey: translate("数据洞察") },
-  { id: "trending", iconName: "TrendingUp", labelKey: translate("热榜"), primary: false },
-  { id: "devtools", iconName: "Wrench", labelKey: translate("开发工具"), primary: false },
+  { id: "trending", iconName: "TrendingUp", labelKey: translate("热榜"), primary: true },
+  { id: "devtools", iconName: "Wrench", labelKey: translate("开发工具"), primary: true },
 ];
 
 /** 合法的 ViewMode 值数组，用于防御旧版残留值 */

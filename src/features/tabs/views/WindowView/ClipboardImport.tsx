@@ -139,7 +139,7 @@ export const ClipboardImport = memo(function ClipboardImport({ onRefresh }: Clip
           </Flex>
           {valid.length > 0 && (
             <Flex vertical gap={4}>
-              <Typography.Text style={{ fontSize: 12, fontWeight: 500 }}>
+              <Typography.Text type="secondary" style={{ fontWeight: 500 }}>
                 {t("选择目标窗口")}
               </Typography.Text>
               {[...windows.values()]

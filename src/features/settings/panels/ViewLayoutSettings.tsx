@@ -266,6 +266,26 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
         />
       </Field>
 
+      <Field
+        label={t("显示闲置时长")}
+        hint={t("窗口视图中在标签旁显示距上次访问的时长，方便识别长期未用的标签")}
+      >
+        <Switch
+          checked={settings.windowShowIdleTime ?? true}
+          onChange={(value) => handleSetting({ windowShowIdleTime: value })}
+        />
+      </Field>
+
+      <Field
+        label={t("显示健康度指示器")}
+        hint={t("窗口卡片上显示健康度徽章，展示标签总数 / 闲置数 / 重复数")}
+      >
+        <Switch
+          checked={settings.windowShowHealthIndicator ?? true}
+          onChange={(value) => handleSetting({ windowShowHealthIndicator: value })}
+        />
+      </Field>
+
       {/* P2-03: TabBar 自定义排序 */}
       <TabBarOrderEditor settings={settings} updateSettings={updateSettings} />
     </Flex>

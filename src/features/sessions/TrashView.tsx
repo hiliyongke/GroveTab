@@ -210,7 +210,7 @@ export function TrashView() {
         </Flex>
       )}
       {archiveTrashMerged && items.length > 0 && (
-        <Flex justify="center" style={{ marginTop: 24 }}>
+        <Flex justify="center" style={{ marginTop: "var(--app-space-6)" }}>
           <Typography.Text type="secondary">
             {t("回收站内容已同步到")}
             <Button

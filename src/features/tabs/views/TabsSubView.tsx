@@ -1,53 +1,65 @@
 /**
  * UnifiedTabsView — TabsView 统一入口
  *
- * 将 TabGroupView / WindowView / TimelineView 合并到 TabsView 作为子维度切换，
- * 不再独立注册为顶层视图。FeatureFlag `unified_tabs_view` 控制是否启用。
+ * 将 TabGroupView / WindowView / TimelineView 合并到 TabsView 作为子维度切换。
+ * "auto" 子视图带 TabsToolbar（搜索 + masonry/compact/grid 布局切换 + S/M/L 密度调节）。
  */
 
-import { Segmented } from 'antd';
-import { useSettingsStore, useFeatureFlagStore } from '@/store';
+import { memo, useState } from 'react';
+import { Segmented, Flex } from 'antd';
+import { useSettingsStore } from '@/store';
 import { usePanelStack } from '@/shared/panels';
 import { useT } from '@/shared/i18n';
 import { QuickStartLayer } from '@/features/quick-start/QuickStartLayer';
-import { TabsView as OldTabsView } from './TabsView.old';
+import { DomainGroupView } from './DomainGroupView';
+import { CompactView } from './CompactView';
+import { GridView } from './GridView';
 import { TabGroupView } from './TabGroupView';
 import { WindowView } from './WindowView';
 import { TimelineView } from './TimelineView';
+import { TabsToolbar } from '../toolbar/TabsToolbar';
+import type { TabsSubView } from '@/shared/config/views';
 
-export function UnifiedTabsView() {
+export const UnifiedTabsView = memo(function UnifiedTabsView() {
   const { t } = useT();
   const tabsSubView = useSettingsStore((s) => s.settings.tabsSubView ?? 'auto');
+  const tabsLayout = useSettingsStore((s) => s.settings.tabsLayout ?? 'masonry');
   const quickStartLayout = useSettingsStore((s) => s.settings.quickStartLayout ?? 'stacked');
-  const flag = useFeatureFlagStore((s) => s.flags.unified_tabs_view);
   const panelStack = usePanelStack();
+  const [filterQuery, setFilterQuery] = useState('');
 
-  if (!flag) return <OldTabsView />;
+  const renderAutoSubView = () => {
+    return (
+      <>
+        <TabsToolbar filterQuery={filterQuery} onFilterChange={setFilterQuery} />
+        {tabsLayout === 'masonry' && <DomainGroupView filterQuery={filterQuery} />}
+        {tabsLayout === 'compact' && <CompactView filterQuery={filterQuery} />}
+        {tabsLayout === 'grid' && <GridView filterQuery={filterQuery} />}
+      </>
+    );
+  };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <div style={{ marginBottom: 8 }}>
-        <Segmented
-          options={[
-            { label: t('全部'), value: 'auto' },
-            { label: t('分组'), value: 'tabgroup' },
-            { label: t('窗口'), value: 'window' },
-            { label: t('时间线'), value: 'timeline' },
-          ]}
-          value={tabsSubView}
-          onChange={(v) =>
-            useSettingsStore.getState().updateSettings({ tabsSubView: v as any })
-          }
-        />
-      </div>
-      {/* 快捷站点：位于子标签下方、正文上方 */}
+    <Flex vertical gap={8}>
+      <Segmented
+        options={[
+          { label: t('全部'), value: 'auto' },
+          { label: t('分组'), value: 'tabgroup' },
+          { label: t('窗口'), value: 'window' },
+          { label: t('时间线'), value: 'timeline' },
+        ]}
+        value={tabsSubView}
+        onChange={(v) =>
+          useSettingsStore.getState().updateSettings({ tabsSubView: v as TabsSubView })
+        }
+      />
       {quickStartLayout !== 'sidebar' && (
         <QuickStartLayer onOpenSettings={() => panelStack.openSettings()} />
       )}
-      {tabsSubView === 'auto' && <OldTabsView />}
+      {tabsSubView === 'auto' && renderAutoSubView()}
       {tabsSubView === 'tabgroup' && <TabGroupView />}
       {tabsSubView === 'window' && <WindowView />}
       {tabsSubView === 'timeline' && <TimelineView />}
-    </div>
+    </Flex>
   );
-}
+});

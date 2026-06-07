@@ -98,12 +98,11 @@
     color: var(--ant-color-text-secondary);
     cursor: pointer;
     border-radius: var(--app-radius-md);
-    transition: all var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
+    transition: background-color var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
 
     &:hover {
       color: var(--ant-color-text);
       background: var(--ant-color-fill-quaternary);
-      transform: translateX(2px);
     }
 
     &.is-active {
@@ -214,7 +213,6 @@
     &:hover {
       color: var(--ant-color-error);
       background: var(--ant-color-error-bg);
-      transform: scale(1.1);
     }
 
     &.is-active { color: var(--ant-color-error); }

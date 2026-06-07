@@ -109,8 +109,7 @@
 }
 
 .appearance-preview-editable {
-  --appearance-edit-icon: color-mix(in srgb, #000000 40%, transparent);
-  color: var(--appearance-edit-icon, color-mix(in srgb, #000000 40%, transparent));
+  color: color-mix(in srgb, var(--ant-color-text) 40%, transparent);
 }
 
 /* ── 主题模式徽章 ── */
@@ -127,13 +126,13 @@
   border-radius: var(--app-radius-sm);
 
   &.is-dark {
-    color: var(--ant-color-text-inverse, #ffffff);
-    background: color-mix(in srgb, #000000 50%, transparent);
+    color: var(--ant-color-text-inverse);
+    background: color-mix(in srgb, var(--ant-color-bg-container) 50%, transparent);
   }
 
   &.is-light {
-    color: var(--ant-color-text, #333333);
-    background: color-mix(in srgb, #ffffff 72%, transparent);
+    color: var(--ant-color-text);
+    background: color-mix(in srgb, var(--ant-color-bg-container) 72%, transparent);
   }
 }
 

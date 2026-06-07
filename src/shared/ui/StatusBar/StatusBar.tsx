@@ -55,14 +55,14 @@ export function StatusBar() {
           {current.action.label}
         </Button>
       )}
-      <button
-        type="button"
+      <Button
+        type="text"
+        size="small"
         className={styles["status-bar__dismiss"]}
         onClick={() => removeMessage(current.id)}
         aria-label={t("关闭")}
-      >
-        <X size={12} />
-      </button>
+        icon={<X size={12} />}
+      />
     </div>
   );
 }

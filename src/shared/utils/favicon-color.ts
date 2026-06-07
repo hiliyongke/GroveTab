@@ -39,11 +39,21 @@ export interface Accent {
   text: string;
 }
 
+/** LRU 缓存上限。300 条目约 60KB，覆盖绝大多数用户场景。 */
+const MAX_CACHE_SIZE = 300;
+
 /** faviconUrl → Accent 结果（或 null 代表已确认取色失败，不再重试） */
 const cache = new Map<string, Accent | null>();
 
 /** 正在加载中的 Promise，用于并发复用 */
 const pending = new Map<string, Promise<Accent | null>>();
+
+/** LRU 淘汰：size 超限时删除最久未访问的条目（Map 首个键） */
+function evictIfNeeded(): void {
+  if (cache.size <= MAX_CACHE_SIZE) return;
+  const oldestKey = cache.keys().next().value;
+  if (oldestKey !== undefined) cache.delete(oldestKey);
+}
 
 /**
  * 把 RGB → HSL 的饱和度（仅需 S，用于过滤灰色）
@@ -254,6 +264,7 @@ export function getAccentFromFavicon(url: string): Promise<Accent | null> {
             const ctx = canvas.getContext('2d', { willReadFrequently: true });
             if (!ctx) {
               cache.set(url, null);
+              evictIfNeeded();
               resolve(null);
               return;
             }
@@ -262,15 +273,18 @@ export function getAccentFromFavicon(url: string): Promise<Accent | null> {
             const dominant = extractDominantColor(pixels);
             if (!dominant) {
               cache.set(url, null);
+              evictIfNeeded();
               resolve(null);
               return;
             }
             const [h] = rgbToHsl(...dominant);
             const accent = buildAccentFromHue(h);
             cache.set(url, accent);
+            evictIfNeeded();
             resolve(accent);
           } catch {
             cache.set(url, null);
+            evictIfNeeded();
             resolve(null);
           }
         };
@@ -278,6 +292,7 @@ export function getAccentFromFavicon(url: string): Promise<Accent | null> {
           cleanup();
           URL.revokeObjectURL(blobUrl);
           cache.set(url, null);
+          evictIfNeeded();
           resolve(null);
         };
         img.src = blobUrl;
@@ -286,6 +301,7 @@ export function getAccentFromFavicon(url: string): Promise<Accent | null> {
         // fetch 失败：网络错误 / 超时 / 非图片响应
         cleanup();
         cache.set(url, null);
+        evictIfNeeded();
         resolve(null);
       });
   });
@@ -300,5 +316,12 @@ export function getAccentFromFavicon(url: string): Promise<Accent | null> {
  */
 export function peekFaviconAccent(url: string): Accent | null | undefined {
   if (!url) return null;
-  return cache.get(url);
+  const value = cache.get(url);
+  // LRU 重排：非 null 成功条目命中时，删除再插入以更新访问序位。
+  // null 条目（已知取色失败）不重排，保持其淘汰优先级。
+  if (value !== undefined && value !== null) {
+    cache.delete(url);
+    cache.set(url, value);
+  }
+  return value;
 }

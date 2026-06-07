@@ -18,7 +18,7 @@
  *   `fine` 归一化为 `hour` 保持向后兼容。
  */
 
-import { useMemo, useState, useCallback } from "react";
+import { memo, useMemo, useState, useCallback } from "react";
 import { Timeline, Button, theme, Flex, Typography, Space } from "antd";
 import { ChevronDown } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
@@ -337,7 +337,7 @@ function SegmentContent({
 /**
  * 时间轴视图（主组件）
  */
-export function TimelineView() {
+export const TimelineView = memo(function TimelineView() {
   const tabs = useTabsStore((s) => s.tabs);
   /**
    * 读取粒度设置。
@@ -380,4 +380,4 @@ export function TimelineView() {
       <Timeline items={items} />
     </Flex>
   );
-}
+});

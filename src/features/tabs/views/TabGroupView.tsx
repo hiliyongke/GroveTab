@@ -15,7 +15,7 @@
  *   - 与浏览器实时同步
  */
 
-import { useLayoutEffect, useMemo, useRef, useState, useCallback } from "react";
+import { memo, useLayoutEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Empty, Flex } from "antd";
 import {
@@ -214,7 +214,7 @@ function VirtualColumn({
 /**
  * Chrome Tab Group 视图
  */
-export function TabGroupView() {
+export const TabGroupView = memo(function TabGroupView() {
   const { t } = useT();
   const tabs = useTabsStore((s) => s.tabs);
   const { jumpToTab, closeSingleTab } = useTabActions();
@@ -412,4 +412,4 @@ export function TabGroupView() {
       </Flex>
     </DndContext>
   );
-}
+});

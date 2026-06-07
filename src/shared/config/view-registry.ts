@@ -53,14 +53,9 @@ function isDevMode(): boolean {
  * @param reg 视图注册信息
  */
 export function registerView(reg: ViewRegistration): void {
-  // Guard: unified_tabs_view 为 true 时，tabgroup/window/timeline 不再注册为顶层视图
-  if (
-    (reg.id === "tabgroup" || reg.id === "window" || reg.id === "timeline")
-  ) {
-    const flags = useFeatureFlagStore.getState().flags;
-    if (flags.unified_tabs_view !== false) {
-      return;
-    }
+  // tabgroup/window/timeline 已合并到 UnifiedTabsView 子维度，不再注册为顶层视图
+  if (reg.id === "tabgroup" || reg.id === "window" || reg.id === "timeline") {
+    return;
   }
 
   // Guard: archive_trash_merged 为 false 时，sessions 不注册

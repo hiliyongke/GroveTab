@@ -1,22 +1,100 @@
 /**
- * InsightsView 统计视图样式
+ * InsightsView 统计视图样式 (v2.0)
+ *
+ * 子组件使用的全局类名前缀 `insights-`，
+ * 模块私有类名走 CSS Modules（styles["..."]）。
  */
-.insights-stat-card :global(.ant-card-body) {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 200px;
+
+.insights-viewport {
+  min-height: 0;
 }
 
-.insights-loading { padding: 8px 4px; }
-.insights-archive-stat { margin: 0; }
-.insights-footer { margin-top: 16px; text-align: right; }
-.insights-line-chart { width: 100%; height: 120px; }
+.insights-panel {
+  width: 100%;
+}
 
+.insights-loading {
+  padding: var(--app-space-2) var(--app-space-1);
+}
+
+.insights-analytics-panel {
+  /* 内部组件自行控制间距 */
+}
+
+.insights-stat-empty {
+  min-height: 160px;
+}
+
+.insights-archive-stat {
+  &__value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+  }
+}
+
+.insights-error {
+  padding: var(--app-space-10);
+}
+
+.insights-suggestion-list {
+  /* 子项间距由 antd Alert 自身控制 */
+}
+
+.insights-header {
+  margin-bottom: var(--app-space-4);
+}
+
+.insights-footer {
+  margin-top: var(--app-space-4);
+}
+
+.insights-line-chart {
+  display: block;
+  width: 100%;
+  // 与 stat card body 统一高度，匹配 ~10 条 bar item 的视觉重量
+  height: 210px;
+}
+
+.insights-line-dot {
+  transition: r var(--app-motion-fast) var(--app-easing-standard);
+
+  &:hover {
+    r: 4;
+  }
+}
+
+// ── BarList ────────────────────────────────────────────────
 .insights-bar {
-  &-list { display: flex; flex-direction: column; gap: 6px; }
-  &-row { display: flex; gap: 8px; align-items: center; }
-  &-label { flex: 0 0 40%; overflow: hidden; text-overflow: ellipsis; font-size: 12px; white-space: nowrap; }
+  &-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &-row {
+    display: flex;
+    gap: var(--app-gap-md);
+    align-items: center;
+    padding: 2px 0;
+    outline: none;
+    border-radius: var(--app-radius-xs);
+    transition: background var(--app-motion-fast) var(--app-easing-standard);
+
+    &:hover,
+    &:focus-visible {
+      background: var(--app-list-item-hover-bg);
+    }
+  }
+
+  &-label {
+    flex: 0 0 40%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: var(--app-font-sm);
+    white-space: nowrap;
+  }
+
   &-track {
     position: relative;
     flex: 1;
@@ -25,12 +103,37 @@
     background: var(--insights-track-bg, var(--ant-color-fill-tertiary));
     border-radius: var(--app-radius-xs);
   }
+
   &-fill {
     width: var(--insights-bar-width, 0%);
     height: 100%;
     background: var(--insights-bar-fill, var(--ant-color-primary));
     border-radius: var(--app-radius-xs);
-    transition: width var(--app-motion-duration-slow, 0.3s) cubic-bezier(0.22, 1, 0.36, 1);
+    transition: width var(--app-motion-duration-slow, 0.3s) var(--app-easing-standard);
   }
-  &-value { font-size: 12px; font-variant-numeric: tabular-nums; }
+
+  &-value {
+    min-width: 24px;
+    font-size: var(--app-font-sm);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+}
+
+// ── StatCard ───────────────────────────────────────────────
+.insights-stat-card :global(.ant-card-body) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  // 统一最小高度，与折线图卡片视觉一致
+  min-height: 260px;
+}
+
+// ── 减少动效偏好 ───────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .insights-line-dot,
+  .insights-bar-row,
+  .insights-bar-fill {
+    transition: none !important;
+  }
 }

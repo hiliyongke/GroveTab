@@ -1,0 +1,467 @@
+/**
+ * BookmarkTree 样式 — 书签树/最近/搜索 视图共享样式
+ *
+ * 设计要点：
+ *   - 4px 基础间距系统（--app-space-* / --app-gap-*）
+ *   - 动效使用项目 --app-motion-* 语义化 token
+ *   - 颜色全部走 --ant-* / --app-bg-* token，自动适配主题 & 4 套皮肤
+ *   - focus-visible 状态保留清晰可见的 outline（无障碍硬要求）
+ *   - 减少动效偏好自动降级（prefers-reduced-motion）
+ */
+
+@toolbar-height: 36px;
+
+.bookmark-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--app-gap-md);
+  align-items: center;
+  margin-bottom: var(--app-space-3);
+
+  &__search {
+    flex: 1 1 200px;
+    min-width: 140px;
+    max-width: 360px;
+  }
+
+  &__sort--active {
+    color: var(--ant-color-primary);
+  }
+}
+
+.bookmark-selection-bar {
+  display: flex;
+  gap: var(--app-gap-md);
+  align-items: center;
+  padding: var(--app-gap-sm) var(--app-gap-md);
+  margin-bottom: var(--app-gap-md);
+  background: var(--app-bg-selected);
+  border: 1px solid var(--ant-color-primary-border, var(--ant-color-primary-bg));
+  border-radius: var(--app-radius-md);
+  animation: bookmark-fade-slide var(--app-motion-base) var(--app-easing-standard);
+
+  &__count {
+    font-size: var(--app-font-base);
+    font-weight: 500;
+    color: var(--ant-color-text);
+  }
+}
+
+.bookmark-stats-bar {
+  margin-bottom: var(--app-gap-md);
+  font-size: var(--app-font-sm);
+  color: var(--ant-color-text-tertiary);
+
+  &__progress {
+    font-weight: 500;
+    color: var(--ant-color-primary);
+  }
+
+  &__broken-badge {
+    cursor: pointer;
+    transition: background var(--app-motion-fast) var(--app-easing-standard);
+
+    &:hover {
+      background: var(--app-bg-hover);
+    }
+  }
+}
+
+.bookmark-smart-tags {
+  margin-bottom: var(--app-space-3);
+
+  &__item {
+    cursor: pointer;
+    user-select: none;
+    transition: background var(--app-motion-fast) var(--app-easing-standard);
+
+    &:hover {
+      background: var(--app-list-item-hover-bg);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--ant-color-primary);
+      outline-offset: 2px;
+    }
+  }
+}
+
+// ── 树形节点 ───────────────────────────────────────────────
+.tree-view {
+  display: flex;
+  flex-direction: column;
+}
+
+.tree-node-wrap {
+  display: contents;
+}
+
+.tree-node {
+  display: flex;
+  gap: var(--app-gap-sm);
+  align-items: center;
+  padding: 6px 10px;
+  cursor: pointer;
+  outline: none;
+  border-radius: var(--app-radius-sm);
+  transition:
+    background var(--app-motion-fast) var(--app-easing-standard);
+
+  &:hover {
+    background: var(--app-list-item-hover-bg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ant-color-primary);
+    outline-offset: -2px;
+    background: var(--app-list-item-hover-bg);
+  }
+
+  &--dragover {
+    outline: 2px dashed var(--ant-color-primary);
+    outline-offset: -2px;
+    background: var(--app-bg-active) !important;
+  }
+
+  &--selected {
+    background: var(--app-list-item-selected-bg);
+  }
+
+  &--selection {
+    padding-left: 8px !important;
+  }
+
+  &__checkbox {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    accent-color: var(--ant-color-primary);
+    cursor: pointer;
+  }
+
+  &__icon {
+    flex-shrink: 0;
+
+    &--folder-closed {
+      color: var(--ant-color-text-quaternary);
+    }
+
+    &--folder-open {
+      color: var(--ant-color-warning);
+    }
+
+    &--globe {
+      color: var(--ant-color-text-quaternary);
+      opacity: 0.5;
+    }
+  }
+
+  &__favicon {
+    flex-shrink: 0;
+    background: var(--app-bg-surface);
+    border-radius: 2px;
+  }
+
+  &__title {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: var(--app-font-md);
+    white-space: nowrap;
+  }
+
+  &__chevron {
+    flex-shrink: 0;
+    color: var(--ant-color-text-quaternary);
+    opacity: 0.6;
+    transition: transform var(--app-motion-fast) var(--app-easing-standard);
+
+    &--open {
+      transform: rotate(90deg);
+    }
+  }
+
+  &__actions {
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity var(--app-motion-fast) var(--app-easing-standard);
+
+    .tree-node:hover &,
+    .tree-node:focus-visible & {
+      opacity: 1;
+    }
+  }
+}
+
+// ── 最近列表 ───────────────────────────────────────────────
+.recent-list {
+  &__loading,
+  &__empty {
+    padding: var(--app-space-6);
+  }
+
+  &__item {
+    padding: 6px 8px;
+    cursor: pointer;
+    outline: none;
+    border-radius: var(--app-radius-sm);
+    transition: background var(--app-motion-fast) var(--app-easing-standard);
+
+    &:hover { background: var(--app-list-item-hover-bg); }
+
+    &:focus-visible {
+      outline: 2px solid var(--ant-color-primary);
+      outline-offset: -2px;
+    }
+  }
+
+  &__favicon {
+    flex-shrink: 0;
+    background: var(--app-bg-surface);
+    border-radius: 2px;
+  }
+
+  &__title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: var(--app-font-base);
+    white-space: nowrap;
+  }
+
+  &__url {
+    display: none;
+  }
+
+  &__open-icon {
+    flex-shrink: 0;
+    opacity: 0.4;
+  }
+}
+
+// ── 搜索结果 ───────────────────────────────────────────────
+.search-results {
+  &__empty {
+    padding: var(--app-space-8);
+  }
+
+  &__item {
+    padding: 6px 8px;
+    cursor: pointer;
+    outline: none;
+    border-radius: var(--app-radius-sm);
+    transition: background var(--app-motion-fast) var(--app-easing-standard);
+
+    &:hover { background: var(--app-list-item-hover-bg); }
+
+    &:focus-visible {
+      outline: 2px solid var(--ant-color-primary);
+      outline-offset: -2px;
+    }
+  }
+
+  &__favicon {
+    flex-shrink: 0;
+    border-radius: 2px;
+  }
+
+  &__folder-icon {
+    flex-shrink: 0;
+    color: var(--ant-color-text-quaternary);
+  }
+
+  &__text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: var(--app-font-base);
+    white-space: nowrap;
+  }
+
+  &__url {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 11px;
+    color: var(--ant-color-text-quaternary);
+    white-space: nowrap;
+  }
+
+  &__path {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 10px;
+    color: var(--ant-color-text-tertiary);
+    white-space: nowrap;
+  }
+
+  &__chevron {
+    flex-shrink: 0;
+    opacity: 0.3;
+  }
+}
+
+// ── 模态框 ─────────────────────────────────────────────────
+.bookmark-edit-modal__body {
+  margin-top: var(--app-space-3);
+}
+
+.bookmark-edit-modal__label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: var(--app-font-sm);
+}
+
+.bookmark-new-folder__input {
+  margin-top: var(--app-space-2);
+}
+
+.bookmark-broken-modal {
+  &__success {
+    padding: var(--app-space-6);
+  }
+
+  &__success-icon {
+    color: var(--ant-color-success);
+  }
+
+  &__scroll {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  &__item {
+    padding: 6px 0;
+    border-bottom: 1px solid var(--ant-color-border-secondary);
+  }
+
+  &__item-icon {
+    flex-shrink: 0;
+    color: var(--ant-color-error);
+  }
+
+  &__item-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__item-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: var(--app-font-base);
+    white-space: nowrap;
+  }
+
+  &__item-url {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 11px;
+    color: var(--ant-color-text-quaternary);
+    white-space: nowrap;
+  }
+}
+
+.bookmark-duplicates-modal {
+  &__success {
+    padding: var(--app-space-6);
+  }
+
+  &__success-icon {
+    color: var(--ant-color-success);
+  }
+
+  &__list {
+    max-height: 480px;
+    overflow-y: auto;
+  }
+
+  &__group {
+    padding: var(--app-gap-md);
+    margin-bottom: var(--app-gap-md);
+    border: 1px solid var(--ant-color-border-secondary);
+    border-radius: var(--app-radius-md);
+  }
+
+  &__group-header {
+    margin-bottom: var(--app-gap-sm);
+  }
+
+  &__group-icon {
+    color: var(--ant-color-primary);
+  }
+
+  &__group-url {
+    flex: 1;
+    font-size: 11px;
+    word-break: break-all;
+  }
+
+  &__group-count {
+    font-size: 11px;
+    color: var(--ant-color-text-tertiary);
+  }
+
+  &__item {
+    padding: 4px 0;
+  }
+
+  &__item-idx {
+    min-width: 24px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ant-color-text-tertiary);
+  }
+
+  &__item-title {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: var(--app-font-base);
+    white-space: nowrap;
+  }
+
+  &__item-keep {
+    padding: 1px 6px;
+    font-size: 10px;
+    color: var(--ant-color-success);
+    background: var(--ant-color-success-bg);
+    border-radius: var(--app-radius-pill);
+  }
+
+  &__remove-btn {
+    align-self: flex-start;
+    margin-top: var(--app-gap-sm);
+  }
+}
+
+// ── 入场动画 ───────────────────────────────────────────────
+@keyframes bookmark-fade-slide {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ── 减少动效偏好 ───────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .tree-node,
+  .recent-list__item,
+  .search-results__item,
+  .bookmark-smart-tags__item,
+  .bookmark-stats-bar__broken-badge,
+  .tree-node__chevron,
+  .bookmark-selection-bar {
+    transition: none !important;
+    animation: none !important;
+  }
+}

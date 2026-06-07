@@ -5,7 +5,7 @@
  *   - 竖排图标+文案，底部折叠按钮
  */
 
-import { useState, useMemo, useCallback, memo } from "react";
+import { useMemo, useCallback, memo } from "react";
 import { Tabs, Tooltip, Button } from "antd";
 import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from "lucide-react";
 import { VIEW_CONFIGS, type ViewMode, type ViewConfig } from "@/shared/config/views";
@@ -63,8 +63,12 @@ export const ViewTabs = memo(function ViewTabs({ activeView, onChange }: ViewTab
   const position = useSettingsStore(
     (s) => (s.settings.viewTabPosition ?? "right") as ViewTabPosition,
   );
-  const [collapsed, setCollapsed] = useState(false);
-  const toggleCollapsed = useCallback(() => setCollapsed((p) => !p), []);
+  const updateSettings = useSettingsStore((s) => s.updateSettings);
+  const collapsed = useSettingsStore((s) => s.settings.viewTabCollapsed ?? false);
+  const toggleCollapsed = useCallback(
+    () => void updateSettings({ viewTabCollapsed: !collapsed }),
+    [collapsed, updateSettings],
+  );
 
   // 垂直侧栏 Tabs 自适应最宽标签宽度；按钮固定底部
   return (

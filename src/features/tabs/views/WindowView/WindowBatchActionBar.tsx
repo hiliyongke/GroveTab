@@ -214,7 +214,7 @@ export const WindowBatchActionBar = memo(function WindowBatchActionBar() {
           value={moveSearch}
           onChange={(e) => setMoveSearch(e.target.value)}
           allowClear
-          style={{ marginBottom: 12 }}
+          style={{ marginBottom: "var(--app-space-3)" }}
         />
         <Space vertical style={{ width: "100%" }}>
           {filteredWindows.map((w) => (

@@ -88,18 +88,18 @@
 // ── Board Card ──
 .trending-board-card {
   min-height: 360px;
-  transition: transform var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1),
-              box-shadow var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
+  background: var(--ant-color-bg-elevated);
+  transition: box-shadow var(--app-motion-duration, 0.2s) cubic-bezier(0.22, 1, 0.36, 1);
 
-  &:hover { border-color: var(--ant-color-border); box-shadow: var(--app-shadow-sm); transform: translateY(-1px); }
+  &:hover { border-color: var(--ant-color-border); box-shadow: var(--app-shadow-sm); }
 
-  &__body { .trend-flex-col(); height: 100%; padding: 14px 16px; }
+  &__body { .trend-flex-col(); height: 100%; padding: 14px 16px; overflow: hidden; }
   &__header { .trend-flex-center(); gap: 12px; justify-content: space-between; margin-bottom: 8px; }
   &__meta { .trend-flex-center(); gap: 8px; flex: 1; min-width: 0; }
   &__dot { flex-shrink: 0; width: 8px; height: 8px; background: var(--trending-platform-color); border-radius: 50%; }
   &__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 14px; font-weight: 700; color: var(--ant-color-text); white-space: nowrap; }
   &__tag { margin: 0; font-size: 10px; line-height: 16px; border-radius: var(--app-radius-sm); }
-  &__list { flex: 1; margin: 0 -8px; overflow: auto; }
+  &__list { flex: 1; margin: 0 -12px; padding: 0 12px; overflow: auto; }
   &__empty { padding: 20px 0; text-align: center; }
   &__footer { margin-top: 6px; text-align: right; }
   &__time,
@@ -121,7 +121,6 @@
 
   &:hover {
     background: var(--ant-color-fill-quaternary);
-    transform: translateX(2px);
   }
 
   &__link {
@@ -131,10 +130,7 @@
     min-width: 0;
     color: inherit;
     text-decoration: none;
-    transition: transform var(--app-motion-duration-fast, 0.15s) cubic-bezier(0.22, 1, 0.36, 1);
   }
-
-  &:hover &__link { transform: translateX(2px); }
 
   &__title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 13px; line-height: 1.5; color: var(--ant-color-text); white-space: nowrap; }
   &__hot { flex-shrink: 0; width: 64px; font-size: 11px; color: var(--ant-color-text-tertiary); text-align: right; }
@@ -223,7 +219,7 @@
   .trending-toolbar-card__icon { width: 24px; height: 24px; }
   .trending-toolbar-card__body { padding: 12px 14px; }
   .trending-board-card__body { padding: 10px 12px; }
-  .trending-board-card__list { margin: 0 -4px; }
+  .trending-board-card__list { margin: 0 -8px; padding: 0 8px; }
   .trending-rank-badge.is-top { width: 16px; height: 16px; font-size: 9px; }
   .trending-rank-badge.is-plain { width: 16px; font-size: 10px; }
   .trending-board-card__name { font-size: 12px; }
@@ -244,26 +240,4 @@
   .trending-grid.is-compact { grid-template-columns: 1fr; }
 }
 
-// ── SpeedDial 常用站点卡片（v1.5） ──
-.trending-speeddial-link {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: var(--ant-border-radius);
-  background: var(--ant-color-fill-tertiary);
-  font-size: 13px;
-  max-width: 160px;
-  overflow: hidden;
-}
-.trending-speeddial-favicon {
-  width: 16px;
-  height: 16px;
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-.trending-speeddial-title {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+// ── SpeedDial 常用站点卡片（v1.5）已移除 ──

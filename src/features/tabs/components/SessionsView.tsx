@@ -23,8 +23,8 @@ export function SessionsView() {
           { label: t("回收站"), value: "trash", icon: <Trash2 size={14} /> },
         ]}
       />
-      <div style={{ marginTop: 16 }}>
-        <Suspense fallback={<Flex justify="center" style={{ padding: 40 }}><Spin /></Flex>}>
+      <div style={{ marginTop: "var(--app-space-4)" }}>
+        <Suspense fallback={<Flex justify="center" style={{ padding: "var(--app-space-10)" }}><Spin /></Flex>}>
           {ActiveView && <ActiveView />}
         </Suspense>
       </div>

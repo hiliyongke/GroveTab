@@ -5,7 +5,7 @@
  * 数据缺失时回退到 lastAccessed 近似并显示"数据重建中"提示。
  */
 
-import { useEffect, useMemo, useCallback } from "react";
+import { memo, useEffect, useMemo, useCallback } from "react";
 import { useTabsStore, useStatsStore, useSettingsStore } from "@/store";
 import { useTabActions } from "@/shared/hooks/use-tab-actions";
 import { useT } from "@/shared/i18n";
@@ -22,7 +22,7 @@ import styles from "../styles/views.module.less";
 
 const MAX_DISPLAY = CONFIG.ui.maxDisplay;
 
-export function FrequencyView() {
+export const FrequencyView = memo(function FrequencyView() {
   const tabs = useTabsStore((s) => s.tabs);
   const { jumpToTab, closeSingleTab } = useTabActions();
   const handleJump = useCallback((id: number, wid: number) => { void jumpToTab(id, wid); }, [jumpToTab]);
@@ -110,4 +110,4 @@ export function FrequencyView() {
       </Flex>
     </Flex>
   );
-}
+});

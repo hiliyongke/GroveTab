@@ -2,8 +2,8 @@
  * SkinPresetSection — 皮肤预设选择器 + 极客模式精细定制
  *
  * 从 AppearancePanel 拆出，负责：
- *   - 5 套高级皮肤预设选择
- *   - 极客模式：单 token 精细化定制（圆角/字号/控件高度/边框粗细/品牌主色）
+ *   - 4 套高级皮肤预设选择
+ *   - 极客模式：单 token 精细化定制（圆角/字号/字重/控件高度/边框粗细/品牌主色）
  */
 
 import { Button, ColorPicker, Switch, Flex, Typography } from "antd";
@@ -117,6 +117,34 @@ export function SkinPresetSection({ settings, updateSettings }: SkinPresetSectio
                   onChange={(value) => {
                     void updateSettings({
                       skinCustom: { ...settings.skinCustom, fontSize: value },
+                    });
+                  }}
+                />
+
+                <SliderField
+                  label={t("正文字重")}
+                  value={settings.skinCustom.fontWeightBody ?? 400}
+                  min={300}
+                  max={700}
+                  step={100}
+                  hint={t("正文字体粗细，300-700 范围")}
+                  onChange={(value) => {
+                    void updateSettings({
+                      skinCustom: { ...settings.skinCustom, fontWeightBody: value },
+                    });
+                  }}
+                />
+
+                <SliderField
+                  label={t("标题字重")}
+                  value={settings.skinCustom.fontWeightHeading ?? 600}
+                  min={400}
+                  max={800}
+                  step={100}
+                  hint={t("标题字体粗细，较高更有视觉层级感")}
+                  onChange={(value) => {
+                    void updateSettings({
+                      skinCustom: { ...settings.skinCustom, fontWeightHeading: value },
                     });
                   }}
                 />

@@ -401,8 +401,9 @@ export function DataPanel() {
                     if (errors.length > 0) parts.push(t("失败") + ": " + errors.join("、"));
                     if (errors.length > 0) feedback.warning(parts.join(" | "));
                     else feedback.success(parts.filter(Boolean).join(" | "));
-                  } catch (e: any) {
-                    feedback.error(e?.message || t("导入失败，请检查文件格式"));
+                  } catch (e: unknown) {
+                    const err = e instanceof Error ? e : new Error(String(e));
+                    feedback.error(err.message || t("导入失败，请检查文件格式"));
                   }
                 };
                 // 确认弹窗

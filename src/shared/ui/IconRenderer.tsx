@@ -8,6 +8,7 @@
 import { useState, useEffect, memo } from "react";
 import type { LucideIcon } from "lucide-react";
 import type { LucideIconName } from "@/shared/config/views";
+import styles from "./IconRenderer.module.less";
 
 interface IconRendererProps {
   name: LucideIconName;
@@ -29,7 +30,7 @@ export const IconRenderer = memo(function IconRenderer({ name, size = 15 }: Icon
   }, [name]);
 
   if (!Icon) {
-    return <span style={{ display: "inline-block", width: size, height: size }} aria-hidden />;
+    return <span className={styles.placeholder} style={{ width: size, height: size }} aria-hidden />;
   }
 
   return <Icon size={size} />;

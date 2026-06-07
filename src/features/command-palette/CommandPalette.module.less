@@ -2,7 +2,7 @@
  * CommandPalette 样式模块
  *
  * 所有 BEM 子元素使用 &__ 嵌套，状态用 &-- 修饰符。
- * CSS 变量统一使用 antd 设计 token 作为 fallback。
+ * 颜色全量使用 antd 设计 token，无硬编码 fallback。
  */
 
 // 重复的基础布局 mixin
@@ -11,16 +11,12 @@
   align-items: center;
 }
 
-// 共享的文本/背景变量（主题自适应）
-@cmd-bg: var(--ant-color-bg-container, #fff);
-@cmd-border-color: var(--ant-color-border-secondary, #e8e8e8);
-
 .command-palette {
   :global {
     .ant-modal-content {
       padding: 0;
       overflow: hidden;
-      border-radius: var(--app-card-radius, 12px);
+      border-radius: var(--app-card-radius);
     }
   }
 
@@ -30,24 +26,24 @@
     gap: 8px;
     align-items: center;
     padding: 12px 16px;
-    border-bottom: 1px solid @cmd-border-color;
+    border-bottom: 1px solid var(--ant-color-border-secondary);
   }
 
   &__search-icon {
     flex-shrink: 0;
-    color: var(--ant-color-text-tertiary, #8c8c8c);
+    color: var(--ant-color-text-tertiary);
   }
 
   &__input {
     flex: 1;
     font-size: 14px;
-    color: var(--ant-color-text, #1f1f1f);
+    color: var(--ant-color-text);
     outline: none;
     background: transparent;
     border: none;
 
     &::placeholder {
-      color: var(--ant-color-text-tertiary, #8c8c8c);
+      color: var(--ant-color-text-tertiary);
     }
   }
 
@@ -55,14 +51,14 @@
     .cmd-center();
     justify-content: center;
     padding: 4px;
-    color: var(--ant-color-text-tertiary, #8c8c8c);
+    color: var(--ant-color-text-tertiary);
     cursor: pointer;
     background: transparent;
     border: none;
     border-radius: 4px;
 
     &:hover {
-      background: var(--ant-color-fill-quaternary, #f5f5f5);
+      background: var(--ant-color-fill-quaternary);
     }
   }
 
@@ -77,7 +73,7 @@
     padding: 8px 16px 4px;
     font-size: 11px;
     font-weight: 600;
-    color: var(--ant-color-text-tertiary, #8c8c8c);
+    color: var(--ant-color-text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
@@ -93,22 +89,21 @@
     display: flex;
     gap: 10px;
     align-items: center;
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: background-color var(--app-motion-duration-fast, 150ms), transform var(--app-motion-duration-fast, 150ms);
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background-color var(--app-motion-duration-fast);
 
-  &:hover {
-    background: var(--ant-color-fill-quaternary);
-    transform: translateX(2px);
-  }
+    &:hover {
+      background: var(--ant-color-fill-quaternary);
+    }
 
     // 选中态修饰符
     &--selected {
-      background: var(--ant-color-primary-bg, #e6f4ff);
+      background: var(--ant-color-primary-bg);
 
       .command-palette__item-icon {
-        color: var(--ant-color-primary, #1677ff);
-        background: var(--ant-color-primary-bg-hover, #bae0ff);
+        color: var(--ant-color-primary);
+        background: var(--ant-color-primary-bg-hover);
       }
     }
   }
@@ -120,15 +115,15 @@
     justify-content: center;
     width: 24px;
     height: 24px;
-    color: var(--ant-color-text-tertiary, #8c8c8c);
-    background: var(--ant-color-fill-tertiary, #f5f5f5);
+    color: var(--ant-color-text-tertiary);
+    background: var(--ant-color-fill-tertiary);
     border-radius: 6px;
   }
 
   &__item-label {
     flex: 1;
     font-size: 13px;
-    color: var(--ant-color-text, #1f1f1f);
+    color: var(--ant-color-text);
   }
 
   &__item-shortcut {
@@ -136,8 +131,8 @@
     margin: 0;
     font-size: 11px;
     line-height: 1.6;
-    color: var(--ant-color-text-tertiary, #8c8c8c);
-    background: var(--ant-color-fill-tertiary, #f5f5f5);
+    color: var(--ant-color-text-tertiary);
+    background: var(--ant-color-fill-tertiary);
     border: none;
     border-radius: 4px;
   }
@@ -189,7 +184,7 @@
     .cmd-center();
     justify-content: center;
     padding: 8px 16px;
-    border-top: 1px solid @cmd-border-color;
+    border-top: 1px solid var(--ant-color-border-secondary);
 
     kbd {
       display: inline-block;
@@ -197,8 +192,8 @@
       margin: 0 2px;
       font-family: inherit;
       font-size: 11px;
-      background: var(--ant-color-fill-tertiary, #f5f5f5);
-      border: 1px solid var(--ant-color-border, #d9d9d9);
+      background: var(--ant-color-fill-tertiary);
+      border: 1px solid var(--ant-color-border);
       border-radius: 3px;
     }
   }

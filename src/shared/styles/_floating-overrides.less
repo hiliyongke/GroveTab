@@ -12,18 +12,18 @@
 
 /* ── 浮层 CSS 变量 ── */
 :root {
-  --app-floating-glass-bg: var(--app-acrylic-bg, var(--ant-color-bg-elevated, #ffffff));
-  --app-floating-glass-bg-strong: var(--app-acrylic-bg, var(--ant-color-bg-elevated, #ffffff));
+  --app-floating-glass-bg: var(--app-acrylic-bg, var(--ant-color-bg-elevated));
+  --app-floating-glass-bg-strong: var(--app-acrylic-bg, var(--ant-color-bg-elevated));
   --app-floating-glass-border: var(
     --app-acrylic-border,
-    color-mix(in srgb, var(--ant-color-border-secondary, #d9d9d9) 86%, transparent)
+    color-mix(in srgb, var(--ant-color-border-secondary) 86%, transparent)
   );
   --app-floating-glass-filter: saturate(var(--app-glass-saturate, 180%)) blur(18px);
 }
 
 [data-theme="dark"] {
-  --app-floating-glass-bg: var(--app-acrylic-bg, var(--ant-color-bg-elevated, #1f1f1f));
-  --app-floating-glass-bg-strong: var(--app-acrylic-bg, var(--ant-color-bg-elevated, #1f1f1f));
+  --app-floating-glass-bg: var(--app-acrylic-bg, var(--ant-color-bg-elevated));
+  --app-floating-glass-bg-strong: var(--app-acrylic-bg, var(--ant-color-bg-elevated));
   --app-floating-glass-border: var(
     --app-acrylic-border,
     color-mix(in srgb, #ffffff 14%, transparent)

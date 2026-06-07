@@ -1,227 +1,268 @@
 /**
- * BookmarkView — 书签管理视图（完整 CRUD + 树形渲染）。
- * 支持树形文件夹、搜索、批量删除和右键菜单。
+ * BookmarkView — 书签管理视图（v2.0 重构版）
+ *
+ * 模块结构：
+ *   - utils/        纯函数（树操作、IO、智能标签、链接检测）
+ *   - hooks/        状态管理（树加载、偏好、链接检测、重复查找）
+ *   - components/   展示组件（工具栏、选择栏、统计、智能标签、树、模态框）
+ *   - styles/       共享样式
+ *
+ * 设计目标：
+ *   - 关注点分离：主组件仅做编排，业务逻辑下沉到 hooks
+ *   - 可访问性：所有可交互元素支持键盘 + ARIA
+ *   - 性能：节点 memo、回调稳定、拖拽增量更新
+ *   - 体验：聚焦反馈、loading 骨架、明确操作反馈
  */
 
-import { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { useCallback, useDeferredValue, useMemo, useRef, useState } from "react";
+import { Flex, Spin, message, Modal } from "antd";
+import type { MenuProps, UploadProps } from "antd";
 import {
-  Flex,
-  Spin,
-  Typography,
-  Input,
-  Button,
-  Popconfirm,
-  Space,
-  message,
-  Dropdown,
-  Modal,
-  Checkbox,
-} from "antd";
-import {
-  Folder,
-  FolderOpen,
-  Globe,
   ExternalLink,
-  Search,
-  Bookmark,
-  BookmarkPlus,
   Edit2,
   Trash2,
-  FolderPlus,
+  BookmarkPlus,
 } from "lucide-react";
-import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
 import {
-  getBookmarkTree,
-  hasBookmarksPermission,
-  requestBookmarksPermission,
-  removeBookmark,
   createBookmark,
+  moveBookmark,
+  removeBookmark,
+  updateBookmark,
   type BookmarkNode,
 } from "@/chrome/bookmarks";
-import { useT } from "@/shared/i18n";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useT } from "@/shared/i18n";
+import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
+import { feedback } from "@/shared/ui/feedback";
+
+import { useBookmarkTree } from "./hooks/use-bookmark-tree";
+import { useBookmarkViewPrefs } from "./hooks/use-bookmark-view-prefs";
+import { useLinkChecker } from "./hooks/use-link-checker";
+import { useDuplicateFinder } from "./hooks/use-duplicate-finder";
+import {
+  buildFlatList,
+  collectUrlBookmarks,
+  isFolder,
+  searchTree,
+} from "./utils/bookmark-tree";
+import { downloadFile, parseImport, toMarkdown, toNetscapeHtml } from "./utils/bookmark-io";
+
+import { BookmarkToolbar } from "./components/BookmarkToolbar";
+import { BookmarkSelectionBar } from "./components/BookmarkSelectionBar";
+import { BookmarkStatsBar } from "./components/BookmarkStatsBar";
+import { SmartTagList } from "./components/SmartTagList";
+import { BookmarkRecentList } from "./components/BookmarkRecentList";
+import { BookmarkSearchResults } from "./components/BookmarkSearchResults";
+import { BookmarkTreeView } from "./components/BookmarkTreeView";
+import { BookmarkEditModal } from "./components/BookmarkEditModal";
+import { NewFolderModal } from "./components/NewFolderModal";
+import { BrokenLinksModal } from "./components/BrokenLinksModal";
+import { DuplicatesModal } from "./components/DuplicatesModal";
+
 import styles from "./BookmarkView.module.less";
 
-/** 扁平列表项（用于搜索结果显示） */
-interface FlatItem {
-  node: BookmarkNode;
-  path: string; // 文件夹路径，如 "工具 > 开发"
-  depth: number;
+// ─── Edit modal state ─────────────────────────────────────────
+interface EditState {
+  open: boolean;
+  isNew: boolean;
+  node?: BookmarkNode;
+  parentId?: string;
 }
+
+const EMPTY_EDIT: EditState = { open: false, isNew: false };
 
 export function BookmarkView() {
   const { t } = useT();
-  const [tree, setTree] = useState<BookmarkNode[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  // ── 数据 ──
+  const { tree, loading, permissionDenied, refresh, requestPermission, invalidate } =
+    useBookmarkTree();
+
+  // ── 视图偏好 ──
+  const { viewTab, setViewTab, sortMode, setSortMode, collapsedDirs, toggleCollapsed } =
+    useBookmarkViewPrefs();
+
+  // ── 工具状态 ──
+  const linkChecker = useLinkChecker();
+  const dupFinder = useDuplicateFinder();
+
+  // ── 局部 UI 状态 ──
   const [query, setQuery] = useState("");
-  const [permissionDenied, setPermissionDenied] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  /** 延迟值：搜索/过滤使用，让输入保持流畅（不阻塞 keystroke） */
+  const deferredQuery = useDeferredValue(query);
+  const [editModal, setEditModal] = useState<EditState>(EMPTY_EDIT);
+  const [newFolderOpen, setNewFolderOpen] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
-  const [editModal, setEditModal] = useState<{
-    open: boolean;
-    node?: BookmarkNode;
-    isNew: boolean;
-    parentId?: string;
-  }>({ open: false, isNew: false });
-  const [newFolderModal, setNewFolderModal] = useState(false);
-  const [collapsedDirs, setCollapsedDirs] = useState<Set<string>>(new Set());
-  const refreshRef = useRef<() => Promise<void>>(async () => {});
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showBrokenModal, setShowBrokenModal] = useState(false);
+  const [showDupModal, setShowDupModal] = useState(false);
+  const [importLoading, setImportLoading] = useState(false);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
 
-  // 缓存书签树（模块级缓存，避免切 tab 重新拉取）
-  const treeCacheRef = useRef<BookmarkNode[] | null>(null);
+  const isSearching = deferredQuery.trim().length > 0;
 
-  const loadBookmarks = useCallback(async (force = false) => {
-    if (!force && treeCacheRef.current) {
-      setTree(treeCacheRef.current);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    try {
-      const permitted = await hasBookmarksPermission();
-      if (!permitted) {
-        const granted = await requestBookmarksPermission();
-        if (!granted) {
-          setLoading(false);
-          setPermissionDenied(true);
-          return;
+  // ── 排序 ──
+  // 关键：原地的 children 数组重新排序，但**节点对象本身保持引用稳定**。
+  // 这样 BookmarkTreeNode 的 React.memo 才能在排序时不重渲染整棵树。
+  const sortedTree = useMemo(() => {
+    if (sortMode === "default") return tree;
+    const walk = (nodes: BookmarkNode[]): BookmarkNode[] => {
+      const arr = [...nodes];
+      arr.sort((a, b) => {
+        const aFolder = isFolder(a);
+        const bFolder = isFolder(b);
+        if (aFolder !== bFolder) return aFolder ? -1 : 1;
+        if (sortMode === "name") return a.title.localeCompare(b.title);
+        return 0;
+      });
+      // 原地修改 children 引用，**不**新建节点对象
+      for (const n of arr) {
+        if (n.children !== undefined) {
+          (n as { children: BookmarkNode[] }).children = walk(n.children);
         }
       }
-      const result = await getBookmarkTree();
-      treeCacheRef.current = result;
-      setTree(result);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      return arr;
+    };
+    return walk(tree);
+  }, [tree, sortMode]);
 
-  useEffect(() => {
-    void loadBookmarks();
-  }, [loadBookmarks]);
-
-  // 手动刷新时强制重拉（绕过缓存）
-  const forceLoad = useCallback(async () => {
-    await loadBookmarks(true);
-  }, [loadBookmarks]);
-  refreshRef.current = forceLoad;
-
-  // 递归搜索：匹配 title/URL/文件夹名
-  const filterNodes = useCallback(
-    (nodes: BookmarkNode[], q: string, path: string, depth: number): FlatItem[] => {
-      const results: FlatItem[] = [];
-      for (const node of nodes) {
-        const hasUrl = !!node.url;
-        const matchesTitle = node.title.toLowerCase().includes(q);
-        const matchesUrl = (node.url ?? "").toLowerCase().includes(q);
-        if (matchesTitle || matchesUrl) {
-          results.push({ node, path: path || node.title, depth });
-        }
-        if (node.children && node.children.length > 0) {
-          const childPath = path ? `${path} > ${node.title}` : node.title;
-          const childResults = filterNodes(node.children, q, childPath, depth + 1);
-          // 如果文件夹名匹配，显示其下所有子项
-          if (!hasUrl && node.title.toLowerCase().includes(q)) {
-            for (const child of flattenAll(node.children)) {
-              results.push({
-                node: child,
-                path: childPath,
-                depth: depth + 1,
-              });
-            }
-          } else {
-            results.push(...childResults);
-          }
-        }
+  // ── 统计 ──
+  const stats = useMemo(() => {
+    let total = 0;
+    let folders = 0;
+    const walk = (nodes: BookmarkNode[]): void => {
+      for (const n of nodes) {
+        if (n.url !== undefined) total++;
+        else folders++;
+        if (n.children) walk(n.children);
       }
-      return results;
+    };
+    walk(tree);
+    return { total, folders };
+  }, [tree]);
+
+  // ── 搜索 ──
+  const searchResults = useMemo(() => {
+    if (!isSearching) return { nodes: [] as BookmarkNode[], flat: [] as ReturnType<typeof buildFlatList> };
+    const nodes = searchTree(tree, deferredQuery.trim());
+    return { nodes, flat: buildFlatList(nodes) };
+  }, [deferredQuery, tree, isSearching]);
+
+  // ── 全部 URL 节点 ──
+  const urlNodes = useMemo(() => collectUrlBookmarks(tree), [tree]);
+
+  // ── CRUD ──
+  const reloadAfterChange = useCallback(async (): Promise<void> => {
+    invalidate();
+    await refresh();
+  }, [invalidate, refresh]);
+
+  const handleCreate = useCallback(
+    async (title: string, url: string, parentId?: string): Promise<void> => {
+      // 重复 URL 检测
+      const normalized = url.trim().toLowerCase();
+      const dup = urlNodes.find(
+        (n) => n.url !== undefined && n.url.toLowerCase() === normalized,
+      );
+      if (dup !== undefined) {
+        message.warning(t("该书签已存在 : {title}", { title: dup.title }));
+        return;
+      }
+      await createBookmark({ title, url, parentId });
+      await reloadAfterChange();
+      feedback.success(t("创建成功"));
+      setEditModal(EMPTY_EDIT);
     },
-    [],
+    [urlNodes, reloadAfterChange, t],
   );
 
-  const filteredList = useMemo((): FlatItem[] => {
-    const q = query.trim().toLowerCase();
-    if (!q) return [];
-    return filterNodes(tree, q, "", 0);
-  }, [tree, query, filterNodes]);
+  const handleEdit = useCallback(
+    async (id: string, title: string, url: string): Promise<void> => {
+      await updateBookmark(id, { title, url });
+      await reloadAfterChange();
+      feedback.success(t("编辑成功"));
+      setEditModal(EMPTY_EDIT);
+    },
+    [reloadAfterChange, t],
+  );
 
-  const handleDelete = useCallback(async (id: string) => {
-    const ok = await removeBookmark(id);
-    if (ok) {
-      message.success(t("删除成功"));
-      void loadBookmarks();
-      setSelectedIds((prev) => {
-        const next = new Set(prev);
-        next.delete(id);
-        return next;
-      });
-    } else {
-      message.error(t("删除失败"));
-    }
-  }, [loadBookmarks, t]);
+  const handleDelete = useCallback(
+    async (id: string, title: string): Promise<void> => {
+      const ok = await removeBookmark(id);
+      if (ok) {
+        feedback.success(t("已删除「{title}」", { title }));
+        await reloadAfterChange();
+      }
+    },
+    [reloadAfterChange, t],
+  );
 
-  const handleBatchDelete = useCallback(async () => {
+  const handleCreateFolder = useCallback(
+    async (name: string): Promise<void> => {
+      await createBookmark({ title: name });
+      await reloadAfterChange();
+      feedback.success(t("文件夹已创建"));
+      setNewFolderOpen(false);
+    },
+    [reloadAfterChange, t],
+  );
+
+  const handleBatchDelete = useCallback(async (): Promise<void> => {
+    const ids = Array.from(selectedIds);
     let count = 0;
-    for (const id of selectedIds) {
+    for (const id of ids) {
       const ok = await removeBookmark(id);
       if (ok) count++;
     }
-    message.success(t("已删除 {count} 条书签", { count }));
+    feedback.success(t("已批量删除 {n} 项", { n: count }));
     setSelectedIds(new Set());
     setSelectionMode(false);
-    void loadBookmarks();
-  }, [selectedIds, loadBookmarks, t]);
+    await reloadAfterChange();
+  }, [selectedIds, reloadAfterChange, t]);
 
-  const handleEdit = useCallback(async (title: string, url?: string) => {
-    if (!editModal.node) return;
-    try {
-      // Chrome bookmarks.update requires just title or url
-      const update: { title?: string; url?: string } = { title };
-      if (url) update.url = url;
-      await createBookmark({ parentId: editModal.node.parentId, title, url }); // This is not update, we need a dedicated update function
-      // Actually, Chrome has chrome.bookmarks.update(id, changes). Let me use a direct call.
-      if (typeof chrome !== "undefined" && chrome.bookmarks) {
-        await chrome.bookmarks.update(editModal.node.id, update);
-        message.success(t("编辑成功"));
-        setEditModal({ open: false, isNew: false });
-        void loadBookmarks();
-      }
-    } catch {
-      message.error(t("编辑失败"));
-    }
-  }, [editModal.node, loadBookmarks, t]);
-
-  const handleCreate = useCallback(async (title: string, url: string) => {
-    try {
-      await createBookmark({
-        parentId: editModal.parentId,
-        title: title || url,
-        url,
-      });
-      message.success(t("创建成功"));
-      setEditModal({ open: false, isNew: false });
-      void loadBookmarks();
-    } catch {
-      message.error(t("创建失败"));
-    }
-  }, [editModal.parentId, loadBookmarks, t]);
-
-  const handleCreateFolder = useCallback(async (name: string) => {
-    if (!name.trim()) return;
-    try {
-      await createBookmark({ title: name.trim() });
-      message.success(t("文件夹已创建"));
-      setNewFolderModal(false);
-      void loadBookmarks();
-    } catch {
-      message.error(t("文件夹创建失败"));
-    }
-  }, [loadBookmarks, t]);
-
-  const handleJump = useCallback((url: string | undefined) => {
-    if (url) window.open(url, "_blank", "noopener,noreferrer");
+  // ── 拖拽 ──
+  const handleDragStart = useCallback((e: React.DragEvent, node: BookmarkNode) => {
+    e.dataTransfer.setData("text/plain", node.id);
+    e.dataTransfer.effectAllowed = "move";
   }, []);
 
-  const toggleSelect = useCallback((id: string) => {
+  // dragOverId 在拖拽时会被频繁触发（mousemove 频率），
+  // 用 ref 比较新旧值，**仅在变化时** setState，避免整树重渲染。
+  const dragOverIdRef = useRef<string | null>(null);
+  const handleDragOver = useCallback((e: React.DragEvent, node: BookmarkNode) => {
+    if (!isFolder(node)) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (dragOverIdRef.current !== node.id) {
+      dragOverIdRef.current = node.id;
+      setDragOverId(node.id);
+    }
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    if (dragOverIdRef.current !== null) {
+      dragOverIdRef.current = null;
+      setDragOverId(null);
+    }
+  }, []);
+
+  const handleDrop = useCallback(
+    async (e: React.DragEvent, targetFolder: BookmarkNode): Promise<void> => {
+      e.preventDefault();
+      setDragOverId(null);
+      if (!isFolder(targetFolder)) return;
+      const draggedId = e.dataTransfer.getData("text/plain");
+      if (draggedId.length === 0) return;
+      if (draggedId === targetFolder.id) return;
+      await moveBookmark(draggedId, targetFolder.id);
+      await reloadAfterChange();
+      feedback.success(t("已移动"));
+    },
+    [reloadAfterChange, t],
+  );
+
+  // ── 多选 ──
+  const handleToggleSelect = useCallback((id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -230,502 +271,348 @@ export function BookmarkView() {
     });
   }, []);
 
-  const toggleCollapse = useCallback((id: string) => {
-    setCollapsedDirs((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
+  const handleSelectAll = useCallback(() => {
+    const all: string[] = [];
+    const walk = (nodes: BookmarkNode[]): void => {
+      for (const n of nodes) {
+        all.push(n.id);
+        if (n.children) walk(n.children);
+      }
+    };
+    walk(tree);
+    setSelectedIds(new Set(all));
+  }, [tree]);
 
-  const selectAllFiltered = useCallback(() => {
-    const ids = filteredList.filter((item) => item.node.url).map((item) => item.node.id);
-    setSelectedIds(new Set(ids));
-  }, [filteredList]);
+  // ── 导出 ──
+  const handleExport = useCallback(
+    (format: "html" | "json" | "md") => {
+      let content = "";
+      let filename = "";
+      let mime = "";
+      switch (format) {
+        case "html":
+          content = `<!DOCTYPE NETSCAPE-Bookmark-file-1>\n<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">\n<TITLE>Bookmarks</TITLE>\n<H1>Bookmarks</H1>\n<DL><p>\n${toNetscapeHtml(tree)}</DL><p>\n`;
+          filename = "bookmarks.html";
+          mime = "text/html";
+          break;
+        case "json":
+          content = JSON.stringify(tree, null, 2);
+          filename = "bookmarks.json";
+          mime = "application/json";
+          break;
+        case "md":
+          content = toMarkdown(tree);
+          filename = "bookmarks.md";
+          mime = "text/markdown";
+          break;
+      }
+      downloadFile(filename, mime, content);
+      feedback.success(t("导出成功"));
+    },
+    [tree, t],
+  );
 
+  // ── 导入 ──
+  const handleImport: UploadProps["beforeUpload"] = useCallback(
+    (file) => {
+      setImportLoading(true);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result;
+        if (typeof text !== "string") {
+          setImportLoading(false);
+          feedback.warning(t("未识别到书签"));
+          return;
+        }
+        const imported = parseImport(text);
+        if (imported.length === 0) {
+          setImportLoading(false);
+          feedback.warning(t("未识别到书签"));
+          return;
+        }
+        Modal.confirm({
+          title: t("导入书签"),
+          content: t("识别到 {n} 个书签，确认导入？", { n: imported.length }),
+          okText: t("导入"),
+          cancelText: t("取消"),
+          onOk: async () => {
+            let count = 0;
+            for (const item of imported) {
+              const created = await createBookmark(item);
+              if (created !== null) count++;
+            }
+            await reloadAfterChange();
+            feedback.success(t("已导入 {n} 个书签", { n: count }));
+            setImportLoading(false);
+          },
+          onCancel: () => setImportLoading(false),
+        });
+      };
+      reader.onerror = () => {
+        setImportLoading(false);
+        feedback.error(t("文件读取失败"));
+      };
+      reader.readAsText(file);
+      return false;
+    },
+    [reloadAfterChange, t],
+  );
+
+  // ── 工具操作 ──
+  const runLinkCheck = useCallback(() => {
+    if (urlNodes.length === 0) {
+      feedback.info(t("没有可检测的网址书签"));
+      return;
+    }
+    // 先打开 modal，再启动检测 —— 用户能立即看到流式预览
+    setShowBrokenModal(true);
+    void linkChecker.run(
+      urlNodes.map((n) => ({ id: n.id, title: n.title, url: n.url ?? "" })),
+    );
+  }, [linkChecker, urlNodes, t]);
+
+  const findDuplicatesImpl = useCallback(() => {
+    dupFinder.compute(tree);
+    setShowDupModal(true);
+  }, [dupFinder, tree]);
+
+  // ── 右键菜单 ──
   const nodeContextMenu = useCallback(
-    (node: BookmarkNode) => ({
+    (node: BookmarkNode): MenuProps => ({
       items: [
-        ...(node.url
+        ...(node.url !== undefined
           ? [
               {
                 key: "open",
                 label: t("打开"),
                 icon: <ExternalLink size={ICON_SIZE.SMALL} />,
-                onClick: () => handleJump(node.url),
+                onClick: () =>
+                  window.open(node.url, "_blank", "noopener,noreferrer"),
               },
             ]
           : []),
+        { type: "divider" as const },
         {
           key: "edit",
           label: t("编辑"),
           icon: <Edit2 size={ICON_SIZE.SMALL} />,
           onClick: () => setEditModal({ open: true, node, isNew: false }),
         },
-        ...(node.url
-          ? []
+        ...(isFolder(node)
+          ? [
+              {
+                key: "add",
+                label: t("在此添加书签"),
+                icon: <BookmarkPlus size={ICON_SIZE.SMALL} />,
+                onClick: () => setEditModal({ open: true, isNew: true, parentId: node.id }),
+              },
+            ]
           : [
               {
                 key: "add",
-                label: t("在此添加"),
+                label: t("在父文件夹添加书签"),
                 icon: <BookmarkPlus size={ICON_SIZE.SMALL} />,
-                onClick: () => setEditModal({ open: true, isNew: true, parentId: node.id }),
+                onClick: () =>
+                  setEditModal({ open: true, isNew: true, parentId: node.parentId }),
               },
             ]),
         { type: "divider" as const },
         {
           key: "delete",
           label: t("删除"),
-          danger: true,
           icon: <Trash2 size={ICON_SIZE.SMALL} />,
-          onClick: () => {
-            Modal.confirm({
-              title: t("确认删除"),
-              content: node.url
-                ? t("确认删除书签「{title}」？", { title: node.title })
-                : t("确认删除文件夹「{title}」及其内容？", { title: node.title }),
-              okText: t("删除"),
-              cancelText: t("取消"),
-              okButtonProps: { danger: true },
-              onOk: () => handleDelete(node.id),
-            });
-          },
+          danger: true,
+          onClick: () => void handleDelete(node.id, node.title),
         },
       ],
     }),
-    [handleDelete, handleJump, t],
+    [t, handleDelete],
   );
 
-  // ------ Rendering ------
+  // ── 渲染分支 ──
 
-  if (loading) {
-    return <Flex justify="center" className={styles["bookmark-loading"]}><Spin /></Flex>;
+  if (loading && tree.length === 0) {
+    return (
+      <Flex justify="center" align="center" className={styles["bookmark-loading"]}>
+        <Spin />
+      </Flex>
+    );
   }
 
   if (permissionDenied) {
     return (
-      <FeatureEmptyState
-        title={t("需要书签权限")}
-        description={t("GroveTab 需要书签权限才能管理您的书签")}
-        icon={<Bookmark size={ICON_SIZE.HERO} />}
-        hints={[t("点击下方按钮授权"), t("仅用于读写书签数据"), t("数据不会上传到任何服务器")]}
-        actions={[{ text: t("授权书签权限"), onClick: requestBookmarksPermission, type: "primary" }]}
-      />
+      <Flex vertical align="center" className={styles["bookmark-loading"]}>
+        <FeatureEmptyState
+          title={t("需要书签权限")}
+          description={t("书签管理功能需要浏览器书签权限")}
+          actions={[
+            { text: t("授予权限"), onClick: () => void requestPermission(), type: "primary" },
+          ]}
+        />
+      </Flex>
     );
   }
-
-  if (tree.length === 0) {
-    return (
-      <FeatureEmptyState
-        title={t("暂无书签")}
-        description={t("点击下方按钮添加第一个书签")}
-        icon={<BookmarkPlus size={ICON_SIZE.HERO} />}
-        hints={[t("支持拖拽导入"), t("支持文件夹管理"), t("支持搜索和批量操作")]}
-        actions={[
-          { text: t("添加书签"), onClick: () => setEditModal({ open: true, isNew: true }), type: "primary" },
-          { text: t("添加文件夹"), onClick: () => setNewFolderModal(true) },
-        ]}
-      />
-    );
-  }
-
-  const isSearching = query.trim().length > 0;
 
   return (
-    <Flex vertical gap={8} className={styles["bookmark-view"]}>
-      {/* 工具栏 */}
-      <Flex align="center" gap={8}>
-        <Input
-          allowClear
-          size="small"
-          prefix={<Search size={ICON_SIZE.SMALL} />}
-          placeholder={t("搜索书签…")}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className={styles["bookmark-search"]}
-          style={{ flex: 1 }}
+    <div className={styles["bookmark-view"]}>
+      <BookmarkToolbar
+        query={query}
+        onQueryChange={setQuery}
+        viewTab={viewTab}
+        onViewTabChange={setViewTab}
+        sortMode={sortMode}
+        onSortChange={setSortMode}
+        onAddBookmark={() => setEditModal({ open: true, isNew: true })}
+        onAddFolder={() => setNewFolderOpen(true)}
+        onExport={handleExport}
+        onImport={handleImport}
+        selectionMode={selectionMode}
+        onToggleSelection={() => {
+          setSelectionMode((v) => !v);
+          setSelectedIds(new Set());
+        }}
+        showSelection={viewTab === "tree" && !isSearching}
+        onCheckLinks={runLinkCheck}
+        onFindDuplicates={findDuplicatesImpl}
+        linkCheckRunning={linkChecker.running}
+        importLoading={importLoading}
+      />
+
+      {selectionMode && selectedIds.size > 0 && (
+        <BookmarkSelectionBar
+          count={selectedIds.size}
+          onSelectAll={handleSelectAll}
+          onClear={() => setSelectedIds(new Set())}
+          onBatchDelete={() => void handleBatchDelete()}
         />
-        {!isSearching && (
-          <Space size={4}>
-            <Button
-              size="small"
-              icon={<BookmarkPlus size={ICON_SIZE.SMALL} />}
-              onClick={() => setEditModal({ open: true, isNew: true })}
-            >
-              {t("添加书签")}
-            </Button>
-            <Button
-              size="small"
-              icon={<FolderPlus size={ICON_SIZE.SMALL} />}
-              onClick={() => setNewFolderModal(true)}
-            >
-              {t("添加文件夹")}
-            </Button>
-          </Space>
-        )}
-        {isSearching && (
-          <Button
-            size="small"
-            type={selectionMode ? "primary" : "default"}
-            onClick={() => {
-              if (selectionMode) {
-                handleBatchDelete();
-              } else {
-                setSelectionMode(true);
-              }
-            }}
-            disabled={selectionMode && selectedIds.size === 0}
-          >
-            {selectionMode
-              ? selectedIds.size > 0
-                ? t("删除选中 ({count})", { count: selectedIds.size })
-                : t("选择书签")
-              : t("批量选择")}
-          </Button>
-        )}
-        {isSearching && selectionMode && (
-          <>
-            <Button size="small" onClick={selectAllFiltered}>
-              {t("全选")}
-            </Button>
-            <Button
-              size="small"
-              onClick={() => {
-                setSelectionMode(false);
-                setSelectedIds(new Set());
-              }}
-            >
-              {t("取消")}
-            </Button>
-          </>
-        )}
-      </Flex>
-
-      {/* 树形视图（无搜索时） */}
-      {!isSearching && (
-        <div className={styles["bookmark-tree"]}>
-          {renderTree(tree, 0, collapsedDirs, toggleCollapse, toggleSelect, selectedIds,
-            selectionMode, handleJump, nodeContextMenu, handleDelete, setEditModal, t, styles,
-          )}
-        </div>
       )}
 
-      {/* 搜索结果（扁平列表） */}
-      {isSearching && filteredList.length === 0 && (
-        <Flex justify="center" className={styles["bookmark-empty"]}>
-          <Typography.Text type="secondary">{t("未找到匹配的书签")}</Typography.Text>
-        </Flex>
+      <BookmarkStatsBar
+        total={stats.total}
+        folders={stats.folders}
+        linkCheckRunning={linkChecker.running}
+        linkCheckChecked={linkChecker.checked}
+        linkCheckTotal={linkChecker.total}
+        brokenCount={linkChecker.broken.length}
+        onShowBroken={() => setShowBrokenModal(true)}
+      />
+
+      {viewTab === "tree" && !isSearching && sortedTree.length > 0 && (
+        <SmartTagList nodes={sortedTree} onSelectTag={setQuery} />
       )}
-      {isSearching &&
-        filteredList.map((item) => (
-          <Flex
-            key={item.node.id}
-            align="center"
-            gap={8}
-            className={`${styles["bookmark-item"]} ${selectedIds.has(item.node.id) ? styles["bookmark-item--selected"] : ""}`}
-            onClick={() => {
-              if (selectionMode) {
-                toggleSelect(item.node.id);
-              } else {
-                handleJump(item.node.url);
-              }
-            }}
-          >
-            {selectionMode && (
-              <Checkbox checked={selectedIds.has(item.node.id)} onChange={() => toggleSelect(item.node.id)} />
-            )}
-            {item.node.url ? (
-              <Globe size={ICON_SIZE.SMALL} className={styles["bookmark-icon"]} />
-            ) : (
-              <Folder size={ICON_SIZE.SMALL} className={styles["bookmark-icon"]} />
-            )}
-            <Flex vertical className={styles["bookmark-item__text"]}>
-              <Typography.Text ellipsis className={styles["bookmark-item__title"]}>
-                {item.node.title}
-              </Typography.Text>
-              <Typography.Text type="secondary" className={styles["bookmark-item__path"]}>
-                {item.path}
-              </Typography.Text>
-            </Flex>
-            {item.node.url && <ExternalLink size={ICON_SIZE.MICRO} className={styles["bookmark-link-icon"]} />}
-          </Flex>
+
+      {viewTab === "recent" && !isSearching && <BookmarkRecentList />}
+
+      {isSearching && (
+        <BookmarkSearchResults flat={searchResults.flat} emptyHint={t("未找到匹配的书签")} />
+      )}
+
+      {viewTab === "tree" &&
+        !isSearching &&
+        (sortedTree.length === 0 ? (
+          <FeatureEmptyState
+            title={t("暂无书签")}
+            description={t("点击上方按钮添加书签，或导入书签文件")}
+            hints={[
+              t("支持拖拽移动书签"),
+              t("文件夹可嵌套管理"),
+              t("支持 HTML / JSON / Markdown 导入导出"),
+            ]}
+            actions={[
+              {
+                text: t("添加书签"),
+                onClick: () => setEditModal({ open: true, isNew: true }),
+                type: "primary",
+              },
+              { text: t("新建文件夹"), onClick: () => setNewFolderOpen(true) },
+            ]}
+          />
+        ) : (
+          <BookmarkTreeView
+            nodes={sortedTree}
+            collapsedDirs={collapsedDirs}
+            toggleCollapse={toggleCollapsed}
+            dragOverId={dragOverId}
+            selectionMode={selectionMode}
+            selectedIds={selectedIds}
+            toggleSelect={handleToggleSelect}
+            onContextMenu={nodeContextMenu}
+            onDelete={(id, title) => void handleDelete(id, title)}
+            onAddChild={(parentId) =>
+              setEditModal({ open: true, isNew: true, parentId })
+            }
+            onEdit={(node) => setEditModal({ open: true, node, isNew: false })}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={(e, node) => void handleDrop(e, node)}
+          />
         ))}
 
-      {/* 编辑/新建弹窗 */}
       <BookmarkEditModal
         open={editModal.open}
-        node={editModal.node}
         isNew={editModal.isNew}
-        onClose={() => setEditModal({ open: false, isNew: false })}
-        onSave={editModal.isNew ? handleCreate : handleEdit}
-        t={t}
+        initialTitle={editModal.node?.title}
+        initialUrl={editModal.node?.url}
+        onClose={() => setEditModal(EMPTY_EDIT)}
+        onSave={async (title, url) => {
+          if (editModal.isNew) {
+            await handleCreate(title, url, editModal.parentId);
+          } else if (editModal.node !== undefined) {
+            await handleEdit(editModal.node.id, title, url);
+          }
+        }}
       />
 
-      {/* 新建文件夹弹窗 */}
-      <BookmarkFolderModal
-        open={newFolderModal}
-        onClose={() => setNewFolderModal(false)}
-        onSave={handleCreateFolder}
-        t={t}
+      <NewFolderModal
+        open={newFolderOpen}
+        onClose={() => setNewFolderOpen(false)}
+        onSave={(name) => handleCreateFolder(name)}
       />
-    </Flex>
-  );
-}
 
-// ─── 递归树形渲染 ──────────────────────────────────────────
+      <BrokenLinksModal
+        open={showBrokenModal}
+        partialResults={linkChecker.partialResults}
+        broken={linkChecker.broken}
+        total={linkChecker.total}
+        checked={linkChecker.checked}
+        running={linkChecker.running}
+        totalDurationMs={linkChecker.totalDurationMs}
+        onClose={() => {
+          // 关闭时若正在检测，给个温和提示
+          if (linkChecker.running) {
+            linkChecker.cancel();
+          }
+          setShowBrokenModal(false);
+        }}
+        onCancel={() => linkChecker.cancel()}
+        onDeleteOne={async (id) => {
+          await handleDelete(id, "");
+        }}
+        onDeleteAll={async () => {
+          for (const item of linkChecker.broken) {
+            await handleDelete(item.bookmarkId, item.title);
+          }
+          linkChecker.reset();
+          setShowBrokenModal(false);
+        }}
+      />
 
-function flattenAll(nodes: BookmarkNode[]): BookmarkNode[] {
-  const result: BookmarkNode[] = [];
-  for (const node of nodes) {
-    result.push(node);
-    if (node.children) result.push(...flattenAll(node.children));
-  }
-  return result;
-}
-
-function renderTree(
-  nodes: BookmarkNode[],
-  depth: number,
-  collapsedDirs: Set<string>,
-  toggleCollapse: (id: string) => void,
-  toggleSelect: (id: string) => void,
-  selectedIds: Set<string>,
-  selectionMode: boolean,
-  handleJump: (url?: string) => void,
-  nodeContextMenu: (node: BookmarkNode) => any,
-  handleDelete: (id: string) => void,
-  setEditModal: (v: any) => void,
-  t: (key: string, params?: Record<string, string | number>) => string,
-  styles: Record<string, string>,
-): React.ReactNode[] {
-  return nodes.map((node) => {
-    const isFolder = !node.url && node.children && node.children.length > 0;
-    const isCollapsed = collapsedDirs.has(node.id);
-    const indent = depth * 20;
-
-    return (
-      <div key={node.id}>
-        <Dropdown menu={nodeContextMenu(node)} trigger={["contextMenu"]}>
-          <Flex
-            align="center"
-            gap={6}
-            className={`${styles["bookmark-tree-item"]} ${selectedIds.has(node.id) ? styles["bookmark-tree-item--selected"] : ""}`}
-            style={{ paddingLeft: indent + 8 }}
-            onClick={() => {
-              if (selectionMode) {
-                toggleSelect(node.id);
-              } else if (isFolder) {
-                toggleCollapse(node.id);
-              } else {
-                handleJump(node.url);
-              }
-            }}
-          >
-            {selectionMode && (
-              <Checkbox
-                checked={selectedIds.has(node.id)}
-                onChange={(e) => {
-                  e.stopPropagation();
-                  toggleSelect(node.id);
-                }}
-                onClick={(e) => e.stopPropagation()}
-              />
-            )}
-            {isFolder ? (
-              isCollapsed ? (
-                <Folder size={ICON_SIZE.SMALL} className={styles["bookmark-tree-icon"]} />
-              ) : (
-                <FolderOpen size={ICON_SIZE.SMALL} className={styles["bookmark-tree-icon"]} />
-              )
-            ) : (
-              <Globe size={ICON_SIZE.SMALL} className={styles["bookmark-tree-icon"]} />
-            )}
-            <Typography.Text ellipsis className={styles["bookmark-tree-title"]}>
-              {node.title}
-            </Typography.Text>
-            {node.url && (
-              <ExternalLink
-                size={ICON_SIZE.MICRO}
-                className={styles["bookmark-tree-link"]}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleJump(node.url);
-                }}
-              />
-            )}
-            <div style={{ flex: 1 }} />
-            {/* 快速操作按钮（非多选模式） */}
-            {!selectionMode && (
-              <Space size={2} className={styles["bookmark-tree-actions"]}>
-                {isFolder && (
-                  <Button
-                    type="text"
-                    size="small"
-                    icon={<BookmarkPlus size={ICON_SIZE.MICRO} />}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setEditModal({ open: true, isNew: true, parentId: node.id });
-                    }}
-                  />
-                )}
-                {node.url && (
-                  <Button
-                    type="text"
-                    size="small"
-                    icon={<Edit2 size={ICON_SIZE.MICRO} />}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setEditModal({ open: true, node, isNew: false });
-                    }}
-                  />
-                )}
-                <Popconfirm
-                  title={
-                    node.url
-                      ? t("确认删除书签「{title}」？", { title: node.title })
-                      : t("确认删除文件夹「{title}」及其内容？", { title: node.title })
-                  }
-                  onConfirm={(e) => {
-                    e?.stopPropagation();
-                    void handleDelete(node.id);
-                  }}
-                  okText={t("删除")}
-                  cancelText={t("取消")}
-                >
-                  <Button
-                    type="text"
-                    size="small"
-                    danger
-                    icon={<Trash2 size={ICON_SIZE.MICRO} />}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </Popconfirm>
-              </Space>
-            )}
-          </Flex>
-        </Dropdown>
-        {/* 递归渲染子节点 */}
-        {isFolder && !isCollapsed && node.children && (
-          <div className={styles["bookmark-tree-children"]}>
-            {renderTree(
-              node.children,
-              depth + 1,
-              collapsedDirs,
-              toggleCollapse,
-              toggleSelect,
-              selectedIds,
-              selectionMode,
-              handleJump,
-              nodeContextMenu,
-              handleDelete,
-              setEditModal,
-              t,
-              styles,
-            )}
-          </div>
-        )}
-      </div>
-    );
-  });
-}
-
-// ─── 编辑/新建书签弹窗 ──────────────────────────────────────
-
-function BookmarkEditModal({
-  open,
-  node,
-  isNew,
-  onClose,
-  onSave,
-  t,
-}: {
-  open: boolean;
-  node?: BookmarkNode;
-  isNew: boolean;
-  onClose: () => void;
-  onSave: (title: string, url: string) => void;
-  t: (key: string, params?: Record<string, string | number>) => string;
-}) {
-  const [title, setTitle] = useState("");
-  const [url, setUrl] = useState("");
-
-  useEffect(() => {
-    if (open && node) {
-      setTitle(node.title || "");
-      setUrl(node.url || "");
-    } else if (open && isNew) {
-      setTitle("");
-      setUrl("");
-    }
-  }, [open, node, isNew]);
-
-  return (
-    <Modal
-      open={open}
-      title={isNew ? t("添加书签") : t("编辑书签")}
-      onOk={() => onSave(title, url)}
-      onCancel={onClose}
-      okText={t("保存")}
-      cancelText={t("取消")}
-      okButtonProps={{ disabled: !title.trim() }}
-    >
-      <Flex vertical gap={12} style={{ marginTop: 12 }}>
-        <div>
-          <Typography.Text type="secondary" style={{ fontSize: 12, marginBottom: 4, display: "block" }}>
-            {t("标题")}
-          </Typography.Text>
-          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("书签标题")} />
-        </div>
-        <div>
-          <Typography.Text type="secondary" style={{ fontSize: 12, marginBottom: 4, display: "block" }}>
-            {t("网址")}
-          </Typography.Text>
-          <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://" />
-        </div>
-      </Flex>
-    </Modal>
-  );
-}
-
-// ─── 新建文件夹弹窗 ──────────────────────────────────────────
-
-function BookmarkFolderModal({
-  open,
-  onClose,
-  onSave,
-  t,
-}: {
-  open: boolean;
-  onClose: () => void;
-  onSave: (name: string) => void;
-  t: (key: string, params?: Record<string, string | number>) => string;
-}) {
-  const [name, setName] = useState("");
-
-  useEffect(() => {
-    if (open) setName("");
-  }, [open]);
-
-  return (
-    <Modal
-      open={open}
-      title={t("添加文件夹")}
-      onOk={() => onSave(name)}
-      onCancel={onClose}
-      okText={t("创建")}
-      cancelText={t("取消")}
-      okButtonProps={{ disabled: !name.trim() }}
-    >
-      <Flex vertical gap={8} style={{ marginTop: 12 }}>
-        <Input
-          autoFocus
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder={t("文件夹名称")}
-          onPressEnter={() => onSave(name)}
-        />
-      </Flex>
-    </Modal>
+      <DuplicatesModal
+        open={showDupModal}
+        groups={dupFinder.duplicates}
+        onClose={() => setShowDupModal(false)}
+        onRemoveGroup={async (group) => {
+          const count = await dupFinder.removeGroup(group);
+          if (count > 0) await reloadAfterChange();
+          return count;
+        }}
+        onRemoveAll={async () => {
+          const count = await dupFinder.removeAll();
+          if (count > 0) await reloadAfterChange();
+          return count;
+        }}
+      />
+    </div>
   );
 }

@@ -99,15 +99,11 @@ export interface SkinPreset {
   /**
    * 正文字体栈。
    *
-   * 各皮肤的平台特有字体及预期回落行为：
-   *   - apple: "SF Pro Display" → macOS/iOS 原生；回落到 -apple-system → "Segoe UI"(Windows) → Roboto(Android/Linux)
+   * 各皮肤的字体选择：
+   *   - apple: "SF Pro Display" → macOS/iOS 原生；回落到 -apple-system → Segoe UI(Win) → Roboto(Android/Linux)
    *   - glassmorphism: "Segoe UI Variable" → Windows 11+；回落到 "Segoe UI"(Win10-) → 系统默认
-   *   - skeuomorphism: "PingFang SC" → macOS 中文；回落到 "Microsoft YaHei"(Win) → "Noto Sans SC"(Linux)
-   *   - elegant: "Georgia" → 全平台衬线体；中文回落到 "Noto Serif SC" → "STSong"(macOS) → "SimSun"(Win)
-   *   - nord: "Inter" → Web 字体需加载；回落到 -apple-system → system-ui
-   *   - solarized: "Source Sans 3" → Web 字体需加载；回落到 -apple-system → system-ui
-   *   - pastel: "SF Pro Rounded" → macOS/iOS 圆角字体；回落到 "SF Pro Display" → 系统默认
-   *   - minimal/aurora: 通用系统字体栈，无平台依赖
+   *   - nord: "Inter" → Web 字体渲染；回落到 -apple-system → system-ui
+   *   - minimal: 通用系统字体栈，无平台依赖
    */
   fontFamily: string;
   /** 标题字体（拟物/典雅皮肤可切换衬线体） */

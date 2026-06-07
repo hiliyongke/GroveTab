@@ -130,13 +130,11 @@
 }
 
 // ─── Lift (hover elevation) ───────────────────────────────
+// 注：去掉了 hover 抖动效果，仅保留过渡。如需明显反馈，
+// 在使用方叠加 box-shadow / border 即可。
 
 .app-lift {
   .transition-lift();
-
-  &:hover {
-    transform: translateY(-1px);
-  }
 }
 
 // ─── Compact Search ───────────────────────────────────────
@@ -166,6 +164,13 @@
   }
 }
 
+/* 卡片基础样式：_skin-overrides.less 中的皮肤规则 (.app-card) 会覆盖这些默认值。 */
+.app-card {
+  background: var(--ant-color-bg-container);
+  border: 1px solid var(--ant-color-border-secondary);
+  box-shadow: var(--app-shadow-card);
+}
+
 /* 卡片级 hover：上浮 + 阴影提升 + 边框加深。 */
 .app-card-interactive {
   .transition-card-interactive();
@@ -174,7 +179,6 @@
   &:focus-within {
     border-color: var(--app-hover-border, var(--ant-color-border));
     box-shadow: var(--app-shadow-card-hover);
-    transform: translateY(calc(-1 * var(--app-card-lift, 2px)));
   }
 }
 

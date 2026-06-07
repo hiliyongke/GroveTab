@@ -103,7 +103,7 @@ export const WindowSnapshotPanel = memo(function WindowSnapshotPanel({
   );
 
   return (
-    <Flex vertical gap={8} style={{ width: 280, maxHeight: 400, overflow: "auto", padding: 4 }}>
+    <Flex vertical gap={8} style={{ width: 280, maxHeight: 400, overflow: "auto", padding: "var(--app-space-1)" }}>
       <Button
         type="primary"
         size="small"
@@ -119,7 +119,7 @@ export const WindowSnapshotPanel = memo(function WindowSnapshotPanel({
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
           description={t("暂无快照")}
-          style={{ margin: "12px 0" }}
+          style={{ margin: "var(--app-space-3) 0" }}
         />
       ) : (
         <List

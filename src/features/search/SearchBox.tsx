@@ -9,10 +9,10 @@
  */
 
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
-import { Modal, Input, theme, Popover, Button, Image, Tooltip, Typography } from "antd";
+import { Modal, Input, theme, Button, Tooltip, Typography, Flex } from "antd";
 import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
 import type { InputRef } from "antd";
-import { Search, Check, ChevronDown, History, Trash2, RefreshCw } from "lucide-react";
+import { Search, History, Trash2, RefreshCw } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import type { SearchEngineId } from "@/shared/types";
 import type { CustomSearchEngine } from "@/shared/types/settings";
@@ -24,7 +24,6 @@ import {
   pushRecentSearch,
   deleteClosedTab,
   getLastSearchEngine,
-  setLastSearchEngine,
 } from "@/repositories";
 import { setData } from "@/repositories/storage-repo";
 import { STORAGE_KEYS } from "@/shared/config/storage-keys";
@@ -39,6 +38,8 @@ import {
 } from "@/shared/config/search-engines";
 import { iconColor } from "@/shared/utils/icon-colors";
 import { SearchResultItem } from "./components/SearchResultItem";
+import { VirtualizedSearchList } from "./components/VirtualizedSearchList";
+import { EngineSelector } from "./components/EngineSelector";
 import { useSearchData } from "./hooks/use-search-data";
 import { useSearchBridgeSync } from "./hooks/use-search-bridge";
 import { useSearchResults } from "./hooks/use-search-results";
@@ -61,7 +62,6 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const [currentEngine, setCurrentEngine] = useState<SearchEngineId>("google");
-  const [enginePopoverOpen, setEnginePopoverOpen] = useState(false);
   const inputRef = useRef<InputRef>(null);
 
   const tabs = useTabsStore((s) => s.tabs);
@@ -324,7 +324,6 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
       setQuery("");
       setDebouncedQuery("");
       setActiveIndex(0);
-      setEnginePopoverOpen(false);
       inputRef.current?.focus();
     },
     [setDebouncedQuery],
@@ -376,6 +375,14 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
     }
   }, [setTrendingCache]);
 
+  // ── 引擎切换回调 ──
+  const handleEngineChange = useCallback(
+    (engineId: string) => {
+      setCurrentEngine(engineId as SearchEngineId);
+    },
+    [],
+  );
+
 
   return (
     <Modal
@@ -398,100 +405,12 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
     >
       <div className={styles["search-box-shell"]} style={rootVars}>
         <div className={styles["search-box-header"]}>
-          <Popover
-            open={enginePopoverOpen}
-            onOpenChange={setEnginePopoverOpen}
-            trigger="click"
-            placement="bottomLeft"
-            arrow={false}
-            classNames={{ root: styles["search-box-engine-popover"] }}
-            content={
-              <ul
-                className={styles["search-box-engine-menu"]}
-                role="listbox"
-                aria-label={t("搜索引擎切换")}
-              >
-                {engineOptions.map((option, idx) => {
-                  const active = option.id === currentEngine;
-                  const shortcut = idx < 9 ? `⌘${idx + 1}` : undefined;
-                  return (
-                    <li
-                      key={option.id}
-                      role="option"
-                      aria-selected={active}
-                      className={`${styles["search-box-engine-menu-item"]} ${active ? styles["is-active"] : ""}`}
-                      style={{ "--searchbox-engine-color": option.color } as React.CSSProperties}
-                      onClick={() => {
-                        setCurrentEngine(option.id);
-                        setLastSearchEngine(option.id);
-                        setEnginePopoverOpen(false);
-                        inputRef.current?.focus();
-                      }}
-                    >
-                      <span className={styles["search-box-engine-logo"]} aria-hidden="true">
-                        {option.iconUrl ? (
-                          <Image
-                            src={option.iconUrl}
-                            alt=""
-                            preview={false}
-                            fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
-                          />
-                        ) : (
-                          option.label.slice(0, 1).toUpperCase()
-                        )}
-                      </span>
-                      <span className={styles["search-box-engine-menu-label"]}>{option.label}</span>
-                      {shortcut !== undefined && (
-                        <span
-                          className={styles["search-box-engine-menu-shortcut"]}
-                          aria-hidden="true"
-                        >
-                          {shortcut}
-                        </span>
-                      )}
-                      {active && (
-                        <Check
-                          size={ICON_SIZE.TINY}
-                          className={styles["search-box-engine-menu-check"]}
-                          aria-hidden="true"
-                        />
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            }
-          >
-            <Button
-              type="text"
-              className={`${styles["search-box-engine-trigger"]} ${enginePopoverOpen ? styles["is-open"] : ""}`}
-              style={
-                { "--searchbox-engine-color": currentEngineOption.color } as React.CSSProperties
-              }
-              aria-haspopup="listbox"
-              aria-expanded={enginePopoverOpen}
-              aria-label={t("搜索引擎切换")}
-              title={currentEngineOption.label}
-            >
-              <span className={styles["search-box-engine-logo"]} aria-hidden="true">
-                {currentEngineOption.iconUrl ? (
-                  <Image
-                    src={currentEngineOption.iconUrl}
-                    alt=""
-                    preview={false}
-                    fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
-                  />
-                ) : (
-                  currentEngineOption.label.slice(0, 1).toUpperCase()
-                )}
-              </span>
-              <ChevronDown
-                size={ICON_SIZE.TINY}
-                className={styles["search-box-engine-trigger-caret"]}
-                aria-hidden="true"
-              />
-            </Button>
-          </Popover>
+          <EngineSelector
+            currentEngine={currentEngine}
+            engineOptions={engineOptions}
+            currentEngineOption={currentEngineOption}
+            onChange={handleEngineChange}
+          />
           <Input
             ref={inputRef}
             size="large"
@@ -551,35 +470,50 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
                   </div>
                 );
               })()
-            : sections.map((section) => {
-                const startIndex = flatItems.findIndex((item) => item.id === section.items[0]?.id);
-                return (
-                  <section key={section.key} className={styles["search-box-section"]}>
-                    <div className={styles["search-box-section-header"]}>
-                      <Typography.Text>{section.title}</Typography.Text>
-                      <span className={styles["search-box-section-count"]}>
-                        {section.items.length}
-                      </span>
-                    </div>
-                    <div role="listbox" className={styles["search-box-list"]}>
-                      {section.items.map((item, offset) => {
-                        const itemIndex = startIndex + offset;
-                        return (
-                          <SearchResultItem
-                            key={item.id}
-                            item={item}
-                            index={itemIndex}
-                            active={itemIndex === activeIndex}
-                            normalizedQuery={normalizedQuery}
-                            onActivate={handleActivate}
-                            onMouseEnter={(index) => setActiveIndex(index)}
-                          />
-                        );
-                      })}
-                    </div>
-                  </section>
-                );
-              })}
+            : sections.length === 1 && sections[0] !== undefined
+              ? (() => {
+                  // 单一分组：使用虚拟滚动
+                  const section = sections[0];
+                  return (
+                    <VirtualizedSearchList
+                      items={section.items}
+                      activeIndex={activeIndex}
+                      normalizedQuery={normalizedQuery}
+                      onActivate={handleActivate}
+                      onMouseEnter={(index) => setActiveIndex(index)}
+                    />
+                  );
+                })()
+              : // 多分组：保持分段渲染（分组数量通常很少）
+                sections.map((section) => {
+                  const startIndex = flatItems.findIndex((item) => item.id === section.items[0]?.id);
+                  return (
+                    <section key={section.key} className={styles["search-box-section"]}>
+                      <div className={styles["search-box-section-header"]}>
+                        <Typography.Text>{section.title}</Typography.Text>
+                        <span className={styles["search-box-section-count"]}>
+                          {section.items.length}
+                        </span>
+                      </div>
+                      <div role="listbox" className={styles["search-box-list"]}>
+                        {section.items.map((item, offset) => {
+                          const itemIndex = startIndex + offset;
+                          return (
+                            <SearchResultItem
+                              key={item.id}
+                              item={item}
+                              index={itemIndex}
+                              active={itemIndex === activeIndex}
+                              normalizedQuery={normalizedQuery}
+                              onActivate={handleActivate}
+                              onMouseEnter={(index) => setActiveIndex(index)}
+                            />
+                          );
+                        })}
+                      </div>
+                    </section>
+                  );
+                })}
         </div>
 
         <div className={styles["search-box-footer"]}>
@@ -588,7 +522,7 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
               ? t("找到 {count} 个候选项", { count: flatItems.length })
               : t("输入后可在本地与网页结果间快速切换")}
           </span>
-          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+          <Flex align="center" gap={4}>
             {recentSearches.length > 0 && (
               <Tooltip title={t("清空最近搜索")}>
                 <Button type="text" size="small" loading={clearing} icon={<Trash2 size={13} />} onClick={handleClearRecent} />
@@ -599,7 +533,7 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
                 <Button type="text" size="small" loading={refreshing} icon={<RefreshCw size={13} />} onClick={handleRefreshTrending} />
               </Tooltip>
             )}
-          </div>
+          </Flex>
         </div>
       </div>
     </Modal>

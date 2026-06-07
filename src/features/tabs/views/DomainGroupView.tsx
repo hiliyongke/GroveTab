@@ -13,7 +13,7 @@
  * 过滤/分组/排序均为同步 useMemo 操作。
  */
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Empty, Flex } from "antd";
 import { useTabsStore, useMetadataStore, useSettingsStore } from "@/store";
@@ -142,7 +142,7 @@ function VirtualColumn({ groups, useVirtual }: VirtualColumnProps) {
 /**
  * 域名分组视图
  */
-export function DomainGroupView({ filterQuery }: DomainGroupViewProps) {
+export const DomainGroupView = memo(function DomainGroupView({ filterQuery }: DomainGroupViewProps) {
   const { t } = useT();
   const tabs = useTabsStore((s) => s.tabs);
   const pinnedUrls = useMetadataStore((s) => s.pinnedUrls);
@@ -282,4 +282,4 @@ export function DomainGroupView({ filterQuery }: DomainGroupViewProps) {
       )}
     </Flex>
   );
-}
+});
