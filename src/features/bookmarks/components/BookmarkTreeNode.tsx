@@ -13,7 +13,7 @@
  */
 
 import { memo, useCallback, useMemo } from "react";
-import { Button, Dropdown, Popconfirm, Space } from "antd";
+import { Button, Dropdown, Popconfirm, Space, Tooltip } from "antd";
 import type { MenuProps } from "antd";
 import {
   Folder,
@@ -191,48 +191,52 @@ function BookmarkTreeNodeImpl({
           )}
           <Space size={2} className={styles["tree-node__actions"]}>
             {folder && (
-              <Button
-                type="text"
-                size="small"
-                icon={<BookmarkPlus size={ICON_SIZE.MICRO} />}
-                aria-label={t("在此添加书签")}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAddChild(node.id);
-                }}
-              />
+              <Tooltip title={t("在此添加书签")}>
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<BookmarkPlus size={ICON_SIZE.MICRO} />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddChild(node.id);
+                  }}
+                />
+              </Tooltip>
             )}
             {node.url !== undefined && (
-              <Button
-                type="text"
-                size="small"
-                icon={<Copy size={ICON_SIZE.MICRO} />}
-                aria-label={t("复制链接")}
-                onClick={handleCopy}
-              />
+              <Tooltip title={t("复制链接")}>
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<Copy size={ICON_SIZE.MICRO} />}
+                  onClick={handleCopy}
+                />
+              </Tooltip>
             )}
             {node.url !== undefined && (
+              <Tooltip title={t("打开")}>
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<ExternalLink size={ICON_SIZE.MICRO} />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(node.url, "_blank", "noopener,noreferrer");
+                  }}
+                />
+              </Tooltip>
+            )}
+            <Tooltip title={t("编辑")}>
               <Button
                 type="text"
                 size="small"
-                icon={<ExternalLink size={ICON_SIZE.MICRO} />}
-                aria-label={t("打开")}
+                icon={<Edit2 size={ICON_SIZE.MICRO} />}
                 onClick={(e) => {
                   e.stopPropagation();
-                  window.open(node.url, "_blank", "noopener,noreferrer");
+                  onEdit(node);
                 }}
               />
-            )}
-            <Button
-              type="text"
-              size="small"
-              icon={<Edit2 size={ICON_SIZE.MICRO} />}
-              aria-label={t("编辑")}
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit(node);
-              }}
-            />
+            </Tooltip>
             <Popconfirm
               title={t("确定删除吗？")}
               okText={t("删除")}
@@ -243,14 +247,15 @@ function BookmarkTreeNodeImpl({
               }}
               onCancel={(e) => e?.stopPropagation()}
             >
-              <Button
-                type="text"
-                size="small"
-                danger
-                icon={<Trash2 size={ICON_SIZE.MICRO} />}
-                aria-label={t("删除")}
-                onClick={(e) => e.stopPropagation()}
-              />
+              <Tooltip title={t("删除")}>
+                <Button
+                  type="text"
+                  size="small"
+                  danger
+                  icon={<Trash2 size={ICON_SIZE.MICRO} />}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </Tooltip>
             </Popconfirm>
           </Space>
           {/* 隐藏的复制成功指示器供样式使用 */}

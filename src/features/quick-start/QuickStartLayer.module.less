@@ -70,7 +70,7 @@
   /* 卡片最小宽度由 --speed-dial-card-min-width 控制（默认 152px，对应 'md' 档） */
   grid-template-columns: repeat(auto-fill, minmax(var(--speed-dial-card-min-width, 152px), 1fr));
   gap: var(--speed-dial-grid-gap, 16px);
-  align-items: start;
+  align-items: stretch;
 }
 
 @media (width < 768px) {
@@ -237,6 +237,9 @@
 
 /* ── 站点卡片（与 GridCard 同体系） ── */
 .app-speed-dial-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   overflow: hidden;
   opacity: var(--speed-dial-card-opacity, 1);
   border-radius: var(--app-card-radius, 12px);

@@ -134,6 +134,32 @@ export async function clearTrash(): Promise<void> {
   await saveSessions(remaining);
 }
 
+/** 清空回收站并返回被清除的快照（用于撤销） */
+export async function clearTrashWithSnapshot(): Promise<ArchivedSession[]> {
+  const sessions = await getArchivedSessions();
+  const trashItems = sessions.filter((s) => s.source === "trash");
+
+  if (trashItems.length === 0) return [];
+
+  const idSet = new Set(trashItems.map((s) => s.id));
+  const remaining = sessions.filter((s) => !idSet.has(s.id));
+  await saveSessions(remaining);
+  return trashItems;
+}
+
+/** 批量恢复回收站条目（用于撤销清空操作） */
+export async function bulkRestoreTrash(items: ArchivedSession[]): Promise<void> {
+  if (items.length === 0) return;
+  const sessions = await getArchivedSessions();
+  const existingIds = new Set(sessions.map((s) => s.id));
+
+  // 过滤掉已存在的（幂等安全），然后追加
+  const toAdd = items.filter((s) => !existingIds.has(s.id));
+  if (toAdd.length === 0) return;
+
+  await saveSessions([...sessions, ...toAdd]);
+}
+
 /** 手动清理过期条目，返回删除数量 */
 export async function pruneTrash(): Promise<number> {
   const sessions = await getArchivedSessions();

@@ -15,7 +15,7 @@
  */
 
 import { useCallback, useDeferredValue, useMemo, useRef, useState } from "react";
-import { Flex, Spin, message, Modal } from "antd";
+import { Flex, Spin, message, Modal, Typography } from "antd";
 import type { MenuProps, UploadProps } from "antd";
 import {
   ExternalLink,
@@ -433,8 +433,9 @@ export function BookmarkView() {
 
   if (loading && tree.length === 0) {
     return (
-      <Flex justify="center" align="center" className={styles["bookmark-loading"]}>
+      <Flex vertical justify="center" align="center" gap={8} className={styles["bookmark-loading"]}>
         <Spin />
+        <Typography.Text type="secondary">{t("加载书签中…")}</Typography.Text>
       </Flex>
     );
   }

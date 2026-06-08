@@ -12,6 +12,7 @@ import { Modal, Input, Form, Select, Segmented, Typography } from 'antd';
 import { useSpeedDialStore, useSettingsStore } from '@/store';
 import { useT } from '@/shared/i18n';
 import { feedback } from '@/shared/ui/feedback';
+import { isSafeExternalUrl } from '@/shared/utils/url-safety';
 import type { SpeedDialSite } from '@/shared/types';
 import styles from './QuickStartLayer.module.less';
 
@@ -145,6 +146,9 @@ export function SpeedDialAddModal({ open, onClose, editingSite, existingGroups }
       const newSites = parsed.map((item: Record<string, unknown>, i: number) => {
         if (!item.url || typeof item.url !== 'string') throw new Error(t('第 {n} 项缺少 url', { n: i + 1 }));
         const normalized = item.url.startsWith('http') ? item.url : `https://${item.url}`;
+        if (!isSafeExternalUrl(normalized)) {
+          throw new Error(t('第 {n} 项 URL 不安全', { n: i + 1 }));
+        }
         return {
           id: `import-${Date.now()}-${i}`, url: normalized,
           title: String(item.title || safeGetHostname(normalized)),

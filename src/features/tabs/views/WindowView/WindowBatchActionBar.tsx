@@ -16,6 +16,7 @@ import { ArrowRightLeft, FolderPlus, Inbox, Monitor, X } from "lucide-react";
 
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
+import { useShallow } from "zustand/shallow";
 import { useSelectionStore, useTabsStore } from "@/store";
 import { moveTabs, closeTabs, createTabGroup } from "@/chrome";
 import { archiveSelectedTabs } from "@/services/archive";
@@ -33,7 +34,7 @@ export const WindowBatchActionBar = memo(function WindowBatchActionBar() {
   const exitSelectionMode = useSelectionStore((s) => s.exitSelectionMode);
   const resetAfterBatch = useSelectionStore((s) => s.resetAfterBatch);
   const selectAll = useSelectionStore((s) => s.selectAll);
-  const tabs = useTabsStore((s) => s.tabs);
+  const tabs = useTabsStore(useShallow((s) => s.tabs));
   const windows = useTabsStore((s) => s.windows);
   const currentWindowId = useTabsStore((s) => s.currentWindowId);
   const loadAllTabs = useTabsStore((s) => s.loadAllTabs);

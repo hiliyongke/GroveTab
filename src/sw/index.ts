@@ -13,11 +13,12 @@
 import { swBroadcast } from "@/shared/utils/sw-broadcast";
 import { archiveCurrentWindowTabs } from "./archive-handler";
 import { createAutoSnapshot } from "@/services/archive";
-import { todayStr } from "@/shared/utils/date";
+import { maybeFetchOg } from "./og-fetcher";
+import { refreshTrendingCache } from "./trending-refresh";
+import { executeScheduledRules, executeOnEventRules } from "./automation-engine";
+import { incrementStats, incrementFocusTime, flushStats, flushFocusTime, handleTabSwitch } from "./collector";
 import {
   getSettings,
-  getStats,
-  saveStats,
   getAutoSnapshotMeta,
   saveAutoSnapshotMeta,
   appendHistoryEvent,
@@ -27,16 +28,12 @@ import {
   upsertDailySnapshot,
   getTodaySnapshot,
   snapshotDateKey,
-  getFocusTime,
-  saveFocusTime,
   getActiveFocusSession,
   setActiveFocusSession,
-  getAutomationRules,
 } from "@/repositories";
-import type { StatsData, StatsRecord, FocusTimeData, DailyFocusTime, OnEventCondition, ScheduledCondition } from "@/shared/types";
 import { BRAND } from "@/shared/config/brand";
 import { CONFIG } from "@/shared/config";
-import { APP_INTERNAL_IDS, STORAGE_KEYS } from "@/shared/config/storage-keys";
+import { APP_INTERNAL_IDS } from "@/shared/config/storage-keys";
 
 /** 统一日志前缀：SW 内所有 console.log/warn/error 都走 SW_LOG_TAG */
 const SW_LOG_TAG = `${BRAND.logTag} SW`;
@@ -175,152 +172,7 @@ function scheduleWindowCloseFlush(windowId: number): void {
   windowCloseFlushTimers.set(windowId, timer);
 }
 
-// ── StatsCollector（F-11） ────────────────────────────
-/**
- * 激活计数按 URL × day 聚合。每 30s 或 onSuspend 时 flush 落盘。
- */
-interface InMemoryCounts {
-  /** URL → count（本批次） */
-  byUrl: Map<string, number>;
-  lastFlushAt: number;
-  dirty: boolean;
-}
-
-const statsMem: InMemoryCounts = {
-  byUrl: new Map<string, number>(),
-  lastFlushAt: 0,
-  dirty: false,
-};
-
-// 从 CONFIG 读取（支持运行时覆盖）
-const STATS_FLUSH_INTERVAL_MS = CONFIG.performance.statsFlushIntervalMs;
-const STATS_RETAIN_DAYS = CONFIG.performance.statsRetainDays;
-
-function urlKey(url: string): string {
-  try {
-    const u = new URL(url);
-    u.hash = "";
-    return u.toString().replace(/\/+$/, "");
-  } catch {
-    return url;
-  }
-}
-
-function incrementStats(url: string): void {
-  if (url === "") return;
-  const key = urlKey(url);
-  statsMem.byUrl.set(key, (statsMem.byUrl.get(key) ?? 0) + 1);
-  statsMem.dirty = true;
-}
-
-async function flushStats(force = false): Promise<void> {
-  if (!statsMem.dirty) return;
-  if (!force && Date.now() - statsMem.lastFlushAt < STATS_FLUSH_INTERVAL_MS) return;
-  const snapshot = new Map(statsMem.byUrl);
-  try {
-    const existing: StatsData = (await getStats()) ?? { daily: [], lastFlushAt: 0 };
-    const today = todayStr();
-    let dayRecord = existing.daily.find((r) => r.day === today);
-    if (dayRecord === undefined) {
-      dayRecord = { day: today, counts: {} };
-      existing.daily.push(dayRecord);
-    }
-    for (const [url, count] of snapshot.entries()) {
-      dayRecord.counts[url] = (dayRecord.counts[url] ?? 0) + count;
-    }
-    // 保留最近 30 天
-    const cutoff = new Date(Date.now() - STATS_RETAIN_DAYS * 86400_000);
-    const cutoffStr = `${cutoff.getUTCFullYear()}-${String(cutoff.getUTCMonth() + 1).padStart(2, "0")}-${String(
-      cutoff.getUTCDate(),
-    ).padStart(2, "0")}`;
-    existing.daily = existing.daily.filter((r: StatsRecord) => r.day >= cutoffStr);
-    existing.lastFlushAt = Date.now();
-    await saveStats(existing);
-    statsMem.byUrl.clear();
-    statsMem.dirty = false;
-    statsMem.lastFlushAt = Date.now();
-  } catch (err) {
-    console.warn(`${SW_LOG_TAG} flushStats failed`, err);
-    for (const [url, count] of snapshot.entries()) {
-      statsMem.byUrl.set(url, (statsMem.byUrl.get(url) ?? 0) + count);
-    }
-    statsMem.dirty = true;
-  }
-}
-
-// ── FocusTimeTracker ──────────────────────────────────
-/**
- * 标签页使用时长追踪：按 URL × day 聚合每日聚焦时长（毫秒）。
- * 依赖 chrome.tabs.onActivated 事件和 chrome.storage.session 保持跨 SW 周期状态。
- */
-
-interface FocusTimeMem {
-  byUrl: Map<string, number>;
-  lastFlushAt: number;
-  dirty: boolean;
-}
-
-const focusTimeMem: FocusTimeMem = {
-  byUrl: new Map<string, number>(),
-  lastFlushAt: 0,
-  dirty: false,
-};
-
-const FOCUS_TIME_FLUSH_INTERVAL_MS = 30_000; // 30s
-const FOCUS_TIME_RETAIN_DAYS = 30;
-
-function incrementFocusTime(url: string, durationMs: number): void {
-  if (url === "" || durationMs <= 0) return;
-  const key = urlKey(url);
-  focusTimeMem.byUrl.set(key, (focusTimeMem.byUrl.get(key) ?? 0) + durationMs);
-  focusTimeMem.dirty = true;
-}
-
-async function flushFocusTime(force = false): Promise<void> {
-  if (!focusTimeMem.dirty) return;
-  if (!force && Date.now() - focusTimeMem.lastFlushAt < FOCUS_TIME_FLUSH_INTERVAL_MS) return;
-  const snapshot = new Map(focusTimeMem.byUrl);
-  try {
-    const existing: FocusTimeData = (await getFocusTime()) ?? { daily: [], lastFlushAt: 0 };
-    const today = todayStr();
-    let dayRecord = existing.daily.find((r) => r.day === today);
-    if (dayRecord === undefined) {
-      dayRecord = { day: today, byUrl: {} };
-      existing.daily.push(dayRecord);
-    }
-    for (const [url, ms] of snapshot.entries()) {
-      dayRecord.byUrl[url] = (dayRecord.byUrl[url] ?? 0) + ms;
-    }
-    const cutoff = new Date(Date.now() - FOCUS_TIME_RETAIN_DAYS * 86400_000);
-    const cutoffStr = `${cutoff.getUTCFullYear()}-${String(cutoff.getUTCMonth() + 1).padStart(2, "0")}-${String(
-      cutoff.getUTCDate(),
-    ).padStart(2, "0")}`;
-    existing.daily = existing.daily.filter((r: DailyFocusTime) => r.day >= cutoffStr);
-    existing.lastFlushAt = Date.now();
-    await saveFocusTime(existing);
-    focusTimeMem.byUrl.clear();
-    focusTimeMem.dirty = false;
-    focusTimeMem.lastFlushAt = Date.now();
-  } catch (err) {
-    console.warn(`${SW_LOG_TAG} flushFocusTime failed`, err);
-    for (const [url, ms] of snapshot.entries()) {
-      focusTimeMem.byUrl.set(url, (focusTimeMem.byUrl.get(url) ?? 0) + ms);
-    }
-    focusTimeMem.dirty = true;
-  }
-}
-
-/** 处理标签切换：结束上一个会话，开始新会话 */
-async function handleTabSwitch(newTabId: number, newUrl: string): Promise<void> {
-  const prev = await getActiveFocusSession();
-  const now = Date.now();
-  if (prev !== null && prev.url !== newUrl) {
-    const duration = now - prev.activatedAt;
-    incrementFocusTime(prev.url, duration);
-    void flushFocusTime(false);
-  }
-  await setActiveFocusSession({ tabId: newTabId, url: newUrl, activatedAt: now });
-}
+// StatsCollector + FocusTimeTracker → sw/collector.ts (CODE-01 阶段3)
 
 // ── Tab Event Listeners ───────────────────────────────
 
@@ -756,7 +608,7 @@ async function autoSnapshotIfNeeded(): Promise<void> {
     const focused = windows.find((w) => w.focused) ?? windows[0];
     if (!focused?.tabs) return;
     const nonPinned = focused.tabs.filter((t) => !t.pinned && !t.incognito);
-    if (nonPinned.length < 10) return;
+    if (nonPinned.length < CONFIG.performance.autoSnapshotMinTabs) return;
 
     const created = await createAutoSnapshot(nonPinned);
     if (created !== null) {
@@ -799,119 +651,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   }
 });
 
-// ── Automation Rule Engine ─────────────────────────────
-
-/**
- * URL 模式匹配：支持 * 通配符
- * 例如 "https://github.com/*" 匹配所有 github.com 页面
- */
-function matchUrlPattern(url: string, pattern: string): boolean {
-  if (!pattern) return true;
-  const regexStr = pattern
-    .replace(/[.+^${}()|[\]\\]/g, "\\$&")
-    .replace(/\*/g, ".*");
-  try {
-    return new RegExp(`^${regexStr}$`, "i").test(url);
-  } catch {
-    return false;
-  }
-}
-
-/**
- * 执行定时清理型规则
- * 在 statsHeartbeat alarm 中被调用
- */
-async function executeScheduledRules(): Promise<void> {
-  try {
-    const ruleData = await getAutomationRules();
-    const scheduledRules = ruleData.rules.filter(
-      (r) => r.enabled && r.condition.kind === "scheduled",
-    );
-    if (scheduledRules.length === 0) return;
-
-    const tabs = await chrome.tabs.query({});
-    const now = Date.now();
-
-    for (const rule of scheduledRules) {
-      const cond = rule.condition as ScheduledCondition;
-      const idleThresholdMs = cond.idleDays * 86400_000;
-      const candidates = tabs.filter((tab) => {
-        if (tab.id === undefined || tab.url === undefined) return false;
-        if (cond.excludePinned && tab.pinned) return false;
-        if (cond.excludeAudible && tab.audible) return false;
-        if (cond.urlPattern && !matchUrlPattern(tab.url, cond.urlPattern)) return false;
-        const lastAccessed = tab.lastAccessed ?? 0;
-        return now - lastAccessed > idleThresholdMs;
-      });
-
-      for (const tab of candidates) {
-        if (tab.id === undefined) continue;
-        switch (rule.action.type) {
-          case "close":
-            try {
-              await chrome.tabs.remove(tab.id);
-            } catch { /* ignore */ }
-            break;
-          case "discard":
-            try {
-              await chrome.tabs.discard(tab.id);
-            } catch { /* ignore */ }
-            break;
-          default:
-            break;
-        }
-      }
-    }
-  } catch (err) {
-    console.warn(`${SW_LOG_TAG} executeScheduledRules failed`, err);
-  }
-}
-
-/**
- * 执行事件触发型规则
- * 在 onCreated/onUpdated 事件中被调用
- */
-async function executeOnEventRules(
-  _eventType: "tabCreated" | "tabUpdated",
-  tab: chrome.tabs.Tab,
-): Promise<void> {
-  if (tab.id === undefined || !tab.url) return;
-  try {
-    const ruleData = await getAutomationRules();
-    const eventRules = ruleData.rules.filter(
-      (r) => r.enabled && r.condition.kind === "onEvent",
-    );
-    if (eventRules.length === 0) return;
-
-    for (const rule of eventRules) {
-      const cond = rule.condition as OnEventCondition;
-      if (!matchUrlPattern(tab.url, cond.urlPattern)) continue;
-
-      switch (rule.action.type) {
-        case "group": {
-          const groupId = await chrome.tabs.group?.({ tabIds: [tab.id] });
-          if (groupId !== undefined && rule.action.groupName) {
-            await chrome.tabGroups?.update?.(groupId, {
-              title: rule.action.groupName,
-              color: rule.action.color as
-                | "grey" | "blue" | "red" | "yellow" | "green"
-                | "pink" | "purple" | "cyan" | "orange"
-                | undefined,
-            });
-          }
-          break;
-        }
-        case "pin":
-          try { await chrome.tabs.update(tab.id, { pinned: true }); } catch { /* ignore */ }
-          break;
-        default:
-          break;
-      }
-    }
-  } catch (err) {
-    console.warn(`${SW_LOG_TAG} executeOnEventRules failed`, err);
-  }
-}
+// Automation Rule Engine → sw/automation-engine.ts (CODE-01 阶段2)
 
 // ── Lifecycle ─────────────────────────────────────────
 
@@ -931,151 +671,5 @@ self.addEventListener("activate", () => {
  * 当前已有每分钟一次的 heartbeat alarm 来定期刷盘。
  */
 
-// ── OG Fetcher（F-24） ────────────────────────────────
-// ogInFlight 已迁移到 chrome.storage.session，见 getOgInFlight/setOgInFlight 函数
-// 从 CONFIG 读取（支持运行时覆盖）
-const OG_CONCURRENCY = CONFIG.performance.ogConcurrency;
-const OG_TIMEOUT_MS = CONFIG.performance.ogTimeoutMs;
-const OG_MAX_BYTES = CONFIG.performance.ogMaxBytes;
-
-async function maybeFetchOg(url: string): Promise<void> {
-  try {
-    const settings = await getSettings();
-    if (settings.enableOgFetch !== true) return;
-
-    // 从 session storage 读取当前并发数
-    const result = await chrome.storage.session.get("ogInFlight");
-    const currentInFlight = (typeof result.ogInFlight === "number" ? result.ogInFlight : 0) ?? 0;
-    if (currentInFlight >= OG_CONCURRENCY) return;
-
-    // 已存在则跳过
-    const { getOgEntry, saveOgEntry } = await import("@/repositories");
-    const existing = await getOgEntry(url);
-    if (existing !== undefined && Date.now() - existing.fetchedAt < 7 * 86400_000) return;
-
-    // 增加并发计数
-    await chrome.storage.session.set({ ogInFlight: currentInFlight + 1 });
-    try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), OG_TIMEOUT_MS);
-      const resp = await fetch(url, {
-        method: "GET",
-        headers: { Range: `bytes=0-${OG_MAX_BYTES - 1}` },
-        signal: controller.signal,
-      });
-      clearTimeout(timer);
-      if (!resp.ok) return;
-      const text = await resp.text();
-
-      // 解析 meta description（避免 DOMParser 在 SW 不可用，这里用 regex）
-      const ogMatch =
-        /<meta[^>]+property\s*=\s*['"]og:description['"][^>]*content\s*=\s*['"]([^'"]*)['"]/i.exec(
-          text,
-        );
-      const descMatch =
-        /<meta[^>]+name\s*=\s*['"]description['"][^>]*content\s*=\s*['"]([^'"]*)['"]/i.exec(text);
-      const titleMatch = /<title>([^<]*)<\/title>/i.exec(text);
-      const description = (ogMatch?.[1] ?? descMatch?.[1] ?? "").slice(0, 500);
-      if (description === "") return;
-
-      await saveOgEntry({
-        url,
-        title: titleMatch?.[1]?.slice(0, 200) ?? "",
-        description,
-        fetchedAt: Date.now(),
-      });
-    } catch {
-      // 静默失败
-    } finally {
-      // 减少并发计数
-      const updated = await chrome.storage.session.get("ogInFlight");
-      const updatedValue = (typeof updated.ogInFlight === "number" ? updated.ogInFlight : 0) ?? 0;
-      await chrome.storage.session.set({ ogInFlight: Math.max(0, updatedValue - 1) });
-    }
-  } catch {
-    // 静默
-  }
-}
-
-// ── Trending Cache Refresh ──
-/**
- * 后台静默刷新热榜缓存
- *
- * 仅当存在缓存（说明用户使用过热榜功能）时才刷新，
- * 避免从未用过热榜的用户产生不必要的网络请求。
- */
-async function refreshTrendingCache(): Promise<void> {
-  try {
-    const { storageGet, storageSet } = await import("@/chrome");
-    const cache = await storageGet<Record<string, unknown>>(STORAGE_KEYS.trendingCache);
-    // 无缓存 → 用户从未用过热榜，跳过
-    if (!cache?.boards || typeof cache.boards !== "object") return;
-
-    const boards = cache.boards as Record<string, Record<string, unknown>>;
-    const boardIds = Object.keys(boards);
-    if (boardIds.length === 0) return;
-
-    // 使用小尘API刷新每个已缓存的平台
-    const FETCH_TIMEOUT_MS = 6000;
-    const MAX_ITEMS = 20;
-    const API_BASE = "https://api.xcvts.cn/api/hotlist";
-    const STAGGER_MS = 500;
-
-    for (const boardId of boardIds) {
-      try {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-        const resp = await fetch(`${API_BASE}?type=${encodeURIComponent(boardId)}`, {
-          signal: controller.signal,
-        });
-        clearTimeout(timer);
-
-        // 429 限流 → 停止后续请求，保留已有缓存
-        if (resp.status === 429) break;
-
-        if (!resp.ok) continue;
-        const json = (await resp.json()) as {
-          success?: boolean;
-          data?: Array<Record<string, unknown>>;
-          title?: string;
-          subtitle?: string;
-          update_time?: string;
-        };
-
-        if (json.success !== true || !Array.isArray(json.data)) continue;
-        if (json.data.length === 0) continue;
-
-        const items = json.data
-          .slice(0, MAX_ITEMS)
-          .map((raw) => ({
-            id: String(raw.index ?? raw.id ?? ""),
-            title: String(raw.title ?? ""),
-            desc: raw.desc ? String(raw.desc) : undefined,
-            pic: raw.pics ? String(raw.pics) : undefined,
-            hot: typeof raw.hot === "number" ? raw.hot : undefined,
-            hotLabel: typeof raw.hot === "string" ? raw.hot : undefined,
-            url: String(raw.url ?? ""),
-            mobileUrl: raw.mobilUrl ? String(raw.mobilUrl) : undefined,
-          }))
-          .filter((item: { title: string }) => item.title !== "");
-
-        (cache.boards as Record<string, unknown>)[boardId] = {
-          ...(boards[boardId] ?? {}),
-          items,
-          updateTime: json.update_time,
-          from: "xcvts",
-        };
-
-        // 请求间延迟，降低限流风险
-        await new Promise((r) => setTimeout(r, STAGGER_MS));
-      } catch {
-        // 单平台刷新失败不影响其他
-      }
-    }
-
-    cache.lastRefreshAt = Date.now();
-    await storageSet(STORAGE_KEYS.trendingCache, cache);
-  } catch (err) {
-    console.warn(`${SW_LOG_TAG} trending cache refresh failed`, err);
-  }
-}
+// OG Fetcher → sw/og-fetcher.ts (CODE-01)
+// Trending Cache Refresh → sw/trending-refresh.ts (CODE-01)

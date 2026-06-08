@@ -534,6 +534,9 @@ function AppContent() {
               >
                 <div
                   className={styles["app-quickstart-resize-handle"]}
+                  role="separator"
+                  tabIndex={0}
+                  aria-label="拖拽调整侧栏宽度"
                   onMouseDown={handleResizeMouseDown}
                 />
                 <QuickStartLayer
@@ -590,6 +593,9 @@ function AppContent() {
               >
                 <div
                   className={styles["app-quickstart-resize-handle"]}
+                  role="separator"
+                  tabIndex={0}
+                  aria-label="拖拽调整侧栏宽度"
                   onMouseDown={handleResizeMouseDown}
                 />
                 <QuickStartLayer

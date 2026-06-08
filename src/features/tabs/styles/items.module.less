@@ -20,10 +20,13 @@
 .app-domain-group-card {
   position: relative;
   width: 100%;
+  height: 100%;
   overflow: hidden;
   box-shadow: var(--app-shadow-card);
 
-  &__body { padding: 4px 0; }
+  &__body { padding: 4px 0; display: flex; flex-direction: column; }
+
+  :global(.ant-card-body) { flex: 1 1 auto; display: flex; flex-direction: column; }
 }
 
 // ── 装饰条 ──
@@ -171,8 +174,8 @@
   gap: 8px;
   align-items: center;
   width: 100%;
-  min-height: 36px;
-  padding: 2px var(--app-space-2);
+  min-height: 42px;
+  padding: 4px var(--app-space-2);
   cursor: pointer;
   outline: none;
   border-radius: var(--ant-border-radius-sm);
@@ -191,14 +194,15 @@
     transform: translate3d(-20px, 0, 0);
   }
 
-  &.has-url-hint { min-height: 52px; padding-block: 8px; }
+  // has-url-hint 不再使用不同的 min-height，让 URL 提示行在固定高度内用更小字体渲染
+  &.has-url-hint { /* min-height/padding 继承 .app-tab-item 默认值，不做差异化 */ }
   &.is-selected { background: var(--app-tab-selected-bg); }
   &.is-discarded { opacity: 0.5; }
 
   &.is-selected::before {
     position: absolute;
-    top: 8px;
-    bottom: 8px;
+    top: 6px;
+    bottom: 6px;
     left: 4px;
     width: 3px;
     content: "";
@@ -206,21 +210,21 @@
     border-radius: 2px;
   }
 
-  // ── url-hint 时 main 区加 gap ──
-  &.has-url-hint .app-tab-item-main { gap: 2px; }
+  // ── url-hint 时 main 区保持相同 gap ──
+  &.has-url-hint .app-tab-item-main { gap: 1px; }
 
   // ── 子元素 ──
   &-checkbox {
     flex-shrink: 0;
-    width: 0;
-    min-width: 0;
+    width: 18px;
+    min-width: 18px;
     padding: 0;
     margin: 0;
     overflow: hidden;
+    visibility: hidden;
     opacity: 0;
-    transition: width 0.18s ease, min-width 0.18s ease, margin 0.18s ease, opacity 0.18s ease;
 
-    &.is-visible { width: auto; min-width: unset; margin-right: -4px; opacity: 1; }
+    &.is-visible { visibility: visible; opacity: 1; }
   }
 
   &-favicon {
@@ -240,7 +244,7 @@
       border-radius: var(--app-radius-xs);
     }
 
-    &-icon { flex-shrink: 0; color: var(--app-tab-text-tertiary); }
+    &-icon { flex-shrink: 0; color: var(--app-tab-text-secondary); opacity: 0.7; }
   }
 
   &-secondary-icon,
@@ -251,11 +255,12 @@
     flex: 1 1 auto;
     flex-direction: column;
     justify-content: center;
-    min-width: 80px;
-    max-width: 60%;
+    min-width: 0;
+    min-height: 30px;
+    gap: 0;
   }
 
-  &-head { display: flex; gap: 4px; align-items: center; min-width: 0; }
+  &-head { display: flex; gap: 4px; align-items: center; min-width: 0; flex-wrap: nowrap; }
 
   &-title {
     flex: 0 1 auto;
@@ -264,21 +269,22 @@
     text-overflow: ellipsis;
     font-size: 12.5px;
     font-weight: 500;
-    line-height: 1.3;
+    line-height: 1.4;
     color: var(--app-tab-text);
     white-space: nowrap;
   }
 
   &-hostname,
-  &-url-hint { overflow: hidden; text-overflow: ellipsis; color: var(--app-tab-text-tertiary); white-space: nowrap; }
+  &-url-hint { overflow: hidden; text-overflow: ellipsis; color: var(--app-tab-text-tertiary); white-space: nowrap; font-size: 10.5px; line-height: 1.3; }
 
-  &-hostname { flex-shrink: 0; max-width: 100px; font-size: 11px; }
+  &-hostname { flex-shrink: 0; max-width: 80px; }
 
   &-url-hint {
     display: block;
     font-family: var(--ant-font-family-code, ui-monospace, monospace);
-    font-size: 11px;
-    line-height: 1.3;
+    font-size: 10px;
+    line-height: 1.2;
+    max-width: 100%;
   }
 
   &-tag {

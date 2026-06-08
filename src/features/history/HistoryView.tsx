@@ -345,7 +345,7 @@ export function HistoryView() {
             )
           ) : filteredEvents.length === 0 ? (
             <Empty
-              description={loading ? "..." : t("还没有任何历史记录")}
+              description={loading ? t("加载中…") : t("还没有任何历史记录")}
               image={Empty.PRESENTED_IMAGE_SIMPLE}
             >
               <div className={styles["history-empty-hint"]}>

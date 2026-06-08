@@ -54,7 +54,7 @@ export const HistoryEventItem = memo(
               {getEventDescription(e, t)}
             </Typography.Text>
             {e.title !== undefined && e.title !== "" && (
-              <Typography.Text className={styles["history-event-target"]} title={e.url}>
+              <Typography.Text className={styles["history-event-target"]} ellipsis={{ tooltip: e.url }}>
                 {e.title}
               </Typography.Text>
             )}

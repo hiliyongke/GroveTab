@@ -6,6 +6,7 @@
  */
 
 import { memo, useEffect, useMemo, useCallback } from "react";
+import { useShallow } from "zustand/shallow";
 import { useTabsStore, useStatsStore, useSettingsStore } from "@/store";
 import { useTabActions } from "@/shared/hooks/use-tab-actions";
 import { useT } from "@/shared/i18n";
@@ -13,7 +14,7 @@ import { findAmbiguousTitleIds } from "@/shared/utils/url-display";
 import { TabItem } from "../components/TabItem";
 import { Flame } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
-import { Tag, Flex, Typography, Tooltip } from "antd";
+import { Tag, Flex, Typography, Tooltip, Empty, Spin } from "antd";
 import { CONFIG } from "@/shared/config";
 import { STORAGE_KEYS } from "@/shared/config/storage-keys";
 import { storageOnChanged } from "@/chrome";
@@ -23,7 +24,7 @@ import styles from "../styles/views.module.less";
 const MAX_DISPLAY = CONFIG.ui.maxDisplay;
 
 export const FrequencyView = memo(function FrequencyView() {
-  const tabs = useTabsStore((s) => s.tabs);
+  const tabs = useTabsStore(useShallow((s) => s.tabs));
   const { jumpToTab, closeSingleTab } = useTabActions();
   const handleJump = useCallback((id: number, wid: number) => { void jumpToTab(id, wid); }, [jumpToTab]);
   const handleClose = useCallback((id: number) => { void closeSingleTab(id); }, [closeSingleTab]);
@@ -68,7 +69,7 @@ export const FrequencyView = memo(function FrequencyView() {
     [sortedTabs],
   );
 
-  if (tabs.length === 0) return null;
+  if (tabs.length === 0) return <Flex justify="center" style={{ padding: 48 }}><Empty description={t("暂无打开的标签页")} /></Flex>;
 
   return (
     <Flex vertical>
@@ -78,7 +79,7 @@ export const FrequencyView = memo(function FrequencyView() {
           {t("最常使用的 {count} 个标签页", { count: sortedTabs.length })}
         </Typography.Text>
         {isFallback && (
-          <Tag color="default" className={styles["app-frequency-rebuild-tag"]}>
+          <Tag color="default" icon={<Spin size="small" />} className={styles["app-frequency-rebuild-tag"]}>
             {t("数据重建中")}
           </Tag>
         )}

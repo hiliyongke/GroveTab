@@ -13,6 +13,7 @@ import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
 import { useTabsStore } from "@/store";
 import { createTab } from "@/chrome";
+import { isSafeExternalUrl } from "@/shared/utils/url-safety";
 import { feedback } from "@/shared/ui/feedback";
 
 interface ClipboardImportProps {
@@ -20,12 +21,7 @@ interface ClipboardImportProps {
 }
 
 function isValidUrl(str: string): boolean {
-  try {
-    const url = new URL(str);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
+  return isSafeExternalUrl(str);
 }
 
 function parseUrls(text: string): { valid: string[]; invalid: string[] } {

@@ -34,6 +34,7 @@ import {
   Columns2,
 } from "lucide-react";
 import { cssVars } from "@/shared/utils/css-vars";
+import { useShallow } from "zustand/shallow";
 import { useSelectionStore, useTabsStore } from "@/store";
 import { iconColor } from "@/shared/utils/icon-colors";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
@@ -63,7 +64,7 @@ export function BatchActionBar() {
   const exitSelectionMode = useSelectionStore((s) => s.exitSelectionMode);
   const closeMultipleTabs = useTabsStore((s) => s.closeMultipleTabs);
   const discardMultipleTabs = useTabsStore((s) => s.discardMultipleTabs);
-  const tabs = useTabsStore((s) => s.tabs);
+  const tabs = useTabsStore(useShallow((s) => s.tabs));
   const loadAllTabs = useTabsStore((s) => s.loadAllTabs);
   const { t } = useT();
   const { token } = theme.useToken();

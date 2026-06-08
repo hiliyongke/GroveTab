@@ -57,7 +57,7 @@ export const ClosedTabItem = memo(
           onClick={() => onRestore(rec)}
         >
           <Flex align="center" gap={6} className={styles["history-item-title"]}>
-            {rec.title || rec.url}
+            <Typography.Text ellipsis>{rec.title || rec.url}</Typography.Text>
           </Flex>
           <Flex align="center" gap={4} className={styles["history-item-subtitle"]}>
             <Typography.Text>{rec.hostname || rec.url}</Typography.Text>

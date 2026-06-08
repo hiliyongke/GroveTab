@@ -3,12 +3,13 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Modal, Typography, Tag, Divider, Flex, Input, Button } from "antd";
+import { Modal, Typography, Tag, Divider, Flex, Input, Button, Tooltip } from "antd";
 import type { InputRef } from "antd";
 import { Search, LayoutGrid, Settings, Monitor, X, Globe, Zap } from "lucide-react";
 import { useCommandSearch, type SearchResult } from "./use-command-search";
 import type { CommandDef, CommandCategory } from "./command-registry";
 import { usePanelStackStore } from "@/shared/panels/panel-stack-store";
+import { useShallow } from "zustand/shallow";
 import { useTabsStore } from "@/store";
 import { useT } from "@/shared/i18n";
 import styles from "./CommandPalette.module.less";
@@ -61,7 +62,7 @@ export function CommandPalette() {
   const { t } = useT();
 
   // ── 全局搜索：搜索所有标签页 ──────────────────────────────────────────────
-  const tabs = useTabsStore((s) => s.tabs);
+  const tabs = useTabsStore(useShallow((s) => s.tabs));
   const tabResults: TabSearchResult[] = (() => {
     if (mode !== "search" || !query.trim()) return [];
     const q = query.toLowerCase();
@@ -204,13 +205,15 @@ export function CommandPalette() {
           className={styles["command-palette__input"]}
         />
         {/* 模式指示器 */}
-        <Tag
-          color={mode === "command" ? "blue" : "green"}
-          className={styles["command-palette__mode-tag"]}
-          onClick={() => setMode((m) => (m === "command" ? "search" : "command"))}
-        >
-          {mode === "command" ? t("命令") : t("搜索")}
-        </Tag>
+        <Tooltip title={t("点击或按 Tab 切换模式")}>
+          <Tag
+            color={mode === "command" ? "blue" : "green"}
+            className={styles["command-palette__mode-tag"]}
+            onClick={() => setMode((m) => (m === "command" ? "search" : "command"))}
+          >
+            {mode === "command" ? t("命令") : t("搜索")}
+          </Tag>
+        </Tooltip>
         {query && (
           <Button
             type="text"

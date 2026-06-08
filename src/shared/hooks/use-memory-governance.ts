@@ -12,6 +12,7 @@
 
 import { useEffect, useRef, useCallback } from "react";
 import { useSettingsStore } from "@/store/settings-slice";
+import { useShallow } from "zustand/shallow";
 import { useTabsStore } from "@/store/tabs-slice";
 import { feedback } from "@/shared/ui/feedback";
 import { translate } from "@/shared/i18n/core";
@@ -72,7 +73,7 @@ function getCandidateTabs(tabs: LiveTab[], allowlist: string[], maxTabs: number)
 
 export function useMemoryGovernance() {
   const settings = useSettingsStore((s) => s.settings);
-  const tabs = useTabsStore((s) => s.tabs);
+  const tabs = useTabsStore(useShallow((s) => s.tabs));
   const discardMultipleTabs = useTabsStore((s) => s.discardMultipleTabs);
   const lastActionAt = useRef<number>(0);
 

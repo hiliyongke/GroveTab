@@ -15,6 +15,7 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { Alert, Button, List, Space, Tag, Tooltip, Typography, Flex } from "antd";
 import { ChevronDown, X, Merge, Moon, Zap } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useShallow } from "zustand/shallow";
 import { useTabsStore, useSettingsStore } from "@/store";
 import { findDuplicates, type DupGroup } from "@/shared/utils/dedupe";
 import { detectIdleTabs, formatIdleTime, type IdleTabInfo } from "@/shared/utils/idle-detect";
@@ -36,7 +37,7 @@ interface TidySuggestionBarProps {
 }
 
 export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) {
-  const tabs = useTabsStore((s) => s.tabs);
+  const tabs = useTabsStore(useShallow((s) => s.tabs));
   const closeMultipleTabs = useTabsStore((s) => s.closeMultipleTabs);
   const discardMultipleTabs = useTabsStore((s) => s.discardMultipleTabs);
   const loadAllTabs = useTabsStore((s) => s.loadAllTabs);

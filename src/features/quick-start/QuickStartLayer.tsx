@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { Button, Tooltip, Typography } from "antd";
+import { Button, Tooltip, Typography, Flex, Spin } from "antd";
 import { Plus, Settings2, PanelLeft, ArrowLeftRight, GripVertical, Layers } from "lucide-react";
 import { useSpeedDialStore, useSettingsStore } from "@/store";
 import { useT } from "@/shared/i18n";
@@ -59,6 +59,7 @@ export function QuickStartLayer({ onOpenSettings, variant = "default" }: QuickSt
   }, [sites]);
 
   if (!quickStartVisible) return null;
+  if (!loaded) return <Flex justify="center" style={{ padding: 16 }}><Spin size="small" /></Flex>;
 
   if (variant === "sidebar") {
     return (
@@ -147,7 +148,7 @@ function SidebarSiteButton({ site, onRemove }: {
           if (e.button === 1) { e.preventDefault(); onRemove(site.id); }
         }}
       >
-        <span className={styles["sidebar-drag-handle"]} {...attributes} {...listeners}>
+        <span className={styles["sidebar-drag-handle"]} {...attributes} {...listeners} role="button" tabIndex={0} aria-label="拖拽排序">
           <GripVertical size={10} />
         </span>
         {favicon ? (

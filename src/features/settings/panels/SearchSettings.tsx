@@ -310,6 +310,7 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
                 feedback.success(t("最近搜索已清空"));
               } catch (err) {
                 console.error("[SearchSettings] clearSearchHistory failed:", err);
+                feedback.error(t("清空失败"));
               }
             })();
           }}

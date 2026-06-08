@@ -994,7 +994,11 @@
   }
 
   &-column {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
     min-height: 400px;
+    overflow: hidden;
     background: var(--app-kanban-column-bg);
     border: 1px solid var(--app-kanban-border);
     border-radius: var(--app-card-radius, 12px);

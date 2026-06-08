@@ -129,15 +129,17 @@ export function BookmarkToolbar({
             onClick={onAddFolder}
           />
         </Tooltip>
-        <Dropdown menu={{ items: sortItems }} trigger={["click"]}>
-          <Button
-            size="small"
-            aria-label={t("排序")}
-            className={sortMode === "default" ? "bookmark-toolbar__sort--default" : "bookmark-toolbar__sort--active"}
-          >
-            {t("排序")}
-          </Button>
-        </Dropdown>
+        <Tooltip title={t("排序方式")}>
+          <Dropdown menu={{ items: sortItems }} trigger={["click"]}>
+            <Button
+              size="small"
+              aria-label={t("排序")}
+              className={sortMode === "default" ? "bookmark-toolbar__sort--default" : "bookmark-toolbar__sort--active"}
+            >
+              {t("排序")}
+            </Button>
+          </Dropdown>
+        </Tooltip>
         <Dropdown menu={{ items: exportItems }} trigger={["click"]}>
           <Tooltip title={t("导出")}>
             <Button size="small" icon={<Download size={ICON_SIZE.SMALL} />} aria-label={t("导出")} />
@@ -161,14 +163,16 @@ export function BookmarkToolbar({
           </Tooltip>
         </Upload>
         {showSelection && (
-          <Button
-            size="small"
-            type={selectionMode ? "primary" : "default"}
-            onClick={onToggleSelection}
-            aria-pressed={selectionMode}
-          >
-            {t("多选")}
-          </Button>
+          <Tooltip title={selectionMode ? t("退出多选") : t("进入多选模式")}>
+            <Button
+              size="small"
+              type={selectionMode ? "primary" : "default"}
+              onClick={onToggleSelection}
+              aria-pressed={selectionMode}
+            >
+              {t("多选")}
+            </Button>
+          </Tooltip>
         )}
         <Dropdown menu={{ items: toolItems }} trigger={["click"]}>
           <Tooltip title={t("工具")}>

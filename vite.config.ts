@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+import type { Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import purgeCss from "vite-plugin-purgecss";
 import { resolve, dirname } from "node:path";
@@ -26,6 +27,83 @@ const BUILD_BRAND = {
     en: "GroveTab — where your tabs find their place. Auto-grouping, instant search, archive & 100% local.",
   },
 } as const;
+
+/**
+ * Vite plugin: lucide-react tree-shaking via subpath imports.
+ *
+ * Barrel imports like `import { X, Search } from "lucide-react"` are transformed
+ * into subpath imports at build time, avoiding the 220KB barrel and achieving
+ * per-icon tree-shaking (~607KB → ~50KB in final bundle).
+ * Type-only imports are left untouched — they don't affect bundle size.
+ */
+function camelToKebab(name: string): string {
+  // Some sources use "BookmarkIcon" / "SearchIcon" as alias-like names.
+  // The actual lucide icons don't have the "Icon" suffix; strip and retry.
+  let iconName = name;
+  if (name.endsWith("Icon") && name !== "Icon") {
+    iconName = name.slice(0, -4);
+  }
+  return iconName
+    .replace(/([a-z])([A-Z])/g, "$1-$2")       // aA → a-A
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1-$2")  // XCircle → X-Circle
+    .replace(/([a-zA-Z])([0-9])/g, "$1-$2")      // a2 → a-2
+    .toLowerCase();
+}
+
+function lucidePreprocessPlugin(): Plugin {
+  const SUBPATH_PREFIX = "lucide-react/dist/esm/icons/";
+
+  return {
+    name: "lucide-preprocess",
+    enforce: "pre",
+
+    transform(code, id) {
+      if (!id.includes("/src/")) return null;
+      if (!code.includes('"lucide-react"') && !code.includes("'lucide-react'")) return null;
+
+      const re =
+        /import\s+(type\s+)?\{([^}]+)\}\s+from\s+["']lucide-react["'];?/g;
+
+      let transformed = code;
+      let hasChanges = false;
+
+      transformed = transformed.replace(re, (_match, typePrefix, specifiers: string) => {
+        if (typePrefix?.trim() === "type") return _match;
+
+        const parts: string[] = [];
+        const specs = specifiers
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+
+        for (const spec of specs) {
+          // "A as B" alias: import { Tag as TagIcon } → import TagIcon from "...tag.js"
+          const asMatch = spec.match(/^(\w+)\s+as\s+(\w+)$/);
+          if (asMatch) {
+            const [, origName, alias] = asMatch;
+            const kebabName = camelToKebab(origName);
+            parts.push(
+              `import ${alias} from "${SUBPATH_PREFIX}${kebabName}.js";`,
+            );
+          } else {
+            const iconName = spec.trim();
+            if (!iconName || iconName.startsWith("type ")) continue;
+            const kebabName = camelToKebab(iconName);
+            parts.push(
+              `import ${iconName} from "${SUBPATH_PREFIX}${kebabName}.js";`,
+            );
+          }
+        }
+
+        if (parts.length === 0) return "";
+        hasChanges = true;
+        return parts.join("\n");
+      });
+
+      return hasChanges ? transformed : null;
+    },
+  };
+}
 
 function pickLocaleField<T>(field: Record<string, T>, locale: string, fallback = "en"): T {
   if (field[locale] !== undefined) return field[locale];
@@ -196,6 +274,7 @@ const enableReport = process.env.VITE_REPORT === "true";
 export default defineConfig({
   plugins: [
     react(),
+    lucidePreprocessPlugin(),
     chromeExtensionPlugin(),
     purgeCss({
       content: ["./src/**/*.{tsx,ts}"],

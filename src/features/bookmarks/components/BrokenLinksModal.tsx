@@ -208,7 +208,7 @@ export function BrokenLinksModal({
 
       {/* ── 初始状态：未开始 ── */}
       {!running && partialResults.length === 0 && (
-        <Flex vertical align="center" gap={8} className="bookmark-broken-modal__idle">
+        <Flex vertical align="center" gap={12} className="bookmark-broken-modal__idle">
           <Play size={ICON_SIZE.LARGE} className="bookmark-broken-modal__idle-icon" />
           <Typography.Text>{t("准备开始检测")}</Typography.Text>
           <Typography.Text type="secondary">

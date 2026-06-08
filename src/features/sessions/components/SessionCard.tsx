@@ -172,7 +172,7 @@ export function SessionCard({
       </Flex>
 
       {/* 标题 + 描述 */}
-      <Typography.Text className={styles["archive-card__title"]}>
+      <Typography.Text className={styles["archive-card__title"]} ellipsis={{ tooltip: session.name }}>
         {highlightText(session.name)}
       </Typography.Text>
       <Flex align="center" gap={4} className={styles["archive-card__meta"]}>
@@ -220,10 +220,10 @@ export function SessionCard({
                     <span className={styles["archive-card__tab-favicon-placeholder"]} />
                   )}
                   <Flex vertical className={styles["archive-card__tab-text"]}>
-                    <Typography.Text className={styles["archive-card__tab-title"]}>
+                    <Typography.Text className={styles["archive-card__tab-title"]} ellipsis>
                       {highlightText(tab.title || tab.url)}
                     </Typography.Text>
-                    <Typography.Text className={styles["archive-card__tab-host"]}>
+                    <Typography.Text className={styles["archive-card__tab-host"]} ellipsis>
                       {highlightText(tab.hostname || tab.url)}
                     </Typography.Text>
                   </Flex>

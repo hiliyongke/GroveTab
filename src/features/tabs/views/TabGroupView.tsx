@@ -28,6 +28,7 @@ import {
   type DragEndEvent,
   closestCorners,
 } from "@dnd-kit/core";
+import { useShallow } from "zustand/shallow";
 import { useTabsStore, useSettingsStore } from "@/store";
 import { useTabActions } from "@/shared/hooks/use-tab-actions";
 import type { ChromeTabGroupColor } from "@/chrome";
@@ -216,7 +217,7 @@ function VirtualColumn({
  */
 export const TabGroupView = memo(function TabGroupView() {
   const { t } = useT();
-  const tabs = useTabsStore((s) => s.tabs);
+  const tabs = useTabsStore(useShallow((s) => s.tabs));
   const { jumpToTab, closeSingleTab } = useTabActions();
   const handleJump = useCallback((id: number, wid: number) => { void jumpToTab(id, wid); }, [jumpToTab]);
   const handleClose = useCallback((id: number) => { void closeSingleTab(id); }, [closeSingleTab]);
@@ -387,7 +388,7 @@ export const TabGroupView = memo(function TabGroupView() {
           filterQuery={filterQuery}
           onFilterChange={setFilterQuery}
         />
-        {sortedGroups.length === 0 ? null : (
+        {sortedGroups.length === 0 ? <Flex justify="center" style={{ padding: 48 }}><Empty description={t("暂无标签组")} /></Flex> : (
           <div
             ref={containerRef}
             className={styles["app-domain-masonry"]}

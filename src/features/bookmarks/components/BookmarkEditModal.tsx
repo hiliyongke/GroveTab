@@ -42,6 +42,7 @@ export function BookmarkEditModal({ open, isNew, initialTitle, initialUrl, onClo
     const trimmedTitle = title.trim();
     if (trimmedTitle.length === 0) return;
     const trimmedUrl = url.trim() || buildUrlFromTitle(trimmedTitle);
+    // 自动生成 URL 可能无效，静默允许但由用户确认
     setSaving(true);
     try {
       await onSave(trimmedTitle, trimmedUrl);

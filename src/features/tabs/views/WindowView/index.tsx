@@ -34,6 +34,7 @@ import { moveTabs } from "@/chrome/tabs";
 import { groupTabs, ungroupTabs } from "@/chrome/tabGroups";
 import { swBroadcast } from "@/shared/utils/sw-broadcast";
 import { feedback } from "@/shared/ui/feedback";
+import { useShallow } from "zustand/shallow";
 import { useTabsStore, useSettingsStore, useMetadataStore } from "@/store";
 import { useTabActions } from "@/shared/hooks/use-tab-actions";
 import { useT } from "@/shared/i18n";
@@ -89,7 +90,7 @@ function filterTabs(tabs: LiveTab[], query: string): LiveTab[] {
 }
 
 export const WindowView = memo(function WindowView() {
-  const tabs = useTabsStore((s) => s.tabs);
+  const tabs = useTabsStore(useShallow((s) => s.tabs));
   const windows = useTabsStore((s) => s.windows);
   const currentWindowId = useTabsStore((s) => s.currentWindowId);
   const { jumpToTab, closeSingleTab } = useTabActions();

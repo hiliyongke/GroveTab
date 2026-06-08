@@ -12,9 +12,10 @@ import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
 import { useFeatureFlagStore } from "@/shared/store/feature-flag-slice";
 import { feedback } from "@/shared/ui/feedback";
-import { getTrashItems, removeFromTrash, clearTrash } from "@/repositories/trash-repo";
+import { getTrashItems, removeFromTrash, clearTrashWithSnapshot, bulkRestoreTrash } from "@/repositories/trash-repo";
 import { createTab } from "@/chrome";
 import type { TrashedTab, TrashedItem } from "@/shared/types";
+import type { ArchivedSession } from "@/shared/types";
 import { formatRelativeTime } from "@/shared/utils/relative-time";
 import styles from "./styles/trash.module.less";
 
@@ -40,6 +41,7 @@ export function TrashView() {
   const [items, setItems] = useState<TrashedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showMoreIds, setShowMoreIds] = useState<Set<string>>(new Set());
+  const [undoSnapshot, setUndoSnapshot] = useState<ArchivedSession[] | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -85,13 +87,32 @@ export function TrashView() {
 
   const handleClearAll = useCallback(async () => {
     try {
-      await clearTrash();
+      const snapshot = await clearTrashWithSnapshot();
       await refresh();
-      feedback.success(t("回收站已清空"));
+      if (snapshot.length > 0) {
+        feedback.success(t("回收站已清空"));
+        setUndoSnapshot(snapshot);
+        // 8 秒后自动清除撤销入口
+        setTimeout(() => setUndoSnapshot(null), 8000);
+      } else {
+        feedback.info(t("回收站为空"));
+      }
     } catch (err) {
       feedback.error(t("清空失败"), err);
     }
   }, [refresh, t]);
+
+  const handleUndoClear = useCallback(async () => {
+    if (!undoSnapshot || undoSnapshot.length === 0) return;
+    try {
+      await bulkRestoreTrash(undoSnapshot);
+      feedback.success(t("已恢复 {n} 个回收项", { n: undoSnapshot.length }));
+      setUndoSnapshot(null);
+      await refresh();
+    } catch {
+      feedback.error(t("恢复失败"));
+    }
+  }, [undoSnapshot, refresh, t]);
 
   const totalTabs = items.reduce((sum, item) => sum + item.tabs.length, 0);
 
@@ -117,7 +138,7 @@ export function TrashView() {
             </Typography.Text>
             <Popconfirm
               title={t("确认清空回收站")}
-              description={t("清空后不可恢复，确定要清空吗？")}
+              description={t("清空后可撤销，确定要清空吗？")}
               onConfirm={() => void handleClearAll()}
               okText={t("清空回收站")}
               cancelText={t("取消")}
@@ -128,6 +149,16 @@ export function TrashView() {
               </Button>
             </Popconfirm>
           </Flex>
+
+          {/* 撤销清空提示 */}
+          {undoSnapshot && (
+            <div className={styles["trash-undo-bar"]}>
+              <Typography.Text>{t("回收站已清空")}</Typography.Text>
+              <Button size="small" onClick={() => void handleUndoClear()}>
+                {t("撤销")}
+              </Button>
+            </div>
+          )}
 
           {/* 分组卡片列表 */}
           {items.map((item) => (

@@ -6,7 +6,7 @@
  */
 
 import styles from "./QuickStartLayer.module.less";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 import { Card, Dropdown, Image } from "antd";
 import type { MenuProps } from "antd";
 import { GripVertical, Pencil, Trash2, ExternalLink, MoreHorizontal } from "lucide-react";
@@ -16,6 +16,7 @@ import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useAccent } from "@/shared/hooks/use-accent";
 import type { SpeedDialSite } from "@/shared/types";
 import { getHostname, getInitial, getFaviconUrl } from "./utils/siteUtils";
+import { isSafeExternalUrl } from "@/shared/utils/url-safety";
 import type { DraggableAttributes } from "@dnd-kit/core";
 
 interface SiteCardProps {
@@ -46,6 +47,7 @@ export function SiteCard({
 
   const hostname = useMemo(() => getHostname(site.url), [site.url]);
   const faviconUrl = useMemo(() => getFaviconUrl(site), [site]);
+  useEffect(() => { setFaviconError(false); }, [faviconUrl]);
 
   /** 从 favicon 提取主色 */
   const accent = useAccent(faviconUrl, hostname);
@@ -53,6 +55,7 @@ export function SiteCard({
 
   /** 打开网站 */
   const openSite = useCallback(() => {
+    if (!isSafeExternalUrl(site.url)) return;
     if (typeof chrome !== "undefined" && chrome.tabs) {
       void chrome.tabs.create({ url: site.url });
     } else {
@@ -117,7 +120,7 @@ export function SiteCard({
       >
         {/* 拖拽手柄 —— 只有绑定了 dragListeners 时才可拖拽 */}
         {dragListeners && (
-          <div {...dragListeners} {...dragAttributes} className={styles["speed-dial-drag-handle"]}>
+          <div {...dragListeners} {...dragAttributes} className={styles["speed-dial-drag-handle"]} role="button" tabIndex={0} aria-label="拖拽排序">
             <GripVertical size={ICON_SIZE.SMALL} className={styles["speed-dial-drag-icon"]} />
           </div>
         )}

@@ -14,6 +14,7 @@ import { Flex, Select, Segmented, Switch } from "antd";
 
 import type { UserSettings } from "@/shared/types";
 import { useT } from "@/shared/i18n";
+import { feedback } from "@/shared/ui/feedback";
 import { Field } from "@/features/settings/components/Field";
 import { BRAND } from "@/shared/config/brand";
 import { CLOSE_CONFIRM_THRESHOLD } from "@/shared/types/settings";
@@ -141,6 +142,7 @@ export function GeneralSettings({ settings, updateSettings }: GeneralSettingsPro
               // 申请 <all_urls> 权限；用户拒绝则不打开
               if (typeof chrome !== "undefined" && chrome.permissions !== undefined) {
                 void chrome.permissions.request({ origins: ["<all_urls>"] }).then((granted) => {
+                  if (!granted) feedback.info(t("需要授权才能启用 OG 抓取"));
                   handleSetting({ enableOgFetch: granted });
                 });
               } else {

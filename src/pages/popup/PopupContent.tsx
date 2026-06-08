@@ -12,6 +12,8 @@ import {
   Popconfirm,
   Tooltip,
   Typography,
+  Flex,
+  Spin,
 } from "antd";
 import {
   LayoutGrid,
@@ -100,6 +102,7 @@ export function PopupContent() {
       setLoaded(true);
     } catch (err) {
       console.warn(`${BRAND.logTag}/popup query tabs failed`, err);
+      setLoaded(true); // 标记已尝试加载，显示空状态而非永久 loading
     }
   }, []);
 
@@ -521,7 +524,7 @@ export function PopupContent() {
         {displayTabs.length === 0 ? (
           <div className="popup-list-empty">
             {!loaded ? (
-              <Text type="secondary" className="popup-empty-text">{t("加载中…")}</Text>
+              <Flex vertical align="center" gap={8}><Spin size="small" /><Text type="secondary" className="popup-empty-text">{t("加载中…")}</Text></Flex>
             ) : (
               <Empty
                 image={Empty.PRESENTED_IMAGE_SIMPLE}

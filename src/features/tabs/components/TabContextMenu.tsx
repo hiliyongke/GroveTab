@@ -261,7 +261,7 @@ export function TabContextMenu({
 
         {/* 已有 tags */}
         {tags.length > 0 && (
-          <Flex wrap="wrap" gap="small" className={styles["app-tab-context-menu__tag-list"]}>
+          <Flex wrap="wrap" gap="small" className={styles["app-tab-context-menu__tag-list"]} style={{ maxHeight: 120, overflowY: "auto" }}>
             {tags.map((tag) => (
               <Tag
                 key={tag}

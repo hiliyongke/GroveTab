@@ -14,6 +14,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { Flex, Empty, Segmented, Tooltip, Typography } from "antd";
 import { Clock, TrendingUp, Timer, ArrowUpDown, Globe, Type } from "lucide-react";
 import { cssVars } from "@/shared/utils/css-vars";
+import { useShallow } from "zustand/shallow";
 import { useTabsStore, useSmartSortStore } from "@/store";
 import { useTabActions } from "@/shared/hooks/use-tab-actions";
 import { useT } from "@/shared/i18n";
@@ -86,7 +87,7 @@ async function buildFocusTimeMap(): Promise<Map<string, number>> {
  */
 export const CompactView = memo(function CompactView({ filterQuery = "" }: CompactViewProps) {
   const { t } = useT();
-  const tabs = useTabsStore((s) => s.tabs);
+  const tabs = useTabsStore(useShallow((s) => s.tabs));
   const { jumpToTab, closeSingleTab } = useTabActions();
 
   const sortRules = useMemo(
@@ -236,7 +237,7 @@ export const CompactView = memo(function CompactView({ filterQuery = "" }: Compa
   const spacerStyle = { height: virtualizer.getTotalSize() };
 
   if (sortedTabs.length === 0) {
-    return <Empty description={t("未找到匹配的域名")} />;
+    return <Empty description={t("未找到匹配的标签页")} />;
   }
 
   return (

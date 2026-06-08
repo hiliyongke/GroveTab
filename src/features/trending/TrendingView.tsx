@@ -41,6 +41,7 @@ import { feedback } from "@/shared/ui/feedback";
 import { useT } from "@/shared/i18n";
 import { FeatureEmptyState } from "@/shared/ui/FeatureEmptyState";
 import { createTab } from "@/chrome";
+import { isSafeExternalUrl } from "@/shared/utils/url-safety";
 import { createBookmark } from "@/chrome/bookmarks";
 import type {
   TrendingGroupMode,
@@ -213,11 +214,15 @@ function TrendingListItem({
     <Tooltip title={item.title} placement="topLeft" mouseEnterDelay={0.6}>
       <div className={styles["trending-list-item"]}>
         <a
-          href={item.url}
+          href={isSafeExternalUrl(item.url) ? item.url : "#"}
           target="_blank"
           rel="noopener noreferrer"
           className={styles["trending-list-item__link"]}
-          onClick={() => {
+          onClick={(e) => {
+            if (!isSafeExternalUrl(item.url)) {
+              e.preventDefault();
+              return;
+            }
             void recordInterestSignal(item.url, "click");
           }}
         >
@@ -510,6 +515,10 @@ export function TrendingView() {
   /** 加入稍后阅读（新建标签页后台打开） */
   const handleReadLaterItem = useCallback(
     async (item: HotBoardData["items"][0]) => {
+      if (!isSafeExternalUrl(item.url)) {
+        void feedback.warning(t("不安全的链接，已拦截"));
+        return;
+      }
       await recordInterestSignal(item.url, "save");
       setSignals(await getInterestSignals());
       try {

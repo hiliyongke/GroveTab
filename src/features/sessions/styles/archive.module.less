@@ -192,6 +192,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
+  align-items: stretch;
 }
 
 .archive-stat-card {
@@ -327,11 +328,14 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 12px;
+  align-items: stretch;
 }
 
 /* ─── Session Card ─── */
 .archive-card {
   position: relative;
+  display: flex;
+  height: 100%;
   .archive-card-base();
   flex-direction: column;
   gap: 10px;

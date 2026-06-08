@@ -19,9 +19,10 @@
  */
 
 import { memo, useMemo, useState, useCallback } from "react";
-import { Timeline, Button, theme, Flex, Typography, Space } from "antd";
+import { Timeline, Button, theme, Flex, Typography, Space, Empty } from "antd";
 import { ChevronDown } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useShallow } from "zustand/shallow";
 import { useTabsStore, useSettingsStore } from "@/store";
 import { useTabActions } from "@/shared/hooks/use-tab-actions";
 import { useT } from "@/shared/i18n";
@@ -338,7 +339,7 @@ function SegmentContent({
  * 时间轴视图（主组件）
  */
 export const TimelineView = memo(function TimelineView() {
-  const tabs = useTabsStore((s) => s.tabs);
+  const tabs = useTabsStore(useShallow((s) => s.tabs));
   /**
    * 读取粒度设置。
    *
@@ -353,7 +354,7 @@ export const TimelineView = memo(function TimelineView() {
 
   const segments = useMemo(() => getTimeSegments(tabs, granularity, t), [tabs, granularity, t]);
 
-  if (tabs.length === 0) return null;
+  if (tabs.length === 0) return <Flex justify="center" style={{ padding: 48 }}><Empty description={t("暂无打开的标签页")} /></Flex>;
 
   /**
    * dot 颜色分配：越靠前越亮（= 越新）

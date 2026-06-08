@@ -22,6 +22,7 @@ import { memo, useMemo, useState, useCallback } from "react";
 import { Button, Card, Flex, Popover, theme, Typography, Empty } from "antd";
 import { Volume2, X } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useShallow } from "zustand/shallow";
 import { useTabsStore, useSettingsStore } from "@/store";
 import { useTabActions } from "@/shared/hooks/use-tab-actions";
 import { useT } from "@/shared/i18n";
@@ -41,7 +42,7 @@ interface GridViewProps {
  * 网格视图主组件：每个域名一张大卡片
  */
 export function GridView({ filterQuery = "" }: GridViewProps) {
-  const tabs = useTabsStore((s) => s.tabs);
+  const tabs = useTabsStore(useShallow((s) => s.tabs));
   const { jumpToTab, closeSingleTab } = useTabActions();
   /**
    * 展开触发方式（点击 / 悬停）。默认 click——保持「需要确认动作」的稳重交互；
@@ -103,7 +104,7 @@ export function GridView({ filterQuery = "" }: GridViewProps) {
 
   // 空状态：原始 tabs 为空时不渲染；过滤后为空时显示 Empty
   const allTabsEmpty = tabs.length === 0;
-  if (allTabsEmpty) return <Empty description={t("暂无打开的标签页")} />;
+  if (allTabsEmpty) return <Flex justify="center" style={{ padding: 48 }}><Empty description={t("暂无打开的标签页")} /></Flex>;
 
   if (groups.length === 0) {
     return <Empty description={t("未找到匹配的域名")} />;

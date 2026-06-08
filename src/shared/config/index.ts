@@ -38,6 +38,8 @@ interface PerformanceConfig {
   maxParticles: number;
   /** 搜索防抖延迟（ms） */
   searchDebounceMs: number;
+  /** 自动快照最小标签数 */
+  autoSnapshotMinTabs: number;
 }
 
 interface UiConfig {
@@ -155,11 +157,12 @@ export const CONFIG: AppConfig = {
     statsRetainDays: 30,
     ogConcurrency: 5,
     ogTimeoutMs: 3_000,
-    ogMaxBytes: 50 * 1024,
+    ogMaxBytes: 8 * 1024,
     healthTimeoutMs: 6_000,
     healthConcurrency: 5,
     maxParticles: 150,
     searchDebounceMs: 180,
+    autoSnapshotMinTabs: 10,
   },
 
   ui: {

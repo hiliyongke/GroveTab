@@ -1,5 +1,5 @@
 import { memo, useEffect, useMemo, useState } from "react";
-import { Button, Card, Input, Popconfirm, theme, Typography, Flex, Empty } from "antd";
+import { Button, Card, Input, Popconfirm, theme, Typography, Flex, Empty, Spin } from "antd";
 import { Plus, Trash2, Save, PenLine, X, GripVertical } from "lucide-react";
 import { cssVars } from "@/shared/utils/css-vars";
 import { feedback } from "@/shared/ui/feedback";
@@ -26,6 +26,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { KanbanCard, KanbanColumn } from "@/shared/types";
+import { useShallow } from "zustand/shallow";
 import { useKanbanStore, useTabsStore } from "@/store";
 import { useTabActions } from "@/shared/hooks/use-tab-actions";
 import { archiveSelectedTabs } from "@/services";
@@ -58,7 +59,7 @@ export const KanbanView = memo(function KanbanView() {
   const moveCard = useKanbanStore((s) => s.moveCard);
   const reorderCard = useKanbanStore((s) => s.reorderCard);
   const reorderColumns = useKanbanStore((s) => s.reorderColumns);
-  const tabs = useTabsStore((s) => s.tabs);
+  const tabs = useTabsStore(useShallow((s) => s.tabs));
   const reduced = useReducedMotionPreference();
 
   useEffect(() => {
@@ -190,11 +191,13 @@ export const KanbanView = memo(function KanbanView() {
     }
   };
 
+  if (!loaded) {
+    return <Flex justify="center" align="center" style={{ padding: 48 }}><Spin /></Flex>;
+  }
   if (tabs.length === 0) {
     return (
       <Empty
         description={t("没有打开的标签页")}
-        className={styles["app-window-empty"]}
       />
     );
   }
@@ -207,7 +210,7 @@ export const KanbanView = memo(function KanbanView() {
       onDragEnd={(e) => void onDragEnd(e)}
       onDragCancel={() => setActive(null)}
     >
-      <Flex align="flex-start" gap="small" className={`${styles["app-kanban-theme"]} ${styles["app-kanban-view"]}`} style={kanbanThemeStyle}>
+      <Flex align="stretch" gap="small" className={`${styles["app-kanban-theme"]} ${styles["app-kanban-view"]}`} style={kanbanThemeStyle}>
           {/* 左侧：实时 Tab 源栏 —— 只作为拖出源，不是排序目标 */}
           <Flex vertical gap={0} className={styles["app-kanban-source"]}>
             <Typography.Text className={styles["app-kanban-source__title"]}>

@@ -166,12 +166,15 @@
   flex-shrink: 0;
   justify-content: center;
   font-variant-numeric: tabular-nums;
+  // 统一容器尺寸，避免列表项因徽章尺寸差异导致对齐偏移
+  width: 22px;
+  height: 22px;
 
-  &.is-top { width: 22px; height: 22px; font-size: 11px; font-weight: 700; color: var(--ant-color-text-inverse, #ffffff); border-radius: var(--app-radius-sm); }
-  &.is-rank-1 { width: 24px; height: 24px; font-size: 12px; background: var(--ant-color-error); box-shadow: 0 2px 6px color-mix(in srgb, var(--ant-color-error, #ff4d4f) 35%, transparent); }
+  &.is-top { font-size: 11px; font-weight: 700; color: var(--ant-color-text-inverse, #ffffff); border-radius: var(--app-radius-sm); }
+  &.is-rank-1 { font-size: 12px; background: var(--ant-color-error); box-shadow: 0 2px 6px color-mix(in srgb, var(--ant-color-error, #ff4d4f) 35%, transparent); }
   &.is-rank-2 { background: var(--ant-color-gold, #faad14); }
   &.is-rank-3 { background: var(--ant-color-gold-active, #d48806); }
-  &.is-plain { min-width: 20px; padding: 2px 6px; font-size: 11px; font-weight: 600; color: var(--ant-color-text-tertiary); text-align: center; background: var(--ant-color-fill-quaternary); border-radius: var(--app-radius-sm); }
+  &.is-plain { min-width: 22px; padding: 0 4px; font-size: 11px; font-weight: 600; color: var(--ant-color-text-tertiary); text-align: center; background: var(--ant-color-fill-quaternary); border-radius: var(--app-radius-sm); }
 }
 
 // ── Stealth Toolbar ──

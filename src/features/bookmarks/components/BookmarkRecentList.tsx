@@ -3,8 +3,8 @@
  */
 
 import { useEffect, useState, useCallback } from "react";
-import { Flex, Spin, Typography } from "antd";
-import { ExternalLink } from "lucide-react";
+import { Button, Flex, Spin, Typography } from "antd";
+import { ExternalLink, RefreshCw } from "lucide-react";
 import { getRecentBookmarks, type BookmarkNode } from "@/chrome/bookmarks";
 import { useT } from "@/shared/i18n";
 import { getFaviconUrl } from "../utils/bookmark-tree";
@@ -14,29 +14,41 @@ export function BookmarkRecentList() {
   const { t } = useT();
   const [items, setItems] = useState<BookmarkNode[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     let cancelled = false;
     setLoading(true);
+    setError(false);
     void getRecentBookmarks(50)
       .then((list) => {
         if (!cancelled) setItems(list);
       })
-      .catch(() => {
-        /* 静默失败 */
-      })
+      .catch(() => { setError(true); })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
+
+  useEffect(() => {
+    const cleanup = load();
+    return cleanup;
+  }, [load]);
 
   const handleOpen = useCallback((url: string | undefined) => {
     if (url === undefined) return;
     window.open(url, "_blank", "noopener,noreferrer");
   }, []);
+
+  if (error) {
+    return (
+      <Flex vertical align="center" gap={8} className={styles["recent-list__empty"]}>
+        <Typography.Text type="secondary">{t("加载失败")}</Typography.Text>
+        <Button size="small" icon={<RefreshCw size={14} />} onClick={load}>{t("重试")}</Button>
+      </Flex>
+    );
+  }
 
   if (loading) {
     return (

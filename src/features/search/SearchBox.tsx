@@ -16,6 +16,7 @@ import { Search, History, Trash2, RefreshCw } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import type { SearchEngineId } from "@/shared/types";
 import type { CustomSearchEngine } from "@/shared/types/settings";
+import { useShallow } from "zustand/shallow";
 import { useTabsStore, useSettingsStore, useMetadataStore } from "@/store";
 import { useT } from "@/shared/i18n";
 import { createTab } from "@/chrome";
@@ -64,7 +65,7 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
   const [currentEngine, setCurrentEngine] = useState<SearchEngineId>("google");
   const inputRef = useRef<InputRef>(null);
 
-  const tabs = useTabsStore((s) => s.tabs);
+  const tabs = useTabsStore(useShallow((s) => s.tabs));
   const tagsByUrl = useMetadataStore((s) => s.tags);
   const jumpToTab = useTabsStore((s) => s.jumpToTab);
   const { t } = useT();

@@ -93,7 +93,7 @@ export function UndoToast() {
           size="small"
           icon={<X size={ICON_SIZE.MEDIUM} />}
           onClick={dismissToast}
-          aria-label="Dismiss"
+          aria-label="关闭"
         />
       </div>
       {activeToast.subNote !== undefined && activeToast.subNote !== '' && (

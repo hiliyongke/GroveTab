@@ -96,18 +96,19 @@ export const ViewTabs = memo(function ViewTabs({ activeView, onChange }: ViewTab
           ),
         }))}
       />
-      <Button
-        type="text"
-        size="small"
-        onClick={toggleCollapsed}
-        aria-label={collapsed ? t("展开文案") : t("收起文案")}
-        className={styles["view-tabs-collapse-btn"]}
-        icon={
-          position === "left"
-            ? (collapsed ? <PanelLeftOpen size={ICON_SIZE.SMALL} /> : <PanelLeftClose size={ICON_SIZE.SMALL} />)
-            : (collapsed ? <PanelRightOpen size={ICON_SIZE.SMALL} /> : <PanelRightClose size={ICON_SIZE.SMALL} />)
-        }
-      />
+      <Tooltip title={collapsed ? t("展开视图标签") : t("收起视图标签")}>
+        <Button
+          type="text"
+          size="small"
+          onClick={toggleCollapsed}
+          className={styles["view-tabs-collapse-btn"]}
+          icon={
+            position === "left"
+              ? (collapsed ? <PanelLeftOpen size={ICON_SIZE.SMALL} /> : <PanelLeftClose size={ICON_SIZE.SMALL} />)
+              : (collapsed ? <PanelRightOpen size={ICON_SIZE.SMALL} /> : <PanelRightClose size={ICON_SIZE.SMALL} />)
+          }
+        />
+      </Tooltip>
     </div>
   );
 });

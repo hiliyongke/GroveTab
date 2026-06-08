@@ -56,7 +56,7 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
       await clearAllNativeHistory();
       feedback.success(t("已清空历史记录"));
     } catch (err) {
-      feedback.error(t("已清空历史记录"), err);
+      feedback.error(t("清空历史记录失败"));
     } finally {
       setClearing(false);
     }

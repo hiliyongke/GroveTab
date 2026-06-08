@@ -8,6 +8,7 @@
 import { useState, useCallback } from "react";
 import { Button, Card, Flex, Switch, Typography, Tag, Popconfirm, Empty } from "antd";
 import { Plus, Trash2, Edit3, Clock, Globe } from "lucide-react";
+import { feedback } from "@/shared/ui/feedback";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
 import { useSettingsStore } from "@/store";
@@ -41,6 +42,7 @@ export function AutomationPanel() {
     async (ruleId: string, enabled: boolean) => {
       const updated = await updateAutomationRule(ruleId, { enabled });
       setRules(updated.rules);
+      feedback.success(enabled ? "规则已启用" : "规则已禁用");
     },
     [setRules],
   );
@@ -49,6 +51,7 @@ export function AutomationPanel() {
     async (ruleId: string) => {
       const updated = await deleteAutomationRule(ruleId);
       setRules(updated.rules);
+      feedback.success("规则已删除");
     },
     [setRules],
   );

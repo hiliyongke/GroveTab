@@ -723,7 +723,9 @@ export function ArchiveView() {
                 ]}
               />
             ) : (
-              <Empty description={t("暂无归档会话")} />
+              <Empty description={t("筛选后无结果")}>
+                <Button size="small" onClick={() => { dispatch({ type: "SET_SCOPE", payload: "all" }); dispatch({ type: "SET_SEARCH_QUERY", payload: "" }); }}>{t("清除筛选")}</Button>
+              </Empty>
             )
           ) : (
             buckets.map((bucket) => (

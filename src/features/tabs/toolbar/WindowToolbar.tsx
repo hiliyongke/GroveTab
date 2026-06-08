@@ -48,18 +48,20 @@ export function WindowToolbar({
       searchPlaceholder={t("搜索窗口…")}
     >
       {/* 排序切换 */}
-      <Select
-        size="small"
-        value={sortMode}
-        onChange={(v) => onSortModeChange?.(v as WindowSortMode)}
-        options={[
-          { value: "manual", label: t("手动") },
-          { value: "tabCount", label: t("标签数") },
-          { value: "name", label: t("名称") },
-          { value: "activity", label: t("活跃度") },
-        ]}
-        className={styles["app-toolbar-sort-select"]}
-      />
+      <Tooltip title={t("选择窗口排序方式")}>
+        <Select
+          size="small"
+          value={sortMode}
+          onChange={(v) => onSortModeChange?.(v as WindowSortMode)}
+          options={[
+            { value: "manual", label: t("手动") },
+            { value: "tabCount", label: t("标签数") },
+            { value: "name", label: t("名称") },
+            { value: "activity", label: t("活跃度") },
+          ]}
+          className={styles["app-toolbar-sort-select"]}
+        />
+      </Tooltip>
 
       {/* 快照入口 */}
       <Popover

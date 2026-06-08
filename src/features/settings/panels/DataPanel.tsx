@@ -20,6 +20,7 @@ import {
   Popconfirm,
   Empty,
   Divider,
+  Tooltip,
   Upload,
   Flex,
   Typography,
@@ -187,6 +188,7 @@ export function DataPanel() {
           feedback.success(t("清空所有归档"));
         } catch (err) {
           console.error("[DataPanel] clearAll failed:", err);
+          feedback.error(t("清空失败"));
         }
       },
     });
@@ -255,25 +257,22 @@ export function DataPanel() {
                     </Typography.Text>
                   )}
                   <Space size={4}>
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<ArrowLeftRight size={ICON_SIZE.MEDIUM} />}
-                      title={t("应用此预设")}
-                      onClick={() => {
-                        void handleApplyProfile(profile);
-                      }}
-                    />
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<Pencil size={ICON_SIZE.MEDIUM} />}
-                      title={t("重命名")}
-                      onClick={() => {
-                        setEditingId(profile.id);
-                        setEditingName(profile.name);
-                      }}
-                    />
+                    <Tooltip title={t("应用此预设")}>
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<ArrowLeftRight size={ICON_SIZE.MEDIUM} />}
+                        onClick={() => { void handleApplyProfile(profile); }}
+                      />
+                    </Tooltip>
+                    <Tooltip title={t("重命名")}>
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<Pencil size={ICON_SIZE.MEDIUM} />}
+                        onClick={() => { setEditingId(profile.id); setEditingName(profile.name); }}
+                      />
+                    </Tooltip>
                     <Popconfirm
                       title={t("确认删除此预设？")}
                       onConfirm={() => {
@@ -283,13 +282,14 @@ export function DataPanel() {
                       cancelText={t("取消")}
                       okButtonProps={{ danger: true }}
                     >
-                      <Button
-                        type="text"
-                        size="small"
-                        danger
-                        icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
-                        title={t("删除")}
-                      />
+                      <Tooltip title={t("删除")}>
+                        <Button
+                          type="text"
+                          size="small"
+                          danger
+                          icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
+                        />
+                      </Tooltip>
                     </Popconfirm>
                   </Space>
                 </Flex>

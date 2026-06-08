@@ -58,16 +58,18 @@ export function TimelineToolbar() {
               />
             </span>
           </Tooltip>
-          <Flex align="center" gap={4} className={toolbarStyles["exact-time-toggle"]}>
-            <Typography.Text className={toolbarStyles["exact-time-label"]}>
-              {t("显示精确时间")}
-            </Typography.Text>
-            <Switch
-              size="small"
-              checked={showExactTime}
-              onChange={(checked) => void updateSettings({ timelineShowExactTime: checked })}
-            />
-          </Flex>
+          <Tooltip title={t("在每个标签行末尾显示具体时间")}>
+            <Flex align="center" gap={4} className={toolbarStyles["exact-time-toggle"]}>
+              <Typography.Text className={toolbarStyles["exact-time-label"]}>
+                {t("显示精确时间")}
+              </Typography.Text>
+              <Switch
+                size="small"
+                checked={showExactTime}
+                onChange={(checked) => void updateSettings({ timelineShowExactTime: checked })}
+              />
+            </Flex>
+          </Tooltip>
         </>
       }
     />

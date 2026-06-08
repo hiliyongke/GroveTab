@@ -16,6 +16,7 @@
 import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Empty, Flex } from "antd";
+import { useShallow } from "zustand/shallow";
 import { useTabsStore, useMetadataStore, useSettingsStore } from "@/store";
 import { groupTabsByDomain, type DomainGroup } from "@/shared/utils/domain";
 import { syncSortToBrowser, restoreBrowserOrder } from "@/shared/utils/tab-sort-sync";
@@ -144,7 +145,7 @@ function VirtualColumn({ groups, useVirtual }: VirtualColumnProps) {
  */
 export const DomainGroupView = memo(function DomainGroupView({ filterQuery }: DomainGroupViewProps) {
   const { t } = useT();
-  const tabs = useTabsStore((s) => s.tabs);
+  const tabs = useTabsStore(useShallow((s) => s.tabs));
   const pinnedUrls = useMetadataStore((s) => s.pinnedUrls);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -261,7 +262,7 @@ export const DomainGroupView = memo(function DomainGroupView({ filterQuery }: Do
 
   return (
     <Flex vertical gap="small">
-      {sortedGroups.length === 0 ? null : (
+      {sortedGroups.length === 0 ? <Flex justify="center" style={{ padding: 48 }}><Empty description={t("暂无标签组")} /></Flex> : (
         <div
           ref={containerRef}
           className={styles["app-domain-masonry"]}

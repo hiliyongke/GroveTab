@@ -11,7 +11,9 @@ import { Plus, Trash2, Play, LayoutTemplate } from "lucide-react";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { useT } from "@/shared/i18n";
 import styles from "./WorkspaceTemplatesPanel.module.less";
+import { useShallow } from "zustand/shallow";
 import { useSettingsStore, useTabsStore } from "@/store";
+import { feedback } from "@/shared/ui/feedback";
 import type { WorkspaceTemplate, TemplateTab } from "@/shared/types";
 import {
   addWorkspaceTemplate,
@@ -24,7 +26,7 @@ export function WorkspaceTemplatesPanel() {
   const { token } = theme.useToken();
   const templates = useSettingsStore((s) => s.workspaceTemplates ?? []);
   const setTemplates = useSettingsStore((s) => s.setWorkspaceTemplates);
-  const tabs = useTabsStore((s) => s.tabs);
+  const tabs = useTabsStore(useShallow((s) => s.tabs));
   const [showCreate, setShowCreate] = useState(false);
   const [templateName, setTemplateName] = useState("");
 
@@ -47,6 +49,7 @@ export function WorkspaceTemplatesPanel() {
     setTemplates(updated.templates);
     setShowCreate(false);
     setTemplateName("");
+    feedback.success(t("模板创建成功"));
   }, [templateName, tabs, setTemplates]);
 
   const handleRestore = useCallback(async (template: WorkspaceTemplate) => {
@@ -54,20 +57,17 @@ export function WorkspaceTemplatesPanel() {
       try {
         await createTab({ url: tab.url, active: false });
       } catch {
-        // fallback
-        try {
-          window.open(tab.url, "_blank", "noopener,noreferrer");
-        } catch {
-          /* ignore */
-        }
+        try { window.open(tab.url, "_blank", "noopener,noreferrer"); } catch { /* ignore */ }
       }
     }
+    feedback.success(t("已恢复 {n} 个标签页", { n: template.tabs.length }));
   }, []);
 
   const handleDelete = useCallback(
     async (templateId: string) => {
       const updated = await deleteWorkspaceTemplate(templateId);
       setTemplates(updated.templates);
+      feedback.success("模板已删除");
     },
     [setTemplates],
   );
