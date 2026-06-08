@@ -35,6 +35,9 @@ const MAX_ITEMS_PER_BOARD = 20;
 /** OPFS 缓存文件名 */
 const OPFS_CACHE_FILE = "trending-cache.json";
 
+/** 请求间延迟（毫秒），降低主源限流风险 */
+const STAGGER_DELAY_MS = 500;
+
 /** 兴趣信号存储 key */
 const INTEREST_KEY = STORAGE_KEYS.trendingInterest ?? "trending_interest_signals";
 
@@ -217,10 +220,21 @@ function normalizeItem(raw: Record<string, unknown>): TrendingItem {
 
 // ── API 请求 ──────────────────────────────────────────
 
+/** 请求结果，区分正常失败和限流 */
+interface FetchResult {
+  data: HotBoardData | null;
+  rateLimited: boolean;
+}
+
+/** 简单延迟工具 */
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 /** 从小尘API获取单个平台的热榜数据（主源） */
-async function fetchFromXcvts(platformId: string): Promise<HotBoardData | null> {
+async function fetchFromXcvts(platformId: string): Promise<FetchResult> {
   const platform = PLATFORMS.find((p) => p.id === platformId);
-  if (!platform) return null;
+  if (!platform) return { data: null, rateLimited: false };
 
   try {
     const controller = new AbortController();
@@ -231,7 +245,10 @@ async function fetchFromXcvts(platformId: string): Promise<HotBoardData | null> 
     });
     clearTimeout(timer);
 
-    if (!resp.ok) return null;
+    // 429 限流 — 特殊标记，让调用方跳过备用源直接走缓存
+    if (resp.status === 429) return { data: null, rateLimited: true };
+
+    if (!resp.ok) return { data: null, rateLimited: false };
 
     const json = (await resp.json()) as {
       success?: boolean;
@@ -243,8 +260,8 @@ async function fetchFromXcvts(platformId: string): Promise<HotBoardData | null> 
       total?: number;
     };
 
-    if (json.success !== true || !Array.isArray(json.data)) return null;
-    if (json.data.length === 0) return null;
+    if (json.success !== true || !Array.isArray(json.data)) return { data: null, rateLimited: false };
+    if (json.data.length === 0) return { data: null, rateLimited: false };
 
     const items = json.data
       .slice(0, MAX_ITEMS_PER_BOARD)
@@ -252,16 +269,19 @@ async function fetchFromXcvts(platformId: string): Promise<HotBoardData | null> 
       .filter((item) => item.title !== "");
 
     return {
-      id: platformId,
-      name: json.title ?? platform.name,
-      subtitle: json.subtitle ?? platform.subtitle,
-      category: platform.category,
-      items,
-      updateTime: json.update_time,
-      from: "xcvts",
+      data: {
+        id: platformId,
+        name: platform.name,
+        subtitle: json.title ?? platform.subtitle,
+        category: platform.category,
+        items,
+        updateTime: json.update_time,
+        from: "xcvts",
+      },
+      rateLimited: false,
     };
   } catch {
-    return null;
+    return { data: null, rateLimited: false };
   }
 }
 
@@ -325,8 +345,8 @@ async function fetchFromDailyhot(platformId: string): Promise<HotBoardData | nul
 
     return {
       id: platformId,
-      name: json.name ?? json.title ?? platform.name,
-      subtitle: platform.subtitle,
+      name: platform.name,
+      subtitle: json.name ?? json.title ?? platform.subtitle,
       category: platform.category,
       items,
       updateTime: json.updateTime,
@@ -442,48 +462,65 @@ export function applyInterestWeights(
 /**
  * 批量获取多个平台的热榜数据
  *
- * 并发请求，每个平台独立缓存。
+ * - 并发上限 2（避免触发主源限流）
+ * - 请求间 300ms 延迟（进一步降低 429 风险）
+ * - 主源 429 限流时跳过备用源直接走缓存
+ * - 支持 onProgress 回调实现渐进加载（每完成一个平台立即通知 UI）
+ * - 所有 worker 完成后统一写入一次缓存（消除并发竞态）
  *
  * @param platformIds 平台 ID 列表
- * @param maxConcurrent 最大并发数，默认 4
+ * @param maxConcurrent 最大并发数，默认 2
+ * @param onProgress 渐进加载回调，每完成一个平台立即触发
  */
 export async function fetchMultipleBoards(
   platformIds: string[],
-  maxConcurrent = 4,
+  maxConcurrent = 2,
+  onProgress?: (platformId: string, data: HotBoardData) => void,
 ): Promise<Record<string, HotBoardData>> {
   const results: Record<string, HotBoardData> = {};
   const queue = [...platformIds];
 
+  // 读取一次缓存，供所有 worker 共享（只读，避免竞争）
+  const sharedCache = await getCache();
+
+  // 全局限流标记：一旦检测到 429，后续平台停止请求网络源
+  let xcvtsGloballyRateLimited = false;
+
   async function worker(): Promise<void> {
-    while (queue.length > 0) {
+    while (true) {
       const id = queue.shift();
       if (id === undefined) break;
 
       let data: HotBoardData | null = null;
 
       // 第一优先：主源（小尘API）
-      data = await fetchFromXcvts(id);
+      if (!xcvtsGloballyRateLimited) {
+        const result = await fetchFromXcvts(id);
+        if (result.rateLimited) {
+          xcvtsGloballyRateLimited = true; // 全局标记，后续平台不再请求
+        } else if (result.data !== null) {
+          data = result.data;
+          // 请求成功，加延迟降低下一个请求触发限流的风险
+          await sleep(STAGGER_DELAY_MS);
+        }
+      }
 
-      // 第二优先：备用源（DailyHot）
-      if (data === null) {
+      // 第二优先：备用源（DailyHot）— 仅在主源未被全局限流时尝试
+      if (data === null && !xcvtsGloballyRateLimited) {
         data = await fetchFromDailyhot(id);
       }
 
       // 第三优先：chrome.storage.local 缓存（仅新鲜时使用）
-      if (data === null) {
-        const cache = await getCache();
-        if (isCacheFresh(cache)) {
-          const cached = cache?.boards[id];
-          if (cached) {
-            data = { ...cached, from: "cache" };
-          }
+      if (data === null && isCacheFresh(sharedCache)) {
+        const cached = sharedCache?.boards[id];
+        if (cached) {
+          data = { ...cached, from: "cache" };
         }
       }
 
-      // 最终降级：OPFS 本地缓存（过期缓存也接受，避免空白）
+      // 最终降级：过期缓存或 OPFS 本地缓存（避免空白）
       if (data === null) {
-        const cache = await getCache();
-        const expiredCached = cache?.boards[id];
+        const expiredCached = sharedCache?.boards[id];
         if (expiredCached) {
           data = { ...expiredCached, from: "cache" };
         } else {
@@ -493,41 +530,60 @@ export async function fetchMultipleBoards(
 
       if (data !== null) {
         results[id] = data;
-        // 写入缓存
-        const cache = await getCache();
-        await setCache({
-          boards: { ...(cache?.boards ?? {}), [id]: data },
-          lastRefreshAt: Date.now(),
-        });
+        // 渐进加载：立即通知 UI 渲染该平台卡片
+        onProgress?.(id, data);
       }
     }
   }
 
-  const workers = Array.from({ length: Math.min(maxConcurrent, queue.length) }, () => worker());
+  const concurrency = Math.min(maxConcurrent, queue.length || 1);
+  const workers = Array.from({ length: concurrency }, () => worker());
   await Promise.all(workers);
+
+  // 所有 worker 完成后，统一写入一次缓存，避免并发读写竞争
+  if (Object.keys(results).length > 0) {
+    const freshCache = await getCache();
+    await setCache({
+      boards: { ...(freshCache?.boards ?? {}), ...results },
+      lastRefreshAt: Date.now(),
+    });
+  }
 
   return results;
 }
 
 /**
- * 强制刷新指定平台的热榜数据（跳过缓存）
+ * 强制刷新指定平台的热榜数据（跳过缓存，网络优先）
  */
 export async function forceRefreshBoard(platformId: string): Promise<HotBoardData | null> {
-  const result = await fetchFromXcvts(platformId);
-
-  if (result !== null) {
+  // 主源优先
+  const xcvtsResult = await fetchFromXcvts(platformId);
+  if (xcvtsResult.data !== null) {
     const cache = await getCache();
-    const newCache: TrendingCache = {
-      boards: {
-        ...(cache?.boards ?? {}),
-        [platformId]: result,
-      },
+    await setCache({
+      boards: { ...(cache?.boards ?? {}), [platformId]: xcvtsResult.data },
       lastRefreshAt: Date.now(),
-    };
-    await setCache(newCache);
+    });
+    return xcvtsResult.data;
   }
 
-  return result;
+  // 主源失败（含 429），尝试备用源
+  const dailyhotData = await fetchFromDailyhot(platformId);
+  if (dailyhotData !== null) {
+    const cache = await getCache();
+    await setCache({
+      boards: { ...(cache?.boards ?? {}), [platformId]: dailyhotData },
+      lastRefreshAt: Date.now(),
+    });
+    return dailyhotData;
+  }
+
+  // 网络源都失败，返回缓存数据但不更新
+  const cache = await getCache();
+  const cached = cache?.boards[platformId];
+  if (cached) return { ...cached, from: "cache" };
+
+  return await fetchFromOPFS(platformId);
 }
 
 /**

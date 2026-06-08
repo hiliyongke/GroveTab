@@ -1019,6 +1019,7 @@ async function refreshTrendingCache(): Promise<void> {
     const FETCH_TIMEOUT_MS = 6000;
     const MAX_ITEMS = 20;
     const API_BASE = "https://api.xcvts.cn/api/hotlist";
+    const STAGGER_MS = 500;
 
     for (const boardId of boardIds) {
       try {
@@ -1028,6 +1029,9 @@ async function refreshTrendingCache(): Promise<void> {
           signal: controller.signal,
         });
         clearTimeout(timer);
+
+        // 429 限流 → 停止后续请求，保留已有缓存
+        if (resp.status === 429) break;
 
         if (!resp.ok) continue;
         const json = (await resp.json()) as {
@@ -1061,6 +1065,9 @@ async function refreshTrendingCache(): Promise<void> {
           updateTime: json.update_time,
           from: "xcvts",
         };
+
+        // 请求间延迟，降低限流风险
+        await new Promise((r) => setTimeout(r, STAGGER_MS));
       } catch {
         // 单平台刷新失败不影响其他
       }

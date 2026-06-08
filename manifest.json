@@ -54,6 +54,6 @@
   },
   "incognito": "split",
   "content_security_policy": {
-    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; img-src 'self' https: data: chrome-extension: chrome://favicon; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' https://api.open-meteo.com https://wttr.in https://github-trending.rexx.cc https://mirror.ghproxy.com https://ungh.cc; frame-src 'self'"
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; img-src 'self' https: data: chrome-extension: chrome://favicon; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' https://api.open-meteo.com https://wttr.in https://github-trending.rexx.cc https://mirror.ghproxy.com https://ungh.cc https://api.xcvts.cn https://dailyhot-api.vercel.app; frame-src 'self'"
   }
 }

@@ -471,10 +471,6 @@ export function TrendingView() {
     try { return (localStorage.getItem("trending_group_mode") as TrendingGroupMode) || "default"; }
     catch { return "default"; }
   });
-  const [cardSort, setCardSort] = useState<"default" | "alpha">(() => {
-    try { return (localStorage.getItem("trending_card_sort") as any) || "default"; }
-    catch { return "default"; }
-  });
   const setGroupMode = useCallback((g: TrendingGroupMode | ((p: TrendingGroupMode) => TrendingGroupMode)) => {
     setGroupModeState((prev) => {
       const next = typeof g === "function" ? g(prev) : g;
@@ -527,21 +523,16 @@ export function TrendingView() {
   );
 
   const activePlatforms = useMemo(() => getPlatformsByCategory("all"), []);
-
-  // 卡片排序
-  const sortedPlatforms = useMemo(() => {
-    const arr = [...activePlatforms];
-    if (cardSort === "alpha") arr.sort((a, b) => a.name.localeCompare(b.name));
-    return arr;
-  }, [activePlatforms, cardSort]);
   const hasBoardData = Object.keys(boards).length > 0;
 
   const loadBoards = useCallback(async (platformIds: string[]) => {
     setLoading(true);
     setAllFailed(false);
     try {
-      const data = await fetchMultipleBoards(platformIds);
-      setBoards((prev) => ({ ...prev, ...data }));
+      const data = await fetchMultipleBoards(platformIds, 2, (platformId, board) => {
+        // 渐进加载：每个平台请求完成立即渲染到 UI
+        setBoards((prev) => ({ ...prev, [platformId]: board }));
+      });
       if (Object.keys(data).length === 0 && platformIds.length > 0) {
         setAllFailed(true);
       }
@@ -669,13 +660,6 @@ export function TrendingView() {
               options={groupModeOptions}
               className={`${styles["trending-toolbar-card__segment"]} ${styles["trending-toolbar-card__segment--group"]}`}
             />
-            <Segmented<string>
-              size="small"
-              value={cardSort}
-              onChange={(v) => { setCardSort(v as "default" | "alpha"); try { localStorage.setItem("trending_card_sort", v); } catch {} }}
-              options={[{ value: "default", label: t("默认") }, { value: "alpha", label: t("按字母") }]}
-              className={styles["trending-toolbar-card__segment"]}
-            />
           </div>
         </div>
       </Card>
@@ -713,7 +697,7 @@ export function TrendingView() {
         <div
           className={cx(styles["trending-grid"], groupMode === "compact" && styles["is-compact"])}
         >
-          {sortedPlatforms.map((platform) => {
+          {activePlatforms.map((platform) => {
             const board = boards[platform.id];
             if (!board) {
               return (
