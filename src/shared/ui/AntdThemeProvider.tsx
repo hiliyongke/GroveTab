@@ -49,11 +49,11 @@ const TYPOGRAPHY_CONFIG = { className: 'app-typography' } as const;
 
 /** 包装 classNames 的对象，避免每次渲染创建新引用 */
 const TAG_PROPS = { classNames: TAG_CLASS };
-const BUTTON_PROPS = { classNames: BUTTON_CLASS };
-const CARD_PROPS = { classNames: CARD_CLASS };
+const BUTTON_PROPS = { classNames: BUTTON_CLASS, size: 'small' as const };
+const CARD_PROPS = { classNames: CARD_CLASS, size: 'small' as const };
 const ALERT_PROPS = { classNames: ALERT_CLASS };
 const BADGE_PROPS = { classNames: BADGE_CLASS };
-const SEGMENTED_PROPS = { classNames: SEGMENTED_CLASS };
+const SEGMENTED_PROPS = { classNames: SEGMENTED_CLASS, size: 'small' as const };
 const MODAL_PROPS = { classNames: MODAL_CLASS_NAMES };
 const DRAWER_PROPS = { classNames: DRAWER_CLASS_NAMES };
 const POPOVER_PROPS = { classNames: POPOVER_CLASS_NAMES };
@@ -148,6 +148,7 @@ export function AntdThemeProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ConfigProvider
+      componentSize="small"
       theme={themeConfig}
       locale={locale}
       typography={TYPOGRAPHY_CONFIG}

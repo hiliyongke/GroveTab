@@ -36,7 +36,6 @@ export function TabGroupToolbar({
           <Tooltip title={t("排序方式")}>
             <span>
               <Segmented
-                size="small"
                 value={sortBy}
                 onChange={(v) =>
                   void updateSettings({

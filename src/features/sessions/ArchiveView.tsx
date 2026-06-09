@@ -673,7 +673,6 @@ export function ArchiveView() {
               </Button>
               {archivingCurrent && (
                 <Button
-                  size="small"
                   danger
                   onClick={() => {
                     abortRef.current?.abort();
@@ -724,7 +723,7 @@ export function ArchiveView() {
               />
             ) : (
               <Empty description={t("筛选后无结果")}>
-                <Button size="small" onClick={() => { dispatch({ type: "SET_SCOPE", payload: "all" }); dispatch({ type: "SET_SEARCH_QUERY", payload: "" }); }}>{t("清除筛选")}</Button>
+                <Button  onClick={() => { dispatch({ type: "SET_SCOPE", payload: "all" }); dispatch({ type: "SET_SEARCH_QUERY", payload: "" }); }}>{t("清除筛选")}</Button>
               </Empty>
             )
           ) : (

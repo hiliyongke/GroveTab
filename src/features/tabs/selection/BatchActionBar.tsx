@@ -352,7 +352,7 @@ export function BatchActionBar() {
     >
       {/* 计数标签组：图标 + 选中数 */}
       <Flex align="center" gap="small" className={styles["app-batch-bar__summary"]}>
-        <Badge count={count} size="small" color={token.colorPrimary} offset={[0, 0]}>
+        <Badge count={count} color={token.colorPrimary} offset={[0, 0]}>
           <Pointer size={ICON_SIZE.LARGE} className={styles["app-batch-bar__pointer"]} />
         </Badge>
         <Typography.Text className={styles["app-batch-bar__summary-copy"]}>
@@ -376,7 +376,6 @@ export function BatchActionBar() {
             cancelButtonProps={{ size: "small" }}
           >
             <Button
-              size="small"
               danger
               icon={<X size={ICON_SIZE.DEFAULT} className={styles["app-batch-bar__danger-icon"]} />}
             >
@@ -387,7 +386,6 @@ export function BatchActionBar() {
 
         <Tooltip title={t("休眠所选")} placement="top">
           <Button
-            size="small"
             icon={
               <Moon size={ICON_SIZE.DEFAULT} className={styles["app-batch-bar__secondary-icon"]} />
             }
@@ -401,7 +399,6 @@ export function BatchActionBar() {
 
         <Tooltip title={t("移到新窗口")} placement="top">
           <Button
-            size="small"
             icon={<ExternalLink size={ICON_SIZE.DEFAULT} />}
             onClick={() => {
               void handleMoveToNewWindow();
@@ -419,7 +416,6 @@ export function BatchActionBar() {
         >
           <Tooltip title={t("把选中的标签页拆成独立窗口并选择布局")} placement="top">
             <Button
-              size="small"
               icon={<Columns2 size={ICON_SIZE.DEFAULT} />}
               disabled={count < 2 || count > MAX_SPLIT_TABS}
             >
@@ -430,7 +426,6 @@ export function BatchActionBar() {
 
         <Tooltip title={t("新建分组")} placement="top">
           <Button
-            size="small"
             icon={<FolderPlus size={ICON_SIZE.DEFAULT} />}
             onClick={handleCreateGroup}
           >
@@ -440,7 +435,6 @@ export function BatchActionBar() {
 
         <Tooltip title={t("加入现有分组")} placement="top">
           <Button
-            size="small"
             icon={<FolderInput size={ICON_SIZE.DEFAULT} />}
             disabled={existingGroups.length === 0}
             onClick={handleJoinExistingGroup}
@@ -466,7 +460,6 @@ export function BatchActionBar() {
             cancelButtonProps={{ size: "small" }}
           >
             <Button
-              size="small"
               type="primary"
               icon={<Save size={ICON_SIZE.DEFAULT} />}
               className={styles["app-batch-bar__archive-btn"]}
@@ -481,7 +474,6 @@ export function BatchActionBar() {
 
       <Tooltip title={t("取消选择")} placement="top">
         <Button
-          size="small"
           type="text"
           icon={
             <XCircle size={ICON_SIZE.DEFAULT} className={styles["app-batch-bar__danger-icon"]} />

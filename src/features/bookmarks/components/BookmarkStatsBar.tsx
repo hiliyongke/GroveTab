@@ -49,7 +49,6 @@ export function BookmarkStatsBar({
                 : 0
             }
             showInfo={false}
-            size="small"
             strokeLinecap="round"
             className="bookmark-stats-bar__progress-bar"
           />
@@ -58,7 +57,6 @@ export function BookmarkStatsBar({
       {brokenCount > 0 && !linkCheckRunning && (
         <Badge
           count={brokenCount}
-          size="small"
           title={t("失效链接")}
           onClick={onShowBroken}
           className="bookmark-stats-bar__broken-badge"

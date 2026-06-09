@@ -223,7 +223,6 @@ export function HistoryView() {
           <Tabs
             activeKey={activeTab}
             onChange={(k) => setActiveTab(k as typeof activeTab)}
-            size="small"
             items={[
               { key: "closed", label: t("最近关闭") },
               { key: "timeline", label: t("操作时间线") },
@@ -241,7 +240,6 @@ export function HistoryView() {
               {quickRanges.map(({ key, label, onClick }) => (
                 <Button
                   key={key}
-                  size="small"
                   type={dateRange.start ? "default" : "text"}
                   onClick={onClick}
                 >
@@ -249,7 +247,7 @@ export function HistoryView() {
                 </Button>
               ))}
               {dateRange.start && (
-                <Button size="small" type="text" onClick={() => setDateRange({})}>
+                <Button  type="text" onClick={() => setDateRange({})}>
                   {t("清除")}
                 </Button>
               )}
@@ -257,7 +255,6 @@ export function HistoryView() {
           )}
           {activeTab === "timeline" && (
             <Segmented<FilterMode>
-              size="small"
               value={filterMode}
               onChange={(v) => setFilterMode(v)}
               options={[

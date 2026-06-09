@@ -2,6 +2,10 @@
  * OG Fetcher (F-24) — 新标签页打开后抓取页面 meta description。
  *
  * 从 sw/index.ts 抽离以改善可维护性（CODE-01）。
+ *
+ * ⚠️ CSP 限制：SW 的 connect-src 只允许 manifest.json 中列出的域名 + 扩展自身。
+ * 对非允许域名的 fetch 会被 Chrome 静默拒绝并打印 CSP 警告到控制台。
+ * 因此 OG 抓取仅对 CSP 白名单内的域名生效（实际用处有限）。
  */
 
 import { CONFIG } from "@/shared/config";
@@ -10,6 +14,17 @@ import { getSettings } from "@/repositories";
 const OG_CONCURRENCY = CONFIG.performance.ogConcurrency;
 const OG_TIMEOUT_MS = CONFIG.performance.ogTimeoutMs;
 const OG_MAX_BYTES = CONFIG.performance.ogMaxBytes;
+
+/** CSP connect-src 允许的域名（需与 manifest.json 同步） */
+const CSP_ALLOWED_ORIGINS = [
+  "api.open-meteo.com",
+  "wttr.in",
+  "github-trending.rexx.cc",
+  "mirror.ghproxy.com",
+  "ungh.cc",
+  "api.xcvts.cn",
+  "dailyhot-api.vercel.app",
+];
 
 /** SSRF 防御：检查 hostname 是否为内网/私有/本地地址 */
 const INTERNAL_HOST_PATTERNS = [
@@ -34,15 +49,24 @@ function isInternalHostname(hostname: string): boolean {
   return false;
 }
 
+function isCspAllowed(hostname: string): boolean {
+  return CSP_ALLOWED_ORIGINS.some((allowed) =>
+    hostname === allowed || hostname.endsWith("." + allowed),
+  );
+}
+
 export async function maybeFetchOg(url: string): Promise<void> {
   try {
     const settings = await getSettings();
     if (settings.enableOgFetch !== true) return;
 
-    // SSRF 防御：拒绝内网/私有地址
+    // URL 解析 + 主机校验
     let hostname = "";
     try { hostname = new URL(url).hostname; } catch { return; }
     if (hostname === "" || isInternalHostname(hostname)) return;
+
+    // CSP 前置检查：只对白名单域名发起请求，避免控制台 CSP 警告
+    if (!isCspAllowed(hostname)) return;
 
     const result = await chrome.storage.session.get("ogInFlight");
     const currentInFlight = (typeof result.ogInFlight === "number" ? result.ogInFlight : 0) ?? 0;

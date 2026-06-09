@@ -78,7 +78,6 @@ export const HistoryEventItem = memo(
           <Tooltip title={t("撤销")}>
             <Button
               type="text"
-              size="small"
               icon={<Undo2 size={ICON_SIZE.SMALL} />}
               onClick={() => onUndo(e)}
             />
@@ -87,7 +86,6 @@ export const HistoryEventItem = memo(
         <Tooltip title={t("删除")}>
           <Button
             type="text"
-            size="small"
             icon={<X size={ICON_SIZE.SMALL} />}
             onClick={() => onDelete(e.id)}
           />

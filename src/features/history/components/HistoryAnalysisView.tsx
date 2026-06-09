@@ -50,13 +50,12 @@ export function HistoryAnalysisView({
       <Flex vertical gap={12} className={styles["history-analysis-panel"]}>
         <Flex align="center" justify="space-between" className={styles["history-analysis-header"]}>
           <Select
-            size="small"
             value={rangeMs}
             onChange={onRangeChange}
             options={rangeOptions.map((o) => ({ value: o.value, label: o.label }))}
             className={styles["history-date-picker"]}
           />
-          <Button size="small" icon={<Download size={12} />} onClick={onExport}>
+          <Button  icon={<Download size={12} />} onClick={onExport}>
             {t("导出")}
           </Button>
         </Flex>
@@ -76,7 +75,6 @@ export function HistoryAnalysisView({
       <Flex align="center" justify="space-between" className={styles["history-analysis-header"]}>
         <Flex align="center" gap={8}>
           <Select
-            size="small"
             value={rangeMs}
             onChange={onRangeChange}
             options={rangeOptions.map((o) => ({ value: o.value, label: o.label }))}
@@ -86,7 +84,7 @@ export function HistoryAnalysisView({
             {t("共 {n} 条记录", { n: analysis.totalEvents })}
           </Typography.Text>
         </Flex>
-        <Button size="small" icon={<Download size={12} />} onClick={onExport}>
+        <Button  icon={<Download size={12} />} onClick={onExport}>
           {t("导出 JSON")}
         </Button>
       </Flex>

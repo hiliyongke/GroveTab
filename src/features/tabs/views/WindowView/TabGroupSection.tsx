@@ -243,7 +243,6 @@ export function TabGroupSection({
           <Typography.Text className={styles["app-window-group-dot"]} />
           {renaming ? (
             <Input
-              size="small"
               autoFocus
               value={titleDraft}
               onChange={(event) => setTitleDraft(event.target.value)}
@@ -266,7 +265,6 @@ export function TabGroupSection({
           <Tooltip title={t("更多")}>
             <Button
               type="text"
-              size="small"
               loading={busy}
               icon={busy ? undefined : <MoreHorizontal size={ICON_SIZE.SMALL} />}
               aria-label={t("更多")}

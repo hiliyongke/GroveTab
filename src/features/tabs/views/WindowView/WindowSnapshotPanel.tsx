@@ -106,7 +106,6 @@ export const WindowSnapshotPanel = memo(function WindowSnapshotPanel({
     <Flex vertical gap={8} style={{ width: 280, maxHeight: 400, overflow: "auto", padding: "var(--app-space-1)" }}>
       <Button
         type="primary"
-        size="small"
         icon={<Save size={ICON_SIZE.SMALL} />}
         loading={saving}
         onClick={() => void handleSave()}
@@ -123,7 +122,6 @@ export const WindowSnapshotPanel = memo(function WindowSnapshotPanel({
         />
       ) : (
         <List
-          size="small"
           dataSource={snapshots}
           renderItem={(session) => (
             <List.Item
@@ -167,7 +165,6 @@ export const WindowSnapshotPanel = memo(function WindowSnapshotPanel({
                 >
                   <Button
                     type="text"
-                    size="small"
                     icon={<MoreHorizontal size={ICON_SIZE.SMALL} />}
                   />
                 </Dropdown>,

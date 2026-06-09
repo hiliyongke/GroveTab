@@ -182,7 +182,6 @@ export function SkinPresetSection({ settings, updateSettings }: SkinPresetSectio
                     <span className={styles["appearance-slider-label"]}>{t("品牌主色")}</span>
                     <ColorPicker
                       value={settings.skinCustom.colorPrimary ?? skinCustomBase.colorPrimary}
-                      size="small"
                       showText
                       onChange={(c) => {
                         void updateSettings({
@@ -197,7 +196,6 @@ export function SkinPresetSection({ settings, updateSettings }: SkinPresetSectio
                 </div>
 
                 <Button
-                  size="small"
                   onClick={() => {
                     void updateSettings({ skinCustom: undefined });
                   }}

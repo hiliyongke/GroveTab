@@ -85,7 +85,7 @@ const popupCssLinks = cssFiles
 const popupHtml = await readFile(popupHtmlFile, 'utf-8');
 const normalizedPopupHtml = popupHtml.replace(
   /<head>[\s\S]*?<\/head>/,
-  `<head><meta charset="UTF-8" /><title>${APP_NAME} Popup</title>${popupCssLinks}</head>`,
+  `<head><meta charset="UTF-8" /><title>${APP_NAME} Popup</title><script src="./i18n-manifest.js"></script>${popupCssLinks}</head>`,
 );
 await writeFile(popupHtmlFile, normalizedPopupHtml);
 console.log('[build-sw] popup HTML CSS links normalized');

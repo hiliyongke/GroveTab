@@ -20,7 +20,7 @@ export function SuggestionList({ suggestions }: Props) {
   if (suggestions.length === 0) return null;
 
   return (
-    <Card size="small" title={t("智能建议")}>
+    <Card title={t("智能建议")}>
       <Flex vertical gap={8} className="insights-suggestion-list" role="list">
         {suggestions.map((s) => (
           <Alert
@@ -42,7 +42,7 @@ export function SuggestionList({ suggestions }: Props) {
             description={s.descKey}
             action={
               s.actionKey !== undefined && s.onAction !== undefined ? (
-                <Button size="small" type="link" onClick={s.onAction}>
+                <Button type="link" onClick={s.onAction}>
                   {s.actionKey}
                 </Button>
               ) : undefined

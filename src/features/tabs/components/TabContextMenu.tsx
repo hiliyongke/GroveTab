@@ -159,7 +159,6 @@ export function TabContextMenu({
       style={menuStyle}
     >
       <Card
-        size="small"
         classNames={{ body: styles["app-tab-context-menu__body"] }}
         className={styles["app-tab-context-menu__card"]}
       >
@@ -283,7 +282,6 @@ export function TabContextMenu({
         {showTagInput && (
           <Flex gap="small" className={styles["app-tab-context-menu__tag-input"]}>
             <Input
-              size="small"
               autoFocus
               value={tagValue}
               onChange={(e) => setTagValue(e.target.value)}
@@ -296,7 +294,7 @@ export function TabContextMenu({
               }}
               placeholder={t("输入标签名...")}
             />
-            <Button type="primary" size="small" onClick={handleAddTag}>
+            <Button type="primary" onClick={handleAddTag}>
               {t("保存")}
             </Button>
           </Flex>
@@ -333,10 +331,10 @@ export function TabContextMenu({
               gap="small"
               className={styles["app-tab-context-menu__note-actions"]}
             >
-              <Button size="small" onClick={() => setShowNoteInput(false)}>
+              <Button  onClick={() => setShowNoteInput(false)}>
                 {t("取消")}
               </Button>
-              <Button type="primary" size="small" onClick={handleSaveNote}>
+              <Button type="primary" onClick={handleSaveNote}>
                 {t("保存")}
               </Button>
             </Flex>

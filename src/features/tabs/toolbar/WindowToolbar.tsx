@@ -50,7 +50,6 @@ export function WindowToolbar({
       {/* 排序切换 */}
       <Tooltip title={t("选择窗口排序方式")}>
         <Select
-          size="small"
           value={sortMode}
           onChange={(v) => onSortModeChange?.(v as WindowSortMode)}
           options={[
@@ -76,7 +75,7 @@ export function WindowToolbar({
       >
         <Tooltip title={t("窗口快照")}>
           <span>
-            <Button type="text" size="small" icon={<Camera size={ICON_SIZE.SMALL} />} />
+            <Button type="text" icon={<Camera size={ICON_SIZE.SMALL} />} />
           </span>
         </Tooltip>
       </Popover>
@@ -85,7 +84,6 @@ export function WindowToolbar({
       <Tooltip title={selectionMode ? t("退出批量模式") : t("批量选择")}>
         <Button
           type={selectionMode ? "primary" : "text"}
-          size="small"
           icon={<CheckSquare size={ICON_SIZE.SMALL} />}
           onClick={() => {
             if (selectionMode) {

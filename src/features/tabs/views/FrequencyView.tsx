@@ -79,7 +79,7 @@ export const FrequencyView = memo(function FrequencyView() {
           {t("最常使用的 {count} 个标签页", { count: sortedTabs.length })}
         </Typography.Text>
         {isFallback && (
-          <Tag color="default" icon={<Spin size="small" />} className={styles["app-frequency-rebuild-tag"]}>
+          <Tag color="default" icon={<Spin />} className={styles["app-frequency-rebuild-tag"]}>
             {t("数据重建中")}
           </Tag>
         )}

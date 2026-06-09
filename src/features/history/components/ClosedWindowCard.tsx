@@ -37,7 +37,6 @@ export const ClosedWindowCard = memo(
           </Typography.Text>
         </Flex>
         <Button
-          size="small"
           type="primary"
           icon={<RotateCcw size={ICON_SIZE.SMALL} />}
           onClick={() => onRestore(win)}

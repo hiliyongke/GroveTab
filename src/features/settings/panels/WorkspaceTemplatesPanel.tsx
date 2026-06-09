@@ -78,7 +78,6 @@ export function WorkspaceTemplatesPanel() {
         <Typography.Text strong>{t("工作区模板")}</Typography.Text>
         <Button
           type="primary"
-          size="small"
           icon={<Plus size={ICON_SIZE.SMALL} />}
           onClick={() => setShowCreate(true)}
         >
@@ -114,7 +113,7 @@ export function WorkspaceTemplatesPanel() {
         <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t("暂无工作区模板")} />
       ) : (
         templates.map((template) => (
-          <Card key={template.id} className={styles["template-card"]} size="small">
+          <Card key={template.id} className={styles["template-card"]}>
             <Flex justify="space-between" align="center">
               <Flex align="center" gap="small">
                 <LayoutTemplate size={ICON_SIZE.SMALL} style={{ color: token.colorPrimary }} />
@@ -126,7 +125,6 @@ export function WorkspaceTemplatesPanel() {
               <Flex align="center" gap="small">
                 <Button
                   type="primary"
-                  size="small"
                   icon={<Play size={ICON_SIZE.SMALL} />}
                   onClick={() => void handleRestore(template)}
                 >
@@ -138,7 +136,6 @@ export function WorkspaceTemplatesPanel() {
                 >
                   <Button
                     type="text"
-                    size="small"
                     danger
                     icon={<Trash2 size={ICON_SIZE.SMALL} />}
                   />

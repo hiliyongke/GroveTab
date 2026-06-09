@@ -21,10 +21,10 @@ export function BookmarkSelectionBar({ count, onSelectAll, onClear, onBatchDelet
       <span className="bookmark-selection-bar__count">
         {t("已选 {n} 项", { n: count })}
       </span>
-      <Button size="small" onClick={onSelectAll}>
+      <Button onClick={onSelectAll}>
         {t("全选")}
       </Button>
-      <Button size="small" onClick={onClear}>
+      <Button onClick={onClear}>
         {t("取消")}
       </Button>
       <Popconfirm
@@ -33,7 +33,7 @@ export function BookmarkSelectionBar({ count, onSelectAll, onClear, onBatchDelet
         cancelText={t("取消")}
         onConfirm={onBatchDelete}
       >
-        <Button size="small" danger>
+        <Button danger>
           {t("批量删除")}
         </Button>
       </Popconfirm>

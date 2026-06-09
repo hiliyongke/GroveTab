@@ -77,7 +77,6 @@ export const ViewTabs = memo(function ViewTabs({ activeView, onChange }: ViewTab
         tabPosition={position}
         activeKey={activeView}
         onChange={(key) => onChange(key as ViewMode)}
-        size="small"
         className={styles["view-tabs-vertical__tabs"]}
         tabBarStyle={collapsed ? { width: 52, minWidth: 52 } : undefined}
         items={items.map((item) => ({
@@ -99,7 +98,6 @@ export const ViewTabs = memo(function ViewTabs({ activeView, onChange }: ViewTab
       <Tooltip title={collapsed ? t("展开视图标签") : t("收起视图标签")}>
         <Button
           type="text"
-          size="small"
           onClick={toggleCollapsed}
           className={styles["view-tabs-collapse-btn"]}
           icon={

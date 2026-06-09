@@ -33,7 +33,7 @@ export function StatCards({ topDomains, topActions, archiveStats, onDomainClick 
 
   return (
     <Flex vertical gap={8}>
-      <Card size="small" title={t("Top 10 访问域名")} className={styles["insights-stat-card"]}>
+      <Card title={t("Top 10 访问域名")} className={styles["insights-stat-card"]}>
         {topDomains.length === 0 ? (
           <EmptyText text={t("暂无数据")} />
         ) : (
@@ -44,7 +44,7 @@ export function StatCards({ topDomains, topActions, archiveStats, onDomainClick 
           />
         )}
       </Card>
-      <Card size="small" title={t("使用频率前 5")} className={styles["insights-stat-card"]}>
+      <Card title={t("使用频率前 5")} className={styles["insights-stat-card"]}>
         {topActions.length === 0 ? (
           <EmptyText text={t("暂无数据")} />
         ) : (
@@ -55,7 +55,7 @@ export function StatCards({ topDomains, topActions, archiveStats, onDomainClick 
           />
         )}
       </Card>
-      <Card size="small" title={t("累计归档")} className={styles["insights-stat-card"]}>
+      <Card title={t("累计归档")} className={styles["insights-stat-card"]}>
         {archiveStats.totalTabs === 0 ? (
           <EmptyText text={t("尚未归档")} />
         ) : (

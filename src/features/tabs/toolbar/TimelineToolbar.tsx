@@ -30,7 +30,6 @@ export function TimelineToolbar() {
           <Tooltip title={t("分组粒度")}>
             <span>
               <Segmented
-                size="small"
                 value={granularity}
                 onChange={(v) =>
                   void updateSettings({ timelineGranularity: v as TimelineGranularity })
@@ -64,7 +63,6 @@ export function TimelineToolbar() {
                 {t("显示精确时间")}
               </Typography.Text>
               <Switch
-                size="small"
                 checked={showExactTime}
                 onChange={(checked) => void updateSettings({ timelineShowExactTime: checked })}
               />

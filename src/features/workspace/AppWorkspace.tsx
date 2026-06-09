@@ -148,7 +148,7 @@ export function AppWorkspace({
           type="warning"
           description={initError}
           action={
-            <Button size="small" onClick={onRetryInit}>
+            <Button  onClick={onRetryInit}>
               {t("重试")}
             </Button>
           }

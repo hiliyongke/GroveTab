@@ -194,7 +194,6 @@ function BookmarkTreeNodeImpl({
               <Tooltip title={t("在此添加书签")}>
                 <Button
                   type="text"
-                  size="small"
                   icon={<BookmarkPlus size={ICON_SIZE.MICRO} />}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -207,7 +206,6 @@ function BookmarkTreeNodeImpl({
               <Tooltip title={t("复制链接")}>
                 <Button
                   type="text"
-                  size="small"
                   icon={<Copy size={ICON_SIZE.MICRO} />}
                   onClick={handleCopy}
                 />
@@ -217,7 +215,6 @@ function BookmarkTreeNodeImpl({
               <Tooltip title={t("打开")}>
                 <Button
                   type="text"
-                  size="small"
                   icon={<ExternalLink size={ICON_SIZE.MICRO} />}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -229,7 +226,6 @@ function BookmarkTreeNodeImpl({
             <Tooltip title={t("编辑")}>
               <Button
                 type="text"
-                size="small"
                 icon={<Edit2 size={ICON_SIZE.MICRO} />}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -250,7 +246,6 @@ function BookmarkTreeNodeImpl({
               <Tooltip title={t("删除")}>
                 <Button
                   type="text"
-                  size="small"
                   danger
                   icon={<Trash2 size={ICON_SIZE.MICRO} />}
                   onClick={(e) => e.stopPropagation()}

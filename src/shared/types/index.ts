@@ -70,13 +70,12 @@ export type { SpeedDialSite } from "./speed-dial";
 // ── 热榜聚合 ──────────────────────────────────────
 export type {
   TrendingCategory,
-  TrendingGroupMode,
   TrendingItem,
   HotBoardData,
   TrendingCache,
 } from "./trending";
 
-// ── 偷摸模式 ──────────────────────────────────────
+// ── 偷摸模式已移除 ──────────────────────────────────
 export type { StealthModeConfig } from "./stealth-mode";
 
 // ── 回收站 ────────────────────────────────────────

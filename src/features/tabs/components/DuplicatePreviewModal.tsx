@@ -158,10 +158,10 @@ export function DuplicatePreviewModal({ open, dupGroups, onClose }: DuplicatePre
       footer={
         <Flex justify="space-between" align="center" className={styles["app-duplicate-footer"]}>
           <Space>
-            <Button size="small" onClick={handleKeepAllOldest}>
+            <Button  onClick={handleKeepAllOldest}>
               {t("全部勾选最旧")}
             </Button>
-            <Button size="small" onClick={handleKeepNone}>
+            <Button  onClick={handleKeepNone}>
               {t("全不勾选")}
             </Button>
           </Space>

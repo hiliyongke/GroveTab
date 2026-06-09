@@ -48,7 +48,6 @@ export function StatusBar() {
       {current.action && (
         <Button
           type="link"
-          size="small"
           className={styles["status-bar__action"]}
           onClick={current.action.onClick}
         >
@@ -57,7 +56,6 @@ export function StatusBar() {
       )}
       <Button
         type="text"
-        size="small"
         className={styles["status-bar__dismiss"]}
         onClick={() => removeMessage(current.id)}
         aria-label={t("关闭")}

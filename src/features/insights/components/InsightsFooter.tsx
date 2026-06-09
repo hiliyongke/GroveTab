@@ -17,7 +17,6 @@ export function InsightsFooter({ onExport, onClear, disabled }: Props) {
   return (
     <Flex className="insights-footer" gap={8} justify="flex-end">
       <Button
-        size="small"
         icon={<Download size={12} />}
         onClick={onExport}
         disabled={disabled}
@@ -31,7 +30,7 @@ export function InsightsFooter({ onExport, onClear, disabled }: Props) {
         onConfirm={onClear}
         disabled={disabled}
       >
-        <Button danger size="small" disabled={disabled}>
+        <Button danger disabled={disabled}>
           {t("清除所有统计")}
         </Button>
       </Popconfirm>

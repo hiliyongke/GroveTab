@@ -315,7 +315,7 @@ export function SearchSettings({ settings, updateSettings }: SearchSettingsProps
             })();
           }}
         >
-          <Button size="small" danger>
+          <Button  danger>
             {t("清空最近搜索")}
           </Button>
         </Popconfirm>

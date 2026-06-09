@@ -554,7 +554,6 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
       <div className={styles["devtools-options"]}>
         {tool.id === "json-format" && (
           <Segmented
-            size="small"
             value={jsonAction}
             onChange={(value) => setJsonAction(value as JsonAction)}
             options={[
@@ -566,7 +565,6 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
         )}
         {tool.id === "json-to-ts" && (
           <Input
-            size="small"
             value={rootName}
             onChange={(event) => setRootName(event.target.value)}
             placeholder="Root"
@@ -575,7 +573,6 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
         )}
         {tool.id === "yaml-json" && (
           <Segmented
-            size="small"
             value={yamlAction}
             onChange={(value) => setYamlAction(value as "yamlToJson" | "jsonToYaml")}
             options={[
@@ -586,7 +583,6 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
         )}
         {tool.id === "csv-json" && (
           <Segmented
-            size="small"
             value={csvAction}
             onChange={(value) => setCsvAction(value as "csvToJson" | "jsonToCsv")}
             options={[
@@ -597,7 +593,6 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
         )}
         {tool.id === "url-query" && (
           <Segmented
-            size="small"
             value={urlQueryAction}
             onChange={(value) => setUrlQueryAction(value as UrlQueryAction)}
             options={[
@@ -608,7 +603,6 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
         )}
         {tool.id === "url-codec" && (
           <Segmented
-            size="small"
             value={urlAction}
             onChange={(value) => setUrlAction(value as UrlAction)}
             options={[
@@ -619,7 +613,6 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
         )}
         {tool.id === "base64-codec" && (
           <Segmented
-            size="small"
             value={base64Action}
             onChange={(value) => setBase64Action(value as Base64Action)}
             options={[
@@ -630,7 +623,6 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
         )}
         {tool.id === "html-entity" && (
           <Segmented
-            size="small"
             value={htmlEntityAction}
             onChange={(value) => setHtmlEntityAction(value as HtmlEntityAction)}
             options={[
@@ -641,7 +633,6 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
         )}
         {tool.id === "string-escape" && (
           <Segmented
-            size="small"
             value={escapeMode}
             onChange={(value) => setEscapeMode(value as "js" | "json" | "regex" | "shell")}
             options={[
@@ -654,7 +645,6 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
         )}
         {tool.id === "timestamp" && (
           <Segmented
-            size="small"
             value={timestampAction}
             onChange={(value) => setTimestampAction(value as TimestampAction)}
             options={[
@@ -665,7 +655,6 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
         )}
         {tool.id === "hash" && (
           <Segmented
-            size="small"
             value={hashAlgo}
             onChange={(value) => setHashAlgo(value as HashAlgorithm)}
             options={[
@@ -678,7 +667,6 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
         {tool.id === "radix" && (
           <>
             <Segmented
-              size="small"
               value={fromRadix}
               onChange={setFromRadix}
               options={[
@@ -690,7 +678,6 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
             />
             <ArrowRightLeft size={14} className={styles["devtools-option-arrow"]} />
             <Segmented
-              size="small"
               value={toRadix}
               onChange={setToRadix}
               options={[
@@ -704,7 +691,6 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
         )}
         {tool.id === "css-unit" && (
           <Input
-            size="small"
             type="number"
             value={baseFontSize}
             onChange={(event) => setBaseFontSize(Number(event.target.value) || 16)}
@@ -715,7 +701,6 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
         )}
         {tool.id === "random-gen" && (
           <Segmented
-            size="small"
             value={randomAction}
             onChange={(value) => setRandomAction(value as RandomAction)}
             options={[
@@ -727,7 +712,6 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
         )}
         {tool.id === "random-gen" && randomAction !== "uuid" && (
           <Input
-            size="small"
             type="number"
             value={randomLen}
             onChange={(event) => setRandomLen(Number(event.target.value) || 1)}
@@ -739,7 +723,6 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
         )}
         {tool.id === "basic-auth" && (
           <Segmented
-            size="small"
             value={basicAuthAction}
             onChange={(value) => setBasicAuthAction(value as "encode" | "decode")}
             options={[
@@ -753,14 +736,12 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
       {tool.id === "regex-test" && (
         <div className={styles["devtools-two-col"]}>
           <Input
-            size="small"
             prefix={<Regex size={14} />}
             placeholder={t('正则')}
             value={regexPattern}
             onChange={(event) => setRegexPattern(event.target.value)}
           />
           <Input
-            size="small"
             placeholder={t('标志')}
             value={regexFlags}
             onChange={(event) => setRegexFlags(event.target.value.replace(/[^gimsuy]/g, ""))}
@@ -771,7 +752,6 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
       {tool.id === "json-path" && (
         <div className={styles["devtools-two-col"]}>
           <Input
-            size="small"
             prefix={<Braces size={14} />}
             placeholder="JSON Path, e.g. $.user.name"
             value={regexPattern}
@@ -877,7 +857,6 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
             </Text>
             <Tooltip title={copied ? t('已复制') : t('复制')}>
               <Button
-                size="small"
                 type="text"
                 onClick={() => void handleCopy()}
                 icon={copied ? <Check size={14} /> : <Copy size={14} />}

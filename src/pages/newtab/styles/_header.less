@@ -36,7 +36,7 @@
 .app-header-shell {
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: @z-header;
 
   /* Flex + 绝对居中：左右自然流式布局，搜索栏绝对定位真居中 */
   .app-header-flex-center();
@@ -207,7 +207,7 @@
     color-mix(in srgb, var(--ant-color-bg-elevated) 66%, transparent)
   );
   border: 1px solid color-mix(in srgb, var(--ant-color-border-secondary) 72%, transparent);
-  border-radius: 999px;
+  border-radius: @app-radius-pill;
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, var(--app-acrylic-highlight, #ffffff) 28%, transparent),
     0 10px 32px color-mix(in srgb, var(--ant-color-text) 10%, transparent);

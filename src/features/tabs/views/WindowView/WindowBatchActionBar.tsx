@@ -158,20 +158,18 @@ export const WindowBatchActionBar = memo(function WindowBatchActionBar() {
           <Typography.Text className={styles["app-batch-bar__summary-copy"]}>
             {t("已选 {count} 项", { count: selectedCount })}
           </Typography.Text>
-          <Button type="link" size="small" onClick={handleSelectAll}>
+          <Button type="link" onClick={handleSelectAll}>
             {t("全选")}
           </Button>
         </Flex>
         <Flex align="center" gap={6} className={styles["app-batch-bar__actions"]}>
           <Button
-            size="small"
             icon={<ArrowRightLeft size={ICON_SIZE.SMALL} />}
             onClick={() => setMoveModalOpen(true)}
           >
             {t("移动到窗口")}
           </Button>
           <Button
-            size="small"
             danger
             icon={<X size={ICON_SIZE.SMALL} className={styles["app-batch-bar__danger-icon"]} />}
             loading={busy}
@@ -180,7 +178,6 @@ export const WindowBatchActionBar = memo(function WindowBatchActionBar() {
             {t("关闭")}
           </Button>
           <Button
-            size="small"
             icon={
               <Inbox size={ICON_SIZE.SMALL} className={styles["app-batch-bar__secondary-icon"]} />
             }
@@ -190,14 +187,13 @@ export const WindowBatchActionBar = memo(function WindowBatchActionBar() {
             {t("归档")}
           </Button>
           <Button
-            size="small"
             icon={<FolderPlus size={ICON_SIZE.SMALL} />}
             onClick={() => void handleBatchGroup()}
           >
             {t("创建分组")}
           </Button>
         </Flex>
-        <Button type="text" size="small" onClick={exitSelectionMode}>
+        <Button type="text" onClick={exitSelectionMode}>
           {t("取消")}
         </Button>
       </div>

@@ -423,7 +423,6 @@ export const TabItem = memo(function TabItem({
           <Tooltip title={isPinned ? t("取消固定") : t("固定")}>
             <Button
               type="text"
-              size="small"
               icon={<Pin size={ICON_SIZE.SMALL} fill={isPinned ? "currentColor" : "none"} />}
               onClick={handleTogglePin}
               className={[styles["app-tab-item-action"], isPinned ? styles["is-active"] : ""].join(
@@ -436,7 +435,6 @@ export const TabItem = memo(function TabItem({
           <Tooltip title={t("复制链接")}>
             <Button
               type="text"
-              size="small"
               icon={<Link size={ICON_SIZE.SMALL} />}
               onClick={handleCopyLink}
               className={styles["app-tab-item-action"]}
@@ -447,7 +445,6 @@ export const TabItem = memo(function TabItem({
           <Tooltip title={isInQuickStart ? t("已在常用站点中") : t("添加到常用站点")}>
             <Button
               type="text"
-              size="small"
               icon={<Star size={ICON_SIZE.SMALL} fill={isInQuickStart ? "currentColor" : "none"} />}
               onClick={(e) => {
                 e.stopPropagation();
@@ -531,7 +528,6 @@ export const TabItem = memo(function TabItem({
             <Tooltip title={t("更多操作")}>
               <Button
                 type="text"
-                size="small"
                 icon={<MoreHorizontal size={ICON_SIZE.SMALL} />}
                 className={styles["app-tab-item-action"]}
                 onClick={(e) => e.stopPropagation()}
@@ -543,7 +539,6 @@ export const TabItem = memo(function TabItem({
           <Tooltip title={t("关闭标签页")}>
             <Button
               type="text"
-              size="small"
               danger
               icon={<X size={ICON_SIZE.SMALL} />}
               onClick={handleClose}

@@ -62,14 +62,12 @@ export class ErrorBoundary extends Component<
           )}
           <Flex gap={8}>
             <Button
-              size="small"
               icon={<RefreshCw size={14} />}
               onClick={this.handleRetry}
             >
               点击重试
             </Button>
             <Button
-              size="small"
               onClick={() => {
                 if (typeof window !== "undefined") window.close();
               }}

@@ -78,7 +78,7 @@ export function AppHeader({
               </span>{" "}
               {t("待处理")}
               {onTidy && (
-                <Button type="link" size="small" className="app-header-tidy-link" onClick={onTidy}>
+                <Button type="link" className="app-header-tidy-link" onClick={onTidy}>
                   {showBreatheDot && <span className="app-header-breathe-dot" />}
                   {t("一键整理")}
                 </Button>
@@ -106,10 +106,10 @@ export function AppHeader({
       <Flex align="center" className="app-header-right">
         <Space size={4}>
           <Tooltip title={t(`theme.${theme}`)}>
-            <Button size="small" type="text" icon={themeIcon} onClick={toggleTheme} aria-label={t(`theme.${theme}`)} />
+            <Button  type="text" icon={themeIcon} onClick={toggleTheme} aria-label={t(`theme.${theme}`)} />
           </Tooltip>
           <Tooltip title={t("设置")}>
-            <Button size="small" type="text" icon={<Settings size={ICON_SIZE.SMALL} />} onClick={onSettings} aria-label={t("设置")} />
+            <Button  type="text" icon={<Settings size={ICON_SIZE.SMALL} />} onClick={onSettings} aria-label={t("设置")} />
           </Tooltip>
         </Space>
       </Flex>

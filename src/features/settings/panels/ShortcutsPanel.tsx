@@ -125,7 +125,6 @@ function KeybindingRecorder({
       </Button>
       <Button
         type="text"
-        size="small"
         icon={<RotateCcw size={ICON_SIZE.MEDIUM} />}
         title={t("恢复默认")}
         aria-label={t("恢复默认")}

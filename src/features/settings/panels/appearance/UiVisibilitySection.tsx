@@ -105,7 +105,6 @@ export function UiVisibilitySection({ settings, updateSettings }: UiVisibilitySe
                   </div>
                 </div>
                 <Select
-                  size="small"
                   className={styles["appearance-quickstart-select"]}
                   value={settings.quickStartCardSize ?? "md"}
                   onChange={(v) => void updateSettings({ quickStartCardSize: v })}
@@ -194,7 +193,6 @@ export function UiVisibilitySection({ settings, updateSettings }: UiVisibilitySe
                   </div>
                 </div>
                 <Select
-                  size="small"
                   className={styles["appearance-quickstart-select"]}
                   value={settings.gridCardSize ?? "md"}
                   onChange={(v) => void updateSettings({ gridCardSize: v })}

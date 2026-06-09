@@ -77,7 +77,6 @@ export function DuplicatesModal({ groups, open, onClose, onRemoveGroup, onRemove
                 </Flex>
               ))}
               <Button
-                size="small"
                 danger
                 icon={<Trash2 size={12} />}
                 onClick={() => void onRemoveGroup(group)}

@@ -151,7 +151,6 @@ export function PermissionDiagnosticsPanel() {
           </Tag>
         </Space>
         <Button
-          size="small"
           icon={<RefreshCw size={ICON_SIZE.SMALL} />}
           loading={checking}
           onClick={() => {
@@ -220,7 +219,6 @@ export function PermissionDiagnosticsPanel() {
             {/* 授权按钮（仅可选权限且未授权时显示） */}
             {entry.status === "denied" && REQUESTABLE_PERMISSIONS.has(entry.permission) && (
               <Button
-                size="small"
                 type="primary"
                 icon={<ShieldCheck size={ICON_SIZE.SMALL} />}
                 loading={requesting === entry.permission}

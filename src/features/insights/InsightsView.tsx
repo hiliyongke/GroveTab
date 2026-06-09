@@ -110,7 +110,7 @@ export default function InsightsView({ onOpenArchive, onOpenSettings }: Props) {
         <Flex vertical align="center" gap={8} className="insights-error">
           <Typography.Text type="danger">{t("洞察数据加载失败")}</Typography.Text>
           <Typography.Text type="secondary">{error.message}</Typography.Text>
-          <Button size="small" onClick={reset}>
+          <Button onClick={reset}>
             {t("重试")}
           </Button>
         </Flex>

@@ -102,7 +102,6 @@ export function BrokenLinksModal({
             percent={progressPct}
             status="active"
             showInfo={false}
-            size="small"
             strokeLinecap="round"
           />
           <Flex align="center" gap={8} className="bookmark-broken-modal__running-actions">
@@ -110,7 +109,6 @@ export function BrokenLinksModal({
               {t("流式预览 — 失败项会立即出现在下方")}
             </Typography.Text>
             <Button
-              size="small"
               icon={<X size={ICON_SIZE.MICRO} />}
               onClick={onCancel}
               aria-label={t("停止检测")}
@@ -176,7 +174,6 @@ export function BrokenLinksModal({
                   </Typography.Text>
                   <Space size={4}>
                     <Button
-                      size="small"
                       type="text"
                       icon={<ExternalLink size={12} />}
                       aria-label={t("打开")}
@@ -191,7 +188,6 @@ export function BrokenLinksModal({
                       }}
                     >
                       <Button
-                        size="small"
                         type="text"
                         danger
                         icon={<Trash2 size={12} />}

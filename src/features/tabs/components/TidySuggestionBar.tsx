@@ -185,7 +185,6 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
             </Typography.Text>
             <Space size={4} className={styles["tidy-suggestion__summary-actions"]}>
               <Button
-                size="small"
                 loading={busy}
                 onClick={() => {
                   void handleTidyAll();
@@ -197,7 +196,6 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
               <Tooltip title={expanded ? t("折叠") : t("展开")}>
                 <Button
                   type="text"
-                  size="small"
                   icon={
                     <ChevronDown
                       size={ICON_SIZE.SMALL}
@@ -210,7 +208,6 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
               <Tooltip title={t("忽略")}>
                 <Button
                   type="text"
-                  size="small"
                   icon={
                     <X size={ICON_SIZE.SMALL} className={styles["tidy-suggestion__dismiss-icon"]} />
                   }
@@ -241,7 +238,6 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                   {t("重复标签")}
                 </Typography.Text>
                 <Button
-                  size="small"
                   type="link"
                   onClick={() => setPreviewOpen(true)}
                   className={styles["tidy-suggestion__link-action"]}
@@ -249,7 +245,6 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                   {t("预览")}
                 </Button>
                 <Button
-                  size="small"
                   type="link"
                   loading={busy}
                   onClick={handleMergeAll}
@@ -259,7 +254,6 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                 </Button>
               </Flex>
               <List
-                size="small"
                 dataSource={dupGroups}
                 className={styles["tidy-suggestion__list"]}
                 renderItem={(group) => (
@@ -269,7 +263,6 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                     actions={[
                       <Button
                         key="merge"
-                        size="small"
                         loading={busy}
                         onClick={() => handleMergeGroup(group)}
                       >
@@ -308,7 +301,6 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                   {t("闲置标签")}
                 </Typography.Text>
                 <Button
-                  size="small"
                   type="link"
                   loading={busy}
                   onClick={() => {
@@ -320,7 +312,6 @@ export function TidySuggestionBar({ expandSignal = 0 }: TidySuggestionBarProps) 
                 </Button>
               </Flex>
               <List
-                size="small"
                 dataSource={idleTabs}
                 className={styles["tidy-suggestion__list"]}
                 renderItem={(item) => (

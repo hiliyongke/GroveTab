@@ -212,8 +212,15 @@ function chromeExtensionPlugin() {
 
       // 构建翻译文件（哈希命名）并获取 manifest
       const i18nManifest = buildI18nAssets();
-      // 注入到 HTML 的内联脚本：window.__I18N_MANIFEST__ = { "zh-CN": "/i18n/zh-CN.xxx.json", ... }
-      const i18nManifestScript = `<script>window.__I18N_MANIFEST__=${JSON.stringify(i18nManifest)};</script>`;
+
+      const newtabDir = resolve(__dirname, "dist/src/pages/newtab");
+      mkdirSync(newtabDir, { recursive: true });
+
+      // 写入独立 JS 文件（非内联，避免 CSP inline-script 拦截）
+      writeFileSync(
+        resolve(newtabDir, "i18n-manifest.js"),
+        `window.__I18N_MANIFEST__=${JSON.stringify(i18nManifest)};\n`,
+      );
 
       // 注入全部构建产物 CSS，避免多入口/懒加载样式因文件顺序不稳定而丢失
       const assetsDir = resolve(__dirname, "dist/assets");
@@ -227,9 +234,6 @@ function chromeExtensionPlugin() {
         .filter((file) => file.startsWith("popup-"))
         .map((file) => `<link rel="stylesheet" href="/assets/${file}" />`)
         .join("\n    ");
-
-      const newtabDir = resolve(__dirname, "dist/src/pages/newtab");
-      mkdirSync(newtabDir, { recursive: true });
       copyFileSync(
         resolve(__dirname, "src/pages/newtab/theme-init.js"),
         resolve(newtabDir, "theme-init.js"),
@@ -246,7 +250,7 @@ function chromeExtensionPlugin() {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>${BUILD_BRAND.name}</title>
-    ${i18nManifestScript}
+    <script src="./i18n-manifest.js"></script>
     <script src="./theme-init.js"></script>
     <link rel="stylesheet" href="./prepaint.css" />
     ${cssLinks}
@@ -256,11 +260,16 @@ function chromeExtensionPlugin() {
       );
 
       mkdirSync(resolve(__dirname, "dist/src/pages/popup"), { recursive: true });
+      // 复制 i18n manifest 到 popup 目录，避免跨目录引用
+      copyFileSync(
+        resolve(newtabDir, "i18n-manifest.js"),
+        resolve(__dirname, "dist/src/pages/popup/i18n-manifest.js"),
+      );
       writeFileSync(
         resolve(__dirname, "dist/src/pages/popup/index.html"),
         `<!DOCTYPE html>
 <html lang="zh-CN">
-  <head><meta charset="UTF-8" /><title>${BUILD_BRAND.name} Popup</title>${i18nManifestScript}${popupCssLinks}</head>
+  <head><meta charset="UTF-8" /><title>${BUILD_BRAND.name} Popup</title><script src="./i18n-manifest.js"></script>${popupCssLinks}</head>
   <body><div id="root"></div><script type="module" src="/popup.js"></script></body>
 </html>`,
       );

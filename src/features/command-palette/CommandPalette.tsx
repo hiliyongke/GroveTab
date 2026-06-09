@@ -217,7 +217,6 @@ export function CommandPalette() {
         {query && (
           <Button
             type="text"
-            size="small"
             className={styles["command-palette__clear"]}
             onClick={clearQuery}
             icon={<X size={14} />}

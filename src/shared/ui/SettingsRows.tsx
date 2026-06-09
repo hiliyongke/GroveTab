@@ -36,7 +36,7 @@ export function SwitchRow({ label, checked, onChange, className, labelClassName 
   return (
     <Flex align="center" justify="space-between" className={className}>
       <span className={labelClassName}>{label}</span>
-      <Switch size="small" checked={checked} onChange={onChange} />
+      <Switch checked={checked} onChange={onChange} />
     </Flex>
   );
 }
@@ -66,7 +66,6 @@ export function SegmentedRow<T extends string>({
     <Flex align="center" justify="space-between" className={className}>
       <span className={labelClassName}>{label}</span>
       <Segmented
-        size="small"
         value={value}
         options={options}
         onChange={(v) => onChange(v as T)}

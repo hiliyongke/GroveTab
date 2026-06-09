@@ -246,7 +246,6 @@ export const CompactView = memo(function CompactView({ filterQuery = "" }: Compa
       <Flex align="center" gap="small" className={toolbarStyles["compact-toolbar"]}>
         <span className={toolbarStyles["compact-toolbar-label"]}>{t("排序：")}</span>
         <Segmented<string>
-          size="small"
           value={sortMode}
           onChange={(value) => {
             void handleSortChange(value);

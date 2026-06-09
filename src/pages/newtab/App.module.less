@@ -1,3 +1,5 @@
+@import (reference) '@/shared/styles/_variables.less';
+
 .app-content-fill {
   min-height: 0;
 }
@@ -7,7 +9,7 @@
   position: absolute;
   left: -999px;
   top: -999px;
-  z-index: 9999;
+  z-index: @z-tooltip + 1;
   background: var(--ant-color-bg-container);
   padding: var(--ant-padding-xs) var(--ant-padding);
   border: 1px solid var(--ant-color-primary);

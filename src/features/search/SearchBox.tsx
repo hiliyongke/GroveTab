@@ -461,7 +461,6 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
                     <FeatureEmptyState
                       title={title}
                       icon={<Search size={20} className={styles["search-box-empty-icon"]} />}
-                      size="small"
                       hints={
                         normalizedQuery !== ""
                           ? [t("尝试使用 site: 语法限定域名"), t("尝试使用 in: 语法限定范围")]
@@ -526,12 +525,12 @@ export function SearchBox({ open, onOpenChange, onOpenHistory }: SearchBoxProps)
           <Flex align="center" gap={4}>
             {recentSearches.length > 0 && (
               <Tooltip title={t("清空最近搜索")}>
-                <Button type="text" size="small" loading={clearing} icon={<Trash2 size={13} />} onClick={handleClearRecent} />
+                <Button type="text" loading={clearing} icon={<Trash2 size={13} />} onClick={handleClearRecent} />
               </Tooltip>
             )}
             {effectiveHotSource === "trending" && (
               <Tooltip title={t("刷新热词")}>
-                <Button type="text" size="small" loading={refreshing} icon={<RefreshCw size={13} />} onClick={handleRefreshTrending} />
+                <Button type="text" loading={refreshing} icon={<RefreshCw size={13} />} onClick={handleRefreshTrending} />
               </Tooltip>
             )}
           </Flex>

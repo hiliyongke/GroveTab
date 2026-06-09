@@ -22,7 +22,7 @@ export function StorageQuotaCard({ info, loading }: Props) {
   }
 
   return (
-    <Card size="small" title={t("存储占用")}>
+    <Card title={t("存储占用")}>
       <Row gutter={24}>
         <Col xs={24} sm={12}>
           <Flex vertical gap={4}>
@@ -36,7 +36,6 @@ export function StorageQuotaCard({ info, loading }: Props) {
                     ? "active"
                     : "normal"
               }
-              size="small"
             />
             <Typography.Text type="secondary">
               {formatBytes(info.chromeStorageUsed)} / {formatBytes(info.chromeStorageTotal)}
@@ -49,7 +48,6 @@ export function StorageQuotaCard({ info, loading }: Props) {
             <Progress
               percent={info.opfsTotal > 0 ? Math.round(info.opfsRatio * 100) : 0}
               status={info.opfsRatio >= 0.9 ? "exception" : "normal"}
-              size="small"
             />
             <Typography.Text type="secondary">
               {formatBytes(info.opfsUsed)}

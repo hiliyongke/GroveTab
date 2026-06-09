@@ -35,7 +35,6 @@ export function TabsToolbar({ filterQuery, onFilterChange }: TabsToolbarProps) {
           <Tooltip title={t("布局模式")}>
             <span>
               <Segmented
-                size="small"
                 value={tabsLayout}
                 onChange={(v) =>
                   void updateSettings({ tabsLayout: v as "masonry" | "compact" | "grid" })
@@ -72,7 +71,6 @@ export function TabsToolbar({ filterQuery, onFilterChange }: TabsToolbarProps) {
           <Tooltip title={t("卡片密度")}>
             <span>
               <Segmented
-                size="small"
                 value={layoutDensity}
                 onChange={(v) =>
                   void updateSettings({

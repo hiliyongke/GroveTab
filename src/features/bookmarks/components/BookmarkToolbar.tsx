@@ -93,7 +93,6 @@ export function BookmarkToolbar({
   return (
     <div className="bookmark-toolbar">
       <Segmented
-        size="small"
         value={viewTab}
         onChange={(v) => onViewTabChange(v as BookmarkViewTab)}
         options={[
@@ -104,7 +103,6 @@ export function BookmarkToolbar({
       />
       <Input
         allowClear
-        size="small"
         prefix={<Search size={ICON_SIZE.SMALL} />}
         placeholder={t("搜索书签…")}
         value={query}
@@ -115,7 +113,6 @@ export function BookmarkToolbar({
       <Space size={4} wrap>
         <Tooltip title={t("添加书签")}>
           <Button
-            size="small"
             icon={<BookmarkPlus size={ICON_SIZE.SMALL} />}
             aria-label={t("添加书签")}
             onClick={onAddBookmark}
@@ -123,7 +120,6 @@ export function BookmarkToolbar({
         </Tooltip>
         <Tooltip title={t("新建文件夹")}>
           <Button
-            size="small"
             icon={<FolderPlus size={ICON_SIZE.SMALL} />}
             aria-label={t("新建文件夹")}
             onClick={onAddFolder}
@@ -132,7 +128,6 @@ export function BookmarkToolbar({
         <Tooltip title={t("排序方式")}>
           <Dropdown menu={{ items: sortItems }} trigger={["click"]}>
             <Button
-              size="small"
               aria-label={t("排序")}
               className={sortMode === "default" ? "bookmark-toolbar__sort--default" : "bookmark-toolbar__sort--active"}
             >
@@ -142,7 +137,7 @@ export function BookmarkToolbar({
         </Tooltip>
         <Dropdown menu={{ items: exportItems }} trigger={["click"]}>
           <Tooltip title={t("导出")}>
-            <Button size="small" icon={<Download size={ICON_SIZE.SMALL} />} aria-label={t("导出")} />
+            <Button  icon={<Download size={ICON_SIZE.SMALL} />} aria-label={t("导出")} />
           </Tooltip>
         </Dropdown>
         <Upload
@@ -155,7 +150,6 @@ export function BookmarkToolbar({
         >
           <Tooltip title={t("导入")}>
             <Button
-              size="small"
               icon={<UploadIcon size={ICON_SIZE.SMALL} />}
               aria-label={t("导入")}
               loading={importLoading}
@@ -165,7 +159,6 @@ export function BookmarkToolbar({
         {showSelection && (
           <Tooltip title={selectionMode ? t("退出多选") : t("进入多选模式")}>
             <Button
-              size="small"
               type={selectionMode ? "primary" : "default"}
               onClick={onToggleSelection}
               aria-pressed={selectionMode}
@@ -177,7 +170,6 @@ export function BookmarkToolbar({
         <Dropdown menu={{ items: toolItems }} trigger={["click"]}>
           <Tooltip title={t("工具")}>
             <Button
-              size="small"
               icon={<Wrench size={ICON_SIZE.SMALL} />}
               aria-label={t("工具")}
               loading={linkCheckRunning}

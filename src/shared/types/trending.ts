@@ -5,8 +5,7 @@
 /** 热榜平台分类 */
 export type TrendingCategory = 'all' | 'comprehensive' | 'tech' | 'entertainment' | 'community' | 'news';
 
-/** 热榜布局模式 */
-export type TrendingGroupMode = 'default' | 'compact';
+
 
 /** 单条热榜条目（标准化后的通用格式） */
 export interface TrendingItem {

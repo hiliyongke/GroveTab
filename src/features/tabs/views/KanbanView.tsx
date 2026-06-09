@@ -270,7 +270,6 @@ export const KanbanView = memo(function KanbanView() {
               placeholder={t("新增列")}
               suffix={
                 <Button
-                  size="small"
                   type="text"
                   icon={<Plus size={ICON_SIZE.SMALL} />}
                   onClick={() => void handleAddColumn()}
@@ -384,7 +383,6 @@ function KanbanColumnView({
       style={columnWrapStyle}
     >
       <Card
-        size="small"
         className={`${styles["app-kanban-column"]}${body.isOver ? ` ${styles["is-over"]}` : ""}`}
         style={columnCardStyle}
         classNames={{ body: styles["app-kanban-column__body"] }}
@@ -393,7 +391,6 @@ function KanbanColumnView({
             {/* 列拖拽句柄 —— 只有点住这里才能拖整列 */}
             <Button
               type="text"
-              size="small"
               icon={<GripVertical size={ICON_SIZE.TINY} />}
               {...sortable.attributes}
               {...sortable.listeners}
@@ -406,13 +403,12 @@ function KanbanColumnView({
             </Typography.Text>
             <Button
               type="text"
-              size="small"
               icon={<Save size={ICON_SIZE.TINY} />}
               onClick={onSaveAsSession}
               title={t("另存为归档会话")}
             />
             <Popconfirm title={t("删除列")} onConfirm={onRemove}>
-              <Button type="text" size="small" icon={<Trash2 size={ICON_SIZE.TINY} />} />
+              <Button type="text" icon={<Trash2 size={ICON_SIZE.TINY} />} />
             </Popconfirm>
           </Flex>
         }
@@ -527,7 +523,6 @@ function SortableCard({ card, columnId, offline, tabs, t, reduced, onRemove }: S
       </Typography.Text>
       <Button
         type="text"
-        size="small"
         icon={<X size={ICON_SIZE.TINY} />}
         onClick={(e) => {
           e.stopPropagation();
@@ -553,7 +548,6 @@ function ColumnNameEditor({
   if (editing) {
     return (
       <Input
-        size="small"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         autoFocus
@@ -577,7 +571,6 @@ function ColumnNameEditor({
       {t(col.name)}
       <Button
         type="text"
-        size="small"
         icon={<PenLine size={ICON_SIZE.TINY} />}
         onClick={() => setEditing(true)}
       />

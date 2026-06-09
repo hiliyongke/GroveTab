@@ -20,7 +20,7 @@
   z-index: 0;
   pointer-events: none;
   content: "";
-  border-radius: 999px;
+  border-radius: @app-radius-pill;
   opacity: 0.46;
   filter: blur(28px);
 }
@@ -145,7 +145,7 @@
 
 .app-content-shell {
   position: relative;
-  z-index: 1;
+  z-index: @z-content;
   width: 100%;
   padding: 0 var(--app-space-3) var(--app-space-4);
   margin: 0 auto;
@@ -255,7 +255,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 50;
+  z-index: @z-header + 1;
   width: 100vw;
   height: 100vh;
   pointer-events: none;

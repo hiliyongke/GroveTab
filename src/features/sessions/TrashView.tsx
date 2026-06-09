@@ -144,7 +144,7 @@ export function TrashView() {
               cancelText={t("取消")}
               okButtonProps={{ danger: true }}
             >
-              <Button danger size="small" icon={<Trash2 size={ICON_SIZE.SMALL} />}>
+              <Button danger icon={<Trash2 size={ICON_SIZE.SMALL} />}>
                 {t("清空回收站")}
               </Button>
             </Popconfirm>
@@ -154,7 +154,7 @@ export function TrashView() {
           {undoSnapshot && (
             <div className={styles["trash-undo-bar"]}>
               <Typography.Text>{t("回收站已清空")}</Typography.Text>
-              <Button size="small" onClick={() => void handleUndoClear()}>
+              <Button  onClick={() => void handleUndoClear()}>
                 {t("撤销")}
               </Button>
             </div>
@@ -164,7 +164,6 @@ export function TrashView() {
           {items.map((item) => (
             <Card
               key={item.id}
-              size="small"
               className={styles["trash-card"]}
               title={
                 <Flex align="center" gap="small">
@@ -178,7 +177,6 @@ export function TrashView() {
                 <Space size={4}>
                   <Tooltip title={t("恢复")}>
                     <Button
-                      size="small"
                       type="primary"
                       icon={<RotateCcw size={ICON_SIZE.SMALL} />}
                       onClick={() => void handleRestore(item)}
@@ -195,7 +193,6 @@ export function TrashView() {
                       okButtonProps={{ danger: true }}
                     >
                       <Button
-                        size="small"
                         danger
                         icon={<X size={ICON_SIZE.SMALL} />}
                       />
@@ -225,11 +222,11 @@ export function TrashView() {
                   ))}
                   {item.tabs.length > 8 && (
                     showMoreIds.has(item.id) ? (
-                      <Button size="small" type="link" onClick={(e) => { e.stopPropagation(); setShowMoreIds((prev) => { const n = new Set(prev); n.delete(item.id); return n; }); }}>
+                      <Button  type="link" onClick={(e) => { e.stopPropagation(); setShowMoreIds((prev) => { const n = new Set(prev); n.delete(item.id); return n; }); }}>
                         {t("展开全部")}
                       </Button>
                     ) : (
-                      <Button size="small" type="link" onClick={(e) => { e.stopPropagation(); setShowMoreIds((prev) => new Set(prev).add(item.id)); }}>
+                      <Button  type="link" onClick={(e) => { e.stopPropagation(); setShowMoreIds((prev) => new Set(prev).add(item.id)); }}>
                         {t("显示全部 {count} 个", { count: item.tabs.length - 8 })}
                       </Button>
                     )
@@ -246,7 +243,6 @@ export function TrashView() {
             {t("回收站内容已同步到")}
             <Button
               type="link"
-              size="small"
               onClick={() => {
                 window.dispatchEvent(
                   new CustomEvent("navigate", {

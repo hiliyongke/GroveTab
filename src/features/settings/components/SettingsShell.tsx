@@ -45,7 +45,6 @@ export function SettingsShell({
           tabPosition="left"
           activeKey={activeTab}
           onChange={(key) => onActiveTabChange(key as SettingsTabKey)}
-          size="small"
           className={styles["settings-tabs"]}
           items={tabs.map((tab) => ({
             key: tab.key,

@@ -196,7 +196,6 @@ export function DevToolsView() {
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               allowClear
-              size="small"
             />
           </div>
 
@@ -237,7 +236,6 @@ export function DevToolsView() {
               title={t("未找到匹配的工具")}
               description={t("搜索无结果")}
               icon={<Search size={ICON_SIZE.LARGE} />}
-              size="small"
               hints={[t("尝试不同的关键词"), t("检查拼写是否正确")]}
             />
             )}

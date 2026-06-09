@@ -101,6 +101,11 @@ export function loadDictionary(baseUrl?: string, force = false): Promise<boolean
 
   loadPromise = (async () => {
     try {
+      // 生产环境：built-in 字典已完整，跳过外部 fetch 避免 CSP 问题
+      if (!import.meta.env.DEV) {
+        dictReady = true;
+        return true;
+      }
       const [zhData, enData] = await Promise.all([
         fetchLocaleDict("zh-CN", baseUrl),
         fetchLocaleDict("en", baseUrl),

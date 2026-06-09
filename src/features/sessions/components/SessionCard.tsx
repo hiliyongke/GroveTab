@@ -238,7 +238,6 @@ export function SessionCard({
       <Flex align="center" gap={4} className={styles["archive-card__actions"]}>
         <Button
           type="primary"
-          size="small"
           icon={<Undo2 size={ICON_SIZE.MEDIUM} />}
           onClick={() => onRestore(session.id)}
         >
@@ -247,7 +246,6 @@ export function SessionCard({
         <Tooltip title={expanded ? t("收起") : t("展开")}>
           <Button
             type="text"
-            size="small"
             icon={
               <ChevronDown
                 size={ICON_SIZE.MEDIUM}
@@ -261,7 +259,6 @@ export function SessionCard({
         <Tooltip title={t("重命名")}>
           <Button
             type="text"
-            size="small"
             icon={<Pencil size={ICON_SIZE.MEDIUM} />}
             onClick={() => onStartRenaming(session)}
           />
@@ -270,7 +267,6 @@ export function SessionCard({
           <Tooltip title={t("分享")}>
             <Button
               type="text"
-              size="small"
               icon={<Share2 size={ICON_SIZE.MEDIUM} />}
               onClick={() => onShare(session.id)}
             />
@@ -285,7 +281,7 @@ export function SessionCard({
           okButtonProps={{ danger: true }}
         >
           <Tooltip title={t("删除")}>
-            <Button type="text" size="small" danger icon={<Trash2 size={ICON_SIZE.MEDIUM} />} />
+            <Button type="text" danger icon={<Trash2 size={ICON_SIZE.MEDIUM} />} />
           </Tooltip>
         </Popconfirm>
       </Flex>

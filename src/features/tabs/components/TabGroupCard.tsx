@@ -197,7 +197,6 @@ export const TabGroupCard = memo(function TabGroupCard({
             />
             {renaming ? (
               <Input
-                size="small"
                 autoFocus
                 value={titleDraft}
                 onChange={(event) => setTitleDraft(event.target.value)}
@@ -223,7 +222,6 @@ export const TabGroupCard = memo(function TabGroupCard({
               <Tooltip title={t("更多")}>
                 <Button
                   type="text"
-                  size="small"
                   loading={busy}
                   icon={busy ? undefined : <MoreHorizontal size={ICON_SIZE.SMALL} />}
                   aria-label={t("更多")}

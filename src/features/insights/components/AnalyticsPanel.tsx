@@ -90,7 +90,7 @@ export function AnalyticsPanel(props: Props) {
 
         {/* ② Top 10 访问域名 — 条形列表 */}
         <Col xs={24} md={12} lg={6}>
-          <Card size="small" title={t("Top 10 访问域名")} className={styles["insights-stat-card"]}>
+          <Card title={t("Top 10 访问域名")} className={styles["insights-stat-card"]}>
             {data.topDomains.length === 0 ? (
               <EmptyText text={t("暂无数据")} />
             ) : (
@@ -105,7 +105,7 @@ export function AnalyticsPanel(props: Props) {
 
         {/* ③ 使用频率前 5 — 条形列表 */}
         <Col xs={24} md={12} lg={6}>
-          <Card size="small" title={t("使用频率前 5")} className={styles["insights-stat-card"]}>
+          <Card title={t("使用频率前 5")} className={styles["insights-stat-card"]}>
             {data.topActions.length === 0 ? (
               <EmptyText text={t("暂无数据")} />
             ) : (
@@ -120,7 +120,7 @@ export function AnalyticsPanel(props: Props) {
 
         {/* ④ 累计归档 — 数字 */}
         <Col xs={24} md={12} lg={6}>
-          <Card size="small" title={t("累计归档")} className={styles["insights-stat-card"]}>
+          <Card title={t("累计归档")} className={styles["insights-stat-card"]}>
             {data.archiveStats.totalTabs === 0 ? (
               <EmptyText text={t("尚未归档")} />
             ) : (

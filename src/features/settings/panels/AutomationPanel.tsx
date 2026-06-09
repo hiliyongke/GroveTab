@@ -121,7 +121,6 @@ export function AutomationPanel() {
         <Typography.Text strong>{t("自动化规则")}</Typography.Text>
         <Button
           type="primary"
-          size="small"
           icon={<Plus size={ICON_SIZE.SMALL} />}
           onClick={handleAdd}
         >
@@ -138,7 +137,6 @@ export function AutomationPanel() {
         rules.map((rule) => (
           <Card
             key={rule.id}
-            size="small"
             className={
               rule.enabled
                 ? styles["automation-rule-card--enabled"]
@@ -158,13 +156,11 @@ export function AutomationPanel() {
               </Flex>
               <Flex align="center" gap="small">
                 <Switch
-                  size="small"
                   checked={rule.enabled}
                   onChange={(v) => void handleToggle(rule.id, v)}
                 />
                 <Button
                   type="text"
-                  size="small"
                   icon={<Edit3 size={ICON_SIZE.SMALL} />}
                   onClick={() => handleEdit(rule)}
                 />
@@ -174,7 +170,6 @@ export function AutomationPanel() {
                 >
                   <Button
                     type="text"
-                    size="small"
                     danger
                     icon={<Trash2 size={ICON_SIZE.SMALL} />}
                   />

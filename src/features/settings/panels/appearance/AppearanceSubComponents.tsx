@@ -80,7 +80,7 @@ export function VisibilityRow({
         <Typography.Text className={styles["appearance-visibility-title"]}>{label}</Typography.Text>
         <Typography.Text className={styles["appearance-visibility-hint"]}>{hint}</Typography.Text>
       </Flex>
-      <Switch size="small" checked={checked} onChange={onChange} />
+      <Switch checked={checked} onChange={onChange} />
     </Flex>
   );
 }

@@ -80,7 +80,6 @@ export function GroupCardShell({
 
   return (
     <Card
-      size="small"
       className={`${cardClasses} ${styles["app-domain-group-card"]}${className ? ` ${className}` : ""}`}
       classNames={{
         body: `${styles["app-domain-group-card__body"]}${bodyClassName ? ` ${bodyClassName}` : ""}`,

@@ -31,7 +31,6 @@ export function SelectionModeNotice({
 
   return (
     <Card
-      size="small"
       className={styles["app-selection-notice"]}
       classNames={{ body: styles["app-selection-notice__body"] }}
     >
@@ -53,13 +52,13 @@ export function SelectionModeNotice({
         </Flex>
 
         <Space size={6} wrap>
-          <Button size="small" onClick={onSelectAll}>
+          <Button  onClick={onSelectAll}>
             {t("全选")}
           </Button>
-          <Button size="small" onClick={onClearSelection} disabled={selectedCount === 0}>
+          <Button  onClick={onClearSelection} disabled={selectedCount === 0}>
             {t("取消选择")}
           </Button>
-          <Button size="small" type="text" onClick={onExitSelectionMode}>
+          <Button  type="text" onClick={onExitSelectionMode}>
             {t("退出多选")}
           </Button>
         </Space>

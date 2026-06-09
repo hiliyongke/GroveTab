@@ -200,7 +200,6 @@ export function DataPanel() {
         <Field label={t("配置预设")} hint={t("保存当前配置为预设，一键切换不同的使用场景")}>
           <Flex className={styles["data-panel__profile-create"]}>
             <Input
-              size="small"
               placeholder={t("输入预设名称…")}
               value={profileName}
               onChange={(e) => setProfileName(e.target.value)}
@@ -211,7 +210,6 @@ export function DataPanel() {
               className={styles["data-panel__profile-input"]}
             />
             <Button
-              size="small"
               type="primary"
               icon={<Save size={ICON_SIZE.MEDIUM} />}
               disabled={!profileName.trim()}
@@ -239,7 +237,6 @@ export function DataPanel() {
                 >
                   {editingId === profile.id ? (
                     <Input
-                      size="small"
                       value={editingName}
                       onChange={(e) => setEditingName(e.target.value)}
                       onPressEnter={() => {
@@ -260,7 +257,6 @@ export function DataPanel() {
                     <Tooltip title={t("应用此预设")}>
                       <Button
                         type="text"
-                        size="small"
                         icon={<ArrowLeftRight size={ICON_SIZE.MEDIUM} />}
                         onClick={() => { void handleApplyProfile(profile); }}
                       />
@@ -268,7 +264,6 @@ export function DataPanel() {
                     <Tooltip title={t("重命名")}>
                       <Button
                         type="text"
-                        size="small"
                         icon={<Pencil size={ICON_SIZE.MEDIUM} />}
                         onClick={() => { setEditingId(profile.id); setEditingName(profile.name); }}
                       />
@@ -285,7 +280,6 @@ export function DataPanel() {
                       <Tooltip title={t("删除")}>
                         <Button
                           type="text"
-                          size="small"
                           danger
                           icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
                         />
@@ -319,7 +313,6 @@ export function DataPanel() {
             </Flex>
             <Progress
               percent={Math.round(quotaInfo.percentage)}
-              size="small"
               status={quotaInfo.isWarning ? "exception" : "normal"}
               showInfo={false}
             />

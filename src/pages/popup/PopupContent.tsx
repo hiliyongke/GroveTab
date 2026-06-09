@@ -404,7 +404,6 @@ export function PopupContent() {
           <Tooltip title={!hasAnyTab ? t("当前没有可归档的标签页") : ""} mouseEnterDelay={0.3}>
             <Button
               type="text"
-              size="small"
               icon={<Save size={ICON_SIZE.SMALL} />}
               loading={archiving}
               disabled={!hasAnyTab || archiving}
@@ -420,7 +419,6 @@ export function PopupContent() {
           <Tooltip title={t("一键去重：保留最近访问的标签页，关闭重复项")}>
             <Button
               type="text"
-              size="small"
               icon={<CopyX size={ICON_SIZE.SMALL} />}
               disabled={dupCount === 0 || dedupRunning}
               loading={dedupRunning}
@@ -447,7 +445,6 @@ export function PopupContent() {
           >
             <Button
               type="text"
-              size="small"
               icon={<ArrowUpDown size={ICON_SIZE.SMALL} />}
               className="popup-toolbar-btn"
             >
@@ -458,7 +455,6 @@ export function PopupContent() {
           <Tooltip title={sortAsc ? t("降序") : t("升序")}>
             <Button
               type="text"
-              size="small"
               icon={
                 sortAsc ? (
                   <ArrowUp size={ICON_SIZE.SMALL} />
@@ -476,7 +472,6 @@ export function PopupContent() {
           <Tooltip title={t("按域名分组显示")}>
             <Button
               type="text"
-              size="small"
               icon={<FolderTree size={ICON_SIZE.SMALL} />}
               onClick={() => setGroupByDomain((v) => !v)}
               className={`popup-toolbar-btn ${groupByDomain ? "popup-toolbar-btn--active" : ""}`}
@@ -486,7 +481,6 @@ export function PopupContent() {
           <Tooltip title={overrideNewTab ? t("已接管新标签页") : t("已关闭接管，新标签页恢复默认")}>
             <Button
               type="text"
-              size="small"
               icon={
                 overrideNewTab ? (
                   <Monitor size={ICON_SIZE.SMALL} />
@@ -509,7 +503,6 @@ export function PopupContent() {
             <Tooltip title={t("关闭全部标签页")}>
               <Button
                 type="text"
-                size="small"
                 danger
                 disabled={recentTabs.length === 0}
                 icon={<Trash2 size={ICON_SIZE.SMALL} />}
@@ -524,7 +517,7 @@ export function PopupContent() {
         {displayTabs.length === 0 ? (
           <div className="popup-list-empty">
             {!loaded ? (
-              <Flex vertical align="center" gap={8}><Spin size="small" /><Text type="secondary" className="popup-empty-text">{t("加载中…")}</Text></Flex>
+              <Flex vertical align="center" gap={8}><Spin /><Text type="secondary" className="popup-empty-text">{t("加载中…")}</Text></Flex>
             ) : (
               <Empty
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -574,7 +567,6 @@ export function PopupContent() {
         <span className="popup-footer-brand">{BRAND.name}</span>
         <Button
           type="text"
-          size="small"
           icon={<LayoutGrid size={ICON_SIZE.SMALL} />}
           onClick={openNewTab}
           className="popup-footer-btn"

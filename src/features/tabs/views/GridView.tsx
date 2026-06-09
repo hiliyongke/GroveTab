@@ -386,7 +386,6 @@ function DomainTabsPanel({
         {/* 关闭按钮 —— antd Button（键盘可达 + ant 原生样式） */}
         <Button
           type="text"
-          size="small"
           aria-label="Close"
           onClick={onClose}
           icon={<X size={ICON_SIZE.MEDIUM} />}

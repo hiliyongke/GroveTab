@@ -73,7 +73,6 @@ export function ViewOnboardingModal({ open, onClose }: ViewOnboardingModalProps)
             return (
               <Card
                 key={view.id}
-                size="small"
                 className={styles.onboardingCard}
                 styles={{
                   body: {

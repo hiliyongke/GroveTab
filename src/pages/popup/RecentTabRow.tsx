@@ -62,7 +62,6 @@ export const RecentTabRow = memo(function RecentTabRow({
       <Tooltip title={t("关闭标签页 {title}", { title: tab.title })}>
         <Button
           type="text"
-          size="small"
           onClick={(e) => {
             e.stopPropagation();
             onClose();

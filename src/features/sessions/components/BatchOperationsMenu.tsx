@@ -136,7 +136,6 @@ export function BatchOperationsMenu({
       {!selectable ? (
         <Tooltip title={t('多选')}>
           <Button
-            size="small"
             type="text"
             icon={<CheckSquare size={ICON_SIZE.DEFAULT} />}
             onClick={() => onToggleSelectMode(true)}
@@ -151,7 +150,6 @@ export function BatchOperationsMenu({
           <Badge
             count={selectedCount}
             showZero={false}
-            size="small"
             classNames={{ indicator: "app-archive-batch-menu__badge-indicator" }}
           >
             <span className="app-archive-batch-menu__summary">
@@ -161,7 +159,7 @@ export function BatchOperationsMenu({
 
           {/* 批量操作下拉菜单 */}
           <Dropdown menu={{ items: menuItems }} placement="bottomRight" disabled={operating}>
-            <Button size="small" type="primary" loading={operating} disabled={selectedCount === 0}>
+            <Button  type="primary" loading={operating} disabled={selectedCount === 0}>
               {t('批量操作')}
             </Button>
           </Dropdown>
@@ -169,7 +167,6 @@ export function BatchOperationsMenu({
           {/* 取消选择 */}
           <Tooltip title={t('退出多选')}>
             <Button
-              size="small"
               type="text"
               icon={<X size={ICON_SIZE.DEFAULT} />}
               onClick={() => onToggleSelectMode(false)}
@@ -191,7 +188,7 @@ export function BatchOperationsMenu({
           okButtonProps={{ danger: true }}
         >
           <Tooltip title={t('清空全部')}>
-            <Button size="small" type="text" danger icon={<Trash2 size={ICON_SIZE.DEFAULT} />} />
+            <Button  type="text" danger icon={<Trash2 size={ICON_SIZE.DEFAULT} />} />
           </Tooltip>
         </Popconfirm>
       )}

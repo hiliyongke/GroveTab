@@ -59,7 +59,7 @@ export function QuickStartLayer({ onOpenSettings, variant = "default" }: QuickSt
   }, [sites]);
 
   if (!quickStartVisible) return null;
-  if (!loaded) return <Flex justify="center" style={{ padding: 16 }}><Spin size="small" /></Flex>;
+  if (!loaded) return <Flex justify="center" style={{ padding: 16 }}><Spin /></Flex>;
 
   if (variant === "sidebar") {
     return (
@@ -82,7 +82,6 @@ export function QuickStartLayer({ onOpenSettings, variant = "default" }: QuickSt
           <Tooltip title={t("切换左右布局")} placement="top">
             <Button
               type="text"
-              size="small"
               icon={<PanelLeft size={ICON_SIZE.SMALL} />}
               onClick={() => void updateSettings({ quickStartLayout: "sidebar" })}
               className={styles["quick-start-action-btn"]}
@@ -91,7 +90,6 @@ export function QuickStartLayer({ onOpenSettings, variant = "default" }: QuickSt
           <Tooltip title={t('添加站点')} placement="top">
             <Button
               type="text"
-              size="small"
               icon={<Plus size={ICON_SIZE.SMALL} />}
               onClick={() => setAddModalOpen(true)}
               className={styles["quick-start-action-btn"]}
@@ -101,7 +99,6 @@ export function QuickStartLayer({ onOpenSettings, variant = "default" }: QuickSt
             <Tooltip title={t('设置')} placement="top">
               <Button
                 type="text"
-                size="small"
                 icon={<Settings2 size={ICON_SIZE.SMALL} />}
                 onClick={onOpenSettings}
                 className={styles["quick-start-action-btn"]}
@@ -256,7 +253,6 @@ function QuickStartSidebar({
         <Tooltip title={t("切回上下布局")} placement="left">
           <Button
             type="text"
-            size="small"
             icon={<PanelLeft size={ICON_SIZE.SMALL} />}
             onClick={() => void updateSettings({ quickStartLayout: "stacked" })}
             className={styles["sidebar-action-btn"]}
@@ -267,7 +263,6 @@ function QuickStartSidebar({
         <Tooltip title={sidebarPosition === "left" ? t("切换至右侧") : t("切换至左侧")} placement="left">
           <Button
             type="text"
-            size="small"
             icon={<ArrowLeftRight size={ICON_SIZE.SMALL} />}
             onClick={() => void updateSettings({
               quickStartSidebarPosition: sidebarPosition === "left" ? "right" : "left",
@@ -280,7 +275,6 @@ function QuickStartSidebar({
         <Tooltip title={groupEnabled ? t("关闭分组") : t("开启分组")} placement="left">
           <Button
             type="text"
-            size="small"
             icon={<Layers size={ICON_SIZE.SMALL} />}
             onClick={() => void updateSettings({ speedDialGroupEnabled: !groupEnabled })}
             className={`${styles["sidebar-action-btn"]}${groupEnabled ? ` ${styles["sidebar-action-btn--active"]}` : ""}`}
@@ -291,7 +285,6 @@ function QuickStartSidebar({
         <Tooltip title={t("添加站点")} placement="left">
           <Button
             type="text"
-            size="small"
             icon={<Plus size={ICON_SIZE.SMALL} />}
             onClick={() => setAddModalOpen(true)}
             className={styles["sidebar-action-btn"]}

@@ -157,7 +157,6 @@ export const DomainGroupCard = memo(function DomainGroupCard({
             <Tooltip title={t("休眠整组")}>
               <Button
                 type="text"
-                size="small"
                 icon={<Moon size={ICON_SIZE.SMALL} />}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -174,7 +173,6 @@ export const DomainGroupCard = memo(function DomainGroupCard({
             <Tooltip title={t("关闭此域名所有标签页")}>
               <Button
                 type="text"
-                size="small"
                 danger
                 loading={closing}
                 disabled={closing}

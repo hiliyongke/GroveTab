@@ -74,7 +74,6 @@ export const ClosedTabItem = memo(
           <Tooltip title={t("恢复")}>
             <Button
               type="text"
-              size="small"
               icon={<RotateCcw size={ICON_SIZE.SMALL} />}
               onClick={() => onRestore(rec)}
             />
@@ -82,7 +81,6 @@ export const ClosedTabItem = memo(
           <Tooltip title={t("删除")}>
             <Button
               type="text"
-              size="small"
               icon={<X size={ICON_SIZE.SMALL} />}
               onClick={() => onDelete(rec)}
             />

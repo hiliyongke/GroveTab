@@ -45,7 +45,7 @@ export function BookmarkRecentList() {
     return (
       <Flex vertical align="center" gap={8} className={styles["recent-list__empty"]}>
         <Typography.Text type="secondary">{t("加载失败")}</Typography.Text>
-        <Button size="small" icon={<RefreshCw size={14} />} onClick={load}>{t("重试")}</Button>
+        <Button icon={<RefreshCw size={14} />} onClick={load}>{t("重试")}</Button>
       </Flex>
     );
   }
@@ -53,7 +53,7 @@ export function BookmarkRecentList() {
   if (loading) {
     return (
       <Flex justify="center" className={styles["recent-list__loading"]}>
-        <Spin size="small" />
+        <Spin />
       </Flex>
     );
   }

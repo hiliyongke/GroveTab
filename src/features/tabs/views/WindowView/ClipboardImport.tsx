@@ -95,7 +95,6 @@ export const ClipboardImport = memo(function ClipboardImport({ onRefresh }: Clip
         <span>
           <Button
             type="text"
-            size="small"
             icon={<ClipboardPaste size={ICON_SIZE.SMALL} />}
             onClick={() => setOpen(true)}
           />
@@ -119,7 +118,7 @@ export const ClipboardImport = memo(function ClipboardImport({ onRefresh }: Clip
             rows={6}
           />
           <Flex gap={8}>
-            <Button size="small" onClick={() => void handlePaste()}>
+            <Button  onClick={() => void handlePaste()}>
               {t("粘贴剪贴板")}
             </Button>
             {valid.length > 0 && (
@@ -144,7 +143,6 @@ export const ClipboardImport = memo(function ClipboardImport({ onRefresh }: Clip
                   <Button
                     key={w.id}
                     block
-                    size="small"
                     type={w.id === currentWindowId ? "primary" : "default"}
                     icon={<ExternalLink size={ICON_SIZE.SMALL} />}
                     loading={importing}

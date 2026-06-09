@@ -69,7 +69,6 @@ export function UndoToast() {
           <Button
             type="default"
             shape="round"
-            size="small"
             icon={<Archive size={ICON_SIZE.DEFAULT} />}
             onClick={() => openArchivePanel(activeToast.archivedSessionId)}
           >
@@ -80,7 +79,6 @@ export function UndoToast() {
         <Button
           type="primary"
           shape="round"
-          size="small"
           icon={<Undo2 size={ICON_SIZE.MEDIUM} />}
           onClick={handleUndo}
         >
@@ -90,7 +88,6 @@ export function UndoToast() {
         <Button
           type="text"
           shape="circle"
-          size="small"
           icon={<X size={ICON_SIZE.MEDIUM} />}
           onClick={dismissToast}
           aria-label="关闭"

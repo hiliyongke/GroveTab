@@ -240,7 +240,6 @@ export const WindowCard = memo(function WindowCard({
             <span className={styles["app-window-card-title-wrap"]}>
               {aliasEditing ? (
                 <Input
-                  size="small"
                   autoFocus
                   value={aliasDraft}
                   placeholder={t("窗口别名")}
@@ -297,7 +296,6 @@ export const WindowCard = memo(function WindowCard({
                 <Tooltip title={t("贴左半屏")}>
                   <Button
                     type="text"
-                    size="small"
                     icon={<PanelLeft size={ICON_SIZE.SMALL} />}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -310,7 +308,6 @@ export const WindowCard = memo(function WindowCard({
                 <Tooltip title={t("贴右半屏")}>
                   <Button
                     type="text"
-                    size="small"
                     icon={<PanelRight size={ICON_SIZE.SMALL} />}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -325,7 +322,6 @@ export const WindowCard = memo(function WindowCard({
             <Tooltip title={t("最大化")}>
               <Button
                 type="text"
-                size="small"
                 icon={<Maximize2 size={ICON_SIZE.SMALL} />}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -339,7 +335,6 @@ export const WindowCard = memo(function WindowCard({
               <Tooltip title={t("合并到当前窗口")}>
                 <Button
                   type="text"
-                  size="small"
                   icon={<Merge size={ICON_SIZE.SMALL} />}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -373,7 +368,6 @@ export const WindowCard = memo(function WindowCard({
               <Tooltip title={t("窗口颜色")}>
                 <Button
                   type="text"
-                  size="small"
                   icon={<Palette size={ICON_SIZE.SMALL} />}
                   className={styles["app-window-card-quick-btn"]}
                 />
@@ -383,7 +377,6 @@ export const WindowCard = memo(function WindowCard({
               <Tooltip title={t("更多")}>
                 <Button
                   type="text"
-                  size="small"
                   loading={busy}
                   icon={busy ? undefined : <MoreHorizontal size={ICON_SIZE.SMALL} />}
                   aria-label={t("更多")}

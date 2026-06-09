@@ -235,11 +235,10 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
           {step.desc}
         </Paragraph>
 
-        <Progress percent={progressPercent} size="small" showInfo={false} />
+        <Progress percent={progressPercent} showInfo={false} />
 
         <div className={styles["onboarding-tour__footer"]}>
           <Button
-            size="small"
             type="text"
             onClick={() => void finish()}
             className={styles["onboarding-tour__skip"]}
@@ -248,7 +247,6 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
           </Button>
           <Space size={8}>
             <Button
-              size="small"
               icon={<ArrowLeft size={ICON_SIZE.DEFAULT} />}
               disabled={stepIndex === 0}
               onClick={() => setStepIndex((idx) => Math.max(idx - 1, 0))}
@@ -257,7 +255,6 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
             </Button>
             {stepIndex < tourSteps.length - 1 ? (
               <Button
-                size="small"
                 type="primary"
                 iconPlacement="end"
                 icon={<ArrowRight size={ICON_SIZE.DEFAULT} />}
@@ -267,7 +264,6 @@ export function OnboardingCard({ onDismiss }: OnboardingCardProps) {
               </Button>
             ) : (
               <Button
-                size="small"
                 type="primary"
                 icon={<Check size={ICON_SIZE.DEFAULT} />}
                 onClick={() => void finish()}

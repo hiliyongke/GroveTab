@@ -30,13 +30,11 @@ export function DailyOpensCard({ data, timeRange, onTimeRangeChange, allZero }: 
 
   return (
     <Card
-      size="small"
       className={styles["insights-stat-card"]}
       title={
         <Flex justify="space-between" align="center">
           <Typography.Text>{t("每日打开次数")}</Typography.Text>
           <Segmented
-            size="small"
             value={timeRange}
             onChange={(v) => onTimeRangeChange(v as InsightsTimeRange)}
             options={[
@@ -52,7 +50,6 @@ export function DailyOpensCard({ data, timeRange, onTimeRangeChange, allZero }: 
         <FeatureEmptyState
           title={t("近 {n} 天暂无打开记录", { n: timeRange })}
           icon={<BarChart3 size={ICON_SIZE.LARGE} />}
-          size="small"
           hints={[t("继续使用扩展以生成洞察数据")]}
         />
       ) : (

@@ -362,21 +362,18 @@ function TabBarOrderEditor({ settings, updateSettings }: {
               <Flex gap={2}>
                 <Button
                   type="text"
-                  size="small"
                   icon={<ArrowUp size={ICON_SIZE.SMALL} />}
                   disabled={index === 0}
                   onClick={() => moveUp(index)}
                 />
                 <Button
                   type="text"
-                  size="small"
                   icon={<ArrowDown size={ICON_SIZE.SMALL} />}
                   disabled={index === ordered.length - 1}
                   onClick={() => moveDown(index)}
                 />
                 <Button
                   type="text"
-                  size="small"
                   icon={<EyeOff size={ICON_SIZE.SMALL} />}
                   danger={isHidden}
                   onClick={() => toggleHidden(view.id)}
