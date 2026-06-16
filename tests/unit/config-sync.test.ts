@@ -16,6 +16,7 @@ vi.mock("@/shared/config/storage-keys", () => ({
     speedDial: "k_speeddial",
     settingsSync: "k_sync",
     settingsSyncApplied: "k_sync_applied",
+    settingsSyncLastAt: "k_sync_last_at",
   },
 }));
 
@@ -86,6 +87,7 @@ import {
   pushConfigToSync,
   pushSmartSortToSync,
   pullAllConfigFromSync,
+  applyRemoteForKey,
   reloadStoresAfterPull,
 } from "@/services/config-sync";
 
@@ -206,6 +208,42 @@ describe("smart-sort（store-backed）", () => {
       weights: { recency: 9 },
       decayRate: 0.9,
     });
+  });
+});
+
+describe("applyRemoteForKey（实时单键应用）", () => {
+  it("应用更新的 storage-keyed 远端值到本地", async () => {
+    const ok = await applyRemoteForKey("featureFlags", {
+      version: 1,
+      updatedAt: Date.now() + 10_000,
+      value: { betaX: true },
+    });
+    expect(ok).toBe(true);
+    expect(localStore["k_flags"]).toEqual({ betaX: true });
+  });
+
+  it("应用 smartSort 远端值（setState）", async () => {
+    const ok = await applyRemoteForKey("smartSort", {
+      version: 1,
+      updatedAt: Date.now() + 10_000,
+      value: { enabled: true, weights: { recency: 3 }, decayRate: 0.2 },
+    });
+    expect(ok).toBe(true);
+    expect(smartSetState).toHaveBeenCalled();
+  });
+
+  it("远端不比已应用更新时返回 false", async () => {
+    localStore["k_sync_applied"] = { featureFlags: 9000 };
+    const ok = await applyRemoteForKey("featureFlags", {
+      version: 1,
+      updatedAt: 9000,
+      value: { a: true },
+    });
+    expect(ok).toBe(false);
+  });
+
+  it("载荷非法时返回 false", async () => {
+    expect(await applyRemoteForKey("featureFlags", undefined)).toBe(false);
   });
 });
 

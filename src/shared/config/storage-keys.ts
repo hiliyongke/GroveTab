@@ -70,6 +70,8 @@ export const STORAGE_KEYS = Object.freeze({
   settingsSync: key("settings_sync"),
   /** 本地标记：最近一次已应用的远端同步时间戳（chrome.storage.local） */
   settingsSyncApplied: key("settings_sync_applied"),
+  /** 本地标记：最近一次成功同步（推送/应用）的时间戳，用于状态展示 */
+  settingsSyncLastAt: key("settings_sync_last_at"),
 });
 
 /** 判断是否属于当前应用命名空间的存储键。 */

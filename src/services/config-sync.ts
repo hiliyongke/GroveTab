@@ -24,6 +24,7 @@ import { getSettings } from "@/repositories";
 import { useSettingsStore } from "@/store/settings-slice";
 import { useSpeedDialStore } from "@/store/speed-dial-slice";
 import { useSmartSortStore } from "@/store/smart-sort-slice";
+import { useSyncStatusStore } from "@/store/sync-status-slice";
 import { useFeatureFlagStore } from "@/shared/store/feature-flag-slice";
 import type { SortWeights } from "@/features/smart-sort/types";
 
@@ -75,6 +76,12 @@ const SYNCED_CONFIGS: readonly SyncedConfig[] = [
 
 const CONFIG_BY_LOCAL_KEY = new Map(SYNCED_CONFIGS.map((c) => [c.localKey, c]));
 
+/** 全部参与同步的 id（含 store-backed 的 smartSort） */
+const ALL_CONFIG_IDS: readonly ConfigKeyId[] = [
+  ...SYNCED_CONFIGS.map((c) => c.id),
+  "smartSort",
+];
+
 interface SyncItemPayload {
   version: number;
   updatedAt: number;
@@ -84,6 +91,15 @@ interface SyncItemPayload {
 /** sync item key = 命名空间前缀 + 配置 id */
 function syncKeyOf(id: ConfigKeyId): string {
   return `${STORAGE_KEYS.settingsSync}:${id}`;
+}
+
+const SYNC_KEY_PREFIX = `${STORAGE_KEYS.settingsSync}:`;
+
+/** 从 sync item key 反解出配置 id（非法返回 null）。 */
+function idFromSyncKey(key: string): ConfigKeyId | null {
+  if (!key.startsWith(SYNC_KEY_PREFIX)) return null;
+  const id = key.slice(SYNC_KEY_PREFIX.length) as ConfigKeyId;
+  return ALL_CONFIG_IDS.includes(id) ? id : null;
 }
 
 // ── 本地「已应用时间戳」标记（按 id） ──────────────────
@@ -125,10 +141,12 @@ export async function pushConfigToSync(id: ConfigKeyId): Promise<boolean> {
   try {
     await setStorageSync({ [syncKeyOf(id)]: payload });
     await setAppliedAt(id, payload.updatedAt);
+    useSyncStatusStore.getState().markSynced();
     return true;
   } catch (err) {
     // 单项超 8KB / 配额超限等：静默失败，本地配置不受影响。
     console.warn(`[config-sync] push "${id}" failed (可能超出 sync 配额)`, err);
+    useSyncStatusStore.getState().markError();
     return false;
   }
 }
@@ -161,9 +179,11 @@ export async function pushSmartSortToSync(): Promise<boolean> {
   try {
     await setStorageSync({ [syncKeyOf("smartSort")]: payload });
     await setAppliedAt("smartSort", payload.updatedAt);
+    useSyncStatusStore.getState().markSynced();
     return true;
   } catch (err) {
     console.warn("[config-sync] push \"smartSort\" failed", err);
+    useSyncStatusStore.getState().markError();
     return false;
   }
 }
@@ -246,6 +266,38 @@ export async function pullAllConfigFromSync(): Promise<ConfigKeyId[]> {
   return changed;
 }
 
+/**
+ * 应用单个配置键的远端载荷（供 sync 区实时监听调用）。
+ * @returns 实际应用返回 true（远端比本地已应用更新）；否则 false。
+ */
+export async function applyRemoteForKey(
+  id: ConfigKeyId,
+  payload: SyncItemPayload | undefined,
+): Promise<boolean> {
+  if (
+    payload === undefined ||
+    typeof payload.updatedAt !== "number" ||
+    payload.value === undefined
+  ) {
+    return false;
+  }
+  const appliedMap = await getAppliedMap();
+  if (payload.updatedAt <= (appliedMap[id] ?? 0)) return false;
+
+  if (id === "smartSort") {
+    applySmartSort(payload.value);
+  } else {
+    const config = SYNCED_CONFIGS.find((c) => c.id === id);
+    if (config === undefined) return false;
+    const value = config.transformOnApply ? config.transformOnApply(payload.value) : payload.value;
+    suppressNextChange(config.localKey, value);
+    await storageSet(config.localKey, value);
+  }
+  appliedMap[id] = payload.updatedAt;
+  await storageSet(STORAGE_KEYS.settingsSyncApplied, appliedMap);
+  return true;
+}
+
 /** 拉取后回灌受影响的 store，使 UI 立即反映同步结果。 */
 export async function reloadStoresAfterPull(changed: ConfigKeyId[]): Promise<void> {
   if (changed.length === 0) return;
@@ -309,16 +361,37 @@ function schedulePush(id: ConfigKeyId, delayMs = 1500): void {
 export function startConfigSyncWatcher(): void {
   if (storageUnsub === null) {
     storageUnsub = storageOnChanged((changes, areaName) => {
-      if (areaName !== "local") return;
       if (!isSyncEnabled()) return;
-      for (const localKey of Object.keys(changes)) {
-        const config = CONFIG_BY_LOCAL_KEY.get(localKey);
-        if (config === undefined) continue;
-        const change = changes[localKey];
-        // 回环抑制：本次变更是拉取写入造成的 → 跳过推送。
-        if (consumeSuppressed(localKey, change?.newValue)) continue;
-        if (change?.newValue === undefined) continue; // 删除不推送
-        schedulePush(config.id);
+
+      // local 区变更 → 防抖推送到 sync（带回环抑制）
+      if (areaName === "local") {
+        for (const localKey of Object.keys(changes)) {
+          const config = CONFIG_BY_LOCAL_KEY.get(localKey);
+          if (config === undefined) continue;
+          const change = changes[localKey];
+          // 回环抑制：本次变更是拉取写入造成的 → 跳过推送。
+          if (consumeSuppressed(localKey, change?.newValue)) continue;
+          if (change?.newValue === undefined) continue; // 删除不推送
+          schedulePush(config.id);
+        }
+        return;
+      }
+
+      // sync 区变更（来自其它设备）→ 实时应用到本地（带 appliedAt 防自我回灌）
+      if (areaName === "sync") {
+        void (async () => {
+          const applied: ConfigKeyId[] = [];
+          for (const syncKey of Object.keys(changes)) {
+            const id = idFromSyncKey(syncKey);
+            if (id === null) continue;
+            const payload = changes[syncKey]?.newValue as SyncItemPayload | undefined;
+            if (await applyRemoteForKey(id, payload)) applied.push(id);
+          }
+          if (applied.length > 0) {
+            await reloadStoresAfterPull(applied);
+            useSyncStatusStore.getState().markSynced();
+          }
+        })();
       }
     });
   }
@@ -359,11 +432,15 @@ export async function initConfigSync(options?: { seed?: boolean }): Promise<void
   // 用 repo 直读 storage 判断开关，避免依赖 settings store 的加载时序。
   const enabled = (await getSettings()).settingsSyncEnabled === true;
   if (!enabled) return;
+  // 载入持久化的「上次同步时间」用于状态展示
+  await useSyncStatusStore.getState().loadStatus();
   try {
     const changed = await pullAllConfigFromSync();
     await reloadStoresAfterPull(changed);
     if (options?.seed === true) {
       await pushAllConfigToSync();
+    } else if (changed.length > 0) {
+      useSyncStatusStore.getState().markSynced();
     }
   } catch (err) {
     console.warn("[config-sync] init failed", err);

@@ -9,7 +9,7 @@
  *   - 清空所有归档
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Button,
   Space,
@@ -47,6 +47,7 @@ import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { feedback } from "@/shared/ui/feedback";
 import { useT } from "@/shared/i18n";
 import { useSettingsStore, useSpeedDialStore } from "@/store";
+import { useSyncStatusStore } from "@/store/sync-status-slice";
 import { useFeatureFlagStore } from "@/shared/store/feature-flag-slice";
 import { exportSessionsJSON, downloadFile, parseImportJSON } from "@/shared/utils/import-export";
 import { getArchivedSessions, saveSessions } from "@/services";
@@ -75,6 +76,9 @@ export function DataPanel() {
   const settings = useSettingsStore((s) => s.settings);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
   const resetSettings = useSettingsStore((s) => s.resetSettings);
+  const syncLastAt = useSyncStatusStore((s) => s.lastSyncedAt);
+  const syncing = useSyncStatusStore((s) => s.syncing);
+  const syncError = useSyncStatusStore((s) => s.error);
 
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [quotaInfo, setQuotaInfo] = useState<QuotaInfo | null>(null);
@@ -86,7 +90,22 @@ export function DataPanel() {
   useEffect(() => {
     void getQuotaStatus().then(setQuotaInfo);
     void getProfiles().then(setProfiles);
+    void useSyncStatusStore.getState().loadStatus();
   }, []);
+
+  /** 同步状态文案（同步中 / 失败 / 上次同步相对时间 / 尚未同步）。 */
+  const syncStatusText = useMemo(() => {
+    if (syncing) return t("同步中…");
+    if (syncError) return t("上次同步失败，将在下次变更时自动重试");
+    if (syncLastAt === null) return t("尚未同步");
+    const diff = Date.now() - syncLastAt;
+    const min = Math.floor(diff / 60000);
+    if (min < 1) return t("上次同步：刚刚");
+    if (min < 60) return t("上次同步：{n} 分钟前", { n: min });
+    const hr = Math.floor(min / 60);
+    if (hr < 24) return t("上次同步：{n} 小时前", { n: hr });
+    return t("上次同步：{date}", { date: new Date(syncLastAt).toLocaleString() });
+  }, [syncing, syncError, syncLastAt, t]);
 
   const handleCreateProfile = useCallback(async () => {
     if (!profileName.trim()) return;
@@ -445,6 +464,14 @@ export function DataPanel() {
               }}
             />
           </Flex>
+          {settings.settingsSyncEnabled === true && (
+            <Typography.Text
+              type={syncError ? "danger" : "secondary"}
+              className={styles["data-panel__import-status"]}
+            >
+              {syncStatusText}
+            </Typography.Text>
+          )}
         </Field>
       </section>
 
