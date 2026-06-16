@@ -903,6 +903,118 @@ export function urlParse(input: string): DevToolResult {
   }
 }
 
+// ── User-Agent 解析 ───────────────────────────────────
+
+/** 从 UA 片段中提取 "Name/Version" 形式的版本号 */
+function matchVersion(ua: string, name: string): string {
+  const re = new RegExp(`${name}[/ ]([\\d._]+)`, "i");
+  const m = re.exec(ua);
+  return m?.[1]?.replace(/_/g, ".") ?? "";
+}
+
+/**
+ * 解析 User-Agent 字符串，识别浏览器、渲染引擎、操作系统与设备类型。
+ *
+ * 纯本地规则匹配，不依赖任何第三方库；覆盖主流浏览器与平台。
+ * 无法识别的字段返回 "Unknown"，保证输出结构稳定。
+ */
+export function uaParse(input: string): DevToolResult {
+  const ua = input.trim();
+  if (!ua) return { output: "", error: translate("输入为空") };
+
+  // ── 设备类型 ──
+  const isTablet = /iPad|Tablet|PlayBook|Silk|(Android(?!.*Mobile))/i.test(ua);
+  const isMobile = /Mobi|iPhone|iPod|Android.*Mobile|Windows Phone|IEMobile/i.test(ua);
+  const isBot = /bot|crawl|spider|slurp|bingpreview|facebookexternalhit|mediapartners/i.test(ua);
+  const deviceType = isBot ? "bot" : isTablet ? "tablet" : isMobile ? "mobile" : "desktop";
+
+  // ── 操作系统 ──
+  let osName = "Unknown";
+  let osVersion = "";
+  if (/Windows NT/i.test(ua)) {
+    osName = "Windows";
+    const ntMap: Record<string, string> = {
+      "10.0": "10/11",
+      "6.3": "8.1",
+      "6.2": "8",
+      "6.1": "7",
+      "6.0": "Vista",
+      "5.1": "XP",
+    };
+    const nt = matchVersion(ua, "Windows NT");
+    osVersion = ntMap[nt] ?? nt;
+  } else if (/iPhone|iPad|iPod/i.test(ua)) {
+    osName = "iOS";
+    osVersion = matchVersion(ua, "OS").replace(/\./g, ".") || matchVersion(ua, "Version");
+  } else if (/Mac OS X/i.test(ua)) {
+    osName = "macOS";
+    osVersion = matchVersion(ua, "Mac OS X");
+  } else if (/Android/i.test(ua)) {
+    osName = "Android";
+    osVersion = matchVersion(ua, "Android");
+  } else if (/CrOS/i.test(ua)) {
+    osName = "ChromeOS";
+  } else if (/Linux/i.test(ua)) {
+    osName = "Linux";
+  }
+
+  // ── 浏览器（顺序敏感：特定品牌优先于通用 Chrome/Safari） ──
+  let browserName = "Unknown";
+  let browserVersion = "";
+  if (/Edg(?:e|A|iOS)?\//i.test(ua)) {
+    browserName = "Edge";
+    browserVersion = matchVersion(ua, "Edg(?:e|A|iOS)?");
+  } else if (/OPR\/|Opera/i.test(ua)) {
+    browserName = "Opera";
+    browserVersion = matchVersion(ua, "OPR") || matchVersion(ua, "Version") || matchVersion(ua, "Opera");
+  } else if (/SamsungBrowser\//i.test(ua)) {
+    browserName = "Samsung Internet";
+    browserVersion = matchVersion(ua, "SamsungBrowser");
+  } else if (/Firefox\/|FxiOS\//i.test(ua)) {
+    browserName = "Firefox";
+    browserVersion = matchVersion(ua, "Firefox") || matchVersion(ua, "FxiOS");
+  } else if (/MSIE |Trident\//i.test(ua)) {
+    browserName = "Internet Explorer";
+    browserVersion = matchVersion(ua, "MSIE") || matchVersion(ua, "rv");
+  } else if (/Chrome\/|CriOS\//i.test(ua)) {
+    browserName = "Chrome";
+    browserVersion = matchVersion(ua, "Chrome") || matchVersion(ua, "CriOS");
+  } else if (/Safari\//i.test(ua) && /Version\//i.test(ua)) {
+    browserName = "Safari";
+    browserVersion = matchVersion(ua, "Version");
+  }
+
+  // ── 渲染引擎 ──
+  let engineName = "Unknown";
+  let engineVersion = "";
+  if (/Gecko\//i.test(ua) && /Firefox/i.test(ua)) {
+    engineName = "Gecko";
+    engineVersion = matchVersion(ua, "rv");
+  } else if (/AppleWebKit\//i.test(ua)) {
+    engineName = /Edg|Chrome|OPR/i.test(ua) ? "Blink" : "WebKit";
+    engineVersion = matchVersion(ua, "AppleWebKit");
+  } else if (/Trident\//i.test(ua)) {
+    engineName = "Trident";
+    engineVersion = matchVersion(ua, "Trident");
+  }
+
+  const result = {
+    browser: { name: browserName, version: browserVersion || "Unknown" },
+    engine: { name: engineName, version: engineVersion || "Unknown" },
+    os: { name: osName, version: osVersion || "Unknown" },
+    device: { type: deviceType },
+  };
+
+  return {
+    output: JSON.stringify(result, null, 2),
+    meta: translate("{browser} · {os} · {device}", {
+      browser: browserName,
+      os: osName,
+      device: deviceType,
+    }),
+  };
+}
+
 // ── Curl 转 Fetch ─────────────────────────────────────
 
 /** 简易 Curl 转 Fetch */

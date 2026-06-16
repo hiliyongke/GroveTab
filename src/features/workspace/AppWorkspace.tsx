@@ -24,7 +24,7 @@ import { useT } from "@/shared/i18n";
 import { useViewOnboarding } from "@/shared/hooks";
 import type { ViewMode } from "@/shared/config/views";
 import { getViewComponentMap } from "@/shared/config/view-registry";
-import { ViewOnboardingModal } from "./ViewOnboardingModal";
+import { WelcomeTour } from "./WelcomeTour";
 
 interface AppWorkspaceProps {
   /** 初始化是否完成 */
@@ -139,8 +139,8 @@ export function AppWorkspace({
     <>
       {showOnboarding && <OnboardingCard onDismiss={onDismissOnboarding} />}
 
-      {/* 视图引导弹窗 */}
-      <ViewOnboardingModal open={showViewOnboarding} onClose={dismissViewOnboarding} />
+      {/* 首次使用的多步高亮引导 */}
+      <WelcomeTour open={showViewOnboarding} onClose={dismissViewOnboarding} />
 
       {initError !== null && (
         <Alert

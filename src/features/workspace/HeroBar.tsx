@@ -58,11 +58,12 @@ export function HeroBar({
           hover 态、transition 全部交给 .app-hero-search（CSS），
           避免在 React 里写 onMouseEnter/Leave 副作用。 */}
       {showSearch && (
-        <div ref={sentinelRef} className="app-hero-search-wrap">
+        <div ref={sentinelRef} className="app-hero-search-wrap" data-tour="search">
           <Input
             className="app-hero-search"
             size="large"
             readOnly
+            aria-label={t("搜索标签页...")}
             placeholder={t("搜索标签页...")}
             prefix={
               <Search

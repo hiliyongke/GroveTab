@@ -6,7 +6,7 @@
  *   - 页面内快捷键自定义（可录制新快捷键）
  */
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { Alert, Button, Flex, Typography } from "antd";
 import { RotateCcw } from "lucide-react";
 
@@ -22,6 +22,7 @@ import {
 import { Field } from "@/features/settings/components/Field";
 import { BRAND } from "@/shared/config/brand";
 import { translate } from "@/shared/i18n/core";
+import { VIEW_CONFIGS } from "@/shared/config/views";
 
 /** Chrome 全局快捷键（只读） */
 const GLOBAL_SHORTCUTS = [
@@ -30,16 +31,18 @@ const GLOBAL_SHORTCUTS = [
   { label: translate("切换搜索"), keys: "Alt + K" },
 ];
 
-/** 视图切换快捷键（只读） */
-const VIEW_SHORTCUTS = [
-  { label: translate("标签视图"), keys: "⌘1 / Ctrl+1", desc: translate("标签视图") },
-  { label: translate("时间轴视图"), keys: "⌘2 / Ctrl+2", desc: translate("时间轴视图") },
-  { label: translate("标签组视图"), keys: "⌘3 / Ctrl+3", desc: translate("标签组视图") },
-  { label: translate("窗口视图"), keys: "⌘4 / Ctrl+4", desc: translate("窗口视图") },
-  { label: translate("看板视图"), keys: "⌘5 / Ctrl+5", desc: translate("看板视图") },
-  { label: translate("频率视图"), keys: "⌘6 / Ctrl+6", desc: translate("频率视图") },
-  { label: translate("归档视图"), keys: "⌘7 / Ctrl+7", desc: translate("归档视图") },
-];
+/**
+ * 视图切换快捷键说明（动态派生，单一数据源）。
+ *
+ * ⚠️ 必须与 `use-keyboard-shortcuts.ts` 的 `VIEW_ORDER` 完全一致：二者都取
+ * `VIEW_CONFIGS.filter(primary)` 并按数组顺序映射 ⌘1..⌘N。这里直接复用同一
+ * 数据源生成提示文案，避免手写常量与实际跳转行为脱节（历史 bug 来源）。
+ */
+const PRIMARY_VIEW_SHORTCUTS = VIEW_CONFIGS.filter((v) => v.primary).map((v, idx) => ({
+  id: v.id,
+  labelKey: v.labelKey,
+  num: idx + 1,
+}));
 
 /** 键盘导航快捷键（只读） */
 const NAVIGATION_SHORTCUTS = [
@@ -141,6 +144,17 @@ export function ShortcutsPanel() {
   const customKeybindings = useSettingsStore((s) => s.settings.customKeybindings);
   const resolved = useResolvedKeybindings();
 
+  // 视图切换快捷键文案：根据平台显示 ⌘N（Mac）或 Ctrl+N（其他）
+  const viewShortcuts = useMemo(() => {
+    const isMac =
+      typeof navigator !== "undefined" && navigator.platform.toLowerCase().includes("mac");
+    return PRIMARY_VIEW_SHORTCUTS.map((item) => ({
+      id: item.id,
+      desc: t(item.labelKey),
+      keys: isMac ? `⌘${item.num}` : `Ctrl+${item.num}`,
+    }));
+  }, [t]);
+
   // 初始化时将自定义快捷键同步到 registry
   useEffect(() => {
     if (customKeybindings && Object.keys(customKeybindings).length > 0) {
@@ -207,13 +221,16 @@ export function ShortcutsPanel() {
 
   return (
     <Flex vertical className="settings-panel-stack">
-      {/* 视图切换快捷键（只读） */}
+      {/* 视图切换快捷键（只读，与实际跳转行为同源派生） */}
       <section className="settings-section">
-        <Field label={t("视图切换")} hint={t("使用数字键 1-7 快速切换不同视图")}>
+        <Field
+          label={t("视图切换")}
+          hint={t("使用数字键 1-{count} 快速切换不同视图", { count: viewShortcuts.length })}
+        >
           <Flex vertical className="settings-card-list">
-            {VIEW_SHORTCUTS.map((item) => (
+            {viewShortcuts.map((item) => (
               <Flex
-                key={item.label}
+                key={item.id}
                 align="center"
                 justify="space-between"
                 className="settings-card-row"

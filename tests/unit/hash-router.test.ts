@@ -8,112 +8,101 @@ import { parseHash, serializeRoute, type RouteDescriptor } from "@/shared/routin
 // ── parseHash ─────────────────────────────────────────────────────────────────
 
 describe("parseHash", () => {
-  it("空 hash → 默认 workspace", () => {
-    expect(parseHash("")).toEqual({ spaceId: "workspace" });
+  it("空 hash → 空路由（默认工作区）", () => {
+    expect(parseHash("")).toEqual({});
   });
 
-  it("非路由 hash → 默认 workspace", () => {
-    expect(parseHash("#foo")).toEqual({ spaceId: "workspace" });
+  it("非路由 hash → 空路由", () => {
+    expect(parseHash("#foo")).toEqual({});
   });
 
-  it("#/space/workspace → workspace", () => {
-    expect(parseHash("#/space/workspace")).toEqual({ spaceId: "workspace" });
+  it("#/ → 空路由", () => {
+    expect(parseHash("#/")).toEqual({});
   });
 
-  it("#/space/trending → trending", () => {
-    expect(parseHash("#/space/trending")).toEqual({ spaceId: "trending" });
+  it("#/view/timeline → timeline 视图", () => {
+    expect(parseHash("#/view/timeline")).toEqual({ viewId: "timeline" });
   });
 
-  it("#/space/devtools → devtools", () => {
-    expect(parseHash("#/space/devtools")).toEqual({ spaceId: "devtools" });
+  it("#/panel/settings → settings 面板", () => {
+    expect(parseHash("#/panel/settings")).toEqual({ panelId: "settings" });
   });
 
-  it("#/space/workspace/view/timeline → workspace + timeline", () => {
-    expect(parseHash("#/space/workspace/view/timeline")).toEqual({
-      spaceId: "workspace",
-      viewId: "timeline",
-    });
-  });
-
-  it("#/space/workspace/panel/settings → workspace + settings 面板", () => {
-    expect(parseHash("#/space/workspace/panel/settings")).toEqual({
-      spaceId: "workspace",
-      panelId: "settings",
-    });
-  });
-
-  it("#/space/workspace/view/tabs/panel/search → workspace + tabs + search", () => {
-    expect(parseHash("#/space/workspace/view/tabs/panel/search")).toEqual({
-      spaceId: "workspace",
+  it("#/view/tabs/panel/search → tabs + search", () => {
+    expect(parseHash("#/view/tabs/panel/search")).toEqual({
       viewId: "tabs",
       panelId: "search",
     });
   });
 
-  it("#/space/workspace/panel/settings/about → workspace + settings + about subId", () => {
-    expect(parseHash("#/space/workspace/panel/settings/about")).toEqual({
-      spaceId: "workspace",
+  it("#/panel/settings/about → settings + about subId", () => {
+    expect(parseHash("#/panel/settings/about")).toEqual({
       panelId: "settings",
       subId: "about",
     });
   });
 
-  it("#/space/workspace/view/timeline/panel/settings/appearance → 全路径", () => {
-    expect(parseHash("#/space/workspace/view/timeline/panel/settings/appearance")).toEqual({
-      spaceId: "workspace",
+  it("#/view/timeline/panel/settings/appearance → 全路径", () => {
+    expect(parseHash("#/view/timeline/panel/settings/appearance")).toEqual({
       viewId: "timeline",
       panelId: "settings",
       subId: "appearance",
     });
   });
 
-  // 旧版 hash 兼容
-  it("#settings → 旧版兼容 → workspace + settings 面板", () => {
-    expect(parseHash("#settings")).toEqual({
-      spaceId: "workspace",
-      panelId: "settings",
+  // 旧版扁平 hash 兼容
+  it("#settings → 旧版兼容 → settings 面板", () => {
+    expect(parseHash("#settings")).toEqual({ panelId: "settings" });
+  });
+
+  it("#about → 旧版兼容 → settings + about subId", () => {
+    expect(parseHash("#about")).toEqual({ panelId: "settings", subId: "about" });
+  });
+
+  it("#search → 旧版兼容 → search 面板", () => {
+    expect(parseHash("#search")).toEqual({ panelId: "search" });
+  });
+
+  // 旧版 "#/space/{spaceId}/..." 协议向后兼容：丢弃 space 维度
+  it("#/space/workspace → 兼容 → 空路由", () => {
+    expect(parseHash("#/space/workspace")).toEqual({});
+  });
+
+  it("#/space/workspace/view/timeline → 兼容 → timeline 视图", () => {
+    expect(parseHash("#/space/workspace/view/timeline")).toEqual({ viewId: "timeline" });
+  });
+
+  it("#/space/workspace/view/tabs/panel/search → 兼容 → tabs + search", () => {
+    expect(parseHash("#/space/workspace/view/tabs/panel/search")).toEqual({
+      viewId: "tabs",
+      panelId: "search",
     });
   });
 
-  it("#about → 旧版兼容 → workspace + settings + about subId", () => {
-    expect(parseHash("#about")).toEqual({
-      spaceId: "workspace",
+  it("#/space/workspace/panel/settings/about → 兼容 → settings + about", () => {
+    expect(parseHash("#/space/workspace/panel/settings/about")).toEqual({
       panelId: "settings",
       subId: "about",
     });
   });
 
-  it("#search → 旧版兼容 → workspace + search 面板", () => {
-    expect(parseHash("#search")).toEqual({
-      spaceId: "workspace",
-      panelId: "search",
-    });
+  it("#/space/trending → 兼容 → 空路由（旧空间值被丢弃）", () => {
+    expect(parseHash("#/space/trending")).toEqual({});
   });
 
   // 边界：无效 viewId
-  it("#/space/workspace/view/invalid → workspace（无效 viewId 忽略）", () => {
-    expect(parseHash("#/space/workspace/view/invalid")).toEqual({
-      spaceId: "workspace",
-    });
+  it("#/view/invalid → 空路由（无效 viewId 忽略）", () => {
+    expect(parseHash("#/view/invalid")).toEqual({});
   });
 
   // 边界：无效 panelId
-  it("#/space/workspace/panel/invalid → workspace（无效 panelId 忽略）", () => {
-    expect(parseHash("#/space/workspace/panel/invalid")).toEqual({
-      spaceId: "workspace",
-    });
-  });
-
-  // 边界：仅 #/space/ → workspace
-  it("#/space/ → workspace", () => {
-    expect(parseHash("#/space/")).toEqual({ spaceId: "workspace" });
+  it("#/panel/invalid → 空路由（无效 panelId 忽略）", () => {
+    expect(parseHash("#/panel/invalid")).toEqual({});
   });
 
   // 边界：面板 + view 的反向顺序
-  it("#/space/workspace/panel/search/view/tabs → 按关键字解析，顺序无关", () => {
-    const result = parseHash("#/space/workspace/panel/search/view/tabs");
-    expect(result.spaceId).toBe("workspace");
-    // 面板在前，view 在后——解析器按顺序消费
+  it("#/panel/search/view/tabs → 按关键字解析，顺序无关", () => {
+    const result = parseHash("#/panel/search/view/tabs");
     expect(result.panelId).toBe("search");
     expect(result.viewId).toBe("tabs");
   });
@@ -122,47 +111,38 @@ describe("parseHash", () => {
 // ── serializeRoute ─────────────────────────────────────────────────────────────
 
 describe("serializeRoute", () => {
-  it("仅 spaceId", () => {
-    expect(serializeRoute({ spaceId: "workspace" })).toBe("#/space/workspace");
+  it("空路由", () => {
+    expect(serializeRoute({})).toBe("#/");
   });
 
-  it("spaceId + viewId", () => {
-    expect(serializeRoute({ spaceId: "workspace", viewId: "timeline" })).toBe(
-      "#/space/workspace/view/timeline",
+  it("仅 viewId", () => {
+    expect(serializeRoute({ viewId: "timeline" })).toBe("#/view/timeline");
+  });
+
+  it("仅 panelId", () => {
+    expect(serializeRoute({ panelId: "settings" })).toBe("#/panel/settings");
+  });
+
+  it("viewId + panelId", () => {
+    expect(serializeRoute({ viewId: "tabs", panelId: "search" })).toBe(
+      "#/view/tabs/panel/search",
     );
   });
 
-  it("spaceId + panelId", () => {
-    expect(serializeRoute({ spaceId: "workspace", panelId: "settings" })).toBe(
-      "#/space/workspace/panel/settings",
+  it("panelId + subId", () => {
+    expect(serializeRoute({ panelId: "settings", subId: "about" })).toBe(
+      "#/panel/settings/about",
     );
-  });
-
-  it("spaceId + viewId + panelId", () => {
-    expect(
-      serializeRoute({ spaceId: "workspace", viewId: "tabs", panelId: "search" }),
-    ).toBe("#/space/workspace/view/tabs/panel/search");
-  });
-
-  it("spaceId + panelId + subId", () => {
-    expect(
-      serializeRoute({ spaceId: "workspace", panelId: "settings", subId: "about" }),
-    ).toBe("#/space/workspace/panel/settings/about");
   });
 
   it("完整路径", () => {
     expect(
       serializeRoute({
-        spaceId: "workspace",
         viewId: "timeline",
         panelId: "settings",
         subId: "appearance",
       }),
-    ).toBe("#/space/workspace/view/timeline/panel/settings/appearance");
-  });
-
-  it("trending 空间", () => {
-    expect(serializeRoute({ spaceId: "trending" })).toBe("#/space/trending");
+    ).toBe("#/view/timeline/panel/settings/appearance");
   });
 });
 
@@ -170,18 +150,12 @@ describe("serializeRoute", () => {
 
 describe("round-trip: parse → serialize → parse", () => {
   const cases: RouteDescriptor[] = [
-    { spaceId: "workspace" },
-    { spaceId: "workspace", viewId: "timeline" },
-    { spaceId: "workspace", panelId: "settings" },
-    { spaceId: "workspace", viewId: "tabs", panelId: "search" },
-    { spaceId: "workspace", panelId: "settings", subId: "about" },
-    { spaceId: "trending" },
-    { spaceId: "devtools" },
-    {
-      spaceId: "workspace",
-      viewId: "kanban",
-      panelId: "search",
-    },
+    {},
+    { viewId: "timeline" },
+    { panelId: "settings" },
+    { viewId: "tabs", panelId: "search" },
+    { panelId: "settings", subId: "about" },
+    { viewId: "kanban", panelId: "search" },
   ];
 
   cases.forEach((route) => {

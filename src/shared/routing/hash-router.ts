@@ -2,18 +2,22 @@
  * URL Hash 路由解析器
  *
  * 路由规范：
- *   #/space/{spaceId}[/view/{viewId}][/panel/{panelId}[/{subId}]]
+ *   #/[view/{viewId}][/panel/{panelId}[/{subId}]]
  *
  * 示例：
- *   #/space/workspace                          → 主工作区
- *   #/space/workspace/view/timeline            → 时间线视图
- *   #/space/workspace/panel/settings           → 设置面板
- *   #/space/workspace/view/tabs/panel/search   → 标签视图 + 搜索面板
+ *   #/                              → 主工作区（默认）
+ *   #/view/timeline                 → 时间线视图
+ *   #/panel/settings                → 设置面板
+ *   #/view/tabs/panel/search        → 标签视图 + 搜索面板
  *
  * 旧版 hash 兼容：
- *   #settings  → #/space/workspace/panel/settings
- *   #about     → #/space/workspace/panel/settings/about
- *   #search    → #/space/workspace/panel/search
+ *   #settings                       → #/panel/settings
+ *   #about                          → #/panel/settings/about
+ *   #search                         → #/panel/search
+ *   #/space/{any}/view/{viewId}...  → 丢弃 space 维度后按新规范解析（兼容历史已打开标签页/书签）
+ *
+ * 说明：v1.x 曾预留 `space` 多空间维度，但始终只有单值 `workspace`、从未驱动任何行为，
+ * 属"未兑现的复杂度"。现已移除该维度，仅保留向后兼容解析。
  */
 
 import type { ViewMode } from "@/shared/config/views";
@@ -23,11 +27,9 @@ import { VALID_VIEWS } from "@/shared/config/views";
 
 /** 路由描述符：从 URL Hash 解析出的完整路由状态 */
 export interface RouteDescriptor {
-  /** 空间 ID：workspace / trending / devtools */
-  spaceId: string;
-  /** 视图 ID：tabs / timeline / tabgroup / window / kanban / frequency / archive */
+  /** 视图 ID：一级视图，取值见 VIEW_CONFIGS（tabs / bookmarks / sessions / trending / devtools / insights / history / trash / ...） */
   viewId?: ViewMode;
-  /** 面板 ID：search / settings / insights / history / trash / commandPalette */
+  /** 面板 ID：仅浮层弹窗，取值见 VALID_PANELS（search / settings / commandPalette） */
   panelId?: string;
   /** 面板子 ID：如 settings 的 about / appearance */
   subId?: string;
@@ -47,13 +49,7 @@ type RouteChangeListener = (event: RouteChangeEvent) => void;
 
 // ── 常量 ──────────────────────────────────────────────────────────────────────
 
-const ROUTE_PREFIX = "#/space";
-const VIEW_SEGMENT = "/view/";
-const PANEL_SEGMENT = "/panel/";
-
-/** 合法的空间 ID 集合 */
-export const VALID_SPACES = ["workspace"] as const;
-export type SpaceId = (typeof VALID_SPACES)[number];
+const ROUTE_PREFIX = "#/";
 
 /** 合法的面板 ID 集合（仅浮层弹窗） */
 export const VALID_PANELS = [
@@ -66,9 +62,9 @@ export type PanelId = (typeof VALID_PANELS)[number];
 // ── 旧版 hash 兼容映射 ────────────────────────────────────────────────────────
 
 const LEGACY_HASH_MAP: Record<string, RouteDescriptor> = {
-  "#settings": { spaceId: "workspace", panelId: "settings" },
-  "#about": { spaceId: "workspace", panelId: "settings", subId: "about" },
-  "#search": { spaceId: "workspace", panelId: "search" },
+  "#settings": { panelId: "settings" },
+  "#about": { panelId: "settings", subId: "about" },
+  "#search": { panelId: "search" },
 };
 
 // ── 解析与序列化 ──────────────────────────────────────────────────────────────
@@ -79,22 +75,28 @@ const LEGACY_HASH_MAP: Record<string, RouteDescriptor> = {
  * 优先检查旧版 hash 兼容映射，再按新规范解析。
  */
 export function parseHash(hash: string): RouteDescriptor {
-  // 旧版 hash 兼容
+  // 旧版扁平 hash 兼容（#settings / #about / #search）
   const legacy = LEGACY_HASH_MAP[hash];
   if (legacy) return { ...legacy };
 
-  // 非路由 hash 或空 hash → 默认 workspace
+  // 非路由 hash 或空 hash → 空路由（默认工作区）
   if (!hash.startsWith(ROUTE_PREFIX)) {
-    return { spaceId: "workspace" };
+    return {};
   }
 
-  const path = hash.slice(ROUTE_PREFIX.length + 1); // 去掉 "#/space/"
-  if (!path) return { spaceId: "workspace" };
+  const path = hash.slice(ROUTE_PREFIX.length); // 去掉 "#/"
+  if (!path) return {};
 
-  const segments = path.split("/").filter(Boolean);
-  const result: RouteDescriptor = { spaceId: segments[0] ?? "workspace" };
+  let segments = path.split("/").filter(Boolean);
 
-  let i = 1;
+  // 向后兼容旧版 "#/space/{spaceId}/..." 协议：丢弃已废弃的 space 维度
+  if (segments[0] === "space") {
+    segments = segments.slice(2); // 跳过 "space" 关键字及其后的 spaceId 值
+  }
+
+  const result: RouteDescriptor = {};
+
+  let i = 0;
   while (i < segments.length) {
     const segment = segments[i];
 
@@ -112,8 +114,10 @@ export function parseHash(hash: string): RouteDescriptor {
       // 检查 subId（面板后的下一个路径段，非关键字）
       if (i + 2 < segments.length && segments[i + 2] !== "view" && segments[i + 2] !== "panel") {
         result.subId = segments[i + 2];
+        i += 3;
+      } else {
+        i += 2;
       }
-      i += result.subId ? 3 : 2;
     } else {
       i++;
     }
@@ -126,20 +130,20 @@ export function parseHash(hash: string): RouteDescriptor {
  * 将 RouteDescriptor 序列化为 URL Hash 字符串
  */
 export function serializeRoute(route: RouteDescriptor): string {
-  const parts: string[] = [ROUTE_PREFIX, "/", route.spaceId];
+  const parts: string[] = [];
 
   if (route.viewId) {
-    parts.push(VIEW_SEGMENT, route.viewId);
+    parts.push("view", route.viewId);
   }
 
   if (route.panelId) {
-    parts.push(PANEL_SEGMENT, route.panelId);
+    parts.push("panel", route.panelId);
     if (route.subId) {
-      parts.push("/", route.subId);
+      parts.push(route.subId);
     }
   }
 
-  return parts.join("");
+  return ROUTE_PREFIX + parts.join("/");
 }
 
 // ── 路由器类 ──────────────────────────────────────────────────────────────────
@@ -226,7 +230,6 @@ export class HashRouter {
   /** 路由相等性比较（浅比较） */
   private routeEquals(a: RouteDescriptor, b: RouteDescriptor): boolean {
     return (
-      a.spaceId === b.spaceId &&
       a.viewId === b.viewId &&
       a.panelId === b.panelId &&
       a.subId === b.subId

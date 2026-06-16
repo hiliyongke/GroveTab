@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Flex } from "antd";
 import { Database, Info, Layout, Palette, Settings, Zap } from "lucide-react";
 import type { UserSettings } from "@/shared/types";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
@@ -15,8 +16,6 @@ import { WorkspaceTemplatesPanel } from "./panels/WorkspaceTemplatesPanel";
 import { MemoryGovernanceSettings } from "./panels/MemoryGovernanceSettings";
 import { DataPanel } from "./panels/DataPanel";
 import { PrivacyPanel } from "./panels/PrivacyPanel";
-
-const GAP = { display: "flex", flexDirection: "column", gap: 20 } as const;
 
 export interface SettingsTabItem {
   key: SettingsTabKey;
@@ -53,12 +52,12 @@ export function createSettingsTabs({
       icon: <Settings size={iconSize} />,
       label: t("通用"),
       content: (
-        <div style={GAP}>
+        <Flex vertical gap={20}>
           <GeneralSettings settings={settings} updateSettings={updateSettings} />
           <SearchSettings settings={settings} updateSettings={updateSettings} />
           {advanced && <TimelineSettings settings={settings} updateSettings={updateSettings} />}
           {advanced && <ShortcutsPanel />}
-        </div>
+        </Flex>
       ),
     },
     // ── 视图布局 ──
@@ -74,11 +73,11 @@ export function createSettingsTabs({
       icon: <Zap size={iconSize} />,
       label: t("自动化"),
       content: (
-        <div style={GAP}>
+        <Flex vertical gap={20}>
           <AutomationPanel />
           <WorkspaceTemplatesPanel />
           {advanced && <MemoryGovernanceSettings settings={settings} updateSettings={updateSettings} />}
-        </div>
+        </Flex>
       ),
     },
     // ── 系统 ──
@@ -87,10 +86,10 @@ export function createSettingsTabs({
       icon: <Database size={iconSize} />,
       label: t("系统"),
       content: (
-        <div style={GAP}>
+        <Flex vertical gap={20}>
           <DataPanel />
           <PrivacyPanel settings={settings} updateSettings={updateSettings} />
-        </div>
+        </Flex>
       ),
     },
     // ── 关于 ──
@@ -99,9 +98,9 @@ export function createSettingsTabs({
       icon: <Info size={iconSize} />,
       label: t("关于"),
       content: (
-        <div style={GAP}>
+        <Flex vertical gap={20}>
           <AboutPanel />
-        </div>
+        </Flex>
       ),
     },
   ];

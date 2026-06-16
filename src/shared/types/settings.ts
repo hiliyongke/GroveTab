@@ -353,6 +353,14 @@ export interface UserSettings {
   lastActiveWorkspaceId?: string;
 
   /**
+   * 轻量配置跨设备同步开关（默认 false，opt-in）。
+   * 开启后仅将「设置 + 快捷键」这类轻量配置通过 chrome.storage.sync 在登录同一
+   * Chrome 账号的设备间同步；标签页、归档、历史等大数据始终留本地，不参与同步。
+   * 采用「最后写入胜」策略，启动时拉取较新的远端配置。
+   */
+  settingsSyncEnabled?: boolean;
+
+  /**
    * 历史记录主开关（默认 true）。关闭后：
    *   - sw 不再向 closedTabs / historyEvents 写入新记录
    *   - SearchBox 的「最近关闭」section 自动隐藏

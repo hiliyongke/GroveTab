@@ -51,6 +51,7 @@ import { createTemplateCommands } from "@/features/workspace/quick-actions/SaveA
 import { useLayoutStyle } from "./hooks/use-layout-style";
 import { useMemoryGovernance } from "@/shared/hooks/use-memory-governance";
 import { registerInsightsNavigation } from "@/shared/utils/insights-filter";
+import { initConfigSync } from "@/services/config-sync";
 import { StatusBar } from "@/shared/ui/StatusBar/StatusBar";
 import { Settings as SettingsIcon } from "lucide-react";
 
@@ -208,6 +209,11 @@ function AppContent() {
   /** Feature Flag 初始化：启动时从 chrome.storage.local 加载，仅执行一次 */
   useEffect(() => {
     void useFeatureFlagStore.getState().loadFlags();
+  }, []);
+
+  /** 跨设备配置同步初始化：若开启则拉取较新远端配置并回灌，仅执行一次 */
+  useEffect(() => {
+    void initConfigSync();
   }, []);
 
   /** 注册 Insights → Tabs 跨视图导航回调（P1-06） */

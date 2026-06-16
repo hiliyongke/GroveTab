@@ -66,6 +66,10 @@ export const STORAGE_KEYS = Object.freeze({
   smartSort: key("smart_sort"),
   /** Feature Flag 存储键（v1.4 核心整合） */
   featureFlags: key("feature_flags"),
+  /** 轻量配置跨设备同步载荷（写入 chrome.storage.sync） */
+  settingsSync: key("settings_sync"),
+  /** 本地标记：最近一次已应用的远端同步时间戳（chrome.storage.local） */
+  settingsSyncApplied: key("settings_sync_applied"),
 });
 
 /** 判断是否属于当前应用命名空间的存储键。 */

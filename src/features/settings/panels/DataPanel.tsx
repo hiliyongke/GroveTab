@@ -23,6 +23,7 @@ import {
   Tooltip,
   Upload,
   Flex,
+  Switch,
   Typography,
 } from "antd";
 import {
@@ -56,6 +57,7 @@ import { APP_RESOURCE_NAMES, STORAGE_KEYS, isAppStorageKey } from "@/shared/conf
 import type { SettingsProfile } from "@/shared/utils/profiles";
 import { getProfiles, createProfile, renameProfile, deleteProfile } from "@/shared/utils/profiles";
 import { exportFullBundle, importFullBundle, downloadJsonFile } from "@/shared/utils/full-export";
+import { initConfigSync } from "@/services/config-sync";
 import styles from "./styles/data.module.less";
 
 interface QuotaInfo {
@@ -418,6 +420,34 @@ export function DataPanel() {
         </Field>
       </section>
 
+      {/* ── 跨设备同步（opt-in，仅轻量配置） ── */}
+      <section className="settings-section">
+        <Field
+          label={t("跨设备同步")}
+          hint={t(
+            "开启后，将「设置、快捷键、功能开关、自动化规则、工作区模板、常用站点、智能排序」等配置通过 Chrome 账号在你的设备间同步；标签页、归档、历史等数据始终保留在本地、不参与同步。采用「最后修改优先」，换设备打开时自动拉取较新配置。",
+          )}
+        >
+          <Flex align="center" justify="space-between" gap={12}>
+            <Typography.Text type="secondary">
+              {t("仅同步轻量配置，不上传标签页与浏览数据")}
+            </Typography.Text>
+            <Switch
+              aria-label={t("跨设备同步")}
+              checked={settings.settingsSyncEnabled === true}
+              onChange={(checked) => {
+                void (async () => {
+                  await updateSettings({ settingsSyncEnabled: checked });
+                  // 开启时：拉取已有远端配置并回灌，再把本设备配置整体播种到 sync。
+                  if (checked) await initConfigSync({ seed: true });
+                  feedback.success(checked ? t("已开启跨设备同步") : t("已关闭跨设备同步"));
+                })();
+              }}
+            />
+          </Flex>
+        </Field>
+      </section>
+
       <section className="settings-section">
         <Button block danger icon={<Trash2 size={ICON_SIZE.MEDIUM} />} onClick={handleClearAll}>
           {t("清空所有归档")}
@@ -452,7 +482,9 @@ export function DataPanel() {
           onConfirm={() => {
             void (async () => {
               try {
+                // 同时重置欢迎卡与多步高亮引导（Tour），下次打开两者都会重新出现。
                 await removeData(STORAGE_KEYS.onboardingDone);
+                await removeData(STORAGE_KEYS.viewOnboardingDone);
                 feedback.success(t("欢迎教程已重置"));
               } catch (err) {
                 console.error("[DataPanel] replayOnboarding failed:", err);

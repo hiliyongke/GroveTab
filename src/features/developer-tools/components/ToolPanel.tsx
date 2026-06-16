@@ -43,6 +43,7 @@ import {
   textDiff,
   textStats,
   timestampTransform,
+  uaParse,
   urlParse,
   urlQueryTransform,
   urlTransform,
@@ -291,7 +292,7 @@ export function ToolPanel({ tool, onUse }: ToolPanelProps) {
         case "http-header":
           return httpHeaderParse(primary);
         case "ua-parse":
-          return { output: "", error: "ua-parse not implemented" };
+          return uaParse(primary);
         case "base64-codec":
           return base64Transform(primary, base64Action);
         case "html-entity":

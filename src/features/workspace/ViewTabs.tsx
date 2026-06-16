@@ -72,7 +72,7 @@ export const ViewTabs = memo(function ViewTabs({ activeView, onChange }: ViewTab
 
   // 垂直侧栏 Tabs 自适应最宽标签宽度；按钮固定底部
   return (
-    <div className={styles["view-tabs-vertical"]}>
+    <div className={styles["view-tabs-vertical"]} data-tour="view-tabs">
       <Tabs
         tabPosition={position}
         activeKey={activeView}

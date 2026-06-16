@@ -34,20 +34,23 @@ const MAX_ENTRIES = 200; // 最多保留 200 条统计
 
 /** 将 RouteDescriptor 序列化为统计 key */
 function routeToStatKey(route: RouteDescriptor): string {
-  const parts = [route.spaceId];
+  const parts: string[] = [];
   if (route.viewId) parts.push(`v:${route.viewId}`);
   if (route.panelId) parts.push(`p:${route.panelId}`);
   if (route.subId) parts.push(`s:${route.subId}`);
-  return parts.join("/");
+  return parts.join("/") || "(root)";
 }
 
 // ── Dev Mode 埋点 ─────────────────────────────────────────────────────────────
 
+function describeRoute(route: RouteDescriptor): string {
+  const desc = `${route.viewId ?? ""}${route.panelId ? `/${route.panelId}` : ""}`;
+  return desc || "(root)";
+}
+
 function logDevTelemetry(event: RouteChangeEvent): void {
-  const from = event.previous
-    ? `${event.previous.spaceId}${event.previous.viewId ? `/${event.previous.viewId}` : ""}${event.previous.panelId ? `/${event.previous.panelId}` : ""}`
-    : "(init)";
-  const to = `${event.route.spaceId}${event.route.viewId ? `/${event.route.viewId}` : ""}${event.route.panelId ? `/${event.route.panelId}` : ""}`;
+  const from = event.previous ? describeRoute(event.previous) : "(init)";
+  const to = describeRoute(event.route);
   const src = event.source;
 
   console.info(`[RouteTelemetry] ${from} → ${to} (${src})`);

@@ -149,6 +149,8 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       automationRules: ruleData.rules,
       workspaceTemplates: templateData.templates,
     });
+    // 注：跨设备配置同步（含 settings）由 config-sync 在应用启动时统一拉取并回灌，
+    // 此处不再单独处理，避免双重机制。
   },
 
   /** 乐观更新：先同步更新 UI，再异步持久化。 */
@@ -159,6 +161,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     try {
       const persisted = await writeTask;
       set({ settings: persisted, loaded: true });
+      // 注：开启同步时，settings 的变更由 config-sync 的 storage.onChanged 监听统一推送。
     } catch (err) {
       console.error("[settings] saveSettings failed:", err);
     }

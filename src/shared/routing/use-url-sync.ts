@@ -138,6 +138,6 @@ export function useUrlSync(): UrlSyncAPI {
  * 用于 SSR / 初始渲染时同步 hash
  */
 export function getInitialRoute(): RouteDescriptor {
-  if (typeof window === "undefined") return { spaceId: "workspace" };
+  if (typeof window === "undefined") return {};
   return parseHash(window.location.hash);
 }
