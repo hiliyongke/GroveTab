@@ -62,11 +62,11 @@ export const VIEW_CONFIGS: ViewConfig[] = [
   { id: "frequency", iconName: "Flame", labelKey: translate("使用频率"), primary: false },
   // ── 记忆与归档 ──
   { id: "history", iconName: "History", labelKey: translate("历史记录"), primary: false },
-  { id: "archive", iconName: "Archive", labelKey: translate("归档") },
-  { id: "trash", iconName: "Trash2", labelKey: translate("回收站") },
+  { id: "archive", iconName: "Archive", labelKey: translate("归档"), primary: false },
+  { id: "trash", iconName: "Trash2", labelKey: translate("回收站"), primary: false },
   { id: "sessions", iconName: "Archive", labelKey: translate("会话"), primary: true },
   // ── 探索与工具 ──
-  { id: "insights", iconName: "BarChart3", labelKey: translate("数据洞察") },
+  { id: "insights", iconName: "BarChart3", labelKey: translate("数据洞察"), primary: false },
   { id: "trending", iconName: "TrendingUp", labelKey: translate("热榜"), primary: true },
   { id: "devtools", iconName: "Wrench", labelKey: translate("开发工具"), primary: true },
 ];
@@ -79,7 +79,10 @@ export const VALID_VIEWS: ViewMode[] = VIEW_CONFIGS.map((v) => v.id);
  * 运行期检测到 legacy defaultView 时自动迁移。
  */
 /** TabsView 内部子视图维度 */
-export type TabsSubView = 'auto' | 'tabgroup' | 'window' | 'timeline';
+export type TabsSubView = "auto" | "tabgroup" | "window" | "timeline" | "kanban" | "frequency";
+
+/** SessionsView 内部子视图维度 */
+export type SessionsSubView = "archive" | "trash" | "history";
 
 export const LEGACY_VIEW_MAP: Record<
   string,

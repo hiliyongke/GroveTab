@@ -8,7 +8,6 @@
  *   - 操作：push / pop / replace / clear
  *   - 栈顶为当前活跃面板
  *   - 与 URL Hash 路由双向同步
- *     当前仅路由→面板栈单向生效，面板关闭时未清除 URL hash）
  */
 
 import { create } from "zustand";

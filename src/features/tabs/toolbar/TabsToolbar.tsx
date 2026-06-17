@@ -29,7 +29,7 @@ export function TabsToolbar({ filterQuery, onFilterChange }: TabsToolbarProps) {
     <ViewToolbar
       searchQuery={filterQuery}
       onSearchChange={onFilterChange}
-      searchPlaceholder={t("搜索标签页（标题/网址/域名）…")}
+      searchPlaceholder={t("筛选当前标签页（标题/网址/域名）…")}
       controls={
         <>
           <Tooltip title={t("布局模式")}>

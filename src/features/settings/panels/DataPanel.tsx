@@ -46,7 +46,7 @@ import { PermissionDiagnosticsPanel } from "./PermissionDiagnosticsPanel";
 import { ICON_SIZE } from "@/shared/utils/icon-size";
 import { feedback } from "@/shared/ui/feedback";
 import { useT } from "@/shared/i18n";
-import { useSettingsStore, useSpeedDialStore } from "@/store";
+import { useSettingsStore, useSpeedDialStore, useUndoStore } from "@/store";
 import { useSyncStatusStore } from "@/store/sync-status-slice";
 import { useFeatureFlagStore } from "@/shared/store/feature-flag-slice";
 import { exportSessionsJSON, downloadFile, parseImportJSON } from "@/shared/utils/import-export";
@@ -86,6 +86,12 @@ export function DataPanel() {
   const [profileName, setProfileName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
 
   useEffect(() => {
     void getQuotaStatus().then(setQuotaInfo);
@@ -98,14 +104,14 @@ export function DataPanel() {
     if (syncing) return t("同步中…");
     if (syncError) return t("上次同步失败，将在下次变更时自动重试");
     if (syncLastAt === null) return t("尚未同步");
-    const diff = Date.now() - syncLastAt;
+    const diff = now - syncLastAt;
     const min = Math.floor(diff / 60000);
     if (min < 1) return t("上次同步：刚刚");
     if (min < 60) return t("上次同步：{n} 分钟前", { n: min });
     const hr = Math.floor(min / 60);
     if (hr < 24) return t("上次同步：{n} 小时前", { n: hr });
     return t("上次同步：{date}", { date: new Date(syncLastAt).toLocaleString() });
-  }, [syncing, syncError, syncLastAt, t]);
+  }, [syncing, syncError, syncLastAt, t, now]);
 
   const handleCreateProfile = useCallback(async () => {
     if (!profileName.trim()) return;
@@ -197,22 +203,34 @@ export function DataPanel() {
   };
 
   const handleClearAll = () => {
-    modal.confirm({
-      title: t("清空所有归档"),
-      content: t("确认清空？点击执行"),
-      okButtonProps: { danger: true },
-      okText: t("清空所有归档"),
-      cancelText: t("取消"),
-      onOk: async () => {
-        try {
-          await saveSessions([]);
-          feedback.success(t("清空所有归档"));
-        } catch (err) {
-          console.error("[DataPanel] clearAll failed:", err);
-          feedback.error(t("清空失败"));
-        }
-      },
-    });
+    void (async () => {
+      const existing = await getArchivedSessions();
+      const count = existing.length;
+      modal.confirm({
+        title: t("清空所有归档"),
+        content:
+          count > 0
+            ? t("将清空 {count} 个归档会话。清空后可在撤销窗口内恢复。是否继续？", { count })
+            : t("当前没有可清空的归档会话。"),
+        okButtonProps: { danger: true, disabled: count === 0 },
+        okText: count > 0 ? t("清空 {count} 个归档", { count }) : t("清空所有归档"),
+        cancelText: t("取消"),
+        onOk: async () => {
+          try {
+            await saveSessions([]);
+            await useUndoStore
+              .getState()
+              .addSessionSnapshotRecord(existing, t("已清空 {count} 个归档", { count }), {
+                subNote: t("可在撤销窗口内恢复"),
+              });
+            feedback.success(t("已清空 {count} 个归档", { count }));
+          } catch (err) {
+            console.error("[DataPanel] clearAll failed:", err);
+            feedback.error(t("清空失败"));
+          }
+        },
+      });
+    })();
   };
 
   return (
@@ -279,14 +297,19 @@ export function DataPanel() {
                       <Button
                         type="text"
                         icon={<ArrowLeftRight size={ICON_SIZE.MEDIUM} />}
-                        onClick={() => { void handleApplyProfile(profile); }}
+                        onClick={() => {
+                          void handleApplyProfile(profile);
+                        }}
                       />
                     </Tooltip>
                     <Tooltip title={t("重命名")}>
                       <Button
                         type="text"
                         icon={<Pencil size={ICON_SIZE.MEDIUM} />}
-                        onClick={() => { setEditingId(profile.id); setEditingName(profile.name); }}
+                        onClick={() => {
+                          setEditingId(profile.id);
+                          setEditingName(profile.name);
+                        }}
                       />
                     </Tooltip>
                     <Popconfirm
@@ -299,11 +322,7 @@ export function DataPanel() {
                       okButtonProps={{ danger: true }}
                     >
                       <Tooltip title={t("删除")}>
-                        <Button
-                          type="text"
-                          danger
-                          icon={<Trash2 size={ICON_SIZE.MEDIUM} />}
-                        />
+                        <Button type="text" danger icon={<Trash2 size={ICON_SIZE.MEDIUM} />} />
                       </Tooltip>
                     </Popconfirm>
                   </Space>
@@ -382,19 +401,27 @@ export function DataPanel() {
 
       {/* ── 全量导出/导入（跨设备迁移） ── */}
       <section className="settings-section">
-        <Field label={t("数据迁移")} hint={t("导出全部数据（设置 + 站点 + 归档 + 规则）为 JSON 文件，方便跨设备迁移或备份")}>
+        <Field
+          label={t("数据迁移")}
+          hint={t("导出全部数据（设置 + 站点 + 归档 + 规则）为 JSON 文件，方便跨设备迁移或备份")}
+        >
           <Flex vertical gap={8}>
             <Button
               block
               icon={<Package size={ICON_SIZE.MEDIUM} />}
-              onClick={async () => {
-                try {
-                  const json = await exportFullBundle();
-                  downloadJsonFile(json, `GroveTab-full-${new Date().toISOString().slice(0, 10)}.json`);
-                  feedback.success(t("全量数据已导出"));
-                } catch (e) {
-                  feedback.error(t("导出失败，请重试"));
-                }
+              onClick={() => {
+                void (async () => {
+                  try {
+                    const json = await exportFullBundle();
+                    downloadJsonFile(
+                      json,
+                      `GroveTab-full-${new Date().toISOString().slice(0, 10)}.json`,
+                    );
+                    feedback.success(t("全量数据已导出"));
+                  } catch (_e) {
+                    feedback.error(t("导出失败，请重试"));
+                  }
+                })();
               }}
             >
               {t("导出全部数据")}
@@ -439,27 +466,27 @@ export function DataPanel() {
         </Field>
       </section>
 
-      {/* ── 跨设备同步（opt-in，仅轻量配置） ── */}
+      {/* ── 配置同步（local-first，opt-in，仅轻量配置） ── */}
       <section className="settings-section">
         <Field
-          label={t("跨设备同步")}
+          label={t("配置同步（Chrome Sync）")}
           hint={t(
-            "开启后，将「设置、快捷键、功能开关、自动化规则、工作区模板、常用站点、智能排序」等配置通过 Chrome 账号在你的设备间同步；标签页、归档、历史等数据始终保留在本地、不参与同步。采用「最后修改优先」，换设备打开时自动拉取较新配置。",
+            "GroveTab 默认本地优先。开启后，仅通过 Chrome Sync 同步「设置、快捷键、功能开关、自动化规则、工作区模板、常用站点、智能排序」等轻量配置；标签页、归档、历史等浏览数据始终保留在本机，不使用第三方服务。采用「最后修改优先」，换设备打开时自动拉取较新配置。",
           )}
         >
           <Flex align="center" justify="space-between" gap={12}>
             <Typography.Text type="secondary">
-              {t("仅同步轻量配置，不上传标签页与浏览数据")}
+              {t("仅同步轻量配置；不上传标签页、归档与历史")}
             </Typography.Text>
             <Switch
-              aria-label={t("跨设备同步")}
+              aria-label={t("配置同步（Chrome Sync）")}
               checked={settings.settingsSyncEnabled === true}
               onChange={(checked) => {
                 void (async () => {
                   await updateSettings({ settingsSyncEnabled: checked });
                   // 开启时：拉取已有远端配置并回灌，再把本设备配置整体播种到 sync。
                   if (checked) await initConfigSync({ seed: true });
-                  feedback.success(checked ? t("已开启跨设备同步") : t("已关闭跨设备同步"));
+                  feedback.success(checked ? t("已开启配置同步") : t("已关闭配置同步"));
                 })();
               }}
             />

@@ -31,7 +31,12 @@ const HeroBar = lazy(() =>
 );
 import { ViewTabs } from "@/features/workspace/ViewTabs";
 import { track } from "@/shared/utils/metrics";
-import { VALID_VIEWS, LEGACY_VIEW_MAP, type ViewMode } from "@/shared/config/views";
+import {
+  VALID_VIEWS,
+  LEGACY_VIEW_MAP,
+  type TabsSubView,
+  type ViewMode,
+} from "@/shared/config/views";
 import { TabsView } from "@/features/tabs/views/TabsView";
 import { registerViews } from "@/shared/config/view-registry";
 import { findDuplicates } from "@/shared/utils/dedupe";
@@ -55,22 +60,34 @@ import { initConfigSync } from "@/services/config-sync";
 import { StatusBar } from "@/shared/ui/StatusBar/StatusBar";
 import { Settings as SettingsIcon } from "lucide-react";
 
-/** 懒加载非默认视图——直接导入文件而非 barrel，确保每个视图独立拆 chunk */
-const TimelineView = lazy(() =>
-  import("@/features/tabs/views/TimelineView").then((m) => ({ default: m.TimelineView })),
-);
-const FrequencyView = lazy(() =>
-  import("@/features/tabs/views/FrequencyView").then((m) => ({ default: m.FrequencyView })),
-);
-const TabGroupView = lazy(() =>
-  import("@/features/tabs/views/TabGroupView").then((m) => ({ default: m.TabGroupView })),
-);
-const WindowView = lazy(() =>
-  import("@/features/tabs/views/WindowView").then((m) => ({ default: m.WindowView })),
-);
-const KanbanView = lazy(() =>
-  import("@/features/tabs/views/KanbanView").then((m) => ({ default: m.KanbanView })),
-);
+/** 旧版独立标签页视图路由兼容：进入 legacy view 时回到 tabs 并切换内部子视图。 */
+function LegacyTabsSubViewRedirect({ subView }: { subView: Exclude<TabsSubView, "auto"> }) {
+  useEffect(() => {
+    void useSettingsStore.getState().updateSettings({ defaultView: "tabs", tabsSubView: subView });
+  }, [subView]);
+  return <TabsView />;
+}
+
+function TabGroupView() {
+  return <LegacyTabsSubViewRedirect subView="tabgroup" />;
+}
+
+function WindowView() {
+  return <LegacyTabsSubViewRedirect subView="window" />;
+}
+
+function TimelineView() {
+  return <LegacyTabsSubViewRedirect subView="timeline" />;
+}
+
+function KanbanView() {
+  return <LegacyTabsSubViewRedirect subView="kanban" />;
+}
+
+function FrequencyView() {
+  return <LegacyTabsSubViewRedirect subView="frequency" />;
+}
+
 const BookmarkView = lazy(() =>
   import("@/features/bookmarks/BookmarkView").then((m) => ({ default: m.BookmarkView })),
 );
@@ -167,27 +184,6 @@ function AppContent() {
   useMemoryGovernance();
   useAutoCleanup();
 
-  // P2: idle preload 常用视图 chunk，避免首次切换卡顿
-  useEffect(() => {
-    if (!checked) return;
-    const win = window as typeof window & {
-      requestIdleCallback?: (cb: () => void) => number;
-      cancelIdleCallback?: (id: number) => void;
-    };
-    if (win.requestIdleCallback) {
-      const id = win.requestIdleCallback(() => {
-        void import("@/features/tabs/views/DomainGroupView");
-        void import("@/features/tabs/views/TabGroupView");
-      });
-      return () => win.cancelIdleCallback?.(id);
-    }
-    const id = setTimeout(() => {
-      void import("@/features/tabs/views/DomainGroupView");
-      void import("@/features/tabs/views/TabGroupView");
-    }, 2000);
-    return () => clearTimeout(id);
-  }, [checked]);
-
   /** 旧版视图设置自动迁移（domain/compact/grid → tabs + tabsLayout），仅执行一次 */
   useEffect(() => {
     const settings = useSettingsStore.getState().settings;
@@ -250,7 +246,6 @@ function AppContent() {
 
   // QuickStartLayer 已由 TabsSubView 内部渲染（位于子标签下方）
 
-
   // ── 侧栏拖拽 resize（本地状态，mouseup 时持久化到 settings）──
   const [sidebarWidth, setSidebarWidth] = useState(quickStartSidebarWidth);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
@@ -258,7 +253,9 @@ function AppContent() {
     setSidebarWidth(quickStartSidebarWidth);
   }, [quickStartSidebarWidth]);
   const sidebarWidthRef = useRef(sidebarWidth);
-  sidebarWidthRef.current = sidebarWidth;
+  useEffect(() => {
+    sidebarWidthRef.current = sidebarWidth;
+  }, [sidebarWidth]);
   const handleResizeMouseDown = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
@@ -506,10 +503,7 @@ function AppContent() {
 
   return (
     <>
-      <Typography.Link
-        href="#main-content"
-        className={styles["app-skip-link"]}
-      >
+      <Typography.Link href="#main-content" className={styles["app-skip-link"]}>
         {t("跳到主内容")}
       </Typography.Link>
       <Layout className="app-layout-shell" style={layoutStyle}>
@@ -647,7 +641,7 @@ function AppContent() {
             onOpenChange={(open: boolean) => {
               if (!open) panelStack.close("settings");
             }}
-            defaultActiveTab={route.subId === "about" ? "about" : "appearance"}
+            defaultActiveTab={route.subId}
           />
           <TidyModal
             open={tidyModalOpen}

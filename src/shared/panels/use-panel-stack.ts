@@ -8,7 +8,7 @@
  *   4. 提供面向组件的 API（open / close / isOpen）
  */
 
-import { useEffect, useCallback, useMemo } from "react";
+import { useEffect, useCallback, useMemo, useRef } from "react";
 import { usePanelStackStore, type PanelDescriptor } from "./panel-stack-store";
 import type { PanelId } from "@/shared/routing";
 import { getRouter } from "@/shared/routing";
@@ -54,10 +54,20 @@ export function usePanelStack(): PanelStackAPI {
   const isOpen = usePanelStackStore((s) => s.isOpen);
 
   const topPanel = useMemo(
-    () => (stack.length > 0 ? stack[stack.length - 1] ?? null : null),
+    () => (stack.length > 0 ? (stack[stack.length - 1] ?? null) : null),
     [stack],
   );
   const depth = stack.length;
+  const initialSyncSkippedRef = useRef(false);
+
+  // ── 初始 URL Hash → 面板栈 hydration ─────────────────────────────────────
+  useEffect(() => {
+    const router = getRouter();
+    const { panelId, subId } = router.getRoute();
+    if (panelId) {
+      usePanelStackStore.getState().replace({ id: panelId as PanelId, subId });
+    }
+  }, []);
 
   // ── 全局 ESC 键监听 ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -80,6 +90,11 @@ export function usePanelStack(): PanelStackAPI {
 
   // ── 面板栈 → URL Hash 同步 ──────────────────────────────────────────────
   useEffect(() => {
+    if (!initialSyncSkippedRef.current) {
+      initialSyncSkippedRef.current = true;
+      return;
+    }
+
     const router = getRouter();
     const top = stack[stack.length - 1];
 
@@ -116,10 +131,7 @@ export function usePanelStack(): PanelStackAPI {
 
   // ── 便捷方法 ──────────────────────────────────────────────────────────────
   const openSearch = useCallback(() => push({ id: "search" }), [push]);
-  const openSettings = useCallback(
-    (subId?: string) => push({ id: "settings", subId }),
-    [push],
-  );
+  const openSettings = useCallback((subId?: string) => push({ id: "settings", subId }), [push]);
   const openCommandPalette = useCallback(() => push({ id: "commandPalette" }), [push]);
 
   return {

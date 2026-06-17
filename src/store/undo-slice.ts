@@ -4,17 +4,18 @@
  * 管理关闭标签页的撤销记录，持久化到 chrome.storage.local。
  */
 
-import { create } from 'zustand';
-import { nanoid } from 'nanoid';
-import type { UndoRecord, ClosedTabSnapshot } from '@/shared/types';
-import { getData, setData } from '@/repositories';
-import { createTab, getCurrentWindow } from '@/chrome';
-import { feedback } from '@/shared/ui/feedback';
-import { translate } from '@/shared/i18n/core';
-import { useSettingsStore } from './settings-slice';
-import { filterSafeExternalUrls } from '@/shared/utils/url-safety';
-import { BRAND } from '@/shared/config/brand';
-import { STORAGE_KEYS } from '@/shared/config/storage-keys';
+import { create } from "zustand";
+import { nanoid } from "nanoid";
+import type { ArchivedSession, UndoRecord, ClosedTabSnapshot } from "@/shared/types";
+import { getData, setData } from "@/repositories";
+import { saveSessions } from "@/services/archive";
+import { createTab, getCurrentWindow } from "@/chrome";
+import { feedback } from "@/shared/ui/feedback";
+import { translate } from "@/shared/i18n/core";
+import { useSettingsStore } from "./settings-slice";
+import { filterSafeExternalUrls } from "@/shared/utils/url-safety";
+import { BRAND } from "@/shared/config/brand";
+import { STORAGE_KEYS } from "@/shared/config/storage-keys";
 
 const UNDO_STORAGE_KEY = STORAGE_KEYS.undo;
 const DEFAULT_UNDO_TTL_MS = 5_000;
@@ -34,7 +35,7 @@ function clearRecordTimer(recordId: string): void {
 
 function getUndoTtlMs(): number {
   const seconds = useSettingsStore.getState().settings.undoWindowSeconds;
-  if (typeof seconds !== 'number' || !Number.isFinite(seconds)) return DEFAULT_UNDO_TTL_MS;
+  if (typeof seconds !== "number" || !Number.isFinite(seconds)) return DEFAULT_UNDO_TTL_MS;
   return Math.min(10, Math.max(3, seconds)) * 1_000;
 }
 
@@ -48,6 +49,12 @@ interface UndoState {
     tabs: ClosedTabSnapshot[],
     description: string,
     extra?: { archivedSessionId?: string; subNote?: string },
+  ) => Promise<UndoRecord>;
+  /** Add a session snapshot undo record for destructive archive/session actions */
+  addSessionSnapshotRecord: (
+    sessionsSnapshot: ArchivedSession[],
+    description: string,
+    extra?: { subNote?: string },
   ) => Promise<UndoRecord>;
   /** Undo (restore) a record */
   undoRecord: (recordId: string) => Promise<void>;
@@ -67,6 +74,7 @@ export const useUndoStore = create<UndoState>((set, get) => ({
     const record: UndoRecord = {
       id: nanoid(8),
       createdAt: Date.now(),
+      kind: "tabs",
       tabs,
       description,
       expired: false,
@@ -101,7 +109,7 @@ export const useUndoStore = create<UndoState>((set, get) => ({
         r.id === record.id ? { ...r, expired: true } : r,
       );
       set({ records: updated });
-      void setData(UNDO_STORAGE_KEY, updated).catch(() => {});
+      void setData(UNDO_STORAGE_KEY, updated).catch(() => undefined);
       recordTimers.delete(record.id);
     }, getUndoTtlMs());
     recordTimers.set(record.id, timerId);
@@ -110,31 +118,84 @@ export const useUndoStore = create<UndoState>((set, get) => ({
     return Promise.resolve(record);
   },
 
+  addSessionSnapshotRecord: (sessionsSnapshot, description, extra) => {
+    const record: UndoRecord = {
+      id: nanoid(8),
+      createdAt: Date.now(),
+      kind: "sessions_snapshot",
+      tabs: [],
+      description,
+      expired: false,
+      subNote: extra?.subNote,
+      sessionsSnapshot,
+    };
+
+    const prevRecords = get().records;
+    const records = [record, ...prevRecords].slice(0, MAX_UNDO_RECORDS);
+    const retainedIds = new Set(records.map((r) => r.id));
+    for (const oldRecord of prevRecords) {
+      if (!retainedIds.has(oldRecord.id)) {
+        clearRecordTimer(oldRecord.id);
+      }
+    }
+
+    set({ records, activeToast: record });
+    void setData(UNDO_STORAGE_KEY, records).catch((err) => {
+      console.warn(`${BRAND.logTag} undo persist failed (record still in memory)`, err);
+    });
+
+    const timerId = setTimeout(() => {
+      const current = get();
+      if (current.activeToast?.id === record.id) {
+        set({ activeToast: null });
+      }
+      const updated = current.records.map((r) =>
+        r.id === record.id ? { ...r, expired: true } : r,
+      );
+      set({ records: updated });
+      void setData(UNDO_STORAGE_KEY, updated).catch(() => undefined);
+      recordTimers.delete(record.id);
+    }, getUndoTtlMs());
+    recordTimers.set(record.id, timerId);
+
+    return Promise.resolve(record);
+  },
+
   undoRecord: async (recordId) => {
     const record = get().records.find((r) => r.id === recordId);
     if (!record || record.expired) return;
 
-    const urls = filterSafeExternalUrls(record.tabs.map((t) => t.url).filter(Boolean));
-
-    /** 在当前窗口顺序恢复标签页，避免并发建 tab 触发限流。 */
-    try {
-      if (urls.length === 1) {
-        await createTab({ url: urls[0], active: false });
-      } else if (urls.length > 1) {
-        const currentWindow = await getCurrentWindow();
-        const windowId = currentWindow?.id;
-        for (const url of urls) {
-          await createTab({ url, windowId, active: false });
-        }
+    if (record.kind === "sessions_snapshot") {
+      try {
+        await saveSessions(record.sessionsSnapshot ?? []);
+        feedback.success(translate("已撤销会话操作"));
+      } catch (err) {
+        feedback.error(translate("恢复失败，请重试"), err);
+        return;
       }
-    } catch (err) {
-      feedback.error(translate('恢复失败，请重试'), err);
+    } else {
+      const urls = filterSafeExternalUrls(record.tabs.map((t) => t.url).filter(Boolean));
+
+      /** 在当前窗口顺序恢复标签页，避免并发建 tab 触发限流。 */
+      try {
+        if (urls.length === 1) {
+          await createTab({ url: urls[0], active: false });
+        } else if (urls.length > 1) {
+          const currentWindow = await getCurrentWindow();
+          const windowId = currentWindow?.id;
+          for (const url of urls) {
+            await createTab({ url, windowId, active: false });
+          }
+        }
+      } catch (err) {
+        feedback.error(translate("恢复失败，请重试"), err);
+      }
     }
 
     const records = get().records.filter((r) => r.id !== recordId);
     clearRecordTimer(recordId);
     set({ records, activeToast: null });
-    void setData(UNDO_STORAGE_KEY, records).catch(() => {});
+    void setData(UNDO_STORAGE_KEY, records).catch(() => undefined);
   },
 
   dismissToast: () => {
@@ -147,9 +208,7 @@ export const useUndoStore = create<UndoState>((set, get) => ({
       // Filter out expired records
       const now = Date.now();
       const ttl = getUndoTtlMs();
-      const valid = records.filter(
-        (r) => !r.expired && now - r.createdAt < ttl,
-      );
+      const valid = records.filter((r) => !r.expired && now - r.createdAt < ttl);
       set({ records: valid });
     }
   },
@@ -157,9 +216,7 @@ export const useUndoStore = create<UndoState>((set, get) => ({
   cleanExpired: async () => {
     const now = Date.now();
     const ttl = getUndoTtlMs();
-    const records = get().records.filter(
-      (r) => !r.expired && now - r.createdAt < ttl,
-    );
+    const records = get().records.filter((r) => !r.expired && now - r.createdAt < ttl);
     set({ records });
     await setData(UNDO_STORAGE_KEY, records);
   },

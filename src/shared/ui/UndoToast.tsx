@@ -2,23 +2,21 @@
  * UndoToast 通过自定义事件 `app:open-archive` 通知上层打开 ArchivePanel 并高亮 session。
  */
 
-import { Button } from 'antd';
-import { Archive, Undo2, X } from 'lucide-react';
-import { ICON_SIZE } from '@/shared/utils/icon-size';
-import { useUndoStore, useSelectionStore } from '@/store';
-import { useT } from '@/shared/i18n';
-import { APP_EVENTS } from '@/shared/config/storage-keys';
-import styles from './status-surfaces.module.less';
+import { Button } from "antd";
+import { Archive, Undo2, X } from "lucide-react";
+import { ICON_SIZE } from "@/shared/utils/icon-size";
+import { useUndoStore, useSelectionStore } from "@/store";
+import { useT } from "@/shared/i18n";
+import { APP_EVENTS } from "@/shared/config/storage-keys";
+import styles from "./status-surfaces.module.less";
 
 /**
  * 触发"打开 Archive 并高亮 session"的跨组件事件。
  * App.tsx 监听该事件并调用 setShowArchive(true)。
  */
 function openArchivePanel(sessionId?: string) {
-  if (typeof window === 'undefined') return;
-  window.dispatchEvent(
-    new CustomEvent(APP_EVENTS.openArchive, { detail: { sessionId } }),
-  );
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(APP_EVENTS.openArchive, { detail: { sessionId } }));
 }
 
 /**
@@ -41,11 +39,13 @@ export function UndoToast() {
    */
   const tabCount = activeToast.tabs.length;
   const isArchive = activeToast.archivedSessionId !== undefined;
-  const mainLabel = isArchive
-    ? activeToast.description
-    : tabCount === 1
-    ? t('已关闭 1 个标签页')
-    : t('已关闭 {count} 个标签页', { count: tabCount });
+  const isSessionSnapshot = activeToast.kind === "sessions_snapshot";
+  const mainLabel =
+    isArchive || isSessionSnapshot
+      ? activeToast.description
+      : tabCount === 1
+        ? t("已关闭 1 个标签页")
+        : t("已关闭 {count} 个标签页", { count: tabCount });
 
   const handleUndo = () => {
     void undoRecord(activeToast.id);
@@ -58,10 +58,10 @@ export function UndoToast() {
     <div
       role="alert"
       aria-live="polite"
-      className={`${styles['app-undo-toast']}${batchBarVisible ? ` ${styles['is-lifted']}` : ''}`}
+      className={`${styles["app-undo-toast"]}${batchBarVisible ? ` ${styles["is-lifted"]}` : ""}`}
     >
-      <div className={styles['app-undo-toast__row']}>
-        <span className={styles['app-undo-toast__title']} title={mainLabel}>
+      <div className={styles["app-undo-toast__row"]}>
+        <span className={styles["app-undo-toast__title"]} title={mainLabel}>
           {mainLabel}
         </span>
 
@@ -72,7 +72,7 @@ export function UndoToast() {
             icon={<Archive size={ICON_SIZE.DEFAULT} />}
             onClick={() => openArchivePanel(activeToast.archivedSessionId)}
           >
-            {t('查看归档')}
+            {t("查看归档")}
           </Button>
         )}
 
@@ -82,7 +82,7 @@ export function UndoToast() {
           icon={<Undo2 size={ICON_SIZE.MEDIUM} />}
           onClick={handleUndo}
         >
-          {t('撤销')}
+          {t("撤销")}
         </Button>
 
         <Button
@@ -90,13 +90,11 @@ export function UndoToast() {
           shape="circle"
           icon={<X size={ICON_SIZE.MEDIUM} />}
           onClick={dismissToast}
-          aria-label="关闭"
+          aria-label={t("关闭")}
         />
       </div>
-      {activeToast.subNote !== undefined && activeToast.subNote !== '' && (
-        <span className={styles['app-undo-toast__note']}>
-          {activeToast.subNote}
-        </span>
+      {activeToast.subNote !== undefined && activeToast.subNote !== "" && (
+        <span className={styles["app-undo-toast__note"]}>{activeToast.subNote}</span>
       )}
     </div>
   );

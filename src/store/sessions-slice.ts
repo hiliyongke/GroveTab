@@ -1,4 +1,3 @@
- 
 /**
  * Zustand Store — Sessions Slice
  *
@@ -17,6 +16,7 @@ import {
 import { BRAND } from "@/shared/config/brand";
 import { feedback } from "@/shared/ui/feedback";
 import { translate } from "@/shared/i18n/core";
+import { useUndoStore } from "./undo-slice";
 
 interface SessionsState {
   sessions: ArchivedSession[];
@@ -65,10 +65,19 @@ export const useSessionsStore = create<SessionsState>((set, get) => ({
 
   deleteSession: async (id: string) => {
     try {
+      const previous = await getArchivedSessions();
+      const target = previous.find((s) => s.id === id);
       await svcDeleteSession(id);
       set((state) => ({
         sessions: state.sessions.filter((s) => s.id !== id),
       }));
+      if (target !== undefined) {
+        await useUndoStore
+          .getState()
+          .addSessionSnapshotRecord(previous, `${translate("已删除会话")}「${target.name}」`, {
+            subNote: translate("可在撤销窗口内恢复"),
+          });
+      }
     } catch (err) {
       feedback.error(translate("删除失败，请重试"), err);
       throw err;
@@ -89,9 +98,15 @@ export const useSessionsStore = create<SessionsState>((set, get) => ({
 
   mergeSessions: async (ids: string[], newName: string) => {
     try {
+      const previous = await getArchivedSessions();
       const newSession = await svcMergeSessions(ids, newName);
       const sessions = await getArchivedSessions();
       set({ sessions });
+      await useUndoStore
+        .getState()
+        .addSessionSnapshotRecord(previous, `${translate("已合并会话")}「${newSession.name}」`, {
+          subNote: translate("可在撤销窗口内恢复合并前状态"),
+        });
       return newSession;
     } catch (err) {
       feedback.error(translate("合并失败，请重试"), err);

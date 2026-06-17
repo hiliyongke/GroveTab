@@ -55,7 +55,7 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
     try {
       await clearAllNativeHistory();
       feedback.success(t("已清空历史记录"));
-    } catch (err) {
+    } catch (_err) {
       feedback.error(t("清空历史记录失败"));
     } finally {
       setClearing(false);
@@ -67,6 +67,19 @@ export function PrivacyPanel({ settings, updateSettings }: PrivacyPanelProps) {
 
   return (
     <Flex vertical className="settings-panel-stack">
+      <section className="settings-section">
+        <Typography.Title level={3} className="settings-section__title">
+          {t("本地优先")}
+        </Typography.Title>
+        <Flex vertical className="settings-section__body">
+          <Typography.Text type="secondary">
+            {t(
+              "GroveTab 不使用第三方云服务。标签页、归档、历史和浏览数据只保存在本机；如你在系统设置中主动开启配置同步，也仅通过 Chrome Sync 同步轻量配置。",
+            )}
+          </Typography.Text>
+        </Flex>
+      </section>
+
       {/* ── 主开关 ───────────────────────────────────── */}
       <section className="settings-section">
         <Typography.Title level={3} className="settings-section__title">

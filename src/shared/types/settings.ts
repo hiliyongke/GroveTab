@@ -354,8 +354,9 @@ export interface UserSettings {
 
   /**
    * 轻量配置跨设备同步开关（默认 false，opt-in）。
-   * 开启后仅将「设置 + 快捷键」这类轻量配置通过 chrome.storage.sync 在登录同一
-   * Chrome 账号的设备间同步；标签页、归档、历史等大数据始终留本地，不参与同步。
+   * GroveTab 默认 local-first；开启后仅将「设置 + 快捷键」这类轻量配置通过
+   * chrome.storage.sync 在登录同一 Chrome 账号的设备间同步，不使用第三方服务。
+   * 标签页、归档、历史等浏览数据始终留本地，不参与同步。
    * 采用「最后写入胜」策略，启动时拉取较新的远端配置。
    */
   settingsSyncEnabled?: boolean;
@@ -460,12 +461,17 @@ export interface UserSettings {
 
   /**
    * 「标签页」主视图的子视图（仅 defaultView='tabs' 时生效）。
-   *   - 'auto'（默认）：智能推荐（根据使用习惯自动选择）
+   *   - 'auto'（默认）：全部标签，按 tabsLayout 呈现
    *   - 'tabgroup'：按 Chrome Tab Group 展示
    *   - 'window'：按窗口展示
    *   - 'timeline'：按时间轴展示
+   *   - 'kanban'：看板整理
+   *   - 'frequency'：按使用频率展示
    */
-  tabsSubView?: "auto" | "tabgroup" | "window" | "timeline";
+  tabsSubView?: "auto" | "tabgroup" | "window" | "timeline" | "kanban" | "frequency";
+
+  /** 「会话」主视图的子视图（归档 / 回收站 / 历史）。 */
+  sessionsSubView?: "archive" | "trash" | "history";
 
   /**
    * History 视图是否在 TabBar 中显示（默认 false，仅快捷键/Command Palette 可访问）。

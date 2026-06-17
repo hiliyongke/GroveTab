@@ -1,56 +1,85 @@
-# Canopy 隐私政策（PRIVACY）
+# GroveTab 隐私政策（PRIVACY）
 
-**最后更新：2026-04-24 · 随 v1.0.0 封板发布**
+**最后更新：2026-06-17**
 
 ## 一句话概括
 
-Canopy 是 100% 本地的新标签页扩展。**所有数据只保存在您本地浏览器里**，我们不上传、不分析、不转卖您的任何数据。
+GroveTab 是 local-first 的新标签页扩展。标签页、归档、历史、书签元数据等浏览数据默认只保存在本机浏览器里；如果您主动开启「配置同步（Chrome Sync）」，也只会通过 Chrome 自带同步能力同步轻量配置，不使用第三方云服务。
 
-## 不收集、不上传
+## 不收集、不转卖、不接入第三方分析
 
-Canopy 不运行任何云端服务，不包含任何遥测（telemetry）/ 分析 SDK；源码中不存在对外部服务器的任何请求，唯一的外部请求来自：
+GroveTab 不运行自建云端服务，不包含遥测（telemetry）/ 分析 SDK，不出售或转卖任何数据。
 
-- （可选）OG description 抓取：在用户显式开启 `enableOgFetch` 并授权 `<all_urls>` 后，Service Worker 会在 Tab 加载完成时对该 URL 发起一次 `GET`（50 KB 截断、3s 超时、5 并发、7 天内不重复）。抓取结果存本地索引，不上传。
+唯一可能发生的外部网络访问来自用户显式开启的功能：
 
-## 本地存储清单（chrome.storage.local）
+- 热榜 / 天气 / 公开数据源：用于展示用户主动启用的内容发现能力。
+- OG description 抓取：在用户显式开启 `enableOgFetch` 并授权 `<all_urls>` 后，Service Worker 会在 Tab 加载完成时对该 URL 发起一次 `GET`（50 KB 截断、3s 超时、5 并发、7 天内不重复）。抓取结果只存本地索引，不上传到第三方服务。
 
-| 存储键 | 用途 | 是否可清除 |
-| --- | --- | --- |
-| `canopy_tabs` | 活跃 Tab 快照（运行时同步） | 不建议手动清除 |
-| `canopy_sessions` | 归档会话 | 设置 → 清除归档 |
-| `canopy_settings` | 用户偏好 | 设置 → 恢复默认 |
-| `canopy_tags` / `canopy_notes` / `canopy_pins` | 标签 / 笔记 / 置顶元数据 | 手动 |
-| `canopy_undo` | 近 5s 可撤销记录 | 自动过期 |
-| `canopy_stats` | URL × day 激活计数（近 30 天） | 设置 → InsightsPanel → 清除 |
-| `canopy_metrics` | 本地事件型埋点（最多 2000 条） | 设置 → InsightsPanel → 清除 |
-| `canopy_activity` | 最近 20 条 ActivityStrip 记录（72h） | 自动过期 |
-| `canopy_workspaces` | 用户工作区 | 手动 |
-| `canopy_kanban` | 看板布局 | 手动 |
-| `canopy_og_index` | OG description 缓存（最多 10000 条） | InsightsPanel → 清除 |
-| `canopy_auto_snapshot_meta` | 自动快照时间戳 | 自动 |
+## 配置同步（Chrome Sync，可选）
+
+配置同步默认关闭。开启后，GroveTab 仅通过 Chrome 浏览器提供的 `chrome.storage.sync` 同步轻量配置，范围包括：
+
+- 设置项
+- 快捷键
+- 功能开关
+- 自动化规则
+- 工作区模板
+- 常用站点配置
+- 智能排序配置
+
+以下数据不会参与配置同步：
+
+- 当前打开的标签页
+- 归档会话
+- 回收站
+- 历史记录
+- 浏览器历史
+- 标签备注、统计和本地缓存
+- 本地视频背景文件
+
+关闭配置同步后，后续修改会继续保留在本机。
+
+## 本地存储清单（chrome.storage.local / OPFS）
+
+| 存储键                                         | 用途                        | 是否可清除                 |
+| ---------------------------------------------- | --------------------------- | -------------------------- |
+| `canopy_tabs`                                  | 活跃 Tab 快照（运行时同步） | 不建议手动清除             |
+| `canopy_sessions`                              | 归档会话                    | 设置 → 系统 → 清空所有归档 |
+| `canopy_settings`                              | 用户偏好                    | 设置 → 系统 → 恢复默认配置 |
+| `canopy_tags` / `canopy_notes` / `canopy_pins` | 标签 / 笔记 / 置顶元数据    | 手动                       |
+| `canopy_undo`                                  | 可撤销记录                  | 自动过期                   |
+| `canopy_stats`                                 | URL × day 激活计数          | 设置中清除统计数据         |
+| `canopy_metrics`                               | 本地事件型指标              | 设置中清除统计数据         |
+| `canopy_activity`                              | 最近操作记录                | 自动过期                   |
+| `canopy_workspaces`                            | 用户工作区                  | 手动                       |
+| `canopy_kanban`                                | 看板布局                    | 手动                       |
+| `canopy_og_index`                              | OG description 缓存         | 设置中清除                 |
+| OPFS 视频文件                                  | 本地视频背景                | 关闭或更换视频背景时清除   |
 
 ## 权限清单与用途
 
-| 权限 | 必选/可选 | 用途 |
-| --- | --- | --- |
-| `tabs` | 必选 | 枚举/关闭/跳转 Tab |
-| `storage` | 必选 | 本地存储 |
-| `favicon` | 必选 | 显示站点图标 |
-| `alarms` | 必选 | 定期 flush 统计、自动快照闹钟 |
-| `sessions` | 必选 | 恢复最近关闭的 Tab |
-| `contextMenus` | 必选 | 右键菜单"保存所有标签" |
-| `tabGroups` | 必选 | Tab 组视图 |
-| `activeTab` | 必选 | 当前 Tab 快捷操作 |
-| `history`（可选） | 仅在用户启用历史视图时请求 | 读取浏览历史 |
-| `bookmarks`（可选） | 仅在用户启用书签视图时请求 | 读取/写入书签 |
-| `<all_urls>`（可选 host） | 仅在用户开启 OG description 抓取时请求 | 为搜索增强抓取页面元描述 |
+| 权限           | 必选/可选 | 用途                                   |
+| -------------- | --------- | -------------------------------------- |
+| `tabs`         | 必选      | 枚举、关闭、跳转 Tab                   |
+| `storage`      | 必选      | 本地存储与可选 Chrome Sync 配置同步    |
+| `favicon`      | 必选      | 显示站点图标                           |
+| `alarms`       | 必选      | 定时刷新缓存、自动快照、清理过期数据   |
+| `sessions`     | 必选      | 恢复最近关闭的 Tab                     |
+| `contextMenus` | 必选      | 右键菜单快捷操作                       |
+| `tabGroups`    | 必选      | Tab 组视图                             |
+| `activeTab`    | 必选      | 当前 Tab 快捷操作                      |
+| `history`      | 可选      | 仅在用户启用历史能力时读取浏览历史     |
+| `bookmarks`    | 可选      | 仅在用户启用书签视图时读取/写入书签    |
+| `<all_urls>`   | 可选 host | 仅在用户开启 OG description 抓取时请求 |
 
 ## 您可以做的
 
-- **导出**：设置 → 数据 → 导出（JSON / Markdown / TXT / HTML）
-- **导入**：设置 → 数据 → 导入（自动识别 JSON / HTML / OneTab）
-- **清除**：设置 → 隐私洞察 → 清除所有统计（metrics / stats / OG / activity）
-- **撤销权限**：设置 → 关闭 `enableOgFetch` 自动 `chrome.permissions.remove(<all_urls>)`
+- 导出：设置 → 系统 → 导出全部数据
+- 导入：设置 → 系统 → 导入全部数据
+- 配置同步：设置 → 系统 → 配置同步（Chrome Sync）
+- 清除归档：设置 → 系统 → 清空所有归档
+- 清除历史：设置 → 系统 → 隐私 / 历史 → 清空所有历史数据
+- 撤销权限：关闭对应功能后，可在浏览器扩展权限设置中撤销授权
 
 ## 联系方式
 

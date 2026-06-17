@@ -49,6 +49,14 @@ vi.mock("@/services/history/undo-bus", () => ({
   registerHistoryUndoHandler: vi.fn(),
 }));
 
+vi.mock("@/store/undo-slice", () => ({
+  useUndoStore: {
+    getState: vi.fn(() => ({
+      addSessionSnapshotRecord: vi.fn().mockResolvedValue({ id: "undo1" }),
+    })),
+  },
+}));
+
 import { useSessionsStore } from "@/store/sessions-slice";
 import {
   getArchivedSessions,
@@ -159,7 +167,9 @@ describe("mergeSessions", () => {
   it("成功后从 service 重新拉取列表", async () => {
     const newSession = sessionsFixture("merged", "merged");
     (svcMergeSessions as ReturnType<typeof vi.fn>).mockResolvedValueOnce(newSession);
-    (getArchivedSessions as ReturnType<typeof vi.fn>).mockResolvedValueOnce([newSession]);
+    (getArchivedSessions as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([newSession]);
     const result = await useSessionsStore.getState().mergeSessions(["a", "b"], "merged");
     expect(result).toBe(newSession);
     expect(useSessionsStore.getState().sessions).toEqual([newSession]);

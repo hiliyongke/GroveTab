@@ -74,9 +74,7 @@ async function runSettingsMigration(): Promise<void> {
     migrationApplied = true;
 
     if (import.meta.env.DEV) {
-      console.info(
-        `[MIGRATION] settings v1→v2 completed. backup: ${backupKey}`,
-      );
+      console.info(`[MIGRATION] settings v1→v2 completed. backup: ${backupKey}`);
     }
   } catch (err) {
     console.warn("[MIGRATION] settings migration failed, restoring from backup:", err);
@@ -176,7 +174,6 @@ export function useAppInitialization(initRunId: number) {
   const [checked, setChecked] = useState(false);
   const [initError, setInitError] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [searchFromHash, setSearchFromHash] = useState(false);
   const [compactSearchVisible, setCompactSearchVisible] = useState(false);
 
   const loadSettings = useSettingsStore((s) => s.loadSettings);
@@ -190,26 +187,14 @@ export function useAppInitialization(initRunId: number) {
   const loadUndoRecordsRef = useRef(loadUndoRecords);
   const loadMetadataRef = useRef(loadMetadata);
   const tRef = useRef(t);
-  loadSettingsRef.current = loadSettings;
-  loadAllTabsRef.current = loadAllTabs;
-  loadUndoRecordsRef.current = loadUndoRecords;
-  loadMetadataRef.current = loadMetadata;
-  tRef.current = t;
-
-  /** 全局快捷键通过 URL hash 传信号：#search → 自动聚焦搜索框 */
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const hash = window.location.hash;
-    if (hash === "#search") {
-      setSearchFromHash(true);
-    }
-  }, []);
 
   useEffect(() => {
-    if (searchFromHash && typeof window !== "undefined" && window.location.hash === "#search") {
-      history.replaceState(null, "", window.location.pathname);
-    }
-  }, [searchFromHash]);
+    loadSettingsRef.current = loadSettings;
+    loadAllTabsRef.current = loadAllTabs;
+    loadUndoRecordsRef.current = loadUndoRecords;
+    loadMetadataRef.current = loadMetadata;
+    tRef.current = t;
+  }, [loadSettings, loadAllTabs, loadUndoRecords, loadMetadata, t]);
 
   /**
    * 异步初始化：并行加载设置、标签页、撤销记录、元数据、新手引导状态
@@ -321,7 +306,6 @@ export function useAppInitialization(initRunId: number) {
     checked,
     initError,
     showOnboarding,
-    searchFromHash,
     compactSearchVisible,
     heroSearchRef,
     retry,

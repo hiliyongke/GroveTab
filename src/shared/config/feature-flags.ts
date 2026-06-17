@@ -6,11 +6,11 @@
  */
 
 export const FEATURE_FLAGS = {
-  UNIFIED_TABS_VIEW: 'unified_tabs_view',
-  ARCHIVE_TRASH_MERGED: 'archive_trash_merged',
-  TABBAR_COMPACT: 'tabbar_compact',
-  TIDY_SUGGESTION_INLINE: 'tidy_suggestion_inline',
-  NEW_ONBOARDING_FLOW: 'new_onboarding_flow',
+  UNIFIED_TABS_VIEW: "unified_tabs_view",
+  ARCHIVE_TRASH_MERGED: "archive_trash_merged",
+  TABBAR_COMPACT: "tabbar_compact",
+  TIDY_SUGGESTION_INLINE: "tidy_suggestion_inline",
+  NEW_ONBOARDING_FLOW: "new_onboarding_flow",
 } as const;
 
 export type FeatureFlagName = (typeof FEATURE_FLAGS)[keyof typeof FEATURE_FLAGS];
@@ -30,20 +30,8 @@ export const FEATURE_FLAG_DEFAULTS: Record<FeatureFlagName, boolean> = {
  */
 export async function isFeatureEnabled(name: FeatureFlagName): Promise<boolean> {
   try {
-    // 优先尝试从已加载的 store 同步读取
-    const { useFeatureFlagStore } = await import(
-      '@/shared/store/feature-flag-slice'
-    );
-    const store = useFeatureFlagStore.getState();
-    if (store.loaded) {
-      return store.isEnabled(name);
-    }
-  } catch {
-    // store 未加载，回退到直接读 storage
-  }
-  try {
-    const { storageGet } = await import('@/chrome');
-    const { STORAGE_KEYS } = await import('@/shared/config/storage-keys');
+    const { storageGet } = await import("@/chrome");
+    const { STORAGE_KEYS } = await import("@/shared/config/storage-keys");
     const flags = await storageGet<Partial<Record<FeatureFlagName, boolean>>>(
       STORAGE_KEYS.featureFlags,
     );

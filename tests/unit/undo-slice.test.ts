@@ -16,7 +16,7 @@ vi.mock("@/chrome", () => ({
 }));
 
 vi.mock("@/shared/ui/feedback", () => ({
-  feedback: { error: vi.fn() },
+  feedback: { error: vi.fn(), success: vi.fn() },
 }));
 
 vi.mock("@/shared/i18n/core", () => ({
@@ -35,6 +35,18 @@ vi.mock("@/shared/config/storage-keys", () => ({
   STORAGE_KEYS: { undo: "grove_undo" },
 }));
 
+vi.mock("@/services/archive", () => ({
+  saveSessions: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("@/store/sessions-slice", () => ({
+  useSessionsStore: {
+    getState: vi.fn(() => ({
+      refreshSessions: vi.fn().mockResolvedValue(undefined),
+    })),
+  },
+}));
+
 vi.mock("nanoid", () => ({
   nanoid: vi.fn(() => "testid01"),
 }));
@@ -50,7 +62,8 @@ vi.mock("@/store/settings-slice", () => ({
 
 import { useUndoStore } from "@/store/undo-slice";
 import { getData, setData } from "@/repositories";
-import type { ClosedTabSnapshot, UndoRecord } from "@/shared/types";
+import { saveSessions } from "@/services/archive";
+import type { ArchivedSession, ClosedTabSnapshot, UndoRecord } from "@/shared/types";
 
 const mkTab = (url: string, title = url): ClosedTabSnapshot => ({
   url,
@@ -58,6 +71,14 @@ const mkTab = (url: string, title = url): ClosedTabSnapshot => ({
   favIconUrl: "",
   windowId: 1,
   pinned: false,
+});
+
+const mkSession = (id: string): ArchivedSession => ({
+  id,
+  name: `session-${id}`,
+  createdAt: Date.now(),
+  tabs: [],
+  tabCount: 0,
 });
 
 beforeEach(() => {
@@ -109,6 +130,19 @@ describe("addRecord", () => {
   });
 });
 
+describe("addSessionSnapshotRecord", () => {
+  it("添加会话快照撤销记录", async () => {
+    const sessions = [mkSession("s1")];
+    const record = await useUndoStore
+      .getState()
+      .addSessionSnapshotRecord(sessions, "deleted session");
+    expect(record.kind).toBe("sessions_snapshot");
+    expect(record.sessionsSnapshot).toEqual(sessions);
+    expect(record.description).toBe("deleted session");
+    expect(useUndoStore.getState().activeToast?.id).toBe(record.id);
+  });
+});
+
 describe("undoRecord", () => {
   it("撤销操作后记录被移除", async () => {
     const tabs = [mkTab("https://a.com")];
@@ -122,6 +156,16 @@ describe("undoRecord", () => {
     const record = await useUndoStore.getState().addRecord(tabs, "test");
     await useUndoStore.getState().undoRecord(record.id);
     expect(useUndoStore.getState().activeToast).toBeNull();
+  });
+
+  it("撤销会话快照时恢复归档会话", async () => {
+    const sessions = [mkSession("s1"), mkSession("s2")];
+    const record = await useUndoStore
+      .getState()
+      .addSessionSnapshotRecord(sessions, "clear sessions");
+    await useUndoStore.getState().undoRecord(record.id);
+    expect(saveSessions).toHaveBeenCalledWith(sessions);
+    expect(useUndoStore.getState().records.length).toBe(0);
   });
 
   it("撤销已过期记录不执行任何操作", async () => {

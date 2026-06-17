@@ -158,7 +158,7 @@ export function CommandPalette() {
   // 按 category 分组（仅命令模式）
   const grouped = results.reduce<Record<string, SearchResult[]>>((acc, result) => {
     const cat = result.item.category;
-    if (!acc[cat]) acc[cat] = [];
+    acc[cat] ??= [];
     acc[cat].push(result);
     return acc;
   }, {});
@@ -173,7 +173,7 @@ export function CommandPalette() {
   ];
 
   const placeholder =
-    mode === "command" ? t("输入命令或搜索...") : t("搜索标签页（标题/URL/域名）...");
+    mode === "command" ? t("输入命令名称...") : t("搜索当前打开的标签页（标题/URL/域名）...");
 
   return (
     <Modal
@@ -211,7 +211,7 @@ export function CommandPalette() {
             className={styles["command-palette__mode-tag"]}
             onClick={() => setMode((m) => (m === "command" ? "search" : "command"))}
           >
-            {mode === "command" ? t("命令") : t("搜索")}
+            {mode === "command" ? t("命令") : t("标签搜索")}
           </Tag>
         </Tooltip>
         {query && (
@@ -228,7 +228,12 @@ export function CommandPalette() {
       <Divider className={styles["command-palette__divider"]} />
 
       {/* 结果列表 */}
-      <div className={styles["command-palette__list"]} ref={listRef}>
+      <div
+        className={styles["command-palette__list"]}
+        ref={listRef}
+        role="listbox"
+        aria-label={mode === "command" ? t("命令列表") : t("标签搜索结果")}
+      >
         {mode === "command" ? (
           // ── 命令模式 ──
           <>
@@ -243,6 +248,9 @@ export function CommandPalette() {
                     return (
                       <div
                         key={result.item.id}
+                        role="option"
+                        aria-selected={globalIndex === selectedIndex}
+                        tabIndex={-1}
                         className={`${styles["command-palette__item"]} ${
                           globalIndex === selectedIndex
                             ? styles["command-palette__item--selected"]
@@ -280,6 +288,9 @@ export function CommandPalette() {
             {tabResults.map((tab, idx) => (
               <div
                 key={tab.id}
+                role="option"
+                aria-selected={idx === selectedIndex}
+                tabIndex={-1}
                 className={`${styles["command-palette__item"]} ${
                   idx === selectedIndex ? styles["command-palette__item--selected"] : ""
                 }`}
@@ -303,17 +314,10 @@ export function CommandPalette() {
                   )}
                 </span>
                 <Flex vertical className={styles["command-palette__tab-text"]}>
-                  <Text
-                    ellipsis
-                    className={styles["command-palette__tab-title"]}
-                  >
+                  <Text ellipsis className={styles["command-palette__tab-title"]}>
                     {tab.title || tab.hostname}
                   </Text>
-                  <Text
-                    type="secondary"
-                    ellipsis
-                    className={styles["command-palette__tab-url"]}
-                  >
+                  <Text type="secondary" ellipsis className={styles["command-palette__tab-url"]}>
                     {tab.url}
                   </Text>
                 </Flex>
@@ -326,7 +330,7 @@ export function CommandPalette() {
             )}
             {!query && (
               <div className={styles["command-palette__empty"]}>
-                <Text type="secondary">{t("输入关键词搜索所有标签页")}</Text>
+                <Text type="secondary">{t("输入关键词搜索当前打开的标签页")}</Text>
               </div>
             )}
           </>
@@ -335,12 +339,10 @@ export function CommandPalette() {
 
       {/* 底部提示 */}
       <div className={styles["command-palette__footer"]}>
-        <Text
-          type="secondary"
-          className={styles["command-palette__footer-hint"]}
-        >
-          <kbd>⌘P</kbd> {t("打开")} · <kbd>↑↓</kbd> {t("导航")} · <kbd>Enter</kbd> {t("执行")} · <kbd>Tab</kbd>{" "}
-          {mode === "command" ? t("搜索标签") : t("切回命令")} · <kbd>ESC</kbd> {t("关闭")}
+        <Text type="secondary" className={styles["command-palette__footer-hint"]}>
+          <kbd>⌘P</kbd> {t("打开命令")} · <kbd>↑↓</kbd> {t("导航")} · <kbd>Enter</kbd> {t("执行")} ·{" "}
+          <kbd>Tab</kbd> {mode === "command" ? t("标签搜索") : t("切回命令")} · <kbd>ESC</kbd>{" "}
+          {t("关闭")}
         </Text>
       </div>
     </Modal>

@@ -41,7 +41,7 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
   /** 默认视图下拉选项，缓存以避免每次渲染重建数组 */
   const defaultViewOptions = useMemo(
     () =>
-      VIEW_CONFIGS.map((view) => ({
+      VIEW_CONFIGS.filter((view) => view.primary === true).map((view) => ({
         value: view.id,
         label: t(view.labelKey),
       })),
@@ -76,10 +76,7 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
         </Field>
       )}
 
-      <Field
-        label={t("视图标签位置")}
-        hint={t("视图切换标签的排列方式：左侧/右侧垂直侧栏")}
-      >
+      <Field label={t("视图标签位置")} hint={t("视图切换标签的排列方式：左侧/右侧垂直侧栏")}>
         <Segmented
           block
           value={settings.viewTabPosition ?? "right"}
@@ -293,7 +290,10 @@ export function ViewLayoutSettings({ settings, updateSettings }: ViewLayoutSetti
 }
 
 /** P2-03: TabBar 视图排序与显隐编辑器 */
-function TabBarOrderEditor({ settings, updateSettings }: {
+function TabBarOrderEditor({
+  settings,
+  updateSettings,
+}: {
   settings: UserSettings;
   updateSettings: (patch: Partial<UserSettings>) => void | Promise<void>;
 }) {
@@ -302,7 +302,9 @@ function TabBarOrderEditor({ settings, updateSettings }: {
   const order = settings.tabBarOrder ?? [];
   const hidden = settings.hiddenTabBarViews ?? [];
 
-  const handleSetting = (patch: Partial<UserSettings>) => { void updateSettings(patch); };
+  const handleSetting = (patch: Partial<UserSettings>) => {
+    void updateSettings(patch);
+  };
 
   // 当前 TabBar 可见的 primary 视图
   const visibleViews = useMemo(
@@ -320,26 +322,35 @@ function TabBarOrderEditor({ settings, updateSettings }: {
     return list;
   }, [visibleViews, order]);
 
-  const moveUp = useCallback((index: number) => {
-    if (index <= 0) return;
-    const newOrder = [...ordered.map((v) => v.id)];
-    [newOrder[index - 1], newOrder[index]] = [newOrder[index]!, newOrder[index - 1]!];
-    handleSetting({ tabBarOrder: newOrder });
-  }, [ordered, handleSetting]);
+  const moveUp = useCallback(
+    (index: number) => {
+      if (index <= 0) return;
+      const newOrder = [...ordered.map((v) => v.id)];
+      [newOrder[index - 1], newOrder[index]] = [newOrder[index]!, newOrder[index - 1]!];
+      handleSetting({ tabBarOrder: newOrder });
+    },
+    [ordered, handleSetting],
+  );
 
-  const moveDown = useCallback((index: number) => {
-    if (index >= ordered.length - 1) return;
-    const newOrder = [...ordered.map((v) => v.id)];
-    [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1]!, newOrder[index]!];
-    handleSetting({ tabBarOrder: newOrder });
-  }, [ordered, handleSetting]);
+  const moveDown = useCallback(
+    (index: number) => {
+      if (index >= ordered.length - 1) return;
+      const newOrder = [...ordered.map((v) => v.id)];
+      [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1]!, newOrder[index]!];
+      handleSetting({ tabBarOrder: newOrder });
+    },
+    [ordered, handleSetting],
+  );
 
-  const toggleHidden = useCallback((viewId: string) => {
-    const newHidden = hidden.includes(viewId)
-      ? hidden.filter((id) => id !== viewId)
-      : [...hidden, viewId];
-    handleSetting({ hiddenTabBarViews: newHidden });
-  }, [hidden, handleSetting]);
+  const toggleHidden = useCallback(
+    (viewId: string) => {
+      const newHidden = hidden.includes(viewId)
+        ? hidden.filter((id) => id !== viewId)
+        : [...hidden, viewId];
+      handleSetting({ hiddenTabBarViews: newHidden });
+    },
+    [hidden, handleSetting],
+  );
 
   return (
     <Field label={t("视图栏排序")} hint={t("拖拽排序或隐藏不常用的视图；至少保留一个可见视图。")}>
